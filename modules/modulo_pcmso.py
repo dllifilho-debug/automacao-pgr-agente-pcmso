@@ -1,5 +1,5 @@
 # =============================================================================
-# MÓDULO PCMSO v7.1 — OCR automatico + AgenteMedicoIA
+# MÓDULO PCMSO v7.2 — OCR automatico + AgenteMedicoIA
 # Funções públicas:
 #   extrair_texto_pdf, extrair_pgr_com_fallback, enriquecer_pgr_com_fispq,
 #   processar_pcmso, gerar_html_pcmso, gerar_docx_rq61
@@ -14,10 +14,10 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "7.1 (OCR + AgenteMedicoIA)"
+VERSAO_MODULO_PCMSO = "7.2 (OCR + AgenteMedicoIA)"
 
 # ---------------------------------------------------------------------------
-# Import do Agente Médico IA
+# Import do Agente Médico IA (opcional)
 # ---------------------------------------------------------------------------
 try:
     from modules.agente_medico_ia import processar_cargo_ia
@@ -39,56 +39,57 @@ except ImportError:
 # 1 — EXTRACAO DE TEXTO DO PDF  (pdfplumber → PyMuPDF → OCR)
 # ============================================================================
 
-_MIN_CHARS_POR_PAGINA = 150  # menos que isso por página = provavel PDF protegido
+_MIN_CHARS_POR_PAGINA = 150
 
 
 def _texto_esta_vazio(texto: str, num_paginas: int) -> bool:
-    """
-    Retorna True se o texto extraido for insuficiente para o numero de paginas.
-    Ex: PDF com 150 paginas, texto total < 22500 chars (150 * 150) → OCR necessario.
-    """
     if not texto or not texto.strip():
         return True
-    media_por_pagina = len(texto) / max(num_paginas, 1)
-    return media_por_pagina < _MIN_CHARS_POR_PAGINA
+    return (len(texto) / max(num_paginas, 1)) < _MIN_CHARS_POR_PAGINA
 
 
 def _extrair_ocr(data: bytes) -> str:
     """
-    Fallback OCR: converte paginas do PDF em imagem e aplica pytesseract.
-    Usa pre-processamento (escala de cinza + binarizacao Otsu) para melhorar
-    a acuracia em documentos escaneados ou protegidos.
+    Fallback OCR com lazy imports para nao crashar o boot do Streamlit.
+    Pre-processamento OpenCV/numpy e opcional; se falhar usa PIL direto.
     """
     texto = ""
     try:
         from pdf2image import convert_from_bytes
         import pytesseract
-        from PIL import Image
-        import numpy as np
-        import cv2
     except ImportError as e:
         return f"[OCR indisponivel: {e}]"
 
     try:
         paginas = convert_from_bytes(data, dpi=250)
     except Exception as e:
-        return f"[OCR falhou na conversao de paginas: {e}]"
+        return f"[OCR: falha na conversao de paginas: {e}]"
 
-    config_tess = "--psm 6 --oem 3"  # layout bloco unico, LSTM engine
+    config_tess = "--psm 6 --oem 3"
 
-    for i, img in enumerate(paginas):
+    # Tenta importar OpenCV para pre-processamento (opcional)
+    _cv2_ok = False
+    try:
+        import cv2
+        import numpy as np
+        _cv2_ok = True
+    except ImportError:
+        pass
+
+    for img in paginas:
         try:
-            # Pre-processamento para melhorar OCR
-            img_array = np.array(img.convert("RGB"))
-            cinza = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-            _, binaria = cv2.threshold(cinza, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-            img_proc = Image.fromarray(binaria)
-
+            if _cv2_ok:
+                img_array = __import__("numpy").array(img.convert("RGB"))
+                cinza = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+                _, binaria = cv2.threshold(cinza, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                from PIL import Image
+                img_proc = Image.fromarray(binaria)
+            else:
+                img_proc = img
             t = pytesseract.image_to_string(img_proc, lang="por+eng", config=config_tess)
             if t and t.strip():
                 texto += t + "\n"
         except Exception:
-            # Fallback sem pre-processamento
             try:
                 t = pytesseract.image_to_string(img, lang="por+eng", config=config_tess)
                 texto += (t or "") + "\n"
@@ -100,7 +101,7 @@ def _extrair_ocr(data: bytes) -> str:
 
 def extrair_texto_pdf(pdf_file) -> str:
     """
-    Extrai texto de um PDF com 3 camadas de fallback:
+    3 camadas de extracao:
     1. pdfplumber
     2. PyMuPDF (fitz)
     3. OCR via pdf2image + pytesseract (ativa se texto < 150 chars/pagina)
@@ -114,7 +115,7 @@ def extrair_texto_pdf(pdf_file) -> str:
     num_paginas = 1
     texto = ""
 
-    # --- Camada 1: pdfplumber ---
+    # Camada 1: pdfplumber
     try:
         import pdfplumber
         with pdfplumber.open(io.BytesIO(data)) as pdf:
@@ -128,7 +129,7 @@ def extrair_texto_pdf(pdf_file) -> str:
     except Exception:
         pass
 
-    # --- Camada 2: PyMuPDF ---
+    # Camada 2: PyMuPDF
     texto_fitz = ""
     try:
         import fitz
@@ -143,13 +144,13 @@ def extrair_texto_pdf(pdf_file) -> str:
     except Exception:
         pass
 
-    # --- Camada 3: OCR ---
+    # Camada 3: OCR
     texto_ocr = _extrair_ocr(data)
     return texto_ocr if texto_ocr.strip() else (texto or texto_fitz or "")
 
 
 # ============================================================================
-# 2 — EXTRACAO / PARSER LOCAL DE PGR
+# 2 — PARSER LOCAL DE PGR
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -298,10 +299,7 @@ def _contexto_do_ghe(ghe_nome: str, riscos_str: list) -> dict:
 def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro):
     if _AGENTE_IA_DISPONIVEL:
         resultado = processar_cargo_ia(
-            cargo=cargo,
-            riscos=riscos_str,
-            contexto=contexto,
-            e_canteiro=e_canteiro,
+            cargo=cargo, riscos=riscos_str, contexto=contexto, e_canteiro=e_canteiro,
         )
         return resultado.get("exames", []), resultado.get("chave_mestra", "")
     base = deepcopy(_EXAMES_MINIMOS_CANTEIRO if e_canteiro else _EXAMES_MINIMOS_ESCRIT)
@@ -309,7 +307,7 @@ def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro):
 
 
 # ============================================================================
-# 5 — processar_pcmso  (assinatura original mantida)
+# 5 — processar_pcmso
 # ============================================================================
 
 def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
@@ -337,13 +335,10 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
 
         for cargo in cargos:
             if exames_pre:
-                if isinstance(exames_pre[0], dict):
-                    exames_base = deepcopy(exames_pre)
-                else:
-                    exames_base = [
-                        {"nome": str(e), "adm": True, "per": "12", "mro": True, "ret": False, "dem": False}
-                        for e in exames_pre
-                    ]
+                exames_base = deepcopy(exames_pre) if isinstance(exames_pre[0], dict) else [
+                    {"nome": str(e), "adm": True, "per": "12", "mro": True, "ret": False, "dem": False}
+                    for e in exames_pre
+                ]
                 if _AGENTE_IA_DISPONIVEL:
                     res_ia = processar_cargo_ia(cargo=cargo, riscos=riscos_str, contexto=contexto, e_canteiro=e_canteiro)
                     nomes_ok = {_normalizar(e.get("nome", "")) for e in exames_base}
@@ -367,21 +362,13 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
                 ret = _bool_para_x(ex.get("ret", False) if isinstance(ex, dict) else False)
                 dem = _bool_para_x(ex.get("dem", False) if isinstance(ex, dict) else False)
                 linhas.append({
-                    "GHE / Setor": nome_ghe,
-                    "Cargo": cargo,
-                    "Exame": nome_ex,
-                    "ADM": adm,
-                    "PER": per,
-                    "MRO": mro,
-                    "RT": ret,
-                    "DEM": dem,
+                    "GHE / Setor": nome_ghe, "Cargo": cargo, "Exame": nome_ex,
+                    "ADM": adm, "PER": per, "MRO": mro, "RT": ret, "DEM": dem,
                     "Justificativa": fonte,
                 })
 
     cols = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM", "Justificativa"]
-    if not linhas:
-        return pd.DataFrame(columns=cols)
-    return pd.DataFrame(linhas)
+    return pd.DataFrame(linhas) if linhas else pd.DataFrame(columns=cols)
 
 
 # ============================================================================
@@ -391,48 +378,29 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
 def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
     if cabecalho is None:
         cabecalho = {}
-    razao   = cabecalho.get("razao_social", "")
-    cnpj    = cabecalho.get("cnpj", "")
-    medico  = cabecalho.get("medico_rt", "")
-    vig_ini = cabecalho.get("vig_ini", "")
-    vig_fim = cabecalho.get("vig_fim", "")
-    resp    = cabecalho.get("responsavel_tec", "")
-    obra    = cabecalho.get("obra", "")
-    hoje    = date.today().strftime("%d/%m/%Y")
-
     cs = "border:1px solid #ccc;padding:6px 8px;font-size:12px;"
     th = f"{cs}background:#084D22;color:white;text-align:center;"
     cols = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM"]
+    hoje = date.today().strftime("%d/%m/%Y")
 
     cab_html = f"""
     <div style="font-family:Arial,sans-serif;margin:0 auto;max-width:1100px;padding:20px;">
     <h2 style="color:#084D22;text-align:center;">PROGRAMA DE CONTROLE M\u00c9DICO DE SA\u00daDE OCUPACIONAL</h2>
     <h3 style="color:#084D22;text-align:center;">NR-07 \u2014 PCMSO</h3>
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
-      <tr><td style="padding:4px 8px;"><b>Empresa:</b> {razao}</td><td><b>CNPJ:</b> {cnpj}</td></tr>
-      <tr><td><b>M\u00e9dico RT:</b> {medico}</td><td><b>Obra:</b> {obra}</td></tr>
-      <tr><td><b>Vig\u00eancia:</b> {vig_ini} a {vig_fim}</td><td><b>Resp. SST:</b> {resp}</td></tr>
+      <tr><td><b>Empresa:</b> {cabecalho.get('razao_social','')}</td><td><b>CNPJ:</b> {cabecalho.get('cnpj','')}</td></tr>
+      <tr><td><b>M\u00e9dico RT:</b> {cabecalho.get('medico_rt','')}</td><td><b>Obra:</b> {cabecalho.get('obra','')}</td></tr>
+      <tr><td><b>Vig\u00eancia:</b> {cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}</td><td><b>Resp. SST:</b> {cabecalho.get('responsavel_tec','')}</td></tr>
       <tr><td colspan="2"><b>Gerado em:</b> {hoje} \u2014 {VERSAO_MODULO_PCMSO}</td></tr>
     </table>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:30px;">
-      <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols)}</tr></thead>
-      <tbody>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols)}</tr></thead><tbody>
     """
-
-    rows_html = ""
-    for _, row in df.iterrows():
-        rows_html += "<tr>" + "".join(
-            f"<td style='{cs}'>{row.get(c, '') if c in df.columns else ''}</td>"
-            for c in cols
-        ) + "</tr>\n"
-
-    rodape = f"""
-      </tbody></table>
-      <p style="font-size:11px;color:#888;text-align:center;margin-top:40px;">
-        Gerado pelo Sistema Automa\u00e7\u00e3o SST \u2014 Seconci GO | {hoje}
-      </p></div>
-    """
-    return f"<!DOCTYPE html><html><body>{cab_html}{rows_html}{rodape}</body></html>"
+    rows = "".join(
+        "<tr>" + "".join(f"<td style='{cs}'>{row.get(c,'') if c in df.columns else ''}</td>" for c in cols) + "</tr>\n"
+        for _, row in df.iterrows()
+    )
+    return f"<!DOCTYPE html><html><body>{cab_html}{rows}</tbody></table><p style='font-size:11px;color:#888;text-align:center;'>Gerado pelo Sistema SST Seconci GO | {hoje}</p></div></body></html>"
 
 
 # ============================================================================
@@ -456,21 +424,20 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
         section.top_margin = section.bottom_margin = Cm(2)
         section.left_margin = section.right_margin = Cm(2)
 
-    titulo = doc.add_heading("PROGRAMA DE CONTROLE M\u00c9DICO DE SA\u00daDE OCUPACIONAL", level=1)
-    titulo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    if titulo.runs:
-        titulo.runs[0].font.color.rgb = RGBColor(0x08, 0x4D, 0x22)
-
+    h1 = doc.add_heading("PROGRAMA DE CONTROLE M\u00c9DICO DE SA\u00daDE OCUPACIONAL", level=1)
+    h1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if h1.runs:
+        h1.runs[0].font.color.rgb = RGBColor(0x08, 0x4D, 0x22)
     doc.add_heading("NR-07 \u2014 PCMSO", level=2).alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     meta = [
-        ("Empresa",      cabecalho.get("razao_social", "")),
-        ("CNPJ",         cabecalho.get("cnpj", "")),
-        ("M\u00e9dico RT",    cabecalho.get("medico_rt", "")),
+        ("Empresa", cabecalho.get("razao_social", "")),
+        ("CNPJ", cabecalho.get("cnpj", "")),
+        ("M\u00e9dico RT", cabecalho.get("medico_rt", "")),
         ("Obra/Unidade", cabecalho.get("obra", "")),
-        ("Vig\u00eancia",     f"{cabecalho.get('vig_ini', '')} a {cabecalho.get('vig_fim', '')}"),
-        ("Resp. SST",    cabecalho.get("responsavel_tec", "")),
-        ("Gerado em",    date.today().strftime("%d/%m/%Y") + f" \u2014 {VERSAO_MODULO_PCMSO}"),
+        ("Vig\u00eancia", f"{cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}"),
+        ("Resp. SST", cabecalho.get("responsavel_tec", "")),
+        ("Gerado em", date.today().strftime("%d/%m/%Y") + f" \u2014 {VERSAO_MODULO_PCMSO}"),
     ]
     t_meta = doc.add_table(rows=len(meta), cols=2)
     t_meta.style = "Table Grid"
@@ -482,18 +449,17 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
     colunas = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM"]
     t = doc.add_table(rows=1, cols=len(colunas))
     t.style = "Table Grid"
-    hdr = t.rows[0].cells
     for i, col in enumerate(colunas):
-        p = hdr[i].paragraphs[0]
+        p = t.rows[0].cells[i].paragraphs[0]
         run = p.add_run(col)
         run.bold = True
         run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-        tc_pr = hdr[i]._tc.get_or_add_tcPr()
+        tcp = t.rows[0].cells[i]._tc.get_or_add_tcPr()
         shd = OxmlElement("w:shd")
         shd.set(qn("w:fill"), "084D22")
         shd.set(qn("w:color"), "auto")
         shd.set(qn("w:val"), "clear")
-        tc_pr.append(shd)
+        tcp.append(shd)
 
     for _, row in df.iterrows():
         cells = t.add_row().cells
