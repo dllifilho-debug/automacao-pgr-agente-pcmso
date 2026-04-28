@@ -1,5 +1,5 @@
 # =============================================================================
-# MÓDULO PCMSO v7.3 — OCR seletivo + AgenteMedicoIA
+# MÓDULO PCMSO v7.4 — OCR seletivo + parser robusto + AgenteMedicoIA
 # Funções públicas:
 #   extrair_texto_pdf, extrair_pgr_com_fallback, enriquecer_pgr_com_fispq,
 #   processar_pcmso, gerar_html_pcmso, gerar_docx_rq61
@@ -14,7 +14,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "7.3 (OCR seletivo + AgenteMedicoIA)"
+VERSAO_MODULO_PCMSO = "7.4 (parser robusto + OCR seletivo + AgenteMedicoIA)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA (opcional)
@@ -41,7 +41,6 @@ except ImportError:
 
 _MIN_CHARS_POR_PAGINA = 150
 
-# Palavras-chave que identificam a página de assinatura eletrônica (ClickSign, DocuSign, etc.)
 _ASSINATURA_KEYWORDS = [
     "autenticação eletrônica",
     "autenticacao eletronica",
@@ -64,7 +63,6 @@ def _texto_esta_vazio(texto: str, num_paginas: int) -> bool:
 
 
 def _e_pagina_assinatura(texto_pagina: str) -> bool:
-    """Detecta se a página é uma página de assinatura eletrônica sem conteúdo útil."""
     if not texto_pagina:
         return False
     t = texto_pagina.lower()
@@ -73,11 +71,10 @@ def _e_pagina_assinatura(texto_pagina: str) -> bool:
 
 def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
     """
-    Fallback OCR com lazy imports para nao crashar o boot do Streamlit.
-    - Pula a ultima pagina se for pagina de assinaturas ClickSign/DocuSign.
+    Fallback OCR com lazy imports.
+    - Pula ultima pagina se for ClickSign/DocuSign.
     - DPI adaptativo: 200 para PDFs >50 paginas, 250 para menores.
-    - Exibe progresso via st.progress() quando Streamlit disponivel.
-    - Pre-processamento OpenCV/numpy e opcional; se falhar usa PIL direto.
+    - Progresso via st.progress() quando Streamlit disponivel.
     """
     texto = ""
     try:
@@ -86,7 +83,6 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
     except ImportError as e:
         return f"[OCR indisponivel: {e}]"
 
-    # DPI adaptativo baseado no numero de paginas
     dpi = 200 if num_paginas_total > 50 else 250
 
     try:
@@ -95,9 +91,6 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
         return f"[OCR: falha na conversao de paginas: {e}]"
 
     total = len(paginas)
-
-    # Remove a ultima pagina se for pagina de assinaturas
-    # (verifica com OCR rapido em baixo DPI apenas da ultima pagina)
     paginas_processar = paginas
     if total > 1:
         try:
@@ -109,21 +102,16 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
             pass
 
     config_tess = "--psm 6 --oem 3"
-
-    # Tenta importar Streamlit para progresso visual (lazy — nao falha se ausente)
-    _st = None
     _progress_bar = None
     _status_ctx = None
     try:
         import streamlit as st
-        _st = st
         _status_ctx = st.status(f"🔍 OCR em andamento — {total} páginas (DPI={dpi})...", expanded=False)
         _status_ctx.__enter__()
         _progress_bar = st.progress(0, text="Iniciando OCR...")
     except Exception:
         pass
 
-    # Tenta importar OpenCV para pre-processamento (opcional)
     _cv2_ok = False
     try:
         import cv2
@@ -151,16 +139,12 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
                 texto += (t or "") + "\n"
             except Exception:
                 pass
-
-        # Atualiza barra de progresso
         if _progress_bar is not None:
             try:
-                pct = int((i + 1) / total * 100)
-                _progress_bar.progress(pct, text=f"OCR: página {i + 1}/{total}")
+                _progress_bar.progress(int((i + 1) / total * 100), text=f"OCR: página {i + 1}/{total}")
             except Exception:
                 pass
 
-    # Finaliza status do Streamlit
     if _status_ctx is not None:
         try:
             _progress_bar.progress(100, text="OCR concluído ✅")
@@ -176,10 +160,7 @@ def extrair_texto_pdf(pdf_file) -> str:
     3 camadas de extracao:
     1. pdfplumber
     2. PyMuPDF (fitz)
-    3. OCR via pdf2image + pytesseract (ativa se texto < 150 chars/pagina)
-       - DPI adaptativo (200 para >50 pags, 250 para menores)
-       - Pula automaticamente a pagina de assinaturas ClickSign
-       - Progresso visual via st.progress()
+    3. OCR via pdf2image + pytesseract
     """
     if hasattr(pdf_file, "read"):
         pdf_file.seek(0)
@@ -190,7 +171,6 @@ def extrair_texto_pdf(pdf_file) -> str:
     num_paginas = 1
     texto = ""
 
-    # Camada 1: pdfplumber
     try:
         import pdfplumber
         with pdfplumber.open(io.BytesIO(data)) as pdf:
@@ -204,7 +184,6 @@ def extrair_texto_pdf(pdf_file) -> str:
     except Exception:
         pass
 
-    # Camada 2: PyMuPDF
     texto_fitz = ""
     try:
         import fitz
@@ -219,13 +198,12 @@ def extrair_texto_pdf(pdf_file) -> str:
     except Exception:
         pass
 
-    # Camada 3: OCR seletivo
     texto_ocr = _extrair_ocr(data, num_paginas_total=num_paginas)
     return texto_ocr if texto_ocr.strip() else (texto or texto_fitz or "")
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR
+# 2 — PARSER LOCAL DE PGR  (v7.4 — robusto para formato Viverde/CMO)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -235,43 +213,162 @@ def _normalizar(texto: str) -> str:
     return nfkd.encode("ASCII", "ignore").decode("ASCII").lower().strip()
 
 
+# Cargos conhecidos de canteiro de obras (normalizados)
+_CARGOS_CANTEIRO = {
+    "carpinteiro", "meio oficial carpinteiro", "meio of carpinteiro",
+    "pedreiro", "meio oficial pedreiro", "meio of pedreiro",
+    "eletricista", "eletricista industrial",
+    "servente", "servente de obras",
+    "armador", "meio oficial armador", "meio of armador",
+    "encanador", "meio oficial encanador", "meio of encanador",
+    "serralheiro",
+    "mestre de obras", "mestre",
+    "tecnico de seguranca do trabalho", "tecnico seguranca trabalho", "tst",
+    "engenheiro civil", "engenheiro",
+    "administrativo de obras", "aux adm de obras", "auxiliar administrativo de obras",
+    "auxiliar administrativo", "aux administrativo",
+    "almoxarife",
+    "pintor", "pintor de obras",
+    "azulejista", "assentador de ceramica",
+    "gesseiro",
+    "impermeabilizador",
+    "operador de cremalheira", "operador de equipamento", "operador",
+    "soldador",
+    "porteiro", "vigia", "porteiro vigia",
+    "sinaleiro",
+    "mecanico", "mecanico de manutencao",
+    "estagiario", "estagiaria",
+    "jovem aprendiz", "aprendiz",
+    "encarregado", "encarregado de obras", "supervisor",
+    "ajudante", "ajudante geral",
+    "calceteiro", "topografo", "motorista",
+}
+
+# Regex GHE: captura 'GHE 01-', 'GHE 01 -', 'GHE01:', 'GRUPO HOMOGENEO...'
 _RE_GHE = re.compile(
-    r"(?i)^(?:GHE\s*[:\-\u2013]?\s*|GRUPO\s+HOMOG[E\u00ca]NEO\s+DE\s+EXPOSI[\u00c7C][\u00c3A]O\s*[:\-\u2013]?\s*)(.+)$"
+    r"(?i)^(?:GHE\s*\d*\s*[-\u2013:]?\s*"
+    r"|GRUPO\s+HOMOG[E\u00ca]NEO\s+DE\s+EXPOSI[\u00c7C][\u00c3A]O\s*[-\u2013:]?\s*)(.+)$"
 )
-_RE_CARGO = re.compile(
-    r"(?i)^(?:CARGO\s+)(.+?)(?:\s*[-\u2013]\s*CBO[:\s]*\d+)?\s*$"
-)
+
+# Regex agente: quimico, fisico, biologico, ergonomico, acidente
 _RE_AGENTE = re.compile(
-    r"(?i)(?:agente\s*(?:qu[i\u00ed]mico|f[i\u00ed]sico|biol[o\u00f3]gico|de\s+risco)?\s*[:\-\u2013]?\s*)(.+)$"
+    r"(?i)^agente\s*(?:qu[i\u00ed]mico|f[i\u00ed]sico|biol[o\u00f3]gico"
+    r"|ergon[o\u00f4]mico|de\s+acidente|de\s+risco)?\s*[:\-\u2013]?\s*(.+)$"
 )
+
+# Linhas que nunca sao cargos
+_RE_SKIP = re.compile(
+    r"(?i)^("
+    r"ef$|ef\s|\d+$|\*|^-+$|^\s*$"
+    r"|fun[c\u00e7][o\u00f5]es\s*(quantidade)?$"
+    r"|quantidade$"
+    r"|raz[a\u00e3]o\s+social|endere[c\u00e7]o|complemento|bairro|cidade|cep|cnpj|cnae"
+    r"|grau\s+de\s+risco|telefone|contato"
+    r"|\d+\.\s+.+|fase\s+|servi[c\u00e7]os?\s+|hor[a\u00e1]rio|in[i\u00ed]cio|previs[a\u00e3]o"
+    r"|n[u\u00fa]mero\s+total|programa\s+de|goiania|goiânia|atualizado|fevereiro|março|janeiro"
+    r"|subsolo|t[e\u00e9]rreo|garagem|pavimento|apartamento|penthouse"
+    r"|segunda|sexta|s[a\u00e1]bado|\d{2}h"
+    r")"
+)
+
+
+def _identificar_cargo(linha: str) -> str | None:
+    """
+    Tenta identificar se a linha representa um cargo.
+    Estrategia 1: cargo conhecido no _CARGOS_CANTEIRO
+    Estrategia 2: 'NOME QTD' (ex: 'Pedreiro 15') -> remove QTD e verifica
+    Estrategia 3: heuristica por formato (2-5 palavras, inicia maiuscula, sem pontuacao)
+    """
+    ls = linha.strip()
+    if not ls:
+        return None
+
+    # Filtra linhas que definitivamente nao sao cargos
+    if _RE_SKIP.match(_normalizar(ls)):
+        return None
+
+    # Ignora linhas de agente (tratadas separadamente)
+    if re.match(r"(?i)^agente\s", ls):
+        return None
+
+    # Ignora linhas de risco/perigo/medida/NR
+    if re.match(r"(?i)^(risco|perigo|medida|a[c\u00e7][a\u00e3]o|nr[-\s]\d|epis?\s|epc\s)", ls):
+        return None
+
+    # Remove numero do final: "Pedreiro 15" -> "Pedreiro", "Mestre de Obras 01" -> "Mestre de Obras"
+    nome_sem_qtd = re.sub(r"\s+\d{1,3}\s*$", "", ls).strip()
+
+    # Estrategia 1 + 2: verifica no set de cargos conhecidos
+    nome_n = _normalizar(nome_sem_qtd)
+    if nome_n in _CARGOS_CANTEIRO:
+        return nome_sem_qtd
+
+    # Tambem testa o nome original (sem remocao de numero) por seguranca
+    if _normalizar(ls) in _CARGOS_CANTEIRO:
+        return ls
+
+    # Estrategia 3: heuristica
+    palavras = nome_sem_qtd.split()
+    if (
+        2 <= len(palavras) <= 5
+        and not re.search(r"[;:,./\(\)]", nome_sem_qtd)
+        and not re.match(r"(?i)^(agente|risco|perigo|medida|acao|nr[-\s]|epi|epc|uso|utilize|verifique)", nome_sem_qtd)
+        and re.match(r"^[A-Z\u00c0-\u00da][a-zA-Z\u00c0-\u00ff\s.]+$", nome_sem_qtd)
+        and len(nome_sem_qtd) >= 5
+    ):
+        return nome_sem_qtd
+
+    return None
 
 
 def _parsear_pgr_local(texto: str) -> list:
     linhas = texto.split("\n")
     blocos = []
     bloco_atual = None
+    em_ghe = False
+
     for linha in linhas:
         ls = linha.strip()
         if not ls:
             continue
+
         m_ghe = _RE_GHE.match(ls)
-        m_cargo = _RE_CARGO.match(ls)
         if m_ghe:
             if bloco_atual:
                 blocos.append(bloco_atual)
-            bloco_atual = {"ghe": m_ghe.group(1).strip(), "cargos": [], "riscos_mapeados": []}
-        elif m_cargo and bloco_atual is not None:
-            nome = m_cargo.group(1).strip()
-            if nome not in bloco_atual["cargos"]:
-                bloco_atual["cargos"].append(nome)
-        elif bloco_atual is not None:
-            m_ag = _RE_AGENTE.match(ls)
-            if m_ag:
-                bloco_atual["riscos_mapeados"].append(
-                    {"nome_agente": m_ag.group(1).strip(), "perigo_especifico": ""}
-                )
+            nome_ghe_raw = m_ghe.group(1).strip()
+            # Preserva numero do GHE para rastreabilidade
+            num_match = re.search(r"\d+", ls)
+            num_ghe = num_match.group() if num_match else str(len(blocos) + 1)
+            # Remove numero do inicio do nome descritivo
+            nome_desc = re.sub(r"^\d+\s*[-\u2013]?\s*", "", nome_ghe_raw).strip()
+            bloco_atual = {
+                "ghe": f"GHE {num_ghe.zfill(2)} - {nome_desc}" if nome_desc else f"GHE {num_ghe}",
+                "cargos": [],
+                "riscos_mapeados": [],
+            }
+            em_ghe = True
+            continue
+
+        if not em_ghe or bloco_atual is None:
+            continue
+
+        # Testa agente primeiro
+        m_ag = _RE_AGENTE.match(ls)
+        if m_ag:
+            bloco_atual["riscos_mapeados"].append(
+                {"nome_agente": m_ag.group(1).strip(), "perigo_especifico": ""}
+            )
+            continue
+
+        # Testa cargo
+        cargo = _identificar_cargo(ls)
+        if cargo and cargo not in bloco_atual["cargos"]:
+            bloco_atual["cargos"].append(cargo)
+
     if bloco_atual:
         blocos.append(bloco_atual)
+
     return blocos
 
 
@@ -388,11 +485,11 @@ def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro):
 def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
     linhas = []
     for ghe_item in dados_ghe:
-        nome_ghe    = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or "GHE sem nome"
-        cargos      = ghe_item.get("cargos", [])
+        nome_ghe        = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or "GHE sem nome"
+        cargos          = ghe_item.get("cargos", [])
         riscos_mapeados = ghe_item.get("riscos_mapeados", [])
-        riscos_str  = _riscos_para_lista_str(riscos_mapeados)
-        exames_pre  = ghe_item.get("exames", [])
+        riscos_str      = _riscos_para_lista_str(riscos_mapeados)
+        exames_pre      = ghe_item.get("exames", [])
 
         if tipo_ambiente == "canteiro":
             e_canteiro = True
