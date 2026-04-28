@@ -1,8 +1,13 @@
 # =============================================================================
-# MÓDULO PCMSO v7.4 — OCR seletivo + parser robusto + AgenteMedicoIA
+# MÓDULO PCMSO v7.5 — OCR seletivo + parser 2 passagens + AgenteMedicoIA
 # Funções públicas:
 #   extrair_texto_pdf, extrair_pgr_com_fallback, enriquecer_pgr_com_fispq,
 #   processar_pcmso, gerar_html_pcmso, gerar_docx_rq61
+#
+# v7.5 — parser em 2 passagens:
+#   Passagem 1: coleta cargos da seção "FUNÇÕES EXISTENTES NO CANTEIRO" (antes dos GHEs)
+#   Passagem 2: parseia GHEs e injeta os cargos coletados quando o GHE não tiver cargos próprios
+#   Isso resolve PDFs no formato Viverde/CMO onde cargos aparecem ANTES dos blocos GHE
 # =============================================================================
 
 import io
@@ -14,7 +19,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "7.4 (parser robusto + OCR seletivo + AgenteMedicoIA)"
+VERSAO_MODULO_PCMSO = "7.5 (parser 2 passagens + OCR seletivo + AgenteMedicoIA)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA (opcional)
@@ -203,7 +208,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR  (v7.4 — robusto para formato Viverde/CMO)
+# 2 — PARSER LOCAL DE PGR  (v7.5 — 2 passagens para formato Viverde/CMO)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -254,6 +259,14 @@ _RE_GHE = re.compile(
 _RE_AGENTE = re.compile(
     r"(?i)^agente\s*(?:qu[i\u00ed]mico|f[i\u00ed]sico|biol[o\u00f3]gico"
     r"|ergon[o\u00f4]mico|de\s+acidente|de\s+risco)?\s*[:\-\u2013]?\s*(.+)$"
+)
+
+# Cabecalho da tabela de funcoes (marca inicio da secao de cargos globais)
+_RE_SECAO_FUNCOES = re.compile(
+    r"(?i)^(fun[c\u00e7][o\u00f5]es\s*(existentes)?\s*(no\s+canteiro)?|"
+    r"fun[c\u00e7][o\u00f5]es\s+quantidade|"
+    r"cargo[s]?\s+cbo|"
+    r"fun[c\u00e7][o\u00f5]es\s+existentes)"
 )
 
 # Linhas que nunca sao cargos
@@ -321,8 +334,60 @@ def _identificar_cargo(linha: str) -> str | None:
     return None
 
 
+def _coletar_cargos_globais(linhas: list) -> list:
+    """
+    PASSAGEM 1: Varre o texto ANTES dos GHEs e coleta todos os cargos
+    da seção 'FUNÇÕES EXISTENTES NO CANTEIRO DE OBRAS'.
+    Retorna lista de cargos encontrados (sem duplicatas).
+    """
+    cargos = []
+    vistos = set()
+    em_secao_funcoes = False
+
+    for linha in linhas:
+        ls = linha.strip()
+        if not ls:
+            continue
+
+        # Detecta inicio da secao de funcoes
+        if _RE_SECAO_FUNCOES.match(ls):
+            em_secao_funcoes = True
+            continue
+
+        # Para de coletar ao encontrar o primeiro GHE
+        if _RE_GHE.match(ls):
+            break
+
+        # Para se encontrar outra secao numerada principal (ex: "9. ...")
+        if re.match(r"^\d+\.\s+[A-Z]", ls) and em_secao_funcoes:
+            em_secao_funcoes = False
+            continue
+
+        if not em_secao_funcoes:
+            continue
+
+        cargo = _identificar_cargo(ls)
+        if cargo:
+            cargo_n = _normalizar(cargo)
+            if cargo_n not in vistos:
+                vistos.add(cargo_n)
+                cargos.append(cargo)
+
+    return cargos
+
+
 def _parsear_pgr_local(texto: str) -> list:
+    """
+    Parser em 2 passagens:
+    1. Coleta cargos globais da seção FUNÇÕES antes dos GHEs
+    2. Parseia blocos GHE e injeta cargos globais quando bloco não tem cargos próprios
+    """
     linhas = texto.split("\n")
+
+    # --- PASSAGEM 1: cargos globais ---
+    cargos_globais = _coletar_cargos_globais(linhas)
+
+    # --- PASSAGEM 2: blocos GHE ---
     blocos = []
     bloco_atual = None
     em_ghe = False
@@ -337,10 +402,8 @@ def _parsear_pgr_local(texto: str) -> list:
             if bloco_atual:
                 blocos.append(bloco_atual)
             nome_ghe_raw = m_ghe.group(1).strip()
-            # Preserva numero do GHE para rastreabilidade
             num_match = re.search(r"\d+", ls)
             num_ghe = num_match.group() if num_match else str(len(blocos) + 1)
-            # Remove numero do inicio do nome descritivo
             nome_desc = re.sub(r"^\d+\s*[-\u2013]?\s*", "", nome_ghe_raw).strip()
             bloco_atual = {
                 "ghe": f"GHE {num_ghe.zfill(2)} - {nome_desc}" if nome_desc else f"GHE {num_ghe}",
@@ -361,13 +424,19 @@ def _parsear_pgr_local(texto: str) -> list:
             )
             continue
 
-        # Testa cargo
+        # Testa cargo dentro do proprio bloco GHE
         cargo = _identificar_cargo(ls)
         if cargo and cargo not in bloco_atual["cargos"]:
             bloco_atual["cargos"].append(cargo)
 
     if bloco_atual:
         blocos.append(bloco_atual)
+
+    # --- INJECAO: distribui cargos globais para GHEs sem cargos proprios ---
+    if cargos_globais:
+        for bloco in blocos:
+            if not bloco["cargos"]:
+                bloco["cargos"] = list(cargos_globais)
 
     return blocos
 
@@ -414,18 +483,18 @@ def enriquecer_pgr_com_fispq(dados_ghe: list, resultados_fispq: list) -> list:
 # ============================================================================
 
 _EXAMES_MINIMOS_CANTEIRO = [
-    {"nome": "Exame Cl\u00ednico",      "adm": True,  "per": "12", "mro": True,  "ret": True,  "dem": True},
+    {"nome": "Exame Clínico",      "adm": True,  "per": "12", "mro": True,  "ret": True,  "dem": True},
     {"nome": "Audiometria",        "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": True},
     {"nome": "Acuidade Visual",    "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
     {"nome": "Hemograma Completo", "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
     {"nome": "Glicemia em Jejum",  "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
     {"nome": "ECG",                "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
     {"nome": "Espirometria",       "adm": True,  "per": "24", "mro": True,  "ret": False, "dem": True},
-    {"nome": "RX de T\u00f3rax OIT",   "adm": True,  "per": "60", "mro": True,  "ret": False, "dem": True},
+    {"nome": "RX de Tórax OIT",   "adm": True,  "per": "60", "mro": True,  "ret": False, "dem": True},
 ]
 
 _EXAMES_MINIMOS_ESCRIT = [
-    {"nome": "Exame Cl\u00ednico", "adm": True, "per": "12", "mro": True, "ret": True, "dem": True},
+    {"nome": "Exame Clínico", "adm": True, "per": "12", "mro": True, "ret": True, "dem": True},
 ]
 
 
@@ -557,13 +626,13 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
 
     cab_html = f"""
     <div style="font-family:Arial,sans-serif;margin:0 auto;max-width:1100px;padding:20px;">
-    <h2 style="color:#084D22;text-align:center;">PROGRAMA DE CONTROLE M\u00c9DICO DE SA\u00daDE OCUPACIONAL</h2>
-    <h3 style="color:#084D22;text-align:center;">NR-07 \u2014 PCMSO</h3>
+    <h2 style="color:#084D22;text-align:center;">PROGRAMA DE CONTROLE MÉDICO DE SAÚDE OCUPACIONAL</h2>
+    <h3 style="color:#084D22;text-align:center;">NR-07 — PCMSO</h3>
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
       <tr><td><b>Empresa:</b> {cabecalho.get('razao_social','')}</td><td><b>CNPJ:</b> {cabecalho.get('cnpj','')}</td></tr>
-      <tr><td><b>M\u00e9dico RT:</b> {cabecalho.get('medico_rt','')}</td><td><b>Obra:</b> {cabecalho.get('obra','')}</td></tr>
-      <tr><td><b>Vig\u00eancia:</b> {cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}</td><td><b>Resp. SST:</b> {cabecalho.get('responsavel_tec','')}</td></tr>
-      <tr><td colspan="2"><b>Gerado em:</b> {hoje} \u2014 {VERSAO_MODULO_PCMSO}</td></tr>
+      <tr><td><b>Médico RT:</b> {cabecalho.get('medico_rt','')}</td><td><b>Obra:</b> {cabecalho.get('obra','')}</td></tr>
+      <tr><td><b>Vigência:</b> {cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}</td><td><b>Resp. SST:</b> {cabecalho.get('responsavel_tec','')}</td></tr>
+      <tr><td colspan="2"><b>Gerado em:</b> {hoje} — {VERSAO_MODULO_PCMSO}</td></tr>
     </table>
     <table style="width:100%;border-collapse:collapse;">
       <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols)}</tr></thead><tbody>
@@ -596,20 +665,20 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
         section.top_margin = section.bottom_margin = Cm(2)
         section.left_margin = section.right_margin = Cm(2)
 
-    h1 = doc.add_heading("PROGRAMA DE CONTROLE M\u00c9DICO DE SA\u00daDE OCUPACIONAL", level=1)
+    h1 = doc.add_heading("PROGRAMA DE CONTROLE MÉDICO DE SAÚDE OCUPACIONAL", level=1)
     h1.alignment = WD_ALIGN_PARAGRAPH.CENTER
     if h1.runs:
         h1.runs[0].font.color.rgb = RGBColor(0x08, 0x4D, 0x22)
-    doc.add_heading("NR-07 \u2014 PCMSO", level=2).alignment = WD_ALIGN_PARAGRAPH.CENTER
+    doc.add_heading("NR-07 — PCMSO", level=2).alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     meta = [
         ("Empresa", cabecalho.get("razao_social", "")),
         ("CNPJ", cabecalho.get("cnpj", "")),
-        ("M\u00e9dico RT", cabecalho.get("medico_rt", "")),
+        ("Médico RT", cabecalho.get("medico_rt", "")),
         ("Obra/Unidade", cabecalho.get("obra", "")),
-        ("Vig\u00eancia", f"{cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}"),
+        ("Vigência", f"{cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}"),
         ("Resp. SST", cabecalho.get("responsavel_tec", "")),
-        ("Gerado em", date.today().strftime("%d/%m/%Y") + f" \u2014 {VERSAO_MODULO_PCMSO}"),
+        ("Gerado em", date.today().strftime("%d/%m/%Y") + f" — {VERSAO_MODULO_PCMSO}"),
     ]
     t_meta = doc.add_table(rows=len(meta), cols=2)
     t_meta.style = "Table Grid"
