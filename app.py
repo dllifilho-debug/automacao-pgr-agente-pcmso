@@ -1,7 +1,7 @@
 """
 Automacao SST - Seconci GO
-app.py v5.20 — fix: riscos do parser_pgr convertidos para [{nome_agente, perigo_especifico}]
-               strip 'CARGO X - CBO: XXXXXX' para que enriquecer_ghe_com_banco encontre o cargo
+app.py v5.21 — fix: quando parser_pgr retorna GHEs sem cargos, injeta cargos globais
+               coletados pelo _parsear_pgr_local v7.5 (formato Viverde/CMO)
 """
 import json
 import os
@@ -147,8 +147,8 @@ def _normalizar_dados_ghe_para_auditor(dados_ghe):
             for r in riscos_raw
         ]
         resultado.append({
-            'ghe': nome_secao,          # nome original → GHE / Setor na planilha
-            'cargos': [nome_cargo],     # nome limpo (sem prefixo CARGO/CBO) → match banco
+            'ghe': nome_secao,
+            'cargos': [nome_cargo],
             'riscos_mapeados': riscos_mapeados,
             'exames': info.get('exames', []),
         })
@@ -426,7 +426,6 @@ elif modulo == "Medicina: PGR - PCMSO":
                     st.warning(_resultado_pgr["aviso"])
 
                 # Converte ghe_blocos (dict) → dados_ghe normalizado (lista)
-                # riscos_identificados pode ser lista de strings ou lista de dicts
                 dados_ghe_raw = {}
                 for _nome_sec, _info in _resultado_pgr["ghe_blocos"].items():
                     dados_ghe_raw[_nome_sec] = {
@@ -437,6 +436,28 @@ elif modulo == "Medicina: PGR - PCMSO":
                     }
                 dados_ghe = _normalizar_dados_ghe_para_auditor(dados_ghe_raw)
                 fonte = "local"
+
+                # ── v5.21 FIX: injeta cargos globais nos GHEs sem cargos ──────────────────
+                # O parser_pgr encontra os GHEs mas nao extrai cargos do formato Viverde/CMO
+                # (cargos ficam na secao FUNCOES EXISTENTES, antes dos GHEs no texto)
+                # O _parsear_pgr_local v7.5 faz a coleta em 2 passagens — reutilizamos
+                # apenas os cargos globais que ele coletou para injetar nos GHEs vazios.
+                _ghe_sem_cargo = [g for g in dados_ghe if not g.get("cargos")]
+                if _ghe_sem_cargo:
+                    try:
+                        from modules.modulo_pcmso import _parsear_pgr_local, _coletar_cargos_globais
+                        _cargos_globais = _coletar_cargos_globais(texto_pgr.split("\n"))
+                        if _cargos_globais:
+                            for _ghe in _ghe_sem_cargo:
+                                _ghe["cargos"] = list(_cargos_globais)
+                            st.info(
+                                f"ℹ️ {len(_cargos_globais)} cargo(s) coletados da seção FUNÇÕES "
+                                f"e distribuídos para {len(_ghe_sem_cargo)} GHE(s) sem cargos."
+                            )
+                    except Exception as _e_inj:
+                        st.warning(f"⚠️ Injeção de cargos globais falhou: {_e_inj}")
+                # ── fim fix v5.21 ────────────────────────────────────────────────────────
+
             else:
                 st.info("🔁 parser_pgr nao encontrou secoes — usando pipeline local (extrair_pgr_local)...")
                 _dados_list, fonte = extrair_pgr_com_fallback(texto_pgr)
