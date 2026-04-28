@@ -1,5 +1,5 @@
 # =============================================================================
-# MÓDULO PCMSO v7.2 — OCR automatico + AgenteMedicoIA
+# MÓDULO PCMSO v7.3 — OCR seletivo + AgenteMedicoIA
 # Funções públicas:
 #   extrair_texto_pdf, extrair_pgr_com_fallback, enriquecer_pgr_com_fispq,
 #   processar_pcmso, gerar_html_pcmso, gerar_docx_rq61
@@ -14,7 +14,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "7.2 (OCR + AgenteMedicoIA)"
+VERSAO_MODULO_PCMSO = "7.3 (OCR seletivo + AgenteMedicoIA)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA (opcional)
@@ -41,6 +41,21 @@ except ImportError:
 
 _MIN_CHARS_POR_PAGINA = 150
 
+# Palavras-chave que identificam a página de assinatura eletrônica (ClickSign, DocuSign, etc.)
+_ASSINATURA_KEYWORDS = [
+    "autenticação eletrônica",
+    "autenticacao eletronica",
+    "página de assinaturas",
+    "pagina de assinaturas",
+    "hash sha256",
+    "identificador:",
+    "clicksign",
+    "docusign",
+    "signatário",
+    "signatario",
+    "escaneie a imagem para verificar",
+]
+
 
 def _texto_esta_vazio(texto: str, num_paginas: int) -> bool:
     if not texto or not texto.strip():
@@ -48,10 +63,21 @@ def _texto_esta_vazio(texto: str, num_paginas: int) -> bool:
     return (len(texto) / max(num_paginas, 1)) < _MIN_CHARS_POR_PAGINA
 
 
-def _extrair_ocr(data: bytes) -> str:
+def _e_pagina_assinatura(texto_pagina: str) -> bool:
+    """Detecta se a página é uma página de assinatura eletrônica sem conteúdo útil."""
+    if not texto_pagina:
+        return False
+    t = texto_pagina.lower()
+    return any(kw in t for kw in _ASSINATURA_KEYWORDS)
+
+
+def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
     """
     Fallback OCR com lazy imports para nao crashar o boot do Streamlit.
-    Pre-processamento OpenCV/numpy e opcional; se falhar usa PIL direto.
+    - Pula a ultima pagina se for pagina de assinaturas ClickSign/DocuSign.
+    - DPI adaptativo: 200 para PDFs >50 paginas, 250 para menores.
+    - Exibe progresso via st.progress() quando Streamlit disponivel.
+    - Pre-processamento OpenCV/numpy e opcional; se falhar usa PIL direto.
     """
     texto = ""
     try:
@@ -60,12 +86,42 @@ def _extrair_ocr(data: bytes) -> str:
     except ImportError as e:
         return f"[OCR indisponivel: {e}]"
 
+    # DPI adaptativo baseado no numero de paginas
+    dpi = 200 if num_paginas_total > 50 else 250
+
     try:
-        paginas = convert_from_bytes(data, dpi=250)
+        paginas = convert_from_bytes(data, dpi=dpi)
     except Exception as e:
         return f"[OCR: falha na conversao de paginas: {e}]"
 
+    total = len(paginas)
+
+    # Remove a ultima pagina se for pagina de assinaturas
+    # (verifica com OCR rapido em baixo DPI apenas da ultima pagina)
+    paginas_processar = paginas
+    if total > 1:
+        try:
+            ultima_texto = pytesseract.image_to_string(paginas[-1], lang="por+eng", config="--psm 6 --oem 3")
+            if _e_pagina_assinatura(ultima_texto):
+                paginas_processar = paginas[:-1]
+                total = len(paginas_processar)
+        except Exception:
+            pass
+
     config_tess = "--psm 6 --oem 3"
+
+    # Tenta importar Streamlit para progresso visual (lazy — nao falha se ausente)
+    _st = None
+    _progress_bar = None
+    _status_ctx = None
+    try:
+        import streamlit as st
+        _st = st
+        _status_ctx = st.status(f"🔍 OCR em andamento — {total} páginas (DPI={dpi})...", expanded=False)
+        _status_ctx.__enter__()
+        _progress_bar = st.progress(0, text="Iniciando OCR...")
+    except Exception:
+        pass
 
     # Tenta importar OpenCV para pre-processamento (opcional)
     _cv2_ok = False
@@ -76,7 +132,7 @@ def _extrair_ocr(data: bytes) -> str:
     except ImportError:
         pass
 
-    for img in paginas:
+    for i, img in enumerate(paginas_processar):
         try:
             if _cv2_ok:
                 img_array = __import__("numpy").array(img.convert("RGB"))
@@ -96,6 +152,22 @@ def _extrair_ocr(data: bytes) -> str:
             except Exception:
                 pass
 
+        # Atualiza barra de progresso
+        if _progress_bar is not None:
+            try:
+                pct = int((i + 1) / total * 100)
+                _progress_bar.progress(pct, text=f"OCR: página {i + 1}/{total}")
+            except Exception:
+                pass
+
+    # Finaliza status do Streamlit
+    if _status_ctx is not None:
+        try:
+            _progress_bar.progress(100, text="OCR concluído ✅")
+            _status_ctx.__exit__(None, None, None)
+        except Exception:
+            pass
+
     return texto
 
 
@@ -105,6 +177,9 @@ def extrair_texto_pdf(pdf_file) -> str:
     1. pdfplumber
     2. PyMuPDF (fitz)
     3. OCR via pdf2image + pytesseract (ativa se texto < 150 chars/pagina)
+       - DPI adaptativo (200 para >50 pags, 250 para menores)
+       - Pula automaticamente a pagina de assinaturas ClickSign
+       - Progresso visual via st.progress()
     """
     if hasattr(pdf_file, "read"):
         pdf_file.seek(0)
@@ -144,8 +219,8 @@ def extrair_texto_pdf(pdf_file) -> str:
     except Exception:
         pass
 
-    # Camada 3: OCR
-    texto_ocr = _extrair_ocr(data)
+    # Camada 3: OCR seletivo
+    texto_ocr = _extrair_ocr(data, num_paginas_total=num_paginas)
     return texto_ocr if texto_ocr.strip() else (texto or texto_fitz or "")
 
 
