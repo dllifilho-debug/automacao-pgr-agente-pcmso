@@ -157,6 +157,62 @@ def normalizar_cargo(nome):
 
 
 # ───────────────────────────────────────────────────────────────────────────
+# MAPA: nome do GHE → chave do banco_matrizes_v2
+# Usado quando o parser_pgr retorna o nome do GHE como "cargo"
+# ───────────────────────────────────────────────────────────────────────────
+_MAPA_GHE_PARA_BANCO_KEY = {
+    # Engenharia / Planejamento
+    'GHE 01': 'ENGENHEIRO',
+    'ENGENHARIA': 'ENGENHEIRO',
+    'ENGENHARIA PLANEJAMENTO': 'ENGENHEIRO',
+    'PLANEJAMENTO DE OBRA': 'ENGENHEIRO',
+    # SST / Segurança do Trabalho
+    'GHE 02': 'TECNICO_SST',
+    'SEGURANCA DO TRABALHO': 'TECNICO_SST',
+    'TECNICO SST': 'TECNICO_SST',
+    'TECNICO DE SEGURANCA': 'TECNICO_SST',
+    # Execução de obra (genérico → PRODUCAO_GERAL como fallback)
+    'GHE 03': 'PRODUCAO_GERAL',
+    'EXECUCAO DE OBRA': 'PRODUCAO_GERAL',
+    'EXECUCAO': 'PRODUCAO_GERAL',
+    # Supervisão rejunte/limpeza
+    'GHE 04': 'ENCARREGADO_SUPERVISAO',
+    'SUPERVISAO REJUNTE': 'ENCARREGADO_SUPERVISAO',
+    'SUPERVISAO REJUNTE LIMPEZA': 'ENCARREGADO_SUPERVISAO',
+    'SUPERVISAO': 'ENCARREGADO_SUPERVISAO',
+    # Administração de campo
+    'GHE 05': 'ADMINISTRATIVO',
+    'ADMINISTRACAO DE CAMPO': 'ADMINISTRATIVO',
+    'ADMINISTRACAO': 'ADMINISTRATIVO',
+    # Almoxarifado
+    'GHE 06': 'ALMOXARIFE',
+    'ALMOXARIFADO': 'ALMOXARIFE',
+}
+
+
+def _chave_banco_v2_por_nome_ghe(nome: str) -> str | None:
+    """
+    Tenta resolver o nome de um GHE (ex: 'GHE 03 - Execução de obra')
+    para a chave correspondente no banco_matrizes_v2 (ex: 'PRODUCAO_GERAL').
+    """
+    s = norm(nome)
+    # Tenta match direto
+    if s in _MAPA_GHE_PARA_BANCO_KEY:
+        return _MAPA_GHE_PARA_BANCO_KEY[s]
+    # Tenta apenas o número do GHE (ex: 'GHE 03')
+    m = re.match(r'GHE\s*(\d{1,2})', s)
+    if m:
+        chave_num = f'GHE {int(m.group(1)):02d}'
+        if chave_num in _MAPA_GHE_PARA_BANCO_KEY:
+            return _MAPA_GHE_PARA_BANCO_KEY[chave_num]
+    # Tenta match parcial por token
+    for token, chave in _MAPA_GHE_PARA_BANCO_KEY.items():
+        if token in s:
+            return chave
+    return None
+
+
+# ───────────────────────────────────────────────────────────────────────────
 # MAPA CBO → cargo canônico (fallback quando nome não bate no banco)
 # ───────────────────────────────────────────────────────────────────────────
 
@@ -241,42 +297,98 @@ def _lista_de_exames(payload):
 
 
 # ───────────────────────────────────────────────────────────────────────────
+# Detecta formato do banco (v2 flat vs v1 obras_referencia)
+# ───────────────────────────────────────────────────────────────────────────
+
+def _banco_e_v2(banco: dict) -> bool:
+    """
+    Retorna True se o banco usa estrutura flat do v2
+    (chaves diretas como 'PINTOR', 'PEDREIRO', cada uma com 'exames': [...]).
+    Retorna False se usa a estrutura legada v1 com 'obras_referencia'.
+    """
+    if 'obras_referencia' in banco:
+        return False
+    # Verifica se pelo menos uma chave tem 'exames' diretamente
+    for v in banco.values():
+        if isinstance(v, dict) and 'exames' in v:
+            return True
+    return False
+
+
+# ───────────────────────────────────────────────────────────────────────────
 # REFERENCIA TECNICA POR CARGO
 # ───────────────────────────────────────────────────────────────────────────
 
 def buscar_exames_por_cargo(nome_cargo: str, banco: dict) -> list | None:
     """
     Busca exames pelo nome canônico do cargo no banco.
-    Tenta primeiro o nome direto; se não encontrar e o nome contiver CBO,
-    resolve pelo código CBO e tenta novamente.
-    Retorna lista de dicts do JSON ou None.
+    Suporta banco_matrizes_v2 (estrutura flat) e v1 (obras_referencia).
+
+    Ordem de tentativas:
+      1. Match direto pela chave normalizada do banco v2
+      2. Resolução via mapa GHE → chave banco v2 (para nomes como 'GHE 03 - Execução de obra')
+      3. Match pelo nome normalizado na estrutura v1 (obras_referencia)
+      4. Via CBO embutido no nome
     """
-    def _buscar_nome(cargo_n):
-        melhor = None
-        for obra in banco.get('obras_referencia', {}).values():
-            for ghe in obra.values():
-                for cargo_ref, exames_ref in ghe.get('cargos', {}).items():
-                    if normalizar_cargo(cargo_ref) == cargo_n:
-                        candidato = list(exames_ref)
-                        if melhor is None or len(candidato) > len(melhor):
-                            melhor = candidato
-        return melhor
+    if _banco_e_v2(banco):
+        # ── Banco v2: estrutura flat {CHAVE: {exames: [...]}} ──────────────
+        cargo_norm = norm(nome_cargo)
 
-    # Tentativa 1: nome como veio
-    resultado = _buscar_nome(normalizar_cargo(nome_cargo))
-    if resultado:
-        return resultado
+        # Tentativa 1: match direto (normaliza underscore e espaço)
+        for chave, perfil in banco.items():
+            if not isinstance(perfil, dict):
+                continue
+            if norm(chave.replace('_', ' ')) == cargo_norm:
+                return perfil.get('exames')
 
-    # Tentativa 2: via CBO embutido no nome (ex: 'CARGO PEDREIRO - CBO: 715210')
-    cbo = _extrair_cbo(nome_cargo)
-    if cbo:
-        nome_canonico = cargo_canonico_por_cbo(cbo)
-        if nome_canonico:
-            resultado = _buscar_nome(normalizar_cargo(nome_canonico))
-            if resultado:
-                return resultado
+        # Tentativa 2: resolve nome do GHE para chave do banco
+        chave_ghe = _chave_banco_v2_por_nome_ghe(nome_cargo)
+        if chave_ghe and chave_ghe in banco:
+            return banco[chave_ghe].get('exames')
 
-    return None
+        # Tentativa 3: match parcial — o nome do cargo contém a chave do banco
+        for chave, perfil in banco.items():
+            if not isinstance(perfil, dict):
+                continue
+            chave_n = norm(chave.replace('_', ' '))
+            if chave_n and chave_n in cargo_norm:
+                return perfil.get('exames')
+
+        # Tentativa 4: via CBO
+        cbo = _extrair_cbo(nome_cargo)
+        if cbo:
+            nome_canonico = cargo_canonico_por_cbo(cbo)
+            if nome_canonico:
+                return buscar_exames_por_cargo(nome_canonico, banco)
+
+        return None
+
+    else:
+        # ── Banco v1: estrutura obras_referencia > obra > ghe > cargos ─────
+        def _buscar_nome_v1(cargo_n):
+            melhor = None
+            for obra in banco.get('obras_referencia', {}).values():
+                for ghe in obra.values():
+                    for cargo_ref, exames_ref in ghe.get('cargos', {}).items():
+                        if normalizar_cargo(cargo_ref) == cargo_n:
+                            candidato = list(exames_ref)
+                            if melhor is None or len(candidato) > len(melhor):
+                                melhor = candidato
+            return melhor
+
+        resultado = _buscar_nome_v1(normalizar_cargo(nome_cargo))
+        if resultado:
+            return resultado
+
+        cbo = _extrair_cbo(nome_cargo)
+        if cbo:
+            nome_canonico = cargo_canonico_por_cbo(cbo)
+            if nome_canonico:
+                resultado = _buscar_nome_v1(normalizar_cargo(nome_canonico))
+                if resultado:
+                    return resultado
+
+        return None
 
 
 def enriquecer_ghe_com_banco(dados_ghe: list, banco: dict) -> tuple:
@@ -284,34 +396,44 @@ def enriquecer_ghe_com_banco(dados_ghe: list, banco: dict) -> tuple:
     Recebe dados_ghe no formato:
         [{'ghe': str, 'cargos': [str, ...], 'riscos_mapeados': [...]}, ...]
 
-    Para cada cargo tenta match no banco:
-      1. Pelo nome normalizado
-      2. Pelo CBO extraído do nome original (se presente)
+    Para cada cargo tenta match no banco (v2 ou v1):
+      1. Pelo nome normalizado / chave direta
+      2. Pelo nome do GHE → mapa GHE→chave banco (novo, para Viverde e similares)
+      3. Pelo CBO extraído do nome original (se presente)
 
-    Retorna (dados_ghe_original, relatorio).
+    Retorna (dados_ghe_enriquecido, relatorio).
+    O dados_ghe retornado tem o campo 'exames_banco' preenchido nos GHEs que deram match,
+    para que processar_pcmso possa usar os exames corretos.
     """
     cargos_enriquecidos = []
     cargos_mantidos = []
     mapa_exames_banco = {}
 
     for ghe in dados_ghe:
-        # ghe_nome_original é o nome da seção (pode conter 'CARGO X - CBO: XXXXXX')
         ghe_nome_original = ghe.get('ghe', '')
 
         for cargo in ghe.get('cargos', []):
             nome_cargo = str(cargo)
             cargo_norm = normalizar_cargo(nome_cargo)
 
-            if cargo_norm in mapa_exames_banco or cargo_norm in [normalizar_cargo(c) for c in cargos_mantidos]:
+            ja_processado = (
+                cargo_norm in mapa_exames_banco
+                or cargo_norm in [normalizar_cargo(c) for c in cargos_mantidos]
+            )
+            if ja_processado:
                 continue
 
-            # Tenta pelo nome; se não achar, tenta pelo CBO do nome da seção original
+            # Tenta pelo nome do cargo
             exames_banco = buscar_exames_por_cargo(nome_cargo, banco)
-            if not exames_banco and ghe_nome_original != nome_cargo:
+
+            # Se não achou, tenta pelo nome completo do GHE
+            if not exames_banco and ghe_nome_original and ghe_nome_original != nome_cargo:
                 exames_banco = buscar_exames_por_cargo(ghe_nome_original, banco)
 
             if exames_banco:
                 mapa_exames_banco[cargo_norm] = exames_banco
+                # Injeta exames no GHE para que processar_pcmso os use
+                ghe['exames_banco'] = exames_banco
                 cargos_enriquecidos.append(nome_cargo)
             else:
                 cargos_mantidos.append(nome_cargo)
