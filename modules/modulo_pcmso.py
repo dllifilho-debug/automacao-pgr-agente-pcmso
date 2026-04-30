@@ -1,13 +1,10 @@
 # =============================================================================
-# MÓDULO PCMSO v7.5 — OCR seletivo + parser 2 passagens + AgenteMedicoIA
-# Funções públicas:
-#   extrair_texto_pdf, extrair_pgr_com_fallback, enriquecer_pgr_com_fispq,
-#   processar_pcmso, gerar_html_pcmso, gerar_docx_rq61
-#
-# v7.5 — parser em 2 passagens:
-#   Passagem 1: coleta cargos da seção "FUNÇÕES EXISTENTES NO CANTEIRO" (antes dos GHEs)
-#   Passagem 2: parseia GHEs e injeta os cargos coletados quando o GHE não tiver cargos próprios
-#   Isso resolve PDFs no formato Viverde/CMO onde cargos aparecem ANTES dos blocos GHE
+# MÓDULO PCMSO v8.0 — Distribuição inteligente de cargos por GHE
+# Novidade v8.0:
+#   _distribuir_cargos_por_ghe() usa resolver_chave_mestra() do agente_medico_ia
+#   para mapear cada cargo do FUNÇÕES ao GHE correto pelo perfil de risco,
+#   eliminando a injeção igual para todos os GHEs.
+#   Sem chamada de API externa — 100% local.
 # =============================================================================
 
 import io
@@ -19,20 +16,21 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "7.5 (parser 2 passagens + OCR seletivo + AgenteMedicoIA)"
+VERSAO_MODULO_PCMSO = "8.0 (distribuicao inteligente GHE + OCR seletivo + AgenteMedicoIA)"
 
 # ---------------------------------------------------------------------------
-# Import do Agente Médico IA (opcional)
+# Import do Agente Médico IA
 # ---------------------------------------------------------------------------
 try:
-    from modules.agente_medico_ia import processar_cargo_ia
+    from modules.agente_medico_ia import processar_cargo_ia, resolver_chave_mestra as _resolver_chave
     _AGENTE_IA_DISPONIVEL = True
 except ImportError:
     try:
-        from agente_medico_ia import processar_cargo_ia
+        from agente_medico_ia import processar_cargo_ia, resolver_chave_mestra as _resolver_chave
         _AGENTE_IA_DISPONIVEL = True
     except ImportError:
         _AGENTE_IA_DISPONIVEL = False
+        _resolver_chave = None
 
 try:
     from data.dicionario_cas import DICIONARIO_CAS
@@ -41,23 +39,16 @@ except ImportError:
 
 
 # ============================================================================
-# 1 — EXTRACAO DE TEXTO DO PDF  (pdfplumber → PyMuPDF → OCR)
+# 1 — EXTRAÇÃO DE TEXTO DO PDF
 # ============================================================================
 
 _MIN_CHARS_POR_PAGINA = 150
 
 _ASSINATURA_KEYWORDS = [
-    "autenticação eletrônica",
-    "autenticacao eletronica",
-    "página de assinaturas",
-    "pagina de assinaturas",
-    "hash sha256",
-    "identificador:",
-    "clicksign",
-    "docusign",
-    "signatário",
-    "signatario",
-    "escaneie a imagem para verificar",
+    "autenticação eletrônica", "autenticacao eletronica",
+    "página de assinaturas", "pagina de assinaturas",
+    "hash sha256", "identificador:", "clicksign", "docusign",
+    "signatário", "signatario", "escaneie a imagem para verificar",
 ]
 
 
@@ -75,12 +66,6 @@ def _e_pagina_assinatura(texto_pagina: str) -> bool:
 
 
 def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
-    """
-    Fallback OCR com lazy imports.
-    - Pula ultima pagina se for ClickSign/DocuSign.
-    - DPI adaptativo: 200 para PDFs >50 paginas, 250 para menores.
-    - Progresso via st.progress() quando Streamlit disponivel.
-    """
     texto = ""
     try:
         from pdf2image import convert_from_bytes
@@ -89,7 +74,6 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
         return f"[OCR indisponivel: {e}]"
 
     dpi = 200 if num_paginas_total > 50 else 250
-
     try:
         paginas = convert_from_bytes(data, dpi=dpi)
     except Exception as e:
@@ -99,6 +83,7 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
     paginas_processar = paginas
     if total > 1:
         try:
+            import pytesseract
             ultima_texto = pytesseract.image_to_string(paginas[-1], lang="por+eng", config="--psm 6 --oem 3")
             if _e_pagina_assinatura(ultima_texto):
                 paginas_processar = paginas[:-1]
@@ -120,7 +105,6 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
     _cv2_ok = False
     try:
         import cv2
-        import numpy as np
         _cv2_ok = True
     except ImportError:
         pass
@@ -128,10 +112,11 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
     for i, img in enumerate(paginas_processar):
         try:
             if _cv2_ok:
-                img_array = __import__("numpy").array(img.convert("RGB"))
+                import numpy as np
+                from PIL import Image
+                img_array = np.array(img.convert("RGB"))
                 cinza = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
                 _, binaria = cv2.threshold(cinza, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-                from PIL import Image
                 img_proc = Image.fromarray(binaria)
             else:
                 img_proc = img
@@ -161,12 +146,6 @@ def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
 
 
 def extrair_texto_pdf(pdf_file) -> str:
-    """
-    3 camadas de extracao:
-    1. pdfplumber
-    2. PyMuPDF (fitz)
-    3. OCR via pdf2image + pytesseract
-    """
     if hasattr(pdf_file, "read"):
         pdf_file.seek(0)
         data = pdf_file.read()
@@ -208,7 +187,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR  (v7.5 — 2 passagens para formato Viverde/CMO)
+# 2 — PARSER LOCAL DE PGR  (v8.0)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -218,7 +197,101 @@ def _normalizar(texto: str) -> str:
     return nfkd.encode("ASCII", "ignore").decode("ASCII").lower().strip()
 
 
-# Cargos conhecidos de canteiro de obras (normalizados)
+# Mapa: tipo de GHE → {palavras-chave no nome, chaves de cargo permitidas}
+# Baseado no MAPA_CARGO_CHAVE do agente_medico_ia
+_PERFIS_GHE = {
+    "engenharia": {
+        "kw": ["engenharia", "planejamento", "projeto", "coordenacao", "direcao", "gerencia"],
+        "chaves": {"ENGENHEIRO", "ESTAGIARIO", "TECNICO_SST"},
+    },
+    "seguranca": {
+        "kw": ["seguranca", "sst", "prevencao"],
+        "chaves": {"TECNICO_SST", "ESTAGIARIO"},
+    },
+    "execucao": {
+        "kw": ["execucao", "obra", "operacao", "estrutura", "alvenaria",
+               "fundacao", "construcao", "canteiro", "servicos"],
+        "chaves": {
+            "CARPINTEIRO", "ARMADOR", "PEDREIRO", "SERVENTE_CANTEIRO",
+            "ELETRICISTA", "ELETRICISTA_ENERGIZADO", "ENCANADOR", "SERRALHEIRO",
+            "PINTOR", "GESSEIRO", "IMPERMEABILIZADOR", "OPERADOR_BETONEIRA",
+            "OPERADOR_GRUA", "OPERADOR_CREMALHEIRA", "SINALEIRO", "MOTORISTA",
+            "MECANICO_MANUTENCAO", "ENCARREGADO_GERAL", "ENCARREGADO_SUPERVISAO",
+        },
+    },
+    "supervisao": {
+        "kw": ["supervisao", "rejunte", "limpeza", "acabamento", "pintura", "revestimento"],
+        "chaves": {
+            "ENCARREGADO_GERAL", "ENCARREGADO_SUPERVISAO",
+            "PINTOR", "GESSEIRO", "SERVENTE_CANTEIRO", "PEDREIRO",
+        },
+    },
+    "administracao": {
+        "kw": ["administracao", "campo", "gestao", "administrativo", "apoio"],
+        "chaves": {
+            "MESTRE_OBRA", "AUXILIAR_ADMINISTRATIVO", "ADMINISTRATIVO",
+            "ENCARREGADO_GERAL", "PORTEIRO_VIGIA", "JOVEM_APRENDIZ",
+        },
+    },
+    "almoxarifado": {
+        "kw": ["almoxarifado", "deposito", "estoque", "material"],
+        "chaves": {"ALMOXARIFE"},
+    },
+}
+
+
+def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
+    """
+    v8.0 — Distribui cargos_globais para cada bloco GHE usando:
+    1. _resolver_chave() do agente_medico_ia para descobrir o perfil de cada cargo
+    2. _PERFIS_GHE para descobrir quais chaves pertencem a cada tipo de GHE
+    3. Match por palavras-chave no nome do GHE
+
+    Modifica blocos in-place. Sem chamada de API externa.
+    """
+    if not cargos_globais:
+        return
+
+    # Pré-resolve chave de cada cargo global
+    cargo_chave = {}
+    for cargo in cargos_globais:
+        if _resolver_chave:
+            chave = _resolver_chave(cargo)
+        else:
+            chave = None
+        cargo_chave[cargo] = chave or "DESCONHECIDO"
+
+    for bloco in blocos:
+        # Se o bloco já tem cargos encontrados dentro do próprio bloco GHE, mantém
+        if bloco.get("cargos"):
+            continue
+
+        nome_ghe_n = _normalizar(bloco.get("ghe", ""))
+
+        # Encontra o perfil GHE com maior pontuação de palavras-chave
+        melhor_perfil = None
+        melhor_score = 0
+        for tipo, perfil in _PERFIS_GHE.items():
+            score = sum(1 for kw in perfil["kw"] if kw in nome_ghe_n)
+            if score > melhor_score:
+                melhor_score = score
+                melhor_perfil = perfil
+
+        if melhor_perfil and melhor_score > 0:
+            chaves_ok = melhor_perfil["chaves"]
+            cargos_filtrados = [
+                c for c in cargos_globais
+                if cargo_chave[c] in chaves_ok
+            ]
+            # Fallback: se filtrou demais (0 cargos), usa todos
+            bloco["cargos"] = cargos_filtrados if cargos_filtrados else list(cargos_globais)
+        else:
+            # GHE com nome não reconhecido: recebe todos os cargos globais
+            bloco["cargos"] = list(cargos_globais)
+
+
+# ── Regex e helpers do parser ────────────────────────────────────────────────
+
 _CARGOS_CANTEIRO = {
     "carpinteiro", "meio oficial carpinteiro", "meio of carpinteiro",
     "pedreiro", "meio oficial pedreiro", "meio of pedreiro",
@@ -249,19 +322,16 @@ _CARGOS_CANTEIRO = {
     "calceteiro", "topografo", "motorista",
 }
 
-# Regex GHE: captura 'GHE 01-', 'GHE 01 -', 'GHE01:', 'GRUPO HOMOGENEO...'
 _RE_GHE = re.compile(
     r"(?i)^(?:GHE\s*\d*\s*[-\u2013:]?\s*"
     r"|GRUPO\s+HOMOG[E\u00ca]NEO\s+DE\s+EXPOSI[\u00c7C][\u00c3A]O\s*[-\u2013:]?\s*)(.+)$"
 )
 
-# Regex agente: quimico, fisico, biologico, ergonomico, acidente
 _RE_AGENTE = re.compile(
     r"(?i)^agente\s*(?:qu[i\u00ed]mico|f[i\u00ed]sico|biol[o\u00f3]gico"
     r"|ergon[o\u00f4]mico|de\s+acidente|de\s+risco)?\s*[:\-\u2013]?\s*(.+)$"
 )
 
-# Cabecalho da tabela de funcoes (marca inicio da secao de cargos globais)
 _RE_SECAO_FUNCOES = re.compile(
     r"(?i)^(fun[c\u00e7][o\u00f5]es\s*(existentes)?\s*(no\s+canteiro)?|"
     r"fun[c\u00e7][o\u00f5]es\s+quantidade|"
@@ -269,7 +339,6 @@ _RE_SECAO_FUNCOES = re.compile(
     r"fun[c\u00e7][o\u00f5]es\s+existentes)"
 )
 
-# Linhas que nunca sao cargos
 _RE_SKIP = re.compile(
     r"(?i)^("
     r"ef$|ef\s|\d+$|\*|^-+$|^\s*$"
@@ -286,41 +355,21 @@ _RE_SKIP = re.compile(
 
 
 def _identificar_cargo(linha: str) -> str | None:
-    """
-    Tenta identificar se a linha representa um cargo.
-    Estrategia 1: cargo conhecido no _CARGOS_CANTEIRO
-    Estrategia 2: 'NOME QTD' (ex: 'Pedreiro 15') -> remove QTD e verifica
-    Estrategia 3: heuristica por formato (2-5 palavras, inicia maiuscula, sem pontuacao)
-    """
     ls = linha.strip()
     if not ls:
         return None
-
-    # Filtra linhas que definitivamente nao sao cargos
     if _RE_SKIP.match(_normalizar(ls)):
         return None
-
-    # Ignora linhas de agente (tratadas separadamente)
     if re.match(r"(?i)^agente\s", ls):
         return None
-
-    # Ignora linhas de risco/perigo/medida/NR
     if re.match(r"(?i)^(risco|perigo|medida|a[c\u00e7][a\u00e3]o|nr[-\s]\d|epis?\s|epc\s)", ls):
         return None
-
-    # Remove numero do final: "Pedreiro 15" -> "Pedreiro", "Mestre de Obras 01" -> "Mestre de Obras"
     nome_sem_qtd = re.sub(r"\s+\d{1,3}\s*$", "", ls).strip()
-
-    # Estrategia 1 + 2: verifica no set de cargos conhecidos
     nome_n = _normalizar(nome_sem_qtd)
     if nome_n in _CARGOS_CANTEIRO:
         return nome_sem_qtd
-
-    # Tambem testa o nome original (sem remocao de numero) por seguranca
     if _normalizar(ls) in _CARGOS_CANTEIRO:
         return ls
-
-    # Estrategia 3: heuristica
     palavras = nome_sem_qtd.split()
     if (
         2 <= len(palavras) <= 5
@@ -330,16 +379,11 @@ def _identificar_cargo(linha: str) -> str | None:
         and len(nome_sem_qtd) >= 5
     ):
         return nome_sem_qtd
-
     return None
 
 
 def _coletar_cargos_globais(linhas: list) -> list:
-    """
-    PASSAGEM 1: Varre o texto ANTES dos GHEs e coleta todos os cargos
-    da seção 'FUNÇÕES EXISTENTES NO CANTEIRO DE OBRAS'.
-    Retorna lista de cargos encontrados (sem duplicatas).
-    """
+    """Passagem 1: coleta cargos da seção FUNÇÕES antes dos GHEs."""
     cargos = []
     vistos = set()
     em_secao_funcoes = False
@@ -348,24 +392,16 @@ def _coletar_cargos_globais(linhas: list) -> list:
         ls = linha.strip()
         if not ls:
             continue
-
-        # Detecta inicio da secao de funcoes
         if _RE_SECAO_FUNCOES.match(ls):
             em_secao_funcoes = True
             continue
-
-        # Para de coletar ao encontrar o primeiro GHE
         if _RE_GHE.match(ls):
             break
-
-        # Para se encontrar outra secao numerada principal (ex: "9. ...")
         if re.match(r"^\d+\.\s+[A-Z]", ls) and em_secao_funcoes:
             em_secao_funcoes = False
             continue
-
         if not em_secao_funcoes:
             continue
-
         cargo = _identificar_cargo(ls)
         if cargo:
             cargo_n = _normalizar(cargo)
@@ -378,16 +414,17 @@ def _coletar_cargos_globais(linhas: list) -> list:
 
 def _parsear_pgr_local(texto: str) -> list:
     """
-    Parser em 2 passagens:
-    1. Coleta cargos globais da seção FUNÇÕES antes dos GHEs
-    2. Parseia blocos GHE e injeta cargos globais quando bloco não tem cargos próprios
+    v8.0 — Parser em 2 passagens com distribuição inteligente.
+    Passagem 1: coleta cargos_globais da seção FUNÇÕES
+    Passagem 2: parseia blocos GHE (riscos + cargos internos)
+    Distribuição: _distribuir_cargos_por_ghe() mapeia cargos → GHE via perfil
     """
     linhas = texto.split("\n")
 
-    # --- PASSAGEM 1: cargos globais ---
+    # --- Passagem 1 ---
     cargos_globais = _coletar_cargos_globais(linhas)
 
-    # --- PASSAGEM 2: blocos GHE ---
+    # --- Passagem 2 ---
     blocos = []
     bloco_atual = None
     em_ghe = False
@@ -409,7 +446,6 @@ def _parsear_pgr_local(texto: str) -> list:
                 "ghe": f"GHE {num_ghe.zfill(2)} - {nome_desc}" if nome_desc else f"GHE {num_ghe}",
                 "cargos": [],
                 "riscos_mapeados": [],
-                "_linhas_raw": [],  # DEBUG temporário
             }
             em_ghe = True
             continue
@@ -417,11 +453,6 @@ def _parsear_pgr_local(texto: str) -> list:
         if not em_ghe or bloco_atual is None:
             continue
 
-        # DEBUG: coleta as primeiras 30 linhas de cada bloco GHE
-        if len(bloco_atual["_linhas_raw"]) < 30:
-            bloco_atual["_linhas_raw"].append(ls)
-
-        # Testa agente primeiro
         m_ag = _RE_AGENTE.match(ls)
         if m_ag:
             bloco_atual["riscos_mapeados"].append(
@@ -429,7 +460,6 @@ def _parsear_pgr_local(texto: str) -> list:
             )
             continue
 
-        # Testa cargo dentro do proprio bloco GHE
         cargo = _identificar_cargo(ls)
         if cargo and cargo not in bloco_atual["cargos"]:
             bloco_atual["cargos"].append(cargo)
@@ -437,28 +467,25 @@ def _parsear_pgr_local(texto: str) -> list:
     if bloco_atual:
         blocos.append(bloco_atual)
 
-    # --- DEBUG: exibe linhas raw por GHE num expander ---
+    # --- Distribuição inteligente v8.0 ---
+    if cargos_globais:
+        _distribuir_cargos_por_ghe(cargos_globais, blocos)
+
+    # --- Info de debug via Streamlit (remover após validação) ---
     try:
         import streamlit as st
-        with st.expander("🔍 DEBUG v7.5 — linhas raw por GHE (remover após análise)", expanded=False):
-            st.caption("Cargos globais coletados (Passagem 1):")
+        with st.expander("🔍 DEBUG v8.0 — distribuição de cargos por GHE", expanded=False):
+            st.caption(f"Cargos globais coletados (Passagem 1): {len(cargos_globais)}")
             st.write(cargos_globais)
             for b in blocos:
-                st.markdown(f"**{b['ghe']}** — cargos detectados na Passagem 2: `{b['cargos']}`")
-                for raw_linha in b["_linhas_raw"]:
-                    st.code(repr(raw_linha), language=None)
+                chaves = []
+                if _resolver_chave:
+                    chaves = [f"{c} → {_resolver_chave(c)}" for c in b["cargos"]]
+                st.markdown(f"**{b['ghe']}** — {len(b['cargos'])} cargo(s)")
+                for ch in chaves:
+                    st.code(ch, language=None)
     except Exception:
         pass
-
-    # Remove chave de debug antes de retornar
-    for b in blocos:
-        b.pop("_linhas_raw", None)
-
-    # --- INJECAO: distribui cargos globais para GHEs sem cargos proprios ---
-    if cargos_globais:
-        for bloco in blocos:
-            if not bloco["cargos"]:
-                bloco["cargos"] = list(cargos_globais)
 
     return blocos
 
