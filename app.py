@@ -1,6 +1,8 @@
 """
 Automacao SST - Seconci GO
-app.py v5.25 — fix: sidebar sempre visível via CSS (força translateX(0))
+app.py v5.26 — fix: _distribuir_cargos_por_ghe chamada corretamente no caminho parser_pgr
+               (antes: todos os 23 cargos eram injetados em todos os 6 GHEs → 1192 linhas)
+               v5.25 fix: sidebar sempre visível via CSS (força translateX(0))
                header oculto mas toggle preservado
                v5.24 initial_sidebar_state=expanded
                v5.23 ghe_mapper Supabase
@@ -29,6 +31,8 @@ from modules.modulo_pcmso import (
     processar_pcmso,
     gerar_html_pcmso,
     gerar_docx_rq61,
+    _distribuir_cargos_por_ghe,
+    _coletar_cargos_globais,
 )
 
 st.set_page_config(
@@ -453,14 +457,16 @@ elif modulo == "Medicina: PGR - PCMSO":
                 ]
                 if _ghe_sem_cargo_real:
                     try:
-                        from modules.modulo_pcmso import _coletar_cargos_globais
                         _cargos_globais = _coletar_cargos_globais(texto_pgr.split("\n"))
                         if _cargos_globais:
-                            for _ghe in _ghe_sem_cargo_real:
-                                _ghe["cargos"] = list(_cargos_globais)
+                            # FIX v5.26: distribuição inteligente por tipo de GHE
+                            # (antes: todos os cargos iam para todos os GHEs)
+                            _distribuir_cargos_por_ghe(_cargos_globais, _ghe_sem_cargo_real)
+                            n_dist = sum(len(g.get("cargos", [])) for g in _ghe_sem_cargo_real)
                             st.info(
                                 f"ℹ️ {len(_cargos_globais)} cargo(s) reais coletados da seção FUNÇÕES "
-                                f"e distribuídos para {len(_ghe_sem_cargo_real)} GHE(s)."
+                                f"e distribuídos por tipo para {len(_ghe_sem_cargo_real)} GHE(s) "
+                                f"({n_dist} atribuições no total)."
                             )
                         else:
                             st.warning("⚠️ Seção FUNÇÕES não encontrada no PDF — tentando Supabase...")
