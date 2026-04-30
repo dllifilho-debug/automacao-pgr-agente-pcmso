@@ -1,8 +1,10 @@
 """
 Automacao SST - Seconci GO
-app.py v5.24 — fix: sidebar sempre expandida (initial_sidebar_state=expanded)
-               v5.23 feat: integra ghe_mapper (Supabase)
-               v5.22 fix: detecção correta de GHE sem cargo real
+app.py v5.25 — fix: sidebar sempre visível via CSS (força translateX(0))
+               header oculto mas toggle preservado
+               v5.24 initial_sidebar_state=expanded
+               v5.23 ghe_mapper Supabase
+               v5.22 detecção correta GHE sem cargo
 """
 import json
 import os
@@ -42,9 +44,27 @@ st.markdown("""
   .block-container{padding-top:1.4rem;padding-bottom:2rem;max-width:1400px;}
   #MainMenu {visibility: hidden;}
   footer    {visibility: hidden;}
-  header    {visibility: hidden;}
+  /* NÃO ocultar header para preservar toggle da sidebar */
+  header    {visibility: hidden; height: 0; min-height: 0;}
+
+  /* ── SIDEBAR SEMPRE VISÍVEL ── */
+  [data-testid="stSidebar"] {
+    transform: translateX(0) !important;
+    min-width: 14rem !important;
+    width: 14rem !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+  [data-testid="stSidebar"] > div:first-child {
+    width: 14rem !important;
+  }
+  /* Botão de toggle da sidebar - garante visibilidade */
+  [data-testid="collapsedControl"] {
+    display: none !important;
+  }
+
   [data-testid="stAppViewContainer"]{background:#F0F2F5;}
-  [data-testid="stSidebar"]{background:#F7F9FB;border-right:1px solid #E4E8EE;}
+  [data-testid="stSidebar"]{background:#F7F9FB !important;border-right:1px solid #E4E8EE;}
   [data-testid="stSidebar"] *{color:#1A1D23;}
   [data-testid="stFileUploadDropzone"]{border:2px dashed #1AA04B;border-radius:16px;background:#FBFFFC;padding:1rem;}
   .stButton>button{background:linear-gradient(135deg,#084D22,#0E6B31);color:white;border-radius:10px;border:none;box-shadow:0 8px 18px rgba(8,77,34,.16);transition:all .2s ease;font-weight:700;padding:.62rem 1rem;}
@@ -103,7 +123,6 @@ def render_auditoria_metrics(resultado_auditoria: dict):
     c4.metric("Cargos sem match", cargo_faltando)
 
 
-# ── Strip 'CARGO X - CBO: XXXXXX' → nome limpo do cargo ──────────────────────────────────
 def _extrair_nome_cargo(nome_secao: str) -> str:
     m = re.match(
         r'^CARGO\s+(.+?)(?:\s*[-–]\s*CBO[:\s]*\d+)?\s*$',
@@ -113,7 +132,6 @@ def _extrair_nome_cargo(nome_secao: str) -> str:
     return m.group(1).strip() if m else nome_secao.strip()
 
 
-# ── v5.22: detecta se cargos são apenas nomes de GHE (não cargos reais) ──────────────────
 _RE_NOME_GHE = re.compile(r'^GHE\s*\d+', re.IGNORECASE)
 
 def _cargos_sao_apenas_ghe_names(cargos: list) -> bool:
@@ -122,7 +140,6 @@ def _cargos_sao_apenas_ghe_names(cargos: list) -> bool:
     return all(_RE_NOME_GHE.match(c.strip()) for c in cargos)
 
 
-# ── Normaliza dados_ghe para o formato lista [{ghe, cargos, riscos_mapeados}] ─────────────────
 def _normalizar_dados_ghe_para_auditor(dados_ghe):
     if isinstance(dados_ghe, list):
         for ghe in dados_ghe:
@@ -395,7 +412,6 @@ elif modulo == "Medicina: PGR - PCMSO":
                 for i, linha in enumerate(texto_pgr.split("\n")[:100], 1):
                     st.text(f"{i:3}: {linha}")
 
-            # ── PARSER v2 ───────────────────────────────────────────────────────────────────────────
             with st.spinner("Identificando GHEs / Cargos e riscos..."):
                 _resultado_pgr = None
                 try:
@@ -431,7 +447,6 @@ elif modulo == "Medicina: PGR - PCMSO":
                 dados_ghe = _normalizar_dados_ghe_para_auditor(dados_ghe_raw)
                 fonte = "local"
 
-                # ── v5.22 FIX: injeta cargos reais da seção FUNÇÕES quando cargos = nomes de GHE ──
                 _ghe_sem_cargo_real = [
                     g for g in dados_ghe
                     if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
@@ -448,20 +463,15 @@ elif modulo == "Medicina: PGR - PCMSO":
                                 f"e distribuídos para {len(_ghe_sem_cargo_real)} GHE(s)."
                             )
                         else:
-                            st.warning(
-                                "⚠️ Seção FUNÇÕES não encontrada no PDF — "
-                                "tentando Supabase..."
-                            )
+                            st.warning("⚠️ Seção FUNÇÕES não encontrada no PDF — tentando Supabase...")
                     except Exception as _e_inj:
                         st.warning(f"⚠️ Injeção de cargos reais falhou: {_e_inj}")
-                # ── fim fix v5.22 ─────────────────────────────────────────────────────────────────
 
             else:
                 st.info("🔁 parser_pgr nao encontrou secoes — usando pipeline local (extrair_pgr_local)...")
                 _dados_list, fonte = extrair_pgr_com_fallback(texto_pgr)
                 dados_ghe = _normalizar_dados_ghe_para_auditor(_dados_list)
 
-            # ── v5.23: enriquece com cargos reais do Supabase (ghe_mapper) ───────────────────────
             _ghe_ainda_sem_cargo = [
                 g for g in dados_ghe
                 if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
@@ -494,7 +504,6 @@ elif modulo == "Medicina: PGR - PCMSO":
                         st.info("ℹ️ ghe_mapper: tabela Supabase vazia ou indisponível — usando matriz interna.")
                 except Exception as _e_mapper:
                     st.warning(f"⚠️ ghe_mapper indisponível: {_e_mapper}")
-            # ── fim v5.23 ─────────────────────────────────────────────────────────────────────────
 
             st.session_state["dados_ghe_processados"] = dados_ghe
 
