@@ -1,7 +1,11 @@
 """
 Automacao SST - Seconci GO
-app.py v5.21 — fix: quando parser_pgr retorna GHEs sem cargos, injeta cargos globais
-               coletados pelo _parsear_pgr_local v7.5 (formato Viverde/CMO)
+app.py v5.22 — fix: detecção correta de GHE sem cargo real
+               v5.21 falhava porque _normalizar_dados_ghe_para_auditor colocava o
+               próprio nome do GHE como cargo (ex: "GHE 01- Engenharia planejamento de obra")
+               e a checagem `if not g.get("cargos")` nunca era True.
+               v5.22 detecta quando cargos contém APENAS nomes de GHE (padrão GHE\\s*\\d+)
+               e injeta os cargos reais da seção FUNÇÕES via _coletar_cargos_globais.
 """
 import json
 import os
@@ -114,6 +118,21 @@ def _extrair_nome_cargo(nome_secao: str) -> str:
         re.IGNORECASE,
     )
     return m.group(1).strip() if m else nome_secao.strip()
+
+
+# ── v5.22: detecta se cargos são apenas nomes de GHE (não cargos reais) ──────────────────
+_RE_NOME_GHE = re.compile(r'^GHE\s*\d+', re.IGNORECASE)
+
+def _cargos_sao_apenas_ghe_names(cargos: list) -> bool:
+    """
+    Retorna True quando todos os itens de `cargos` são nomes de GHE
+    (ex: 'GHE 01- Engenharia planejamento de obra'), não cargos reais.
+    Isso acontece quando _normalizar_dados_ghe_para_auditor converte o
+    dict do parser_pgr e usa o nome do GHE como cargo (regex CARGO não bate).
+    """
+    if not cargos:
+        return True
+    return all(_RE_NOME_GHE.match(c.strip()) for c in cargos)
 
 
 # ── Normaliza dados_ghe para o formato lista [{ghe, cargos, riscos_mapeados}] ─────────────────
@@ -437,26 +456,37 @@ elif modulo == "Medicina: PGR - PCMSO":
                 dados_ghe = _normalizar_dados_ghe_para_auditor(dados_ghe_raw)
                 fonte = "local"
 
-                # ── v5.21 FIX: injeta cargos globais nos GHEs sem cargos ──────────────────
-                # O parser_pgr encontra os GHEs mas nao extrai cargos do formato Viverde/CMO
-                # (cargos ficam na secao FUNCOES EXISTENTES, antes dos GHEs no texto)
-                # O _parsear_pgr_local v7.5 faz a coleta em 2 passagens — reutilizamos
-                # apenas os cargos globais que ele coletou para injetar nos GHEs vazios.
-                _ghe_sem_cargo = [g for g in dados_ghe if not g.get("cargos")]
-                if _ghe_sem_cargo:
+                # ── v5.22 FIX: detecta GHEs cujos "cargos" são apenas nomes de GHE ──────────
+                # _normalizar_dados_ghe_para_auditor coloca o nome do GHE como cargo quando
+                # a regex "CARGO XXX - CBO: XXXX" não casa (formato Viverde/CMO usa "GHE N-").
+                # O resultado: cargos = ["GHE 01- Engenharia planejamento de obra"] → não vazio,
+                # mas tampouco é um cargo real → enriquecer_ghe_com_banco nunca encontra no banco.
+                # Solução: detectar pelo padrão GHE\s*\d+ e injetar cargos reais da seção FUNÇÕES.
+                _ghe_sem_cargo_real = [
+                    g for g in dados_ghe
+                    if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
+                ]
+                if _ghe_sem_cargo_real:
                     try:
-                        from modules.modulo_pcmso import _parsear_pgr_local, _coletar_cargos_globais
+                        from modules.modulo_pcmso import _coletar_cargos_globais
                         _cargos_globais = _coletar_cargos_globais(texto_pgr.split("\n"))
                         if _cargos_globais:
-                            for _ghe in _ghe_sem_cargo:
+                            for _ghe in _ghe_sem_cargo_real:
                                 _ghe["cargos"] = list(_cargos_globais)
                             st.info(
-                                f"ℹ️ {len(_cargos_globais)} cargo(s) coletados da seção FUNÇÕES "
-                                f"e distribuídos para {len(_ghe_sem_cargo)} GHE(s) sem cargos."
+                                f"ℹ️ {len(_cargos_globais)} cargo(s) reais coletados da seção FUNÇÕES "
+                                f"e distribuídos para {len(_ghe_sem_cargo_real)} GHE(s) "
+                                f"(cargos anteriores eram nomes de GHE, não cargos reais)."
+                            )
+                        else:
+                            st.warning(
+                                "⚠️ Seção FUNÇÕES não encontrada no PDF — "
+                                "os GHEs ficarão com o nome do GHE como cargo. "
+                                "Verifique o PDF ou adicione os cargos manualmente."
                             )
                     except Exception as _e_inj:
-                        st.warning(f"⚠️ Injeção de cargos globais falhou: {_e_inj}")
-                # ── fim fix v5.21 ────────────────────────────────────────────────────────
+                        st.warning(f"⚠️ Injeção de cargos reais falhou: {_e_inj}")
+                # ── fim fix v5.22 ─────────────────────────────────────────────────────────────
 
             else:
                 st.info("🔁 parser_pgr nao encontrou secoes — usando pipeline local (extrair_pgr_local)...")
