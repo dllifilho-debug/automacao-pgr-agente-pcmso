@@ -1,9 +1,10 @@
 # =============================================================================
-# MÓDULO PCMSO v8.0 — Distribuição inteligente de cargos por GHE
-# Novidade v8.0:
-#   _distribuir_cargos_por_ghe() usa resolver_chave_mestra() do agente_medico_ia
-#   para mapear cada cargo do FUNÇÕES ao GHE correto pelo perfil de risco,
-#   eliminando a injeção igual para todos os GHEs.
+# MÓDULO PCMSO v8.1 — Distribuição inteligente de cargos por GHE
+# Novidade v8.1:
+#   _distribuir_cargos_por_ghe() usa keyword direta no nome do cargo
+#   (sem depender de _resolver_chave que falha com variações de PDF).
+#   _TIPOS_GHE_KW  → keywords no nome do GHE → tipo
+#   _CARGO_TIPOS   → keywords no nome do cargo → tipos aceitos
 #   Sem chamada de API externa — 100% local.
 # =============================================================================
 
@@ -16,7 +17,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "8.0 (distribuicao inteligente GHE + OCR seletivo + AgenteMedicoIA)"
+VERSAO_MODULO_PCMSO = "8.1 (keyword-cargo distribuicao GHE + OCR seletivo + AgenteMedicoIA)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA
@@ -187,7 +188,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR  (v8.0)
+# 2 — PARSER LOCAL DE PGR  (v8.1)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -197,96 +198,102 @@ def _normalizar(texto: str) -> str:
     return nfkd.encode("ASCII", "ignore").decode("ASCII").lower().strip()
 
 
-# Mapa: tipo de GHE → {palavras-chave no nome, chaves de cargo permitidas}
-# Baseado no MAPA_CARGO_CHAVE do agente_medico_ia
-_PERFIS_GHE = {
-    "engenharia": {
-        "kw": ["engenharia", "planejamento", "projeto", "coordenacao", "direcao", "gerencia"],
-        "chaves": {"ENGENHEIRO", "ESTAGIARIO", "TECNICO_SST"},
-    },
-    "seguranca": {
-        "kw": ["seguranca", "sst", "prevencao"],
-        "chaves": {"TECNICO_SST", "ESTAGIARIO"},
-    },
-    "execucao": {
-        "kw": ["execucao", "obra", "operacao", "estrutura", "alvenaria",
-               "fundacao", "construcao", "canteiro", "servicos"],
-        "chaves": {
-            "CARPINTEIRO", "ARMADOR", "PEDREIRO", "SERVENTE_CANTEIRO",
-            "ELETRICISTA", "ELETRICISTA_ENERGIZADO", "ENCANADOR", "SERRALHEIRO",
-            "PINTOR", "GESSEIRO", "IMPERMEABILIZADOR", "OPERADOR_BETONEIRA",
-            "OPERADOR_GRUA", "OPERADOR_CREMALHEIRA", "SINALEIRO", "MOTORISTA",
-            "MECANICO_MANUTENCAO", "ENCARREGADO_GERAL", "ENCARREGADO_SUPERVISAO",
-        },
-    },
-    "supervisao": {
-        "kw": ["supervisao", "rejunte", "limpeza", "acabamento", "pintura", "revestimento"],
-        "chaves": {
-            "ENCARREGADO_GERAL", "ENCARREGADO_SUPERVISAO",
-            "PINTOR", "GESSEIRO", "SERVENTE_CANTEIRO", "PEDREIRO",
-        },
-    },
-    "administracao": {
-        "kw": ["administracao", "campo", "gestao", "administrativo", "apoio"],
-        "chaves": {
-            "MESTRE_OBRA", "AUXILIAR_ADMINISTRATIVO", "ADMINISTRATIVO",
-            "ENCARREGADO_GERAL", "PORTEIRO_VIGIA", "JOVEM_APRENDIZ",
-        },
-    },
-    "almoxarifado": {
-        "kw": ["almoxarifado", "deposito", "estoque", "material"],
-        "chaves": {"ALMOXARIFE"},
-    },
+# ---------------------------------------------------------------------------
+# Mapa de tipos de GHE: palavras-chave no nome do GHE → tipo
+# ---------------------------------------------------------------------------
+_TIPOS_GHE_KW = {
+    "engenharia":    ["engenharia", "planejamento", "projeto", "coordenacao", "direcao", "gerencia"],
+    "seguranca":     ["seguranca", "sst", "prevencao"],
+    "execucao":      ["execucao", "obra", "operacao", "estrutura", "alvenaria",
+                      "fundacao", "construcao", "canteiro", "servicos"],
+    "supervisao":    ["supervisao", "rejunte", "limpeza", "acabamento", "pintura", "revestimento"],
+    "administracao": ["administracao", "campo", "gestao", "administrativo", "apoio"],
+    "almoxarifado":  ["almoxarifado", "deposito", "estoque", "material"],
 }
+
+# ---------------------------------------------------------------------------
+# Mapa de cargos: palavras-chave no NOME DO CARGO → tipos de GHE que aceitam
+# Ordem importa: verificação top-down, primeiro match vence.
+# ---------------------------------------------------------------------------
+_CARGO_TIPOS = [
+    (["engenheiro"],                                                      {"engenharia"}),
+    (["tecnico de seguranca", "tecnico seguranca", " tst"],               {"engenharia", "seguranca"}),
+    (["estagiario", "estagiaria"],                                        {"engenharia", "seguranca"}),
+    (["mestre"],                                                          {"administracao"}),
+    (["aux adm", "auxiliar adm", "assistente adm",
+      "assistente administrativo", "administrativo"],                     {"administracao"}),
+    (["porteiro", "vigia"],                                               {"administracao"}),
+    (["aprendiz"],                                                        {"administracao"}),
+    (["almoxarife"],                                                      {"almoxarifado"}),
+    (["pintor"],                                                          {"supervisao", "execucao"}),
+    (["gesseiro"],                                                        {"supervisao", "execucao"}),
+    (["pedreiro"],                                                        {"execucao", "supervisao"}),
+    (["servente"],                                                        {"execucao", "supervisao"}),
+    (["encarregado", "supervisor de"],                                    {"execucao", "supervisao"}),
+    (["azulejista", "assentador de ceramica"],                            {"execucao", "supervisao"}),
+    (["carpinteiro"],                                                     {"execucao"}),
+    (["eletricista"],                                                     {"execucao"}),
+    (["armador"],                                                         {"execucao"}),
+    (["encanador"],                                                       {"execucao"}),
+    (["serralheiro"],                                                     {"execucao"}),
+    (["impermeabilizador"],                                               {"execucao"}),
+    (["operador"],                                                        {"execucao"}),
+    (["sinaleiro"],                                                       {"execucao"}),
+    (["motorista"],                                                       {"execucao"}),
+    (["mecanico"],                                                        {"execucao"}),
+    (["soldador"],                                                        {"execucao"}),
+    (["calceteiro", "topografo"],                                         {"execucao"}),
+]
+
+
+def _tipos_do_cargo(cargo: str) -> set:
+    """Retorna os tipos de GHE aceitos para um cargo pelo nome normalizado."""
+    cn = _normalizar(cargo)
+    for keywords, tipos in _CARGO_TIPOS:
+        if any(kw in cn for kw in keywords):
+            return tipos
+    return set()
+
+
+def _tipo_do_ghe(nome_ghe: str) -> str | None:
+    """Retorna o tipo de GHE com maior score de palavras-chave no nome."""
+    gn = _normalizar(nome_ghe)
+    melhor_tipo = None
+    melhor_score = 0
+    for tipo, kws in _TIPOS_GHE_KW.items():
+        score = sum(1 for kw in kws if kw in gn)
+        if score > melhor_score:
+            melhor_score = score
+            melhor_tipo = tipo
+    return melhor_tipo if melhor_score > 0 else None
 
 
 def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
     """
-    v8.0 — Distribui cargos_globais para cada bloco GHE usando:
-    1. _resolver_chave() do agente_medico_ia para descobrir o perfil de cada cargo
-    2. _PERFIS_GHE para descobrir quais chaves pertencem a cada tipo de GHE
-    3. Match por palavras-chave no nome do GHE
+    v8.1 — Distribui cargos_globais para cada bloco GHE usando keyword direta
+    no nome do cargo. Não depende de _resolver_chave() — robusto para qualquer
+    variação de texto de PDF.
 
     Modifica blocos in-place. Sem chamada de API externa.
     """
     if not cargos_globais:
         return
 
-    # Pré-resolve chave de cada cargo global
-    cargo_chave = {}
-    for cargo in cargos_globais:
-        if _resolver_chave:
-            chave = _resolver_chave(cargo)
-        else:
-            chave = None
-        cargo_chave[cargo] = chave or "DESCONHECIDO"
-
     for bloco in blocos:
-        # Se o bloco já tem cargos encontrados dentro do próprio bloco GHE, mantém
         if bloco.get("cargos"):
             continue
 
-        nome_ghe_n = _normalizar(bloco.get("ghe", ""))
+        tipo_ghe = _tipo_do_ghe(bloco.get("ghe", ""))
 
-        # Encontra o perfil GHE com maior pontuação de palavras-chave
-        melhor_perfil = None
-        melhor_score = 0
-        for tipo, perfil in _PERFIS_GHE.items():
-            score = sum(1 for kw in perfil["kw"] if kw in nome_ghe_n)
-            if score > melhor_score:
-                melhor_score = score
-                melhor_perfil = perfil
-
-        if melhor_perfil and melhor_score > 0:
-            chaves_ok = melhor_perfil["chaves"]
+        if tipo_ghe:
             cargos_filtrados = [
                 c for c in cargos_globais
-                if cargo_chave[c] in chaves_ok
+                if tipo_ghe in _tipos_do_cargo(c)
             ]
-            # Fallback: se filtrou demais (0 cargos), usa todos
+            # Fallback: se filtrou demais (0 cargos), usa todos os globais
             bloco["cargos"] = cargos_filtrados if cargos_filtrados else list(cargos_globais)
         else:
-            # GHE com nome não reconhecido: recebe todos os cargos globais
+            # GHE com nome não reconhecido: recebe todos
             bloco["cargos"] = list(cargos_globais)
 
 
@@ -414,10 +421,10 @@ def _coletar_cargos_globais(linhas: list) -> list:
 
 def _parsear_pgr_local(texto: str) -> list:
     """
-    v8.0 — Parser em 2 passagens com distribuição inteligente.
+    v8.1 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
     Passagem 1: coleta cargos_globais da seção FUNÇÕES
     Passagem 2: parseia blocos GHE (riscos + cargos internos)
-    Distribuição: _distribuir_cargos_por_ghe() mapeia cargos → GHE via perfil
+    Distribuição: _distribuir_cargos_por_ghe() mapeia cargos → GHE via keyword direta
     """
     linhas = texto.split("\n")
 
@@ -467,23 +474,23 @@ def _parsear_pgr_local(texto: str) -> list:
     if bloco_atual:
         blocos.append(bloco_atual)
 
-    # --- Distribuição inteligente v8.0 ---
+    # --- Distribuição inteligente v8.1 ---
     if cargos_globais:
         _distribuir_cargos_por_ghe(cargos_globais, blocos)
 
     # --- Info de debug via Streamlit (remover após validação) ---
     try:
         import streamlit as st
-        with st.expander("🔍 DEBUG v8.0 — distribuição de cargos por GHE", expanded=False):
+        with st.expander("🔍 DEBUG v8.1 — distribuição de cargos por GHE", expanded=False):
             st.caption(f"Cargos globais coletados (Passagem 1): {len(cargos_globais)}")
             st.write(cargos_globais)
+            st.divider()
             for b in blocos:
-                chaves = []
-                if _resolver_chave:
-                    chaves = [f"{c} → {_resolver_chave(c)}" for c in b["cargos"]]
-                st.markdown(f"**{b['ghe']}** — {len(b['cargos'])} cargo(s)")
-                for ch in chaves:
-                    st.code(ch, language=None)
+                tipo = _tipo_do_ghe(b["ghe"])
+                st.markdown(f"**{b['ghe']}** → tipo detectado: `{tipo}` — {len(b['cargos'])} cargo(s)")
+                for c in b["cargos"]:
+                    tipos_c = _tipos_do_cargo(c)
+                    st.code(f"{c}  →  tipos: {tipos_c}", language=None)
     except Exception:
         pass
 
