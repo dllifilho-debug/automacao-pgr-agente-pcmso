@@ -409,12 +409,17 @@ def _parsear_pgr_local(texto: str) -> list:
                 "ghe": f"GHE {num_ghe.zfill(2)} - {nome_desc}" if nome_desc else f"GHE {num_ghe}",
                 "cargos": [],
                 "riscos_mapeados": [],
+                "_linhas_raw": [],  # DEBUG temporário
             }
             em_ghe = True
             continue
 
         if not em_ghe or bloco_atual is None:
             continue
+
+        # DEBUG: coleta as primeiras 30 linhas de cada bloco GHE
+        if len(bloco_atual["_linhas_raw"]) < 30:
+            bloco_atual["_linhas_raw"].append(ls)
 
         # Testa agente primeiro
         m_ag = _RE_AGENTE.match(ls)
@@ -431,6 +436,23 @@ def _parsear_pgr_local(texto: str) -> list:
 
     if bloco_atual:
         blocos.append(bloco_atual)
+
+    # --- DEBUG: exibe linhas raw por GHE num expander ---
+    try:
+        import streamlit as st
+        with st.expander("🔍 DEBUG v7.5 — linhas raw por GHE (remover após análise)", expanded=False):
+            st.caption("Cargos globais coletados (Passagem 1):")
+            st.write(cargos_globais)
+            for b in blocos:
+                st.markdown(f"**{b['ghe']}** — cargos detectados na Passagem 2: `{b['cargos']}`")
+                for raw_linha in b["_linhas_raw"]:
+                    st.code(repr(raw_linha), language=None)
+    except Exception:
+        pass
+
+    # Remove chave de debug antes de retornar
+    for b in blocos:
+        b.pop("_linhas_raw", None)
 
     # --- INJECAO: distribui cargos globais para GHEs sem cargos proprios ---
     if cargos_globais:
