@@ -1,11 +1,10 @@
 # =============================================================================
-# MÓDULO PCMSO v8.1 — Distribuição inteligente de cargos por GHE
-# Novidade v8.1:
-#   _distribuir_cargos_por_ghe() usa keyword direta no nome do cargo
-#   (sem depender de _resolver_chave que falha com variações de PDF).
-#   _TIPOS_GHE_KW  → keywords no nome do GHE → tipo
-#   _CARGO_TIPOS   → keywords no nome do cargo → tipos aceitos
-#   Sem chamada de API externa — 100% local.
+# MÓDULO PCMSO v9.0 — Motor completo com Agente Médico IA v2.0
+# Novidades v9.0:
+#   F1 — Auditoria NR-7 exibida ao fim de processar_pcmso()
+#   F5 — Relatório de qualidade do PGR exibido após o parser
+#   F6 — gerar_justificativas_pcmso() exposta como função pública
+#   Mantido: distribuição inteligente de cargos por GHE (v8.1)
 # =============================================================================
 
 import io
@@ -17,21 +16,42 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "8.1 (keyword-cargo distribuicao GHE + OCR seletivo + AgenteMedicoIA)"
+VERSAO_MODULO_PCMSO = "9.0 (AgenteMedicoIA v2.0 + auditoria NR-7 + qualidade PGR + justificativas)"
 
 # ---------------------------------------------------------------------------
-# Import do Agente Médico IA
+# Import do Agente Médico IA v2.0
 # ---------------------------------------------------------------------------
 try:
-    from modules.agente_medico_ia import processar_cargo_ia, resolver_chave_mestra as _resolver_chave
+    from modules.agente_medico_ia import (
+        processar_cargo_ia,
+        resolver_chave_mestra as _resolver_chave,
+        auditar_pcmso,
+        relatorio_qualidade_pgr,
+        gerar_justificativa_ghe,
+        enriquecer_contexto_por_riscos,
+        carregar_cargos_desconhecidos,
+    )
     _AGENTE_IA_DISPONIVEL = True
 except ImportError:
     try:
-        from agente_medico_ia import processar_cargo_ia, resolver_chave_mestra as _resolver_chave
+        from agente_medico_ia import (
+            processar_cargo_ia,
+            resolver_chave_mestra as _resolver_chave,
+            auditar_pcmso,
+            relatorio_qualidade_pgr,
+            gerar_justificativa_ghe,
+            enriquecer_contexto_por_riscos,
+            carregar_cargos_desconhecidos,
+        )
         _AGENTE_IA_DISPONIVEL = True
     except ImportError:
         _AGENTE_IA_DISPONIVEL = False
         _resolver_chave = None
+        auditar_pcmso = None
+        relatorio_qualidade_pgr = None
+        gerar_justificativa_ghe = None
+        enriquecer_contexto_por_riscos = None
+        carregar_cargos_desconhecidos = None
 
 try:
     from data.dicionario_cas import DICIONARIO_CAS
@@ -188,7 +208,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR  (v8.1)
+# 2 — PARSER LOCAL DE PGR (v9.0)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -213,7 +233,6 @@ _TIPOS_GHE_KW = {
 
 # ---------------------------------------------------------------------------
 # Mapa de cargos: palavras-chave no NOME DO CARGO → tipos de GHE que aceitam
-# Ordem importa: verificação top-down, primeiro match vence.
 # ---------------------------------------------------------------------------
 _CARGO_TIPOS = [
     (["engenheiro"],                                                      {"engenharia"}),
@@ -247,7 +266,6 @@ _CARGO_TIPOS = [
 
 
 def _tipos_do_cargo(cargo: str) -> set:
-    """Retorna os tipos de GHE aceitos para um cargo pelo nome normalizado."""
     cn = _normalizar(cargo)
     for keywords, tipos in _CARGO_TIPOS:
         if any(kw in cn for kw in keywords):
@@ -256,7 +274,6 @@ def _tipos_do_cargo(cargo: str) -> set:
 
 
 def _tipo_do_ghe(nome_ghe: str) -> str | None:
-    """Retorna o tipo de GHE com maior score de palavras-chave no nome."""
     gn = _normalizar(nome_ghe)
     melhor_tipo = None
     melhor_score = 0
@@ -269,31 +286,19 @@ def _tipo_do_ghe(nome_ghe: str) -> str | None:
 
 
 def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
-    """
-    v8.1 — Distribui cargos_globais para cada bloco GHE usando keyword direta
-    no nome do cargo. Não depende de _resolver_chave() — robusto para qualquer
-    variação de texto de PDF.
-
-    Modifica blocos in-place. Sem chamada de API externa.
-    """
     if not cargos_globais:
         return
-
     for bloco in blocos:
         if bloco.get("cargos"):
             continue
-
         tipo_ghe = _tipo_do_ghe(bloco.get("ghe", ""))
-
         if tipo_ghe:
             cargos_filtrados = [
                 c for c in cargos_globais
                 if tipo_ghe in _tipos_do_cargo(c)
             ]
-            # Fallback: se filtrou demais (0 cargos), usa todos os globais
             bloco["cargos"] = cargos_filtrados if cargos_filtrados else list(cargos_globais)
         else:
-            # GHE com nome não reconhecido: recebe todos
             bloco["cargos"] = list(cargos_globais)
 
 
@@ -327,6 +332,7 @@ _CARGOS_CANTEIRO = {
     "encarregado", "encarregado de obras", "supervisor",
     "ajudante", "ajudante geral",
     "calceteiro", "topografo", "motorista",
+    "assistente administrativo",
 }
 
 _RE_GHE = re.compile(
@@ -390,11 +396,9 @@ def _identificar_cargo(linha: str) -> str | None:
 
 
 def _coletar_cargos_globais(linhas: list) -> list:
-    """Passagem 1: coleta cargos da seção FUNÇÕES antes dos GHEs."""
     cargos = []
     vistos = set()
     em_secao_funcoes = False
-
     for linha in linhas:
         ls = linha.strip()
         if not ls:
@@ -415,23 +419,20 @@ def _coletar_cargos_globais(linhas: list) -> list:
             if cargo_n not in vistos:
                 vistos.add(cargo_n)
                 cargos.append(cargo)
-
     return cargos
 
 
 def _parsear_pgr_local(texto: str) -> list:
     """
-    v8.1 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
-    Passagem 1: coleta cargos_globais da seção FUNÇÕES
-    Passagem 2: parseia blocos GHE (riscos + cargos internos)
-    Distribuição: _distribuir_cargos_por_ghe() mapeia cargos → GHE via keyword direta
+    v9.0 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
+    Exibe F5 (relatório de qualidade) e debug v9.0 via Streamlit após processar.
     """
     linhas = texto.split("\n")
 
-    # --- Passagem 1 ---
+    # --- Passagem 1: cargos globais ---
     cargos_globais = _coletar_cargos_globais(linhas)
 
-    # --- Passagem 2 ---
+    # --- Passagem 2: blocos GHE ---
     blocos = []
     bloco_atual = None
     em_ghe = False
@@ -440,7 +441,6 @@ def _parsear_pgr_local(texto: str) -> list:
         ls = linha.strip()
         if not ls:
             continue
-
         m_ghe = _RE_GHE.match(ls)
         if m_ghe:
             if bloco_atual:
@@ -456,17 +456,14 @@ def _parsear_pgr_local(texto: str) -> list:
             }
             em_ghe = True
             continue
-
         if not em_ghe or bloco_atual is None:
             continue
-
         m_ag = _RE_AGENTE.match(ls)
         if m_ag:
             bloco_atual["riscos_mapeados"].append(
                 {"nome_agente": m_ag.group(1).strip(), "perigo_especifico": ""}
             )
             continue
-
         cargo = _identificar_cargo(ls)
         if cargo and cargo not in bloco_atual["cargos"]:
             bloco_atual["cargos"].append(cargo)
@@ -474,20 +471,59 @@ def _parsear_pgr_local(texto: str) -> list:
     if bloco_atual:
         blocos.append(bloco_atual)
 
-    # --- Distribuição inteligente v8.1 ---
+    # --- Distribuição inteligente v9.0 ---
     if cargos_globais:
         _distribuir_cargos_por_ghe(cargos_globais, blocos)
 
-    # --- Info de debug via Streamlit (remover após validação) ---
+    # --- F5: Relatório de qualidade do PGR ---
+    if _AGENTE_IA_DISPONIVEL:
+        try:
+            import streamlit as st
+            rel = relatorio_qualidade_pgr(blocos, texto)
+            icon = "✅" if rel["apto_para_pcmso"] else "⚠️"
+            expandido = not rel["apto_para_pcmso"]
+            with st.expander(
+                f"{icon} Qualidade do PGR recebido — Score: {rel['score']}/100",
+                expanded=expandido,
+            ):
+                c1, c2, c3 = st.columns(3)
+                c1.metric("GHEs extraídos", rel["total_ghes"])
+                c2.metric("Cargos mapeados", rel["total_cargos"])
+                c3.metric("Score", f"{rel['score']}/100")
+                if rel["problemas"]:
+                    st.warning("**Pontos de atenção antes de gerar o PCMSO:**")
+                    for p in rel["problemas"]:
+                        st.write(f"• {p}")
+                else:
+                    st.success("PGR completo — sem problemas identificados.")
+                # Cargos desconhecidos registrados
+                if carregar_cargos_desconhecidos:
+                    desconhecidos = carregar_cargos_desconhecidos()
+                    if desconhecidos:
+                        st.divider()
+                        st.warning(f"📋 {len(desconhecidos)} cargo(s) não reconhecido(s) registrado(s) para revisão:")
+                        for d in desconhecidos:
+                            st.code(
+                                f"{d['cargo']}  →  GHE: {d.get('contexto_ghe','?')}  "
+                                f"| data: {d.get('data','?')}",
+                                language=None,
+                            )
+        except Exception:
+            pass
+
+    # --- Debug estrutural v9.0 (remover após validação do Viverde) ---
     try:
         import streamlit as st
-        with st.expander("🔍 DEBUG v8.1 — distribuição de cargos por GHE", expanded=False):
+        with st.expander("🔍 DEBUG v9.0 — distribuição de cargos por GHE", expanded=False):
             st.caption(f"Cargos globais coletados (Passagem 1): {len(cargos_globais)}")
             st.write(cargos_globais)
             st.divider()
             for b in blocos:
                 tipo = _tipo_do_ghe(b["ghe"])
-                st.markdown(f"**{b['ghe']}** → tipo detectado: `{tipo}` — {len(b['cargos'])} cargo(s)")
+                st.markdown(
+                    f"**{b['ghe']}** → tipo: `{tipo}` — {len(b['cargos'])} cargo(s) "
+                    f"| {len(b.get('riscos_mapeados', []))} risco(s)"
+                )
                 for c in b["cargos"]:
                     tipos_c = _tipos_do_cargo(c)
                     st.code(f"{c}  →  tipos: {tipos_c}", language=None)
@@ -665,11 +701,80 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
                 })
 
     cols = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM", "Justificativa"]
-    return pd.DataFrame(linhas) if linhas else pd.DataFrame(columns=cols)
+    df_final = pd.DataFrame(linhas) if linhas else pd.DataFrame(columns=cols)
+
+    # --- F1: Auditoria NR-7 ---
+    if _AGENTE_IA_DISPONIVEL and not df_final.empty:
+        try:
+            import streamlit as st
+            audit = auditar_pcmso(df_final, dados_ghe)
+            icon = "✅" if audit["aprovado"] else "❌"
+            expanded_audit = not audit["aprovado"]
+            with st.expander(
+                f"{icon} Auditoria NR-7 — {audit['resumo']}",
+                expanded=expanded_audit,
+            ):
+                if audit["pendencias"]:
+                    st.error("**Pendências críticas — corrigir antes de assinar:**")
+                    for p in audit["pendencias"]:
+                        st.write(p)
+                if audit["avisos"]:
+                    st.warning("**Avisos de conformidade:**")
+                    for a in audit["avisos"]:
+                        st.write(a)
+                if not audit["pendencias"] and not audit["avisos"]:
+                    st.success("Nenhuma pendência ou aviso encontrado. PCMSO pronto para assinatura.")
+        except Exception:
+            pass
+
+    # --- F6: Justificativas técnicas por GHE (expander colapsado) ---
+    if _AGENTE_IA_DISPONIVEL and dados_ghe:
+        try:
+            import streamlit as st
+            justificativas = gerar_justificativas_pcmso(dados_ghe)
+            if justificativas:
+                with st.expander("📝 Justificativas técnicas por GHE (para o médico RT)", expanded=False):
+                    for j in justificativas:
+                        st.markdown(f"**{j['ghe']}**")
+                        st.info(j["justificativa"])
+        except Exception:
+            pass
+
+    return df_final
 
 
 # ============================================================================
-# 6 — gerar_html_pcmso
+# 6 — gerar_justificativas_pcmso  (F6 — função pública)
+# ============================================================================
+
+def gerar_justificativas_pcmso(dados_ghe: list) -> list:
+    """
+    F6 — Gera justificativas técnicas por GHE para o documento PCMSO.
+    Retorna lista de dicts: [{ghe, justificativa}, ...].
+    Pode ser chamada externamente pelo app principal para incluir no DOCX.
+    """
+    if not _AGENTE_IA_DISPONIVEL:
+        return []
+    resultado = []
+    for ghe_item in dados_ghe:
+        nome_ghe = ghe_item.get("ghe", "GHE sem nome")
+        cargos = ghe_item.get("cargos", [])
+        riscos_str = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
+        try:
+            texto_j = gerar_justificativa_ghe(
+                ghe_nome=nome_ghe,
+                cargos=cargos,
+                riscos=riscos_str,
+                exames_nomes=[],
+            )
+        except Exception:
+            texto_j = f"Justificativa não disponível para {nome_ghe}."
+        resultado.append({"ghe": nome_ghe, "justificativa": texto_j})
+    return resultado
+
+
+# ============================================================================
+# 7 — gerar_html_pcmso
 # ============================================================================
 
 def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
@@ -701,7 +806,7 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
 
 
 # ============================================================================
-# 7 — gerar_docx_rq61
+# 8 — gerar_docx_rq61
 # ============================================================================
 
 def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
