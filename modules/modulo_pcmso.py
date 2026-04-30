@@ -1,10 +1,8 @@
 # =============================================================================
-# MÓDULO PCMSO v9.0 — Motor completo com Agente Médico IA v2.0
-# Novidades v9.0:
-#   F1 — Auditoria NR-7 exibida ao fim de processar_pcmso()
-#   F5 — Relatório de qualidade do PGR exibido após o parser
-#   F6 — gerar_justificativas_pcmso() exposta como função pública
-#   Mantido: distribuição inteligente de cargos por GHE (v8.1)
+# MÓDULO PCMSO v9.1 — Motor completo com Agente Médico IA v2.0
+# Novidades v9.1:
+#   DEBUG — exibe matches brutos do _RE_GHE no texto completo do PDF
+#   Mantido: distribuição inteligente de cargos por GHE (v8.1+)
 # =============================================================================
 
 import io
@@ -16,7 +14,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "9.0 (AgenteMedicoIA v2.0 + auditoria NR-7 + qualidade PGR + justificativas)"
+VERSAO_MODULO_PCMSO = "9.1 (AgenteMedicoIA v2.0 + auditoria NR-7 + qualidade PGR + justificativas)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA v2.0
@@ -208,7 +206,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR (v9.0)
+# 2 — PARSER LOCAL DE PGR (v9.1)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -424,8 +422,8 @@ def _coletar_cargos_globais(linhas: list) -> list:
 
 def _parsear_pgr_local(texto: str) -> list:
     """
-    v9.0 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
-    Exibe F5 (relatório de qualidade) e debug v9.0 via Streamlit após processar.
+    v9.1 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
+    Exibe F5 (relatório de qualidade) e debug v9.1 via Streamlit após processar.
     """
     linhas = texto.split("\n")
 
@@ -471,7 +469,7 @@ def _parsear_pgr_local(texto: str) -> list:
     if bloco_atual:
         blocos.append(bloco_atual)
 
-    # --- Distribuição inteligente v9.0 ---
+    # --- Distribuição inteligente v9.1 ---
     if cargos_globais:
         _distribuir_cargos_por_ghe(cargos_globais, blocos)
 
@@ -496,7 +494,6 @@ def _parsear_pgr_local(texto: str) -> list:
                         st.write(f"• {p}")
                 else:
                     st.success("PGR completo — sem problemas identificados.")
-                # Cargos desconhecidos registrados
                 if carregar_cargos_desconhecidos:
                     desconhecidos = carregar_cargos_desconhecidos()
                     if desconhecidos:
@@ -511,10 +508,26 @@ def _parsear_pgr_local(texto: str) -> list:
         except Exception:
             pass
 
-    # --- Debug estrutural v9.0 (remover após validação do Viverde) ---
+    # --- Debug estrutural v9.1 (remover após validação do Viverde) ---
     try:
         import streamlit as st
-        with st.expander("🔍 DEBUG v9.0 — distribuição de cargos por GHE", expanded=False):
+        with st.expander("🔍 DEBUG v9.1 — distribuição de cargos por GHE", expanded=False):
+
+            # ── NOVO: matches brutos do _RE_GHE no texto completo ──────────
+            st.markdown("#### 🔎 Matches brutos do `_RE_GHE` no texto completo")
+            raw_ghe_lines = [
+                linha.strip() for linha in linhas
+                if linha.strip() and _RE_GHE.match(linha.strip())
+            ]
+            st.caption(
+                f"Total de linhas que casam com `_RE_GHE`: **{len(raw_ghe_lines)}** "
+                f"(parser criou {len(blocos)} bloco(s))"
+            )
+            for i, m in enumerate(raw_ghe_lines, 1):
+                st.code(f"{i:02d}: {m}", language=None)
+            # ───────────────────────────────────────────────────────────────
+
+            st.divider()
             st.caption(f"Cargos globais coletados (Passagem 1): {len(cargos_globais)}")
             st.write(cargos_globais)
             st.divider()
