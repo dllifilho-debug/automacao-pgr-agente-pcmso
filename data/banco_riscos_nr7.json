@@ -1,1 +1,291 @@
-BANCO_CONTENT
+{
+  "_meta": {
+    "versao": "1.0",
+    "fonte": "Matriz-funcao-risco-exames-validado-Dra.-Patricia-06.2025.xlsx",
+    "validado_por": "Dra. Patricia",
+    "data_referencia": "06/2025",
+    "total_riscos": 62,
+    "total_exames": 71
+  },
+  "riscos": {
+    "1,1,1 TRICLOROETANO": {
+      "exames": [{"nome": "ÁCIDO TRICLOROACÉTICO NA URINA OU TRICLOROETANOL TOTAL NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["tricloroetano", "tricloroetanol"]
+    },
+    "1,3 BUTADIENO": {
+      "exames": [{"nome": "1,2 DIHIDRO-4 (NACETILCISTEÍNA) BUTANO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["butadieno"]
+    },
+    "1,6 DIISOCIANATO DE HEXAMETILENO (HDI)": {
+      "exames": [{"nome": "1,6 HEXAMETILENODIAMINA NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["hdi", "hexametileno", "isocianato"]
+    },
+    "2-METOXIETANOL E 2-METOXIETILACETATO": {
+      "exames": [{"nome": "ÁCIDO 2-METÓXIACÉTICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["metoxietanol", "metoxietilacetato"]
+    },
+    "2,4 E 2,6 TOLUENO DIISOCIANATO": {
+      "exames": [{"nome": "ISÔMEROS 2,4 E 2,6 TOLUENODIAMINO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["tdi", "diisocianato", "tolueno diisocianato"]
+    },
+    "2-BUTOXIETANOL": {
+      "exames": [{"nome": "ÁCIDO BUTOXIACÉTICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["butoxietanol"]
+    },
+    "2-PROPANOL": {
+      "exames": [{"nome": "ACETONA NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["propanol", "isopropanol"]
+    },
+    "ACETONA": {
+      "exames": [{"nome": "ACETONA NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["acetona"]
+    },
+    "ANILINA": {
+      "exames": [{"nome": "METAHEMOGLOBINA NO SANGUE", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["anilina"]
+    },
+    "ARSÊNICO": {
+      "exames": [{"nome": "ARSÊNIO INORGÂNICO MAIS METABÓLITOS METILADOS NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["arsênico", "arsenico", "arsênio"]
+    },
+    "ASO PADRÃO": {
+      "exames": [{"nome": "EXAME CLÍNICO", "adm": true, "per": "12", "mud": true, "rt": true, "dem": true}],
+      "keywords": ["administrativo", "escritório", "sem risco", "baixo risco", "área administrativa"]
+    },
+    "BENZENO": {
+      "exames": [{"nome": "ÁCIDO TRANS TRANS MUCÔNICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["benzeno", "gasolina", "combustível"]
+    },
+    "CÁDMIO": {
+      "exames": [{"nome": "CÁDMIO NA URINA", "adm": true, "per": "6", "mud": true, "rt": true, "dem": true}],
+      "keywords": ["cádmio", "cadmio"]
+    },
+    "CHUMBO": {
+      "exames": [
+        {"nome": "ÁC. DELTA AMINO LEVULÍNICO NA URINA (ALA-U)", "adm": true, "per": "6", "mud": true, "rt": true, "dem": true},
+        {"nome": "CHUMBO NO SANGUE", "adm": true, "per": "6", "mud": true, "rt": true, "dem": true}
+      ],
+      "keywords": ["chumbo", "tinta de chumbo"]
+    },
+    "CHUMBO TETRAETILA": {
+      "exames": [{"nome": "CHUMBO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["chumbo tetraetila"]
+    },
+    "CICLO-HEXANONA": {
+      "exames": [{"nome": "CICLOHEXANOL NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["ciclo-hexanona", "ciclohexanona"]
+    },
+    "CLOROBENZENO": {
+      "exames": [{"nome": "4-CLOROCATECOL OU P-CLOROFENOL NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["clorobenzeno"]
+    },
+    "COBALTO": {
+      "exames": [{"nome": "COBALTO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["cobalto"]
+    },
+    "CROMO HEXAVALENTE": {
+      "exames": [{"nome": "CROMO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["cromo", "cromato"]
+    },
+    "DICLOROMETANO": {
+      "exames": [{"nome": "DICLOROMETANO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["diclorometano", "cloreto de metileno"]
+    },
+    "ESPAÇO CONFINADO": {
+      "exames": [{"nome": "AVALIAÇÃO PSICOSSOCIAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false, "obs": "OBRIGATÓRIA PARA TRABALHO EM ESPAÇO CONFINADO"}],
+      "keywords": ["espaço confinado", "confined space", "nr-33", "nr33"]
+    },
+    "ESTIRENO": {
+      "exames": [{"nome": "SOMA DOS ÁCIDOS MANDÉLICO E FENILGLIOXÍLICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["estireno", "estireno monomero"]
+    },
+    "ETILBENZENO": {
+      "exames": [{"nome": "SOMA DOS ÁCIDOS MANDÉLICO E FENILGLIOXÍLICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["etilbenzeno"]
+    },
+    "EXPOSTO À COMBUSTÍVEIS/BENZENO/RADIAÇÃO IONIZANTE": {
+      "exames": [{"nome": "HEMOGRAMA", "adm": true, "per": "6", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["combustível", "benzeno", "gasolina", "radiação ionizante", "raio-x", "radioativo"]
+    },
+    "EXPOSTO PRODUTOS QUÍMICOS": {
+      "exames": [{"nome": "EXAME CLÍNICO", "adm": true, "per": "6", "mud": true, "rt": true, "dem": true}],
+      "keywords": ["produto químico", "substância química", "químico", "solvente orgânico"]
+    },
+    "EXPOSTOS A COMBUSTÍVEIS/BENZENO": {
+      "exames": [{"nome": "CONTAGEM DE RETICULÓCITOS", "adm": true, "per": "6", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["combustível", "benzeno", "gasolina", "derivado petróleo"]
+    },
+    "EXPOSTOS A MANGANÊS": {
+      "exames": [{"nome": "MANGANÊS NO SANGUE", "adm": true, "per": "6", "mud": true, "rt": false, "dem": false}],
+      "keywords": ["manganês", "eletrodo de solda", "manganes"]
+    },
+    "FENOL": {
+      "exames": [{"nome": "FENOL NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["fenol"]
+    },
+    "FLÚOR": {
+      "exames": [{"nome": "FLUORETO URINÁRIO", "adm": true, "per": "6", "mud": true, "rt": true, "dem": true}],
+      "keywords": ["flúor", "fluoreto", "ácido fluorídrico"]
+    },
+    "FURFURAL": {
+      "exames": [{"nome": "ÁCIDO FURÓICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["furfural"]
+    },
+    "INDUTORES DE METAHEMOGLOBINA": {
+      "exames": [{"nome": "METAHEMOGLOBINA NO SANGUE", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["metahemoglobina", "nitrobenzeno", "nitroanilina"]
+    },
+    "INSETICIDAS INIBIDORES DA COLINESTERASE": {
+      "exames": [{"nome": "ATIVIDADE DE ACETILCOLINESTERASE ERITROCITÁRIA", "adm": true, "per": "6", "mud": true, "rt": true, "dem": true}],
+      "keywords": ["inseticida", "pesticida", "agrotóxico", "organofosforado", "carbamato"]
+    },
+    "MANIPULAR ALIMENTOS": {
+      "exames": [
+        {"nome": "EAS", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "COPROLÓGICO (EPF)", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "COPROCULTURA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "MICOLÓGICO DE UNHAS", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "HEMOGRAMA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}
+      ],
+      "keywords": ["alimentos", "cozinha", "cantina", "alimentação", "manipulador"]
+    },
+    "MERCÚRIO METÁLICO": {
+      "exames": [{"nome": "MERCÚRIO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["mercúrio", "mercurio"]
+    },
+    "METANOL": {
+      "exames": [{"nome": "METANOL NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["metanol", "álcool metílico"]
+    },
+    "METIL-ETIL-CETONA": {
+      "exames": [{"nome": "METIL-ETIL-CETONA (MEK) NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["mek", "metil etil cetona", "butanona"]
+    },
+    "MONÓXIDO DE CARBONO": {
+      "exames": [{"nome": "CARBOXIHEMOGLOBINA NO SANGUE", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["monóxido de carbono", "co", "combustão", "motor de explosão"]
+    },
+    "ÓXIDO DE ETILENO": {
+      "exames": [{"nome": "ADUTO DE N-(2-HIDROXIETIL) VALINA (HEV) EM HEMOGLOBINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["óxido de etileno", "eto"]
+    },
+    "PNOS / POEIRA GESSO / MADEIRA / POEIRA METÁLICA / FUMOS METÁLICOS": {
+      "exames": [{"nome": "RX TÓRAX OIT", "adm": true, "per": "60", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["gesso", "madeira", "fumo metálico", "fumos metálicos", "poeira metálica", "lã de vidro", "fibra de vidro", "poeira inerte"]
+    },
+    "NÉVOAS / NEBLINAS / TINTAS / COLAS / IMPERMEABILIZAÇÃO": {
+      "exames": [{"nome": "ESPIROMETRIA", "adm": true, "per": "24", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["névoa", "neblina", "tinta", "cola", "impermeabilizante", "solvente", "pintura", "verniz", "primer", "spray"]
+    },
+    "POEIRA MINERAL / SÍLICA / QUARTZO / ABESTO / CARVÃO / OPERADOR DE BETONEIRA": {
+      "exames": [{"nome": "RX TÓRAX OIT", "adm": true, "per": "12", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["sílica", "silica", "quartzo", "abesto", "asbesto", "carvão", "betoneira", "poeira mineral", "argamassa industrializada"]
+    },
+    "CIMENTO SEM SÍLICA / ESPAÇO CONFINADO / PRODUTO AGRESSOR PULMONAR": {
+      "exames": [{"nome": "ESPIROMETRIA", "adm": true, "per": "24", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["cimento", "cal", "argamassa", "confinado", "agressor pulmonar", "inalante"]
+    },
+    "POLICORTE / SOLDA": {
+      "exames": [{"nome": "CARBOXIHEMOGLOBINA NO SANGUE", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["policorte", "disco de corte", "corte"]
+    },
+    "PORTEIRO / ELETRICIDADE / TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA / OP. MÁQUINAS PESADAS": {
+      "exames": [{"nome": "ACUIDADE VISUAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}],
+      "keywords": ["porteiro", "vigia", "vigilante", "eletricidade", "elétrico", "altura", "motorista", "máquina pesada", "operador"]
+    },
+    "RUÍDO": {
+      "exames": [{"nome": "AUDIOMETRIA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": true, "obs": "NO DEMISSIONAL, SE A AUDIOMETRIA FOI REALIZADA HÁ MAIS DE 120 DIAS, REALIZAR NOVO EXAME."}],
+      "keywords": ["ruído", "ruido", "nps", "pressão sonora", "decibelímetro", "equipamento ruidoso"]
+    },
+    "MOTORISTA VEÍCULOS LEVES": {
+      "exames": [
+        {"nome": "AUDIOMETRIA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "ACUIDADE VISUAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}
+      ],
+      "keywords": ["motorista", "veículo leve", "carro", "van", "condução"]
+    },
+    "SOLDA": {
+      "exames": [{"nome": "ACUIDADE VISUAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["solda", "soldagem", "eletrodo", "fumo de solda", "soldar", "soldador"]
+    },
+    "SULFETO DE CARBONO": {
+      "exames": [{"nome": "ÁCIDO 2-TIOXOTIAZOLIDINA 4-CARBOXÍLICO (TTCA) NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["sulfeto de carbono", "dissulfeto de carbono"]
+    },
+    "TETRACLOROETILENO": {
+      "exames": [{"nome": "TETRACLOROETILENO NO SANGUE", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["tetracloroetileno", "percloroetileno"]
+    },
+    "TETRAHIDROFURANO": {
+      "exames": [{"nome": "TETRAHIDROFURANO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["tetrahidrofurano", "thf"]
+    },
+    "TOLUENO": {
+      "exames": [{"nome": "ORTOCRESOL NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["tolueno", "thinner", "diluente"]
+    },
+    "TRABALHADORES DA SAÚDE": {
+      "exames": [
+        {"nome": "HBSAG", "adm": true, "per": null, "mud": true, "rt": false, "dem": false},
+        {"nome": "ANTI-HBS", "adm": true, "per": "24", "mud": true, "rt": false, "dem": false},
+        {"nome": "ANTI-HCV", "adm": true, "per": null, "mud": true, "rt": false, "dem": false},
+        {"nome": "HEMOGRAMA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}
+      ],
+      "keywords": ["saúde", "hospital", "clínica", "biológico", "sangue", "fluido corporal", "hiv"]
+    },
+    "TRABALHO EM ALTURA": {
+      "exames": [
+        {"nome": "HEMOGRAMA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "GLICEMIA DE JEJUM", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "AUDIOMETRIA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "ECG", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "ACUIDADE VISUAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}
+      ],
+      "keywords": ["trabalho em altura", "andaime", "elevado", "nr-35", "nr35", "telhado", "torre", "linha de vida"]
+    },
+    "ELETRICIDADE": {
+      "exames": [
+        {"nome": "HEMOGRAMA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "GLICEMIA DE JEJUM", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "AUDIOMETRIA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "ECG", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "ACUIDADE VISUAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}
+      ],
+      "keywords": ["eletricidade", "elétrico", "choque elétrico", "nr-10", "nr10", "alta tensão", "eletricista"]
+    },
+    "OPERADOR DE MÁQUINAS PESADAS": {
+      "exames": [
+        {"nome": "HEMOGRAMA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "GLICEMIA DE JEJUM", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "AUDIOMETRIA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "ECG", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false},
+        {"nome": "ACUIDADE VISUAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}
+      ],
+      "keywords": ["máquina pesada", "operador de máquinas", "retroescavadeira", "escavadeira", "guindaste", "empilhadeira"]
+    },
+    "VIBRAÇÃO E SUBSTÂNCIAS OTOTÓXICAS": {
+      "exames": [{"nome": "AUDIOMETRIA", "adm": true, "per": "12", "mud": true, "rt": false, "dem": true}],
+      "keywords": ["ototóxico", "vibração de mãos", "ferramenta vibratória", "martelete", "compactador manual"]
+    },
+    "TRICLOROETILENO": {
+      "exames": [{"nome": "ÁC. TRICLOROACÉTICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["tricloroetileno"]
+    },
+    "USO DE MÁSCARA DE PROTEÇÃO RESPIRATÓRIA": {
+      "exames": [{"nome": "ESPIROMETRIA", "adm": true, "per": "24", "mud": true, "rt": false, "dem": false}],
+      "keywords": ["máscara de proteção respiratória", "epi respiratório", "filtro respiratório", "respirador"]
+    },
+    "VIBRAÇÃO CORPO INTEIRO": {
+      "exames": [{"nome": "RX COLUNA LOMBO-SACRA", "adm": true, "per": null, "mud": true, "rt": false, "dem": false}],
+      "keywords": ["vibração de corpo inteiro", "veículo pesado", "rolo compressor", "motorista pesado", "vibração vertical"]
+    },
+    "XILENO": {
+      "exames": [{"nome": "ÁC. METIL-HIPÚRICO NA URINA", "adm": false, "per": "6", "mud": false, "rt": false, "dem": false}],
+      "keywords": ["xileno", "xilol"]
+    },
+    "TRABALHO EM ALTURA COM RISCO PSICOSSOCIAL": {
+      "exames": [{"nome": "AVALIAÇÃO PSICOSSOCIAL", "adm": true, "per": "12", "mud": true, "rt": false, "dem": false}],
+      "keywords": ["psicossocial", "estresse", "carga mental", "assédio", "burnout"]
+    }
+  }
+}
