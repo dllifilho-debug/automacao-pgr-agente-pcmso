@@ -1,7 +1,8 @@
 """
 Automacao SST - Seconci GO
-app.py v5.26 — fix: _distribuir_cargos_por_ghe chamada corretamente no caminho parser_pgr
-               (antes: todos os 23 cargos eram injetados em todos os 6 GHEs → 1192 linhas)
+app.py v9.2 — login visual: fundo verde escuro, card branco, st.form (Enter submete),
+               logo acima do form + rodapé de versão
+               v5.26 fix: _distribuir_cargos_por_ghe chamada corretamente no caminho parser_pgr
                v5.25 fix: sidebar sempre visível via CSS (força translateX(0))
                header oculto mas toggle preservado
                v5.24 initial_sidebar_state=expanded
@@ -173,43 +174,112 @@ def _normalizar_dados_ghe_para_auditor(dados_ghe):
 
 # ── Autenticacao ──────────────────────────────────────────────────────────────────────────────
 def check_password():
-    def validar_login():
-        usr_digitado = st.session_state["username_input"]
-        pwd_digitada = st.session_state["password_input"]
-        usr_correto = st.secrets.get("USUARIO_SISTEMA", "diovanni")
-        pwd_correta = st.secrets.get("SENHA_SISTEMA", "seconci123")
-        if usr_digitado == usr_correto and pwd_digitada == pwd_correta:
-            st.session_state["autenticado"] = True
-            del st.session_state["password_input"]
-            del st.session_state["username_input"]
-        else:
-            st.session_state["autenticado"] = False
-
     if st.session_state.get("autenticado", False):
         return True
 
+    # CSS exclusivo da tela de login — sobrepõe o CSS global acima
     st.markdown("""
-        <h2 style='text-align:center;color:#084D22;margin-top:80px;'>
-            🔒 Acesso Restrito — Seconci GO
-        </h2>
-        <p style='text-align:center;color:#6C757D;margin-bottom:30px;'>
-            Sistema de Automação SST
-        </p>
+    <style>
+      /* Fundo escuro com gradiente de marca */
+      [data-testid="stAppViewContainer"] {
+        background: linear-gradient(150deg, #021608 0%, #053d18 55%, #0a6629 100%) !important;
+        min-height: 100vh;
+      }
+      /* Oculta sidebar na tela de login */
+      [data-testid="stSidebar"] { display: none !important; }
+      /* Remove padding lateral padrão do Streamlit */
+      .block-container { padding-top: 3rem !important; max-width: 480px !important; margin: 0 auto !important; }
+      /* Card branco do formulário via stForm */
+      [data-testid="stForm"] {
+        background: #FFFFFF;
+        border-radius: 24px;
+        padding: 2.4rem 2rem 2rem !important;
+        box-shadow: 0 40px 100px rgba(0,0,0,.45);
+        margin-top: .5rem;
+      }
+      /* Inputs com foco verde */
+      [data-testid="stForm"] input:focus {
+        border-color: #084D22 !important;
+        box-shadow: 0 0 0 3px rgba(8,77,34,.12) !important;
+      }
+      /* Botão de submit no card */
+      [data-testid="stForm"] .stButton > button,
+      [data-testid="stForm"] [data-testid="stFormSubmitButton"] > button {
+        background: linear-gradient(135deg, #084D22, #0E6B31) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        margin-top: .6rem;
+        box-shadow: 0 8px 18px rgba(8,77,34,.25) !important;
+      }
+      /* Rodapé de versão */
+      .login-footer {
+        text-align: center;
+        color: rgba(255,255,255,.40);
+        font-size: 0.76rem;
+        margin-top: 1.4rem;
+        letter-spacing: .03em;
+      }
+      /* Logo / ícone acima do card */
+      .login-header {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      .login-header h3 {
+        color: white !important;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: .5rem 0 0;
+        letter-spacing: .06em;
+        opacity: .85;
+      }
+    </style>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        st.markdown("""
-            <div style='border:1px solid #DDE6E0;padding:30px;
-                        border-radius:18px;background-color:#FFFFFF;
-                        box-shadow:0 10px 24px rgba(8,77,34,.08);'>
-        """, unsafe_allow_html=True)
-        st.text_input("Usuário", key="username_input")
-        st.text_input("Senha", type="password", key="password_input")
-        st.button("Entrar no Sistema", on_click=validar_login, use_container_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-        if "autenticado" in st.session_state and not st.session_state["autenticado"]:
-            st.error("Usuário ou senha incorretos.")
+    # Logo ou ícone acima do card
+    for logo in ("logo.png", "logo.jpg"):
+        if os.path.exists(logo):
+            st.image(logo, width=140)
+            break
+    else:
+        st.markdown(
+            "<div class='login-header'>"
+            "<span style='font-size:3rem;'>🛡️</span>"
+            "<h3>SECONCI GO</h3>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+    # Formulário — Enter submete automaticamente
+    with st.form("login_form"):
+        st.markdown(
+            "<h3 style='text-align:center;color:#084D22;margin:0 0 1.2rem;font-size:1.25rem;'>"
+            "Entrar no Sistema</h3>",
+            unsafe_allow_html=True,
+        )
+        usr = st.text_input("Usuário", key="username_input")
+        pwd = st.text_input("Senha", type="password", key="password_input")
+        submitted = st.form_submit_button("Entrar", use_container_width=True)
+
+    if submitted:
+        usr_correto = st.secrets.get("USUARIO_SISTEMA", "diovanni")
+        pwd_correta = st.secrets.get("SENHA_SISTEMA", "seconci123")
+        if usr == usr_correto and pwd == pwd_correta:
+            st.session_state["autenticado"] = True
+            st.rerun()
+        else:
+            st.session_state["autenticado"] = False
+
+    if "autenticado" in st.session_state and not st.session_state["autenticado"]:
+        st.error("Usuário ou senha incorretos.")
+
+    st.markdown(
+        "<div class='login-footer'>"
+        "Sistema SST Seconci GO &nbsp;·&nbsp; v9.2 &nbsp;·&nbsp; Acesso monitorado"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
     return False
 
 
