@@ -1,5 +1,8 @@
 # =============================================================================
-# MÓDULO PCMSO v9.2 — Motor completo com Agente Médico IA v2.0
+# MÓDULO PCMSO v9.3 — Motor completo com Agente Médico IA v2.0
+# Novidades v9.3:
+#   Remove bloco DEBUG v9.2 de _parsear_pgr_local após validação
+#   da distribuição inteligente de cargos por GHE (PDF Viverde confirmado).
 # Novidades v9.2:
 #   FIX _distribuir_cargos_por_ghe: verificava bloco.get("cargos") antes de
 #   distribuir — mas blocos vindos do parser_pgr chegam com cargos=["GHE 01-..."],
@@ -16,7 +19,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "9.2 (AgenteMedicoIA v2.0 + fix distribuição cargos + auditoria NR-7)"
+VERSAO_MODULO_PCMSO = "9.3 (AgenteMedicoIA v2.0 + distribuição cargos validada + auditoria NR-7)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA v2.0
@@ -208,7 +211,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR (v9.2)
+# 2 — PARSER LOCAL DE PGR (v9.3)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -440,7 +443,8 @@ def _coletar_cargos_globais(linhas: list) -> list:
 
 def _parsear_pgr_local(texto: str) -> list:
     """
-    v9.2 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
+    v9.3 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
+    Debug removido após validação da distribuição no PDF Viverde (GHEs confirmados).
     """
     linhas = texto.split("\n")
 
@@ -524,45 +528,6 @@ def _parsear_pgr_local(texto: str) -> list:
                             )
         except Exception:
             pass
-
-    # --- Debug estrutural v9.2 (remover após validação do Viverde) ---
-    try:
-        import streamlit as st
-        with st.expander("🔍 DEBUG v9.2 — distribuição de cargos por GHE", expanded=True):
-
-            # ── Matches brutos do _RE_GHE ──────────────────────────────────
-            st.markdown("#### 🔎 Matches brutos do `_RE_GHE` no texto completo")
-            raw_ghe_lines = [
-                linha.strip() for linha in linhas
-                if linha.strip() and _RE_GHE.match(linha.strip())
-            ]
-            st.caption(
-                f"Total de linhas que casam com `_RE_GHE`: **{len(raw_ghe_lines)}** "
-                f"(parser criou {len(blocos)} bloco(s))"
-            )
-            for i, m in enumerate(raw_ghe_lines, 1):
-                st.code(f"{i:02d}: {m}", language=None)
-            # ───────────────────────────────────────────────────────────────
-
-            st.divider()
-            st.caption(f"Cargos globais coletados (Passagem 1): {len(cargos_globais)}")
-            st.write(cargos_globais)
-            st.divider()
-            st.markdown("#### Distribuição por GHE (após fix v9.2)")
-            for b in blocos:
-                tipo = _tipo_do_ghe(b["ghe"])
-                n_cargos = len(b["cargos"])
-                cor = "🟢" if n_cargos > 1 else ("🟡" if n_cargos == 1 else "🔴")
-                st.markdown(
-                    f"{cor} **{b['ghe']}** → tipo: `{tipo}` — "
-                    f"**{n_cargos} cargo(s)** | {len(b.get('riscos_mapeados', []))} risco(s)"
-                )
-                for c in b["cargos"]:
-                    tipos_c = _tipos_do_cargo(c)
-                    match = "✓" if tipo and tipo in tipos_c else "↩ fallback"
-                    st.code(f"{c}  →  tipos: {tipos_c}  {match}", language=None)
-    except Exception:
-        pass
 
     return blocos
 
