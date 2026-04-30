@@ -1,8 +1,10 @@
 # =============================================================================
-# MÓDULO PCMSO v9.1 — Motor completo com Agente Médico IA v2.0
-# Novidades v9.1:
-#   DEBUG — exibe matches brutos do _RE_GHE no texto completo do PDF
-#   Mantido: distribuição inteligente de cargos por GHE (v8.1+)
+# MÓDULO PCMSO v9.2 — Motor completo com Agente Médico IA v2.0
+# Novidades v9.2:
+#   FIX _distribuir_cargos_por_ghe: verificava bloco.get("cargos") antes de
+#   distribuir — mas blocos vindos do parser_pgr chegam com cargos=["GHE 01-..."],
+#   que é truthy → pulava todos os blocos → 1 cargo/GHE (o nome do GHE).
+#   Agora verifica se os cargos são REAIS (não nomes de GHE) antes de pular.
 # =============================================================================
 
 import io
@@ -14,7 +16,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "9.1 (AgenteMedicoIA v2.0 + auditoria NR-7 + qualidade PGR + justificativas)"
+VERSAO_MODULO_PCMSO = "9.2 (AgenteMedicoIA v2.0 + fix distribuição cargos + auditoria NR-7)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA v2.0
@@ -206,7 +208,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR (v9.1)
+# 2 — PARSER LOCAL DE PGR (v9.2)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -262,6 +264,9 @@ _CARGO_TIPOS = [
     (["calceteiro", "topografo"],                                         {"execucao"}),
 ]
 
+# Regex para detectar nomes de GHE usados como cargo falso
+_RE_CARGO_EH_GHE = re.compile(r'^GHE\s*\d+', re.IGNORECASE)
+
 
 def _tipos_do_cargo(cargo: str) -> set:
     cn = _normalizar(cargo)
@@ -284,11 +289,24 @@ def _tipo_do_ghe(nome_ghe: str) -> str | None:
 
 
 def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
+    """
+    v9.2 — FIX: antes verificava apenas `if bloco.get("cargos")` para pular,
+    mas blocos vindos do parser_pgr chegam com cargos=["GHE 01- ..."] (nome
+    do GHE como cargo falso), que é truthy → pulava todos os blocos.
+    Agora distingue cargos REAIS de GHE-names falsos antes de pular.
+    """
     if not cargos_globais:
         return
     for bloco in blocos:
-        if bloco.get("cargos"):
+        cargos_atuais = bloco.get("cargos", [])
+        # Pula somente se já tem cargos REAIS (não nomes de GHE disfarçados)
+        tem_cargos_reais = bool(cargos_atuais) and not all(
+            _RE_CARGO_EH_GHE.match(c.strip()) for c in cargos_atuais
+        )
+        if tem_cargos_reais:
             continue
+        # Limpa GHE-names falsos antes de distribuir
+        bloco["cargos"] = []
         tipo_ghe = _tipo_do_ghe(bloco.get("ghe", ""))
         if tipo_ghe:
             cargos_filtrados = [
@@ -422,8 +440,7 @@ def _coletar_cargos_globais(linhas: list) -> list:
 
 def _parsear_pgr_local(texto: str) -> list:
     """
-    v9.1 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
-    Exibe F5 (relatório de qualidade) e debug v9.1 via Streamlit após processar.
+    v9.2 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
     """
     linhas = texto.split("\n")
 
@@ -469,7 +486,7 @@ def _parsear_pgr_local(texto: str) -> list:
     if bloco_atual:
         blocos.append(bloco_atual)
 
-    # --- Distribuição inteligente v9.1 ---
+    # --- Distribuição inteligente v9.2 ---
     if cargos_globais:
         _distribuir_cargos_por_ghe(cargos_globais, blocos)
 
@@ -508,12 +525,12 @@ def _parsear_pgr_local(texto: str) -> list:
         except Exception:
             pass
 
-    # --- Debug estrutural v9.1 (remover após validação do Viverde) ---
+    # --- Debug estrutural v9.2 (remover após validação do Viverde) ---
     try:
         import streamlit as st
-        with st.expander("🔍 DEBUG v9.1 — distribuição de cargos por GHE", expanded=False):
+        with st.expander("🔍 DEBUG v9.2 — distribuição de cargos por GHE", expanded=True):
 
-            # ── NOVO: matches brutos do _RE_GHE no texto completo ──────────
+            # ── Matches brutos do _RE_GHE ──────────────────────────────────
             st.markdown("#### 🔎 Matches brutos do `_RE_GHE` no texto completo")
             raw_ghe_lines = [
                 linha.strip() for linha in linhas
@@ -531,15 +548,19 @@ def _parsear_pgr_local(texto: str) -> list:
             st.caption(f"Cargos globais coletados (Passagem 1): {len(cargos_globais)}")
             st.write(cargos_globais)
             st.divider()
+            st.markdown("#### Distribuição por GHE (após fix v9.2)")
             for b in blocos:
                 tipo = _tipo_do_ghe(b["ghe"])
+                n_cargos = len(b["cargos"])
+                cor = "🟢" if n_cargos > 1 else ("🟡" if n_cargos == 1 else "🔴")
                 st.markdown(
-                    f"**{b['ghe']}** → tipo: `{tipo}` — {len(b['cargos'])} cargo(s) "
-                    f"| {len(b.get('riscos_mapeados', []))} risco(s)"
+                    f"{cor} **{b['ghe']}** → tipo: `{tipo}` — "
+                    f"**{n_cargos} cargo(s)** | {len(b.get('riscos_mapeados', []))} risco(s)"
                 )
                 for c in b["cargos"]:
                     tipos_c = _tipos_do_cargo(c)
-                    st.code(f"{c}  →  tipos: {tipos_c}", language=None)
+                    match = "✓" if tipo and tipo in tipos_c else "↩ fallback"
+                    st.code(f"{c}  →  tipos: {tipos_c}  {match}", language=None)
     except Exception:
         pass
 
@@ -761,11 +782,6 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
 # ============================================================================
 
 def gerar_justificativas_pcmso(dados_ghe: list) -> list:
-    """
-    F6 — Gera justificativas técnicas por GHE para o documento PCMSO.
-    Retorna lista de dicts: [{ghe, justificativa}, ...].
-    Pode ser chamada externamente pelo app principal para incluir no DOCX.
-    """
     if not _AGENTE_IA_DISPONIVEL:
         return []
     resultado = []
