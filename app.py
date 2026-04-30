@@ -1,11 +1,12 @@
 """
 Automacao SST - Seconci GO
-app.py v5.22 — fix: detecção correta de GHE sem cargo real
+app.py v5.23 — feat: integra ghe_mapper (Supabase) para resolver cargos reais
+               antes de enriquecer_ghe_com_banco.
+               GHEs cujos "cargos" ainda são nomes de GHE após v5.22 agora recebem
+               os cargos corretos direto da tabela ghe_mapeamentos no Supabase.
+               v5.22 fix: detecção correta de GHE sem cargo real
                v5.21 falhava porque _normalizar_dados_ghe_para_auditor colocava o
-               próprio nome do GHE como cargo (ex: "GHE 01- Engenharia planejamento de obra")
-               e a checagem `if not g.get("cargos")` nunca era True.
-               v5.22 detecta quando cargos contém APENAS nomes de GHE (padrão GHE\\s*\\d+)
-               e injeta os cargos reais da seção FUNÇÕES via _coletar_cargos_globais.
+               próprio nome do GHE como cargo.
 """
 import json
 import os
@@ -127,8 +128,6 @@ def _cargos_sao_apenas_ghe_names(cargos: list) -> bool:
     """
     Retorna True quando todos os itens de `cargos` são nomes de GHE
     (ex: 'GHE 01- Engenharia planejamento de obra'), não cargos reais.
-    Isso acontece quando _normalizar_dados_ghe_para_auditor converte o
-    dict do parser_pgr e usa o nome do GHE como cargo (regex CARGO não bate).
     """
     if not cargos:
         return True
@@ -147,7 +146,6 @@ def _normalizar_dados_ghe_para_auditor(dados_ghe):
       - dict {nome_secao: {cargo, riscos, exames}} (saida do parser_pgr v2) → converte
     """
     if isinstance(dados_ghe, list):
-        # Garante que riscos_mapeados sejam dicts mesmo na lista legada
         for ghe in dados_ghe:
             riscos_raw = ghe.get('riscos_mapeados', [])
             ghe['riscos_mapeados'] = [
@@ -156,7 +154,6 @@ def _normalizar_dados_ghe_para_auditor(dados_ghe):
             ]
         return dados_ghe
 
-    # dict vindo do parser_pgr v2
     resultado = []
     for nome_secao, info in dados_ghe.items():
         nome_cargo = _extrair_nome_cargo(nome_secao)
@@ -444,7 +441,6 @@ elif modulo == "Medicina: PGR - PCMSO":
                 if _resultado_pgr.get("aviso"):
                     st.warning(_resultado_pgr["aviso"])
 
-                # Converte ghe_blocos (dict) → dados_ghe normalizado (lista)
                 dados_ghe_raw = {}
                 for _nome_sec, _info in _resultado_pgr["ghe_blocos"].items():
                     dados_ghe_raw[_nome_sec] = {
@@ -456,12 +452,7 @@ elif modulo == "Medicina: PGR - PCMSO":
                 dados_ghe = _normalizar_dados_ghe_para_auditor(dados_ghe_raw)
                 fonte = "local"
 
-                # ── v5.22 FIX: detecta GHEs cujos "cargos" são apenas nomes de GHE ──────────
-                # _normalizar_dados_ghe_para_auditor coloca o nome do GHE como cargo quando
-                # a regex "CARGO XXX - CBO: XXXX" não casa (formato Viverde/CMO usa "GHE N-").
-                # O resultado: cargos = ["GHE 01- Engenharia planejamento de obra"] → não vazio,
-                # mas tampouco é um cargo real → enriquecer_ghe_com_banco nunca encontra no banco.
-                # Solução: detectar pelo padrão GHE\s*\d+ e injetar cargos reais da seção FUNÇÕES.
+                # ── v5.22 FIX: injeta cargos reais da seção FUNÇÕES quando cargos = nomes de GHE ──
                 _ghe_sem_cargo_real = [
                     g for g in dados_ghe
                     if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
@@ -475,23 +466,62 @@ elif modulo == "Medicina: PGR - PCMSO":
                                 _ghe["cargos"] = list(_cargos_globais)
                             st.info(
                                 f"ℹ️ {len(_cargos_globais)} cargo(s) reais coletados da seção FUNÇÕES "
-                                f"e distribuídos para {len(_ghe_sem_cargo_real)} GHE(s) "
-                                f"(cargos anteriores eram nomes de GHE, não cargos reais)."
+                                f"e distribuídos para {len(_ghe_sem_cargo_real)} GHE(s)."
                             )
                         else:
                             st.warning(
                                 "⚠️ Seção FUNÇÕES não encontrada no PDF — "
-                                "os GHEs ficarão com o nome do GHE como cargo. "
-                                "Verifique o PDF ou adicione os cargos manualmente."
+                                "tentando Supabase..."
                             )
                     except Exception as _e_inj:
                         st.warning(f"⚠️ Injeção de cargos reais falhou: {_e_inj}")
-                # ── fim fix v5.22 ─────────────────────────────────────────────────────────────
+                # ── fim fix v5.22 ─────────────────────────────────────────────────────────────────
 
             else:
                 st.info("🔁 parser_pgr nao encontrou secoes — usando pipeline local (extrair_pgr_local)...")
                 _dados_list, fonte = extrair_pgr_com_fallback(texto_pgr)
                 dados_ghe = _normalizar_dados_ghe_para_auditor(_dados_list)
+
+            # ── v5.23: enriquece com cargos reais do Supabase (ghe_mapper) ───────────────────────
+            # Após v5.22, GHEs que ainda têm apenas nomes de GHE como cargo
+            # (ex: seção FUNÇÕES não encontrada) recebem os cargos do banco Supabase.
+            _ghe_ainda_sem_cargo = [
+                g for g in dados_ghe
+                if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
+            ]
+            if _ghe_ainda_sem_cargo:
+                try:
+                    from utils.ghe_mapper import carregar_mapeamentos, buscar_match as _buscar_match_ghe
+                    _mapeamentos_sb = carregar_mapeamentos()
+                    if _mapeamentos_sb:
+                        _matches_ok = 0
+                        _sem_match = []
+                        for _ghe in _ghe_ainda_sem_cargo:
+                            # extrai parte após "GHE XX -" para melhor match
+                            _desc = _ghe.get("ghe", "")
+                            _desc_clean = re.split(r'GHE\s*\d+[-–\s]+', _desc, maxsplit=1, flags=re.IGNORECASE)
+                            _desc_clean = _desc_clean[-1].strip() if len(_desc_clean) > 1 else _desc
+                            _match = _buscar_match_ghe(_desc_clean, _mapeamentos_sb)
+                            if _match and _match.get("cargos"):
+                                _ghe["cargos"] = _match["cargos"]
+                                _matches_ok += 1
+                            else:
+                                _sem_match.append(_desc_clean)
+                        if _matches_ok:
+                            st.success(
+                                f"✅ {_matches_ok} GHE(s) enriquecido(s) com cargos reais do Supabase!"
+                            )
+                        if _sem_match:
+                            st.warning(
+                                f"⚠️ {len(_sem_match)} GHE(s) sem match no Supabase — "
+                                f"exames gerados pela matriz interna: "
+                                f"{', '.join(_sem_match)}"
+                            )
+                    else:
+                        st.info("ℹ️ ghe_mapper: tabela Supabase vazia ou indisponível — usando matriz interna.")
+                except Exception as _e_mapper:
+                    st.warning(f"⚠️ ghe_mapper indisponível: {_e_mapper}")
+            # ── fim v5.23 ─────────────────────────────────────────────────────────────────────────
 
             st.session_state["dados_ghe_processados"] = dados_ghe
 
