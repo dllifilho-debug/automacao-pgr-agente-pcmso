@@ -24,3 +24,4 @@ rapidfuzz>=3.6.0
 
 # ── IA Gemini (fallback extracao PGR) ────────────────────────────────────────
 google-generativeai>=0.5.0
+PyMuPDF
