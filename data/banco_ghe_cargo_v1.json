@@ -1,0 +1,3428 @@
+{
+  "GHE_ESTRUTURA_FORMA:CARPINTEIRO": {
+    "descricao": "GHE 01 Estrutura - Execução fôrma pilar/laje",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_FORMA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 01 Estrutura - Execução fôrma pilar/laje",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_ARMACAO:ARMADOR": {
+    "descricao": "GHE 02 Estrutura - Execução viga/pilar/laje (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_ARMACAO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 02 Estrutura - Execução viga/pilar/laje (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_BETONEIRA:OPERADOR_BETONEIRA": {
+    "descricao": "GHE 03 Estrutura - Preparação argamassa/betoneira",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_BETONEIRA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 03 Estrutura - Preparação argamassa/betoneira",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_MONT:ELETRICISTA_ENERGIZADO": {
+    "descricao": "GHE 04 Estrutura - Elevador cremalheira montagem/manutenção (Tricloroetileno ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido tricloroacético na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_MONT:MECANICO_MANUTENCAO": {
+    "descricao": "GHE 04 Estrutura - Elevador cremalheira montagem/manutenção (Tricloroetileno ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido tricloroacético na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_MONT:ELETRICISTA": {
+    "descricao": "GHE 04 Estrutura - Elevador cremalheira montagem/manutenção (Tricloroetileno ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido tricloroacético na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_OP:OPERADOR_CREMALHEIRA": {
+    "descricao": "GHE 05 Estrutura - Elevador cremalheira (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_OP:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 05 Estrutura - Elevador cremalheira (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_GRUA_SINALIZACAO:SINALEIRO": {
+    "descricao": "GHE 06 Estrutura - Grua (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_GRUA_SINALIZACAO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 06 Estrutura - Grua (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_ALVENARIA:PEDREIRO": {
+    "descricao": "GHE 07 Estrutura - Alvenaria interna/externa (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_ALVENARIA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 07 Estrutura - Alvenaria interna/externa (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_PRUMADA:ELETRICISTA": {
+    "descricao": "GHE 08 Estrutura - Prumada elétrica desenergizada",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_PRUMADA:MECANICO_MANUTENCAO": {
+    "descricao": "GHE 08 Estrutura - Prumada elétrica desenergizada",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_PRUMADA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 08 Estrutura - Prumada elétrica desenergizada",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_HIDRO:ENCANADOR": {
+    "descricao": "GHE 09 Estrutura - Tubulação hidro-sanitária (Metietilcetona abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_HIDRO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 09 Estrutura - Tubulação hidro-sanitária (Metietilcetona abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_SERRALHERIA:SERRALHEIRO": {
+    "descricao": "GHE 10 Estrutura - Serralheria (Cromo abaixo 10% LT ACGIH)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Manganês Sanguíneo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_SERRALHERIA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 10 Estrutura - Serralheria (Cromo abaixo 10% LT ACGIH)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Manganês Sanguíneo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_LIMPEZA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 11 Estrutura - Limpeza",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "?",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_SERVICOS_GERAIS:PEDREIRO": {
+    "descricao": "GHE 12 Estrutura - Serviço gerais (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_SERVICOS_GERAIS:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 12 Estrutura - Serviço gerais (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_PINTURA:PINTOR": {
+    "descricao": "GHE 13 Estrutura - Pintura (tolueno/xileno/estireno abaixo nível ação, ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_PINTURA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 13 Estrutura - Pintura (tolueno/xileno/estireno abaixo nível ação, ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_PORTARIA:PORTEIRO_VIGIA": {
+    "descricao": "GHE 14 Estrutura - Portaria",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_GRUA_OPERACAO:OPERADOR_GRUA": {
+    "descricao": "GHE 15 Estrutura - Operação Grua",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ESTRUTURA_ELETRICA_TEMP:ELETRICISTA": {
+    "descricao": "GHE 16 Estrutura - Instalação elétrica temporária energizada",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_REBOCO:PEDREIRO": {
+    "descricao": "GHE 01 Acabamento - Reboco interno/externo (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_REBOCO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 01 Acabamento - Reboco interno/externo (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_CONTRAPISO:PEDREIRO": {
+    "descricao": "GHE 02 Acabamento - Contrapiso (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_CONTRAPISO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 02 Acabamento - Contrapiso (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_IMPERMEABILIZACAO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 03 Acabamento - Impermeabilização",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Metil-hipúrico na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ácido Mandélico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ácido Fenilglioxílico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_GESSO:GESSEIRO": {
+    "descricao": "GHE 04 Acabamento - Gesso corrido e placa (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_GESSO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 04 Acabamento - Gesso corrido e placa (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_PINTURA:PINTOR": {
+    "descricao": "GHE 05 Acabamento - Pintura interna/externa (tinta ototóxica)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_PINTURA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 05 Acabamento - Pintura interna/externa (tinta ototóxica)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_REVESTIMENTO:PEDREIRO": {
+    "descricao": "GHE 06 Acabamento - Revestimento (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_REVESTIMENTO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 06 Acabamento - Revestimento (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_REJUNTE:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 07 Acabamento - Rejunte/Limpeza grossa e fina (Fluoreto de Hidrogênio abaixo NA ACGIH)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acetona urinária",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ácido Metil-hipúrico na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Metil-Etil-Cetona",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "O-Cresol urinário",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_ASSENTAMENTO:PEDREIRO": {
+    "descricao": "GHE 08 Acabamento - Assentamento bancada (Estireno abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_ASSENTAMENTO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 08 Acabamento - Assentamento bancada (Estireno abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_MANTA_ASFALTICA:ENCARREGADO_SUPERVISAO": {
+    "descricao": "GHE 09 Acabamento - Impermeabilização manta asfáltica (monóxido de carbono ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Avaliação Psicossocial",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_MANTA_ASFALTICA:IMPERMEABILIZADOR": {
+    "descricao": "GHE 09 Acabamento - Impermeabilização manta asfáltica (monóxido de carbono ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Avaliação Psicossocial",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ACABAMENTO_MANTA_ASFALTICA:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 09 Acabamento - Impermeabilização manta asfáltica (monóxido de carbono ototóxico)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Avaliação Psicossocial",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ADMIN_ENGENHARIA:ENGENHEIRO": {
+    "descricao": "GHE 01 Admin - Engenharia planejamento de obra (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ADMIN_ENGENHARIA:ESTAGIARIO": {
+    "descricao": "GHE 01 Admin - Engenharia planejamento de obra (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ADMIN_SST:TECNICO_SST": {
+    "descricao": "GHE 02 Admin - Segurança do trabalho (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ADMIN_SST:ESTAGIARIO": {
+    "descricao": "GHE 02 Admin - Segurança do trabalho (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_ADMIN_EXECUCAO:MESTRE_OBRA": {
+    "descricao": "GHE 03 Admin - Execução de obra",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ADMIN_EXECUCAO:ENCARREGADO_GERAL": {
+    "descricao": "GHE 03 Admin - Execução de obra",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ADMIN_SUPERVISAO_REJUNTE:ENCARREGADO_SUPERVISAO": {
+    "descricao": "GHE 04 Admin - Supervisão Rejunte/limpeza",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ADMIN_ADMINISTRATIVO:AUXILIAR_ADMINISTRATIVO": {
+    "descricao": "GHE 05 Admin - Administrativo (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ADMIN_ADMINISTRATIVO:JOVEM_APRENDIZ": {
+    "descricao": "GHE 05 Admin - Administrativo (ruído abaixo nível ação)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ADMIN_ALMOXARIFADO:ALMOXARIFE": {
+    "descricao": "GHE 06 Admin - Almoxarifado",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_ADMIN_ALMOXARIFADO:SERVENTE_CANTEIRO": {
+    "descricao": "GHE 06 Admin - Almoxarifado",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  }
+}
