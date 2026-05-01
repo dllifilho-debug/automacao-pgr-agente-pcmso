@@ -1,378 +1,3412 @@
 {
   "ADMINISTRATIVO": {
     "descricao": "Pessoal administrativo sem risco ocupacional específico",
-    "riscos_base": ["Ausência de Risco Ocupacional Específico"],
+    "riscos_base": [
+      "Ausência de Risco Ocupacional Específico"
+    ],
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
     ]
   },
   "AUXILIAR_ADMINISTRATIVO": {
     "descricao": "Auxiliar administrativo, jovem aprendiz, estagiário administrativo",
-    "riscos_base": ["Ausência de Risco Ocupacional Específico"],
+    "riscos_base": [
+      "Ausência de Risco Ocupacional Específico"
+    ],
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
     ]
   },
   "ESTAGIARIO": {
     "descricao": "Estagiário de engenharia ou SST que circula em obra",
-    "riscos_base": ["Ruído", "NR-35 eventual"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35 eventual"
+    ],
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "JOVEM_APRENDIZ": {
     "descricao": "Jovem aprendiz maiores de 18 anos em obra",
-    "riscos_base": ["Ausência de Risco Ocupacional Específico"],
+    "riscos_base": [
+      "Ausência de Risco Ocupacional Específico"
+    ],
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
     ]
   },
   "ENGENHEIRO": {
     "descricao": "Engenheiro de obra, planejamento - circula em toda a obra",
-    "riscos_base": ["Ruído", "NR-35 eventual"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35 eventual"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Adm-01",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "TECNICO_SST": {
     "descricao": "Técnico de segurança do trabalho - circula em toda a obra",
-    "riscos_base": ["Ruído", "NR-35 eventual"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35 eventual"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Adm-02",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "MESTRE_OBRA": {
     "descricao": "Mestre de obra - supervisão geral do canteiro",
-    "riscos_base": ["Ruído", "NR-35", "Supervisão"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35",
+      "Supervisão"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Adm-03",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "ENCARREGADO_GERAL": {
     "descricao": "Encarregado de equipes - pedreiro, pintor, eletricista, encanador",
-    "riscos_base": ["Ruído", "NR-35", "Supervisão"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35",
+      "Supervisão"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Adm-03",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "ENCARREGADO_SUPERVISAO": {
     "descricao": "Encarregado de supervisão de rejunte/limpeza - exposição química moderada",
-    "riscos_base": ["Supervisão"],
+    "riscos_base": [
+      "Supervisão"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Adm-04",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
     ]
   },
   "ALMOXARIFE": {
     "descricao": "Almoxarife e servente de almoxarifado",
-    "riscos_base": ["Poeira", "Ruído eventual"],
+    "riscos_base": [
+      "Poeira",
+      "Ruído eventual"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Adm-06",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "PORTEIRO_VIGIA": {
     "descricao": "Porteiro ou vigia de obra",
-    "riscos_base": ["Estresse", "Acuidade Visual"],
+    "riscos_base": [
+      "Estresse",
+      "Acuidade Visual"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-14",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "CARPINTEIRO": {
     "descricao": "Carpinteiro, meio oficial de carpinteiro - forma de pilar e laje",
-    "riscos_base": ["Ruído", "NR-35", "Poeira de Madeira"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35",
+      "Poeira de Madeira"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-01",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "ARMADOR": {
     "descricao": "Armador, meio oficial de armador - estrutura de concreto armado",
-    "riscos_base": ["Ruído", "NR-35"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-02",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "PEDREIRO": {
     "descricao": "Pedreiro, meio oficial de pedreiro - alvenaria, reboco, contrapiso, revestimento",
-    "riscos_base": ["Ruído", "Poeira Mineral/Cimento", "NR-35"],
+    "riscos_base": [
+      "Ruído",
+      "Poeira Mineral/Cimento",
+      "NR-35"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-07 / Acab-01,02,06",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "SERVENTE_CANTEIRO": {
     "descricao": "Servente de canteiro genérico - auxilia diversas frentes",
-    "riscos_base": ["Ruído", "Poeira", "NR-35"],
+    "riscos_base": [
+      "Ruído",
+      "Poeira",
+      "NR-35"
+    ],
     "fonte_regra": "RQ.61 CMO GHE variados",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "SINALEIRO": {
     "descricao": "Sinaleiro de grua - operação em altura",
-    "riscos_base": ["Ruído", "NR-35"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-06",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "OPERADOR_CREMALHEIRA": {
     "descricao": "Operador de elevador de cremalheira",
-    "riscos_base": ["Ruído", "NR-35", "Acuidade Visual"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35",
+      "Acuidade Visual"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-05",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "MECANICO_MANUTENCAO": {
     "descricao": "Mecânico de manutenção - exposição a solvente clorado tricloroetileno",
-    "riscos_base": ["Ruído", "NR-35", "Solvente Clorado"],
+    "riscos_base": [
+      "Ruído",
+      "NR-35",
+      "Solvente Clorado"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-04",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "Ácido tricloroacético na urina", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido tricloroacético na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "PRODUCAO_GERAL": {
     "descricao": "Trabalhador de produção genérico sem risco específico mapeado",
-    "riscos_base": ["Poeira Mineral", "Ruído", "Acidentes"],
+    "riscos_base": [
+      "Poeira Mineral",
+      "Ruído",
+      "Acidentes"
+    ],
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "PINTOR": {
     "descricao": "Pintor, meio oficial de pintor - tinta, tolueno, xileno, substância ototóxica",
-    "riscos_base": ["Solventes", "Tolueno", "Xileno", "Ruído"],
+    "riscos_base": [
+      "Solventes",
+      "Tolueno",
+      "Xileno",
+      "Ruído"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-13 / Acab-05",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "6", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "6", "mro": true, "ret": false, "dem": true},
-      {"nome": "Contagem de Reticulócitos", "adm": true, "per": "6", "mro": true, "ret": false, "dem": true},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Ácido Trans-trans Mucônico", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false},
-      {"nome": "Ortocresol na urina", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false},
-      {"nome": "Ácido Metil-hipúrico na urina", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false},
-      {"nome": "Metil-Etil-Cetona", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ortocresol na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ácido Metil-hipúrico na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Metil-Etil-Cetona",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "SERRALHEIRO": {
     "descricao": "Serralheiro, meio oficial - fumos metálicos, manganês, cromo",
-    "riscos_base": ["Fumos Metálicos", "Manganês", "Ruído", "Solda"],
+    "riscos_base": [
+      "Fumos Metálicos",
+      "Manganês",
+      "Ruído",
+      "Solda"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-10",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "6", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Manganês Sanguíneo", "adm": true, "per": "6", "mro": true, "ret": false, "dem": false},
-      {"nome": "Carboxiemoglobina", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Manganês Sanguíneo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Carboxiemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "IMPERMEABILIZADOR": {
     "descricao": "Impermeabilizador, aplicador de asfalto, encarregado de impermeabilização",
-    "riscos_base": ["Fumos Asfálticos", "Monóxido de Carbono", "Benzeno", "NR-35"],
+    "riscos_base": [
+      "Fumos Asfálticos",
+      "Monóxido de Carbono",
+      "Benzeno",
+      "NR-35"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Acab-03 / Acab-09",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "6", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "6", "mro": true, "ret": false, "dem": true},
-      {"nome": "Contagem de Reticulócitos", "adm": true, "per": "6", "mro": true, "ret": false, "dem": true},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Ácido Trans-trans Mucônico", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false},
-      {"nome": "Carboxiemoglobina", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false},
-      {"nome": "Avaliação Psicossocial", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Contagem de Reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ácido Trans-trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Carboxiemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Avaliação Psicossocial",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "OPERADOR_GRUA": {
     "descricao": "Operador de grua - trabalho em altura, vibração corpo inteiro",
-    "riscos_base": ["Trabalho em Altura", "Vibração Corpo Inteiro", "Ruído"],
+    "riscos_base": [
+      "Trabalho em Altura",
+      "Vibração Corpo Inteiro",
+      "Ruído"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-15",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "OPERADOR_BETONEIRA": {
     "descricao": "Operador de betoneira - poeira de cimento, vibração, ruído",
-    "riscos_base": ["Ruído", "Poeira de Cimento", "Vibração"],
+    "riscos_base": [
+      "Ruído",
+      "Poeira de Cimento",
+      "Vibração"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-03",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "ELETRICISTA": {
     "descricao": "Eletricista NR-10 desenergizado",
-    "riscos_base": ["Choque Elétrico", "Trabalho em Altura", "NR-10 Desenergizado"],
+    "riscos_base": [
+      "Choque Elétrico",
+      "Trabalho em Altura",
+      "NR-10 Desenergizado"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-08 / Est-16",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "ELETRICISTA_ENERGIZADO": {
     "descricao": "Eletricista NR-10 energizado ou elevador cremalheira - solvente clorado",
-    "riscos_base": ["Choque Elétrico", "NR-10 Energizado", "Solvente Clorado - Tricloroetileno"],
+    "riscos_base": [
+      "Choque Elétrico",
+      "NR-10 Energizado",
+      "Solvente Clorado - Tricloroetileno"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-04 eletricista",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "Ácido tricloroacético na urina", "adm": false, "per": "6", "mro": false, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido tricloroacético na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
     ]
   },
   "ENCANADOR": {
     "descricao": "Encanador, meio oficial de encanador - metilcetona abaixo do nível de ação",
-    "riscos_base": ["Solventes Cetonaster", "Ruído"],
+    "riscos_base": [
+      "Solventes Cetonaster",
+      "Ruído"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Est-09",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "GESSEIRO": {
     "descricao": "Gesseiro, meio oficial de gesseiro - poeira de gesso",
-    "riscos_base": ["Poeira de Gesso", "Ruído"],
+    "riscos_base": [
+      "Poeira de Gesso",
+      "Ruído"
+    ],
     "fonte_regra": "RQ.61 CMO GHE Acab-04",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "24", "mro": true, "ret": false, "dem": true}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   },
   "MOTORISTA": {
     "descricao": "Motorista de veículos leves e pesados",
-    "riscos_base": ["Acidente de Trânsito", "Ruído"],
+    "riscos_base": [
+      "Acidente de Trânsito",
+      "Ruído"
+    ],
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Audiometria", "adm": true, "per": "12", "mro": true, "ret": true, "dem": true},
-      {"nome": "Acuidade Visual", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma Completo", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false}
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "GHE_01__BETONEIRA_BETONEIRA": {
+    "descricao": "Importado via PDF RQ.61 - Betoneira",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_01__BETONEIRA_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_02__ARMAÇÃO_ARMADOR": {
+    "descricao": "Importado via PDF RQ.61 - Armador",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_03__CARPINTARIA_CARPINTEIRO": {
+    "descricao": "Importado via PDF RQ.61 - Carpinteiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_04__PRODUÇÃO_01_PEDREIRO": {
+    "descricao": "Importado via PDF RQ.61 - Pedreiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_04__PRODUÇÃO_01_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_05__LIMPEZA_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_06__ELÉTRICA__ENERGIZADO_INDUSTRIAL": {
+    "descricao": "Importado via PDF RQ.61 - Industrial",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_06__ELÉTRICA__ENERGIZADO_ELETRICISTA": {
+    "descricao": "Importado via PDF RQ.61 - Eletricista",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_07__CREMALHEIRA_CREMALHEIRA": {
+    "descricao": "Importado via PDF RQ.61 - Cremalheira",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_08__SINALIZAÇÃO_DE_GRUA_SINALEIRO": {
+    "descricao": "Importado via PDF RQ.61 - Sinaleiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_09__PRODUÇÃO_02_PEDREIRO": {
+    "descricao": "Importado via PDF RQ.61 - Pedreiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_09__PRODUÇÃO_02_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_10__PRODUÇÃO_03_MONOBUTÍLICO_DE_ETILENOGLICOL": {
+    "descricao": "Importado via PDF RQ.61 - Monobutílico De Etilenoglicol)",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_11__MANUTENÇÃO_MECÂNICO_DE_MANUTENÇÃO": {
+    "descricao": "Importado via PDF RQ.61 - Mecânico De Manutenção",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_11__MANUTENÇÃO_MONTADOR": {
+    "descricao": "Importado via PDF RQ.61 - Montador",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_12__SEGURANÇA_DO_TRABALHO_TRABALHO": {
+    "descricao": "Importado via PDF RQ.61 - Trabalho",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_13__SUPERVISÃO_DE_EQUIPES_PEDREIRO": {
+    "descricao": "Importado via PDF RQ.61 - Pedreiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_13__SUPERVISÃO_DE_EQUIPES_PINTOR": {
+    "descricao": "Importado via PDF RQ.61 - Pintor",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_13__SUPERVISÃO_DE_EQUIPES_ELETRICISTA": {
+    "descricao": "Importado via PDF RQ.61 - Eletricista",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_13__SUPERVISÃO_DE_EQUIPES_ENCANADOR": {
+    "descricao": "Importado via PDF RQ.61 - Encanador",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_13__SUPERVISÃO_DE_EQUIPES_REJUNTE": {
+    "descricao": "Importado via PDF RQ.61 - Rejunte",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_13__SUPERVISÃO_DE_EQUIPES_OBRA": {
+    "descricao": "Importado via PDF RQ.61 - Obra",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_14__ADMINISTRAÇÃO_OBRAS": {
+    "descricao": "Importado via PDF RQ.61 - Obras",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_15__ALMOXARIFADO_ALMOXARIFE": {
+    "descricao": "Importado via PDF RQ.61 - Almoxarife",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_15__ALMOXARIFADO_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_16__ENGENHARIA_ENGENHEIRO": {
+    "descricao": "Importado via PDF RQ.61 - Engenheiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_16__ENGENHARIA_ENGENHARIA": {
+    "descricao": "Importado via PDF RQ.61 - Engenharia",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_17__GRUA_GRUA": {
+    "descricao": "Importado via PDF RQ.61 - Grua",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_18__SERRALHERIA_SERRALHEIRO": {
+    "descricao": "Importado via PDF RQ.61 - Serralheiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_18__SERRALHERIA_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_19__INSTALAÇÕES_HIDROSSANITÁRIAS_ETILENOGLICOL": {
+    "descricao": "Importado via PDF RQ.61 - Etilenoglicol)",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_20__INSTALAÇÕES_ELÉTRICAS__DESENERGIZADO_ELETRICISTA": {
+    "descricao": "Importado via PDF RQ.61 - Eletricista",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_20__INSTALAÇÕES_ELÉTRICAS__DESENERGIZADO_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_21__IMPERMEABILIZAÇÃO_ENCARREGADO_DE_IMPERMEABILIZAÇÃO": {
+    "descricao": "Importado via PDF RQ.61 - Encarregado De Impermeabilização",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_21__IMPERMEABILIZAÇÃO_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_22__GESSO_GESSEIRO": {
+    "descricao": "Importado via PDF RQ.61 - Gesseiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_24__PORTARIA_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_25__PINTURA_2_OCTOATO_DE_COBALTO": {
+    "descricao": "Importado via PDF RQ.61 - Octoato De Cobalto)",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_26__PRODUÇÃO_04_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_27__PRODUÇÃO_05_PEDREIRO": {
+    "descricao": "Importado via PDF RQ.61 - Pedreiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_28__PRODUÇÃO_06_PEDREIRO": {
+    "descricao": "Importado via PDF RQ.61 - Pedreiro",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "GHE_28__PRODUÇÃO_06_SERVENTE": {
+    "descricao": "Importado via PDF RQ.61 - Servente",
+    "riscos_base": [
+      "Riscos a validar com PGR"
+    ],
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Radiografia de Tórax (OIT)",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
     ]
   }
 }
