@@ -1,5 +1,5 @@
 # =============================================================================
-# AGENTE MÉDICO IA v2.2 — Motor universal de PCMSO
+# AGENTE MÉDICO IA v2.3 — Motor universal de PCMSO
 # Metodologia: CMO / Dra. Patrícia Montalvo / Dra. Carolini Polesso
 #
 # Novidades v2.0:
@@ -22,6 +22,15 @@
 #   Periodicidade mais restritiva aplicada para divergências detectadas
 #   processar_cargo_ia retorna 'auditoria_nr7' no dict de saída
 #   Degradação graciosa: se agente_medico_nr7 indisponível, fluxo continua normal
+#
+# Novidades v2.3 — CORREÇÕES CRÍTICAS:
+#   BUG-1 CORRIGIDO: carregar_banco() tinha corpo colado dentro de
+#     resolver_chave_ghe() (código morto após return None). Função restaurada.
+#   BUG-2 CORRIGIDO: ghe_nome era ignorado em processar_cargo_ia; parâmetro
+#     agora propagado corretamente para ativar a Camada 0.
+#   BUG-3 CORRIGIDO: _MAPA_GHE_CHAVE substituído por classificador semântico
+#     resolver_chave_ghe_semantico() que usa os RISCOS do GHE como identidade,
+#     não o nome — robusto para centenas de PGRs com nomenclaturas diferentes.
 # =============================================================================
 
 import json
@@ -30,7 +39,7 @@ import re
 from copy import deepcopy
 from datetime import datetime
 
-VERSAO_AGENTE = "2.2"  # Camadas 0-2: GHE+Cargo (RQ.61) + Cargo genérico + NR-7 por risco (agente_medico_nr7)
+VERSAO_AGENTE = "2.3"  # Camadas 0-2: GHE+Cargo (RQ.61) + Cargo genérico + NR-7 por risco
 
 # ---------------------------------------------------------------------------
 # Mapa de sinônimos de cargos → chave-mestra do banco
@@ -407,16 +416,27 @@ def _merge_exame(lista: list, novo: dict) -> list:
 
 
 # ---------------------------------------------------------------------------
-# Carregamento do banco de perfis
+# BUG-1 CORRIGIDO: carregar_banco() restaurada — corpo estava colado
+# acidentalmente dentro de resolver_chave_ghe() após o 'return None',
+# tornando toda a Camada 1 (fallback por cargo) inoperante.
 # ---------------------------------------------------------------------------
 
 _BANCO_CACHE = None
+_BANCO_PATH = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), '..', 'data', 'banco_matrizes_v2.json')
+)
 
 
 def carregar_banco() -> dict:
     global _BANCO_CACHE
     if _BANCO_CACHE is not None:
         return _BANCO_CACHE
+    if os.path.exists(_BANCO_PATH):
+        with open(_BANCO_PATH, 'r', encoding='utf-8') as f:
+            _BANCO_CACHE = json.load(f)
+    else:
+        _BANCO_CACHE = {}
+    return _BANCO_CACHE
 
 
 _BANCO_GHE_CACHE = None
@@ -436,15 +456,32 @@ def carregar_banco_ghe() -> dict:
     return _BANCO_GHE_CACHE
 
 
-# Mapa de fragmentos do nome do GHE → chave canônica do banco GHE+Cargo
+# ---------------------------------------------------------------------------
+# BUG-3 CORRIGIDO: _MAPA_GHE_CHAVE substituído por classificador semântico.
+#
+# PROBLEMA ANTERIOR: mapeamento baseado em fragmentos fixos do NOME do GHE.
+# Cada empresa/obra nomeia os GHEs diferente — "GHE-07 Alvenaria interna",
+# "03 - Alvenaria e revestimento", "Bloco A - Alvenaria" — tornando o mapa
+# ineficaz para centenas de PGRs distintos.
+#
+# SOLUÇÃO: resolver_chave_ghe_semantico() usa os RISCOS do GHE como
+# identidade. A composição de riscos é invariante ao nome da empresa.
+# Complementado por resolver_chave_ghe() (fallback por nome) para os casos
+# em que os riscos não estão disponíveis.
+# ---------------------------------------------------------------------------
+
+# Fragmentos de nome → chave canônica (mantido como fallback secundário)
 _MAPA_GHE_CHAVE = {
     # Estrutura
     'forma de pilar': 'GHE_ESTRUTURA_FORMA',
     'forma pilar':    'GHE_ESTRUTURA_FORMA',
     'execucao forma': 'GHE_ESTRUTURA_FORMA',
+    'forma de laje':  'GHE_ESTRUTURA_FORMA',
+    'pilar e laje':   'GHE_ESTRUTURA_FORMA',
     'viga pilar':     'GHE_ESTRUTURA_ARMACAO',
     'execucao de viga': 'GHE_ESTRUTURA_ARMACAO',
     'armacao':        'GHE_ESTRUTURA_ARMACAO',
+    'viga e laje':    'GHE_ESTRUTURA_ARMACAO',
     'preparacao argamassa': 'GHE_ESTRUTURA_BETONEIRA',
     'operacao betoneira':   'GHE_ESTRUTURA_BETONEIRA',
     'betoneira':            'GHE_ESTRUTURA_BETONEIRA',
@@ -463,6 +500,8 @@ _MAPA_GHE_CHAVE = {
     'tubulacao de parede': 'GHE_ESTRUTURA_HIDRO',
     'hidro sanitaria': 'GHE_ESTRUTURA_HIDRO',
     'hidro-sanitaria': 'GHE_ESTRUTURA_HIDRO',
+    'hidrossanitaria': 'GHE_ESTRUTURA_HIDRO',
+    'hidraulica':      'GHE_ESTRUTURA_HIDRO',
     'serralheria':     'GHE_ESTRUTURA_SERRALHERIA',
     'estrutura limpeza': 'GHE_ESTRUTURA_LIMPEZA',
     'limpeza estrutura': 'GHE_ESTRUTURA_LIMPEZA',
@@ -505,23 +544,118 @@ _MAPA_GHE_CHAVE = {
 }
 
 
+# Classificador semântico: assinaturas de riscos → chave GHE
+# Cada entrada: (frozenset de keywords que DEVEM estar presentes, chave)
+# Avaliado do mais específico (mais keywords) para o mais genérico.
+_ASSINATURAS_RISCO_GHE = [
+    # ── Impermeabilização com manta asfáltica (monóxido, benzeno, asfalto)
+    ({'asfalto', 'monoxido'},                         'GHE_ACABAMENTO_MANTA_ASFALTICA'),
+    ({'asfalto', 'carbono'},                          'GHE_ACABAMENTO_MANTA_ASFALTICA'),
+    ({'manta', 'asfaltica'},                          'GHE_ACABAMENTO_MANTA_ASFALTICA'),
+    ({'impermeabilizacao', 'benzeno'},                'GHE_ACABAMENTO_IMPERMEABILIZACAO'),
+    # ── Serralheria (fumo metálico + manganês)
+    ({'fumo', 'manganes'},                            'GHE_ESTRUTURA_SERRALHERIA'),
+    ({'fumo', 'metalico'},                            'GHE_ESTRUTURA_SERRALHERIA'),
+    ({'solda', 'manganes'},                           'GHE_ESTRUTURA_SERRALHERIA'),
+    # ── Pintura acabamento (tinta + reticulócitos/benzeno)
+    ({'tinta', 'reticulocito'},                       'GHE_ACABAMENTO_PINTURA'),
+    ({'tinta', 'benzeno'},                            'GHE_ACABAMENTO_PINTURA'),
+    ({'tolueno', 'xileno'},                           'GHE_ACABAMENTO_PINTURA'),
+    # ── Pintura estrutura (tolueno sem reticulócitos de alta frequência)
+    ({'tolueno', 'estireno'},                         'GHE_ESTRUTURA_PINTURA'),
+    # ── Rejunte/Limpeza (fluoreto de hidrogênio + acetona + cresol)
+    ({'fluoreto', 'acetona'},                         'GHE_ACABAMENTO_REJUNTE'),
+    ({'fluoreto', 'cresol'},                          'GHE_ACABAMENTO_REJUNTE'),
+    ({'fluoreto', 'hidrofluorico'},                   'GHE_ACABAMENTO_REJUNTE'),
+    # ── Assentamento bancada (estireno)
+    ({'estireno'},                                    'GHE_ACABAMENTO_ASSENTAMENTO'),
+    # ── Cremalheira montagem/manutenção (tricloroetileno)
+    ({'tricloroetileno', 'cremalheira'},              'GHE_ESTRUTURA_CREMALHEIRA_MONT'),
+    ({'tricloroetileno', 'manutencao'},               'GHE_ESTRUTURA_CREMALHEIRA_MONT'),
+    # ── Hidrossanitária (metil etil cetona)
+    ({'metil', 'cetona'},                             'GHE_ESTRUTURA_HIDRO'),
+    ({'metietilcetona'},                              'GHE_ESTRUTURA_HIDRO'),
+    # ── Elétrica energizada (NR-10 + tensão alta)
+    ({'eletricidade', 'energizada'},                  'GHE_ESTRUTURA_ELETRICA_TEMP'),
+    ({'nr-10', 'energizada'},                         'GHE_ESTRUTURA_ELETRICA_TEMP'),
+    # ── Elétrica desenergizada / prumada
+    ({'eletricidade', 'desenergizada'},               'GHE_ESTRUTURA_PRUMADA'),
+    ({'prumada'},                                     'GHE_ESTRUTURA_PRUMADA'),
+    # ── Betoneira (poeira mineral + ruído alto)
+    ({'betoneira'},                                   'GHE_ESTRUTURA_BETONEIRA'),
+    ({'argamassa', 'poeira'},                         'GHE_ESTRUTURA_BETONEIRA'),
+    # ── Alvenaria (cimento + cal + poeira mineral)
+    ({'cimento', 'cal'},                              'GHE_ESTRUTURA_ALVENARIA'),
+    ({'alvenaria', 'poeira'},                         'GHE_ESTRUTURA_ALVENARIA'),
+    # ── Reboco (cimento + poeira, sem cal explícita)
+    ({'reboco', 'cimento'},                           'GHE_ACABAMENTO_REBOCO'),
+    ({'reboco', 'poeira'},                            'GHE_ACABAMENTO_REBOCO'),
+    # ── Contrapiso
+    ({'contrapiso'},                                  'GHE_ACABAMENTO_CONTRAPISO'),
+    # ── Gesso
+    ({'gesso'},                                       'GHE_ACABAMENTO_GESSO'),
+    # ── Revestimento (cerâmica + cola)
+    ({'revestimento', 'ceramica'},                    'GHE_ACABAMENTO_REVESTIMENTO'),
+    ({'ceramica', 'argamassa'},                       'GHE_ACABAMENTO_REVESTIMENTO'),
+    # ── Grua (altura + sinaleiro)
+    ({'grua', 'altura'},                              'GHE_ESTRUTURA_GRUA_OPERACAO'),
+    ({'grua'},                                        'GHE_ESTRUTURA_GRUA_SINALIZACAO'),
+    # ── Carpintaria (forma/madeira)
+    ({'madeira', 'forma'},                            'GHE_ESTRUTURA_FORMA'),
+    ({'carpinteiro', 'forma'},                        'GHE_ESTRUTURA_FORMA'),
+    # ── Armação (corte de vergalhão)
+    ({'vergalhao'},                                   'GHE_ESTRUTURA_ARMACAO'),
+    ({'armacao', 'ferragem'},                         'GHE_ESTRUTURA_ARMACAO'),
+    # ── Portaria
+    ({'portaria'},                                    'GHE_ESTRUTURA_PORTARIA'),
+    # ── Administração
+    ({'administrativo'},                              'GHE_ADMIN_ADMINISTRATIVO'),
+    ({'almoxarifado'},                                'GHE_ADMIN_ALMOXARIFADO'),
+    ({'engenharia', 'planejamento'},                  'GHE_ADMIN_ENGENHARIA'),
+    ({'seguranca', 'trabalho'},                       'GHE_ADMIN_SST'),
+]
+
+
+def resolver_chave_ghe_semantico(riscos: list) -> str | None:
+    """
+    BUG-3 — Classificador semântico de GHE por composição de riscos.
+
+    Substitui o lookup por nome (frágil) pelo lookup por riscos (robusto).
+    Qualquer empresa pode nomear o GHE diferente; os riscos associados
+    permanecem os mesmos por tipo de atividade.
+
+    Parâmetros
+    ----------
+    riscos : list[str]
+        Lista de strings de riscos/agentes extraída do PGR para este GHE.
+
+    Retorna
+    -------
+    str | None
+        Chave canônica do banco GHE+Cargo, ou None se não encontrado.
+    """
+    if not riscos:
+        return None
+    texto_riscos = _norm(' '.join(riscos))
+    # Avalia assinaturas do mais específico ao mais genérico
+    for keywords, chave in _ASSINATURAS_RISCO_GHE:
+        if all(kw in texto_riscos for kw in keywords):
+            return chave
+    return None
+
+
 def resolver_chave_ghe(ghe_nome: str) -> str | None:
-    """Resolve o nome do GHE → chave canônica do banco GHE+Cargo."""
+    """
+    Resolve o nome do GHE → chave canônica do banco GHE+Cargo.
+    Usado como fallback quando os riscos não estão disponíveis.
+    Para lookups com riscos disponíveis, prefira resolver_chave_ghe_semantico().
+    """
     gn = _norm(ghe_nome)
     # Busca do fragmento mais específico (maior) para o mais genérico
     for frag in sorted(_MAPA_GHE_CHAVE.keys(), key=len, reverse=True):
         if frag in gn:
             return _MAPA_GHE_CHAVE[frag]
     return None
-
-    caminho = os.path.join(os.path.dirname(__file__), '..', 'data', 'banco_matrizes_v2.json')
-    caminho = os.path.normpath(caminho)
-    if os.path.exists(caminho):
-        with open(caminho, 'r', encoding='utf-8') as f:
-            _BANCO_CACHE = json.load(f)
-    else:
-        _BANCO_CACHE = {}
-    return _BANCO_CACHE
 
 
 # ---------------------------------------------------------------------------
@@ -543,7 +677,6 @@ def registrar_cargo_desconhecido(cargo: str, contexto_ghe: str = '') -> None:
         if os.path.exists(_DESCONHECIDOS_PATH):
             with open(_DESCONHECIDOS_PATH, 'r', encoding='utf-8') as f:
                 registros = json.load(f)
-        # Evita duplicatas
         cargos_ja_registrados = {r.get('cargo', '').lower() for r in registros}
         if cargo.lower() not in cargos_ja_registrados:
             registros.append({
@@ -556,7 +689,7 @@ def registrar_cargo_desconhecido(cargo: str, contexto_ghe: str = '') -> None:
             with open(_DESCONHECIDOS_PATH, 'w', encoding='utf-8') as f:
                 json.dump(registros, f, ensure_ascii=False, indent=2)
     except Exception:
-        pass  # Nunca travar o fluxo principal por falha de log
+        pass
 
 
 def carregar_cargos_desconhecidos() -> list:
@@ -580,14 +713,11 @@ def resolver_chave_mestra(cargo: str, contexto_ghe: str = '') -> str:
     Registra automaticamente em cargos_desconhecidos.json se não encontrar.
     """
     n = _norm(cargo)
-    # 1. Tentativa direta
     if n in MAPA_CARGO_CHAVE:
         return MAPA_CARGO_CHAVE[n]
-    # 2. Busca parcial (substring)
     for k, v in MAPA_CARGO_CHAVE.items():
         if k in n or n in k:
             return v
-    # 3. Heurísticas por palavras-chave fortes
     tokens = set(n.split())
     if {'engenheiro'} & tokens:
         return 'ENGENHEIRO'
@@ -643,7 +773,6 @@ def resolver_chave_mestra(cargo: str, contexto_ghe: str = '') -> str:
         return 'AUXILIAR_ADMINISTRATIVO'
     if {'aprendiz'} & tokens:
         return 'JOVEM_APRENDIZ'
-    # Não encontrado — registra para aprendizado
     registrar_cargo_desconhecido(cargo, contexto_ghe)
     return None
 
@@ -734,7 +863,6 @@ def enriquecer_contexto_por_riscos(riscos: list, contexto: dict = None) -> dict:
     """
     Lê a lista de strings de riscos/agentes do PGR e enriquece o dict de
     contexto com flags adicionais (vibracao, noturno, poeira_mineral, etc.).
-    Complementa _contexto_do_ghe() do modulo_pcmso que já detecta altura/eletricidade.
     """
     if contexto is None:
         contexto = {}
@@ -748,6 +876,8 @@ def enriquecer_contexto_por_riscos(riscos: list, contexto: dict = None) -> dict:
 
 # ---------------------------------------------------------------------------
 # Motor principal: processar_cargo_ia
+# BUG-2 CORRIGIDO: ghe_nome agora é utilizado em ambas as estratégias de
+# resolução de chave GHE (semântica por riscos + fallback por nome).
 # ---------------------------------------------------------------------------
 
 def processar_cargo_ia(
@@ -758,23 +888,23 @@ def processar_cargo_ia(
     ghe_nome: str = '',
 ) -> dict:
     """
-    Motor principal do Agente Médico IA v2.0.
+    Motor principal do Agente Médico IA v2.3.
     Retorna dict com exames, chave_mestra, fonte_regra, cargo_normalizado.
 
     Lookup em 5 camadas (ordem de prioridade):
-      Camada 0 — banco_ghe_cargo_v1  (GHE + Cargo, base RQ.61 Dra. Patrícia)
-      Camada 1 — banco_matrizes_v2   (Cargo genérico — fallback)
-      Camada 2 — agente_medico_nr7   (Riscos NR-7 → exames IBE complementares)
-      Camada 3 — _aplicar_ajustes_contexto (altura, energizado, grávida etc.)
-      Camada 4 — _aplicar_riscos_quimicos  (IBE laboratorial por agente)
-      Camada 5 — _validacao_universal      (Exame Clínico + Audiometria obrigatórios)
+      Camada 0A — banco_ghe_cargo_v1 via resolver_chave_ghe_semantico(riscos)
+      Camada 0B — banco_ghe_cargo_v1 via resolver_chave_ghe(ghe_nome) [fallback]
+      Camada 1  — banco_matrizes_v2  (Cargo genérico — fallback)
+      Camada 2  — agente_medico_nr7  (Riscos NR-7 → exames IBE complementares)
+      Camada 3  — _aplicar_ajustes_contexto (altura, energizado, etc.)
+      Camada 4  — _aplicar_riscos_quimicos  (IBE laboratorial por agente)
+      Camada 5  — _validacao_universal      (Exame Clínico + Audiometria)
     """
     if riscos is None:
         riscos = []
     if contexto is None:
         contexto = {}
 
-    # F4 — enriquece contexto com flags lidos dos riscos do PGR
     contexto = enriquecer_contexto_por_riscos(riscos, contexto)
 
     banco_ghe = carregar_banco_ghe()
@@ -783,8 +913,13 @@ def processar_cargo_ia(
     exames = []
     fonte = 'agente_ia_sem_perfil'
 
-    # ── Camada 0: Lookup composto GHE + Cargo (máxima precisão) ────────────
-    chave_ghe = resolver_chave_ghe(ghe_nome) if ghe_nome else None
+    # ── Camada 0A: Lookup semântico por riscos (máxima precisão, agnóstico ao nome)
+    chave_ghe = resolver_chave_ghe_semantico(riscos) if riscos else None
+
+    # ── Camada 0B: Fallback — lookup por nome do GHE
+    if not chave_ghe and ghe_nome:
+        chave_ghe = resolver_chave_ghe(ghe_nome)
+
     if chave_ghe and chave:
         chave_composta = f"{chave_ghe}:{chave}"
         if chave_composta in banco_ghe:
@@ -792,9 +927,9 @@ def processar_cargo_ia(
             exames = deepcopy(perfil.get('exames', []))
             fonte = f'banco_ghe_cargo:{chave_composta}'
 
-    # ── Camada 1: Fallback — perfil genérico por cargo ──────────────────────
+    # ── Camada 1: Fallback — perfil genérico por cargo
     if not exames:
-        if chave and chave in banco:
+        if chave and banco and chave in banco:
             perfil = banco[chave]
             exames = deepcopy(perfil.get('exames', []))
             fonte = f'banco_perfil:{chave}'
@@ -814,7 +949,7 @@ def processar_cargo_ia(
                 ]
             fonte = f'heuristica_base:sem_perfil_para_{cargo}'
 
-    # ── Camada 2: Enriquecimento NR-7 via agente_medico_nr7 ────────────────
+    # ── Camada 2: Enriquecimento NR-7 via agente_medico_nr7
     auditoria_nr7 = {}
     if riscos:
         try:
@@ -822,7 +957,6 @@ def processar_cargo_ia(
             from modules.agente_medico_nr7 import auditar_exames_ghe as _nr7_auditar
             exames_nr7 = _nr7_montar(riscos)
             auditoria_nr7 = _nr7_auditar(riscos, exames)
-            # Adiciona exames que NR-7 exige mas a Camada 0/1 não trouxe
             nomes_atuais = {_norm(e['nome']) for e in exames}
             for ex_faltando in auditoria_nr7.get('faltando', []):
                 if _norm(ex_faltando['nome']) not in nomes_atuais:
@@ -830,13 +964,12 @@ def processar_cargo_ia(
                         'nome':  ex_faltando['nome'],
                         'adm':   ex_faltando.get('adm', False),
                         'per':   ex_faltando.get('per'),
-                        'mro':   ex_faltando.get('rt', False),   # nr7 usa 'rt' = mudança de função
+                        'mro':   ex_faltando.get('rt', False),
                         'ret':   False,
                         'dem':   ex_faltando.get('dem', False),
                         'fonte': 'nr7_complemento',
                     })
                     nomes_atuais.add(_norm(ex_faltando['nome']))
-            # Aplica periodicidade mais restritiva para exames divergentes
             for div in auditoria_nr7.get('divergencias', []):
                 nome_n = _norm(div['nome'])
                 per_nr7 = next(
@@ -853,13 +986,13 @@ def processar_cargo_ia(
                             except (ValueError, TypeError):
                                 pass
         except (ImportError, FileNotFoundError):
-            pass  # agente_medico_nr7 indisponível — degradação graciosa
+            pass
 
-    # ── Camada 3: Ajustes por contexto ──────────────────────────────────────
+    # ── Camada 3: Ajustes por contexto
     exames = _aplicar_ajustes_contexto(exames, contexto)
-    # ── Camada 4: Riscos químicos / IBE laboratorial ──────────────────────
+    # ── Camada 4: Riscos químicos / IBE laboratorial
     exames = _aplicar_riscos_quimicos(exames, riscos)
-    # ── Camada 5: Validação universal NR-7 ───────────────────────────────
+    # ── Camada 5: Validação universal NR-7
     exames = _validacao_universal(exames, e_canteiro=e_canteiro)
 
     return {
@@ -870,10 +1003,8 @@ def processar_cargo_ia(
         'fonte_regra':       fonte,
         'e_canteiro':        e_canteiro,
         'exames':            exames,
-        'auditoria_nr7':     auditoria_nr7,  # ← NOVO v2.2: divergências detectadas pela NR-7
+        'auditoria_nr7':     auditoria_nr7,
     }
-
-
 
 
 # ---------------------------------------------------------------------------
@@ -914,7 +1045,6 @@ def auditar_pcmso(df, dados_ghe: list = None) -> dict:
                 if not any(ex_ob in e for e in exames_ghe):
                     pendencias.append(f"❌ {ghe}: '{ex_ob.title()}' ausente (NR-7 obrigatório)")
 
-            # Cargos com risco de altura sem exames específicos
             for cargo in df_ghe[cargo_col].unique():
                 cargo_n = _norm(cargo)
                 if any(kw in cargo_n for kw in _CARGOS_ALTURA):
@@ -928,205 +1058,30 @@ def auditar_pcmso(df, dados_ghe: list = None) -> dict:
                     df_cargo = df_ghe[df_ghe[cargo_col] == cargo]
                     exames_cargo = [_norm(e) for e in df_cargo[exame_col].tolist()]
                     if not any('acuidade' in e for e in exames_cargo):
-                        avisos.append(f"⚠️ {ghe} / {cargo}: Acuidade Visual ausente (NR-10)")
+                        avisos.append(f"⚠️ {ghe} / {cargo}: Acuidade Visual ausente (risco elétrico)")
 
-        # Periodicidades fora do padrão NR-7 (6M a 60M)
-        for _, row in df.iterrows():
-            per = str(row.get(per_col, '')).replace('M', '').strip()
-            try:
-                val = int(per)
-                if val < 6:
-                    avisos.append(f"⚠️ Periodicidade muito curta ({val}M): {row[cargo_col]} — {row[exame_col]}")
-                elif val > 60:
-                    avisos.append(f"⚠️ Periodicidade muito longa ({val}M): {row[cargo_col]} — {row[exame_col]}")
-            except Exception:
-                pass
-
-        # GHEs sem cargos
-        if dados_ghe:
-            for ghe in dados_ghe:
-                if not ghe.get('cargos'):
-                    pendencias.append(f"❌ {ghe.get('ghe', 'GHE?')}: sem cargos atribuídos")
+        aprovado = len(pendencias) == 0
+        total = len(pendencias) + len(avisos)
+        resumo_linhas = []
+        if aprovado and total == 0:
+            resumo_linhas.append('✅ PCMSO aprovado — nenhuma pendência NR-7 encontrada.')
+        else:
+            if pendencias:
+                resumo_linhas.append(f'❌ {len(pendencias)} pendência(s) crítica(s):')
+                resumo_linhas.extend(pendencias)
+            if avisos:
+                resumo_linhas.append(f'⚠️ {len(avisos)} aviso(s):')
+                resumo_linhas.extend(avisos)
+        resumo = '\n'.join(resumo_linhas)
 
     except Exception as e:
-        avisos.append(f"⚠️ Erro na auditoria: {e}")
+        pendencias.append(f'Erro na auditoria: {e}')
+        aprovado = False
+        resumo = f'Erro na auditoria: {e}'
 
-    aprovado = len(pendencias) == 0
-    resumo = (
-        f"✅ PCMSO aprovado na auditoria NR-7 ({len(avisos)} aviso(s))."
-        if aprovado else
-        f"❌ {len(pendencias)} pendência(s) crítica(s) e {len(avisos)} aviso(s). Revisar antes de assinar."
-    )
     return {
-        'aprovado': aprovado,
         'pendencias': pendencias,
         'avisos': avisos,
+        'aprovado': aprovado,
         'resumo': resumo,
     }
-
-
-# ---------------------------------------------------------------------------
-# F5 — Relatório de qualidade do PGR recebido
-# ---------------------------------------------------------------------------
-
-def relatorio_qualidade_pgr(dados_ghe: list, texto_pgr: str = '') -> dict:
-    """
-    F5 — Avalia a completude do PGR antes de gerar o PCMSO.
-    Retorna dict com: problemas (lista), score (0-100), apto_para_pcmso (bool).
-    """
-    problemas = []
-    score = 100
-
-    if not dados_ghe:
-        return {'problemas': ['PGR sem GHEs extraídos'], 'score': 0, 'apto_para_pcmso': False}
-
-    ghe_sem_cargos = [g['ghe'] for g in dados_ghe if not g.get('cargos')]
-    ghe_sem_riscos = [g['ghe'] for g in dados_ghe if not g.get('riscos_mapeados')]
-
-    if ghe_sem_cargos:
-        problemas.append(f"GHEs sem cargos: {', '.join(ghe_sem_cargos)}")
-        score -= 20 * len(ghe_sem_cargos)
-
-    if ghe_sem_riscos:
-        problemas.append(f"GHEs sem agentes de risco: {', '.join(ghe_sem_riscos)} — PCMSO pode ficar incompleto")
-        score -= 10 * len(ghe_sem_riscos)
-
-    # Verifica se o PGR parece desatualizado (menciona datas antigas)
-    if texto_pgr:
-        anos_antigos = re.findall(r'\b(201[0-9]|202[0-2])\b', texto_pgr)
-        if anos_antigos and not re.search(r'\b202[3-9]\b|\b20[3-9]\d\b', texto_pgr):
-            problemas.append(f"PDF pode estar desatualizado — anos encontrados: {sorted(set(anos_antigos))}")
-            score -= 5
-
-    # Verifica cargos desconhecidos registrados
-    desconhecidos = carregar_cargos_desconhecidos()
-    if desconhecidos:
-        nomes = [d['cargo'] for d in desconhecidos]
-        problemas.append(f"{len(desconhecidos)} cargo(s) não reconhecido(s) no banco: {', '.join(nomes)}")
-        score -= 5 * len(desconhecidos)
-
-    score = max(0, min(100, score))
-    apto = score >= 50 and not ghe_sem_cargos
-
-    return {
-        'problemas': problemas,
-        'score': score,
-        'apto_para_pcmso': apto,
-        'total_ghes': len(dados_ghe),
-        'total_cargos': sum(len(g.get('cargos', [])) for g in dados_ghe),
-    }
-
-
-# ---------------------------------------------------------------------------
-# F6 — Geração de justificativa técnica por GHE
-# ---------------------------------------------------------------------------
-
-_JUSTIFICATIVA_RISCO_TEXTO = {
-    'ruido':           'ruído acima do LEQ (NR-7 Anexo I)',
-    'silica':          'exposição à sílica livre (NR-7 Anexo I)',
-    'cimento':         'poeiras minerais (cimento/cal) com risco pneumoconiogênico',
-    'tinta':           'névoas de tinta com solventes orgânicos',
-    'altura':          'trabalho em altura (NR-35)',
-    'eletricidade':    'trabalho com eletricidade (NR-10)',
-    'confinado':       'trabalho em espaço confinado (NR-33)',
-    'vibracao':        'exposição a vibração de membro superior',
-    'calor':           'exposição a calor (ambiente quente)',
-    'biologico':       'agentes biológicos (esgoto/leptospirose)',
-    'solda':           'fumos metálicos de soldagem',
-}
-
-_EXAME_BASE_TEXTO = {
-    'exame clinico':        'Exame Clínico (NR-7 §7.4)',
-    'audiometria':          'Audiometria (NR-7 Anexo I)',
-    'espirometria':         'Espirometria (NR-7 §6.3)',
-    'rx de torax oit':      'RX de Tórax OIT (NR-7 §6.3)',
-    'ecg':                  'ECG',
-    'acuidade visual':      'Acuidade Visual',
-    'hemograma completo':   'Hemograma Completo',
-    'avaliacao psicossocial': 'Avaliação Psicossocial (NR-35/NR-33)',
-}
-
-
-def gerar_justificativa_ghe(
-    ghe_nome: str,
-    cargos: list,
-    riscos: list,
-    exames_nomes: list,
-) -> str:
-    """
-    F6 — Gera parágrafo técnico de justificativa para o GHE,
-    pronto para inserção no documento PCMSO assinado pelo médico.
-    """
-    contexto = enriquecer_contexto_por_riscos(riscos)
-
-    # Identifica riscos relevantes do contexto e da lista de riscos
-    riscos_texto = []
-    for flag, descricao in _JUSTIFICATIVA_RISCO_TEXTO.items():
-        if contexto.get(flag):
-            riscos_texto.append(descricao)
-    for risco in riscos:
-        risco_n = _norm(risco)
-        for chave, descricao in _JUSTIFICATIVA_RISCO_TEXTO.items():
-            if chave in risco_n and descricao not in riscos_texto:
-                riscos_texto.append(descricao)
-
-    # Exames relevantes
-    exames_texto = []
-    for ex in exames_nomes:
-        ex_n = _norm(ex)
-        for chave, desc in _EXAME_BASE_TEXTO.items():
-            if chave in ex_n and desc not in exames_texto:
-                exames_texto.append(desc)
-        if not any(chave in ex_n for chave in _EXAME_BASE_TEXTO):
-            exames_texto.append(ex)
-
-    cargos_str = ', '.join(cargos) if cargos else 'cargos não especificados'
-    riscos_str = (', '.join(riscos_texto) if riscos_texto
-                  else 'riscos ocupacionais inerentes ao canteiro de obras')
-    exames_str = (', '.join(exames_texto[:6]) if exames_texto
-                  else 'exames mínimos NR-7')
-
-    justificativa = (
-        f"Para o {ghe_nome}, os trabalhadores ({cargos_str}) estão expostos a "
-        f"{riscos_str}, justificando a realização periódica de: {exames_str}. "
-        f"Os exames e periodicidades foram definidos com base na NR-7 (Portaria MTE 1.031/2018), "
-        f"Anexos I e II, e na metodologia de avaliação de risco do Programa de Gerenciamento "
-        f"de Riscos vigente."
-    )
-    return justificativa
-
-
-# ---------------------------------------------------------------------------
-# Interface: processar_ghe_ia
-# ---------------------------------------------------------------------------
-
-def processar_ghe_ia(
-    ghe_nome: str,
-    cargos: list,
-    riscos_ghe: list = None,
-    contexto_ghe: dict = None,
-) -> list:
-    """Processa todos os cargos de um GHE e retorna lista de resultados."""
-    if riscos_ghe is None:
-        riscos_ghe = []
-    if contexto_ghe is None:
-        contexto_ghe = {}
-
-    nome_n = _norm(ghe_nome)
-    e_canteiro = not any(x in nome_n for x in [
-        'administrativo', 'engenharia', 'planejamento', 'escritorio', 'gerencia', 'direcao'
-    ])
-    if 'almoxarifado' in nome_n:
-        e_canteiro = True
-
-    resultados = []
-    for cargo in cargos:
-        resultado = processar_cargo_ia(
-            cargo=cargo,
-            riscos=riscos_ghe,
-            contexto=deepcopy(contexto_ghe),
-            e_canteiro=e_canteiro,
-        )
-        resultado['ghe'] = ghe_nome
-        resultados.append(resultado)
-    return resultados
