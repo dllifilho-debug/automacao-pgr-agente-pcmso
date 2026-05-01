@@ -1,8 +1,12 @@
 # =============================================================================
-# MÓDULO PCMSO v9.3 — Motor completo com Agente Médico IA v2.0
+# MÓDULO PCMSO v9.4 — Motor completo com Agente Médico IA v2.2
 # Novidades v9.3:
 #   Remove bloco DEBUG v9.2 de _parsear_pgr_local após validação
 #   da distribuição inteligente de cargos por GHE (PDF Viverde confirmado).
+# Novidades v9.4:
+#   FIX CRÍTICO: ghe_nome passado para processar_cargo_ia() — Camada 0 ativada
+#   FIX: auditoria_nr7 exibida em expander por GHE no app
+#   UPD: versão referenciada atualizada para AgenteMedicoIA v2.2
 # Novidades v9.2:
 #   FIX _distribuir_cargos_por_ghe: verificava bloco.get("cargos") antes de
 #   distribuir — mas blocos vindos do parser_pgr chegam com cargos=["GHE 01-..."],
@@ -19,7 +23,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "9.3 (AgenteMedicoIA v2.0 + distribuição cargos validada + auditoria NR-7)"
+VERSAO_MODULO_PCMSO = "9.4 (AgenteMedicoIA v2.2 + ghe_nome na Camada 0 + auditoria NR-7 por cargo)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA v2.0
@@ -628,14 +632,15 @@ def _contexto_do_ghe(ghe_nome: str, riscos_str: list) -> dict:
     }
 
 
-def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro):
+def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro, ghe_nome=""):
     if _AGENTE_IA_DISPONIVEL:
         resultado = processar_cargo_ia(
-            cargo=cargo, riscos=riscos_str, contexto=contexto, e_canteiro=e_canteiro,
+            cargo=cargo, riscos=riscos_str, contexto=contexto,
+            e_canteiro=e_canteiro, ghe_nome=ghe_nome,  # v9.4: Camada 0 ativada
         )
-        return resultado.get("exames", []), resultado.get("chave_mestra", "")
+        return resultado.get("exames", []), resultado.get("chave_mestra", ""), resultado.get("auditoria_nr7", {})
     base = deepcopy(_EXAMES_MINIMOS_CANTEIRO if e_canteiro else _EXAMES_MINIMOS_ESCRIT)
-    return base, None
+    return base, None, {}
 
 
 # ============================================================================
@@ -666,25 +671,33 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
         contexto = _contexto_do_ghe(nome_ghe, riscos_str)
 
         for cargo in cargos:
+            auditoria_nr7_cargo = {}  # v9.4: resetado por cargo
             if exames_pre:
                 exames_base = deepcopy(exames_pre) if isinstance(exames_pre[0], dict) else [
                     {"nome": str(e), "adm": True, "per": "12", "mro": True, "ret": False, "dem": False}
                     for e in exames_pre
                 ]
                 if _AGENTE_IA_DISPONIVEL:
-                    res_ia = processar_cargo_ia(cargo=cargo, riscos=riscos_str, contexto=contexto, e_canteiro=e_canteiro)
+                    res_ia = processar_cargo_ia(
+                        cargo=cargo, riscos=riscos_str, contexto=contexto,
+                        e_canteiro=e_canteiro, ghe_nome=nome_ghe,  # v9.4
+                    )
                     nomes_ok = {_normalizar(e.get("nome", "")) for e in exames_base}
                     for ex in res_ia.get("exames", []):
                         if _normalizar(ex.get("nome", "")) not in nomes_ok:
                             exames_base.append(ex)
                             nomes_ok.add(_normalizar(ex.get("nome", "")))
-                    fonte = f"banco+agente_ia:{res_ia.get('chave_mestra', '')}"
+                    fonte = f"banco+agente_ia:{res_ia.get('chave_mestra', '')}|ghe:{res_ia.get('chave_ghe','')}"
+                    auditoria_nr7_cargo = res_ia.get("auditoria_nr7", {})
                 else:
                     fonte = "banco_pre_definido"
+                    auditoria_nr7_cargo = {}
                 exames_finais = exames_base
             else:
-                exames_finais, chave = _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro)
-                fonte = f"agente_ia:{chave}" if _AGENTE_IA_DISPONIVEL else "fallback_minimo"
+                exames_finais, chave, auditoria_nr7_cargo = _resolver_exames_cargo(
+                    cargo, riscos_str, contexto, e_canteiro, ghe_nome=nome_ghe  # v9.4
+                )
+                fonte = f"agente_ia:{chave}|ghe:{nome_ghe}" if _AGENTE_IA_DISPONIVEL else "fallback_minimo"
 
             for ex in exames_finais:
                 nome_ex = ex.get("nome", "") if isinstance(ex, dict) else str(ex)
@@ -701,6 +714,48 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
 
     cols = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM", "Justificativa"]
     df_final = pd.DataFrame(linhas) if linhas else pd.DataFrame(columns=cols)
+
+    # --- v9.4: Auditoria NR-7 por cargo (agente_medico_ia v2.2) ---
+    if _AGENTE_IA_DISPONIVEL and not df_final.empty:
+        try:
+            import streamlit as st
+            divergencias_total = []
+            for ghe_item in dados_ghe:
+                nome_ghe_exp = ghe_item.get("ghe", "")
+                riscos_str_exp = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
+                contexto_exp = _contexto_do_ghe(nome_ghe_exp, riscos_str_exp)
+                e_canteiro_exp = tipo_ambiente == "canteiro"
+                for cargo_exp in ghe_item.get("cargos", []):
+                    _, _, aud = _resolver_exames_cargo(
+                        cargo_exp, riscos_str_exp, contexto_exp, e_canteiro_exp, ghe_nome=nome_ghe_exp
+                    )
+                    faltando = aud.get("faltando", [])
+                    divs = aud.get("divergencias", [])
+                    if faltando or divs:
+                        divergencias_total.append({
+                            "ghe": nome_ghe_exp,
+                            "cargo": cargo_exp,
+                            "faltando": faltando,
+                            "divergencias": divs,
+                        })
+            if divergencias_total:
+                with st.expander(
+                    f"⚠️ Auditoria NR-7 por cargo — {len(divergencias_total)} divergência(s) detectada(s)",
+                    expanded=False,
+                ):
+                    for item in divergencias_total:
+                        st.markdown(f"**{item['ghe']} → {item['cargo']}**")
+                        if item["faltando"]:
+                            st.warning("Faltando: " + ", ".join(e["nome"] for e in item["faltando"]))
+                        if item["divergencias"]:
+                            for d in item["divergencias"]:
+                                divs_str = ", ".join(
+                                    f"{dd['campo']}: esperado={dd['esperado']} gerado={dd['gerado']}"
+                                    for dd in d.get("divergencias", [])
+                                )
+                                st.info(f"↔ {d['nome']}: {divs_str}")
+        except Exception:
+            pass
 
     # --- F1: Auditoria NR-7 ---
     if _AGENTE_IA_DISPONIVEL and not df_final.empty:
