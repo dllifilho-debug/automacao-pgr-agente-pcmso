@@ -4,7 +4,7 @@ import os
 import re
 
 # Caminho do arquivo Excel na raiz (ajuste se mudou o nome)
-CAMINHO_EXCEL = "Matriz função- risco-exames - validado Dra. Patrícia 06.2025.xlsx"
+CAMINHO_EXCEL = "matrizes_originais/Matriz função- risco-exames - validado Dra. Patrícia 06.2025.xlsx"
 CAMINHO_JSON_RISCOS = "data/banco_riscos_nr7.json"
 
 def limpar_texto(t):
