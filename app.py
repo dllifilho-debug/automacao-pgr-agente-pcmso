@@ -1,6 +1,7 @@
 """
 Automacao SST - Seconci GO
-app.py v9.2 — login visual: fundo verde escuro, card branco, st.form (Enter submete),
+app.py v9.3 — fix: preserva cargos do parser_pgr ao montar dados_ghe_raw
+               v9.2 — login visual: fundo verde escuro, card branco, st.form (Enter submete),
                logo acima do form + rodapé de versão
                v5.27 fix: enriquecer_ghe_com_banco só processa GHEs com cargos reais
                v5.26 fix: _distribuir_cargos_por_ghe chamada corretamente no caminho parser_pgr
@@ -147,6 +148,14 @@ def _cargos_sao_apenas_ghe_names(cargos: list) -> bool:
 
 
 def _normalizar_dados_ghe_para_auditor(dados_ghe):
+    """
+    Normaliza dados_ghe para o formato de lista de dicionários esperado pelo auditor.
+
+    IMPORTANTE (v9.3): se o item já vier com 'cargos' preenchidos (lista não-vazia
+    de cargos reais), preserva esses cargos em vez de derivar do nome da seção.
+    Isso garante que os cargos extraídos pelo parser_pgr via SETOR/FUNCAO não
+    sejam descartados.
+    """
     if isinstance(dados_ghe, list):
         for ghe in dados_ghe:
             riscos_raw = ghe.get('riscos_mapeados', [])
@@ -158,15 +167,24 @@ def _normalizar_dados_ghe_para_auditor(dados_ghe):
 
     resultado = []
     for nome_secao, info in dados_ghe.items():
-        nome_cargo = _extrair_nome_cargo(nome_secao)
         riscos_raw = info.get('riscos', [])
         riscos_mapeados = [
             r if isinstance(r, dict) else {'nome_agente': str(r), 'perigo_especifico': ''}
             for r in riscos_raw
         ]
+
+        # v9.3 FIX: usa cargos já extraídos pelo parser_pgr se disponíveis e reais;
+        # só deriva do nome_secao como fallback quando não há cargos reais.
+        cargos_raw = info.get('cargos', [])
+        if cargos_raw and not _cargos_sao_apenas_ghe_names(cargos_raw):
+            cargos = cargos_raw
+        else:
+            nome_cargo = _extrair_nome_cargo(nome_secao)
+            cargos = [nome_cargo]
+
         resultado.append({
             'ghe': nome_secao,
-            'cargos': [nome_cargo],
+            'cargos': cargos,
             'riscos_mapeados': riscos_mapeados,
             'exames': info.get('exames', []),
         })
@@ -276,7 +294,7 @@ def check_password():
 
     st.markdown(
         "<div class='login-footer'>"
-        "Sistema SST Seconci GO &nbsp;·&nbsp; v9.2 &nbsp;·&nbsp; Acesso monitorado"
+        "Sistema SST Seconci GO &nbsp;·&nbsp; v9.3 &nbsp;·&nbsp; Acesso monitorado"
         "</div>",
         unsafe_allow_html=True,
     )
@@ -511,10 +529,17 @@ elif modulo == "Medicina: PGR - PCMSO":
                 if _resultado_pgr.get("aviso"):
                     st.warning(_resultado_pgr["aviso"])
 
+                # ── v9.3 FIX ──────────────────────────────────────────────────────
+                # O parser_pgr já extrai cargos reais via SETOR/FUNCAO e os devolve
+                # em ghe_blocos[nome]["cargos"]. Incluímos essa chave no raw dict
+                # para que _normalizar_dados_ghe_para_auditor os preserve em vez de
+                # derivar o cargo a partir do nome genérico do GHE.
+                # ──────────────────────────────────────────────────────────────────
                 dados_ghe_raw = {}
                 for _nome_sec, _info in _resultado_pgr["ghe_blocos"].items():
                     dados_ghe_raw[_nome_sec] = {
                         "cargo":  _nome_sec,
+                        "cargos": _info.get("cargos", []),   # ← NOVO: preserva cargos reais
                         "riscos": _info["riscos_identificados"],
                         "exames": [_e["exame"] if isinstance(_e, dict) else str(_e)
                                    for _e in _info.get("exames_gerados", [])],
@@ -522,15 +547,17 @@ elif modulo == "Medicina: PGR - PCMSO":
                 dados_ghe = _normalizar_dados_ghe_para_auditor(dados_ghe_raw)
                 fonte = "local"
 
+                # Conta quantos GHEs ainda ficaram sem cargo real após a normalização
                 _ghe_sem_cargo_real = [
                     g for g in dados_ghe
                     if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
                 ]
+
                 if _ghe_sem_cargo_real:
+                    # Fallback: tenta coletar cargos globais da seção FUNÇÕES do PDF
                     try:
                         _cargos_globais = _coletar_cargos_globais(texto_pgr.split("\n"))
                         if _cargos_globais:
-                            # FIX v5.26: distribuição inteligente por tipo de GHE
                             _distribuir_cargos_por_ghe(_cargos_globais, _ghe_sem_cargo_real)
                             n_dist = sum(len(g.get("cargos", [])) for g in _ghe_sem_cargo_real)
                             st.info(
@@ -542,12 +569,20 @@ elif modulo == "Medicina: PGR - PCMSO":
                             st.warning("⚠️ Seção FUNÇÕES não encontrada no PDF — tentando Supabase...")
                     except Exception as _e_inj:
                         st.warning(f"⚠️ Injeção de cargos reais falhou: {_e_inj}")
+                else:
+                    # Todos os GHEs já vieram com cargos reais do parser_pgr ✅
+                    _n_cargos_total = sum(len(g.get("cargos", [])) for g in dados_ghe)
+                    st.info(
+                        f"✅ {_n_cargos_total} cargo(s) reais extraídos diretamente pelo parser_pgr "
+                        f"via campo SETOR/FUNCAO — nenhuma distribuição necessária."
+                    )
 
             else:
                 st.info("🔁 parser_pgr nao encontrou secoes — usando pipeline local (extrair_pgr_local)...")
                 _dados_list, fonte = extrair_pgr_com_fallback(texto_pgr)
                 dados_ghe = _normalizar_dados_ghe_para_auditor(_dados_list)
 
+            # ── Supabase ghe_mapper (fallback para GHEs ainda sem cargo real) ──
             _ghe_ainda_sem_cargo = [
                 g for g in dados_ghe
                 if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
@@ -603,9 +638,9 @@ elif modulo == "Medicina: PGR - PCMSO":
             if _banco_ativo:
                 from modules.modulo_auditor_v1_1 import enriquecer_ghe_com_banco
                 with st.spinner("Aplicando padrao tecnico de exames por cargo..."):
-                    # FIX v5.27: separa GHEs com cargos reais dos que ainda têm nomes de GHE
-                    # para evitar que enriquecer_ghe_com_banco faça match pelo _MAPA_GHE_PARA_BANCO_KEY
-                    # e sobrescreva os exames corretos com pacotes genéricos (PRODUCAO_GERAL etc.)
+                    # Apenas GHEs que já têm cargos reais confirmados recebem
+                    # enriquecimento pelo banco; os demais usam a matriz interna
+                    # para não sobrescrever exames com pacotes genéricos.
                     _ghe_com_cargo_real = [
                         g for g in dados_ghe
                         if not _cargos_sao_apenas_ghe_names(g.get("cargos", []))
@@ -618,7 +653,6 @@ elif modulo == "Medicina: PGR - PCMSO":
                         _enriquecidos, rel_banco = enriquecer_ghe_com_banco(_ghe_com_cargo_real, banco_matrizes)
                         dados_ghe = _enriquecidos + _ghe_sem_cargo_final
                     else:
-                        # Todos os GHEs ainda sem cargo — deixa processar_pcmso usar matriz interna
                         rel_banco = {"cargos_enriquecidos": [], "cargos_mantidos": [], "mapa_exames_banco": {}}
 
                 n_enr = len(rel_banco['cargos_enriquecidos'])
