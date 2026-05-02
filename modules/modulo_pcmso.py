@@ -439,6 +439,24 @@ _RE_AGENTE = re.compile(
     r"|ergon[o\u00f4]mico|de\s+acidente|de\s+risco)?\s*[:\-\u2013]?\s*(.+)$"
 )
 
+# Captura riscos em bullet points e listas numeradas (Bug #2)
+_RE_RISCO_BULLET = re.compile(r"^[-\u2022\u2023\u2043*]\s+(.{5,120})$")
+_RE_RISCO_NUMERADO = re.compile(r"^\d{1,2}[.)]\s+(.{5,120})$")
+
+# Keywords m\u00ednimas para confirmar que uma linha descreve um risco ocupacional
+_TERMOS_RISCO_KW = re.compile(
+    r"(?i)\b("
+    r"ru[i\u00ed]do|vibra[c\u00e7][a\u00e3]o|calor|frio|radia[c\u00e7][a\u00e3]o"
+    r"|poeira|silica|s[i\u00ed]lica|amianto|asbesto|fibra"
+    r"|benzeno|tolueno|xileno|estireno|fenol|acetona|mek|solvente"
+    r"|chumbo|mercur[i\u00ed]o|manganes|mangan\u00eas|cromo|fluor"
+    r"|monoxido|fumo\s+met[a\u00e1]lico|fumos\s+met[a\u00e1]licos"
+    r"|biol[o\u00f3]gico|esgoto|leptospiro|hepatite|sangue"
+    r"|ergon[o\u00f4]mico|postura|levantamento|esfor[c\u00e7]o"
+    r"|altura|confinado|eletric|psicossocial"
+    r")\b"
+)
+
 _RE_SECAO_FUNCOES = re.compile(
     r"(?i)^(fun[c\u00e7][o\u00f5]es\s*(existentes)?\s*(no\s+canteiro)?|"
     r"fun[c\u00e7][o\u00f5]es\s+quantidade|"
@@ -554,6 +572,18 @@ def _parsear_pgr_local(texto: str) -> list:
                 {"nome_agente": m_ag.group(1).strip(), "perigo_especifico": ""}
             )
             continue
+
+        # Bullet points / listas numeradas com keyword de risco (Bug #2)
+        m_bullet = _RE_RISCO_BULLET.match(ls) or _RE_RISCO_NUMERADO.match(ls)
+        if m_bullet and _TERMOS_RISCO_KW.search(ls):
+            conteudo = m_bullet.group(1).strip()
+            _vistos = {r.get("nome_agente") for r in bloco_atual["riscos_mapeados"]}
+            if conteudo not in _vistos:
+                bloco_atual["riscos_mapeados"].append(
+                    {"nome_agente": conteudo, "perigo_especifico": ""}
+                )
+            continue
+
         cargo = _identificar_cargo(ls)
         if cargo and cargo not in bloco_atual["cargos"]:
             bloco_atual["cargos"].append(cargo)
@@ -603,12 +633,97 @@ def _parsear_pgr_local(texto: str) -> list:
     return blocos
 
 
+# ============================================================================
+# 2b — TRADUÇÃO DE CHAVES INTERNAS → TEXTO EM PORTUGUÊS NATURAL
+# ============================================================================
+
+_CHAVE_PARA_RISCO_TEXTO = {
+    "RUIDO":                                             "Ruído",
+    "VIBRACAO_CORPO_INTEIRO":                            "Vibração de corpo inteiro",
+    "VIBRACAO_MAOS_BRACOS":                              "Vibração em mãos e braços",
+    "TRABALHO_EM_ALTURA_ESPACO_CONFINADO_MOTORISTA":     "Trabalho em altura",
+    "ESPACO_CONFINADO":                                  "Espaço confinado",
+    "PORTEIRO_ELETRICIDADE_ALTURA_MOTORISTA":            "Eletricidade / energia elétrica",
+    "TRABALHO_EM_ALTURA_MAQUINAS_PESADAS_PSICOSSOCIAL":  "Risco psicossocial / trabalho em altura",
+    "POEIRA_PNOS_GESSO_MADEIRA_METALICA":                "Poeira de madeira, gesso e fumos metálicos (PNOS)",
+    "POEIRA_MINERAL_SILICA_QUARTZO_OPERADOR_BETONEIRA":  "Poeira mineral contendo sílica / quartzo",
+    "NEVOAS_TINTAS_COLAS_IMPERMEABILIZACAO":             "Névoas de tintas, colas e impermeabilizantes",
+    "CONTATO_QUIMICOS_AGRESSORES_PULMONARES":            "Contato com agentes químicos agressores pulmonares",
+    "USO_MASCARA_EPI_SEM_RISCO_QUIMICO":                 "Uso de máscara respiratória (sem risco químico específico)",
+    "TRICLOROETILENO":                                   "Tricloroetileno",
+    "BENZENO":                                           "Benzeno",
+    "TOLUENO":                                           "Tolueno",
+    "XILENO":                                            "Xileno",
+    "ESTIRENO":                                          "Estireno",
+    "FENOL":                                             "Fenol",
+    "MONOXIDO_DE_CARBONO":                               "Monóxido de carbono",
+    "MANGANES":                                          "Manganês",
+    "CROMO_HEXAVALENTE":                                 "Cromo hexavalente",
+    "FLUOR_ACIDO_FLUORIDRICO_FLUORETOS":                 "Flúor / Ácido fluorídrico / Fluoretos",
+    "METIL_ETIL_CETONA":                                 "Metil-etil-cetona (MEK)",
+    "ACETONA":                                           "Acetona",
+    "TETRAHIDROFURANO":                                  "Tetrahidrofurano",
+    "CICLOEXANONA":                                      "Cicloexanona",
+    "POLICORTE_SOLDA":                                   "Fumos metálicos de solda / policorte",
+    "TRABALHADORES_DA_SAUDE":                            "Agente biológico (trabalhadores da saúde)",
+    "MANIPULAR_ALIMENTOS":                               "Agente biológico (manipulação de alimentos)",
+    "SUBSTANCIA_OTOTOXICA":                              "Substância ototóxica (potencial perda auditiva)",
+}
+
+
+def _traduzir_chave_para_texto(chave: str) -> str:
+    """
+    Converte chave interna do parser_pgr (ex: 'RUIDO') para texto em
+    português natural (ex: 'Ruído') que o Agente Médico IA consegue processar.
+    Fallback: substitui underscores por espaços e aplica Title Case.
+    """
+    return _CHAVE_PARA_RISCO_TEXTO.get(chave, chave.replace("_", " ").title())
+
+
+def _converter_ghe_blocos_para_lista(ghe_blocos: dict) -> list:
+    """
+    Converte o formato dict de parser_pgr.parsear_pgr() para a lista de dicts
+    esperada por processar_pcmso() e _normalizar_dados_ghe_para_auditor().
+    Aplica _traduzir_chave_para_texto() em cada risco para que o Agente IA
+    receba texto legível ('Ruído') em vez de chaves internas ('RUIDO').
+    """
+    resultado = []
+    for nome_ghe, info in ghe_blocos.items():
+        riscos_raw = info.get("riscos_identificados", [])
+        riscos_mapeados = [
+            {
+                "nome_agente": (
+                    _traduzir_chave_para_texto(r)
+                    if isinstance(r, str)
+                    else (r.get("nome_agente") or "")
+                ),
+                "perigo_especifico": r.get("perigo_especifico", "") if isinstance(r, dict) else "",
+            }
+            for r in riscos_raw
+            if r
+        ]
+        exames = [
+            e["exame"] if isinstance(e, dict) else str(e)
+            for e in info.get("exames_gerados", [])
+        ]
+        resultado.append({
+            "ghe":             nome_ghe,
+            "cargos":          info.get("cargos", []),
+            "riscos_mapeados": riscos_mapeados,
+            "exames":          exames,
+        })
+    return resultado
+
+
 def extrair_pgr_com_fallback(texto_pgr: str):
+    # Bug #1 corrigido: parser_pgr exporta parsear_pgr(), não parsear_pgr_texto()
     try:
-        from parser_pgr import parsear_pgr_texto
-        resultado = parsear_pgr_texto(texto_pgr)
-        if resultado:
-            return resultado, "local"
+        from parser_pgr import parsear_pgr as _parsear_pgr_ext
+        resultado = _parsear_pgr_ext(texto_pgr, regras={})
+        if resultado and resultado.get("ghe_blocos"):
+            dados = _converter_ghe_blocos_para_lista(resultado["ghe_blocos"])
+            if dados:
+                return dados, "local"
     except Exception:
         pass
     dados = _parsear_pgr_local(texto_pgr)

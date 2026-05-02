@@ -36,6 +36,7 @@ from modules.modulo_pcmso import (
     gerar_docx_rq61,
     _distribuir_cargos_por_ghe,
     _coletar_cargos_globais,
+    _traduzir_chave_para_texto,
 )
 
 st.set_page_config(
@@ -539,8 +540,14 @@ elif modulo == "Medicina: PGR - PCMSO":
                 for _nome_sec, _info in _resultado_pgr["ghe_blocos"].items():
                     dados_ghe_raw[_nome_sec] = {
                         "cargo":  _nome_sec,
-                        "cargos": _info.get("cargos", []),   # ← NOVO: preserva cargos reais
-                        "riscos": _info["riscos_identificados"],
+                        "cargos": _info.get("cargos", []),
+                        # Bug Secundário corrigido: converte chaves internas (ex: 'RUIDO')
+                        # para texto em português natural (ex: 'Ruído') antes de passar
+                        # ao Agente Médico IA, que precisa de texto legível para aplicar NR-07.
+                        "riscos": [
+                            _traduzir_chave_para_texto(r) if isinstance(r, str) else r
+                            for r in _info["riscos_identificados"]
+                        ],
                         "exames": [_e["exame"] if isinstance(_e, dict) else str(_e)
                                    for _e in _info.get("exames_gerados", [])],
                     }
