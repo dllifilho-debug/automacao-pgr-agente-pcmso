@@ -125,9 +125,15 @@ def extrair_texto_pgr(pdf_bytes: bytes, forcar_ocr: bool = False) -> dict:
 # DETECCAO DE FORMATO
 # ──────────────────────────────────────────────────────────────────────────────
 def detectar_formato(texto: str) -> str:
-    """Retorna 'GHE' ou 'CARGO' conforme o padrao dominante no documento."""
+    """Retorna 'GHE' ou 'CARGO' conforme o padrao dominante no documento.
+
+    FIX: regex de CARGO agora aceita letras minusculas e acentuadas,
+    evitando que PDFs com cargos em caixa mista sejam detectados como GHE.
+    """
     n_ghe   = len(re.findall(r"\bGHE\s*\d+", texto, re.IGNORECASE))
-    n_cargo = len(re.findall(r"\bCARGO\s+[A-Z]{2}", texto, re.IGNORECASE))
+    # Antes: r"\bCARGO\s+[A-Z]{2}" -- so pegava 2 letras maiusculas
+    # Agora: aceita qualquer letra (maiuscula, minuscula ou acentuada)
+    n_cargo = len(re.findall(r"\bCARGO\s+[A-Za-z\u00C0-\u00FF]", texto, re.IGNORECASE))
     return "CARGO" if n_cargo >= n_ghe else "GHE"
 
 
@@ -163,9 +169,12 @@ def extrair_blocos_cargo(texto: str) -> dict:
       CARGO <NOME> - CBO: XXXXXX
     ou simplesmente CARGO <NOME> (sem CBO).
     Captura o nome completo ate o fim da linha.
+
+    FIX: regex agora aceita letras minusculas, acentuadas e EN-DASH alem do hifen.
     """
     padrao = re.compile(
-        r"(CARGO[ \t]+[A-Z\xC0-\xFF][A-Z\xC0-\xFF \t\/\-]*?(?:[ \t]*-[ \t]*CBO[: \t]*\d{6})?)[ \t]*\n",
+        r"(CARGO[ \t]+[A-Za-z\u00C0-\u00FF][A-Za-z\u00C0-\u00FF \t\/\-]*?"
+        r"(?:[ \t]*[-\u2013][ \t]*CBO[: \t]*\d{6})?)[ \t]*[\r\n]",
         re.IGNORECASE
     )
     partes = padrao.split(texto)
