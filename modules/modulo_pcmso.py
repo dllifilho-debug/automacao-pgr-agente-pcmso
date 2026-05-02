@@ -1,12 +1,16 @@
 # =============================================================================
-# MÓDULO PCMSO v9.4 — Motor completo com Agente Médico IA v2.2
-# Novidades v9.3:
-#   Remove bloco DEBUG v9.2 de _parsear_pgr_local após validação
-#   da distribuição inteligente de cargos por GHE (PDF Viverde confirmado).
+# MÓDULO PCMSO v9.5 — Motor completo com Agente Médico IA v2.2
+# Novidades v9.5:
+#   FIX gerar_docx_rq61: células GHE/Cargo mergeadas verticalmente por bloco
+#   FIX gerar_html_pcmso: rowspan correto em GHE e Cargo (sem repetição)
+#   Formato final idêntico ao modelo de referência (PDF VIVERDE)
 # Novidades v9.4:
 #   FIX CRÍTICO: ghe_nome passado para processar_cargo_ia() — Camada 0 ativada
 #   FIX: auditoria_nr7 exibida em expander por GHE no app
 #   UPD: versão referenciada atualizada para AgenteMedicoIA v2.2
+# Novidades v9.3:
+#   Remove bloco DEBUG v9.2 de _parsear_pgr_local após validação
+#   da distribuição inteligente de cargos por GHE (PDF Viverde confirmado).
 # Novidades v9.2:
 #   FIX _distribuir_cargos_por_ghe: verificava bloco.get("cargos") antes de
 #   distribuir — mas blocos vindos do parser_pgr chegam com cargos=["GHE 01-..."],
@@ -23,7 +27,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "9.4 (AgenteMedicoIA v2.2 + ghe_nome na Camada 0 + auditoria NR-7 por cargo)"
+VERSAO_MODULO_PCMSO = "9.5 (AgenteMedicoIA v2.2 + merge células .docx/HTML)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA v2.0
@@ -823,16 +827,26 @@ def gerar_justificativas_pcmso(dados_ghe: list) -> list:
 
 
 # ============================================================================
-# 7 — gerar_html_pcmso
+# 7 — gerar_html_pcmso  (v9.5 — rowspan em GHE e Cargo)
 # ============================================================================
 
 def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
+    """
+    v9.5 — Gera HTML com células GHE e Cargo mergeadas (rowspan) para
+    eliminar a repetição linha a linha.
+    Estrutura: GHE (rowspan = total de linhas do GHE) |
+               Cargo (rowspan = total de exames do cargo) |
+               Exame | ADM | PER | MRO | RT | DEM
+    """
     if cabecalho is None:
         cabecalho = {}
-    cs = "border:1px solid #ccc;padding:6px 8px;font-size:12px;"
-    th = f"{cs}background:#084D22;color:white;text-align:center;"
-    cols = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM"]
-    hoje = date.today().strftime("%d/%m/%Y")
+
+    cs       = "border:1px solid #ccc;padding:6px 8px;font-size:12px;vertical-align:top;"
+    cs_ghe   = f"{cs}background:#084D22;color:white;font-weight:bold;text-align:center;"
+    cs_cargo = f"{cs}font-weight:bold;"
+    th       = f"{cs}background:#084D22;color:white;text-align:center;font-weight:bold;"
+    cols_vis = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM"]
+    hoje     = date.today().strftime("%d/%m/%Y")
 
     cab_html = f"""
     <div style="font-family:Arial,sans-serif;margin:0 auto;max-width:1100px;padding:20px;">
@@ -845,25 +859,87 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
       <tr><td colspan="2"><b>Gerado em:</b> {hoje} — {VERSAO_MODULO_PCMSO}</td></tr>
     </table>
     <table style="width:100%;border-collapse:collapse;">
-      <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols)}</tr></thead><tbody>
+      <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols_vis)}</tr></thead><tbody>
     """
-    rows = "".join(
-        "<tr>" + "".join(f"<td style='{cs}'>{row.get(c,'') if c in df.columns else ''}</td>" for c in cols) + "</tr>\n"
-        for _, row in df.iterrows()
+
+    # Agrupa: GHE → Cargo → [linhas de exame]
+    rows_html = []
+    if not df.empty:
+        ghes = df["GHE / Setor"].unique() if "GHE / Setor" in df.columns else []
+        for ghe_nome in ghes:
+            df_ghe = df[df["GHE / Setor"] == ghe_nome]
+            rowspan_ghe = len(df_ghe)
+            cargos = df_ghe["Cargo"].unique() if "Cargo" in df_ghe.columns else []
+            primeira_linha_ghe = True
+            for cargo in cargos:
+                df_cargo = df_ghe[df_ghe["Cargo"] == cargo]
+                rowspan_cargo = len(df_cargo)
+                primeira_linha_cargo = True
+                for _, row in df_cargo.iterrows():
+                    tr = "<tr>"
+                    if primeira_linha_ghe:
+                        tr += f'<td style="{cs_ghe}" rowspan="{rowspan_ghe}">{ghe_nome}</td>'
+                        primeira_linha_ghe = False
+                    if primeira_linha_cargo:
+                        tr += f'<td style="{cs_cargo}" rowspan="{rowspan_cargo}">{cargo}</td>'
+                        primeira_linha_cargo = False
+                    for col in ["Exame", "ADM", "PER", "MRO", "RT", "DEM"]:
+                        val = row.get(col, "") if col in df.columns else ""
+                        tr += f'<td style="{cs}">{val}</td>'
+                    tr += "</tr>\n"
+                    rows_html.append(tr)
+
+    return (
+        f"<!DOCTYPE html><html><body>{cab_html}"
+        + "".join(rows_html)
+        + f"</tbody></table>"
+        + f"<p style='font-size:11px;color:#888;text-align:center;'>Gerado pelo Sistema SST Seconci GO | {hoje}</p>"
+        + "</div></body></html>"
     )
-    return f"<!DOCTYPE html><html><body>{cab_html}{rows}</tbody></table><p style='font-size:11px;color:#888;text-align:center;'>Gerado pelo Sistema SST Seconci GO | {hoje}</p></div></body></html>"
 
 
 # ============================================================================
-# 8 — gerar_docx_rq61
+# 8 — gerar_docx_rq61  (v9.5 — merge vertical de células GHE e Cargo)
 # ============================================================================
+
+def _set_cell_background(cell, hex_color: str) -> None:
+    """Aplica cor de fundo a uma célula .docx via XML."""
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    tcp = cell._tc.get_or_add_tcPr()
+    shd = OxmlElement("w:shd")
+    shd.set(qn("w:fill"), hex_color)
+    shd.set(qn("w:color"), "auto")
+    shd.set(qn("w:val"), "clear")
+    tcp.append(shd)
+
+
+def _merge_cells_vertical(table, col_idx: int, start_row: int, end_row: int) -> None:
+    """
+    Faz merge vertical de células em `col_idx` de `start_row` até `end_row` (inclusive).
+    Usa a API nativa do python-docx: merge() entre primeira e última célula.
+    """
+    if end_row <= start_row:
+        return
+    a = table.rows[start_row].cells[col_idx]
+    b = table.rows[end_row].cells[col_idx]
+    a.merge(b)
+
 
 def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
+    """
+    v9.5 — Gera .docx com células GHE e Cargo mergeadas verticalmente.
+    Estrutura idêntica ao modelo de referência (PDF VIVERDE):
+      - Linha de cabeçalho GHE: célula mergeada horizontalmente (todas as colunas),
+        fundo verde escuro, texto centralizado.
+      - Para cada cargo: célula "Cargo" mergeada verticalmente pelo nº de exames,
+        exames em linhas separadas.
+    """
     if cabecalho is None:
         cabecalho = {}
     try:
         from docx import Document
-        from docx.shared import RGBColor, Cm
+        from docx.shared import RGBColor, Cm, Pt
         from docx.enum.text import WD_ALIGN_PARAGRAPH
         from docx.oxml.ns import qn
         from docx.oxml import OxmlElement
@@ -897,25 +973,119 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
         t_meta.rows[i].cells[1].text = v
     doc.add_paragraph()
 
-    colunas = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM"]
-    t = doc.add_table(rows=1, cols=len(colunas))
-    t.style = "Table Grid"
-    for i, col in enumerate(colunas):
-        p = t.rows[0].cells[i].paragraphs[0]
-        run = p.add_run(col)
-        run.bold = True
-        run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-        tcp = t.rows[0].cells[i]._tc.get_or_add_tcPr()
-        shd = OxmlElement("w:shd")
-        shd.set(qn("w:fill"), "084D22")
-        shd.set(qn("w:color"), "auto")
-        shd.set(qn("w:val"), "clear")
-        tcp.append(shd)
+    # ------------------------------------------------------------------
+    # Colunas visíveis (sem Justificativa)
+    # ------------------------------------------------------------------
+    COLS = ["FUNÇÃO", "EXAMES SOLICITADOS", "ADM", "PER", "MRO", "RT", "DEM"]
+    # Mapeia nomes das colunas do DF para as colunas da tabela
+    COL_MAP = {
+        "FUNÇÃO":            "Cargo",
+        "EXAMES SOLICITADOS": "Exame",
+        "ADM": "ADM", "PER": "PER", "MRO": "MRO", "RT": "RT", "DEM": "DEM",
+    }
 
-    for _, row in df.iterrows():
-        cells = t.add_row().cells
-        for i, col in enumerate(colunas):
-            cells[i].text = str(row.get(col, "")) if col in df.columns else ""
+    if df.empty:
+        buf = io.BytesIO()
+        doc.save(buf)
+        return buf.getvalue()
+
+    # ------------------------------------------------------------------
+    # Agrupa: GHE → [(cargo, [rows])]
+    # ------------------------------------------------------------------
+    ghes_ordem = list(dict.fromkeys(df["GHE / Setor"].tolist())) if "GHE / Setor" in df.columns else []
+
+    # Pré-calcula estrutura para construção correta da tabela
+    # estrutura: lista de (tipo, dados)
+    #   tipo="ghe_header"  → dados = nome_ghe
+    #   tipo="col_header"  → dados = None  (linha com FUNÇÃO / EXAMES SOLICITADOS ...)
+    #   tipo="cargo_exame" → dados = (cargo, exame_row, is_first_cargo, rowspan_cargo)
+    estrutura = []
+    for ghe_nome in ghes_ordem:
+        df_ghe = df[df["GHE / Setor"] == ghe_nome]
+        cargos_ordem = list(dict.fromkeys(df_ghe["Cargo"].tolist())) if "Cargo" in df_ghe.columns else []
+        estrutura.append(("ghe_header", ghe_nome))
+        estrutura.append(("col_header", None))
+        for cargo in cargos_ordem:
+            df_cargo = df_ghe[df_ghe["Cargo"] == cargo]
+            rows_cargo = list(df_cargo.itertuples(index=False))
+            for idx, row in enumerate(rows_cargo):
+                estrutura.append(("cargo_exame", (cargo, row, idx == 0, len(rows_cargo))))
+
+    # Conta linhas reais na tabela (ghe_header e col_header não são linhas de dados
+    # mas precisam de 1 linha cada na tabela Word)
+    num_linhas = len(estrutura)
+    t = doc.add_table(rows=num_linhas, cols=len(COLS))
+    t.style = "Table Grid"
+
+    # ------------------------------------------------------------------
+    # Preenche a tabela linha por linha
+    # ------------------------------------------------------------------
+    row_idx = 0
+    # Rastreia posição de início dos blocos de cargo para merge posterior
+    # merge_ops: lista de (col_idx, start_row, end_row)
+    merge_ops = []
+
+    for tipo, dados in estrutura:
+        cells = t.rows[row_idx].cells
+
+        if tipo == "ghe_header":
+            # Mescla todas as colunas horizontalmente
+            merged = cells[0]
+            for ci in range(1, len(COLS)):
+                merged = merged.merge(cells[ci])
+            merged.text = dados
+            p = merged.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            if p.runs:
+                p.runs[0].bold = True
+                p.runs[0].font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+            else:
+                run = p.add_run(dados)
+                run.bold = True
+                run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+            _set_cell_background(merged, "084D22")
+
+        elif tipo == "col_header":
+            for ci, col in enumerate(COLS):
+                p = cells[ci].paragraphs[0]
+                run = p.add_run(col)
+                run.bold = True
+                run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                _set_cell_background(cells[ci], "084D22")
+
+        elif tipo == "cargo_exame":
+            cargo, row, is_first, rowspan = dados
+            col_offset = 0
+
+            # Coluna 0: FUNÇÃO (cargo) — só escreve na primeira linha, agenda merge
+            if is_first:
+                cells[0].text = cargo
+                if rowspan > 1:
+                    merge_ops.append((0, row_idx, row_idx + rowspan - 1))
+
+            # Colunas 1..6: Exame e flags
+            exame_val = getattr(row, "Exame", "") if hasattr(row, "Exame") else ""
+            adm_val   = getattr(row, "ADM",   "") if hasattr(row, "ADM")   else ""
+            per_val   = getattr(row, "PER",   "") if hasattr(row, "PER")   else ""
+            mro_val   = getattr(row, "MRO",   "") if hasattr(row, "MRO")   else ""
+            rt_val    = getattr(row, "RT",    "") if hasattr(row, "RT")    else ""
+            dem_val   = getattr(row, "DEM",   "") if hasattr(row, "DEM")   else ""
+
+            cells[1].text = str(exame_val)
+            cells[2].text = str(adm_val)
+            cells[3].text = str(per_val)
+            cells[4].text = str(mro_val)
+            cells[5].text = str(rt_val)
+            cells[6].text = str(dem_val)
+
+        row_idx += 1
+
+    # ------------------------------------------------------------------
+    # Aplica merges verticais de cargo (após preencher todas as linhas)
+    # ------------------------------------------------------------------
+    for col_idx, start_row, end_row in merge_ops:
+        _merge_cells_vertical(t, col_idx, start_row, end_row)
 
     buf = io.BytesIO()
     doc.save(buf)
