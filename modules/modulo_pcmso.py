@@ -1126,4 +1126,3 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
     buf = io.BytesIO()
     doc.save(buf)
     return buf.getvalue()
-{cat /tmp/modulo_pcmso_v97.py}
