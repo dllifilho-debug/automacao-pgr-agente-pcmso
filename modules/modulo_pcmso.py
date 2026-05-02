@@ -346,54 +346,187 @@ def _tipos_do_ghe_por_riscos(riscos_mapeados: list) -> set:
     return tipos
 
 
+# ---------------------------------------------------------------------------
+# v9.7 — Mapa SEMÂNTICO ESPECÍFICO: keyword no nome do GHE → keywords nos
+# nomes dos cargos compatíveis. Mais específico que _TIPOS_GHE_KW + _CARGO_TIPOS
+# (que são coarse-grained: tipo "execucao" matches 12+ cargos).
+#
+# Bug #3 — RAIZ: o lookup por TIPO ainda dá listas grandes demais. O cross-match
+# direto por keyword evita que GHE "Hidráulica" receba pedreiros, carpinteiros,
+# armadores, etc. — apenas encanadores.
+# ---------------------------------------------------------------------------
+_GHE_NOME_PARA_CARGO_KEYWORDS = {
+    # Estrutura
+    "alvenaria":         ["pedreiro", "servente", "ajudante"],
+    "estrutura":         ["pedreiro", "servente", "carpinteiro", "armador"],
+    "concreto":          ["pedreiro", "servente", "operador de betoneira", "operador"],
+    "fundacao":          ["pedreiro", "servente", "armador"],
+    "forma":             ["carpinteiro"],
+    "armacao":           ["armador"],
+    "ferragem":          ["armador"],
+    "carpintaria":       ["carpinteiro"],
+    "betoneira":         ["operador", "servente"],
+
+    # Acabamento
+    "pintura":           ["pintor"],
+    "reboco":            ["pedreiro", "servente"],
+    "revestimento":      ["azulejista", "assentador", "pedreiro"],
+    "rejunte":           ["pedreiro", "azulejista", "servente"],
+    "gesso":             ["gesseiro"],
+    "impermeabilizacao": ["impermeabilizador", "aplicador"],
+    "ceramica":          ["azulejista", "assentador"],
+    "manta asfaltica":   ["impermeabilizador"],
+    "contrapiso":        ["pedreiro", "servente"],
+    "acabamento":        ["pintor", "azulejista", "gesseiro", "pedreiro"],
+
+    # Elétrica/Hidráulica
+    "eletrica":          ["eletricista"],
+    "eletricidade":      ["eletricista"],
+    "hidraulica":        ["encanador"],
+    "hidrossanitaria":   ["encanador"],
+    "hidro":             ["encanador"],
+    "encanamento":       ["encanador"],
+    "tubulacao":         ["encanador"],
+    "prumada":           ["eletricista", "encanador"],
+
+    # Equipamentos
+    "grua":              ["operador de grua", "sinaleiro", "operador"],
+    "cremalheira":       ["operador de cremalheira", "operador"],
+    "sinalizacao":       ["sinaleiro"],
+    "guincho":           ["operador"],
+
+    # Solda/Serralheria
+    "serralheria":       ["serralheiro", "soldador"],
+    "solda":             ["soldador", "serralheiro"],
+    "metalica":          ["serralheiro", "soldador"],
+
+    # Administração
+    "administrativo":    ["administrativo", "assistente", "auxiliar", "aprendiz", "aux adm"],
+    "administracao":     ["administrativo", "assistente", "auxiliar", "aprendiz"],
+    "engenharia":        ["engenheiro", "estagiario", "tecnico"],
+    "planejamento":      ["engenheiro"],
+    "seguranca":         ["tecnico de seguranca", "tst"],
+    "sst":               ["tecnico de seguranca", "tst"],
+    "almoxarifado":      ["almoxarife"],
+    "deposito":          ["almoxarife"],
+    "estoque":           ["almoxarife"],
+    "portaria":          ["porteiro", "vigia"],
+    "vigilancia":        ["porteiro", "vigia"],
+
+    # Limpeza/Apoio
+    "limpeza":           ["servente", "ajudante"],
+    "apoio":             ["servente", "ajudante"],
+    "servicos gerais":   ["servente", "ajudante"],
+
+    # Mestre/Supervisão
+    "mestre":            ["mestre"],
+    "supervisao":        ["encarregado", "supervisor", "mestre"],
+    "encarregado":       ["encarregado"],
+}
+
+
+def _associar_cargos_por_nome_ghe(nome_ghe: str, cargos_globais: list) -> list:
+    """
+    v9.7 — Cross-match direto entre keywords no nome do GHE e keywords nos
+    nomes dos cargos. Evita o fallback de tipo (coarse-grained) que retornava
+    listas inflacionadas.
+
+    Exemplo: GHE "Hidráulica e Prumada" → keywords {encanador, eletricista}
+    → retorna apenas cargos cujos nomes contêm essas keywords.
+
+    Retorna lista vazia se nenhuma keyword do GHE for reconhecida.
+    """
+    nome_n = _normalizar(nome_ghe)
+    keywords_alvo = set()
+    for kw_ghe, kws_cargo in _GHE_NOME_PARA_CARGO_KEYWORDS.items():
+        if kw_ghe in nome_n:
+            keywords_alvo.update(kws_cargo)
+    if not keywords_alvo:
+        return []
+    cargos_match = []
+    for cargo in cargos_globais:
+        cargo_n = _normalizar(cargo)
+        if any(kw in cargo_n for kw in keywords_alvo):
+            cargos_match.append(cargo)
+    return cargos_match
+
+
 def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
     """
-    v9.6 — FIX CRÍTICO: quando _tipo_do_ghe() retorna None (GHE sem keyword
-    reconhecida no nome, ex: "GHE 01 - Estrutura de Concreto Armado"), a versão
-    anterior copiava todos os 23 cargos globais para aquele GHE.
+    v9.7 — Distribui cargos globais (extraídos da seção FUNÇÕES) por GHE com
+    lógica em 4 camadas. NUNCA atribui todos os cargos a um GHE como fallback.
 
-    Nova lógica em 3 camadas:
-      1. Se tipo_ghe foi reconhecido pelo nome → filtra cargos pelo tipo (comportamento original)
-      2. Se tipo_ghe é None mas há riscos mapeados → infere tipos compatíveis via _RISCOS_PARA_TIPOS
-         e filtra cargos pelos tipos inferidos
-      3. Se nenhuma inferência funcionou → usa todos os cargos (último recurso, igual ao anterior)
+    Bug #3 RESOLVIDO: removido o `bloco["cargos"] = list(cargos_globais)` que
+    duplicava os 23 cargos em todos os GHEs quando nenhuma camada acertava,
+    e removido o fallback equivalente da Camada 2 (tipo do GHE × tipo do cargo).
+
+    Camadas (ordem de prioridade — para na primeira que produzir match):
+      1. Cross-match nome do GHE × keywords de cargo (mais específico, novo)
+      2. Tipo do GHE pelo nome × tipo do cargo (existente, agora SEM fallback)
+      3. Tipo do GHE inferido pelos riscos × tipo do cargo (existente)
+      4. Indeterminado: deixa cargos vazios e registra warning para revisão manual
     """
     if not cargos_globais:
         return
+
+    indeterminados = []
     for bloco in blocos:
         cargos_atuais = bloco.get("cargos", [])
-        # Pula somente se já tem cargos REAIS (não nomes de GHE disfarçados)
         tem_cargos_reais = bool(cargos_atuais) and not all(
             _RE_CARGO_EH_GHE.match(c.strip()) for c in cargos_atuais
         )
         if tem_cargos_reais:
             continue
-        # Limpa GHE-names falsos antes de distribuir
         bloco["cargos"] = []
+        nome_ghe = bloco.get("ghe", "")
 
-        # --- Camada 1: tipo pelo nome do GHE ---
-        tipo_ghe = _tipo_do_ghe(bloco.get("ghe", ""))
+        # --- Camada 1: cross-match direto por keyword (NOVO, mais específico) ---
+        cargos_match = _associar_cargos_por_nome_ghe(nome_ghe, cargos_globais)
+        if cargos_match:
+            bloco["cargos"] = cargos_match
+            continue
+
+        # --- Camada 2: tipo do GHE pelo nome × tipo do cargo ---
+        tipo_ghe = _tipo_do_ghe(nome_ghe)
         if tipo_ghe:
             cargos_filtrados = [
                 c for c in cargos_globais
                 if tipo_ghe in _tipos_do_cargo(c)
             ]
-            bloco["cargos"] = cargos_filtrados if cargos_filtrados else list(cargos_globais)
-            continue
+            if cargos_filtrados:
+                bloco["cargos"] = cargos_filtrados
+                continue
+            # FIX Bug #3: removido fallback `else list(cargos_globais)` aqui
 
-        # --- Camada 2: tipos inferidos pelos riscos do bloco (v9.6) ---
+        # --- Camada 3: tipos inferidos pelos riscos do bloco ---
         tipos_por_risco = _tipos_do_ghe_por_riscos(bloco.get("riscos_mapeados", []))
         if tipos_por_risco:
             cargos_filtrados = [
                 c for c in cargos_globais
-                if _tipos_do_cargo(c) & tipos_por_risco  # interseção não-vazia
+                if _tipos_do_cargo(c) & tipos_por_risco
             ]
             if cargos_filtrados:
                 bloco["cargos"] = cargos_filtrados
                 continue
 
-        # --- Camada 3: fallback total (último recurso) ---
-        bloco["cargos"] = list(cargos_globais)
+        # --- Camada 4: indeterminado — NÃO duplica todos os cargos ---
+        # FIX Bug #3 RAIZ: removido `bloco["cargos"] = list(cargos_globais)`
+        indeterminados.append(nome_ghe)
+
+    # Log GHEs sem cargo associado para revisão manual no Passo 3
+    if indeterminados:
+        try:
+            import streamlit as st
+            preview = ", ".join(indeterminados[:5])
+            extra = f" (+{len(indeterminados) - 5} outros)" if len(indeterminados) > 5 else ""
+            st.warning(
+                f"⚠️ {len(indeterminados)} GHE(s) sem cargos associados automaticamente. "
+                f"Adicione manualmente no Passo 3 ou ajuste o nome do GHE no PGR para conter "
+                f"keywords reconhecidas (ex: alvenaria, hidráulica, pintura, almoxarifado): "
+                f"{preview}{extra}"
+            )
+        except Exception:
+            pass
 
 
 # ── Regex e helpers do parser ────────────────────────────────────────────────
