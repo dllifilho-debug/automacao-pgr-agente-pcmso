@@ -190,47 +190,61 @@ _CARGOS_KEYWORDS = (
 )
 
 
+def _split_e_limpar_cargos(valor: str) -> list:
+    """Quebra string de cargos por / , ; ou ' e ', limpa CBO e devolve lista."""
+    out = []
+    partes = re.split(r"[/,;]|\s+e\s+", valor)
+    for parte in partes:
+        parte_limpa = re.sub(r"\b\d{5,6}\b", "", parte).strip()
+        parte_limpa = re.sub(r"\s{2,}", " ", parte_limpa).strip()
+        parte_limpa = parte_limpa.rstrip(".,;:")
+        if 4 <= len(parte_limpa) <= 60 and not _PALAVRAS_EXCLUIR_CARGO.match(parte_limpa):
+            out.append(parte_limpa)
+    return out
+
+
 def _extrair_cargos_do_bloco_ghe(conteudo: str) -> list:
     """
-    Extrai cargos do bloco de um GHE em tr\u00EAs passadas:
-      1. Cabe\u00E7alho 'SETOR/FUNCAO' / 'FUN\u00C7\u00D5ES' / 'CARGOS' \u2192 linha de valores
-      2. 'TRABALHADORES ENVOLVIDOS' / 'EMPREGADOS' / 'PROFISSIONAIS'
-      3. Fallback: busca por keywords de cargos conhecidos no texto livre,
-         capturando opcionalmente UM qualificador (' de <palavra>')
+    Extrai cargos do bloco de um GHE em tr\u00EAs passadas, sempre usando APENAS
+    a PRIMEIRA ocorr\u00EAncia de cada cabe\u00E7alho (evita vazamento entre blocos
+    quando a delimita\u00E7\u00E3o do PDF n\u00E3o est\u00E1 limpa):
 
-    Retorna lista deduplicada preservando a ordem de apari\u00E7\u00E3o.
+      1. Cabe\u00E7alho 'SETOR/FUNCAO' (formato Viverde, sem separador obrigat\u00F3rio)
+      2. Cabe\u00E7alho gen\u00E9rico ('FUN\u00C7\u00D5ES:', 'CARGOS:', 'TRABALHADORES:', etc.)
+      3. Fallback: busca por keywords de cargos conhecidos no texto livre
+
+    A busca \u00E9 limitada aos primeiros 2000 caracteres do conteudo, j\u00E1 que o
+    SETOR/FUNCAO de um GHE quase sempre aparece logo ap\u00F3s o header \u2014 qualquer
+    cargo encontrado mais adiante provavelmente vazou de outro GHE.
     """
+    # Limita a janela de busca aos primeiros 2000 chars (~30 linhas)
+    janela = conteudo[:2000]
     cargos = []
 
-    # Passadas 1 + 2: SETOR/FUNCAO (sem separador) + cabe\u00E7alho gen\u00E9rico (com separador)
-    for regex in (_PADRAO_SETOR_FUNCAO, _PADRAO_CABECALHO_GENERICO):
-        for m in regex.finditer(conteudo):
-            valor = m.group(1).strip()[:200]
-            # Separa por /, , ; ou " e "
-            partes = re.split(r"[/,;]|\s+e\s+", valor)
-            for parte in partes:
-                parte_limpa = re.sub(r"\b\d{5,6}\b", "", parte).strip()
-                parte_limpa = re.sub(r"\s{2,}", " ", parte_limpa).strip()
-                parte_limpa = parte_limpa.rstrip(".,;:")
-                if 4 <= len(parte_limpa) <= 60 and not _PALAVRAS_EXCLUIR_CARGO.match(parte_limpa):
-                    cargos.append(parte_limpa)
+    # Passada 1: SETOR/FUNCAO (formato Viverde) \u2014 APENAS PRIMEIRA ocorr\u00EAncia
+    m = _PADRAO_SETOR_FUNCAO.search(janela)
+    if m:
+        cargos = _split_e_limpar_cargos(m.group(1).strip()[:200])
 
-    # Passada 3: fallback por keyword (s\u00F3 se cabe\u00E7alhos n\u00E3o trouxeram nada)
+    # Passada 2: cabe\u00E7alho gen\u00E9rico \u2014 s\u00F3 se SETOR/FUNCAO n\u00E3o deu match
     if not cargos:
-        texto_n = _normalizar(conteudo)
+        m = _PADRAO_CABECALHO_GENERICO.search(janela)
+        if m:
+            cargos = _split_e_limpar_cargos(m.group(1).strip()[:200])
+
+    # Passada 3: fallback por keyword (s\u00F3 se nenhum cabe\u00E7alho trouxe nada)
+    if not cargos:
+        texto_n = _normalizar(janela)
         for kw in _CARGOS_KEYWORDS:
-            # Captura "<kw>" ou "<kw> de <palavra>" (1 qualificador apenas)
             for match in re.finditer(
                 rf"\b{re.escape(kw)}\b(?:\s+de\s+[a-z\u00E0-\u00FF]+\b)?",
                 texto_n,
             ):
                 valor = match.group(0).strip()
-                # Title case por palavra
                 valor = " ".join(w.capitalize() for w in valor.split())
                 if 5 <= len(valor) <= 60 and valor not in cargos:
                     cargos.append(valor)
 
-    # Dedup preservando ordem
     return list(dict.fromkeys(cargos))
 
 
@@ -252,20 +266,56 @@ def extrair_blocos_ghe(texto: str) -> dict:
         r"(GHE\s*\d+(?:\s*[-:\u2013\u2014]+\s*[^\n]{3,80})?)",
         re.IGNORECASE,
     )
-    partes = padrao.split(texto)
-    blocos = {}
-    for i in range(1, len(partes), 2):
-        nome_raw = partes[i].strip()
-        conteudo = partes[i + 1] if i + 1 < len(partes) else ""
+    # NOTE: o split-by-regex foi substituído por parsing LINHA-A-LINHA abaixo.
+    # Mantemos `padrao` sem uso para registro histórico do bug; será removido
+    # quando confirmarmos estabilidade do novo método em produção.
+    _ = padrao
 
-        # Normaliza a chave: "GHE  01" -> "GHE 01"
-        nome = re.sub(r"(GHE)\s+(\d+)", lambda m: f"{m.group(1)} {int(m.group(2)):02d}", nome_raw, flags=re.IGNORECASE)
-        nome = re.sub(r"\s{2,}", " ", nome).strip()
+    re_ghe_inicio_linha = re.compile(
+        r"^[\s\d.•*\-]*?(GHE)\s*(\d+)\s*([-:–—][^\n]{0,200})?\s*$",
+        re.IGNORECASE,
+    )
 
-        # Extrai cargos reais do campo SETOR/FUNCAO dentro do bloco
+    blocos_ord = []
+    nome_atual = None
+    conteudo_atual = []
+
+    def fechar_bloco():
+        nonlocal nome_atual, conteudo_atual
+        if nome_atual is None:
+            return
+        conteudo = "\n".join(conteudo_atual)
         cargos = _extrair_cargos_do_bloco_ghe(conteudo)
+        blocos_ord.append((nome_atual, conteudo, cargos))
+        nome_atual = None
+        conteudo_atual = []
 
-        blocos[nome] = {"conteudo": conteudo, "cargos": cargos}
+    for linha in texto.split("\n"):
+        m = re_ghe_inicio_linha.match(linha)
+        if m:
+            fechar_bloco()
+            num = int(m.group(2))
+            desc_raw = (m.group(3) or "").strip()
+            desc = re.sub(r"^[-:–—\s]+", "", desc_raw).strip()[:200]
+            nome_atual = f"GHE {num:02d}" + (f" - {desc}" if desc else "")
+            nome_atual = re.sub(r"\s{2,}", " ", nome_atual).strip()
+            continue
+        if nome_atual is not None:
+            conteudo_atual.append(linha)
+
+    fechar_bloco()
+
+    # Consolida duplicatas: mesmo "GHE NN" aparecendo 2x agora JUNTA conteúdo
+    # e cargos, em vez de sobrescrever (que perdia o primeiro bloco silenciosamente).
+    blocos = {}
+    for nome, conteudo, cargos in blocos_ord:
+        if nome in blocos:
+            blocos[nome]["conteudo"] += "\n" + conteudo
+            blocos[nome]["cargos"] = list(
+                dict.fromkeys(blocos[nome]["cargos"] + cargos)
+            )
+        else:
+            blocos[nome] = {"conteudo": conteudo, "cargos": cargos}
     return blocos
 
 
