@@ -2,6 +2,7 @@
 Automacao SST - Seconci GO
 app.py v9.2 — login visual: fundo verde escuro, card branco, st.form (Enter submete),
                logo acima do form + rodapé de versão
+               v5.27 fix: enriquecer_ghe_com_banco só processa GHEs com cargos reais
                v5.26 fix: _distribuir_cargos_por_ghe chamada corretamente no caminho parser_pgr
                v5.25 fix: sidebar sempre visível via CSS (força translateX(0))
                header oculto mas toggle preservado
@@ -530,7 +531,6 @@ elif modulo == "Medicina: PGR - PCMSO":
                         _cargos_globais = _coletar_cargos_globais(texto_pgr.split("\n"))
                         if _cargos_globais:
                             # FIX v5.26: distribuição inteligente por tipo de GHE
-                            # (antes: todos os cargos iam para todos os GHEs)
                             _distribuir_cargos_por_ghe(_cargos_globais, _ghe_sem_cargo_real)
                             n_dist = sum(len(g.get("cargos", [])) for g in _ghe_sem_cargo_real)
                             st.info(
@@ -603,7 +603,23 @@ elif modulo == "Medicina: PGR - PCMSO":
             if _banco_ativo:
                 from modules.modulo_auditor_v1_1 import enriquecer_ghe_com_banco
                 with st.spinner("Aplicando padrao tecnico de exames por cargo..."):
-                    dados_ghe, rel_banco = enriquecer_ghe_com_banco(dados_ghe, banco_matrizes)
+                    # FIX v5.27: separa GHEs com cargos reais dos que ainda têm nomes de GHE
+                    # para evitar que enriquecer_ghe_com_banco faça match pelo _MAPA_GHE_PARA_BANCO_KEY
+                    # e sobrescreva os exames corretos com pacotes genéricos (PRODUCAO_GERAL etc.)
+                    _ghe_com_cargo_real = [
+                        g for g in dados_ghe
+                        if not _cargos_sao_apenas_ghe_names(g.get("cargos", []))
+                    ]
+                    _ghe_sem_cargo_final = [
+                        g for g in dados_ghe
+                        if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
+                    ]
+                    if _ghe_com_cargo_real:
+                        _enriquecidos, rel_banco = enriquecer_ghe_com_banco(_ghe_com_cargo_real, banco_matrizes)
+                        dados_ghe = _enriquecidos + _ghe_sem_cargo_final
+                    else:
+                        # Todos os GHEs ainda sem cargo — deixa processar_pcmso usar matriz interna
+                        rel_banco = {"cargos_enriquecidos": [], "cargos_mantidos": [], "mapa_exames_banco": {}}
 
                 n_enr = len(rel_banco['cargos_enriquecidos'])
                 n_man = len(rel_banco['cargos_mantidos'])
