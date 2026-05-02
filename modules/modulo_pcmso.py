@@ -1,5 +1,14 @@
 # =============================================================================
-# MÓDULO PCMSO v9.5 — Motor completo com Agente Médico IA v2.2
+# MÓDULO PCMSO v9.6 — Motor completo com Agente Médico IA v2.2
+# Novidades v9.6:
+#   FIX CRÍTICO _distribuir_cargos_por_ghe:
+#     - quando _tipo_do_ghe() retorna None (GHE sem keyword reconhecida),
+#       em vez de copiar TODOS os 23 cargos para aquele GHE, tenta inferir
+#       os cargos relevantes a partir dos riscos mapeados no próprio bloco.
+#     - Se riscos também não ajudam, usa a lista completa (comportamento
+#       anterior) mas só como último recurso — agora logado explicitamente.
+#     - Adiciona _RISCOS_PARA_TIPOS: mapa de palavras no risco → tipos de GHE
+#       para enriquecer a inferência de tipo sem depender apenas do nome do GHE.
 # Novidades v9.5:
 #   FIX gerar_docx_rq61: células GHE/Cargo mergeadas verticalmente por bloco
 #   FIX gerar_html_pcmso: rowspan correto em GHE e Cargo (sem repetição)
@@ -27,7 +36,7 @@ from datetime import date
 
 import pandas as pd
 
-VERSAO_MODULO_PCMSO = "9.5 (AgenteMedicoIA v2.2 + merge células .docx/HTML)"
+VERSAO_MODULO_PCMSO = "9.6 (AgenteMedicoIA v2.2 + distribuição inteligente por risco)"
 
 # ---------------------------------------------------------------------------
 # Import do Agente Médico IA v2.0
@@ -219,7 +228,7 @@ def extrair_texto_pdf(pdf_file) -> str:
 
 
 # ============================================================================
-# 2 — PARSER LOCAL DE PGR (v9.3)
+# 2 — PARSER LOCAL DE PGR (v9.6)
 # ============================================================================
 
 def _normalizar(texto: str) -> str:
@@ -243,6 +252,25 @@ _TIPOS_GHE_KW = {
 }
 
 # ---------------------------------------------------------------------------
+# v9.6 — Mapa de riscos → tipos de GHE (para inferência quando nome do GHE
+# não contém keywords conhecidas)
+# ---------------------------------------------------------------------------
+_RISCOS_PARA_TIPOS = {
+    "ruido":            {"execucao", "supervisao", "almoxarifado"},
+    "vibracao":         {"execucao"},
+    "altura":           {"execucao", "supervisao"},
+    "confinado":        {"execucao"},
+    "eletric":          {"execucao", "seguranca"},
+    "quimico":          {"execucao", "supervisao"},
+    "poeira":           {"execucao", "supervisao", "almoxarifado"},
+    "solda":            {"execucao"},
+    "tinta":            {"execucao", "supervisao"},
+    "ergon":            {"execucao", "administracao", "almoxarifado"},
+    "psicossocial":     {"administracao", "seguranca", "engenharia"},
+    "biologico":        {"execucao"},
+}
+
+# ---------------------------------------------------------------------------
 # Mapa de cargos: palavras-chave no NOME DO CARGO → tipos de GHE que aceitam
 # ---------------------------------------------------------------------------
 _CARGO_TIPOS = [
@@ -254,7 +282,7 @@ _CARGO_TIPOS = [
       "assistente administrativo", "administrativo"],                     {"administracao"}),
     (["porteiro", "vigia"],                                               {"administracao"}),
     (["aprendiz"],                                                        {"administracao"}),
-    (["almoxarife"],                                                      {"almoxarifado"}),
+    (["almoxarife"],                                                       {"almoxarifado"}),
     (["pintor"],                                                          {"supervisao", "execucao"}),
     (["gesseiro"],                                                        {"supervisao", "execucao"}),
     (["pedreiro"],                                                        {"execucao", "supervisao"}),
@@ -299,12 +327,36 @@ def _tipo_do_ghe(nome_ghe: str) -> str | None:
     return melhor_tipo if melhor_score > 0 else None
 
 
+def _tipos_do_ghe_por_riscos(riscos_mapeados: list) -> set:
+    """
+    v9.6 — Infere tipos de GHE compatíveis a partir dos riscos mapeados no bloco.
+    Usado como fallback quando _tipo_do_ghe() retorna None.
+    """
+    tipos = set()
+    for risco in riscos_mapeados:
+        if isinstance(risco, dict):
+            texto_risco = _normalizar(
+                (risco.get("nome_agente") or "") + " " + (risco.get("perigo_especifico") or "")
+            )
+        else:
+            texto_risco = _normalizar(str(risco))
+        for kw, tipos_risco in _RISCOS_PARA_TIPOS.items():
+            if kw in texto_risco:
+                tipos.update(tipos_risco)
+    return tipos
+
+
 def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
     """
-    v9.2 — FIX: antes verificava apenas `if bloco.get("cargos")` para pular,
-    mas blocos vindos do parser_pgr chegam com cargos=["GHE 01- ..."] (nome
-    do GHE como cargo falso), que é truthy → pulava todos os blocos.
-    Agora distingue cargos REAIS de GHE-names falsos antes de pular.
+    v9.6 — FIX CRÍTICO: quando _tipo_do_ghe() retorna None (GHE sem keyword
+    reconhecida no nome, ex: "GHE 01 - Estrutura de Concreto Armado"), a versão
+    anterior copiava todos os 23 cargos globais para aquele GHE.
+
+    Nova lógica em 3 camadas:
+      1. Se tipo_ghe foi reconhecido pelo nome → filtra cargos pelo tipo (comportamento original)
+      2. Se tipo_ghe é None mas há riscos mapeados → infere tipos compatíveis via _RISCOS_PARA_TIPOS
+         e filtra cargos pelos tipos inferidos
+      3. Se nenhuma inferência funcionou → usa todos os cargos (último recurso, igual ao anterior)
     """
     if not cargos_globais:
         return
@@ -318,6 +370,8 @@ def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
             continue
         # Limpa GHE-names falsos antes de distribuir
         bloco["cargos"] = []
+
+        # --- Camada 1: tipo pelo nome do GHE ---
         tipo_ghe = _tipo_do_ghe(bloco.get("ghe", ""))
         if tipo_ghe:
             cargos_filtrados = [
@@ -325,8 +379,21 @@ def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
                 if tipo_ghe in _tipos_do_cargo(c)
             ]
             bloco["cargos"] = cargos_filtrados if cargos_filtrados else list(cargos_globais)
-        else:
-            bloco["cargos"] = list(cargos_globais)
+            continue
+
+        # --- Camada 2: tipos inferidos pelos riscos do bloco (v9.6) ---
+        tipos_por_risco = _tipos_do_ghe_por_riscos(bloco.get("riscos_mapeados", []))
+        if tipos_por_risco:
+            cargos_filtrados = [
+                c for c in cargos_globais
+                if _tipos_do_cargo(c) & tipos_por_risco  # interseção não-vazia
+            ]
+            if cargos_filtrados:
+                bloco["cargos"] = cargos_filtrados
+                continue
+
+        # --- Camada 3: fallback total (último recurso) ---
+        bloco["cargos"] = list(cargos_globais)
 
 
 # ── Regex e helpers do parser ────────────────────────────────────────────────
@@ -450,10 +517,6 @@ def _coletar_cargos_globais(linhas: list) -> list:
 
 
 def _parsear_pgr_local(texto: str) -> list:
-    """
-    v9.3 — Parser em 2 passagens com distribuição inteligente por keyword de cargo.
-    Debug removido após validação da distribuição no PDF Viverde (GHEs confirmados).
-    """
     linhas = texto.split("\n")
 
     # --- Passagem 1: cargos globais ---
@@ -498,7 +561,7 @@ def _parsear_pgr_local(texto: str) -> list:
     if bloco_atual:
         blocos.append(bloco_atual)
 
-    # --- Distribuição inteligente v9.2 ---
+    # --- Distribuição inteligente v9.6 ---
     if cargos_globais:
         _distribuir_cargos_por_ghe(cargos_globais, blocos)
 
@@ -640,7 +703,7 @@ def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro, ghe_nome="")
     if _AGENTE_IA_DISPONIVEL:
         resultado = processar_cargo_ia(
             cargo=cargo, riscos=riscos_str, contexto=contexto,
-            e_canteiro=e_canteiro, ghe_nome=ghe_nome,  # v9.4: Camada 0 ativada
+            e_canteiro=e_canteiro, ghe_nome=ghe_nome,
         )
         return resultado.get("exames", []), resultado.get("chave_mestra", ""), resultado.get("auditoria_nr7", {})
     base = deepcopy(_EXAMES_MINIMOS_CANTEIRO if e_canteiro else _EXAMES_MINIMOS_ESCRIT)
@@ -675,7 +738,7 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
         contexto = _contexto_do_ghe(nome_ghe, riscos_str)
 
         for cargo in cargos:
-            auditoria_nr7_cargo = {}  # v9.4: resetado por cargo
+            auditoria_nr7_cargo = {}
             if exames_pre:
                 exames_base = deepcopy(exames_pre) if isinstance(exames_pre[0], dict) else [
                     {"nome": str(e), "adm": True, "per": "12", "mro": True, "ret": False, "dem": False}
@@ -684,7 +747,7 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
                 if _AGENTE_IA_DISPONIVEL:
                     res_ia = processar_cargo_ia(
                         cargo=cargo, riscos=riscos_str, contexto=contexto,
-                        e_canteiro=e_canteiro, ghe_nome=nome_ghe,  # v9.4
+                        e_canteiro=e_canteiro, ghe_nome=nome_ghe,
                     )
                     nomes_ok = {_normalizar(e.get("nome", "")) for e in exames_base}
                     for ex in res_ia.get("exames", []):
@@ -699,7 +762,7 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
                 exames_finais = exames_base
             else:
                 exames_finais, chave, auditoria_nr7_cargo = _resolver_exames_cargo(
-                    cargo, riscos_str, contexto, e_canteiro, ghe_nome=nome_ghe  # v9.4
+                    cargo, riscos_str, contexto, e_canteiro, ghe_nome=nome_ghe
                 )
                 fonte = f"agente_ia:{chave}|ghe:{nome_ghe}" if _AGENTE_IA_DISPONIVEL else "fallback_minimo"
 
@@ -862,7 +925,6 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
       <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols_vis)}</tr></thead><tbody>
     """
 
-    # Agrupa: GHE → Cargo → [linhas de exame]
     rows_html = []
     if not df.empty:
         ghes = df["GHE / Setor"].unique() if "GHE / Setor" in df.columns else []
@@ -973,11 +1035,7 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
         t_meta.rows[i].cells[1].text = v
     doc.add_paragraph()
 
-    # ------------------------------------------------------------------
-    # Colunas visíveis (sem Justificativa)
-    # ------------------------------------------------------------------
     COLS = ["FUNÇÃO", "EXAMES SOLICITADOS", "ADM", "PER", "MRO", "RT", "DEM"]
-    # Mapeia nomes das colunas do DF para as colunas da tabela
     COL_MAP = {
         "FUNÇÃO":            "Cargo",
         "EXAMES SOLICITADOS": "Exame",
@@ -989,16 +1047,8 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
         doc.save(buf)
         return buf.getvalue()
 
-    # ------------------------------------------------------------------
-    # Agrupa: GHE → [(cargo, [rows])]
-    # ------------------------------------------------------------------
     ghes_ordem = list(dict.fromkeys(df["GHE / Setor"].tolist())) if "GHE / Setor" in df.columns else []
 
-    # Pré-calcula estrutura para construção correta da tabela
-    # estrutura: lista de (tipo, dados)
-    #   tipo="ghe_header"  → dados = nome_ghe
-    #   tipo="col_header"  → dados = None  (linha com FUNÇÃO / EXAMES SOLICITADOS ...)
-    #   tipo="cargo_exame" → dados = (cargo, exame_row, is_first_cargo, rowspan_cargo)
     estrutura = []
     for ghe_nome in ghes_ordem:
         df_ghe = df[df["GHE / Setor"] == ghe_nome]
@@ -1011,25 +1061,17 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
             for idx, row in enumerate(rows_cargo):
                 estrutura.append(("cargo_exame", (cargo, row, idx == 0, len(rows_cargo))))
 
-    # Conta linhas reais na tabela (ghe_header e col_header não são linhas de dados
-    # mas precisam de 1 linha cada na tabela Word)
     num_linhas = len(estrutura)
     t = doc.add_table(rows=num_linhas, cols=len(COLS))
     t.style = "Table Grid"
 
-    # ------------------------------------------------------------------
-    # Preenche a tabela linha por linha
-    # ------------------------------------------------------------------
     row_idx = 0
-    # Rastreia posição de início dos blocos de cargo para merge posterior
-    # merge_ops: lista de (col_idx, start_row, end_row)
     merge_ops = []
 
     for tipo, dados in estrutura:
         cells = t.rows[row_idx].cells
 
         if tipo == "ghe_header":
-            # Mescla todas as colunas horizontalmente
             merged = cells[0]
             for ci in range(1, len(COLS)):
                 merged = merged.merge(cells[ci])
@@ -1056,15 +1098,12 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
 
         elif tipo == "cargo_exame":
             cargo, row, is_first, rowspan = dados
-            col_offset = 0
 
-            # Coluna 0: FUNÇÃO (cargo) — só escreve na primeira linha, agenda merge
             if is_first:
                 cells[0].text = cargo
                 if rowspan > 1:
                     merge_ops.append((0, row_idx, row_idx + rowspan - 1))
 
-            # Colunas 1..6: Exame e flags
             exame_val = getattr(row, "Exame", "") if hasattr(row, "Exame") else ""
             adm_val   = getattr(row, "ADM",   "") if hasattr(row, "ADM")   else ""
             per_val   = getattr(row, "PER",   "") if hasattr(row, "PER")   else ""
@@ -1081,9 +1120,6 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
 
         row_idx += 1
 
-    # ------------------------------------------------------------------
-    # Aplica merges verticais de cargo (após preencher todas as linhas)
-    # ------------------------------------------------------------------
     for col_idx, start_row, end_row in merge_ops:
         _merge_cells_vertical(t, col_idx, start_row, end_row)
 
