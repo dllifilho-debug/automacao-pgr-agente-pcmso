@@ -154,38 +154,84 @@ _PALAVRAS_EXCLUIR_CARGO = re.compile(
 )
 
 
+# Padr\u00E3o A: SETOR/FUNCAO (formato Viverde) \u2014 separador N\u00C3O obrigat\u00F3rio,
+# j\u00E1 que o pdfplumber extrai como "SETOR/FUNCAO  Pedreiro/Servente"
+_PADRAO_SETOR_FUNCAO = re.compile(
+    r"SETOR[/\\]?FUN[CG\u00C7][A\u00C3]?[O\u00D5]E?S?\s+([^\n]+)",
+    re.IGNORECASE,
+)
+
+# Padr\u00E3o B: cabe\u00E7alho gen\u00E9rico (Fun\u00E7\u00F5es, Cargos, Trabalhadores, etc.)
+# REQUER separador (`:`, `-`, `.`) \u2014 evita falsos positivos em prosa como
+# "profissionais como pedreiro" que n\u00E3o \u00E9 uma lista estruturada.
+_PADRAO_CABECALHO_GENERICO = re.compile(
+    r"(?:"
+    r"FUN[CG\u00C7][A\u00C3]?[O\u00D5]E?S?"
+    r"|CARGO[S]?"
+    r"|TRABALHADOR(?:ES)?"
+    r"|EMPREGADOS?"
+    r"|PROFISSION(?:AL|AIS|\u00C1IS)"
+    r")"
+    r"(?:\s+\w+){0,3}"        # at\u00E9 3 palavras opcionais (envolvidos, existentes, etc.)
+    r"\s*[:.\-\u2013]\s*"           # separador OBRIGAT\u00D3RIO
+    r"([^\n]+)",
+    re.IGNORECASE,
+)
+
+# Cargos conhecidos para busca por keyword no texto livre (fallback Camada 3)
+_CARGOS_KEYWORDS = (
+    "pedreiro", "servente", "carpinteiro", "armador", "ajudante",
+    "pintor", "azulejista", "gesseiro", "encanador", "eletricista",
+    "serralheiro", "soldador", "impermeabilizador",
+    "almoxarife", "porteiro", "vigia", "sinaleiro", "motorista",
+    "engenheiro", "estagiario", "tecnico", "encarregado", "mestre",
+    "administrativo", "assistente", "auxiliar", "aprendiz",
+    "topografo", "calceteiro", "mecanico", "operador",
+)
+
+
 def _extrair_cargos_do_bloco_ghe(conteudo: str) -> list:
     """
-    Le o campo SETOR/FUNCAO (ou FUNCAO / CARGO) dentro do bloco de um GHE
-    e retorna lista de cargos individuais.
+    Extrai cargos do bloco de um GHE em tr\u00EAs passadas:
+      1. Cabe\u00E7alho 'SETOR/FUNCAO' / 'FUN\u00C7\u00D5ES' / 'CARGOS' \u2192 linha de valores
+      2. 'TRABALHADORES ENVOLVIDOS' / 'EMPREGADOS' / 'PROFISSIONAIS'
+      3. Fallback: busca por keywords de cargos conhecidos no texto livre,
+         capturando opcionalmente UM qualificador (' de <palavra>')
 
-    O pdfplumber extrai a linha como:
-      "SETOR/FUNCAO  Carpinteiro/ meio oficial de carpinteiro/Servente"
-    ou
-      "SETOR/FUNCAO Carpinteiro/ meio oficial de carpinteiro/Servente"
-
-    Divide pelo separador "/" e limpa cada token.
+    Retorna lista deduplicada preservando a ordem de apari\u00E7\u00E3o.
     """
     cargos = []
 
-    # Tenta capturar o valor apos SETOR/FUNCAO ou FUNCAO
-    m = re.search(
-        r"(?:SETOR[/\\]?FUN[CG][\u00C3A]O|FUN[CG][\u00C3A]O)[\s:]+(.+)",
-        conteudo,
-        re.IGNORECASE,
-    )
-    if m:
-        valor = m.group(1).strip()
-        # Divide por "/" mas respeita tokens compostos (ex: "meio oficial de carpinteiro")
-        partes = [p.strip() for p in valor.split("/") if p.strip()]
-        for parte in partes:
-            # Remove numeros CBO e textos curtos
-            parte_limpa = re.sub(r"\b\d{5,6}\b", "", parte).strip()
-            parte_limpa = re.sub(r"\s{2,}", " ", parte_limpa).strip()
-            if len(parte_limpa) >= 4 and not _PALAVRAS_EXCLUIR_CARGO.match(parte_limpa):
-                cargos.append(parte_limpa)
+    # Passadas 1 + 2: SETOR/FUNCAO (sem separador) + cabe\u00E7alho gen\u00E9rico (com separador)
+    for regex in (_PADRAO_SETOR_FUNCAO, _PADRAO_CABECALHO_GENERICO):
+        for m in regex.finditer(conteudo):
+            valor = m.group(1).strip()[:200]
+            # Separa por /, , ; ou " e "
+            partes = re.split(r"[/,;]|\s+e\s+", valor)
+            for parte in partes:
+                parte_limpa = re.sub(r"\b\d{5,6}\b", "", parte).strip()
+                parte_limpa = re.sub(r"\s{2,}", " ", parte_limpa).strip()
+                parte_limpa = parte_limpa.rstrip(".,;:")
+                if 4 <= len(parte_limpa) <= 60 and not _PALAVRAS_EXCLUIR_CARGO.match(parte_limpa):
+                    cargos.append(parte_limpa)
 
-    return cargos
+    # Passada 3: fallback por keyword (s\u00F3 se cabe\u00E7alhos n\u00E3o trouxeram nada)
+    if not cargos:
+        texto_n = _normalizar(conteudo)
+        for kw in _CARGOS_KEYWORDS:
+            # Captura "<kw>" ou "<kw> de <palavra>" (1 qualificador apenas)
+            for match in re.finditer(
+                rf"\b{re.escape(kw)}\b(?:\s+de\s+[a-z\u00E0-\u00FF]+\b)?",
+                texto_n,
+            ):
+                valor = match.group(0).strip()
+                # Title case por palavra
+                valor = " ".join(w.capitalize() for w in valor.split())
+                if 5 <= len(valor) <= 60 and valor not in cargos:
+                    cargos.append(valor)
+
+    # Dedup preservando ordem
+    return list(dict.fromkeys(cargos))
 
 
 # ------------------------------------------------------------------------------
