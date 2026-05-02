@@ -647,7 +647,7 @@ def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro, ghe_nome="")
 # 5 — processar_pcmso
 # ============================================================================
 
-(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
+def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
     linhas = []
     for ghe_item in dados_ghe:
         nome_ghe        = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or "GHE sem nome"
