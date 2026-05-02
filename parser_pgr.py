@@ -48,7 +48,7 @@ OTOTOXICOS_COM_BIOLOGICO = {
     "TRICLOROETILENO", "MONOXIDO_DE_CARBONO", "MANGANES",
 }
 
-# Codigos eSocial → chave interna (PGRs gerados pelo SistemaEso e similares)
+# Codigos eSocial -> chave interna
 ESOCIAL_PARA_CHAVE = {
     "02.01.001": "RUIDO",
     "02.01.002": "RUIDO",
@@ -69,9 +69,9 @@ ESOCIAL_PARA_CHAVE = {
 }
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# EXTRAÇÃO DE TEXTO
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
+# EXTRACAO DE TEXTO
+# ------------------------------------------------------------------------------
 def _eh_pdf_bloqueado(paginas_texto: list, limite_chars_media: int = 30) -> bool:
     chars = sum(len(t.strip()) for t in paginas_texto)
     return (chars / max(len(paginas_texto), 1)) < limite_chars_media
@@ -104,7 +104,7 @@ def _texto_via_ocr(pdf_bytes: bytes, lang: str = "por") -> str:
 
 def extrair_texto_pgr(pdf_bytes: bytes, forcar_ocr: bool = False) -> dict:
     """
-    Extrai texto do PGR com detecção automatica de PDF bloqueado.
+    Extrai texto do PGR com deteccao automatica de PDF bloqueado.
     Retorna: {texto, metodo, bloqueado, aviso}
     """
     if not forcar_ocr:
@@ -121,86 +121,142 @@ def extrair_texto_pgr(pdf_bytes: bytes, forcar_ocr: bool = False) -> dict:
     return {"texto": texto, "metodo": "ocr", "bloqueado": True, "aviso": aviso}
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # DETECCAO DE FORMATO
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 def detectar_formato(texto: str) -> str:
-    """Retorna 'GHE' ou 'CARGO' conforme o padrao dominante no documento.
-
-    FIX: regex de CARGO agora aceita letras minusculas e acentuadas,
-    evitando que PDFs com cargos em caixa mista sejam detectados como GHE.
-    """
+    """Retorna 'GHE' ou 'CARGO' conforme o padrao dominante no documento."""
     n_ghe   = len(re.findall(r"\bGHE\s*\d+", texto, re.IGNORECASE))
-    # Antes: r"\bCARGO\s+[A-Z]{2}" -- so pegava 2 letras maiusculas
-    # Agora: aceita qualquer letra (maiuscula, minuscula ou acentuada)
     n_cargo = len(re.findall(r"\bCARGO\s+[A-Za-z\u00C0-\u00FF]", texto, re.IGNORECASE))
     return "CARGO" if n_cargo >= n_ghe else "GHE"
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # NORMALIZACAO
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 def _normalizar(texto: str) -> str:
     nfkd = unicodedata.normalize("NFKD", texto.lower())
     return "".join(c for c in nfkd if not unicodedata.combining(c))
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
+# EXTRACAO DE CARGOS DO CAMPO SETOR/FUNCAO (formato tabular Viverde/SistemaEso)
+# ------------------------------------------------------------------------------
+# Palavras que NAO sao cargos reais — evita poluir a lista com rubricas da tabela
+_PALAVRAS_EXCLUIR_CARGO = re.compile(
+    r"^(?:"
+    r"estrutura\b|concreto\b|armado\b|processo\b|etapa\b|atividade[s]?\b|"
+    r"inventario\b|classificacao\b|riscos\b|ocupacionais\b|pgr\b|gro\b|"
+    r"versao\b|revisao\b|data\b|pagina\b|responsavel\b|avaliador\b|"
+    r"atividade\s+detalhada|cbo\b|trabalho\b|habitual\b|administracao\b"
+    r")$",
+    re.IGNORECASE | re.UNICODE,
+)
+
+
+def _extrair_cargos_do_bloco_ghe(conteudo: str) -> list:
+    """
+    Le o campo SETOR/FUNCAO (ou FUNCAO / CARGO) dentro do bloco de um GHE
+    e retorna lista de cargos individuais.
+
+    O pdfplumber extrai a linha como:
+      "SETOR/FUNCAO  Carpinteiro/ meio oficial de carpinteiro/Servente"
+    ou
+      "SETOR/FUNCAO Carpinteiro/ meio oficial de carpinteiro/Servente"
+
+    Divide pelo separador "/" e limpa cada token.
+    """
+    cargos = []
+
+    # Tenta capturar o valor apos SETOR/FUNCAO ou FUNCAO
+    m = re.search(
+        r"(?:SETOR[/\\]?FUN[CG][\u00C3A]O|FUN[CG][\u00C3A]O)[\s:]+(.+)",
+        conteudo,
+        re.IGNORECASE,
+    )
+    if m:
+        valor = m.group(1).strip()
+        # Divide por "/" mas respeita tokens compostos (ex: "meio oficial de carpinteiro")
+        partes = [p.strip() for p in valor.split("/") if p.strip()]
+        for parte in partes:
+            # Remove numeros CBO e textos curtos
+            parte_limpa = re.sub(r"\b\d{5,6}\b", "", parte).strip()
+            parte_limpa = re.sub(r"\s{2,}", " ", parte_limpa).strip()
+            if len(parte_limpa) >= 4 and not _PALAVRAS_EXCLUIR_CARGO.match(parte_limpa):
+                cargos.append(parte_limpa)
+
+    return cargos
+
+
+# ------------------------------------------------------------------------------
 # EXTRATORES DE BLOCOS
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 def extrair_blocos_ghe(texto: str) -> dict:
-    """Divide o texto em blocos iniciados por GHE NN - Nome."""
+    """
+    Divide o texto em blocos por GHE.
+
+    Suporta dois formatos:
+      1. Formato inline:  "GHE 01 - Almoxarifado"  (nome na mesma linha)
+      2. Formato tabular: "GHE  01" em linha propria, nome/cargos no campo SETOR/FUNCAO
+
+    Retorna dict: {chave_ghe -> {"conteudo": str, "cargos": list}}
+    """
+    # Aceita: GHE 01, GHE  01, GHE01 — com ou sem nome inline
     padrao = re.compile(
-        r"(GHE\s*\d+\s*[-:\u2013\u2014]+\s*[^\n]{3,80})",
-        re.IGNORECASE
+        r"(GHE\s*\d+(?:\s*[-:\u2013\u2014]+\s*[^\n]{3,80})?)",
+        re.IGNORECASE,
     )
     partes = padrao.split(texto)
     blocos = {}
     for i in range(1, len(partes), 2):
-        nome = partes[i].strip()
+        nome_raw = partes[i].strip()
         conteudo = partes[i + 1] if i + 1 < len(partes) else ""
-        blocos[nome] = conteudo
+
+        # Normaliza a chave: "GHE  01" -> "GHE 01"
+        nome = re.sub(r"(GHE)\s+(\d+)", lambda m: f"{m.group(1)} {int(m.group(2)):02d}", nome_raw, flags=re.IGNORECASE)
+        nome = re.sub(r"\s{2,}", " ", nome).strip()
+
+        # Extrai cargos reais do campo SETOR/FUNCAO dentro do bloco
+        cargos = _extrair_cargos_do_bloco_ghe(conteudo)
+
+        blocos[nome] = {"conteudo": conteudo, "cargos": cargos}
     return blocos
 
 
 def extrair_blocos_cargo(texto: str) -> dict:
     """
-    Divide o texto em blocos iniciados por:
-      CARGO <NOME> - CBO: XXXXXX
-    ou simplesmente CARGO <NOME> (sem CBO).
-    Captura o nome completo ate o fim da linha.
-
-    FIX: regex agora aceita letras minusculas, acentuadas e EN-DASH alem do hifen.
+    Divide o texto em blocos por CARGO <NOME> (formato CARGO/CBO).
+    Retorna dict: {chave_cargo -> {"conteudo": str, "cargos": list}}
     """
     padrao = re.compile(
         r"(CARGO[ \t]+[A-Za-z\u00C0-\u00FF][A-Za-z\u00C0-\u00FF \t\/\-]*?"
         r"(?:[ \t]*[-\u2013][ \t]*CBO[: \t]*\d{6})?)[ \t]*[\r\n]",
-        re.IGNORECASE
+        re.IGNORECASE,
     )
     partes = padrao.split(texto)
     blocos = {}
     for i in range(1, len(partes), 2):
         nome = re.sub(r"\s+", " ", partes[i]).strip()
         conteudo = partes[i + 1] if i + 1 < len(partes) else ""
-        blocos[nome] = conteudo
+        # No formato CARGO, o proprio nome ja e o cargo
+        cargo_limpo = re.sub(r"(?i)CARGO\s+", "", nome).split(" - CBO")[0].strip()
+        blocos[nome] = {"conteudo": conteudo, "cargos": [cargo_limpo] if cargo_limpo else []}
     return blocos
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # IDENTIFICACAO DE RISCOS
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 def identificar_riscos(texto_bloco: str) -> list:
     texto_norm = _normalizar(texto_bloco)
     chaves = set()
 
-    # 1. Codigos eSocial explícitos
     for cod, chave in ESOCIAL_PARA_CHAVE.items():
         if cod in texto_bloco:
             chaves.add(chave)
             if chave in OTOTOXICOS_COM_BIOLOGICO:
                 chaves.add("SUBSTANCIA_OTOTOXICA")
 
-    # 2. Termos livres (narrativo)
     for padrao, chave in TERMOS_PARA_CHAVE.items():
         if re.search(padrao, texto_norm):
             chaves.add(chave)
@@ -210,9 +266,9 @@ def identificar_riscos(texto_bloco: str) -> list:
     return sorted(chaves)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # GERACAO DE EXAMES
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 def gerar_exames_por_riscos(lista_riscos: list, regras: dict) -> list:
     vistos = set()
     lista = []
@@ -234,27 +290,33 @@ def gerar_exames_por_riscos(lista_riscos: list, regras: dict) -> list:
     return lista
 
 
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 # FUNCAO PRINCIPAL
-# ──────────────────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------------------------
 def parsear_pgr(fonte, regras: dict, forcar_ocr: bool = False) -> dict:
     """
-    Parseia um PGR e retorna blocos com riscos e exames.
+    Parseia um PGR e retorna blocos com riscos, exames e cargos.
 
     Aceita:
       - bytes do PDF
       - caminho str/Path para o arquivo
       - texto puro str
 
-    Detecta automaticamente o formato: GHE ou CARGO/CBO.
+    Detecta automaticamente o formato: GHE (tabular ou inline) ou CARGO/CBO.
 
     Retorna:
         {
             "metodo_extracao": str,
             "bloqueado":       bool,
             "aviso":           str | None,
-            "formato":         str,   # "GHE" | "CARGO"
-            "ghe_blocos":      dict,  # chave = nome do GHE ou CARGO
+            "formato":         str,
+            "ghe_blocos":      dict,
+                # chave = nome do GHE ou CARGO
+                # valor = {
+                #   "riscos_identificados": list,
+                #   "exames_gerados":       list,
+                #   "cargos":               list,  <- NOVO: cargos reais do SETOR/FUNCAO
+                # }
         }
     """
     if isinstance(fonte, str) and ("\n" in fonte or len(fonte) > 300):
@@ -275,10 +337,15 @@ def parsear_pgr(fonte, regras: dict, forcar_ocr: bool = False) -> dict:
     blocos  = extrair_blocos_cargo(texto) if formato == "CARGO" else extrair_blocos_ghe(texto)
 
     ghe_resultado = {}
-    for nome, conteudo in blocos.items():
-        riscos = identificar_riscos(conteudo)
-        exames = gerar_exames_por_riscos(riscos, regras)
-        ghe_resultado[nome] = {"riscos_identificados": riscos, "exames_gerados": exames}
+    for nome, info in blocos.items():
+        conteudo = info["conteudo"]
+        riscos   = identificar_riscos(conteudo)
+        exames   = gerar_exames_por_riscos(riscos, regras)
+        ghe_resultado[nome] = {
+            "riscos_identificados": riscos,
+            "exames_gerados":       exames,
+            "cargos":               info.get("cargos", []),
+        }
 
     return {
         "metodo_extracao": metodo,
