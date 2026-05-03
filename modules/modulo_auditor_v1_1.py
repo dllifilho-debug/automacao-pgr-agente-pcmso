@@ -131,12 +131,38 @@ _ALIASES_CARGO_NORM = {
     'vigia diurno':                        'vigia',
     'vigia noturno':                       'vigia',
 
-    # Encarregados
-    'encarregado de acabamento':           'encarregado de pedreiro',
-    'encarregado de armacao':              'encarregado de pedreiro',
-    'encarregado de forma':                'encarregado de carpinteiro',
-    'encarregado de instalacoes':          'encarregado de encanador',
+    # Encarregados → nova entrada ENCARREGADO (perfil canteiro)
+    'encarregado de obra':                 'encarregado',
+    'encarregado de obras':                'encarregado',
+    'encarregado de acabamento':           'encarregado',
+    'encarregado de armacao':              'encarregado',
+    'encarregado de forma':                'encarregado',
+    'encarregado de instalacoes':          'encarregado',
     'encarregado administrativo de obras': 'auxiliar administrativo de obras',
+    # Encarregado por especialidade (mantém chave específica se existir no banco)
+    'encarregado de pedreiro':             'encarregado',
+    'encarregado de carpinteiro':          'encarregado',
+    'encarregado de eletricista':          'encarregado',
+    'encarregado de encanador':            'encarregado',
+    'encarregado de pintor':               'encarregado',
+
+    # Administrativo variantes → ADMINISTRATIVO (só Exame Clínico)
+    'administrativo de obra':              'administrativo',
+    'administrativo de obras':             'administrativo',
+
+    # Aprendiz → JOVEM_APRENDIZ
+    'aprendiz':                            'jovem aprendiz',
+
+    # Operador de Guincho → mesmos exames de OPERADOR_GRUA
+    'operador de guincho':                 'operador grua',
+    'operador de grua':                    'operador grua',
+    'operador de betoneira':               'operador betoneira',
+    'operador de cremalheira':             'operador cremalheira',
+
+    # Aplicador de asfalto → APLICADOR_DE_ASFALTO_IMPERMEABILIZANTE
+    'aplicador de asfalto':                        'aplicador de asfalto impermeabilizante',
+    'aplicador asfalto impermeabilizante':          'aplicador de asfalto impermeabilizante',
+    'aplicador de asfalto e impermeabilizante':     'aplicador de asfalto impermeabilizante',
 }
 
 

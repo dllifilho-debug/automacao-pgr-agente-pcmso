@@ -3408,5 +3408,189 @@
         "dem": true
       }
     ]
+  },
+  "ENCARREGADO": {
+    "descricao": "Encarregado de obra — supervisão geral em canteiro",
+    "riscos_base": [
+      "Ruído",
+      "Poeira mineral",
+      "Trabalho em canteiro"
+    ],
+    "fonte_regra": "Adicionado via Prompt 4 — perfil expandido para encarregado responsável por equipes em canteiro",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
+  },
+  "PORTEIRO": {
+    "descricao": "Porteiro de canteiro de obras (perfil simplificado)",
+    "riscos_base": [
+      "Ruído ambiente"
+    ],
+    "fonte_regra": "Adicionado via Prompt 4 — ASO Padrão Porteiro",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "VIGIA": {
+    "descricao": "Vigia de canteiro de obras (perfil simplificado)",
+    "riscos_base": [
+      "Ruído ambiente"
+    ],
+    "fonte_regra": "Adicionado via Prompt 4 — ASO Padrão Vigia (idêntico a Porteiro)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ]
+  },
+  "APLICADOR_DE_ASFALTO_IMPERMEABILIZANTE": {
+    "descricao": "Aplicador de asfalto / manta asfáltica em impermeabilização",
+    "riscos_base": [
+      "Névoas/neblinas de impermeabilização",
+      "Ruído",
+      "Calor"
+    ],
+    "fonte_regra": "NR-07 Anexo — perfil específico para asfalto impermeabilizante (4 exames)",
+    "exames": [
+      {
+        "nome": "Exame Clínico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ]
   }
 }
