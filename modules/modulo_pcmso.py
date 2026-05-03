@@ -78,6 +78,15 @@ try:
 except ImportError:
     DICIONARIO_CAS = {}
 
+# Importa normalizar_cargo (Prompt 1) para deduplicação intra-GHE
+try:
+    from modules.modulo_auditor_v1_1 import normalizar_cargo as _normalizar_cargo_aud
+except ImportError:
+    try:
+        from modulo_auditor_v1_1 import normalizar_cargo as _normalizar_cargo_aud
+    except ImportError:
+        _normalizar_cargo_aud = None
+
 
 # ============================================================================
 # 1 — EXTRAÇÃO DE TEXTO DO PDF
@@ -986,10 +995,142 @@ def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro, ghe_nome="")
 # 5 — processar_pcmso
 # ============================================================================
 
+# Padrão para extrair número e título de um nome de GHE existente.
+# Aceita "GHE 01 - Foo", "GHE 7: Bar", "GHE 12 — Baz", etc.
+_RE_GHE_PREFIX = re.compile(
+    r'^\s*GHE\s*(\d+)\s*[-:–—]?\s*',
+    re.IGNORECASE,
+)
+
+
+# ---------------------------------------------------------------------------
+# Prompt 7 — Deduplicação intra-GHE + redistribuição admin/técnico
+# ---------------------------------------------------------------------------
+# Keywords (forma normalizada) que identificam cargos administrativos.
+# Usadas para mover cargos admin de GHEs técnicos para GHE administrativo.
+_ADMIN_CARGO_KEYS = (
+    'administrativo', 'aprendiz', 'engenheiro',
+    'estagiari', 'assistente administrativo',
+)
+
+# Tipos de GHE considerados administrativos pelo _tipo_do_ghe()
+_TIPOS_GHE_ADMIN = {'engenharia', 'seguranca', 'administracao', 'almoxarifado'}
+
+
+def _norm_cargo_para_dedup(cargo: str) -> str:
+    """Wrapper: usa normalizar_cargo() do Prompt 1 com fallback para _normalizar."""
+    if not cargo:
+        return ""
+    if _normalizar_cargo_aud is not None:
+        try:
+            return _normalizar_cargo_aud(cargo)
+        except Exception:
+            pass
+    return _normalizar(cargo).strip()
+
+
+def _consolidar_cargos_dados_ghe(dados_ghe: list) -> None:
+    """
+    Pré-processamento IN PLACE de dados_ghe (Prompt 7):
+
+      1. DEDUP intra-GHE: remove cargos duplicados dentro de cada GHE,
+         comparando pela forma normalizada via normalizar_cargo() do Prompt 1.
+         Preserva a primeira ocorrência (forma original para exibição).
+         "Servente" pode aparecer em múltiplos GHEs diferentes — apenas
+         duplicatas DENTRO do mesmo GHE são removidas.
+
+      2. REDISTRIBUIÇÃO: cargos administrativos (Administrativo,
+         Administrativo De Obra, Aprendiz, Engenheiro, Estagiário) que
+         aparecem em GHEs técnicos (Pintura, Serralheria, etc.) são
+         movidos para o primeiro GHE administrativo encontrado. Se não
+         houver GHE admin de destino, cargos permanecem onde estão
+         (preferível a perda silenciosa).
+
+    Aplicado no início de processar_pcmso() — antes da geração do DataFrame.
+    """
+    if not dados_ghe:
+        return
+
+    # ── Etapa 1: dedup intra-GHE ─────────────────────────────────────────
+    for ghe in dados_ghe:
+        cargos_orig = list(ghe.get('cargos', []))
+        seen = set()
+        cargos_dedup = []
+        for c in cargos_orig:
+            norm = _norm_cargo_para_dedup(c)
+            if norm and norm not in seen:
+                seen.add(norm)
+                cargos_dedup.append(c)  # preserva forma ORIGINAL para exibição
+        ghe['cargos'] = cargos_dedup
+
+    # ── Etapa 2: redistribuir cargos admin de GHEs técnicos ──────────────
+    # Identifica primeiro GHE administrativo como destino
+    ghe_destino = None
+    for ghe in dados_ghe:
+        if _tipo_do_ghe(ghe.get('ghe', '')) in _TIPOS_GHE_ADMIN:
+            ghe_destino = ghe
+            break
+    if ghe_destino is None:
+        return  # sem GHE admin → não move (mantém integridade)
+
+    # Conjunto de cargos já presentes no destino (forma normalizada)
+    nomes_no_destino = {
+        _norm_cargo_para_dedup(c) for c in ghe_destino.get('cargos', [])
+    }
+
+    for ghe in dados_ghe:
+        if ghe is ghe_destino:
+            continue
+        if _tipo_do_ghe(ghe.get('ghe', '')) in _TIPOS_GHE_ADMIN:
+            continue  # outro GHE admin existente — não mexe
+
+        # GHE técnico — extrai cargos admin
+        cargos = list(ghe.get('cargos', []))
+        cargos_kept = []
+        for c in cargos:
+            c_norm = _norm_cargo_para_dedup(c)
+            is_admin = any(kw in c_norm for kw in _ADMIN_CARGO_KEYS)
+            if is_admin:
+                # Move para destino se ainda não está lá
+                if c_norm and c_norm not in nomes_no_destino:
+                    ghe_destino.setdefault('cargos', []).append(c)
+                    nomes_no_destino.add(c_norm)
+            else:
+                cargos_kept.append(c)
+        ghe['cargos'] = cargos_kept
+
+
+def _renumerar_ghe_sequencial(nome_original: str, novo_num: int) -> str:
+    """
+    Reconstrói o nome do GHE com numeração sequencial (1, 2, 3, ...) e
+    título descritivo preservado a partir do nome original.
+
+    Comportamento:
+      - "GHE 07: Estrutura - Alvenaria"  -> "GHE 01 - Estrutura - Alvenaria"
+      - "GHE 03 - Forma de pilar"        -> "GHE 02 - Forma de pilar"
+      - "GHE 99" (sem descrição)         -> "GHE 03 - Atividade não identificada"
+      - ""                               -> "GHE 04 - Atividade não identificada"
+
+    Garante que o nome NUNCA fica em branco (sempre tem título), conforme
+    spec do Prompt 6 (Parte A — fallback obrigatório).
+    """
+    titulo = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
+    if not titulo:
+        titulo = "Atividade não identificada"
+    return f"GHE {novo_num:02d} - {titulo}"
+
+
 def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
+    # Prompt 7: dedup intra-GHE + redistribuição cargos admin/técnico.
+    # Modifica dados_ghe in place ANTES de gerar o DataFrame.
+    _consolidar_cargos_dados_ghe(dados_ghe)
+
     linhas = []
-    for ghe_item in dados_ghe:
-        nome_ghe        = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or "GHE sem nome"
+    # Renumera GHEs sequencialmente por posição na lista (Parte B do Prompt 6).
+    # `enumerate(start=1)` reinicia a cada chamada — sem estado global.
+    for idx, ghe_item in enumerate(dados_ghe, start=1):
+        nome_original   = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or ""
+        nome_ghe        = _renumerar_ghe_sequencial(nome_original, idx)
         cargos          = ghe_item.get("cargos", [])
         riscos_mapeados = ghe_item.get("riscos_mapeados", [])
         riscos_str      = _riscos_para_lista_str(riscos_mapeados)
@@ -1059,8 +1200,10 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
         try:
             import streamlit as st
             divergencias_total = []
-            for ghe_item in dados_ghe:
-                nome_ghe_exp = ghe_item.get("ghe", "")
+            for idx_aud, ghe_item in enumerate(dados_ghe, start=1):
+                # Usa o nome renumerado para que a auditoria exiba o mesmo
+                # número que aparece no PCMSO gerado (Parte B do Prompt 6).
+                nome_ghe_exp = _renumerar_ghe_sequencial(ghe_item.get("ghe", ""), idx_aud)
                 riscos_str_exp = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
                 contexto_exp = _contexto_do_ghe(nome_ghe_exp, riscos_str_exp)
                 e_canteiro_exp = tipo_ambiente == "canteiro"
@@ -1144,8 +1287,9 @@ def gerar_justificativas_pcmso(dados_ghe: list) -> list:
     if not _AGENTE_IA_DISPONIVEL:
         return []
     resultado = []
-    for ghe_item in dados_ghe:
-        nome_ghe = ghe_item.get("ghe", "GHE sem nome")
+    # Renumera consistentemente com processar_pcmso (Parte B do Prompt 6)
+    for idx_just, ghe_item in enumerate(dados_ghe, start=1):
+        nome_ghe = _renumerar_ghe_sequencial(ghe_item.get("ghe", ""), idx_just)
         cargos = ghe_item.get("cargos", [])
         riscos_str = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
         try:
