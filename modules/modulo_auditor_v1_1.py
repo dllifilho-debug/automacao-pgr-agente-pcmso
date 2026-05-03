@@ -79,81 +79,111 @@ def normalizar_exame(nome):
     return mapa.get(s, nome.strip())
 
 
-def normalizar_cargo(nome):
-    """Normaliza nome de cargo para comparacao."""
-    s = norm(nome)
-    aliases = {
-        'MESTRE DE OBRA': 'Mestre de Obra',
-        'MESTRE DE OBRAS': 'Mestre de Obra',
-        'OPERADOR DE BETONEIRA': 'Operador de Betoneira',
-        'OPERADOR DE GRUA': 'Operador de Grua',
-        'OPERADOR DE MUNCK': 'Operador de Munck',
-        'OPERADOR DE CREMALHEIRA': 'Operador de Cremalheira',
-        'MEIO OFICIAL DE PEDREIRO': 'Meio Oficial de Pedreiro',
-        'MEIO OFICIAL DE ARMADOR': 'Meio Oficial de Armador',
-        'MEIO OFICIAL DE CARPINTEIRO': 'Meio Oficial de Carpinteiro',
-        'MEIO OFICIAL DE ELETRICISTA': 'Meio Oficial de Eletricista',
-        'MEIO OFICIAL DE ELETRICA': 'Meio Oficial de Eletricista',
-        'MEIO OFICIAL DE ELETRICO': 'Meio Oficial de Eletricista',
-        'MEIO OFICIAL ELETRICA': 'Meio Oficial de Eletricista',
-        'MEIO OFICIAL DE ENCANADOR': 'Meio Oficial de Encanador',
-        'MEIO OFICIAL HIDRAULICO': 'Meio Oficial de Encanador',
-        'MEIO OFICIAL DE SERRALHEIRO': 'Meio Oficial de Serralheiro',
-        'MEIO OFICIAL DE PINTOR': 'Meio Oficial de Pintor',
-        'SERVENTE DE ARMADOR': 'Servente de Armador',
-        'SERVENTE DE CARPINTEIRO': 'Servente de Carpinteiro',
-        'SERVENTE DE OBRA': 'Servente',
-        'SERVENTE DE OBRAS': 'Servente',
-        'ELETRICISTA INDUSTRIAL': 'Eletricista Industrial',
-        'ENCARREGADO DE IMPERMEABILIZACAO': 'Encarregado de Impermeabilização',
-        'ENCARREGADO DE PEDREIRO': 'Encarregado de Pedreiro',
-        'ENCARREGADO DE PINTOR': 'Encarregado de Pintor',
-        'ENCARREGADO DE ELETRICISTA': 'Encarregado de Eletricista',
-        'ENCARREGADO DE ENCANADOR': 'Encarregado de Encanador',
-        'ENCARREGADO DE REJUNTE': 'Encarregado de Rejunte',
-        'ENCARREGADO DE ACABAMENTO': 'Encarregado de Pedreiro',
-        'ENCARREGADO DE ARMACAO': 'Encarregado de Pedreiro',
-        'ENCARREGADO DE FORMA': 'Encarregado de Carpinteiro',
-        'ENCARREGADO DE INSTALACOES': 'Encarregado de Encanador',
-        'ENCARREGADO DE OBRAS': 'Encarregado de Obras',
-        'ENCARREGADO ADMINISTRATIVO DE OBRAS': 'Auxiliar Administrativo de Obras',
-        'ESTAGIARIO DE ENGENHARIA': 'Estagiário de Engenharia',
-        'ESTAGIARIO DE ENGENHARIA CIVIL': 'Estagiário de Engenharia',
-        'ESTAGIARIO DE SEGURANCA DO TRABALHO': 'Estagiário de Segurança do Trabalho',
-        'ESTAGIARIO': 'Estagiário de Engenharia',
-        'TECNICO DE SEGURANCA DO TRABALHO': 'Técnico de Segurança do Trabalho',
-        'TECNICO EM EDIFICACOES': 'Técnico em Edificações',
-        'ADMINISTRATIVO DE OBRAS': 'Administrativo de Obras',
-        'AUXILIAR ADMINISTRATIVO DE OBRAS': 'Auxiliar Administrativo de Obras',
-        'JOVEM APRENDIZ': 'Jovem Aprendiz',
-        'MECANICO DE MANUTENCAO': 'Mecânico de Manutenção',
-        'SERRALHEIRO': 'Serralheiro',
-        'PINTOR': 'Pintor',
-        'SERVENTE': 'Servente',
-        'ARMADOR': 'Armador',
-        'CARPINTEIRO': 'Carpinteiro',
-        'PEDREIRO': 'Pedreiro',
-        'GESSEIRO': 'Gesseiro',
-        'ENCANADOR': 'Encanador',
-        'MONTADOR': 'Montador',
-        'SOLDADOR': 'Soldador',
-        'ELETRICISTA': 'Eletricista',
-        'SINALEIRO': 'Sinaleiro',
-        'ALMOXARIFE': 'Almoxarife',
-        'AUXILIAR DE ALMOXARIFE': 'Almoxarife',
-        'ENGENHEIRO': 'Engenheiro',
-        'ENGENHEIRO CIVIL': 'Engenheiro',
-        'VIGIA': 'Vigia',
-        'VIGIA DIURNO': 'Vigia',
-        'VIGIA NOTURNO': 'Vigia',
-        'COPEIRA': 'Copeira',
-        'AUXILIAR DE LIMPEZA': 'Servente',
-        'AUXILIAR DE SERVICOS GERAIS': 'Servente',
-        'ASSISTENTE ADMINISTRATIVO': 'Assistente Administrativo',
-        'AUXILIAR ADMINISTRATIVO': 'Assistente Administrativo',
-        'AUXILIAR DE ENGENHARIA': 'Estagiário de Engenharia',
-    }
-    return aliases.get(s, nome.strip().title())
+# Aliases para mapear cargos normalizados em formas canônicas que casam com o
+# banco. As chaves estão em forma JÁ NORMALIZADA (lowercase, sem acento, sem
+# pontuação) — o resultado de normalizar_cargo() ANTES da resolução de alias.
+_ALIASES_CARGO_NORM = {
+    # Meio oficial → cargo principal (banco_matrizes_v2 só tem o cargo principal)
+    'meio oficial de pedreiro':            'pedreiro',
+    'meio oficial de armador':             'armador',
+    'meio oficial de carpinteiro':         'carpinteiro',
+    'meio oficial de eletricista':         'eletricista',
+    'meio oficial de eletrica':            'eletricista',
+    'meio oficial eletrica':               'eletricista',
+    'meio oficial de encanador':           'encanador',
+    'meio oficial hidraulico':             'encanador',
+    'meio oficial de serralheiro':         'serralheiro',
+    'meio oficial de pintor':              'pintor',
+    'meio oficial de gesseiro':            'gesseiro',
+    'meio oficial de impermeabilizador':   'impermeabilizador',
+
+    # Técnico SST e variantes → forma plena (TECNICO_SST no banco)
+    'tecnico de seguranca':                'tecnico de seguranca do trabalho',
+    'tecnico em seguranca do trabalho':    'tecnico de seguranca do trabalho',
+    'tecnico sst':                         'tecnico de seguranca do trabalho',
+    'tst':                                 'tecnico de seguranca do trabalho',
+
+    # Eletricista variantes
+    'eletricista industrial':              'eletricista energizado',
+
+    # Servente variantes
+    'servente de obra':                    'servente',
+    'servente de obras':                   'servente',
+    'servente de armador':                 'servente',
+    'servente de carpinteiro':             'servente',
+    'auxiliar de limpeza':                 'servente',
+    'auxiliar de servicos gerais':         'servente',
+
+    # Auxiliares
+    'auxiliar de almoxarife':              'almoxarife',
+    'auxiliar administrativo':             'assistente administrativo',
+    'aux administrativo':                  'assistente administrativo',
+    'aux adm':                             'assistente administrativo',
+    'auxiliar de engenharia':              'estagiario de engenharia',
+
+    # Engenharia
+    'engenheiro civil':                    'engenheiro',
+    'estagiario de engenharia civil':      'estagiario de engenharia',
+    'estagiario':                          'estagiario de engenharia',
+
+    # Mestre/Vigia
+    'mestre de obras':                     'mestre de obra',
+    'vigia diurno':                        'vigia',
+    'vigia noturno':                       'vigia',
+
+    # Encarregados
+    'encarregado de acabamento':           'encarregado de pedreiro',
+    'encarregado de armacao':              'encarregado de pedreiro',
+    'encarregado de forma':                'encarregado de carpinteiro',
+    'encarregado de instalacoes':          'encarregado de encanador',
+    'encarregado administrativo de obras': 'auxiliar administrativo de obras',
+}
+
+
+def normalizar_cargo(nome) -> str:
+    """
+    Normaliza nome de cargo para comparação ESTRITA contra o banco de exames.
+
+    Aplica em sequência:
+      1. .strip() + .lower()
+      2. Remove acentos (equivalente a unidecode via unicodedata)
+      3. Remove prefixo "X:" (mantém só o texto DEPOIS do ":")
+         Ex: "Manutenção: Eletricista industrial" → "eletricista industrial"
+      4. Expande "meio of." e "meio of " → "meio oficial de "
+         Ex: "meio of. de pedreiro" → "meio oficial de pedreiro"
+      5. Remove pontuação isolada e espaços duplos
+      6. Resolve alias canônico via _ALIASES_CARGO_NORM
+         Ex: "tecnico de seguranca" → "tecnico de seguranca do trabalho"
+
+    Retorna string lowercase sem acentos. DEVE ser aplicada em AMBOS os lados
+    (input e chave do banco) para garantir igualdade simétrica.
+    """
+    if not nome:
+        return ""
+
+    s = str(nome).strip().lower()
+
+    # 2. Remove acentos
+    s = ''.join(
+        c for c in unicodedata.normalize('NFD', s)
+        if unicodedata.category(c) != 'Mn'
+    )
+
+    # 3. Remove prefixo "X:" (mantém só texto depois)
+    if ':' in s:
+        s = s.split(':', 1)[1].strip()
+
+    # 4. Expande "meio of." e variantes em "meio oficial de "
+    s = re.sub(r'\bmeio\s+of\.?\s+', 'meio oficial de ', s)
+    # Corrige "de de" duplicado que surge de "meio of. de pedreiro"
+    s = re.sub(r'\bde\s+de\b', 'de', s)
+
+    # 5. Remove pontuação isolada (-, ., ', `) e normaliza espaços
+    s = re.sub(r"[\-\.\'\`]", ' ', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+
+    # 6. Resolve alias canônico
+    return _ALIASES_CARGO_NORM.get(s, s)
 
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -332,13 +362,14 @@ def buscar_exames_por_cargo(nome_cargo: str, banco: dict) -> list | None:
     """
     if _banco_e_v2(banco):
         # ── Banco v2: estrutura flat {CHAVE: {exames: [...]}} ──────────────
-        cargo_norm = norm(nome_cargo)
+        # Normalização ESTRITA aplicada em AMBOS os lados (input + chave do banco)
+        cargo_norm = normalizar_cargo(nome_cargo)
 
-        # Tentativa 1: match direto (normaliza underscore e espaço)
+        # Tentativa 1: match direto (ambos os lados normalizados via normalizar_cargo)
         for chave, perfil in banco.items():
             if not isinstance(perfil, dict):
                 continue
-            if norm(chave.replace('_', ' ')) == cargo_norm:
+            if normalizar_cargo(chave.replace('_', ' ')) == cargo_norm:
                 return perfil.get('exames')
 
         # Tentativa 2: resolve nome do GHE para chave do banco
@@ -350,7 +381,7 @@ def buscar_exames_por_cargo(nome_cargo: str, banco: dict) -> list | None:
         for chave, perfil in banco.items():
             if not isinstance(perfil, dict):
                 continue
-            chave_n = norm(chave.replace('_', ' '))
+            chave_n = normalizar_cargo(chave.replace('_', ' '))
             if chave_n and chave_n in cargo_norm:
                 return perfil.get('exames')
 
