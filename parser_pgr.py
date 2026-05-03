@@ -189,16 +189,77 @@ _CARGOS_KEYWORDS = (
     "topografo", "calceteiro", "mecanico", "operador",
 )
 
+# ALLOWLIST: toda string que pretende ser cargo DEVE conter pelo menos uma
+# destas keywords. Filtra "Estrutura de concreto armado", "Contrapiso",
+# "Impermeabilização", "Alvenaria" — que são etapas/processos, NÃO cargos.
+_CARGOS_VALIDOS_KW = re.compile(
+    r"\b("
+    r"pedreiro|servente|carpinteiro|armador|ajudante"
+    r"|pintor|azulejista|gesseiro|encanador|eletricista"
+    r"|serralheiro|soldador|impermeabilizador|aplicador"
+    r"|almoxarife|porteiro|vigia|sinaleiro|motorista"
+    r"|engenheiro|estagi[aá]ri[oa]|t[eé]cnico|encarregado|mestre"
+    r"|administrativo|assistente|auxiliar|aprendiz"
+    r"|top[oó]grafo|calceteiro|mec[aâ]nico|operador"
+    r"|supervisor|coordenador|gerente|montador|monitor"
+    r"|copeir[oa]|cozinheir[oa]|recepcionist[ae]|secret[aá]ri[oa]"
+    r"|escritur[aá]ri[oa]|vigilante"
+    r")\b",
+    re.IGNORECASE,
+)
+
+# BLOCKLIST: nomes de etapas/processos/atividades da obra que NÃO são cargos.
+# Mesmo que passem pela allowlist (raro), são bloqueados aqui.
+_BLOCKLIST_ETAPAS = re.compile(
+    r"\b("
+    r"estrutura|concreto|alvenaria|fundac[aã]o|forma\s+de"
+    r"|impermeabilizac?[aã]o|contrapiso|reboco|revestimento|rejunte"
+    r"|acabamento|pintura|gesso\s+corrido|cer[aâ]mica|manta\s+asf[aá]ltica"
+    r"|hidr[aá]ulica|hidrossanit[aá]ria|el[eé]trica|prumada"
+    r"|carpintaria|serralheria|armac[aã]o|ferragem"
+    r"|atividade|processo|etapa|tarefa|servi[cç]os?\s+gerais"
+    r"|execuc?[aã]o\s+de|supervis[aã]o\s+de|administrac?[aã]o"
+    r"|sst|seguranc?[aã]\s+do\s+trabalho"
+    r")\b",
+    re.IGNORECASE,
+)
+
+
+def _e_cargo_valido(nome: str) -> bool:
+    """
+    Validação ESTRITA: a string só é considerada cargo se:
+      - Contiver pelo menos uma keyword de cargo conhecido (allowlist)
+      - NÃO começar com nome de etapa/processo (blocklist)
+      - NÃO estiver totalmente em _PALAVRAS_EXCLUIR_CARGO
+    Filtra 'Estrutura de concreto armado', 'Contrapiso', 'Impermeabilização',
+    'Alvenaria' e similares que são atividades, não profissões.
+    """
+    if not nome or len(nome) < 4 or len(nome) > 60:
+        return False
+    if _PALAVRAS_EXCLUIR_CARGO.match(nome):
+        return False
+    # Se a string COMEÇA com nome de etapa, rejeita (mesmo que contenha keyword
+    # de cargo no meio — ex: "Estrutura com pedreiro responsável" não é cargo)
+    if _BLOCKLIST_ETAPAS.match(nome.lstrip()):
+        return False
+    # ALLOWLIST: precisa conter keyword de cargo conhecido
+    if not _CARGOS_VALIDOS_KW.search(nome):
+        return False
+    return True
+
 
 def _split_e_limpar_cargos(valor: str) -> list:
-    """Quebra string de cargos por / , ; ou ' e ', limpa CBO e devolve lista."""
+    """
+    Quebra string de cargos por / , ; ou ' e ', limpa CBO e devolve lista
+    APENAS de cargos que passam na validação estrita _e_cargo_valido().
+    """
     out = []
     partes = re.split(r"[/,;]|\s+e\s+", valor)
     for parte in partes:
         parte_limpa = re.sub(r"\b\d{5,6}\b", "", parte).strip()
         parte_limpa = re.sub(r"\s{2,}", " ", parte_limpa).strip()
         parte_limpa = parte_limpa.rstrip(".,;:")
-        if 4 <= len(parte_limpa) <= 60 and not _PALAVRAS_EXCLUIR_CARGO.match(parte_limpa):
+        if _e_cargo_valido(parte_limpa):
             out.append(parte_limpa)
     return out
 
@@ -305,17 +366,31 @@ def extrair_blocos_ghe(texto: str) -> dict:
 
     fechar_bloco()
 
-    # Consolida duplicatas: mesmo "GHE NN" aparecendo 2x agora JUNTA conteúdo
-    # e cargos, em vez de sobrescrever (que perdia o primeiro bloco silenciosamente).
+    # Consolida POR NÚMERO de GHE (não por nome completo). Em PGRs com
+    # sumário/índice, o mesmo número aparece com descrição curta no início
+    # e descrição completa no corpo — merge sob o nome MAIS LONGO.
     blocos = {}
+    numero_para_chave = {}
     for nome, conteudo, cargos in blocos_ord:
-        if nome in blocos:
-            blocos[nome]["conteudo"] += "\n" + conteudo
-            blocos[nome]["cargos"] = list(
-                dict.fromkeys(blocos[nome]["cargos"] + cargos)
-            )
-        else:
+        m_num = re.match(r"GHE\s+(\d+)", nome, re.IGNORECASE)
+        num = m_num.group(1) if m_num else None
+
+        chave_existente = numero_para_chave.get(num) if num else None
+
+        if chave_existente is None:
             blocos[nome] = {"conteudo": conteudo, "cargos": cargos}
+            if num is not None:
+                numero_para_chave[num] = nome
+        else:
+            # Promove o nome mais longo (descrição mais completa) como chave canônica
+            if len(nome) > len(chave_existente):
+                blocos[nome] = blocos.pop(chave_existente)
+                chave_existente = nome
+                numero_para_chave[num] = nome
+            blocos[chave_existente]["conteudo"] += "\n" + conteudo
+            blocos[chave_existente]["cargos"] = list(
+                dict.fromkeys(blocos[chave_existente]["cargos"] + cargos)
+            )
     return blocos
 
 

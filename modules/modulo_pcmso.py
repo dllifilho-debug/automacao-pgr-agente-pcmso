@@ -347,108 +347,96 @@ def _tipos_do_ghe_por_riscos(riscos_mapeados: list) -> set:
 
 
 # ---------------------------------------------------------------------------
-# v9.7 — Mapa SEMÂNTICO ESPECÍFICO: keyword no nome do GHE → keywords nos
-# nomes dos cargos compatíveis. Mais específico que _TIPOS_GHE_KW + _CARGO_TIPOS
-# (que são coarse-grained: tipo "execucao" matches 12+ cargos).
+# v9.8 — Mapa SEMÂNTICO CONSERVADOR: apenas associações de ALTA CERTEZA.
 #
-# Bug #3 — RAIZ: o lookup por TIPO ainda dá listas grandes demais. O cross-match
-# direto por keyword evita que GHE "Hidráulica" receba pedreiros, carpinteiros,
-# armadores, etc. — apenas encanadores.
+# REVISÃO: o mapa anterior espalhava 'pedreiro' em GHEs com keywords
+# ambíguas como 'estrutura', 'concreto', 'fundacao', 'reboco', 'rejunte',
+# 'contrapiso', 'acabamento'. Removidos esses mapeamentos genéricos.
+# Mantidas apenas associações 1:1 onde o nome da etapa indica
+# inequivocamente um único cargo.
+#
+# Para GHEs com nomes ambíguos (ex: 'Estrutura de concreto'), prefere-se
+# deixar VAZIO e exigir edição manual — em vez de errar com 4 cargos
+# falsos. O parser_pgr é a fonte de verdade; este mapa é fallback.
 # ---------------------------------------------------------------------------
 _GHE_NOME_PARA_CARGO_KEYWORDS = {
-    # Estrutura
-    "alvenaria":         ["pedreiro", "servente", "ajudante"],
-    "estrutura":         ["pedreiro", "servente", "carpinteiro", "armador"],
-    "concreto":          ["pedreiro", "servente", "operador de betoneira", "operador"],
-    "fundacao":          ["pedreiro", "servente", "armador"],
-    "forma":             ["carpinteiro"],
+    # 1:1 inequívocas (atividade → cargo único)
+    "alvenaria":         ["pedreiro"],
+    "carpintaria":       ["carpinteiro"],
     "armacao":           ["armador"],
     "ferragem":          ["armador"],
-    "carpintaria":       ["carpinteiro"],
-    "betoneira":         ["operador", "servente"],
-
-    # Acabamento
     "pintura":           ["pintor"],
-    "reboco":            ["pedreiro", "servente"],
-    "revestimento":      ["azulejista", "assentador", "pedreiro"],
-    "rejunte":           ["pedreiro", "azulejista", "servente"],
     "gesso":             ["gesseiro"],
-    "impermeabilizacao": ["impermeabilizador", "aplicador"],
-    "ceramica":          ["azulejista", "assentador"],
+    "impermeabilizacao": ["impermeabilizador"],
     "manta asfaltica":   ["impermeabilizador"],
-    "contrapiso":        ["pedreiro", "servente"],
-    "acabamento":        ["pintor", "azulejista", "gesseiro", "pedreiro"],
-
-    # Elétrica/Hidráulica
+    "ceramica":          ["azulejista"],
+    "azulej":            ["azulejista"],
     "eletrica":          ["eletricista"],
     "eletricidade":      ["eletricista"],
     "hidraulica":        ["encanador"],
     "hidrossanitaria":   ["encanador"],
-    "hidro":             ["encanador"],
     "encanamento":       ["encanador"],
     "tubulacao":         ["encanador"],
-    "prumada":           ["eletricista", "encanador"],
-
-    # Equipamentos
-    "grua":              ["operador de grua", "sinaleiro", "operador"],
-    "cremalheira":       ["operador de cremalheira", "operador"],
-    "sinalizacao":       ["sinaleiro"],
-    "guincho":           ["operador"],
-
-    # Solda/Serralheria
-    "serralheria":       ["serralheiro", "soldador"],
-    "solda":             ["soldador", "serralheiro"],
-    "metalica":          ["serralheiro", "soldador"],
-
-    # Administração
-    "administrativo":    ["administrativo", "assistente", "auxiliar", "aprendiz", "aux adm"],
-    "administracao":     ["administrativo", "assistente", "auxiliar", "aprendiz"],
-    "engenharia":        ["engenheiro", "estagiario", "tecnico"],
-    "planejamento":      ["engenheiro"],
-    "seguranca":         ["tecnico de seguranca", "tst"],
-    "sst":               ["tecnico de seguranca", "tst"],
+    "serralheria":       ["serralheiro"],
+    "solda":             ["soldador"],
     "almoxarifado":      ["almoxarife"],
     "deposito":          ["almoxarife"],
     "estoque":           ["almoxarife"],
     "portaria":          ["porteiro", "vigia"],
     "vigilancia":        ["porteiro", "vigia"],
+    "engenharia":        ["engenheiro"],
+    "planejamento":      ["engenheiro"],
+    "seguranca do trabalho": ["tecnico de seguranca", "tst"],
+    "sst":               ["tecnico de seguranca", "tst"],
 
-    # Limpeza/Apoio
-    "limpeza":           ["servente", "ajudante"],
-    "apoio":             ["servente", "ajudante"],
-    "servicos gerais":   ["servente", "ajudante"],
+    # Forma de pilar/laje/viga é trabalho de carpinteiro (madeira para concreto)
+    "forma de pilar":    ["carpinteiro"],
+    "forma de laje":     ["carpinteiro"],
+    "forma de viga":     ["carpinteiro"],
+    "execucao forma":    ["carpinteiro"],
+    "forma":             ["carpinteiro"],
 
-    # Mestre/Supervisão
-    "mestre":            ["mestre"],
-    "supervisao":        ["encarregado", "supervisor", "mestre"],
-    "encarregado":       ["encarregado"],
+    # Equipamentos específicos
+    "operacao grua":     ["operador de grua", "sinaleiro"],
+    "operacao cremalheira": ["operador de cremalheira"],
+    "sinalizacao":       ["sinaleiro"],
+
+    # Administrativo (palavra completa, não substring de "administracao de obra")
+    "administrativo":    ["administrativo", "assistente", "auxiliar"],
+
+    # NÃO MAPEADOS (ambíguos demais, propagavam 'pedreiro' incorretamente):
+    # "estrutura", "concreto", "fundacao", "reboco", "rejunte",
+    # "contrapiso", "acabamento", "revestimento", "execucao",
+    # "supervisao", "limpeza", "apoio", "servicos gerais",
+    # "mestre", "encarregado", "betoneira", "metalica"
 }
 
 
 def _associar_cargos_por_nome_ghe(nome_ghe: str, cargos_globais: list) -> list:
     """
-    v9.7 — Cross-match direto entre keywords no nome do GHE e keywords nos
-    nomes dos cargos. Evita o fallback de tipo (coarse-grained) que retornava
-    listas inflacionadas.
+    v9.8 — Cross-match CONSERVADOR: usa apenas a keyword MAIS ESPECÍFICA
+    encontrada no nome do GHE (evita misturar cargos de múltiplas keywords
+    que poderiam dar falsos positivos).
 
-    Exemplo: GHE "Hidráulica e Prumada" → keywords {encanador, eletricista}
-    → retorna apenas cargos cujos nomes contêm essas keywords.
+    Exemplo: GHE "Forma de pilar e laje" → keyword mais específica é
+    "forma de pilar" → retorna apenas Carpinteiro.
 
-    Retorna lista vazia se nenhuma keyword do GHE for reconhecida.
+    Se o nome do GHE não contiver nenhuma keyword conhecida (ou só
+    keywords ambíguas removidas do mapa), retorna lista vazia — preferindo
+    obrigar revisão manual a inserir cargos errados.
     """
     nome_n = _normalizar(nome_ghe)
-    keywords_alvo = set()
-    for kw_ghe, kws_cargo in _GHE_NOME_PARA_CARGO_KEYWORDS.items():
+    # Ordena por especificidade DECRESCENTE: maior keyword primeiro
+    for kw_ghe in sorted(_GHE_NOME_PARA_CARGO_KEYWORDS, key=len, reverse=True):
         if kw_ghe in nome_n:
-            keywords_alvo.update(kws_cargo)
-    if not keywords_alvo:
-        return []
-    cargos_match = []
-    for cargo in cargos_globais:
-        cargo_n = _normalizar(cargo)
-        if any(kw in cargo_n for kw in keywords_alvo):
-            cargos_match.append(cargo)
-    return cargos_match
+            kws_cargo = _GHE_NOME_PARA_CARGO_KEYWORDS[kw_ghe]
+            cargos_match = []
+            for cargo in cargos_globais:
+                cargo_n = _normalizar(cargo)
+                if any(kw in cargo_n for kw in kws_cargo):
+                    cargos_match.append(cargo)
+            return cargos_match
+    return []
 
 
 def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
@@ -612,6 +600,37 @@ _RE_SKIP = re.compile(
 )
 
 
+# Allowlist + blocklist locais (espelham parser_pgr para fallback _parsear_pgr_local).
+# Garante que strings gen\u00e9ricas como "Estrutura de concreto armado", "Contrapiso",
+# "Impermeabiliza\u00e7\u00e3o", "Alvenaria" N\u00c3O entrem no campo Cargo.
+_CARGOS_ALLOWLIST_KW = re.compile(
+    r"(?i)\b("
+    r"pedreiro|servente|carpinteiro|armador|ajudante"
+    r"|pintor|azulejista|gesseiro|encanador|eletricista"
+    r"|serralheiro|soldador|impermeabilizador|aplicador"
+    r"|almoxarife|porteiro|vigia|sinaleiro|motorista"
+    r"|engenheiro|estagi[a\u00e1]ri[oa]|t[e\u00e9]cnico|encarregado|mestre"
+    r"|administrativo|assistente|auxiliar|aprendiz"
+    r"|top[o\u00f3]grafo|calceteiro|mec[a\u00e2]nico|operador"
+    r"|supervisor|coordenador|gerente|montador|monitor"
+    r"|copeir[oa]|cozinheir[oa]|recepcionist[ae]|secret[a\u00e1]ri[oa]"
+    r"|escritur[a\u00e1]ri[oa]|vigilante"
+    r")\b"
+)
+
+_CARGOS_BLOCKLIST_ETAPAS = re.compile(
+    r"(?i)^("
+    r"estrutura|concreto|alvenaria|fundac[a\u00e3]o|forma\s+de"
+    r"|impermeabilizac?[a\u00e3]o|contrapiso|reboco|revestimento|rejunte"
+    r"|acabamento|pintura\s+(interna|externa)|gesso\s+corrido|cer[a\u00e2]mica"
+    r"|manta\s+asf[a\u00e1]ltica|hidr[a\u00e1]ulica|hidrossanit[a\u00e1]ria"
+    r"|el[e\u00e9]trica|prumada|carpintaria|serralheria|armac[a\u00e3]o\s+de"
+    r"|atividade|processo|etapa|tarefa|servi[c\u00e7]os?\s+gerais"
+    r"|execuc?[a\u00e3]o\s+de|supervis[a\u00e3]o\s+de"
+    r")"
+)
+
+
 def _identificar_cargo(linha: str) -> str | None:
     ls = linha.strip()
     if not ls:
@@ -621,6 +640,9 @@ def _identificar_cargo(linha: str) -> str | None:
     if re.match(r"(?i)^agente\s", ls):
         return None
     if re.match(r"(?i)^(risco|perigo|medida|a[c\u00e7][a\u00e3]o|nr[-\s]\d|epis?\s|epc\s)", ls):
+        return None
+    # BLOCKLIST: rejeita nomes de etapas/processos da obra
+    if _CARGOS_BLOCKLIST_ETAPAS.match(ls):
         return None
     nome_sem_qtd = re.sub(r"\s+\d{1,3}\s*$", "", ls).strip()
     nome_n = _normalizar(nome_sem_qtd)
@@ -635,6 +657,8 @@ def _identificar_cargo(linha: str) -> str | None:
         and not re.match(r"(?i)^(agente|risco|perigo|medida|acao|nr[-\s]|epi|epc|uso|utilize|verifique)", nome_sem_qtd)
         and re.match(r"^[A-Z\u00c0-\u00da][a-zA-Z\u00c0-\u00ff\s.]+$", nome_sem_qtd)
         and len(nome_sem_qtd) >= 5
+        # ALLOWLIST: precisa conter keyword de cargo conhecido
+        and _CARGOS_ALLOWLIST_KW.search(nome_sem_qtd)
     ):
         return nome_sem_qtd
     return None
