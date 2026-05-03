@@ -986,10 +986,41 @@ def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro, ghe_nome="")
 # 5 — processar_pcmso
 # ============================================================================
 
+# Padrão para extrair número e título de um nome de GHE existente.
+# Aceita "GHE 01 - Foo", "GHE 7: Bar", "GHE 12 — Baz", etc.
+_RE_GHE_PREFIX = re.compile(
+    r'^\s*GHE\s*(\d+)\s*[-:–—]?\s*',
+    re.IGNORECASE,
+)
+
+
+def _renumerar_ghe_sequencial(nome_original: str, novo_num: int) -> str:
+    """
+    Reconstrói o nome do GHE com numeração sequencial (1, 2, 3, ...) e
+    título descritivo preservado a partir do nome original.
+
+    Comportamento:
+      - "GHE 07: Estrutura - Alvenaria"  -> "GHE 01 - Estrutura - Alvenaria"
+      - "GHE 03 - Forma de pilar"        -> "GHE 02 - Forma de pilar"
+      - "GHE 99" (sem descrição)         -> "GHE 03 - Atividade não identificada"
+      - ""                               -> "GHE 04 - Atividade não identificada"
+
+    Garante que o nome NUNCA fica em branco (sempre tem título), conforme
+    spec do Prompt 6 (Parte A — fallback obrigatório).
+    """
+    titulo = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
+    if not titulo:
+        titulo = "Atividade não identificada"
+    return f"GHE {novo_num:02d} - {titulo}"
+
+
 def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
     linhas = []
-    for ghe_item in dados_ghe:
-        nome_ghe        = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or "GHE sem nome"
+    # Renumera GHEs sequencialmente por posição na lista (Parte B do Prompt 6).
+    # `enumerate(start=1)` reinicia a cada chamada — sem estado global.
+    for idx, ghe_item in enumerate(dados_ghe, start=1):
+        nome_original   = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or ""
+        nome_ghe        = _renumerar_ghe_sequencial(nome_original, idx)
         cargos          = ghe_item.get("cargos", [])
         riscos_mapeados = ghe_item.get("riscos_mapeados", [])
         riscos_str      = _riscos_para_lista_str(riscos_mapeados)
@@ -1059,8 +1090,10 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
         try:
             import streamlit as st
             divergencias_total = []
-            for ghe_item in dados_ghe:
-                nome_ghe_exp = ghe_item.get("ghe", "")
+            for idx_aud, ghe_item in enumerate(dados_ghe, start=1):
+                # Usa o nome renumerado para que a auditoria exiba o mesmo
+                # número que aparece no PCMSO gerado (Parte B do Prompt 6).
+                nome_ghe_exp = _renumerar_ghe_sequencial(ghe_item.get("ghe", ""), idx_aud)
                 riscos_str_exp = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
                 contexto_exp = _contexto_do_ghe(nome_ghe_exp, riscos_str_exp)
                 e_canteiro_exp = tipo_ambiente == "canteiro"
@@ -1144,8 +1177,9 @@ def gerar_justificativas_pcmso(dados_ghe: list) -> list:
     if not _AGENTE_IA_DISPONIVEL:
         return []
     resultado = []
-    for ghe_item in dados_ghe:
-        nome_ghe = ghe_item.get("ghe", "GHE sem nome")
+    # Renumera consistentemente com processar_pcmso (Parte B do Prompt 6)
+    for idx_just, ghe_item in enumerate(dados_ghe, start=1):
+        nome_ghe = _renumerar_ghe_sequencial(ghe_item.get("ghe", ""), idx_just)
         cargos = ghe_item.get("cargos", [])
         riscos_str = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
         try:
