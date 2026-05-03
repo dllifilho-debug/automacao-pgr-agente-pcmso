@@ -210,6 +210,8 @@ _CARGOS_VALIDOS_KW = re.compile(
 
 # BLOCKLIST: nomes de etapas/processos/atividades da obra que NÃO são cargos.
 # Mesmo que passem pela allowlist (raro), são bloqueados aqui.
+# Match em START-OF-STRING (via .match()) — exceções "Operador de X" e
+# "Aplicador de X" passam porque começam com cargo, não com etapa.
 _BLOCKLIST_ETAPAS = re.compile(
     r"\b("
     r"estrutura|concreto|alvenaria|fundac[aã]o|forma\s+de"
@@ -220,38 +222,93 @@ _BLOCKLIST_ETAPAS = re.compile(
     r"|atividade|processo|etapa|tarefa|servi[cç]os?\s+gerais"
     r"|execuc?[aã]o\s+de|supervis[aã]o\s+de|administrac?[aã]o"
     r"|sst|seguranc?[aã]\s+do\s+trabalho"
+    # Adicionados: termos de etapas/materiais/tarefas reportados como cargos
+    r"|argamassa|montagem|escavac?[aã]o|preparac?[aã]o"
     r")\b",
     re.IGNORECASE,
 )
 
 
-def _e_cargo_valido(nome: str) -> bool:
+def _strip_ghe_prefix(titulo: str) -> str:
+    """Remove o prefixo 'GHE NN - ' do título, mantendo só a descrição."""
+    if not titulo:
+        return ""
+    return re.sub(
+        r"^\s*GHE\s*\d+\s*[-:–—]?\s*", "", titulo, flags=re.IGNORECASE
+    ).strip()
+
+
+def _norm_para_comparacao(s: str) -> str:
+    """Normaliza para comparação estrita: lower + sem acento + spaces."""
+    if not s:
+        return ""
+    return _normalizar(s).strip()
+
+
+def is_cargo_valido(texto: str, titulo_ghe: str = "") -> bool:
     """
-    Validação ESTRITA: a string só é considerada cargo se:
-      - Contiver pelo menos uma keyword de cargo conhecido (allowlist)
-      - NÃO começar com nome de etapa/processo (blocklist)
-      - NÃO estiver totalmente em _PALAVRAS_EXCLUIR_CARGO
-    Filtra 'Estrutura de concreto armado', 'Contrapiso', 'Impermeabilização',
-    'Alvenaria' e similares que são atividades, não profissões.
+    Validação de cargo conforme spec do Prompt 5.
+
+    Retorna False se:
+      1. Texto normalizado for IDÊNTICO ao título do GHE (após strip de "GHE NN - ")
+         OU substring do título (>= 6 chars), evitando contaminação do header.
+      2. Texto começar com nome de etapa/processo (BLOCKLIST_ETAPAS).
+         Exceção: "Operador de X" / "Aplicador de X" passam porque começam com
+         a função humana, não com o nome da atividade.
+      3. Texto tiver menos de 4 caracteres após normalização.
+      4. Texto não contiver keyword de cargo conhecido (ALLOWLIST).
+
+    Args:
+        texto: candidato a cargo (ex: "Carpinteiro", "Estrutura de concreto").
+        titulo_ghe: título do GHE em que o texto foi encontrado (opcional,
+                    usado para detectar contaminação de header).
+    Returns:
+        True se 'texto' parece um cargo real; False caso contrário.
     """
-    if not nome or len(nome) < 4 or len(nome) > 60:
+    if not texto:
         return False
-    if _PALAVRAS_EXCLUIR_CARGO.match(nome):
+
+    texto_norm = _norm_para_comparacao(texto)
+
+    # Critério 3: comprimento mínimo após normalização
+    if len(texto_norm) < 4 or len(texto_norm) > 60:
         return False
-    # Se a string COMEÇA com nome de etapa, rejeita (mesmo que contenha keyword
-    # de cargo no meio — ex: "Estrutura com pedreiro responsável" não é cargo)
-    if _BLOCKLIST_ETAPAS.match(nome.lstrip()):
+
+    # Critério 1: igualdade ou substring com título do GHE
+    if titulo_ghe:
+        titulo_strip = _strip_ghe_prefix(titulo_ghe)
+        titulo_norm = _norm_para_comparacao(titulo_strip)
+        if titulo_norm:
+            if texto_norm == titulo_norm:
+                return False
+            if len(texto_norm) >= 6 and texto_norm in titulo_norm:
+                return False
+
+    # Critério auxiliar: palavras reservadas isoladas
+    if _PALAVRAS_EXCLUIR_CARGO.match(texto):
         return False
-    # ALLOWLIST: precisa conter keyword de cargo conhecido
-    if not _CARGOS_VALIDOS_KW.search(nome):
+
+    # Critério 2: blocklist de etapas (start-of-string)
+    if _BLOCKLIST_ETAPAS.match(texto.lstrip()):
         return False
+
+    # Critério 4: allowlist — texto deve conter keyword de cargo conhecido
+    if not _CARGOS_VALIDOS_KW.search(texto):
+        return False
+
     return True
 
 
-def _split_e_limpar_cargos(valor: str) -> list:
+def _e_cargo_valido(nome: str, titulo_ghe: str = "") -> bool:
+    """Wrapper privado: delega para is_cargo_valido() (API pública)."""
+    return is_cargo_valido(nome, titulo_ghe)
+
+
+def _split_e_limpar_cargos(valor: str, titulo_ghe: str = "") -> list:
     """
     Quebra string de cargos por / , ; ou ' e ', limpa CBO e devolve lista
-    APENAS de cargos que passam na validação estrita _e_cargo_valido().
+    APENAS de cargos que passam em is_cargo_valido(). Quando titulo_ghe é
+    informado, descarta candidatos que sejam o próprio título do GHE.
     """
     out = []
     partes = re.split(r"[/,;]|\s+e\s+", valor)
@@ -259,12 +316,12 @@ def _split_e_limpar_cargos(valor: str) -> list:
         parte_limpa = re.sub(r"\b\d{5,6}\b", "", parte).strip()
         parte_limpa = re.sub(r"\s{2,}", " ", parte_limpa).strip()
         parte_limpa = parte_limpa.rstrip(".,;:")
-        if _e_cargo_valido(parte_limpa):
+        if is_cargo_valido(parte_limpa, titulo_ghe):
             out.append(parte_limpa)
     return out
 
 
-def _extrair_cargos_do_bloco_ghe(conteudo: str) -> list:
+def _extrair_cargos_do_bloco_ghe(conteudo: str, titulo_ghe: str = "") -> list:
     """
     Extrai cargos do bloco de um GHE em tr\u00EAs passadas, sempre usando APENAS
     a PRIMEIRA ocorr\u00EAncia de cada cabe\u00E7alho (evita vazamento entre blocos
@@ -285,13 +342,13 @@ def _extrair_cargos_do_bloco_ghe(conteudo: str) -> list:
     # Passada 1: SETOR/FUNCAO (formato Viverde) \u2014 APENAS PRIMEIRA ocorr\u00EAncia
     m = _PADRAO_SETOR_FUNCAO.search(janela)
     if m:
-        cargos = _split_e_limpar_cargos(m.group(1).strip()[:200])
+        cargos = _split_e_limpar_cargos(m.group(1).strip()[:200], titulo_ghe)
 
     # Passada 2: cabe\u00E7alho gen\u00E9rico \u2014 s\u00F3 se SETOR/FUNCAO n\u00E3o deu match
     if not cargos:
         m = _PADRAO_CABECALHO_GENERICO.search(janela)
         if m:
-            cargos = _split_e_limpar_cargos(m.group(1).strip()[:200])
+            cargos = _split_e_limpar_cargos(m.group(1).strip()[:200], titulo_ghe)
 
     # Passada 3: fallback por keyword (s\u00F3 se nenhum cabe\u00E7alho trouxe nada)
     if not cargos:
@@ -303,7 +360,11 @@ def _extrair_cargos_do_bloco_ghe(conteudo: str) -> list:
             ):
                 valor = match.group(0).strip()
                 valor = " ".join(w.capitalize() for w in valor.split())
-                if 5 <= len(valor) <= 60 and valor not in cargos:
+                if (
+                    5 <= len(valor) <= 60
+                    and valor not in cargos
+                    and is_cargo_valido(valor, titulo_ghe)
+                ):
                     cargos.append(valor)
 
     return list(dict.fromkeys(cargos))
@@ -346,7 +407,9 @@ def extrair_blocos_ghe(texto: str) -> dict:
         if nome_atual is None:
             return
         conteudo = "\n".join(conteudo_atual)
-        cargos = _extrair_cargos_do_bloco_ghe(conteudo)
+        # Passa o título do GHE para is_cargo_valido descartar contaminação
+        # de header (ex: "Estrutura de concreto armado" extraído como cargo).
+        cargos = _extrair_cargos_do_bloco_ghe(conteudo, titulo_ghe=nome_atual)
         blocos_ord.append((nome_atual, conteudo, cargos))
         nome_atual = None
         conteudo_atual = []
