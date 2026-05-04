@@ -654,3 +654,125 @@ class TestExameClinicoPeriodicidade:
             assert norm in CARGOS_RISCO_QUIMICO_6M, (
                 f"'{cargo_raw}' normalizado para '{norm}' não está em CARGOS_RISCO_QUIMICO_6M"
             )
+
+
+# ---------------------------------------------------------------------------
+# Suite 9 — Exames de risco específicos por cargo (Prompt 4)
+# ---------------------------------------------------------------------------
+
+class TestExamesRiscoEspecificos:
+    """
+    Valida que exames de risco químico obrigatórios (NR-7 Anexo I/II) estão
+    presentes e posicionados APÓS os exames padrão.
+    Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+    """
+
+    def _exames(self, cargo: str):
+        from modules.agente_medico_ia import processar_cargo_ia
+        return processar_cargo_ia(cargo, riscos=[], e_canteiro=True)["exames"]
+
+    def _tem_exame(self, exames: list, canonical: str) -> bool:
+        """Verifica presença pelo nome canônico (via normalizar_exame)."""
+        from modules.modulo_auditor_v1_1 import normalizar_exame
+        return any(normalizar_exame(e["nome"]) == canonical for e in exames)
+
+    # ── Presença dos exames ──────────────────────────────────────────────────
+
+    def test_serralheiro_tem_carboxihemoglobina(self):
+        """Serralheiro deve ter Carboxihemoglobina (qualquer variante canonical)."""
+        exames = self._exames("Serralheiro")
+        assert self._tem_exame(exames, "Carboxiemoglobina"), (
+            "Serralheiro: Carboxihemoglobina no Sangue ausente. "
+            f"Exames presentes: {[e['nome'] for e in exames]}"
+        )
+
+    def test_serralheiro_tem_manganes(self):
+        """Serralheiro deve ter Manganês no Sangue (qualquer variante canonical)."""
+        exames = self._exames("Serralheiro")
+        assert self._tem_exame(exames, "Manganês sanguíneo"), (
+            "Serralheiro: Manganês no Sangue ausente. "
+            f"Exames presentes: {[e['nome'] for e in exames]}"
+        )
+
+    def test_eletricista_industrial_tem_acido_tricloracetico(self):
+        """Eletricista industrial deve ter Ácido Tricloroacético na Urina."""
+        exames = self._exames("Eletricista industrial")
+        assert self._tem_exame(exames, "Ácido tricloroacético na urina"), (
+            "Eletricista industrial: Ácido Tricloroacético na Urina ausente. "
+            f"Exames: {[e['nome'] for e in exames]}"
+        )
+
+    def test_encanador_tem_mek_urina(self):
+        """Encanador deve ter Metil-etil-cetona (MEK) na Urina (genuinamente ausente no banco)."""
+        exames = self._exames("Encanador")
+        assert self._tem_exame(exames, "Metil-Etil-Cetona"), (
+            "Encanador: MEK na Urina ausente. "
+            f"Exames: {[e['nome'] for e in exames]}"
+        )
+
+    def test_encanador_mek_periodicidade_6m(self):
+        """MEK do Encanador deve ter periodicidade 6M."""
+        from modules.modulo_auditor_v1_1 import normalizar_exame
+        exames = self._exames("Encanador")
+        mek = next(
+            (e for e in exames if normalizar_exame(e["nome"]) == "Metil-Etil-Cetona"),
+            None,
+        )
+        assert mek is not None, "MEK não encontrado para Encanador"
+        assert str(mek.get("per")) == "6", (
+            f"MEK do Encanador: periodicidade esperada 6M, obtida {mek.get('per')}M"
+        )
+
+    # ── Ordem: exames de risco aparecem após exames padrão ──────────────────
+
+    def test_exames_risco_aparecem_apos_exames_padrao(self):
+        """
+        Para o Serralheiro, exames de risco (Carboxiemoglobina, Manganês) devem
+        aparecer APÓS todos os exames padrão (Espirometria, RX de Tórax, etc.).
+        Verifica que o índice mínimo dos exames de risco > índice máximo dos padrões.
+        """
+        from modules.modulo_auditor_v1_1 import normalizar_exame
+        exames = self._exames("Serralheiro")
+
+        risk_canonicos = {"carboxiemoglobina", "manganês sanguíneo"}
+
+        padrao_idx, risco_idx = [], []
+        for i, e in enumerate(exames):
+            nc = normalizar_exame(e["nome"]).lower()
+            if nc in risk_canonicos:
+                risco_idx.append(i)
+            else:
+                padrao_idx.append(i)
+
+        assert risco_idx, "Nenhum exame de risco (Carboxiemoglobina/Manganês) encontrado"
+        assert padrao_idx, "Nenhum exame padrão encontrado"
+
+        # Exame Clínico no início
+        assert exames[0]["nome"] == "Exame Clínico", (
+            f"Exame Clínico não é o primeiro: '{exames[0]['nome']}'"
+        )
+        # Todos os exames de risco devem ter índice > máximo dos padrões
+        assert min(risco_idx) > max(padrao_idx), (
+            f"Exame de risco (pos {min(risco_idx)}) antes de exame padrão (pos {max(padrao_idx)}). "
+            f"Ordem: {[e['nome'] for e in exames]}"
+        )
+
+    # ── Anti-duplicata ───────────────────────────────────────────────────────
+
+    def test_sem_duplicata_serralheiro(self):
+        """
+        Regressão anti-duplicata: a adição de exames de risco NÃO deve criar
+        entradas duplicadas para exames que já existiam no banco.
+        """
+        from modules.modulo_auditor_v1_1 import normalizar_exame
+        exames = self._exames("Serralheiro")
+
+        for canonical in ("Carboxiemoglobina", "Manganês sanguíneo"):
+            count = sum(
+                1 for e in exames
+                if normalizar_exame(e["nome"]) == canonical
+            )
+            assert count == 1, (
+                f"Duplicata detectada: '{canonical}' aparece {count} vezes "
+                f"na lista de exames do Serralheiro"
+            )

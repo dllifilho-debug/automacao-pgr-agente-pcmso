@@ -81,6 +81,96 @@ def _normalizar_cargo_risco_quimico(cargo: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Exames de risco químico específicos por cargo (Prompt 4 — NR-7 Anexo I/II)
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# Colunas: adm, mro, ret, dem = False (apenas PER marcado).
+# ---------------------------------------------------------------------------
+_EXAMES_RISCO_POR_CARGO: dict = {
+    "serralheiro": [
+        {"nome": "Carboxihemoglobina no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+        {"nome": "Manganês no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "meio oficial de serralheiro": [
+        {"nome": "Carboxihemoglobina no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+        {"nome": "Manganês no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "eletricista industrial": [
+        {"nome": "Ácido Tricloroacético na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "manutencao eletricista industrial": [
+        {"nome": "Ácido Tricloroacético na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "encanador": [
+        {"nome": "Metil-etil-cetona (MEK) na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "meio oficial de encanador": [
+        {"nome": "Metil-etil-cetona (MEK) na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+}
+
+
+def _norm_exame_para_dedup(nome: str) -> str:
+    """
+    Normaliza nome de exame para deduplicação — usa normalizar_exame() quando
+    disponível (resolve equivalências como 'Carboxiemoglobina' ==
+    'Carboxihemoglobina no Sangue'), senão usa _norm() simples.
+    """
+    try:
+        from modules.modulo_auditor_v1_1 import normalizar_exame as _ne
+    except ImportError:
+        try:
+            from modulo_auditor_v1_1 import normalizar_exame as _ne
+        except ImportError:
+            return _norm(nome)
+    return _ne(nome)
+
+
+def _processar_exames_risco_cargo(cargo: str, exames: list) -> list:
+    """
+    Prompt 4 — Garante exames de risco químico específicos por cargo (NR-7).
+
+    Aplica em sequência:
+      1. Adiciona exames genuinamente ausentes (dedup via normalizar_exame).
+      2. Reordena: exames padrão primeiro, exames de risco específicos por último.
+         "Risco específico" = todo exame cujo nome canônico está no conjunto
+         alvo do cargo (incluindo equivalentes como "Manganês Sanguíneo").
+
+    Garante que exames de risco NUNCA precedem o Exame Clínico.
+    """
+    cargo_n = _normalizar_cargo_risco_quimico(cargo)
+    targets = _EXAMES_RISCO_POR_CARGO.get(cargo_n, [])
+    if not targets:
+        return exames
+
+    # Nomes canônicos dos exames de risco alvo (para dedup e reordenação)
+    risk_canonicos: set = {_norm_exame_para_dedup(e["nome"]) for e in targets}
+
+    # Nomes canônicos já presentes na lista
+    presentes_canonicos: set = {_norm_exame_para_dedup(e["nome"]) for e in exames}
+
+    # 1. Adiciona exames genuinamente ausentes (SEM duplicar equivalentes)
+    for ex in targets:
+        nc = _norm_exame_para_dedup(ex["nome"])
+        if nc not in presentes_canonicos:
+            exames.append(deepcopy(ex))
+            presentes_canonicos.add(nc)
+
+    # 2. Reordena: exames cujo nome canônico NÃO é risco específico primeiro,
+    #    depois os de risco (empurra para o final da tabela).
+    padroes = [e for e in exames if _norm_exame_para_dedup(e["nome"]) not in risk_canonicos]
+    riscos  = [e for e in exames if _norm_exame_para_dedup(e["nome"]) in risk_canonicos]
+    return padroes + riscos
+
+
+# ---------------------------------------------------------------------------
 # Mapa de sinônimos de cargos → chave-mestra do banco
 # ---------------------------------------------------------------------------
 MAPA_CARGO_CHAVE = {
@@ -1042,6 +1132,9 @@ def processar_cargo_ia(
         for ex in exames:
             if _norm(ex.get('nome', '')) == 'exame clinico':
                 ex['per'] = '6'
+
+    # ── Prompt 4 — Exames de risco específicos + reordenação (padrões → risco)
+    exames = _processar_exames_risco_cargo(cargo, exames)
 
     return {
         'cargo':             cargo,
