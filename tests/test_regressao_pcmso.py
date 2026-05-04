@@ -555,3 +555,102 @@ class TestGheOrdenacao:
         dados.sort(key=_num_ghe_para_sort)
         nums = [_num_ghe_para_sort(d) for d in dados]
         assert nums == [1, 7, 10, 16], f"Ordenação incorreta: {nums}"
+
+
+# ---------------------------------------------------------------------------
+# Suite 8 — Exame Clínico 6M por exposição a risco químico (Prompt 3)
+# ---------------------------------------------------------------------------
+
+class TestExameClinicoPeriodicidade:
+    """
+    Valida que cargos expostos a agentes químicos obrigatórios (NR-7 Anexo I/II)
+    têm Exame Clínico com periodicidade 6M, e que cargos sem essa exposição
+    continuam com 12M (regressão obrigatória).
+    Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+    """
+
+    def _get_ec_per(self, cargo: str) -> str:
+        """Helper: retorna periodicidade do Exame Clínico para o cargo."""
+        from modules.agente_medico_ia import processar_cargo_ia
+        result = processar_cargo_ia(cargo, riscos=[], e_canteiro=True)
+        exames = result.get("exames", [])
+        ec = next(
+            (e for e in exames
+             if "cl" in e.get("nome", "").lower()
+             and "nico" in e.get("nome", "").lower()),
+            None,
+        )
+        assert ec is not None, f"Exame Clínico não encontrado para '{cargo}'"
+        return str(ec.get("per", ""))
+
+    def test_exame_clinico_serralheiro_6m(self):
+        """Serralheiro: exposto a Cromo hexavalente → Exame Clínico 6M."""
+        assert self._get_ec_per("Serralheiro") == "6", (
+            "Serralheiro deve ter Exame Clínico 6M (exposição a Cromo)"
+        )
+
+    def test_exame_clinico_meio_oficial_serralheiro_6m(self):
+        """Meio oficial de serralheiro: mesma exposição que serralheiro → 6M."""
+        assert self._get_ec_per("meio oficial de serralheiro") == "6", (
+            "Meio oficial de serralheiro deve ter Exame Clínico 6M"
+        )
+
+    def test_exame_clinico_eletricista_industrial_6m(self):
+        """Eletricista industrial: exposto a Tricloroetileno (NR-10) → Exame Clínico 6M."""
+        assert self._get_ec_per("Eletricista industrial") == "6", (
+            "Eletricista industrial deve ter Exame Clínico 6M (Tricloroetileno)"
+        )
+
+    def test_exame_clinico_variante_manutencao_6m(self):
+        """'Manutenção: Eletricista industrial' normaliza para 'eletricista industrial' → 6M."""
+        # normalizar_cargo strips the "Manutenção:" prefix → "eletricista industrial"
+        assert self._get_ec_per("Manutenção: Eletricista industrial") == "6", (
+            "Variante 'Manutenção: Eletricista industrial' deve ter Exame Clínico 6M"
+        )
+
+    def test_exame_clinico_encanador_6m(self):
+        """Encanador: exposto a Metil-etil-cetona (MEK) → Exame Clínico 6M."""
+        assert self._get_ec_per("Encanador") == "6", (
+            "Encanador deve ter Exame Clínico 6M (MEK)"
+        )
+
+    def test_exame_clinico_meio_oficial_encanador_6m(self):
+        """Meio oficial de encanador: mesma exposição que encanador → 6M."""
+        assert self._get_ec_per("meio oficial de encanador") == "6", (
+            "Meio oficial de encanador deve ter Exame Clínico 6M"
+        )
+
+    def test_exame_clinico_pedreiro_permanece_12m(self):
+        """
+        Regressão obrigatória: Pedreiro NÃO tem exposição química → Exame Clínico 12M.
+        Garante que a regra 6M não vazou para cargos sem risco químico.
+        """
+        assert self._get_ec_per("Pedreiro") == "12", (
+            "REGRESSAO: Pedreiro deve ter Exame Clínico 12M, não 6M"
+        )
+
+    def test_exame_clinico_carpinteiro_permanece_12m(self):
+        """Regressão: Carpinteiro sem exposição química → 12M."""
+        assert self._get_ec_per("Carpinteiro") == "12"
+
+    def test_exame_clinico_armador_permanece_12m(self):
+        """Regressão: Armador sem exposição química → 12M."""
+        assert self._get_ec_per("Armador") == "12"
+
+    def test_normalizar_cargo_risco_quimico_colon(self):
+        """_normalizar_cargo_risco_quimico strips prefix before colon correctly."""
+        from modules.agente_medico_ia import _normalizar_cargo_risco_quimico, CARGOS_RISCO_QUIMICO_6M
+
+        # Strips colon prefix → matches the set entry
+        assert _normalizar_cargo_risco_quimico("Manutenção: Eletricista industrial") == "eletricista industrial"
+        assert _normalizar_cargo_risco_quimico("Eletricista industrial") == "eletricista industrial"
+        assert _normalizar_cargo_risco_quimico("meio oficial de serralheiro") == "meio oficial de serralheiro"
+
+        # Verify membership after normalization
+        for cargo_raw in ["Serralheiro", "Eletricista industrial",
+                          "Manutenção: Eletricista industrial",
+                          "Encanador", "meio oficial de encanador"]:
+            norm = _normalizar_cargo_risco_quimico(cargo_raw)
+            assert norm in CARGOS_RISCO_QUIMICO_6M, (
+                f"'{cargo_raw}' normalizado para '{norm}' não está em CARGOS_RISCO_QUIMICO_6M"
+            )

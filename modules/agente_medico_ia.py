@@ -39,7 +39,46 @@ import re
 from copy import deepcopy
 from datetime import datetime
 
-VERSAO_AGENTE = "2.3"  # Camadas 0-2: GHE+Cargo (RQ.61) + Cargo genérico + NR-7 por risco
+VERSAO_AGENTE = "2.4"  # Prompt 3: Exame Clínico 6M para cargos com risco químico NR-7
+
+# ---------------------------------------------------------------------------
+# Cargos com exposição a agentes químicos obrigatórios (NR-7 Anexo I/II)
+# que requerem Exame Clínico semestral (6M) em vez de anual (12M).
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# Valores em forma normalizada: lowercase, sem acento, prefixo "X:" removido.
+# ---------------------------------------------------------------------------
+CARGOS_RISCO_QUIMICO_6M = {
+    "serralheiro",                      # Cromo hexavalente (solda/policorte)
+    "meio oficial de serralheiro",       # idem
+    "eletricista industrial",            # Tricloroetileno (NR-10, energizado)
+    "manutencao eletricista industrial", # variante sem colon: "Manutenção Eletricista industrial"
+    "encanador",                         # Metil-etil-cetona / MEK (tubulações)
+    "meio oficial de encanador",         # idem
+}
+
+
+def _normalizar_cargo_risco_quimico(cargo: str) -> str:
+    """
+    Normalização mínima para lookup em CARGOS_RISCO_QUIMICO_6M.
+
+    Aplica em sequência:
+      1. lowercase + remove acentos (via _norm)
+      2. Remove prefixo "X:" — ex: "Manutenção: Eletricista industrial"
+         → "eletricista industrial"
+      3. Expande "meio of." → "meio oficial de"
+      4. Colapsa espaços
+
+    Não aplica alias de cargo (não colapsa cargo-filho em cargo-pai).
+    """
+    import re as _re2
+    s = _norm(str(cargo or ''))
+    if ':' in s:
+        s = s.split(':', 1)[1].strip()
+    s = _re2.sub(r'\bmeio\s+of\.?\s+', 'meio oficial de ', s)
+    s = _re2.sub(r'\bde\s+de\b', 'de', s)
+    s = _re2.sub(r'\s+', ' ', s).strip()
+    return s
+
 
 # ---------------------------------------------------------------------------
 # Mapa de sinônimos de cargos → chave-mestra do banco
@@ -994,6 +1033,15 @@ def processar_cargo_ia(
     exames = _aplicar_riscos_quimicos(exames, riscos)
     # ── Camada 5: Validação universal NR-7
     exames = _validacao_universal(exames, e_canteiro=e_canteiro)
+
+    # ── Prompt 3 — Exame Clínico 6M para cargos com exposição química (NR-7)
+    # Aplica APÓS todas as camadas para garantir prevalência sobre o banco
+    # (ELETRICISTA_ENERGIZADO e ENCANADOR têm per='12' no banco_matrizes_v2).
+    _cargo_n = _normalizar_cargo_risco_quimico(cargo)
+    if _cargo_n in CARGOS_RISCO_QUIMICO_6M:
+        for ex in exames:
+            if _norm(ex.get('nome', '')) == 'exame clinico':
+                ex['per'] = '6'
 
     return {
         'cargo':             cargo,
