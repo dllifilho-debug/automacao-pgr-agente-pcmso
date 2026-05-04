@@ -776,3 +776,103 @@ class TestExamesRiscoEspecificos:
                 f"Duplicata detectada: '{canonical}' aparece {count} vezes "
                 f"na lista de exames do Serralheiro"
             )
+
+
+# ---------------------------------------------------------------------------
+# Suite 10 — Operador de Betoneira: protocolo específico (Prompt 5)
+# ---------------------------------------------------------------------------
+
+class TestOperadorBetoneira:
+    """
+    Valida o protocolo EXATO do Operador de Betoneira (NR-7 / poeira mineral).
+    Os testes usam contexto={'maquinas_pesadas': True} para reproduzir a
+    situação real de produção (GHE com nome contendo 'betoneira'), que é a
+    origem dos 3 bugs reportados.
+    """
+
+    @staticmethod
+    def _exames_producao():
+        """Retorna exames com contexto de produção (maquinas_pesadas=True)."""
+        from modules.agente_medico_ia import processar_cargo_ia
+        return processar_cargo_ia(
+            "Operador de Betoneira",
+            riscos=[],
+            contexto={"maquinas_pesadas": True},
+            e_canteiro=True,
+        )["exames"]
+
+    def _get(self, nome_substr: str, exames=None):
+        if exames is None:
+            exames = self._exames_producao()
+        return next((e for e in exames if nome_substr.lower() in e["nome"].lower()), None)
+
+    # ── Ausências obrigatórias (Bug 1 e 2) ──────────────────────────────────
+
+    def test_betoneira_sem_acuidade_visual(self):
+        """
+        Bug 1: Acuidade Visual NÃO deve aparecer para Operador de Betoneira.
+        Em produção, _aplicar_ajustes_contexto() injetava quando maquinas_pesadas=True.
+        """
+        exames = self._exames_producao()
+        nomes = [e["nome"] for e in exames]
+        assert "Acuidade Visual" not in nomes, (
+            f"Acuidade Visual não deveria estar na lista: {nomes}"
+        )
+
+    def test_betoneira_sem_ecg(self):
+        """
+        Bug 2: ECG NÃO deve aparecer para Operador de Betoneira.
+        Em produção, _aplicar_ajustes_contexto() injetava quando maquinas_pesadas=True.
+        """
+        exames = self._exames_producao()
+        nomes = [e["nome"] for e in exames]
+        assert "ECG" not in nomes, (
+            f"ECG não deveria estar na lista: {nomes}"
+        )
+
+    # ── Periodicidade correta (Bug 3) ────────────────────────────────────────
+
+    def test_betoneira_rx_oit_12m(self):
+        """
+        Bug 3: RX de Tórax OIT deve ter per=12M (exposição a poeira mineral/sílica).
+        O banco_matrizes_v2 tinha per=60M (template genérico de poeira mineral).
+        """
+        exames = self._exames_producao()
+        rx = self._get("RX", exames)
+        assert rx is not None, "RX de Tórax OIT não encontrado para Operador de Betoneira"
+        assert str(rx.get("per")) == "12", (
+            f"RX de Tórax OIT: esperado per=12M, obtido {rx.get('per')}M"
+        )
+
+    # ── Regressão: exames que DEVEM permanecer ───────────────────────────────
+
+    def test_betoneira_tem_espirometria_24m(self):
+        """Regressão: Espirometria deve estar presente com per=24M."""
+        exames = self._exames_producao()
+        espiro = self._get("Espirometria", exames)
+        assert espiro is not None, "Espirometria ausente para Operador de Betoneira"
+        assert str(espiro.get("per")) == "24", (
+            f"Espirometria: esperado per=24M, obtido {espiro.get('per')}M"
+        )
+
+    def test_betoneira_tem_audiometria_12m(self):
+        """Regressão: Audiometria deve estar presente com per=12M."""
+        exames = self._exames_producao()
+        audio = self._get("Audiometria", exames)
+        assert audio is not None, "Audiometria ausente para Operador de Betoneira"
+        assert str(audio.get("per")) == "12", (
+            f"Audiometria: esperado per=12M, obtido {audio.get('per')}M"
+        )
+
+    def test_betoneira_protocolo_exato_4_exames(self):
+        """
+        Protocolo do Operador de Betoneira deve ter EXATAMENTE 4 exames:
+        Exame Clínico, Audiometria, Espirometria, RX de Tórax OIT.
+        Sem Hemograma, Glicemia, ECG ou Acuidade Visual.
+        """
+        exames = self._exames_producao()
+        nomes = [e["nome"] for e in exames]
+        esperados = {"Exame Clínico", "Audiometria", "Espirometria", "RX de Tórax OIT"}
+        assert set(nomes) == esperados, (
+            f"Protocolo incorreto.\nEsperado: {sorted(esperados)}\nObtido:   {sorted(nomes)}"
+        )

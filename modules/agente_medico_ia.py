@@ -117,6 +117,42 @@ _EXAMES_RISCO_POR_CARGO: dict = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Protocolo específico por cargo (Prompt 5 — substitui template genérico)
+# Cargos listados aqui recebem EXATAMENTE esses exames, sobrepondo todas as
+# camadas anteriores (inclusive _aplicar_ajustes_contexto).
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# ---------------------------------------------------------------------------
+_EXAMES_ESPECIFICOS_POR_CARGO: dict = {
+    # Operador de Betoneira: exposição a poeira mineral (sílica/quartzo).
+    # NÃO tem Acuidade Visual nem ECG (diferente do template maquinas_pesadas).
+    # RX de Tórax OIT: 12M (não 60M do template genérico de poeira mineral).
+    "operador de betoneira": [
+        {"nome": "Exame Clínico",  "adm": True,  "per": "12", "mro": True,  "ret": True,  "dem": True},
+        {"nome": "Audiometria",    "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": True},
+        {"nome": "Espirometria",   "adm": True,  "per": "24", "mro": True,  "ret": False, "dem": True},
+        {"nome": "RX de Tórax OIT", "adm": True, "per": "12", "mro": True,  "ret": False, "dem": True},
+    ],
+}
+
+
+def _aplicar_protocolo_especifico(cargo: str, exames: list) -> list:
+    """
+    Prompt 5 — Se o cargo tiver um protocolo específico definido em
+    _EXAMES_ESPECIFICOS_POR_CARGO, substitui a lista de exames pelo protocolo
+    exato, ignorando o template genérico e todos os ajustes de contexto.
+
+    Aplica APÓS todas as camadas (0-5) e Prompts 3 e 4, garantindo precedência
+    absoluta sobre _aplicar_ajustes_contexto (que adiciona Acuidade Visual e
+    ECG quando maquinas_pesadas=True — indesejável para Betoneira).
+    """
+    cargo_n = _normalizar_cargo_risco_quimico(cargo)
+    protocolo = _EXAMES_ESPECIFICOS_POR_CARGO.get(cargo_n)
+    if protocolo is None:
+        return exames
+    return [deepcopy(e) for e in protocolo]
+
+
 def _norm_exame_para_dedup(nome: str) -> str:
     """
     Normaliza nome de exame para deduplicação — usa normalizar_exame() quando
@@ -1135,6 +1171,10 @@ def processar_cargo_ia(
 
     # ── Prompt 4 — Exames de risco específicos + reordenação (padrões → risco)
     exames = _processar_exames_risco_cargo(cargo, exames)
+
+    # ── Prompt 5 — Protocolo específico (substitui template se cargo mapeado)
+    # Deve ser o ÚLTIMO passo: sobrepõe _aplicar_ajustes_contexto e o banco.
+    exames = _aplicar_protocolo_especifico(cargo, exames)
 
     return {
         'cargo':             cargo,
