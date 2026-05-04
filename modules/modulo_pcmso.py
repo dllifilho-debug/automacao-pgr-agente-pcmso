@@ -1100,7 +1100,7 @@ def _consolidar_cargos_dados_ghe(dados_ghe: list) -> None:
         ghe['cargos'] = cargos_kept
 
 
-def _renumerar_ghe_sequencial(nome_original: str, novo_num: int) -> str:
+def _renumerar_ghe_sequencial(nome_original: str, novo_num: int, hint: str = "") -> str:
     """
     Reconstrói o nome do GHE com numeração sequencial (1, 2, 3, ...) e
     título descritivo preservado a partir do nome original.
@@ -1108,21 +1108,60 @@ def _renumerar_ghe_sequencial(nome_original: str, novo_num: int) -> str:
     Comportamento:
       - "GHE 07: Estrutura - Alvenaria"  -> "GHE 01 - Estrutura - Alvenaria"
       - "GHE 03 - Forma de pilar"        -> "GHE 02 - Forma de pilar"
-      - "GHE 99" (sem descrição)         -> "GHE 03 - Atividade não identificada"
-      - ""                               -> "GHE 04 - Atividade não identificada"
+      - "GHE 99" (sem descrição) + hint  -> "GHE 03 - <hint>"
+      - "GHE 99" (sem descrição) s/hint  -> "GHE 03 - Grupo 3"
+      - ""                               -> "GHE 04 - Grupo 4"
+
+    hint: título derivado do primeiro cargo ou do risco predominante do bloco,
+          calculado em processar_pcmso() quando o nome não contém descrição.
 
     Garante que o nome NUNCA fica em branco (sempre tem título), conforme
     spec do Prompt 6 (Parte A — fallback obrigatório).
     """
     titulo = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
     if not titulo:
-        titulo = "Atividade não identificada"
+        titulo = hint if hint else f"Grupo {novo_num}"
     return f"GHE {novo_num:02d} - {titulo}"
 
 
+def _extrair_hint_titulo(cargos: list, riscos_mapeados: list) -> str:
+    """
+    Deriva um título descritivo a partir dos cargos ou riscos de um bloco GHE
+    quando o nome original não contém descrição (ex: apenas "GHE 07").
+
+    Prioridade:
+      1. Primeiro cargo real (não é nome de GHE)
+      2. Primeiro risco mapeado
+      3. "" (vazio — _renumerar_ghe_sequencial usará "Grupo N")
+    """
+    # Tenta primeiro cargo real
+    for c in cargos:
+        if c and not _RE_CARGO_EH_GHE.match(c.strip()):
+            return c.strip().title()
+    # Fallback: primeiro risco mapeado
+    for r in riscos_mapeados:
+        if isinstance(r, dict):
+            nome = (r.get("nome_agente") or r.get("perigo_especifico") or "").strip()
+        else:
+            nome = str(r).strip()
+        if nome:
+            return nome.title()
+    return ""
+
+
+def _num_ghe_para_sort(item: dict) -> int:
+    """Extrai o número do campo 'ghe' para ordenação — fallback 9999."""
+    m = re.search(r'\d+', item.get('ghe', '') or item.get('nome_ghe', ''))
+    return int(m.group()) if m else 9999
+
+
 def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
+    # Ordena GHEs pelo número original do PGR antes de qualquer processamento.
+    # Garante que GHE 01 vem antes de GHE 02, independente da ordem de chegada.
+    dados_ghe.sort(key=_num_ghe_para_sort)
+
     # Prompt 7: dedup intra-GHE + redistribuição cargos admin/técnico.
-    # Modifica dados_ghe in place ANTES de gerar o DataFrame.
+    # Modifica dados_ghe in place APÓS o sort.
     _consolidar_cargos_dados_ghe(dados_ghe)
 
     linhas = []
@@ -1130,9 +1169,14 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
     # `enumerate(start=1)` reinicia a cada chamada — sem estado global.
     for idx, ghe_item in enumerate(dados_ghe, start=1):
         nome_original   = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or ""
-        nome_ghe        = _renumerar_ghe_sequencial(nome_original, idx)
         cargos          = ghe_item.get("cargos", [])
         riscos_mapeados = ghe_item.get("riscos_mapeados", [])
+
+        # Deriva hint de título quando o nome original não tem descrição
+        _titulo_check = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
+        _hint = _extrair_hint_titulo(cargos, riscos_mapeados) if not _titulo_check else ""
+
+        nome_ghe        = _renumerar_ghe_sequencial(nome_original, idx, hint=_hint)
         riscos_str      = _riscos_para_lista_str(riscos_mapeados)
         exames_pre      = ghe_item.get("exames", [])
 

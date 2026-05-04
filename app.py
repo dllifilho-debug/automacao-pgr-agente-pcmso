@@ -672,8 +672,13 @@ elif modulo == "Medicina: PGR - PCMSO":
                         if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
                     ]
                     if _ghe_com_cargo_real:
-                        _enriquecidos, rel_banco = enriquecer_ghe_com_banco(_ghe_com_cargo_real, banco_matrizes)
-                        dados_ghe = _enriquecidos + _ghe_sem_cargo_final
+                        # enriquecer_ghe_com_banco modifica os dicts IN-PLACE (por referência).
+                        # Como _ghe_com_cargo_real contém referências aos mesmos objetos de
+                        # dados_ghe, o enriquecimento já atualiza dados_ghe automaticamente.
+                        # NÃO reatribuir dados_ghe = _enriquecidos + _ghe_sem_cargo_final:
+                        # isso destruiria a ordem original do PGR (bug C2).
+                        _, rel_banco = enriquecer_ghe_com_banco(_ghe_com_cargo_real, banco_matrizes)
+                        # dados_ghe já está atualizado e em ordem correta.
                     else:
                         rel_banco = {"cargos_enriquecidos": [], "cargos_mantidos": [], "mapa_exames_banco": {}}
 

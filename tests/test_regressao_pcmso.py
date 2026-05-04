@@ -6,22 +6,24 @@ import sys
 import os
 from pathlib import Path
 
-# ROOT aponta para o projeto principal.
-# Path(__file__).resolve() resolve o caminho real, mesmo dentro de um worktree.
-# parents[1] sobe dois níveis a partir de tests/ → raiz do projeto.
-# Se o worktree for um git worktree dentro de .claude/worktrees/, resolve() retorna
-# o path real do worktree, e precisamos subir até o projeto principal.
+# Configura sys.path com duas entradas:
+#   1. WORKTREE root  — código do branch atual (tem precedência nos imports)
+#   2. PROJETO PRINCIPAL root — usado apenas para localizar o PDF de teste
+#
+# Separar os dois paths garante que os testes importem o código do worktree
+# (com as correções desta sprint) e não o código do projeto principal (sem elas).
 _here = Path(__file__).resolve()
-# Detecta se estamos dentro de um worktree (.claude/worktrees/<branch>/tests/)
-# e, nesse caso, aponta para o projeto raiz dois níveis acima do worktree.
+_worktree_root = _here.parents[1]  # .../competent-cartwright-b3e939/
+
 if ".claude" in _here.parts and "worktrees" in _here.parts:
-    # .../automacao-pgr-seconci/.claude/worktrees/<branch>/tests/test_...py
     # parents: [0]=tests  [1]=<branch>  [2]=worktrees  [3]=.claude  [4]=automacao-pgr-seconci
-    ROOT = _here.parents[4]
+    ROOT = _here.parents[4]   # projeto principal (apenas para PDF path)
 else:
     ROOT = _here.parents[1]
 
-sys.path.insert(0, str(ROOT))
+# Worktree em primeiro: garante que 'from modules.X import' usa o código do branch.
+sys.path.insert(0, str(ROOT))          # projeto principal (fallback)
+sys.path.insert(0, str(_worktree_root))  # worktree (precedência nos imports)
 
 import pytest
 import pandas as pd
@@ -435,3 +437,121 @@ class TestCabecalho:
         assert vig_fim_fallback != date.today(), (
             "Fallback de vig_fim deveria ser hoje + 1 ano, mas é hoje!"
         )
+
+
+# ---------------------------------------------------------------------------
+# Suite 7 — GHE: títulos descritivos + ordem sequencial (C2)
+# ---------------------------------------------------------------------------
+
+class TestGheOrdenacao:
+    """
+    Testa os dois bugs do Prompt 2 (C2):
+      1. GHEs sem título descritivo (apareciam como "GHE 07" sem label)
+      2. GHEs nomeados inseridos no final do documento (ordem errada)
+    """
+
+    @pytest.fixture(scope="class")
+    def _dados_e_df(self):
+        """Gera dados_ghe e df a partir do PDF real (ou pula se ausente)."""
+        from modules.modulo_pcmso import extrair_texto_pdf, extrair_pgr_com_fallback, processar_pcmso
+
+        pdf_path = _PDF_PATH if _PDF_PATH.exists() else _PDF_FALLBACK
+        if not pdf_path.exists():
+            pytest.skip("PDF de teste não encontrado")
+
+        with open(pdf_path, "rb") as f:
+            texto = extrair_texto_pdf(f)
+
+        dados_ghe, _ = extrair_pgr_com_fallback(texto)
+        if not dados_ghe:
+            pytest.skip("PDF não retornou GHEs válidos")
+
+        df = processar_pcmso(dados_ghe)
+        return df, dados_ghe
+
+    def test_todos_ghe_tem_titulo(self, _dados_e_df):
+        """
+        Nenhum GHE deve ter título vazio ou ser apenas número.
+        Antes do fix: GHEs 07–16 tinham 'ghe=GHE 07' sem descrição e
+        _renumerar_ghe_sequencial gerava fallback genérico.
+        Após o fix: título derivado do primeiro cargo (ex: 'GHE 07 - Pedreiro').
+        """
+        import re
+        df, _ = _dados_e_df
+        for ghe_nome in df["GHE / Setor"].unique():
+            m = re.match(r"GHE\s*\d+\s*[-:–—]\s*(.+)", ghe_nome, re.IGNORECASE)
+            assert m, f"GHE sem separador / estrutura incorreta: '{ghe_nome}'"
+            titulo = m.group(1).strip()
+            assert titulo, f"GHE com título vazio: '{ghe_nome}'"
+            # Título não deve ser o fallback genérico antigo
+            assert titulo.lower() != "atividade não identificada", (
+                f"GHE com fallback genérico — derive o título do cargo: '{ghe_nome}'"
+            )
+
+    def test_ghe_ordem_sequencial(self, _dados_e_df):
+        """
+        Os números de GHE no documento devem ser estritamente crescentes.
+        Antes do fix: GHEs 07–16 apareciam ANTES de 01–06 porque
+        'dados_ghe = _enriquecidos + _ghe_sem_cargo_final' destruía a ordem.
+        """
+        import re
+        df, _ = _dados_e_df
+        nums = []
+        for ghe_nome in df["GHE / Setor"].unique():
+            m = re.search(r"GHE\s*(\d+)", ghe_nome, re.IGNORECASE)
+            if m:
+                nums.append(int(m.group(1)))
+
+        assert nums, "Nenhum GHE com número encontrado no df"
+        for i in range(len(nums) - 1):
+            assert nums[i] < nums[i + 1], (
+                f"Ordem incorreta na posição {i}: GHE {nums[i]} vem antes de GHE {nums[i+1]}. "
+                f"Sequência completa: {nums}"
+            )
+
+    def test_renumerar_sem_titulo_usa_hint(self):
+        """_renumerar_ghe_sequencial usa hint quando nome não tem descrição."""
+        from modules.modulo_pcmso import _renumerar_ghe_sequencial
+
+        # Com hint → usa hint
+        assert _renumerar_ghe_sequencial("GHE 07", 7, hint="Pedreiro") == "GHE 07 - Pedreiro"
+        assert _renumerar_ghe_sequencial("", 3, hint="Serralheiro") == "GHE 03 - Serralheiro"
+
+        # Sem hint → usa "Grupo N"
+        assert _renumerar_ghe_sequencial("GHE 07", 7) == "GHE 07 - Grupo 7"
+        assert _renumerar_ghe_sequencial("", 3) == "GHE 03 - Grupo 3"
+
+        # Com título no nome → ignora hint
+        assert _renumerar_ghe_sequencial("GHE 07 - Alvenaria", 7, hint="Pedreiro") == "GHE 07 - Alvenaria"
+
+    def test_extrair_hint_titulo_usa_cargo(self):
+        """_extrair_hint_titulo prioriza o primeiro cargo real."""
+        from modules.modulo_pcmso import _extrair_hint_titulo
+
+        cargos = ["pedreiro", "meio oficial de pedreiro"]
+        riscos = [{"nome_agente": "Ruído", "perigo_especifico": ""}]
+        hint = _extrair_hint_titulo(cargos, riscos)
+        assert hint == "Pedreiro", f"Esperado 'Pedreiro', obteve '{hint}'"
+
+    def test_extrair_hint_titulo_fallback_risco(self):
+        """_extrair_hint_titulo usa risco quando não há cargos reais."""
+        from modules.modulo_pcmso import _extrair_hint_titulo
+
+        cargos = []  # sem cargos
+        riscos = [{"nome_agente": "Ruído", "perigo_especifico": ""}]
+        hint = _extrair_hint_titulo(cargos, riscos)
+        assert "ruído" in hint.lower() or "Ruído" in hint, f"Esperado risco no hint, obteve '{hint}'"
+
+    def test_sort_por_numero_ghe(self):
+        """_num_ghe_para_sort extrai o número correto para ordenação."""
+        from modules.modulo_pcmso import _num_ghe_para_sort
+
+        dados = [
+            {"ghe": "GHE 10 - Serralheiro"},
+            {"ghe": "GHE 07"},
+            {"ghe": "GHE 01 - Engenharia planejamento de obra"},
+            {"ghe": "GHE 16"},
+        ]
+        dados.sort(key=_num_ghe_para_sort)
+        nums = [_num_ghe_para_sort(d) for d in dados]
+        assert nums == [1, 7, 10, 16], f"Ordenação incorreta: {nums}"
