@@ -1100,7 +1100,7 @@ def _consolidar_cargos_dados_ghe(dados_ghe: list) -> None:
         ghe['cargos'] = cargos_kept
 
 
-def _renumerar_ghe_sequencial(nome_original: str, novo_num: int) -> str:
+def _renumerar_ghe_sequencial(nome_original: str, novo_num: int, hint: str = "") -> str:
     """
     Reconstrói o nome do GHE com numeração sequencial (1, 2, 3, ...) e
     título descritivo preservado a partir do nome original.
@@ -1108,21 +1108,60 @@ def _renumerar_ghe_sequencial(nome_original: str, novo_num: int) -> str:
     Comportamento:
       - "GHE 07: Estrutura - Alvenaria"  -> "GHE 01 - Estrutura - Alvenaria"
       - "GHE 03 - Forma de pilar"        -> "GHE 02 - Forma de pilar"
-      - "GHE 99" (sem descrição)         -> "GHE 03 - Atividade não identificada"
-      - ""                               -> "GHE 04 - Atividade não identificada"
+      - "GHE 99" (sem descrição) + hint  -> "GHE 03 - <hint>"
+      - "GHE 99" (sem descrição) s/hint  -> "GHE 03 - Grupo 3"
+      - ""                               -> "GHE 04 - Grupo 4"
+
+    hint: título derivado do primeiro cargo ou do risco predominante do bloco,
+          calculado em processar_pcmso() quando o nome não contém descrição.
 
     Garante que o nome NUNCA fica em branco (sempre tem título), conforme
     spec do Prompt 6 (Parte A — fallback obrigatório).
     """
     titulo = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
     if not titulo:
-        titulo = "Atividade não identificada"
+        titulo = hint if hint else f"Grupo {novo_num}"
     return f"GHE {novo_num:02d} - {titulo}"
 
 
+def _extrair_hint_titulo(cargos: list, riscos_mapeados: list) -> str:
+    """
+    Deriva um título descritivo a partir dos cargos ou riscos de um bloco GHE
+    quando o nome original não contém descrição (ex: apenas "GHE 07").
+
+    Prioridade:
+      1. Primeiro cargo real (não é nome de GHE)
+      2. Primeiro risco mapeado
+      3. "" (vazio — _renumerar_ghe_sequencial usará "Grupo N")
+    """
+    # Tenta primeiro cargo real
+    for c in cargos:
+        if c and not _RE_CARGO_EH_GHE.match(c.strip()):
+            return c.strip().title()
+    # Fallback: primeiro risco mapeado
+    for r in riscos_mapeados:
+        if isinstance(r, dict):
+            nome = (r.get("nome_agente") or r.get("perigo_especifico") or "").strip()
+        else:
+            nome = str(r).strip()
+        if nome:
+            return nome.title()
+    return ""
+
+
+def _num_ghe_para_sort(item: dict) -> int:
+    """Extrai o número do campo 'ghe' para ordenação — fallback 9999."""
+    m = re.search(r'\d+', item.get('ghe', '') or item.get('nome_ghe', ''))
+    return int(m.group()) if m else 9999
+
+
 def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
+    # Ordena GHEs pelo número original do PGR antes de qualquer processamento.
+    # Garante que GHE 01 vem antes de GHE 02, independente da ordem de chegada.
+    dados_ghe.sort(key=_num_ghe_para_sort)
+
     # Prompt 7: dedup intra-GHE + redistribuição cargos admin/técnico.
-    # Modifica dados_ghe in place ANTES de gerar o DataFrame.
+    # Modifica dados_ghe in place APÓS o sort.
     _consolidar_cargos_dados_ghe(dados_ghe)
 
     linhas = []
@@ -1130,9 +1169,14 @@ def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.Data
     # `enumerate(start=1)` reinicia a cada chamada — sem estado global.
     for idx, ghe_item in enumerate(dados_ghe, start=1):
         nome_original   = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or ""
-        nome_ghe        = _renumerar_ghe_sequencial(nome_original, idx)
         cargos          = ghe_item.get("cargos", [])
         riscos_mapeados = ghe_item.get("riscos_mapeados", [])
+
+        # Deriva hint de título quando o nome original não tem descrição
+        _titulo_check = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
+        _hint = _extrair_hint_titulo(cargos, riscos_mapeados) if not _titulo_check else ""
+
+        nome_ghe        = _renumerar_ghe_sequencial(nome_original, idx, hint=_hint)
         riscos_str      = _riscos_para_lista_str(riscos_mapeados)
         exames_pre      = ghe_item.get("exames", [])
 
@@ -1306,6 +1350,70 @@ def gerar_justificativas_pcmso(dados_ghe: list) -> list:
 
 
 # ============================================================================
+# 6b — Notas de risco químico por cargo (Prompt 6)
+# ============================================================================
+
+# Mapeamento: cargo normalizado → nota de risco obrigatória (NR-7 Anexo II).
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# Chaves em forma normalizada: resultado de normalizar_cargo() aplicado.
+NOTAS_RISCO_QUIMICO = {
+    "serralheiro": {
+        "agente":          "Cromo hexavalente",
+        "exame_controle":  "Carboxihemoglobina no Sangue",
+    },
+    "meio oficial de serralheiro": {
+        "agente":          "Cromo hexavalente",
+        "exame_controle":  "Carboxihemoglobina no Sangue",
+    },
+    "eletricista industrial": {
+        "agente":          "Tricloroetileno",
+        "exame_controle":  "Ácido Tricloroacético na Urina",
+    },
+    "manutencao eletricista industrial": {
+        "agente":          "Tricloroetileno",
+        "exame_controle":  "Ácido Tricloroacético na Urina",
+    },
+    "encanador": {
+        "agente":          "Metietilcetona (MEK)",
+        "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
+    },
+    "meio oficial de encanador": {
+        "agente":          "Metietilcetona (MEK)",
+        "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
+    },
+}
+
+
+def _coletar_notas_ghe(cargos: list) -> list:
+    """
+    Retorna lista de notas de risco únicas para os cargos de um GHE.
+    Deduplicação por agente: se dois cargos (ex: Serralheiro + Meio Oficial de
+    Serralheiro) mapeiam para o mesmo agente, emite a nota apenas uma vez.
+
+    Retorna lista de dicts com: cargo, agente, exame_controle.
+    """
+    notas: list = []
+    agentes_vistos: set = set()
+    for cargo in cargos:
+        cargo_n = _norm_cargo_para_dedup(cargo)
+        nota = NOTAS_RISCO_QUIMICO.get(cargo_n)
+        if nota and nota["agente"] not in agentes_vistos:
+            notas.append({"cargo": cargo, **nota})
+            agentes_vistos.add(nota["agente"])
+    return notas
+
+
+def _formatar_nota_texto(nota: dict) -> str:
+    """Formata o bloco de texto de uma nota de risco para uso em HTML/docx."""
+    return (
+        f"⚠️ NOTA DE RISCO QUÍMICO — {nota['cargo']}\n"
+        f"Agente: {nota['agente']}\n"
+        f"Fundamento: NR-7 Anexo II / Matriz Dra. Patrícia 06/2025\n"
+        f"Exame de controle: {nota['exame_controle']} — periodicidade semestral"
+    )
+
+
+# ============================================================================
 # 7 — gerar_html_pcmso  (v9.5 — rowspan em GHE e Cargo)
 # ============================================================================
 
@@ -1341,6 +1449,10 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
       <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols_vis)}</tr></thead><tbody>
     """
 
+    cs_nota = (
+        "background:#FFF8E1;border:1px solid #F9A825;padding:8px 10px;"
+        "font-size:11px;color:#5D4037;white-space:pre-line;"
+    )
     rows_html = []
     if not df.empty:
         ghes = df["GHE / Setor"].unique() if "GHE / Setor" in df.columns else []
@@ -1366,6 +1478,14 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
                         tr += f'<td style="{cs}">{val}</td>'
                     tr += "</tr>\n"
                     rows_html.append(tr)
+
+            # Notas de risco químico — injetadas após o último cargo do GHE
+            notas_ghe = _coletar_notas_ghe(list(cargos))
+            for nota in notas_ghe:
+                texto_html = _formatar_nota_texto(nota).replace("\n", "<br>")
+                rows_html.append(
+                    f'<tr><td colspan="8" style="{cs_nota}">{texto_html}</td></tr>\n'
+                )
 
     return (
         f"<!DOCTYPE html><html><body>{cab_html}"
@@ -1476,6 +1596,9 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
             rows_cargo = list(df_cargo.itertuples(index=False))
             for idx, row in enumerate(rows_cargo):
                 estrutura.append(("cargo_exame", (cargo, row, idx == 0, len(rows_cargo))))
+        # Notas de risco químico após o último cargo do GHE
+        for nota in _coletar_notas_ghe(cargos_ordem):
+            estrutura.append(("nota_risco", nota))
 
     num_linhas = len(estrutura)
     t = doc.add_table(rows=num_linhas, cols=len(COLS))
@@ -1533,6 +1656,18 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
             cells[4].text = str(mro_val)
             cells[5].text = str(rt_val)
             cells[6].text = str(dem_val)
+
+        elif tipo == "nota_risco":
+            nota = dados
+            texto_nota = _formatar_nota_texto(nota)
+            merged = cells[0]
+            for ci in range(1, len(COLS)):
+                merged = merged.merge(cells[ci])
+            p = merged.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            run = p.add_run(texto_nota)
+            run.font.size = Pt(9)
+            _set_cell_background(merged, "FFF8E1")
 
         row_idx += 1
 

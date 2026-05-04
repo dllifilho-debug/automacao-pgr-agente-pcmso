@@ -39,7 +39,172 @@ import re
 from copy import deepcopy
 from datetime import datetime
 
-VERSAO_AGENTE = "2.3"  # Camadas 0-2: GHE+Cargo (RQ.61) + Cargo genérico + NR-7 por risco
+VERSAO_AGENTE = "2.4"  # Prompt 3: Exame Clínico 6M para cargos com risco químico NR-7
+
+# ---------------------------------------------------------------------------
+# Cargos com exposição a agentes químicos obrigatórios (NR-7 Anexo I/II)
+# que requerem Exame Clínico semestral (6M) em vez de anual (12M).
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# Valores em forma normalizada: lowercase, sem acento, prefixo "X:" removido.
+# ---------------------------------------------------------------------------
+CARGOS_RISCO_QUIMICO_6M = {
+    "serralheiro",                      # Cromo hexavalente (solda/policorte)
+    "meio oficial de serralheiro",       # idem
+    "eletricista industrial",            # Tricloroetileno (NR-10, energizado)
+    "manutencao eletricista industrial", # variante sem colon: "Manutenção Eletricista industrial"
+    "encanador",                         # Metil-etil-cetona / MEK (tubulações)
+    "meio oficial de encanador",         # idem
+}
+
+
+def _normalizar_cargo_risco_quimico(cargo: str) -> str:
+    """
+    Normalização mínima para lookup em CARGOS_RISCO_QUIMICO_6M.
+
+    Aplica em sequência:
+      1. lowercase + remove acentos (via _norm)
+      2. Remove prefixo "X:" — ex: "Manutenção: Eletricista industrial"
+         → "eletricista industrial"
+      3. Expande "meio of." → "meio oficial de"
+      4. Colapsa espaços
+
+    Não aplica alias de cargo (não colapsa cargo-filho em cargo-pai).
+    """
+    import re as _re2
+    s = _norm(str(cargo or ''))
+    if ':' in s:
+        s = s.split(':', 1)[1].strip()
+    s = _re2.sub(r'\bmeio\s+of\.?\s+', 'meio oficial de ', s)
+    s = _re2.sub(r'\bde\s+de\b', 'de', s)
+    s = _re2.sub(r'\s+', ' ', s).strip()
+    return s
+
+
+# ---------------------------------------------------------------------------
+# Exames de risco químico específicos por cargo (Prompt 4 — NR-7 Anexo I/II)
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# Colunas: adm, mro, ret, dem = False (apenas PER marcado).
+# ---------------------------------------------------------------------------
+_EXAMES_RISCO_POR_CARGO: dict = {
+    "serralheiro": [
+        {"nome": "Carboxihemoglobina no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+        {"nome": "Manganês no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "meio oficial de serralheiro": [
+        {"nome": "Carboxihemoglobina no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+        {"nome": "Manganês no Sangue",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "eletricista industrial": [
+        {"nome": "Ácido Tricloroacético na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "manutencao eletricista industrial": [
+        {"nome": "Ácido Tricloroacético na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "encanador": [
+        {"nome": "Metil-etil-cetona (MEK) na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+    "meio oficial de encanador": [
+        {"nome": "Metil-etil-cetona (MEK) na Urina",
+         "adm": False, "per": "6", "mro": False, "ret": False, "dem": False},
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# Protocolo específico por cargo (Prompt 5 — substitui template genérico)
+# Cargos listados aqui recebem EXATAMENTE esses exames, sobrepondo todas as
+# camadas anteriores (inclusive _aplicar_ajustes_contexto).
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# ---------------------------------------------------------------------------
+_EXAMES_ESPECIFICOS_POR_CARGO: dict = {
+    # Operador de Betoneira: exposição a poeira mineral (sílica/quartzo).
+    # NÃO tem Acuidade Visual nem ECG (diferente do template maquinas_pesadas).
+    # RX de Tórax OIT: 12M (não 60M do template genérico de poeira mineral).
+    "operador de betoneira": [
+        {"nome": "Exame Clínico",  "adm": True,  "per": "12", "mro": True,  "ret": True,  "dem": True},
+        {"nome": "Audiometria",    "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": True},
+        {"nome": "Espirometria",   "adm": True,  "per": "24", "mro": True,  "ret": False, "dem": True},
+        {"nome": "RX de Tórax OIT", "adm": True, "per": "12", "mro": True,  "ret": False, "dem": True},
+    ],
+}
+
+
+def _aplicar_protocolo_especifico(cargo: str, exames: list) -> list:
+    """
+    Prompt 5 — Se o cargo tiver um protocolo específico definido em
+    _EXAMES_ESPECIFICOS_POR_CARGO, substitui a lista de exames pelo protocolo
+    exato, ignorando o template genérico e todos os ajustes de contexto.
+
+    Aplica APÓS todas as camadas (0-5) e Prompts 3 e 4, garantindo precedência
+    absoluta sobre _aplicar_ajustes_contexto (que adiciona Acuidade Visual e
+    ECG quando maquinas_pesadas=True — indesejável para Betoneira).
+    """
+    cargo_n = _normalizar_cargo_risco_quimico(cargo)
+    protocolo = _EXAMES_ESPECIFICOS_POR_CARGO.get(cargo_n)
+    if protocolo is None:
+        return exames
+    return [deepcopy(e) for e in protocolo]
+
+
+def _norm_exame_para_dedup(nome: str) -> str:
+    """
+    Normaliza nome de exame para deduplicação — usa normalizar_exame() quando
+    disponível (resolve equivalências como 'Carboxiemoglobina' ==
+    'Carboxihemoglobina no Sangue'), senão usa _norm() simples.
+    """
+    try:
+        from modules.modulo_auditor_v1_1 import normalizar_exame as _ne
+    except ImportError:
+        try:
+            from modulo_auditor_v1_1 import normalizar_exame as _ne
+        except ImportError:
+            return _norm(nome)
+    return _ne(nome)
+
+
+def _processar_exames_risco_cargo(cargo: str, exames: list) -> list:
+    """
+    Prompt 4 — Garante exames de risco químico específicos por cargo (NR-7).
+
+    Aplica em sequência:
+      1. Adiciona exames genuinamente ausentes (dedup via normalizar_exame).
+      2. Reordena: exames padrão primeiro, exames de risco específicos por último.
+         "Risco específico" = todo exame cujo nome canônico está no conjunto
+         alvo do cargo (incluindo equivalentes como "Manganês Sanguíneo").
+
+    Garante que exames de risco NUNCA precedem o Exame Clínico.
+    """
+    cargo_n = _normalizar_cargo_risco_quimico(cargo)
+    targets = _EXAMES_RISCO_POR_CARGO.get(cargo_n, [])
+    if not targets:
+        return exames
+
+    # Nomes canônicos dos exames de risco alvo (para dedup e reordenação)
+    risk_canonicos: set = {_norm_exame_para_dedup(e["nome"]) for e in targets}
+
+    # Nomes canônicos já presentes na lista
+    presentes_canonicos: set = {_norm_exame_para_dedup(e["nome"]) for e in exames}
+
+    # 1. Adiciona exames genuinamente ausentes (SEM duplicar equivalentes)
+    for ex in targets:
+        nc = _norm_exame_para_dedup(ex["nome"])
+        if nc not in presentes_canonicos:
+            exames.append(deepcopy(ex))
+            presentes_canonicos.add(nc)
+
+    # 2. Reordena: exames cujo nome canônico NÃO é risco específico primeiro,
+    #    depois os de risco (empurra para o final da tabela).
+    padroes = [e for e in exames if _norm_exame_para_dedup(e["nome"]) not in risk_canonicos]
+    riscos  = [e for e in exames if _norm_exame_para_dedup(e["nome"]) in risk_canonicos]
+    return padroes + riscos
+
 
 # ---------------------------------------------------------------------------
 # Mapa de sinônimos de cargos → chave-mestra do banco
@@ -994,6 +1159,22 @@ def processar_cargo_ia(
     exames = _aplicar_riscos_quimicos(exames, riscos)
     # ── Camada 5: Validação universal NR-7
     exames = _validacao_universal(exames, e_canteiro=e_canteiro)
+
+    # ── Prompt 3 — Exame Clínico 6M para cargos com exposição química (NR-7)
+    # Aplica APÓS todas as camadas para garantir prevalência sobre o banco
+    # (ELETRICISTA_ENERGIZADO e ENCANADOR têm per='12' no banco_matrizes_v2).
+    _cargo_n = _normalizar_cargo_risco_quimico(cargo)
+    if _cargo_n in CARGOS_RISCO_QUIMICO_6M:
+        for ex in exames:
+            if _norm(ex.get('nome', '')) == 'exame clinico':
+                ex['per'] = '6'
+
+    # ── Prompt 4 — Exames de risco específicos + reordenação (padrões → risco)
+    exames = _processar_exames_risco_cargo(cargo, exames)
+
+    # ── Prompt 5 — Protocolo específico (substitui template se cargo mapeado)
+    # Deve ser o ÚLTIMO passo: sobrepõe _aplicar_ajustes_contexto e o banco.
+    exames = _aplicar_protocolo_especifico(cargo, exames)
 
     return {
         'cargo':             cargo,
