@@ -1350,6 +1350,70 @@ def gerar_justificativas_pcmso(dados_ghe: list) -> list:
 
 
 # ============================================================================
+# 6b — Notas de risco químico por cargo (Prompt 6)
+# ============================================================================
+
+# Mapeamento: cargo normalizado → nota de risco obrigatória (NR-7 Anexo II).
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# Chaves em forma normalizada: resultado de normalizar_cargo() aplicado.
+NOTAS_RISCO_QUIMICO = {
+    "serralheiro": {
+        "agente":          "Cromo hexavalente",
+        "exame_controle":  "Carboxihemoglobina no Sangue",
+    },
+    "meio oficial de serralheiro": {
+        "agente":          "Cromo hexavalente",
+        "exame_controle":  "Carboxihemoglobina no Sangue",
+    },
+    "eletricista industrial": {
+        "agente":          "Tricloroetileno",
+        "exame_controle":  "Ácido Tricloroacético na Urina",
+    },
+    "manutencao eletricista industrial": {
+        "agente":          "Tricloroetileno",
+        "exame_controle":  "Ácido Tricloroacético na Urina",
+    },
+    "encanador": {
+        "agente":          "Metietilcetona (MEK)",
+        "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
+    },
+    "meio oficial de encanador": {
+        "agente":          "Metietilcetona (MEK)",
+        "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
+    },
+}
+
+
+def _coletar_notas_ghe(cargos: list) -> list:
+    """
+    Retorna lista de notas de risco únicas para os cargos de um GHE.
+    Deduplicação por agente: se dois cargos (ex: Serralheiro + Meio Oficial de
+    Serralheiro) mapeiam para o mesmo agente, emite a nota apenas uma vez.
+
+    Retorna lista de dicts com: cargo, agente, exame_controle.
+    """
+    notas: list = []
+    agentes_vistos: set = set()
+    for cargo in cargos:
+        cargo_n = _norm_cargo_para_dedup(cargo)
+        nota = NOTAS_RISCO_QUIMICO.get(cargo_n)
+        if nota and nota["agente"] not in agentes_vistos:
+            notas.append({"cargo": cargo, **nota})
+            agentes_vistos.add(nota["agente"])
+    return notas
+
+
+def _formatar_nota_texto(nota: dict) -> str:
+    """Formata o bloco de texto de uma nota de risco para uso em HTML/docx."""
+    return (
+        f"⚠️ NOTA DE RISCO QUÍMICO — {nota['cargo']}\n"
+        f"Agente: {nota['agente']}\n"
+        f"Fundamento: NR-7 Anexo II / Matriz Dra. Patrícia 06/2025\n"
+        f"Exame de controle: {nota['exame_controle']} — periodicidade semestral"
+    )
+
+
+# ============================================================================
 # 7 — gerar_html_pcmso  (v9.5 — rowspan em GHE e Cargo)
 # ============================================================================
 
@@ -1385,6 +1449,10 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
       <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols_vis)}</tr></thead><tbody>
     """
 
+    cs_nota = (
+        "background:#FFF8E1;border:1px solid #F9A825;padding:8px 10px;"
+        "font-size:11px;color:#5D4037;white-space:pre-line;"
+    )
     rows_html = []
     if not df.empty:
         ghes = df["GHE / Setor"].unique() if "GHE / Setor" in df.columns else []
@@ -1410,6 +1478,14 @@ def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
                         tr += f'<td style="{cs}">{val}</td>'
                     tr += "</tr>\n"
                     rows_html.append(tr)
+
+            # Notas de risco químico — injetadas após o último cargo do GHE
+            notas_ghe = _coletar_notas_ghe(list(cargos))
+            for nota in notas_ghe:
+                texto_html = _formatar_nota_texto(nota).replace("\n", "<br>")
+                rows_html.append(
+                    f'<tr><td colspan="8" style="{cs_nota}">{texto_html}</td></tr>\n'
+                )
 
     return (
         f"<!DOCTYPE html><html><body>{cab_html}"
@@ -1520,6 +1596,9 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
             rows_cargo = list(df_cargo.itertuples(index=False))
             for idx, row in enumerate(rows_cargo):
                 estrutura.append(("cargo_exame", (cargo, row, idx == 0, len(rows_cargo))))
+        # Notas de risco químico após o último cargo do GHE
+        for nota in _coletar_notas_ghe(cargos_ordem):
+            estrutura.append(("nota_risco", nota))
 
     num_linhas = len(estrutura)
     t = doc.add_table(rows=num_linhas, cols=len(COLS))
@@ -1577,6 +1656,18 @@ def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
             cells[4].text = str(mro_val)
             cells[5].text = str(rt_val)
             cells[6].text = str(dem_val)
+
+        elif tipo == "nota_risco":
+            nota = dados
+            texto_nota = _formatar_nota_texto(nota)
+            merged = cells[0]
+            for ci in range(1, len(COLS)):
+                merged = merged.merge(cells[ci])
+            p = merged.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            run = p.add_run(texto_nota)
+            run.font.size = Pt(9)
+            _set_cell_background(merged, "FFF8E1")
 
         row_idx += 1
 

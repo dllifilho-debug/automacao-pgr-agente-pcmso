@@ -876,3 +876,136 @@ class TestOperadorBetoneira:
         assert set(nomes) == esperados, (
             f"Protocolo incorreto.\nEsperado: {sorted(esperados)}\nObtido:   {sorted(nomes)}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Suite 11 — Notas de risco químico na serialização (Prompt 6)
+# ---------------------------------------------------------------------------
+
+class TestNotasRiscoQuimico:
+    """
+    Valida que os blocos de nota de risco químico são injetados corretamente
+    no HTML gerado por gerar_html_pcmso().
+    """
+
+    def _df_ghe(self, ghe_nome: str, cargos_exames: list) -> "pd.DataFrame":
+        """Helper: monta DataFrame mínimo para um GHE com os cargos/exames dados."""
+        rows = []
+        for cargo, exame in cargos_exames:
+            rows.append({
+                "GHE / Setor": ghe_nome,
+                "Cargo": cargo,
+                "Exame": exame,
+                "ADM": "X", "PER": "12M", "MRO": "X", "RT": "-", "DEM": "-",
+            })
+        return pd.DataFrame(rows)
+
+    def _html(self, ghe_nome: str, cargos_exames: list) -> str:
+        from modules.modulo_pcmso import gerar_html_pcmso
+        df = self._df_ghe(ghe_nome, cargos_exames)
+        return gerar_html_pcmso(df)
+
+    # ── Presença obrigatória ─────────────────────────────────────────────────
+
+    def test_nota_risco_serralheiro_presente(self):
+        """GHE com Serralheiro deve conter nota de Cromo hexavalente."""
+        html = self._html(
+            "GHE 10 - Serralheria",
+            [("Serralheiro", "Exame Clínico"), ("Serralheiro", "Audiometria")],
+        )
+        assert "NOTA DE RISCO" in html, "Bloco de nota ausente para Serralheiro"
+        assert "Cromo hexavalente" in html, "Agente 'Cromo hexavalente' ausente"
+        assert "Carboxihemoglobina no Sangue" in html, "Exame de controle ausente"
+        assert "NR-7 Anexo II" in html, "Fundamento legal ausente"
+
+    def test_nota_risco_eletricista_industrial_presente(self):
+        """GHE com Eletricista industrial deve conter nota de Tricloroetileno."""
+        html = self._html(
+            "GHE 08 - Eletricista",
+            [("Eletricista industrial", "Exame Clínico")],
+        )
+        assert "NOTA DE RISCO" in html, "Bloco de nota ausente para Eletricista industrial"
+        assert "Tricloroetileno" in html, "Agente 'Tricloroetileno' ausente"
+        assert "Ácido Tricloroacético na Urina" in html, "Exame de controle ausente"
+
+    def test_nota_risco_encanador_presente(self):
+        """GHE com Encanador deve conter nota de Metietilcetona (MEK)."""
+        html = self._html(
+            "GHE 09 - Instalações Hidrossanitárias",
+            [("encanador", "Exame Clínico")],
+        )
+        assert "NOTA DE RISCO" in html, "Bloco de nota ausente para Encanador"
+        assert "Metietilcetona" in html, "Agente 'Metietilcetona' ausente"
+        assert "Metil-etil-cetona (MEK) na Urina" in html, "Exame de controle ausente"
+
+    # ── Deduplicação por agente ──────────────────────────────────────────────
+
+    def test_nota_sem_duplicata_mesmo_ghe(self):
+        """
+        GHE com Serralheiro + Meio Oficial de Serralheiro → apenas 1 nota
+        para Cromo hexavalente (dedup por agente, não por cargo).
+        """
+        html = self._html(
+            "GHE 10 - Serralheria",
+            [
+                ("Serralheiro", "Exame Clínico"),
+                ("Serralheiro", "Audiometria"),
+                ("meio oficial de serralheiro", "Exame Clínico"),
+                ("meio oficial de serralheiro", "Audiometria"),
+            ],
+        )
+        count_cromo = html.count("Cromo hexavalente")
+        assert count_cromo == 1, (
+            f"Nota de 'Cromo hexavalente' duplicada: aparece {count_cromo}x no HTML. "
+            "Dedup por agente deveria emitir apenas 1 nota."
+        )
+
+    # ── Regressão: cargo sem risco não deve gerar nota ───────────────────────
+
+    def test_ghe_sem_cargo_risco_sem_nota(self):
+        """
+        Regressão: GHE com Pedreiro NÃO deve conter nenhuma nota de risco.
+        Pedreiro não está em NOTAS_RISCO_QUIMICO.
+        """
+        html = self._html(
+            "GHE 03 - Execução de Obra",
+            [("Pedreiro", "Exame Clínico"), ("Pedreiro", "Audiometria")],
+        )
+        assert "NOTA DE RISCO" not in html, (
+            "Nota de risco indevida para GHE com Pedreiro"
+        )
+        assert "Cromo hexavalente" not in html
+        assert "Tricloroetileno" not in html
+        assert "Metietilcetona" not in html
+
+    # ── Verificação da estrutura da nota ────────────────────────────────────
+
+    def test_nota_contem_todos_os_campos(self):
+        """A nota deve conter: cargo, agente, fundamento e exame_controle."""
+        html = self._html(
+            "GHE 09 - Encanador",
+            [("encanador", "Exame Clínico")],
+        )
+        assert "NOTA DE RISCO QUÍMICO" in html
+        assert "encanador" in html.lower()
+        assert "Metietilcetona (MEK)" in html
+        assert "Matriz Dra. Patrícia 06/2025" in html
+        assert "periodicidade semestral" in html
+
+    def test_notas_distintas_para_ghes_diferentes(self):
+        """Dois GHEs distintos geram notas distintas e independentes."""
+        from modules.modulo_pcmso import gerar_html_pcmso
+        df = pd.DataFrame([
+            {"GHE / Setor": "GHE 10 - Serralheria", "Cargo": "Serralheiro",
+             "Exame": "Exame Clínico",
+             "ADM": "X", "PER": "6M", "MRO": "X", "RT": "X", "DEM": "X"},
+            {"GHE / Setor": "GHE 09 - Hidrossanitária", "Cargo": "encanador",
+             "Exame": "Exame Clínico",
+             "ADM": "X", "PER": "6M", "MRO": "X", "RT": "-", "DEM": "-"},
+        ])
+        html = gerar_html_pcmso(df)
+        assert html.count("NOTA DE RISCO") == 2, (
+            f"Esperado 2 notas (1 por GHE), obtido {html.count('NOTA DE RISCO')}"
+        )
+        assert "Cromo hexavalente" in html
+        assert "Metietilcetona" in html
