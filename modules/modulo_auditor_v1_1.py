@@ -168,7 +168,7 @@ _ALIASES_CARGO_NORM = {
 
 def normalizar_cargo(nome) -> str:
     """
-    Normaliza nome de cargo para comparação ESTRITA contra o banco de exames.
+    Normaliza nome de cargo para comparação de GRAFIA (não colapsa cargo-filho → cargo-pai).
 
     Aplica em sequência:
       1. .strip() + .lower()
@@ -178,11 +178,10 @@ def normalizar_cargo(nome) -> str:
       4. Expande "meio of." e "meio of " → "meio oficial de "
          Ex: "meio of. de pedreiro" → "meio oficial de pedreiro"
       5. Remove pontuação isolada e espaços duplos
-      6. Resolve alias canônico via _ALIASES_CARGO_NORM
-         Ex: "tecnico de seguranca" → "tecnico de seguranca do trabalho"
 
-    Retorna string lowercase sem acentos. DEVE ser aplicada em AMBOS os lados
-    (input e chave do banco) para garantir igualdade simétrica.
+    Retorna string lowercase sem acentos. NÃO resolve aliases (não colapsa
+    "meio oficial de pintor" → "pintor"). Use resolver_alias_cargo() para
+    lookup no banco quando necessário.
     """
     if not nome:
         return ""
@@ -208,7 +207,16 @@ def normalizar_cargo(nome) -> str:
     s = re.sub(r"[\-\.\'\`]", ' ', s)
     s = re.sub(r'\s+', ' ', s).strip()
 
-    # 6. Resolve alias canônico
+    return s
+
+
+def resolver_alias_cargo(s: str) -> str:
+    """
+    Resolve alias canônico para lookup no banco de exames.
+    Ex: "meio oficial de pintor" → "pintor"
+    Aplica APÓS normalizar_cargo() para deduplicação ou busca no banco v1.
+    NÃO usar para deduplicação intra-GHE — isso colapsaria cargo-filho em cargo-pai.
+    """
     return _ALIASES_CARGO_NORM.get(s, s)
 
 
@@ -433,7 +441,11 @@ def buscar_exames_por_cargo(nome_cargo: str, banco: dict) -> list | None:
                                 melhor = candidato
             return melhor
 
-        resultado = _buscar_nome_v1(normalizar_cargo(nome_cargo))
+        cargo_norm_v1 = normalizar_cargo(nome_cargo)
+        resultado = _buscar_nome_v1(cargo_norm_v1)
+        if not resultado:
+            # Tenta com alias para compatibilidade com bancos v1 que usam cargo-pai
+            resultado = _buscar_nome_v1(resolver_alias_cargo(cargo_norm_v1))
         if resultado:
             return resultado
 
