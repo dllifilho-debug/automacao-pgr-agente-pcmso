@@ -15,7 +15,8 @@ import json
 import os
 import re
 import traceback
-from datetime import date
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
 
 import pandas as pd
 import streamlit as st
@@ -447,8 +448,22 @@ elif modulo == "Medicina: PGR - PCMSO":
                 cnpj = st.text_input("CNPJ *", value=cab.get("cnpj", ""))
                 medico_rt = st.text_input("Medico Responsavel RT (Nome + CRM) *", value=cab.get("medico_rt", ""))
             with col2:
-                vig_ini = st.date_input("Vigencia - Inicio", value=date.today())
-                vig_fim = st.date_input("Vigencia - Fim", value=date.today())
+                # Restaura datas do session_state para persistência entre reruns.
+                # Formato armazenado: "DD/MM/YYYY" → converte de volta para date.
+                def _parse_data(s: str, fallback: date) -> date:
+                    try:
+                        return datetime.strptime(s, "%d/%m/%Y").date() if s else fallback
+                    except ValueError:
+                        return fallback
+
+                _vig_ini_default = _parse_data(cab.get("vig_ini", ""), date.today())
+                # Bug C5: vig_fim padrão deve ser 1 ano a partir do início, não date.today()
+                _vig_fim_default = _parse_data(
+                    cab.get("vig_fim", ""),
+                    date.today() + relativedelta(years=1),
+                )
+                vig_ini = st.date_input("Vigencia - Inicio", value=_vig_ini_default)
+                vig_fim = st.date_input("Vigencia - Fim", value=_vig_fim_default)
                 resp_tec = st.text_input("Tecnico SST Responsavel (opcional)", value=cab.get("responsavel_tec", ""))
                 obra = st.text_input("Obra / Unidade (opcional)", value=cab.get("obra", ""))
             st.markdown("---")
