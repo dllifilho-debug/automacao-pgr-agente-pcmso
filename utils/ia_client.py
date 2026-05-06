@@ -78,3 +78,102 @@ Texto do PGR:
         return json.loads(_limpar_json(texto))
     except Exception:
         return []
+
+
+def extrair_pgr_estruturado_via_gemini(texto_pgr: str, chave: str) -> list | None:
+    """
+    Envia texto do PGR para o Gemini e retorna lista de GHEs estruturados.
+    Retorna None se a API falhar, a chave estiver vazia ou o JSON for inválido.
+
+    O prompt exige o schema:
+      {"ghes": [{"numero": "01", "titulo": "...", "cargos": [...], "riscos": [...]}]}
+
+    Retorno convertido para list[dict_ghe]:
+    [
+        {
+            "ghe": "GHE 01 - Estrutura de concreto armado",
+            "cargos": ["Carpinteiro", "Servente"],
+            "riscos_mapeados": [
+                {"nome_agente": "Ruído", "perigo_especifico": ""}
+            ],
+            "exames": []   # resolvido depois por processar_cargo_ia()
+        }
+    ]
+
+    Nunca lança exceção para o chamador — qualquer falha retorna None.
+    """
+    if not chave:
+        return None
+
+    prompt = (
+        "Você é um especialista em Saúde e Segurança do Trabalho (SST) brasileiro.\n"
+        "Analise o texto do PGR (Programa de Gerenciamento de Riscos) abaixo e extraia "
+        "todos os Grupos Homogêneos de Exposição (GHEs).\n\n"
+        "Retorne APENAS JSON válido, sem texto adicional, markdown ou explicações, "
+        "neste formato exato:\n"
+        '{\n'
+        '  "ghes": [\n'
+        '    {\n'
+        '      "numero": "01",\n'
+        '      "titulo": "Estrutura de concreto armado - Execução fôrma",\n'
+        '      "cargos": ["Carpinteiro", "Meio Oficial de Carpinteiro", "Servente"],\n'
+        '      "riscos": ["Ruído", "Poeira de madeira", "Trabalho em altura"]\n'
+        '    }\n'
+        '  ]\n'
+        '}\n\n'
+        "Regras obrigatórias:\n"
+        '- "numero" deve ser o número do GHE com dois dígitos (ex: "01", "07")\n'
+        '- "titulo" é a descrição do GHE sem o prefixo "GHE NN -" ou "GHE NN:"\n'
+        '- "cargos" são APENAS funções humanas (ex: Pedreiro, Eletricista, Carpinteiro) —'
+        ' NÃO inclua etapas, processos ou atividades da obra como cargos'
+        ' (NÃO inclua Alvenaria, Estrutura, Contrapiso, Impermeabilização, Pintura)\n'
+        '- "riscos" são os agentes de risco em linguagem natural\n'
+        '- Se não encontrar GHEs, retorne {"ghes": []}\n\n'
+        f"Texto do PGR:\n{texto_pgr[:40000]}"
+    )
+
+    try:
+        texto = _chamar_gemini(prompt, chave)
+        if not texto:
+            return None
+
+        dados = json.loads(_limpar_json(texto))
+
+        ghes_raw = dados.get("ghes")
+        if not isinstance(ghes_raw, list) or len(ghes_raw) == 0:
+            return None
+
+        resultado = []
+        for item in ghes_raw:
+            if not isinstance(item, dict):
+                continue
+
+            numero = str(item.get("numero", "")).strip().zfill(2)
+            titulo = str(item.get("titulo", "")).strip()
+            ghe_nome = (
+                f"GHE {numero} - {titulo}" if titulo else f"GHE {numero}"
+            )
+
+            cargos = [
+                str(c).strip()
+                for c in item.get("cargos", [])
+                if str(c).strip()
+            ]
+
+            riscos_mapeados = [
+                {"nome_agente": str(r).strip(), "perigo_especifico": ""}
+                for r in item.get("riscos", [])
+                if str(r).strip()
+            ]
+
+            resultado.append({
+                "ghe":             ghe_nome,
+                "cargos":          cargos,
+                "riscos_mapeados": riscos_mapeados,
+                "exames":          [],
+            })
+
+        return resultado if resultado else None
+
+    except Exception:
+        return None
