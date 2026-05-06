@@ -882,6 +882,22 @@ def _converter_ghe_blocos_para_lista(ghe_blocos: dict) -> list:
 
 
 def extrair_pgr_com_fallback(texto_pgr: str):
+    # ── Camada 0: Gemini (se chave disponível) ──────────────────────────────
+    # Tenta extração estruturada via LLM antes do parser regex.
+    # Qualquer falha (sem chave, API down, JSON inválido) cai silenciosamente
+    # para as camadas seguintes — nunca propaga exceção.
+    try:
+        import streamlit as st
+        chave = str(st.secrets.get("CHAVE_API_GOOGLE", "")).strip()
+        if chave:
+            from utils.ia_client import extrair_pgr_estruturado_via_gemini
+            dados_ia = extrair_pgr_estruturado_via_gemini(texto_pgr, chave)
+            if dados_ia and len(dados_ia) >= 2:
+                return dados_ia, "gemini"
+    except Exception:
+        pass
+
+    # ── Camada 1: parser_pgr regex (fallback primário) ───────────────────────
     # Bug #1 corrigido: parser_pgr exporta parsear_pgr(), não parsear_pgr_texto()
     try:
         from parser_pgr import parsear_pgr as _parsear_pgr_ext
@@ -892,6 +908,8 @@ def extrair_pgr_com_fallback(texto_pgr: str):
                 return dados, "local"
     except Exception:
         pass
+
+    # ── Camada 2: parser local interno (último recurso) ──────────────────────
     dados = _parsear_pgr_local(texto_pgr)
     fonte = "local" if dados else "vazio"
     return dados, fonte
