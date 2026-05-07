@@ -881,6 +881,66 @@ def _converter_ghe_blocos_para_lista(ghe_blocos: dict) -> list:
     return resultado
 
 
+def tentar_gemini_para_ghes_sem_cargo(texto_pgr: str):
+    """
+    Camada 0 isolada para o caminho principal de app.py.
+    Retorna (dados_ghe_ia, "gemini") em sucesso, ou (None, None) em qualquer falha.
+
+    Lê CHAVE_API_GOOGLE de st.secrets primeiro, depois de os.environ. Nunca lança.
+    """
+    import os as _os
+    chave = ""
+    _chave_origem = "nenhuma"
+    try:
+        import streamlit as _st
+        _chave_secrets = str(_st.secrets.get("CHAVE_API_GOOGLE", "")).strip()
+        if _chave_secrets:
+            chave = _chave_secrets
+            _chave_origem = "st.secrets"
+    except Exception as _e_st:
+        _chave_origem = f"st.secrets ERRO: {_e_st}"
+    if not chave:
+        chave = _os.environ.get("CHAVE_API_GOOGLE", "").strip()
+        if chave:
+            _chave_origem = "os.environ"
+
+    # DEBUG TEMPORÁRIO ─────────────────────────────────────────────────────────
+    try:
+        import streamlit as _st_dbg
+        _st_dbg.warning(
+            f"DEBUG Gemini helper: chave={'SIM (' + _chave_origem + ')' if chave else 'NÃO'} | "
+            f"origem={_chave_origem} | "
+            f"len_texto={len(texto_pgr)}"
+        )
+    except Exception:
+        pass
+    # ──────────────────────────────────────────────────────────────────────────
+
+    if not chave:
+        return None, None
+    try:
+        from utils.ia_client import extrair_pgr_estruturado_via_gemini
+        dados_ia = extrair_pgr_estruturado_via_gemini(texto_pgr, chave)
+        # DEBUG TEMPORÁRIO ─────────────────────────────────────────────────────
+        try:
+            import streamlit as _st_dbg2
+            _st_dbg2.warning(
+                f"DEBUG Gemini resultado: dados_ia={'None' if dados_ia is None else f'{len(dados_ia)} GHE(s)'}"
+            )
+        except Exception:
+            pass
+        # ──────────────────────────────────────────────────────────────────────
+        if dados_ia and len(dados_ia) >= 2:
+            return dados_ia, "gemini"
+    except Exception as _e_gemini:
+        try:
+            import streamlit as _st_dbg3
+            _st_dbg3.warning(f"DEBUG Gemini EXCEÇÃO: {type(_e_gemini).__name__}: {_e_gemini}")
+        except Exception:
+            pass
+    return None, None
+
+
 def extrair_pgr_com_fallback(texto_pgr: str):
     # ── Camada 0: Gemini (se chave disponível) ──────────────────────────────
     # Tenta extração estruturada via LLM antes do parser regex.

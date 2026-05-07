@@ -38,6 +38,7 @@ from modules.modulo_pcmso import (
     _distribuir_cargos_por_ghe,
     _coletar_cargos_globais,
     _traduzir_chave_para_texto,
+    tentar_gemini_para_ghes_sem_cargo,
 )
 
 st.set_page_config(
@@ -575,22 +576,39 @@ elif modulo == "Medicina: PGR - PCMSO":
                     if _cargos_sao_apenas_ghe_names(g.get("cargos", []))
                 ]
 
+                # DEBUG TEMPORÁRIO ─────────────────────────────────────────────
+                st.warning(f"DEBUG: _ghe_sem_cargo_real = {len(_ghe_sem_cargo_real)} GHE(s)")
+                st.warning(f"DEBUG: cargos detectados = {[g.get('cargos', []) for g in dados_ghe[:3]]}")
+                # ──────────────────────────────────────────────────────────────
+
                 if _ghe_sem_cargo_real:
-                    # Fallback: tenta coletar cargos globais da seção FUNÇÕES do PDF
-                    try:
-                        _cargos_globais = _coletar_cargos_globais(texto_pgr.split("\n"))
-                        if _cargos_globais:
-                            _distribuir_cargos_por_ghe(_cargos_globais, _ghe_sem_cargo_real)
-                            n_dist = sum(len(g.get("cargos", [])) for g in _ghe_sem_cargo_real)
-                            st.info(
-                                f"ℹ️ {len(_cargos_globais)} cargo(s) reais coletados da seção FUNÇÕES "
-                                f"e distribuídos por tipo para {len(_ghe_sem_cargo_real)} GHE(s) "
-                                f"({n_dist} atribuições no total)."
-                            )
-                        else:
-                            st.warning("⚠️ Seção FUNÇÕES não encontrada no PDF — tentando Supabase...")
-                    except Exception as _e_inj:
-                        st.warning(f"⚠️ Injeção de cargos reais falhou: {_e_inj}")
+                    # ── Camada 0: Gemini (se chave disponível) ──────────────────
+                    # Quando GHEs voltam sem cargos reais, o PGR provavelmente lista
+                    # cargos numa seção global FUNÇÕES sem associação direta ao GHE.
+                    # Heurística regex erra a associação — Gemini lê o documento
+                    # estruturadamente e infere cargo↔GHE corretamente.
+                    dados_ia, _fonte_ia = tentar_gemini_para_ghes_sem_cargo(texto_pgr)
+                    if _fonte_ia == "gemini" and dados_ia:
+                        dados_ghe = dados_ia
+                        fonte = "gemini"
+                        st.info(f"🤖 {len(dados_ia)} GHE(s) extraídos via Gemini")
+
+                    # Fallback: cargos globais + distribuição heurística (só se Gemini falhar)
+                    if fonte != "gemini":
+                        try:
+                            _cargos_globais = _coletar_cargos_globais(texto_pgr.split("\n"))
+                            if _cargos_globais:
+                                _distribuir_cargos_por_ghe(_cargos_globais, _ghe_sem_cargo_real)
+                                n_dist = sum(len(g.get("cargos", [])) for g in _ghe_sem_cargo_real)
+                                st.info(
+                                    f"ℹ️ {len(_cargos_globais)} cargo(s) reais coletados da seção FUNÇÕES "
+                                    f"e distribuídos por tipo para {len(_ghe_sem_cargo_real)} GHE(s) "
+                                    f"({n_dist} atribuições no total)."
+                                )
+                            else:
+                                st.warning("⚠️ Seção FUNÇÕES não encontrada no PDF — tentando Supabase...")
+                        except Exception as _e_inj:
+                            st.warning(f"⚠️ Injeção de cargos reais falhou: {_e_inj}")
                 else:
                     # Todos os GHEs já vieram com cargos reais do parser_pgr ✅
                     _n_cargos_total = sum(len(g.get("cargos", [])) for g in dados_ghe)
@@ -642,7 +660,7 @@ elif modulo == "Medicina: PGR - PCMSO":
 
             if fonte == "local":
                 st.success("Dados extraidos localmente — sem consumo de IA!")
-            elif fonte == "ia":
+            elif fonte in ("ia", "gemini"):
                 st.info("Dados extraidos via IA (Gemini).")
             else:
                 st.warning("Extracao parcial — revise os resultados.")
