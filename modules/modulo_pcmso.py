@@ -684,12 +684,14 @@ def gerar_docx_rq61(df, cabecalho=None):
     from docx.shared import Cm, Pt, RGBColor
     if not cabecalho:
         cabecalho = {}
-    razao = cabecalho.get('razao_social', 'Empresa não informada')
-    obra = cabecalho.get('obra', '---')
-    medico = cabecalho.get('medico_rt', 'Não informado')
-    crm = cabecalho.get('crm', '')
-    vig_i = cabecalho.get('vig_ini', '---')
-    tipo = cabecalho.get('tipo_obra', 'Renovação')
+    razao    = cabecalho.get('razao_social',    'Empresa não informada')
+    cnpj     = cabecalho.get('cnpj',            '---')
+    obra     = cabecalho.get('obra',            '---')
+    medico   = cabecalho.get('medico_rt',       'Não informado')
+    crm      = cabecalho.get('crm',             '')
+    resp_tec = cabecalho.get('responsavel_tec', '---')
+    vig_i    = cabecalho.get('vig_ini',         '---')
+    tipo     = cabecalho.get('tipo_obra',       'Renovação')
     VERDE_ESC = '084D22'
     VERDE_MED = '1AA04B'
     BRANCO = RGBColor(0xFF, 0xFF, 0xFF)
@@ -747,23 +749,32 @@ def gerar_docx_rq61(df, cabecalho=None):
         sec.bottom_margin = Cm(1.5)
         sec.left_margin = Cm(2.0)
         sec.right_margin = Cm(1.5)
-    cab = doc.add_table(rows=4, cols=4)
+    cab = doc.add_table(rows=5, cols=4)
     cab.style = 'Table Grid'
+    # Linha 0 — título (largura total)
     cab.rows[0].cells[0].merge(cab.rows[0].cells[3])
     shd(cab.rows[0].cells[0], VERDE_ESC)
     txt(cab.rows[0].cells[0], 'MATRIZ FUNÇÃO – EXAMES PCMSO', bold=True, color=BRANCO, size=13, align=WD_ALIGN_PARAGRAPH.CENTER)
+    # Linha 1 — Empresa | CNPJ
     cab.rows[1].cells[0].merge(cab.rows[1].cells[1])
     cab.rows[1].cells[2].merge(cab.rows[1].cells[3])
     txt(cab.rows[1].cells[0], f'Empresa: {razao}', bold=True, size=9)
-    adendo_txt = f'Obra Nova (   )   {tipo} ( X )' if str(tipo).lower() == 'renovação' else 'Obra Nova ( X )   Renovação (   )'
-    txt(cab.rows[1].cells[2], adendo_txt, size=9)
+    txt(cab.rows[1].cells[2], f'CNPJ: {cnpj}', bold=True, size=9)
+    # Linha 2 — Obra | Tipo
     cab.rows[2].cells[0].merge(cab.rows[2].cells[1])
     cab.rows[2].cells[2].merge(cab.rows[2].cells[3])
-    txt(cab.rows[2].cells[0], f'Obra: {obra}', bold=True, size=9)
-    txt(cab.rows[2].cells[2], f"Data: {datetime.now().strftime('%d/%m/%Y')}", bold=True, size=9)
-    cab.rows[3].cells[0].merge(cab.rows[3].cells[3])
+    txt(cab.rows[2].cells[0], f'Obra/Unidade: {obra}', bold=True, size=9)
+    adendo_txt = f'Obra Nova (   )   {tipo} ( X )' if str(tipo).lower() == 'renovação' else 'Obra Nova ( X )   Renovação (   )'
+    txt(cab.rows[2].cells[2], adendo_txt, size=9)
+    # Linha 3 — Resp. SST | Data
+    cab.rows[3].cells[0].merge(cab.rows[3].cells[1])
+    cab.rows[3].cells[2].merge(cab.rows[3].cells[3])
+    txt(cab.rows[3].cells[0], f'Resp. SST: {resp_tec}', size=9)
+    txt(cab.rows[3].cells[2], f"Data: {datetime.now().strftime('%d/%m/%Y')}", bold=True, size=9)
+    # Linha 4 — Médico (largura total)
+    cab.rows[4].cells[0].merge(cab.rows[4].cells[3])
     crm_txt = f'  CRM-GO {crm}' if crm else ''
-    txt(cab.rows[3].cells[0], f'Médico(a) Coordenador(a) do PCMSO: {medico}{crm_txt}', size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
+    txt(cab.rows[4].cells[0], f'Médico(a) Coordenador(a) do PCMSO: {medico}{crm_txt}', size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
     doc.add_paragraph()
     ghe_grupos = {}
     for _, row in df.iterrows():
@@ -796,8 +807,20 @@ def gerar_docx_rq61(df, cabecalho=None):
                 set_borders(row_ex.cells[0])
                 set_borders(row_ex.cells[1])
                 txt(row_ex.cells[1], exame_str, size=9)
+            # Nota de risco químico: merge horizontal (única vez por cargo)
+            notas_risco = sorted({
+                str(r.get('Justificativa', ''))
+                for r in rows_cargo
+                if str(r.get('Justificativa', '')).startswith('Exposição:')
+            })
+            if notas_risco:
+                row_nota = tbl.add_row()
+                row_nota.cells[0].merge(row_nota.cells[1])
+                set_borders(row_nota.cells[0])
+                txt(row_nota.cells[0], 'Nota risco químico: ' + ' | '.join(notas_risco),
+                    size=8, italic=True)
         doc.add_paragraph()
-    p = doc.add_paragraph(f"Responsável pelo preenchimento: {cabecalho.get('responsavel_tec', '---')}\nMédico(a) Responsável pela validação: {medico}{(' CRM-GO ' + crm) if crm else ''}\nData do PCMAT/PGR: {vig_i}")
+    p = doc.add_paragraph(f"Médico(a) Responsável pela validação: {medico}{(' CRM-GO ' + crm) if crm else ''}\nData do PCMAT/PGR: {vig_i}")
     p.runs[0].font.size = Pt(8)
     buf = io.BytesIO()
     doc.save(buf)

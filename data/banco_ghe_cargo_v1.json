@@ -1,0 +1,70 @@
+{
+  "GHE_ESTRUTURA_BETONEIRA": {
+    "titulo_referencia": "Preparação argamassa / Operação betoneira",
+    "riscos_tipicos": ["Poeira Mineral", "Ruído", "Sílica"],
+    "exames": [
+      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
+      {"nome": "Audiometria",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
+      {"nome": "Espirometria",  "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
+      {"nome": "RX de Tórax OIT", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true}
+    ]
+  },
+  "GHE_ESTRUTURA_SERRALHERIA": {
+    "titulo_referencia": "Solda / Serralheria",
+    "riscos_tipicos": ["Fumos Metálicos", "Manganês", "Cromo", "Ruído"],
+    "exames": [
+      {"nome": "Exame Clínico",     "adm": true,  "per": "6",  "mro": true,  "ret": true,  "dem": true},
+      {"nome": "Audiometria",       "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": true},
+      {"nome": "Acuidade Visual",   "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
+      {"nome": "Hemograma",         "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
+      {"nome": "Glicemia em Jejum", "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
+      {"nome": "ECG",               "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
+      {"nome": "Manganês sanguíneo","adm": true,  "per": "6",  "mro": true,  "ret": false, "dem": false},
+      {"nome": "Carboxiemoglobina", "adm": false, "per": "6",  "mro": false, "ret": false, "dem": false},
+      {"nome": "Espirometria",      "adm": true,  "per": "24", "mro": true,  "ret": false, "dem": true},
+      {"nome": "RX de Tórax OIT",  "adm": true,  "per": "60", "mro": true,  "ret": false, "dem": true}
+    ]
+  },
+  "GHE_ESTRUTURA_FORMA": {
+    "titulo_referencia": "Estrutura de concreto armado / Execução fôrma de pilar e laje",
+    "riscos_tipicos": ["Poeira Mineral", "Ruído", "Sílica", "Trabalho em Altura"],
+    "exames": [
+      {"nome": "Exame Clínico",     "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
+      {"nome": "Audiometria",       "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
+      {"nome": "Acuidade Visual",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Hemograma",         "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "ECG",               "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Espirometria",      "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
+      {"nome": "RX de Tórax OIT",  "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+    ]
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_MONT": {
+    "titulo_referencia": "Elevador cremalheira / Montagem, manutenção",
+    "riscos_tipicos": ["Trabalho em Altura", "Ruído", "Risco Elétrico"],
+    "exames": [
+      {"nome": "Exame Clínico",     "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
+      {"nome": "Audiometria",       "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
+      {"nome": "Acuidade Visual",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Hemograma",         "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "ECG",               "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Espirometria",      "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
+      {"nome": "RX de Tórax OIT",  "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+    ]
+  },
+  "GHE_ESTRUTURA_HIDRO": {
+    "titulo_referencia": "Tubulação de parede e teto / Instalações hidro-sanitárias",
+    "riscos_tipicos": ["Ruído", "Poeira Mineral", "Agentes Químicos Diversos"],
+    "exames": [
+      {"nome": "Exame Clínico",     "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
+      {"nome": "Audiometria",       "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
+      {"nome": "Acuidade Visual",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Hemograma",         "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "ECG",               "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
+      {"nome": "Espirometria",      "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
+      {"nome": "RX de Tórax OIT",  "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
+    ]
+  }
+}
