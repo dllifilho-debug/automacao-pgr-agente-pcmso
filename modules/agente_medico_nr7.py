@@ -18,7 +18,8 @@ _BANCO_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "banco_risco
 
 def _carregar_banco() -> dict:
     with open(_BANCO_PATH, encoding="utf-8") as f:
-        return json.load(f)["riscos"]
+        data = json.load(f)
+    return data.get("riscos", data)
 
 
 _BANCO: dict = _carregar_banco()
@@ -32,12 +33,34 @@ def _norm(texto: str) -> str:
 
 
 # ── Match de riscos ────────────────────────────────────────────
+def _keywords(chave: str, dados) -> list:
+    """Extrai keywords de uma entrada do banco, independentemente do formato."""
+    if isinstance(dados, dict):
+        return dados.get("keywords", [chave])
+    # formato plano: a própria chave é o keyword
+    return [chave]
+
+
+def _exames_entry(dados) -> list:
+    """Extrai lista de exames de uma entrada do banco, independentemente do formato."""
+    if isinstance(dados, dict):
+        return dados.get("exames", [])
+    if isinstance(dados, list):
+        return dados
+    return []
+
+
+def _nome_exame(exame: dict) -> str:
+    """Lê o nome do exame tolerando tanto 'nome' quanto 'exame' como chave."""
+    return exame.get("nome") or exame.get("exame") or ""
+
+
 def _match_risco(texto_risco: str) -> list:
     texto_n = _norm(texto_risco)
     matches = []
     for chave, dados in _BANCO.items():
-        for kw in dados.get("keywords", []):
-            if _norm(kw) in texto_n:
+        for kw in _keywords(chave, dados):
+            if _norm(kw) in texto_n or texto_n in _norm(kw):
                 matches.append(chave)
                 break
     return matches
@@ -78,8 +101,8 @@ def montar_exames_ghe(riscos: list) -> list:
     exames_map = {}
 
     for chave in chaves:
-        for exame in _BANCO[chave]["exames"]:
-            nome = exame["nome"]
+        for exame in _exames_entry(_BANCO.get(chave, [])):
+            nome = _nome_exame(exame)
             if nome not in exames_map:
                 exames_map[nome] = {
                     "nome":          nome,

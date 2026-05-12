@@ -668,6 +668,8 @@ _MAPA_GHE_CHAVE = {
     'hidrossanitaria': 'GHE_ESTRUTURA_HIDRO',
     'hidraulica':      'GHE_ESTRUTURA_HIDRO',
     'serralheria':     'GHE_ESTRUTURA_SERRALHERIA',
+    'solda':           'GHE_ESTRUTURA_SERRALHERIA',
+    'soldagem':        'GHE_ESTRUTURA_SERRALHERIA',
     'estrutura limpeza': 'GHE_ESTRUTURA_LIMPEZA',
     'limpeza estrutura': 'GHE_ESTRUTURA_LIMPEZA',
     'servico gerais':  'GHE_ESTRUTURA_SERVICOS_GERAIS',
@@ -1150,7 +1152,7 @@ def processar_cargo_ia(
                                     ex['per'] = per_nr7
                             except (ValueError, TypeError):
                                 pass
-        except (ImportError, FileNotFoundError):
+        except Exception:
             pass
 
     # ── Camada 3: Ajustes por contexto

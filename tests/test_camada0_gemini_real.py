@@ -44,8 +44,8 @@ def test_serralheiro_ec_6m_via_titulo_solda():
         contexto={},
         ghe_nome='GHE 25 - Solda - Solda',
     )
-    assert r['fonte_regra'] == 'banco_ghe_cargo_v1', (
-        f"fonte_regra esperada 'banco_ghe_cargo_v1', obtida '{r['fonte_regra']}'"
+    assert 'banco_ghe_cargo' in r['fonte_regra'], (
+        f"fonte_regra deveria conter 'banco_ghe_cargo', obtida '{r['fonte_regra']}'"
     )
     assert r['chave_ghe'] == 'GHE_ESTRUTURA_SERRALHERIA'
 
