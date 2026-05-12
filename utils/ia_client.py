@@ -129,7 +129,7 @@ def extrair_pgr_estruturado_via_gemini(texto_pgr: str, chave: str) -> list | Non
         ' (NÃO inclua Alvenaria, Estrutura, Contrapiso, Impermeabilização, Pintura)\n'
         '- "riscos" são os agentes de risco em linguagem natural\n'
         '- Se não encontrar GHEs, retorne {"ghes": []}\n\n'
-        f"Texto do PGR:\n{texto_pgr[:40000]}"
+        f"Texto do PGR:\n{texto_pgr}"
     )
 
     try:

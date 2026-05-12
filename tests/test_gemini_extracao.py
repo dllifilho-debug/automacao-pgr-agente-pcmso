@@ -202,8 +202,8 @@ class TestExtracaoConvertRiscosParaDict:
         assert resultado is not None
         assert resultado[0]["ghe"].startswith("GHE 07 - ")
 
-    def test_pgr_truncado_a_40000_chars(self):
-        """Confirma que o texto enviado à API nunca excede 40 000 chars."""
+    def test_pgr_enviado_completo_sem_truncamento(self):
+        """PGR deve ser enviado completo ao Gemini — GHEs podem estar após char 40000."""
         texto_longo = "X" * 100_000
         chamadas = []
 
@@ -215,7 +215,6 @@ class TestExtracaoConvertRiscosParaDict:
             extrair_pgr_estruturado_via_gemini(texto_longo, _CHAVE_FAKE)
 
         assert chamadas, "API não foi chamada"
-        # O prompt inclui o texto truncado: confirma que os X's não excedem 40k
-        assert chamadas[0].count("X") <= 40_000, (
-            f"Texto enviado tem {chamadas[0].count('X')} chars de PGR, esperado <= 40000"
+        assert chamadas[0].count("X") == 100_000, (
+            f"Texto enviado tem {chamadas[0].count('X')} chars de PGR, esperado 100000 (completo)"
         )
