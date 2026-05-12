@@ -133,7 +133,7 @@ def extrair_pgr_estruturado_via_gemini(texto_pgr: str, chave: str) -> list | Non
     )
 
     try:
-        texto = _chamar_gemini(prompt, chave)
+        texto = _chamar_gemini(prompt, chave, max_tokens=32768)
         if not texto:
             return None
 

@@ -1268,3 +1268,31 @@ def auditar_pcmso(df, dados_ghe: list = None) -> dict:
         'aprovado': aprovado,
         'resumo': resumo,
     }
+
+
+def relatorio_qualidade_pgr(dados_ghe: list, texto_pgr: str = '') -> dict:
+    """F5 — Avalia completude do PGR antes de processar."""
+    total_ghes = len(dados_ghe)
+    total_cargos = sum(len(g.get('cargos', [])) for g in dados_ghe)
+    return {
+        'apto_para_pcmso': total_ghes > 0,
+        'score': min(100, total_ghes * 6 + total_cargos),
+        'total_ghes': total_ghes,
+        'total_cargos': total_cargos,
+        'problemas': [] if total_ghes > 0 else ['Nenhum GHE extraído'],
+    }
+
+
+def gerar_justificativa_ghe(
+    ghe_nome: str,
+    cargos: list,
+    riscos: list,
+    exames_nomes: list,
+) -> str:
+    """F6 — Gera parágrafo técnico por GHE."""
+    riscos_str = ', '.join(riscos[:3]) if riscos else 'não identificados'
+    cargos_str = ', '.join(cargos[:3]) if cargos else 'não informados'
+    return (
+        f"{ghe_nome}: cargos expostos ({cargos_str}) a {riscos_str}. "
+        f"Exames prescritos conforme NR-7 e Matriz Dra. Patrícia 06/2025."
+    )
