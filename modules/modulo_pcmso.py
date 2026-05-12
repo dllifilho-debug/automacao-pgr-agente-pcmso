@@ -1,828 +1,1757 @@
+# =============================================================================
+# MÓDULO PCMSO v9.6 — Motor completo com Agente Médico IA v2.2
+# Novidades v9.6:
+#   FIX CRÍTICO _distribuir_cargos_por_ghe:
+#     - quando _tipo_do_ghe() retorna None (GHE sem keyword reconhecida),
+#       em vez de copiar TODOS os 23 cargos para aquele GHE, tenta inferir
+#       os cargos relevantes a partir dos riscos mapeados no próprio bloco.
+#     - Se riscos também não ajudam, usa a lista completa (comportamento
+#       anterior) mas só como último recurso — agora logado explicitamente.
+#     - Adiciona _RISCOS_PARA_TIPOS: mapa de palavras no risco → tipos de GHE
+#       para enriquecer a inferência de tipo sem depender apenas do nome do GHE.
+# Novidades v9.5:
+#   FIX gerar_docx_rq61: células GHE/Cargo mergeadas verticalmente por bloco
+#   FIX gerar_html_pcmso: rowspan correto em GHE e Cargo (sem repetição)
+#   Formato final idêntico ao modelo de referência (PDF VIVERDE)
+# Novidades v9.4:
+#   FIX CRÍTICO: ghe_nome passado para processar_cargo_ia() — Camada 0 ativada
+#   FIX: auditoria_nr7 exibida em expander por GHE no app
+#   UPD: versão referenciada atualizada para AgenteMedicoIA v2.2
+# Novidades v9.3:
+#   Remove bloco DEBUG v9.2 de _parsear_pgr_local após validação
+#   da distribuição inteligente de cargos por GHE (PDF Viverde confirmado).
+# Novidades v9.2:
+#   FIX _distribuir_cargos_por_ghe: verificava bloco.get("cargos") antes de
+#   distribuir — mas blocos vindos do parser_pgr chegam com cargos=["GHE 01-..."],
+#   que é truthy → pulava todos os blocos → 1 cargo/GHE (o nome do GHE).
+#   Agora verifica se os cargos são REAIS (não nomes de GHE) antes de pular.
+# =============================================================================
+
 import io
+import os
 import re
 import unicodedata
 from copy import deepcopy
-from datetime import datetime
+from datetime import date
 
-import pdfplumber
 import pandas as pd
 
-from data.matriz_exames import MATRIZ_FUNCAO_EXAME, MATRIZ_RISCO_EXAME
-from utils.cargo_utils import MAPA_CARGOS_CONHECIDOS, PALAVRAS_EXCLUIR_CARGO, normalizar_cargo, normalizar_texto
-from utils.exame_utils import adicionar_exame_dedup
-from utils.biologico_utils import CHAVES_BIOLOGICAS_MATRIZ, tem_risco_biologico_real
+VERSAO_MODULO_PCMSO = "9.6 (AgenteMedicoIA v2.2 + distribuição inteligente por risco)"
 
-VERSAO_MODULO_PCMSO = '5.1'
+# ---------------------------------------------------------------------------
+# Import do Agente Médico IA v2.0
+# ---------------------------------------------------------------------------
+try:
+    from modules.agente_medico_ia import (
+        processar_cargo_ia,
+        resolver_chave_mestra as _resolver_chave,
+        auditar_pcmso,
+        relatorio_qualidade_pgr,
+        gerar_justificativa_ghe,
+        enriquecer_contexto_por_riscos,
+        carregar_cargos_desconhecidos,
+    )
+    _AGENTE_IA_DISPONIVEL = True
+except ImportError:
+    try:
+        from agente_medico_ia import (
+            processar_cargo_ia,
+            resolver_chave_mestra as _resolver_chave,
+            auditar_pcmso,
+            relatorio_qualidade_pgr,
+            gerar_justificativa_ghe,
+            enriquecer_contexto_por_riscos,
+            carregar_cargos_desconhecidos,
+        )
+        _AGENTE_IA_DISPONIVEL = True
+    except ImportError:
+        _AGENTE_IA_DISPONIVEL = False
+        _resolver_chave = None
+        auditar_pcmso = None
+        relatorio_qualidade_pgr = None
+        gerar_justificativa_ghe = None
+        enriquecer_contexto_por_riscos = None
+        carregar_cargos_desconhecidos = None
 
-_INVALIDOS_GHE = [
-    'QUANTIDADE', 'PREVISTOS', 'EXPOSTOS', 'TOTAL DE', 'NUMERO DE',
-    'FUNCIONARIOS', 'TRABALHADORES', 'MEDIDAS DE CONTROLE',
-    'FONTE GERADORA', 'TRAJETORIA', 'DESCRICAO', 'ATIVIDADES EXERCIDAS',
-    'INFORMACOES SOBRE', 'PAGINA DE REVISAO', 'IDENTIFICACAO DA EMPRESA',
-    'COMUNICAR', 'DESEMPENHA ATIVIDADES', 'UTILIZAM-SE', 'DIRETORES DA',
-    'DURANTE O DESENVOLVIMENTO', 'OCULOS DE', 'NIVEIS BAIXOS', 'IMPORTANCIA',
-    'PERMANENTE ELEVADISSIMA', 'INTERMITENTE', 'ATIVIDADES DE -',
-    'ATIVIDADES, UTILIZAM', 'ATIVIDADES PERMANENTE', 'DESENVOLV',
+try:
+    from data.dicionario_cas import DICIONARIO_CAS
+except ImportError:
+    DICIONARIO_CAS = {}
+
+# Importa normalizar_cargo (Prompt 1) para deduplicação intra-GHE
+try:
+    from modules.modulo_auditor_v1_1 import normalizar_cargo as _normalizar_cargo_aud
+except ImportError:
+    try:
+        from modulo_auditor_v1_1 import normalizar_cargo as _normalizar_cargo_aud
+    except ImportError:
+        _normalizar_cargo_aud = None
+
+
+# ============================================================================
+# 1 — EXTRAÇÃO DE TEXTO DO PDF
+# ============================================================================
+
+_MIN_CHARS_POR_PAGINA = 150
+
+_ASSINATURA_KEYWORDS = [
+    "autenticação eletrônica", "autenticacao eletronica",
+    "página de assinaturas", "pagina de assinaturas",
+    "hash sha256", "identificador:", "clicksign", "docusign",
+    "signatário", "signatario", "escaneie a imagem para verificar",
 ]
 
-_INVALIDOS_GHE_REGEX = [
-    r'^-\s+\w', r'comunicar', r'desempenha', r'utilizam.se',
-    r'diretores\s+da', r'durante\s+o\s+desenvolv', r'oculos\s+de',
-    r'niveis\s+baixos', r'permanente\s+elevad', r'intermitente\s+niveis',
-    r'em\s+fun.ao\s+das', r'atividades\s+de\s+-', r'atividades\s+desempenh',
-    r'riscos\s+ocupacionais', r'altura,\s+em\s+fun', r'para\s+execu',
-    r'que\s+executam', r'os\s+trabalhadores', r'expostos\s+a',
-    r'conforme\s+', r'verificar\s+', r'realizar\s+', r'responsav',
-    r'^\w\)\s+', r'departamento de seguranca', r'quantitativa',
-    r'para verifica', r'avalia.ao quantitativa', r'confirma.ao da categoria',
-    r'monitoramento peri', r'medidas de controle', r'grau\s+\d',
-    r'avaliacao quantitativa do setor', r'iniciar processo',
-    r'confirmacao da categoria', r'monitoramento periodico',
-    r'neste\s+ghe', r'expostos\s+neste', r'quantidade\s+de\s+func',
+
+def _texto_esta_vazio(texto: str, num_paginas: int) -> bool:
+    if not texto or not texto.strip():
+        return True
+    return (len(texto) / max(num_paginas, 1)) < _MIN_CHARS_POR_PAGINA
+
+
+def _e_pagina_assinatura(texto_pagina: str) -> bool:
+    if not texto_pagina:
+        return False
+    t = texto_pagina.lower()
+    return any(kw in t for kw in _ASSINATURA_KEYWORDS)
+
+
+def _extrair_ocr(data: bytes, num_paginas_total: int = 0) -> str:
+    texto = ""
+    try:
+        from pdf2image import convert_from_bytes
+        import pytesseract
+    except ImportError as e:
+        return f"[OCR indisponivel: {e}]"
+
+    dpi = 200 if num_paginas_total > 50 else 250
+    try:
+        paginas = convert_from_bytes(data, dpi=dpi)
+    except Exception as e:
+        return f"[OCR: falha na conversao de paginas: {e}]"
+
+    total = len(paginas)
+    paginas_processar = paginas
+    if total > 1:
+        try:
+            import pytesseract
+            ultima_texto = pytesseract.image_to_string(paginas[-1], lang="por+eng", config="--psm 6 --oem 3")
+            if _e_pagina_assinatura(ultima_texto):
+                paginas_processar = paginas[:-1]
+                total = len(paginas_processar)
+        except Exception:
+            pass
+
+    config_tess = "--psm 6 --oem 3"
+    _progress_bar = None
+    _status_ctx = None
+    try:
+        import streamlit as st
+        _status_ctx = st.status(f"🔍 OCR em andamento — {total} páginas (DPI={dpi})...", expanded=False)
+        _status_ctx.__enter__()
+        _progress_bar = st.progress(0, text="Iniciando OCR...")
+    except Exception:
+        pass
+
+    _cv2_ok = False
+    try:
+        import cv2
+        _cv2_ok = True
+    except ImportError:
+        pass
+
+    for i, img in enumerate(paginas_processar):
+        try:
+            if _cv2_ok:
+                import numpy as np
+                from PIL import Image
+                img_array = np.array(img.convert("RGB"))
+                cinza = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+                _, binaria = cv2.threshold(cinza, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                img_proc = Image.fromarray(binaria)
+            else:
+                img_proc = img
+            t = pytesseract.image_to_string(img_proc, lang="por+eng", config=config_tess)
+            if t and t.strip():
+                texto += t + "\n"
+        except Exception:
+            try:
+                t = pytesseract.image_to_string(img, lang="por+eng", config=config_tess)
+                texto += (t or "") + "\n"
+            except Exception:
+                pass
+        if _progress_bar is not None:
+            try:
+                _progress_bar.progress(int((i + 1) / total * 100), text=f"OCR: página {i + 1}/{total}")
+            except Exception:
+                pass
+
+    if _status_ctx is not None:
+        try:
+            _progress_bar.progress(100, text="OCR concluído ✅")
+            _status_ctx.__exit__(None, None, None)
+        except Exception:
+            pass
+
+    return texto
+
+
+def extrair_texto_pdf(pdf_file) -> str:
+    if hasattr(pdf_file, "read"):
+        pdf_file.seek(0)
+        data = pdf_file.read()
+    else:
+        data = bytes(pdf_file)
+
+    num_paginas = 1
+    texto = ""
+
+    try:
+        import pdfplumber
+        with pdfplumber.open(io.BytesIO(data)) as pdf:
+            num_paginas = max(len(pdf.pages), 1)
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    texto += t + "\n"
+        if not _texto_esta_vazio(texto, num_paginas):
+            return texto
+    except Exception:
+        pass
+
+    texto_fitz = ""
+    try:
+        import fitz
+        doc = fitz.open(stream=data, filetype="pdf")
+        num_paginas = max(len(doc), 1)
+        for page in doc:
+            t = page.get_text()
+            if t:
+                texto_fitz += t + "\n"
+        if not _texto_esta_vazio(texto_fitz, num_paginas):
+            return texto_fitz
+    except Exception:
+        pass
+
+    texto_ocr = _extrair_ocr(data, num_paginas_total=num_paginas)
+    return texto_ocr if texto_ocr.strip() else (texto or texto_fitz or "")
+
+
+# ============================================================================
+# 2 — PARSER LOCAL DE PGR (v9.6)
+# ============================================================================
+
+def _normalizar(texto: str) -> str:
+    if not texto:
+        return ""
+    nfkd = unicodedata.normalize("NFKD", str(texto))
+    return nfkd.encode("ASCII", "ignore").decode("ASCII").lower().strip()
+
+
+# ---------------------------------------------------------------------------
+# Mapa de tipos de GHE: palavras-chave no nome do GHE → tipo
+# ---------------------------------------------------------------------------
+_TIPOS_GHE_KW = {
+    "engenharia":    ["engenharia", "planejamento", "projeto", "coordenacao", "direcao", "gerencia"],
+    "seguranca":     ["seguranca", "sst", "prevencao"],
+    "execucao":      ["execucao", "obra", "operacao", "estrutura", "alvenaria",
+                      "fundacao", "construcao", "canteiro", "servicos"],
+    "supervisao":    ["supervisao", "rejunte", "limpeza", "acabamento", "pintura", "revestimento"],
+    "administracao": ["administracao", "campo", "gestao", "administrativo", "apoio"],
+    "almoxarifado":  ["almoxarifado", "deposito", "estoque", "material"],
+}
+
+# ---------------------------------------------------------------------------
+# v9.6 — Mapa de riscos → tipos de GHE (para inferência quando nome do GHE
+# não contém keywords conhecidas)
+# ---------------------------------------------------------------------------
+_RISCOS_PARA_TIPOS = {
+    "ruido":            {"execucao", "supervisao", "almoxarifado"},
+    "vibracao":         {"execucao"},
+    "altura":           {"execucao", "supervisao"},
+    "confinado":        {"execucao"},
+    "eletric":          {"execucao", "seguranca"},
+    "quimico":          {"execucao", "supervisao"},
+    "poeira":           {"execucao", "supervisao", "almoxarifado"},
+    "solda":            {"execucao"},
+    "tinta":            {"execucao", "supervisao"},
+    "ergon":            {"execucao", "administracao", "almoxarifado"},
+    "psicossocial":     {"administracao", "seguranca", "engenharia"},
+    "biologico":        {"execucao"},
+}
+
+# ---------------------------------------------------------------------------
+# Mapa de cargos: palavras-chave no NOME DO CARGO → tipos de GHE que aceitam
+# ---------------------------------------------------------------------------
+_CARGO_TIPOS = [
+    (["engenheiro"],                                                      {"engenharia"}),
+    (["tecnico de seguranca", "tecnico seguranca", " tst"],               {"engenharia", "seguranca"}),
+    (["estagiario", "estagiaria"],                                        {"engenharia", "seguranca"}),
+    (["mestre"],                                                          {"administracao"}),
+    (["aux adm", "auxiliar adm", "assistente adm",
+      "assistente administrativo", "administrativo"],                     {"administracao"}),
+    (["porteiro", "vigia"],                                               {"administracao"}),
+    (["aprendiz"],                                                        {"administracao"}),
+    (["almoxarife"],                                                       {"almoxarifado"}),
+    (["pintor"],                                                          {"supervisao", "execucao"}),
+    (["gesseiro"],                                                        {"supervisao", "execucao"}),
+    (["pedreiro"],                                                        {"execucao", "supervisao"}),
+    (["servente"],                                                        {"execucao", "supervisao"}),
+    (["encarregado", "supervisor de"],                                    {"execucao", "supervisao"}),
+    (["azulejista", "assentador de ceramica"],                            {"execucao", "supervisao"}),
+    (["carpinteiro"],                                                     {"execucao"}),
+    (["eletricista"],                                                     {"execucao"}),
+    (["armador"],                                                         {"execucao"}),
+    (["encanador"],                                                       {"execucao"}),
+    (["serralheiro"],                                                     {"execucao"}),
+    (["impermeabilizador"],                                               {"execucao"}),
+    (["operador"],                                                        {"execucao"}),
+    (["sinaleiro"],                                                       {"execucao"}),
+    (["motorista"],                                                       {"execucao"}),
+    (["mecanico"],                                                        {"execucao"}),
+    (["soldador"],                                                        {"execucao"}),
+    (["calceteiro", "topografo"],                                         {"execucao"}),
 ]
 
-_PALAVRAS_CANTEIRO = [
-    'OBRA', 'CANTEIRO', 'CONSTRUCAO', 'REFORMA', 'HOSPITAL', 'RESIDENCIAL',
-    'EDIFICIO', 'BLOCO', 'TORRE', 'HETRIN', 'VIADUTO', 'PONTE', 'SHOPPING',
-    'CONDOMINIO', 'EMPREENDIMENTO', 'MONTAGEM', 'INSTALACAO', 'CAMPO',
-]
+# Regex para detectar nomes de GHE usados como cargo falso
+_RE_CARGO_EH_GHE = re.compile(r'^GHE\s*\d+', re.IGNORECASE)
 
-_PALAVRAS_ESCRITORIO = [
-    'ESCRITORIO', 'SEDE', 'CORPORATIVO', 'ADMINISTRACAO', 'MARKETING',
-    'TECNOLOGIA DA INFORMACAO', 'RECURSOS HUMANOS', 'FINANCEIRO',
-    'CONTABILIDADE', 'JURIDICO', 'COMERCIAL',
-]
 
-_RISCOS_CANTEIRO = [
-    'RUIDO', 'VIBRACAO', 'POEIRA', 'CIMENTO', 'SILICA', 'TINTA',
-    'SOLDA', 'ALTURA', 'CONFINADO', 'MAQUINA', 'INCENDIO',
-]
+def _tipos_do_cargo(cargo: str) -> set:
+    cn = _normalizar(cargo)
+    for keywords, tipos in _CARGO_TIPOS:
+        if any(kw in cn for kw in keywords):
+            return tipos
+    return set()
 
-_LIXO_GHE = [
-    r'caracteristicas e as circunstancias', r'atividades exercidas',
-    r'descricao das atividades', r'informacoes sobre', r'pagina de revisao',
-    r'digitacao de textos',
-]
 
-_MAPA_AGENTES = {
-    'RUIDO': 'RUIDO', 'RUÍDO': 'RUIDO', 'VIBRAÇÃO CORPO': 'VIBRACAO CORPO INTEIRO',
-    'VIBRACAO CORPO': 'VIBRACAO CORPO INTEIRO', 'VIBRAÇÃO': 'VIBRACAO', 'VIBRACAO': 'VIBRACAO',
-    'BENZENO': 'BENZENO', 'TOLUENO': 'TOLUENO', 'XILENO': 'XILENO', 'ACETONA': 'ACETONA',
-    'METIL-ETIL': 'METIL-ETIL-CETONA', 'TETRAHIDRO': 'TETRAHIDROFURANO', 'CICLOHEXAN': 'CICLOHEXANONA',
-    'DICLOROMETANO': 'DICLOROMETANO', 'TRICLOROETILENO': 'TRICLOROETILENO', 'ESTIRENO': 'ESTIRENO',
-    'HEXANO': 'N-HEXANO', 'FENOL': 'FENOL', 'MERCURIO': 'MERCURIO', 'MERCÚRIO': 'MERCURIO',
-    'METANOL': 'METANOL', 'CHUMBO': 'CHUMBO', 'MANGANES': 'MANGANES', 'MANGANÊS': 'MANGANES',
-    'CROMO': 'CROMO', 'CADMIO': 'CADMIO', 'CÁDMIO': 'CADMIO', 'ARSENICO': 'ARSENICO',
-    'ARSÊNIO': 'ARSENICO', 'COBALTO': 'COBALTO', 'FLUOR': 'FLUOR', 'FLÚOR': 'FLUOR',
-    'SOLDA': 'SOLDA', 'MONOXIDO': 'MONOXIDO DE CARBONO', 'MONÓXIDO': 'MONOXIDO DE CARBONO',
-    'POLICORTE': 'POLICORTE', 'DIESEL': 'COMBUSTIVEL', 'GASOLINA': 'COMBUSTIVEL',
-    'COMBUSTIVEL': 'COMBUSTIVEL', 'COMBUSTÍVEL': 'COMBUSTIVEL', 'SILICA': 'SILICA', 'SÍLICA': 'SILICA',
-    'QUARTZO': 'SILICA', 'POEIRA MINERAL': 'POEIRA MINERAL', 'POEIRAS MINERAIS': 'POEIRA MINERAL',
-    'CIMENTO': 'CIMENTO', 'ASBESTO': 'ASBESTO', 'AMIANTO': 'ASBESTO', 'FUMO METALICO': 'FUMOS METALICOS',
-    'FUMO METÁLICO': 'FUMOS METALICOS', 'MADEIRA': 'MADEIRA', 'TINTA': 'TINTA',
-    'IMPERMEAB': 'IMPERMEABILIZACAO', 'MASCARA': 'MASCARA RESPIRATORIA', 'MÁSCARA': 'MASCARA RESPIRATORIA',
-    'ALTURA': 'QUEDA DE ALTURA', 'CONFINADO': 'ESPACO CONFINADO', 'ELETRICO': 'RISCO ELETRICO',
-    'ELÉTRIC': 'RISCO ELETRICO', 'BIOLOGICO': 'AGENTE BIOLOGICO', 'BIOLÓGICO': 'AGENTE BIOLOGICO',
-    'ESGOTO': 'ESGOTO', 'EFLUENTE': 'ESGOTO', 'MOTORISTA': 'MOTORISTA',
+def _tipo_do_ghe(nome_ghe: str) -> str | None:
+    gn = _normalizar(nome_ghe)
+    melhor_tipo = None
+    melhor_score = 0
+    for tipo, kws in _TIPOS_GHE_KW.items():
+        score = sum(1 for kw in kws if kw in gn)
+        if score > melhor_score:
+            melhor_score = score
+            melhor_tipo = tipo
+    return melhor_tipo if melhor_score > 0 else None
+
+
+def _tipos_do_ghe_por_riscos(riscos_mapeados: list) -> set:
+    """
+    v9.6 — Infere tipos de GHE compatíveis a partir dos riscos mapeados no bloco.
+    Usado como fallback quando _tipo_do_ghe() retorna None.
+    """
+    tipos = set()
+    for risco in riscos_mapeados:
+        if isinstance(risco, dict):
+            texto_risco = _normalizar(
+                (risco.get("nome_agente") or "") + " " + (risco.get("perigo_especifico") or "")
+            )
+        else:
+            texto_risco = _normalizar(str(risco))
+        for kw, tipos_risco in _RISCOS_PARA_TIPOS.items():
+            if kw in texto_risco:
+                tipos.update(tipos_risco)
+    return tipos
+
+
+# ---------------------------------------------------------------------------
+# v9.8 — Mapa SEMÂNTICO CONSERVADOR: apenas associações de ALTA CERTEZA.
+#
+# REVISÃO: o mapa anterior espalhava 'pedreiro' em GHEs com keywords
+# ambíguas como 'estrutura', 'concreto', 'fundacao', 'reboco', 'rejunte',
+# 'contrapiso', 'acabamento'. Removidos esses mapeamentos genéricos.
+# Mantidas apenas associações 1:1 onde o nome da etapa indica
+# inequivocamente um único cargo.
+#
+# Para GHEs com nomes ambíguos (ex: 'Estrutura de concreto'), prefere-se
+# deixar VAZIO e exigir edição manual — em vez de errar com 4 cargos
+# falsos. O parser_pgr é a fonte de verdade; este mapa é fallback.
+# ---------------------------------------------------------------------------
+_GHE_NOME_PARA_CARGO_KEYWORDS = {
+    # 1:1 inequívocas (atividade → cargo único)
+    "alvenaria":         ["pedreiro"],
+    "carpintaria":       ["carpinteiro"],
+    "armacao":           ["armador"],
+    "ferragem":          ["armador"],
+    "pintura":           ["pintor"],
+    "gesso":             ["gesseiro"],
+    "impermeabilizacao": ["impermeabilizador"],
+    "manta asfaltica":   ["impermeabilizador"],
+    "ceramica":          ["azulejista"],
+    "azulej":            ["azulejista"],
+    "eletrica":          ["eletricista"],
+    "eletricidade":      ["eletricista"],
+    "hidraulica":        ["encanador"],
+    "hidrossanitaria":   ["encanador"],
+    "encanamento":       ["encanador"],
+    "tubulacao":         ["encanador"],
+    "serralheria":       ["serralheiro"],
+    "solda":             ["soldador"],
+    "almoxarifado":      ["almoxarife"],
+    "deposito":          ["almoxarife"],
+    "estoque":           ["almoxarife"],
+    "portaria":          ["porteiro", "vigia"],
+    "vigilancia":        ["porteiro", "vigia"],
+    "engenharia":        ["engenheiro"],
+    "planejamento":      ["engenheiro"],
+    "seguranca do trabalho": ["tecnico de seguranca", "tst"],
+    "sst":               ["tecnico de seguranca", "tst"],
+
+    # Forma de pilar/laje/viga é trabalho de carpinteiro (madeira para concreto)
+    "forma de pilar":    ["carpinteiro"],
+    "forma de laje":     ["carpinteiro"],
+    "forma de viga":     ["carpinteiro"],
+    "execucao forma":    ["carpinteiro"],
+    "forma":             ["carpinteiro"],
+
+    # Equipamentos específicos
+    "operacao grua":     ["operador de grua", "sinaleiro"],
+    "operacao cremalheira": ["operador de cremalheira"],
+    "sinalizacao":       ["sinaleiro"],
+
+    # Administrativo (palavra completa, não substring de "administracao de obra")
+    "administrativo":    ["administrativo", "assistente", "auxiliar"],
+
+    # NÃO MAPEADOS (ambíguos demais, propagavam 'pedreiro' incorretamente):
+    # "estrutura", "concreto", "fundacao", "reboco", "rejunte",
+    # "contrapiso", "acabamento", "revestimento", "execucao",
+    # "supervisao", "limpeza", "apoio", "servicos gerais",
+    # "mestre", "encarregado", "betoneira", "metalica"
+}
+
+
+def _associar_cargos_por_nome_ghe(nome_ghe: str, cargos_globais: list) -> list:
+    """
+    v9.8 — Cross-match CONSERVADOR: usa apenas a keyword MAIS ESPECÍFICA
+    encontrada no nome do GHE (evita misturar cargos de múltiplas keywords
+    que poderiam dar falsos positivos).
+
+    Exemplo: GHE "Forma de pilar e laje" → keyword mais específica é
+    "forma de pilar" → retorna apenas Carpinteiro.
+
+    Se o nome do GHE não contiver nenhuma keyword conhecida (ou só
+    keywords ambíguas removidas do mapa), retorna lista vazia — preferindo
+    obrigar revisão manual a inserir cargos errados.
+    """
+    nome_n = _normalizar(nome_ghe)
+    # Ordena por especificidade DECRESCENTE: maior keyword primeiro
+    for kw_ghe in sorted(_GHE_NOME_PARA_CARGO_KEYWORDS, key=len, reverse=True):
+        if kw_ghe in nome_n:
+            kws_cargo = _GHE_NOME_PARA_CARGO_KEYWORDS[kw_ghe]
+            cargos_match = []
+            for cargo in cargos_globais:
+                cargo_n = _normalizar(cargo)
+                if any(kw in cargo_n for kw in kws_cargo):
+                    cargos_match.append(cargo)
+            return cargos_match
+    return []
+
+
+def _distribuir_cargos_por_ghe(cargos_globais: list, blocos: list) -> None:
+    """
+    v9.7 — Distribui cargos globais (extraídos da seção FUNÇÕES) por GHE com
+    lógica em 4 camadas. NUNCA atribui todos os cargos a um GHE como fallback.
+
+    Bug #3 RESOLVIDO: removido o `bloco["cargos"] = list(cargos_globais)` que
+    duplicava os 23 cargos em todos os GHEs quando nenhuma camada acertava,
+    e removido o fallback equivalente da Camada 2 (tipo do GHE × tipo do cargo).
+
+    Camadas (ordem de prioridade — para na primeira que produzir match):
+      1. Cross-match nome do GHE × keywords de cargo (mais específico, novo)
+      2. Tipo do GHE pelo nome × tipo do cargo (existente, agora SEM fallback)
+      3. Tipo do GHE inferido pelos riscos × tipo do cargo (existente)
+      4. Indeterminado: deixa cargos vazios e registra warning para revisão manual
+    """
+    if not cargos_globais:
+        return
+
+    indeterminados = []
+    for bloco in blocos:
+        cargos_atuais = bloco.get("cargos", [])
+        tem_cargos_reais = bool(cargos_atuais) and not all(
+            _RE_CARGO_EH_GHE.match(c.strip()) for c in cargos_atuais
+        )
+        if tem_cargos_reais:
+            continue
+        bloco["cargos"] = []
+        nome_ghe = bloco.get("ghe", "")
+
+        # --- Camada 1: cross-match direto por keyword (NOVO, mais específico) ---
+        cargos_match = _associar_cargos_por_nome_ghe(nome_ghe, cargos_globais)
+        if cargos_match:
+            bloco["cargos"] = cargos_match
+            continue
+
+        # --- Camada 2: tipo do GHE pelo nome × tipo do cargo ---
+        tipo_ghe = _tipo_do_ghe(nome_ghe)
+        if tipo_ghe:
+            cargos_filtrados = [
+                c for c in cargos_globais
+                if tipo_ghe in _tipos_do_cargo(c)
+            ]
+            if cargos_filtrados:
+                bloco["cargos"] = cargos_filtrados
+                continue
+            # FIX Bug #3: removido fallback `else list(cargos_globais)` aqui
+
+        # --- Camada 3: tipos inferidos pelos riscos do bloco ---
+        tipos_por_risco = _tipos_do_ghe_por_riscos(bloco.get("riscos_mapeados", []))
+        if tipos_por_risco:
+            cargos_filtrados = [
+                c for c in cargos_globais
+                if _tipos_do_cargo(c) & tipos_por_risco
+            ]
+            if cargos_filtrados:
+                bloco["cargos"] = cargos_filtrados
+                continue
+
+        # --- Camada 4: indeterminado — NÃO duplica todos os cargos ---
+        # FIX Bug #3 RAIZ: removido `bloco["cargos"] = list(cargos_globais)`
+        indeterminados.append(nome_ghe)
+
+    # Log GHEs sem cargo associado para revisão manual no Passo 3
+    if indeterminados:
+        try:
+            import streamlit as st
+            preview = ", ".join(indeterminados[:5])
+            extra = f" (+{len(indeterminados) - 5} outros)" if len(indeterminados) > 5 else ""
+            st.warning(
+                f"⚠️ {len(indeterminados)} GHE(s) sem cargos associados automaticamente. "
+                f"Adicione manualmente no Passo 3 ou ajuste o nome do GHE no PGR para conter "
+                f"keywords reconhecidas (ex: alvenaria, hidráulica, pintura, almoxarifado): "
+                f"{preview}{extra}"
+            )
+        except Exception:
+            pass
+
+
+# ── Regex e helpers do parser ────────────────────────────────────────────────
+
+_CARGOS_CANTEIRO = {
+    "carpinteiro", "meio oficial carpinteiro", "meio of carpinteiro",
+    "pedreiro", "meio oficial pedreiro", "meio of pedreiro",
+    "eletricista", "eletricista industrial",
+    "servente", "servente de obras",
+    "armador", "meio oficial armador", "meio of armador",
+    "encanador", "meio oficial encanador", "meio of encanador",
+    "serralheiro",
+    "mestre de obras", "mestre",
+    "tecnico de seguranca do trabalho", "tecnico seguranca trabalho", "tst",
+    "engenheiro civil", "engenheiro",
+    "administrativo de obras", "aux adm de obras", "auxiliar administrativo de obras",
+    "auxiliar administrativo", "aux administrativo",
+    "almoxarife",
+    "pintor", "pintor de obras",
+    "azulejista", "assentador de ceramica",
+    "gesseiro",
+    "impermeabilizador",
+    "operador de cremalheira", "operador de equipamento", "operador",
+    "soldador",
+    "porteiro", "vigia", "porteiro vigia",
+    "sinaleiro",
+    "mecanico", "mecanico de manutencao",
+    "estagiario", "estagiaria",
+    "jovem aprendiz", "aprendiz",
+    "encarregado", "encarregado de obras", "supervisor",
+    "ajudante", "ajudante geral",
+    "calceteiro", "topografo", "motorista",
+    "assistente administrativo",
 }
 
 _RE_GHE = re.compile(
-    r'(?:GHE[\s:\.\-]*\d|GRUPO\s+HOMOGENEO|LOCAL\s+DE\s+TRABALHO\s*:\s*\w|SETOR\s*:\s*\w)',
-    re.IGNORECASE,
+    r"(?i)^(?:GHE\s*\d*\s*[-\u2013:]?\s*"
+    r"|GRUPO\s+HOMOG[E\u00ca]NEO\s+DE\s+EXPOSI[\u00c7C][\u00c3A]O\s*[-\u2013:]?\s*)(.+)$"
 )
-_RE_TIPO_RISCO = re.compile(r'^[FQBEA]$')
-_RE_CABECALHO_AIHA = re.compile(r'matriz de risco aiha|tipo de risco|identificacao de perigo|codigo e.?social|avaliacao de risco|meio de propagacao|nivel de risco|pouca importancia|probabilidade|efeito', re.IGNORECASE)
-_RE_DESCRICAO_FUNCAO = re.compile(r'supervisiona|elabora documentacao|controla recursos|cronograma da obra|executa atividades|responsavel por|realiza tarefas|desenvolve|presta servicos', re.IGNORECASE)
-_MAPA_TIPO_RISCO = {'F': 'Fisico', 'Q': 'Quimico', 'B': 'Biologico', 'E': 'Ergonomico', 'A': 'Acidente'}
-_PALAVRAS_CARGO_AIHA = [
-    'ENCARREGADO', 'PEDREIRO', 'ELETRICISTA', 'CARPINTEIRO', 'SOLDADOR', 'SERVENTE',
-    'MOTORISTA', 'ENGENHEIRO', 'TECNICO', 'MESTRE', 'OPERADOR', 'ADMINISTRATIVO',
-    'ASSISTENTE', 'AUXILIAR', 'COMPRADOR', 'SUPERVISOR', 'PINTOR', 'ARMADOR', 'MONTADOR',
-    'INSTALADOR', 'ENCANADOR', 'BOMBEIRO', 'SERRALHEIRO', 'TOPOGRAFO', 'ALMOXARIFE',
-    'VIGIA', 'PORTEIRO', 'ZELADOR', 'MENOR', 'APRENDIZ', 'ESTAGIARIO', 'COORDENADOR',
-    'GERENTE', 'DIRETOR', 'SERVICOS GERAIS', 'FISCAL', 'INSPETOR', 'PROJETISTA', 'DESENHISTA',
-]
 
-_EXAME_ALIAS = {
-    'EXAME CLINICO ANAMNESE EXAME FISICO': 'Exame Clinico',
-    'EXAME CLINICO': 'Exame Clinico',
-    'EXAME CLINICO SEMESTRAL': 'Exame Clinico',
-    'AUDIOMETRIA TONAL PTA': 'Audiometria',
-    'AUDIOMETRIA': 'Audiometria',
-    'ACUIDADE VISUAL AVALIACAO OFTALMOLOGICA': 'Acuidade Visual',
-    'ACUIDADE VISUAL': 'Acuidade Visual',
-    'ELETROCARDIOGRAMA ECG': 'ECG',
-    'ECG': 'ECG',
-    'GLICEMIA DE JEJUM': 'Glicemia em Jejum',
-    'GLICEMIA EM JEJUM': 'Glicemia em Jejum',
-    'HEMOGRAMA COMPLETO': 'Hemograma',
-    'HEMOGRAMA': 'Hemograma',
-    'HEMOGRAMA COMPLETO UREIA CREATININA': 'Hemograma',
-    'RAIO X DE TORAX OIT': 'RX de Tórax OIT',
-    'RX DE TORAX OIT': 'RX de Tórax OIT',
-    'RAIO X COLUNA LOMBO SACRA': 'RX de coluna lombo-sacra',
-    'RX COLUNA LOMBO SACRA': 'RX de coluna lombo-sacra',
-    'AC TRICLOROACETICO NA URINA': 'Ácido tricloroacético na urina',
-    'ACIDO TRICLOROACETICO NA URINA': 'Ácido tricloroacético na urina',
-    'ACETONA NA URINA': 'Acetona na urina',
-    'METIL ETIL CETONA MEK NA URINA': 'Metil-Etil-Cetona',
-    'METIL ETIL CETONA NA URINA': 'Metil-Etil-Cetona',
-    'METIL ETIL CETONA': 'Metil-Etil-Cetona',
-    'METILETILCETONA NA URINA': 'Metiletilcetona na urina',
-    'CICLOHEXANOL H NA URINA': 'Ciclohexanol na urina',
-    'CICLOHEXANOL NA URINA': 'Ciclohexanol na urina',
-    'TETRAHIDROFURNANO NA URINA': 'Tetrahidrofurnano na urina',
-    'MANGANES NO SANGUE': 'Manganês sanguíneo',
-    'MANGANES SANGUINEO': 'Manganês sanguíneo',
-    'CARBOXIHEMOGLOBINA NO SANGUE': 'Carboxiemoglobina',
-    'CARBOXIEMOGLOBINA NO SANGUE': 'Carboxiemoglobina',
-    'CARBOXIHEMOGLOBINA': 'Carboxiemoglobina',
-    'CONTAGEM DE RETICULOCITOS': 'Contagem de Reticulócitos',
-    'ACIDO TRANS TRANS MUCONICO NA URINA': 'Ácido trans-trans mucônico',
-    'ACIDO TRANS TRANS MUCONICO': 'Ácido trans-trans mucônico',
-    'AVALIACAO PSICOSSOCIAL NR 35': 'Avaliação Psicossocial',
-    'AVALIACAO PSICOSSOCIAL': 'Avaliação Psicossocial',
-    'ORTOCRESOL NA URINA': 'Ortocresol na urina',
-    'AC METIL HIPURICO NA URINA': 'Ác. Metil-hipúrico na urina',
-    'ACIDO METIL HIPURICO NA URINA': 'Ác. Metil-hipúrico na urina',
-    'ESPIROMETRIA': 'Espirometria',
-}
+_RE_AGENTE = re.compile(
+    r"(?i)^agente\s*(?:qu[i\u00ed]mico|f[i\u00ed]sico|biol[o\u00f3]gico"
+    r"|ergon[o\u00f4]mico|de\s+acidente|de\s+risco)?\s*[:\-\u2013]?\s*(.+)$"
+)
 
-_BASE_MINIMO = ['Exame Clinico', 'Audiometria', 'Espirometria', 'RX de Tórax OIT']
-_BASE_COMPLETO = ['Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Hemograma', 'Glicemia em Jejum', 'ECG', 'Espirometria', 'RX de Tórax OIT']
-_BASE_GRUA = ['Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Hemograma', 'Glicemia em Jejum', 'ECG']
-_BASE_PORTARIA = ['Exame Clinico', 'Acuidade Visual']
+# Captura riscos em bullet points e listas numeradas (Bug #2)
+_RE_RISCO_BULLET = re.compile(r"^[-\u2022\u2023\u2043*]\s+(.{5,120})$")
+_RE_RISCO_NUMERADO = re.compile(r"^\d{1,2}[.)]\s+(.{5,120})$")
 
-_GHE_BASE = {
-    '01': _BASE_MINIMO, '02': _BASE_COMPLETO, '03': _BASE_COMPLETO, '04': _BASE_COMPLETO,
-    '05': _BASE_MINIMO, '06': _BASE_COMPLETO, '07': _BASE_COMPLETO, '08': _BASE_COMPLETO,
-    '09': _BASE_COMPLETO, '10': _BASE_COMPLETO, '11': _BASE_COMPLETO, '12': _BASE_COMPLETO,
-    '13': _BASE_COMPLETO, '14': _BASE_MINIMO, '15': _BASE_COMPLETO, '16': _BASE_COMPLETO,
-    '17': _BASE_GRUA, '18': _BASE_COMPLETO, '19': _BASE_COMPLETO, '20': _BASE_COMPLETO,
-    '21': ['Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Glicemia em Jejum', 'ECG', 'Hemograma', 'Contagem de Reticulócitos', 'Ácido trans-trans mucônico', 'Carboxiemoglobina', 'Avaliação Psicossocial', 'Espirometria', 'RX de Tórax OIT'],
-    '22': _BASE_COMPLETO,
-    '23': ['Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Hemograma', 'Contagem de Reticulócitos', 'Ácido trans-trans mucônico', 'Glicemia em Jejum', 'ECG', 'Espirometria', 'RX de Tórax OIT'],
-    '24': _BASE_PORTARIA,
-    '25': ['Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Glicemia em Jejum', 'ECG', 'Hemograma', 'Contagem de Reticulócitos', 'Ácido trans-trans mucônico', 'Ortocresol na urina', 'Metiletilcetona na urina', 'Ác. Metil-hipúrico na urina', 'Espirometria', 'RX de Tórax OIT'],
-    '26': ['Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Glicemia em Jejum', 'ECG', 'Hemograma', 'Ácido trans-trans mucônico', 'Contagem de Reticulócitos', 'Ortocresol na urina', 'Metil-Etil-Cetona', 'Acetona na urina', 'Ác. Metil-hipúrico na urina', 'Espirometria', 'RX de Tórax OIT'],
-    '27': _BASE_COMPLETO, '28': _BASE_COMPLETO,
-}
+# Keywords m\u00ednimas para confirmar que uma linha descreve um risco ocupacional
+_TERMOS_RISCO_KW = re.compile(
+    r"(?i)\b("
+    r"ru[i\u00ed]do|vibra[c\u00e7][a\u00e3]o|calor|frio|radia[c\u00e7][a\u00e3]o"
+    r"|poeira|silica|s[i\u00ed]lica|amianto|asbesto|fibra"
+    r"|benzeno|tolueno|xileno|estireno|fenol|acetona|mek|solvente"
+    r"|chumbo|mercur[i\u00ed]o|manganes|mangan\u00eas|cromo|fluor"
+    r"|monoxido|fumo\s+met[a\u00e1]lico|fumos\s+met[a\u00e1]licos"
+    r"|biol[o\u00f3]gico|esgoto|leptospiro|hepatite|sangue"
+    r"|ergon[o\u00f4]mico|postura|levantamento|esfor[c\u00e7]o"
+    r"|altura|confinado|eletric|psicossocial"
+    r")\b"
+)
 
-_GHE_PERIODICIDADES = {
-    '01': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-    '02': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '03': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '04': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-    '05': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '06': {'Exame Clinico': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES', 'Ácido tricloroacético na urina': '6 MESES'},
-    '07': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '08': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '09': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-    '10': {'Exame Clinico': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES', 'Acetona na urina': '6 MESES', 'Metil-Etil-Cetona': '6 MESES', 'Ciclohexanol na urina': '6 MESES', 'Tetrahidrofurnano na urina': '6 MESES'},
-    '11': {'Exame Clinico': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES', 'Ácido tricloroacético na urina': '6 MESES'},
-    '12': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '13': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '14': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '15': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '16': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '17': {},
-    '18': {'Exame Clinico': '6 MESES', 'Manganês sanguíneo': '6 MESES', 'Carboxiemoglobina': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '19': {'Exame Clinico': '6 MESES', 'Acetona na urina': '6 MESES', 'Metil-Etil-Cetona': '6 MESES', 'Ciclohexanol na urina': '6 MESES', 'Tetrahidrofurnano na urina': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '20': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '21': {'Exame Clinico': '6 MESES', 'Hemograma': '6 MESES', 'Contagem de Reticulócitos': '6 MESES', 'Ácido trans-trans mucônico': '6 MESES', 'Carboxiemoglobina': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-    '22': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '23': {'Exame Clinico': '6 MESES', 'Hemograma': '6 MESES', 'Contagem de Reticulócitos': '6 MESES', 'Ácido trans-trans mucônico': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-    '24': {},
-    '25': {'Exame Clinico': '6 MESES', 'Hemograma': '6 MESES', 'Contagem de Reticulócitos': '6 MESES', 'Ácido trans-trans mucônico': '6 MESES', 'Ortocresol na urina': '6 MESES', 'Metiletilcetona na urina': '6 MESES', 'Ác. Metil-hipúrico na urina': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-    '26': {'Exame Clinico': '6 MESES', 'Hemograma': '6 MESES', 'Ácido trans-trans mucônico': '6 MESES', 'Contagem de Reticulócitos': '6 MESES', 'Ortocresol na urina': '6 MESES', 'Metil-Etil-Cetona': '6 MESES', 'Acetona na urina': '6 MESES', 'Ác. Metil-hipúrico na urina': '6 MESES', 'Espirometria': '24 MESES', 'RX de Tórax OIT': '60 MESES'},
-    '27': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-    '28': {'Espirometria': '24 MESES', 'RX de Tórax OIT': '12 MESES'},
-}
+_RE_SECAO_FUNCOES = re.compile(
+    r"(?i)^(fun[c\u00e7][o\u00f5]es\s*(existentes)?\s*(no\s+canteiro)?|"
+    r"fun[c\u00e7][o\u00f5]es\s+quantidade|"
+    r"cargo[s]?\s+cbo|"
+    r"fun[c\u00e7][o\u00f5]es\s+existentes)"
+)
 
-_GHE_EXTRAS = {
-    '06': ['Ácido tricloroacético na urina'], '07': ['RX de coluna lombo-sacra'],
-    '10': ['Acetona na urina', 'Metil-Etil-Cetona', 'Ciclohexanol na urina', 'Tetrahidrofurnano na urina'],
-    '11': ['Ácido tricloroacético na urina'], '18': ['Manganês sanguíneo', 'Carboxiemoglobina'],
-    '19': ['Acetona na urina', 'Metil-Etil-Cetona', 'Ciclohexanol na urina', 'Tetrahidrofurnano na urina'],
-    '21': ['Hemograma', 'Contagem de Reticulócitos', 'Ácido trans-trans mucônico', 'Carboxiemoglobina', 'Avaliação Psicossocial'],
-    '23': ['Hemograma', 'Contagem de Reticulócitos', 'Ácido trans-trans mucônico'],
-    '25': ['Hemograma', 'Contagem de Reticulócitos', 'Ácido trans-trans mucônico', 'Ortocresol na urina', 'Metiletilcetona na urina', 'Ác. Metil-hipúrico na urina'],
-    '26': ['Hemograma', 'Ácido trans-trans mucônico', 'Contagem de Reticulócitos', 'Ortocresol na urina', 'Metil-Etil-Cetona', 'Acetona na urina', 'Ác. Metil-hipúrico na urina'],
-}
-
-_GHE_RESTRICOES = {
-    '17': {'Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Hemograma', 'Glicemia em Jejum', 'ECG'},
-    '24': {'Exame Clinico', 'Acuidade Visual'},
-}
-
-_RISCOS_TRIVIAIS_OBRIGATORIOS = {
-    '10': {'SERVENTE': ['Éter monobutílico de etilenoglicol']},
-    '19': {'ENCANADOR': ['Éter monobutílico de etilenoglicol'], 'MEIO OFICIAL DE ENCANADOR': ['Éter monobutílico de etilenoglicol'], 'SERVENTE': ['Éter monobutílico de etilenoglicol']},
-    '23': {'PINTOR': ['Tolueno', 'Acetona', 'Acetato de etilglicol', 'Xileno']},
-    '25': {'PINTOR': ['Acetona', 'Octoato de Cobalto'], 'SERVENTE': ['Acetona', 'Octoato de Cobalto']},
-}
+_RE_SKIP = re.compile(
+    r"(?i)^("
+    r"ef$|ef\s|\d+$|\*|^-+$|^\s*$"
+    r"|fun[c\u00e7][o\u00f5]es\s*(quantidade)?$"
+    r"|quantidade$"
+    r"|raz[a\u00e3]o\s+social|endere[c\u00e7]o|complemento|bairro|cidade|cep|cnpj|cnae"
+    r"|grau\s+de\s+risco|telefone|contato"
+    r"|\d+\.\s+.+|fase\s+|servi[c\u00e7]os?\s+|hor[a\u00e1]rio|in[i\u00ed]cio|previs[a\u00e3]o"
+    r"|n[u\u00fa]mero\s+total|programa\s+de|goiania|goiânia|atualizado|fevereiro|março|janeiro"
+    r"|subsolo|t[e\u00e9]rreo|garagem|pavimento|apartamento|penthouse"
+    r"|segunda|sexta|s[a\u00e1]bado|\d{2}h"
+    r")"
+)
 
 
-def _sem_acentos(texto):
-    return unicodedata.normalize('NFKD', str(texto)).encode('ascii', 'ignore').decode('ascii')
+# Allowlist + blocklist locais (espelham parser_pgr para fallback _parsear_pgr_local).
+# Garante que strings gen\u00e9ricas como "Estrutura de concreto armado", "Contrapiso",
+# "Impermeabiliza\u00e7\u00e3o", "Alvenaria" N\u00c3O entrem no campo Cargo.
+_CARGOS_ALLOWLIST_KW = re.compile(
+    r"(?i)\b("
+    r"pedreiro|servente|carpinteiro|armador|ajudante"
+    r"|pintor|azulejista|gesseiro|encanador|eletricista"
+    r"|serralheiro|soldador|impermeabilizador|aplicador"
+    r"|almoxarife|porteiro|vigia|sinaleiro|motorista"
+    r"|engenheiro|estagi[a\u00e1]ri[oa]|t[e\u00e9]cnico|encarregado|mestre"
+    r"|administrativo|assistente|auxiliar|aprendiz"
+    r"|top[o\u00f3]grafo|calceteiro|mec[a\u00e2]nico|operador"
+    r"|supervisor|coordenador|gerente|montador|monitor"
+    r"|copeir[oa]|cozinheir[oa]|recepcionist[ae]|secret[a\u00e1]ri[oa]"
+    r"|escritur[a\u00e1]ri[oa]|vigilante"
+    r")\b"
+)
+
+_CARGOS_BLOCKLIST_ETAPAS = re.compile(
+    r"(?i)^("
+    r"estrutura|concreto|alvenaria|fundac[a\u00e3]o|forma\s+de"
+    r"|impermeabilizac?[a\u00e3]o|contrapiso|reboco|revestimento|rejunte"
+    r"|acabamento|pintura\s+(interna|externa)|gesso\s+corrido|cer[a\u00e2]mica"
+    r"|manta\s+asf[a\u00e1]ltica|hidr[a\u00e1]ulica|hidrossanit[a\u00e1]ria"
+    r"|el[e\u00e9]trica|prumada|carpintaria|serralheria|armac[a\u00e3]o\s+de"
+    r"|atividade|processo|etapa|tarefa|servi[c\u00e7]os?\s+gerais"
+    r"|execuc?[a\u00e3]o\s+de|supervis[a\u00e3]o\s+de"
+    r")"
+)
 
 
-def _norm(texto):
-    texto = _sem_acentos(str(texto or '')).upper().strip()
-    texto = re.sub(r'[^A-Z0-9]+', ' ', texto)
-    return re.sub(r'\s+', ' ', texto).strip()
+def _identificar_cargo(linha: str) -> str | None:
+    ls = linha.strip()
+    if not ls:
+        return None
+    if _RE_SKIP.match(_normalizar(ls)):
+        return None
+    if re.match(r"(?i)^agente\s", ls):
+        return None
+    if re.match(r"(?i)^(risco|perigo|medida|a[c\u00e7][a\u00e3]o|nr[-\s]\d|epis?\s|epc\s)", ls):
+        return None
+    # BLOCKLIST: rejeita nomes de etapas/processos da obra
+    if _CARGOS_BLOCKLIST_ETAPAS.match(ls):
+        return None
+    nome_sem_qtd = re.sub(r"\s+\d{1,3}\s*$", "", ls).strip()
+    nome_n = _normalizar(nome_sem_qtd)
+    if nome_n in _CARGOS_CANTEIRO:
+        return nome_sem_qtd
+    if _normalizar(ls) in _CARGOS_CANTEIRO:
+        return ls
+    palavras = nome_sem_qtd.split()
+    if (
+        2 <= len(palavras) <= 5
+        and not re.search(r"[;:,./\(\)]", nome_sem_qtd)
+        and not re.match(r"(?i)^(agente|risco|perigo|medida|acao|nr[-\s]|epi|epc|uso|utilize|verifique)", nome_sem_qtd)
+        and re.match(r"^[A-Z\u00c0-\u00da][a-zA-Z\u00c0-\u00ff\s.]+$", nome_sem_qtd)
+        and len(nome_sem_qtd) >= 5
+        # ALLOWLIST: precisa conter keyword de cargo conhecido
+        and _CARGOS_ALLOWLIST_KW.search(nome_sem_qtd)
+    ):
+        return nome_sem_qtd
+    return None
 
 
-def _ghe_codigo(nome):
-    m = re.search(r'GHE\s*(\d{1,2})', str(nome or ''), re.IGNORECASE)
-    return m.group(1).zfill(2) if m else ''
-
-
-def _nome_oficial_exame(nome):
-    if not nome:
-        return ''
-    return _EXAME_ALIAS.get(_norm(nome), str(nome).strip())
-
-
-def _limpar_nome_ghe(nome):
-    if len(nome) > 100:
-        return nome[:100].strip() + '...'
-    norm = normalizar_texto(nome)
-    for lixo in _LIXO_GHE:
-        if re.search(lixo, norm, re.IGNORECASE):
-            return 'GHE (revisar nome)'
-    return nome.strip()
-
-
-def _is_linha_ghe(linha):
-    lu = normalizar_texto(linha.strip())
-    for pat in _INVALIDOS_GHE_REGEX:
-        if re.search(pat, lu, re.IGNORECASE):
-            return False
-    if re.match(r'^GHE\s*\d+', linha.strip(), re.IGNORECASE):
-        return True
-    if _RE_GHE.search(linha):
-        return True
-    if len(linha.strip()) <= 50 and '/' not in linha and ',' not in linha and 'DEPARTAMENTO' in lu:
-        return True
-    return False
-
-
-def _ghe_valido(nome_ghe):
-    norm = normalizar_texto(nome_ghe)
-    if len(nome_ghe.strip()) > 90 or len(norm.strip()) < 4:
-        return False
-    if any(re.search(pat, norm, re.IGNORECASE) for pat in _INVALIDOS_GHE_REGEX):
-        return False
-    return not any(inv in norm for inv in _INVALIDOS_GHE)
-
-
-def _fallback_necessario(ghes):
-    for g in ghes:
-        if len(normalizar_texto(g['ghe'])) <= 90 and g['cargos']:
-            return False
-    return True
-
-
-def _fmt_per(per):
-    if per is None or per is False:
-        return '-'
-    per = str(per).strip().upper().replace('MESES', '').replace('MES', '').strip()
-    if not per or per in ('TRUE', 'FALSE', 'NONE', ''):
-        return '-'
-    try:
-        return f'{int(per)}M'
-    except ValueError:
-        return per if per else '-'
-
-
-def _flag(val):
-    if isinstance(val, bool):
-        return 'X' if val else '-'
-    return 'X' if str(val).strip().upper() in ('X', 'TRUE', '1', 'SIM') else '-'
-
-
-def _ghe_e_canteiro_misto(nome_ghe, riscos):
-    norm = normalizar_texto(nome_ghe)
-    if any(p in norm for p in _PALAVRAS_CANTEIRO):
-        return True
-    if any(p in norm for p in _PALAVRAS_ESCRITORIO):
-        return False
-    texto_r = ' '.join(normalizar_texto(r.get('nome_agente', '') + ' ' + r.get('perigo_especifico', '')) for r in riscos)
-    return any(rc in texto_r for rc in _RISCOS_CANTEIRO)
-
-
-def _is_nome_funcao_aiha(linha):
-    lstrip = linha.strip()
-    lu = normalizar_texto(lstrip)
-    if not lstrip or len(lstrip) > 60:
-        return False
-    if _RE_CABECALHO_AIHA.search(lu) or _RE_DESCRICAO_FUNCAO.search(lu) or _RE_TIPO_RISCO.match(lstrip):
-        return False
-    if lstrip.startswith('-') or re.match(r'^\d{2}\.\d{2}\.\d{3}$', lstrip):
-        return False
-    if len(lstrip.split()) < 2:
-        return False
-    return any(p in lu for p in _PALAVRAS_CARGO_AIHA)
-
-
-def extrair_texto_pdf(uploaded_file):
-    texto = []
-    with pdfplumber.open(io.BytesIO(uploaded_file.read())) as pdf:
-        for p in pdf.pages:
-            t = p.extract_text()
-            if t:
-                texto.append(t)
-    return '\n'.join(texto)
-
-
-def extrair_texto_pdf_path(caminho):
-    texto = []
-    with pdfplumber.open(caminho) as pdf:
-        for p in pdf.pages:
-            t = p.extract_text()
-            if t:
-                texto.append(t)
-    return '\n'.join(texto)
-
-
-def extrair_pgr_local(texto):
-    linhas = texto.split('\n')
-    ghes, ghe_atual, agentes_set = [], None, set()
+def _coletar_cargos_globais(linhas: list) -> list:
+    cargos = []
+    vistos = set()
+    em_secao_funcoes = False
     for linha in linhas:
-        lc = linha.strip()
-        if not lc:
+        ls = linha.strip()
+        if not ls:
             continue
-        lu = normalizar_texto(lc)
-        if _is_linha_ghe(lc) and len(lc) < 120 and len(lc.strip()) >= 4 and not lc.strip().endswith('.'):
-            if ghe_atual and (ghe_atual['cargos'] or ghe_atual['riscos_mapeados']):
-                ghes.append(ghe_atual)
-            nome_ghe_limpo = re.split(r'\s+CMO\b|\s+[–\-]\s+CMO|\s+SPE\b|\s+LTDA\b', lc, flags=re.IGNORECASE)[0].strip()
-            ghe_atual = {'ghe': nome_ghe_limpo, 'cargos': [], 'riscos_mapeados': []}
-            agentes_set = set()
+        if _RE_SECAO_FUNCOES.match(ls):
+            em_secao_funcoes = True
             continue
-        if ghe_atual is None:
+        if _RE_GHE.match(ls):
+            break
+        if re.match(r"^\d+\.\s+[A-Z]", ls) and em_secao_funcoes:
+            em_secao_funcoes = False
             continue
-        if not any(normalizar_texto(exc) in lu for exc in PALAVRAS_EXCLUIR_CARGO):
-            for cargo in MAPA_CARGOS_CONHECIDOS:
-                if normalizar_texto(cargo) in lu and cargo not in ghe_atual['cargos']:
-                    ghe_atual['cargos'].append(cargo)
-                    break
-        for palavra, chave_risco in _MAPA_AGENTES.items():
-            if normalizar_texto(palavra) in lu and chave_risco not in agentes_set:
-                agentes_set.add(chave_risco)
-                ghe_atual['riscos_mapeados'].append({'nome_agente': chave_risco, 'perigo_especifico': lc[:200]})
-    if ghe_atual and (ghe_atual['cargos'] or ghe_atual['riscos_mapeados']):
-        ghes.append(ghe_atual)
-    return _deduplicar_ghes(ghes)
+        if not em_secao_funcoes:
+            continue
+        cargo = _identificar_cargo(ls)
+        if cargo:
+            cargo_n = _normalizar(cargo)
+            if cargo_n not in vistos:
+                vistos.add(cargo_n)
+                cargos.append(cargo)
+    return cargos
 
 
-def extrair_pgr_matriz_aiha(texto):
-    linhas = texto.split('\n')
-    ghes = []
-    funcao_atual = None
-    tipo_risco_atual = None
-    agentes_set = set()
-    i = 0
-    while i < len(linhas):
-        lc = linhas[i].strip()
-        lu = normalizar_texto(lc)
-        if not lc or _RE_CABECALHO_AIHA.search(lu):
-            i += 1
+def _parsear_pgr_local(texto: str) -> list:
+    linhas = texto.split("\n")
+
+    # --- Passagem 1: cargos globais ---
+    cargos_globais = _coletar_cargos_globais(linhas)
+
+    # --- Passagem 2: blocos GHE ---
+    blocos = []
+    bloco_atual = None
+    em_ghe = False
+
+    for linha in linhas:
+        ls = linha.strip()
+        if not ls:
             continue
-        if _RE_TIPO_RISCO.match(lc):
-            tipo_risco_atual = lc.strip()
-            i += 1
+        m_ghe = _RE_GHE.match(ls)
+        if m_ghe:
+            if bloco_atual:
+                blocos.append(bloco_atual)
+            nome_ghe_raw = m_ghe.group(1).strip()
+            num_match = re.search(r"\d+", ls)
+            num_ghe = num_match.group() if num_match else str(len(blocos) + 1)
+            nome_desc = re.sub(r"^\d+\s*[-\u2013]?\s*", "", nome_ghe_raw).strip()
+            bloco_atual = {
+                "ghe": f"GHE {num_ghe.zfill(2)} - {nome_desc}" if nome_desc else f"GHE {num_ghe}",
+                "cargos": [],
+                "riscos_mapeados": [],
+            }
+            em_ghe = True
             continue
-        if lc.startswith('-') and funcao_atual is not None and tipo_risco_atual:
-            agente_texto = lc.lstrip('- ').split('(')[0].split('\u2013')[0].split('–')[0].strip()[:120]
-            agente_norm = normalizar_texto(agente_texto)
-            chave_risco = None
-            for palavra, chave in _MAPA_AGENTES.items():
-                if normalizar_texto(palavra) in agente_norm:
-                    chave_risco = chave
-                    break
-            if not chave_risco:
-                chave_risco = agente_texto[:80]
-            if chave_risco not in agentes_set:
-                agentes_set.add(chave_risco)
-                funcao_atual['riscos_mapeados'].append({'nome_agente': chave_risco, 'perigo_especifico': lc[:200], 'tipo_risco': _MAPA_TIPO_RISCO.get(tipo_risco_atual, tipo_risco_atual)})
-            i += 1
+        if not em_ghe or bloco_atual is None:
             continue
-        if _is_nome_funcao_aiha(lc):
-            nome_completo = lc
-            if i + 1 < len(linhas):
-                proxima = linhas[i + 1].strip()
-                if proxima and len(proxima) <= 40 and not _RE_CABECALHO_AIHA.search(normalizar_texto(proxima)) and not _RE_TIPO_RISCO.match(proxima) and not proxima.startswith('-') and not re.match(r'^\d{2}\.\d{2}\.\d{3}$', proxima) and not _RE_DESCRICAO_FUNCAO.search(normalizar_texto(proxima)):
-                    nome_completo = f'{lc} {proxima}'
-                    i += 1
-            if funcao_atual and (funcao_atual['cargos'] or funcao_atual['riscos_mapeados']):
-                ghes.append(funcao_atual)
-            funcao_atual = {'ghe': nome_completo, 'cargos': [nome_completo], 'riscos_mapeados': []}
-            agentes_set = set()
-            tipo_risco_atual = None
-            i += 1
+        m_ag = _RE_AGENTE.match(ls)
+        if m_ag:
+            bloco_atual["riscos_mapeados"].append(
+                {"nome_agente": m_ag.group(1).strip(), "perigo_especifico": ""}
+            )
             continue
-        i += 1
-    if funcao_atual and (funcao_atual['cargos'] or funcao_atual['riscos_mapeados']):
-        ghes.append(funcao_atual)
-    return ghes
+
+        # Bullet points / listas numeradas com keyword de risco (Bug #2)
+        m_bullet = _RE_RISCO_BULLET.match(ls) or _RE_RISCO_NUMERADO.match(ls)
+        if m_bullet and _TERMOS_RISCO_KW.search(ls):
+            conteudo = m_bullet.group(1).strip()
+            _vistos = {r.get("nome_agente") for r in bloco_atual["riscos_mapeados"]}
+            if conteudo not in _vistos:
+                bloco_atual["riscos_mapeados"].append(
+                    {"nome_agente": conteudo, "perigo_especifico": ""}
+                )
+            continue
+
+        cargo = _identificar_cargo(ls)
+        if cargo and cargo not in bloco_atual["cargos"]:
+            bloco_atual["cargos"].append(cargo)
+
+    if bloco_atual:
+        blocos.append(bloco_atual)
+
+    # --- Distribuição inteligente v9.6 ---
+    if cargos_globais:
+        _distribuir_cargos_por_ghe(cargos_globais, blocos)
+
+    # --- F5: Relatório de qualidade do PGR ---
+    if _AGENTE_IA_DISPONIVEL:
+        try:
+            import streamlit as st
+            rel = relatorio_qualidade_pgr(blocos, texto)
+            icon = "✅" if rel["apto_para_pcmso"] else "⚠️"
+            expandido = not rel["apto_para_pcmso"]
+            with st.expander(
+                f"{icon} Qualidade do PGR recebido — Score: {rel['score']}/100",
+                expanded=expandido,
+            ):
+                c1, c2, c3 = st.columns(3)
+                c1.metric("GHEs extraídos", rel["total_ghes"])
+                c2.metric("Cargos mapeados", rel["total_cargos"])
+                c3.metric("Score", f"{rel['score']}/100")
+                if rel["problemas"]:
+                    st.warning("**Pontos de atenção antes de gerar o PCMSO:**")
+                    for p in rel["problemas"]:
+                        st.write(f"• {p}")
+                else:
+                    st.success("PGR completo — sem problemas identificados.")
+                if carregar_cargos_desconhecidos:
+                    desconhecidos = carregar_cargos_desconhecidos()
+                    if desconhecidos:
+                        st.divider()
+                        st.warning(f"📋 {len(desconhecidos)} cargo(s) não reconhecido(s) registrado(s) para revisão:")
+                        for d in desconhecidos:
+                            st.code(
+                                f"{d['cargo']}  →  GHE: {d.get('contexto_ghe','?')}  "
+                                f"| data: {d.get('data','?')}",
+                                language=None,
+                            )
+        except Exception:
+            pass
+
+    return blocos
 
 
-def _detectar_formato_pgr(texto):
-    norm = normalizar_texto(texto)
-    tem_aiha = 'MATRIZ DE RISCO AIHA' in norm
-    tem_ghe = bool(re.search(r'GHE\s*[\d:\-]', texto, re.IGNORECASE))
-    if tem_aiha and tem_ghe:
-        return 'misto'
-    if tem_aiha:
-        return 'aiha'
-    return 'ghe'
+# ============================================================================
+# 2b — TRADUÇÃO DE CHAVES INTERNAS → TEXTO EM PORTUGUÊS NATURAL
+# ============================================================================
+
+_CHAVE_PARA_RISCO_TEXTO = {
+    "RUIDO":                                             "Ruído",
+    "VIBRACAO_CORPO_INTEIRO":                            "Vibração de corpo inteiro",
+    "VIBRACAO_MAOS_BRACOS":                              "Vibração em mãos e braços",
+    "TRABALHO_EM_ALTURA_ESPACO_CONFINADO_MOTORISTA":     "Trabalho em altura",
+    "ESPACO_CONFINADO":                                  "Espaço confinado",
+    "PORTEIRO_ELETRICIDADE_ALTURA_MOTORISTA":            "Eletricidade / energia elétrica",
+    "TRABALHO_EM_ALTURA_MAQUINAS_PESADAS_PSICOSSOCIAL":  "Risco psicossocial / trabalho em altura",
+    "POEIRA_PNOS_GESSO_MADEIRA_METALICA":                "Poeira de madeira, gesso e fumos metálicos (PNOS)",
+    "POEIRA_MINERAL_SILICA_QUARTZO_OPERADOR_BETONEIRA":  "Poeira mineral contendo sílica / quartzo",
+    "NEVOAS_TINTAS_COLAS_IMPERMEABILIZACAO":             "Névoas de tintas, colas e impermeabilizantes",
+    "CONTATO_QUIMICOS_AGRESSORES_PULMONARES":            "Contato com agentes químicos agressores pulmonares",
+    "USO_MASCARA_EPI_SEM_RISCO_QUIMICO":                 "Uso de máscara respiratória (sem risco químico específico)",
+    "TRICLOROETILENO":                                   "Tricloroetileno",
+    "BENZENO":                                           "Benzeno",
+    "TOLUENO":                                           "Tolueno",
+    "XILENO":                                            "Xileno",
+    "ESTIRENO":                                          "Estireno",
+    "FENOL":                                             "Fenol",
+    "MONOXIDO_DE_CARBONO":                               "Monóxido de carbono",
+    "MANGANES":                                          "Manganês",
+    "CROMO_HEXAVALENTE":                                 "Cromo hexavalente",
+    "FLUOR_ACIDO_FLUORIDRICO_FLUORETOS":                 "Flúor / Ácido fluorídrico / Fluoretos",
+    "METIL_ETIL_CETONA":                                 "Metil-etil-cetona (MEK)",
+    "ACETONA":                                           "Acetona",
+    "TETRAHIDROFURANO":                                  "Tetrahidrofurano",
+    "CICLOEXANONA":                                      "Cicloexanona",
+    "POLICORTE_SOLDA":                                   "Fumos metálicos de solda / policorte",
+    "TRABALHADORES_DA_SAUDE":                            "Agente biológico (trabalhadores da saúde)",
+    "MANIPULAR_ALIMENTOS":                               "Agente biológico (manipulação de alimentos)",
+    "SUBSTANCIA_OTOTOXICA":                              "Substância ototóxica (potencial perda auditiva)",
+}
 
 
-def _deduplicar_ghes(ghes):
-    vistos, resultado = {}, []
-    for ghe in ghes:
-        chave = frozenset(ghe.get('cargos', []))
-        if not chave:
-            resultado.append(ghe)
-            continue
-        if chave not in vistos:
-            vistos[chave] = len(resultado)
-            resultado.append(ghe)
-        else:
-            idx = vistos[chave]
-            if len(ghe['ghe']) < len(resultado[idx]['ghe']):
-                resultado[idx]['ghe'] = ghe['ghe']
-            riscos_existentes = {r['nome_agente'] for r in resultado[idx]['riscos_mapeados']}
-            for r in ghe.get('riscos_mapeados', []):
-                if r['nome_agente'] not in riscos_existentes:
-                    resultado[idx]['riscos_mapeados'].append(r)
-                    riscos_existentes.add(r['nome_agente'])
+def _traduzir_chave_para_texto(chave: str) -> str:
+    """
+    Converte chave interna do parser_pgr (ex: 'RUIDO') para texto em
+    português natural (ex: 'Ruído') que o Agente Médico IA consegue processar.
+    Fallback: substitui underscores por espaços e aplica Title Case.
+    """
+    return _CHAVE_PARA_RISCO_TEXTO.get(chave, chave.replace("_", " ").title())
+
+
+def _converter_ghe_blocos_para_lista(ghe_blocos: dict) -> list:
+    """
+    Converte o formato dict de parser_pgr.parsear_pgr() para a lista de dicts
+    esperada por processar_pcmso() e _normalizar_dados_ghe_para_auditor().
+    Aplica _traduzir_chave_para_texto() em cada risco para que o Agente IA
+    receba texto legível ('Ruído') em vez de chaves internas ('RUIDO').
+    """
+    resultado = []
+    for nome_ghe, info in ghe_blocos.items():
+        riscos_raw = info.get("riscos_identificados", [])
+        riscos_mapeados = [
+            {
+                "nome_agente": (
+                    _traduzir_chave_para_texto(r)
+                    if isinstance(r, str)
+                    else (r.get("nome_agente") or "")
+                ),
+                "perigo_especifico": r.get("perigo_especifico", "") if isinstance(r, dict) else "",
+            }
+            for r in riscos_raw
+            if r
+        ]
+        exames = [
+            e["exame"] if isinstance(e, dict) else str(e)
+            for e in info.get("exames_gerados", [])
+        ]
+        resultado.append({
+            "ghe":             nome_ghe,
+            "cargos":          info.get("cargos", []),
+            "riscos_mapeados": riscos_mapeados,
+            "exames":          exames,
+        })
     return resultado
 
 
-def extrair_pgr_com_fallback(texto_pgr, chave_api=None):
-    formato = _detectar_formato_pgr(texto_pgr)
-    if formato == 'aiha':
-        resultado = extrair_pgr_matriz_aiha(texto_pgr)
-        return (resultado, 'aiha') if resultado else ([], 'parcial')
-    if formato == 'misto':
-        local = extrair_pgr_local(texto_pgr)
-        aiha = extrair_pgr_matriz_aiha(texto_pgr)
-        nomes_local = {x['ghe'] for x in local}
-        merged = local + [g for g in aiha if g['ghe'] not in nomes_local]
-        return (merged, 'misto') if merged else ([], 'parcial')
-    local = extrair_pgr_local(texto_pgr)
-    if not _fallback_necessario(local):
-        return local, 'local'
-    if chave_api:
-        try:
-            from utils.ia_client import extrair_pgr_via_ia
-            ia = extrair_pgr_via_ia(texto_pgr, chave_api)
-            return (ia, 'ia') if ia else (local or [], 'parcial')
-        except Exception as e:
-            print(f'[WARN] Falha IA: {e}')
-    return (local or [], 'parcial')
+def tentar_gemini_para_ghes_sem_cargo(texto_pgr: str):
+    """
+    Camada 0 isolada para o caminho principal de app.py.
+    Retorna (dados_ghe_ia, "gemini") em sucesso, ou (None, None) em qualquer falha.
 
+    Lê CHAVE_API_GOOGLE de st.secrets primeiro, depois de os.environ. Nunca lança.
+    """
+    import os as _os
+    chave = ""
+    _chave_origem = "nenhuma"
+    try:
+        import streamlit as _st
+        _chave_secrets = str(_st.secrets.get("CHAVE_API_GOOGLE", "")).strip()
+        if _chave_secrets:
+            chave = _chave_secrets
+            _chave_origem = "st.secrets"
+    except Exception as _e_st:
+        _chave_origem = f"st.secrets ERRO: {_e_st}"
+    if not chave:
+        chave = _os.environ.get("CHAVE_API_GOOGLE", "").strip()
+        if chave:
+            _chave_origem = "os.environ"
 
-def _novo_exame(exame, adm=True, per=None, mro=True, rt=False, dem=False, obs='', motivo=''):
-    return {'exame': _nome_oficial_exame(exame), 'adm': adm, 'per': per, 'mro': mro, 'rt': rt, 'dem': dem, 'obs': obs, 'motivo': motivo}
-
-
-def _match_funcao_matriz(cargo_upper, funcao_matriz):
-    alvo = _norm(funcao_matriz)
-    cargo_n = _norm(cargo_upper)
-    return alvo == cargo_n or alvo in cargo_n or cargo_n in alvo
-
-
-def _forcar_regras_exame(ex, cod_ghe):
-    ex = deepcopy(ex)
-    nome = _nome_oficial_exame(ex.get('exame', ''))
-    ex['exame'] = nome
-    if nome == 'Exame Clinico':
-        ex['adm'] = True if ex.get('adm') is None else ex.get('adm', True)
-        ex['mro'] = True if ex.get('mro') is None else ex.get('mro', True)
-        ex['rt'] = True
-        ex['dem'] = True if ex.get('dem') is None else ex.get('dem', True)
-        ex['per'] = _GHE_PERIODICIDADES.get(cod_ghe, {}).get('Exame Clinico', ex.get('per') or '12 MESES')
-    else:
-        ex['rt'] = False
-    per_regra = _GHE_PERIODICIDADES.get(cod_ghe, {}).get(nome)
-    if per_regra:
-        ex['per'] = per_regra
-    if nome == 'RX de coluna lombo-sacra':
-        ex['adm'] = True
-        ex['per'] = None
-        ex['mro'] = True
-        ex['rt'] = False
-        ex['dem'] = False
-    if cod_ghe == '17' and nome == 'Audiometria':
-        ex['adm'] = True
-        ex['per'] = ex.get('per') or '12 MESES'
-        ex['mro'] = True
-        ex['rt'] = False
-        ex['dem'] = False
-    if nome in {'Ácido tricloroacético na urina', 'Acetona na urina', 'Metil-Etil-Cetona', 'Metiletilcetona na urina', 'Ciclohexanol na urina', 'Tetrahidrofurnano na urina', 'Carboxiemoglobina', 'Ácido trans-trans mucônico', 'Ortocresol na urina', 'Ác. Metil-hipúrico na urina'}:
-        ex['adm'] = ex.get('adm', False)
-        ex['mro'] = ex.get('mro', False)
-        ex['dem'] = ex.get('dem', False)
-    if nome == 'Manganês sanguíneo':
-        ex['adm'] = True
-        ex['mro'] = True
-        ex['dem'] = False
-    return ex
-
-
-def _adicionar_base_por_ghe(exames, cod_ghe):
-    for nome in _GHE_BASE.get(cod_ghe, _BASE_COMPLETO):
-        adicionar_exame_dedup(exames, _forcar_regras_exame(_novo_exame(nome, motivo=f'Base GHE {cod_ghe}'), cod_ghe))
-    for nome in _GHE_EXTRAS.get(cod_ghe, []):
-        adicionar_exame_dedup(exames, _forcar_regras_exame(_novo_exame(nome, motivo=f'Extra GHE {cod_ghe}'), cod_ghe))
-
-
-def _riscos_triviais_para_cargo(cod_ghe, cargo):
-    return _RISCOS_TRIVIAIS_OBRIGATORIOS.get(cod_ghe, {}).get(_norm(cargo), [])
-
-
-def _aplicar_funcao_matriz(exames, cargo_norm, cod_ghe):
-    for funcao, lista_ex in MATRIZ_FUNCAO_EXAME.items():
-        if _match_funcao_matriz(cargo_norm, funcao):
-            for ex in lista_ex:
-                exame = _novo_exame(
-                    ex.get('exame', ''),
-                    adm=ex.get('adm', True),
-                    per=ex.get('per'),
-                    mro=ex.get('mro', True),
-                    rt=ex.get('rt', False),
-                    dem=ex.get('dem', False),
-                    obs=ex.get('obs', ''),
-                    motivo=f'Função: {funcao.title()}',
-                )
-                adicionar_exame_dedup(exames, _forcar_regras_exame(exame, cod_ghe))
-
-
-def _aplicar_riscos_matriz(exames, riscos, cod_ghe):
-    bio_real = tem_risco_biologico_real(riscos)
-    for risco in riscos:
-        chave_r = normalizar_texto(risco.get('nome_agente', ''))
-        if chave_r in CHAVES_BIOLOGICAS_MATRIZ and not bio_real:
-            continue
-        regra = MATRIZ_RISCO_EXAME.get(chave_r)
-        if not regra:
-            continue
-        exame = _novo_exame(
-            regra['exame'], adm=regra.get('adm', True), per=regra.get('periodico'), mro=regra.get('mro', True),
-            rt=regra.get('rt', False), dem=regra.get('dem', False), obs=regra.get('obs', ''),
-            motivo=f"Exposição: {chave_r.title()} — {regra.get('obs', '')}",
+    # DEBUG TEMPORÁRIO ─────────────────────────────────────────────────────────
+    try:
+        import streamlit as _st_dbg
+        _st_dbg.warning(
+            f"DEBUG Gemini helper: chave={'SIM (' + _chave_origem + ')' if chave else 'NÃO'} | "
+            f"origem={_chave_origem} | "
+            f"len_texto={len(texto_pgr)}"
         )
-        adicionar_exame_dedup(exames, _forcar_regras_exame(exame, cod_ghe))
+    except Exception:
+        pass
+    # ──────────────────────────────────────────────────────────────────────────
+
+    if not chave:
+        return None, None
+    try:
+        from utils.ia_client import extrair_pgr_estruturado_via_gemini
+        dados_ia = extrair_pgr_estruturado_via_gemini(texto_pgr, chave)
+        # DEBUG TEMPORÁRIO ─────────────────────────────────────────────────────
+        try:
+            import streamlit as _st_dbg2
+            _st_dbg2.warning(
+                f"DEBUG Gemini resultado: dados_ia={'None' if dados_ia is None else f'{len(dados_ia)} GHE(s)'}"
+            )
+        except Exception:
+            pass
+        # ──────────────────────────────────────────────────────────────────────
+        if dados_ia and len(dados_ia) >= 2:
+            return dados_ia, "gemini"
+    except Exception as _e_gemini:
+        try:
+            import streamlit as _st_dbg3
+            _st_dbg3.warning(f"DEBUG Gemini EXCEÇÃO: {type(_e_gemini).__name__}: {_e_gemini}")
+        except Exception:
+            pass
+    return None, None
 
 
-def _filtrar_por_restricao_ghe(exames, cod_ghe):
-    permitidos = _GHE_RESTRICOES.get(cod_ghe)
-    if not permitidos:
-        return exames
-    return {k: v for k, v in exames.items() if _nome_oficial_exame(v.get('exame', '')) in permitidos}
+def extrair_pgr_com_fallback(texto_pgr: str):
+    # ── Camada 0: Gemini (se chave disponível) ──────────────────────────────
+    # Tenta extração estruturada via LLM antes do parser regex.
+    # Qualquer falha (sem chave, API down, JSON inválido) cai silenciosamente
+    # para as camadas seguintes — nunca propaga exceção.
+    try:
+        import streamlit as st
+        chave = str(st.secrets.get("CHAVE_API_GOOGLE", "")).strip()
+        if chave:
+            from utils.ia_client import extrair_pgr_estruturado_via_gemini
+            dados_ia = extrair_pgr_estruturado_via_gemini(texto_pgr, chave)
+            if dados_ia and len(dados_ia) >= 2:
+                return dados_ia, "gemini"
+    except Exception:
+        pass
+
+    # ── Camada 1: parser_pgr regex (fallback primário) ───────────────────────
+    # Bug #1 corrigido: parser_pgr exporta parsear_pgr(), não parsear_pgr_texto()
+    try:
+        from parser_pgr import parsear_pgr as _parsear_pgr_ext
+        resultado = _parsear_pgr_ext(texto_pgr, regras={})
+        if resultado and resultado.get("ghe_blocos"):
+            dados = _converter_ghe_blocos_para_lista(resultado["ghe_blocos"])
+            if dados:
+                return dados, "local"
+    except Exception:
+        pass
+
+    # ── Camada 2: parser local interno (último recurso) ──────────────────────
+    dados = _parsear_pgr_local(texto_pgr)
+    fonte = "local" if dados else "vazio"
+    return dados, fonte
 
 
-def _ordenar_exames(rows):
-    ordem = ['Exame Clinico', 'Audiometria', 'Acuidade Visual', 'Hemograma', 'Glicemia em Jejum', 'ECG', 'Ácido tricloroacético na urina', 'Acetona na urina', 'Metil-Etil-Cetona', 'Metiletilcetona na urina', 'Ciclohexanol na urina', 'Tetrahidrofurnano na urina', 'Manganês sanguíneo', 'Carboxiemoglobina', 'Contagem de Reticulócitos', 'Ácido trans-trans mucônico', 'Ortocresol na urina', 'Ác. Metil-hipúrico na urina', 'Avaliação Psicossocial', 'Espirometria', 'RX de coluna lombo-sacra', 'RX de Tórax OIT']
-    peso = {nome: i for i, nome in enumerate(ordem)}
-    return sorted(rows, key=lambda r: (peso.get(_nome_oficial_exame(r['Exame']), 999), _norm(r['Exame'])))
+# ============================================================================
+# 3 — ENRIQUECIMENTO COM FISPQ
+# ============================================================================
+
+def enriquecer_pgr_com_fispq(dados_ghe: list, resultados_fispq: list) -> list:
+    agentes = []
+    for fispq in resultados_fispq:
+        nome = fispq.get("nome_produto") or fispq.get("produto") or ""
+        cas  = fispq.get("cas") or ""
+        if nome:
+            agentes.append({"nome_agente": nome, "perigo_especifico": cas})
+        for comp in fispq.get("componentes", []):
+            nc = comp.get("nome") or comp.get("substancia") or ""
+            cc = comp.get("cas") or ""
+            if nc:
+                agentes.append({"nome_agente": nc, "perigo_especifico": cc})
+    for ghe in dados_ghe:
+        existentes = {r.get("nome_agente", "").lower() for r in ghe.get("riscos_mapeados", [])}
+        for ag in agentes:
+            if ag["nome_agente"].lower() not in existentes:
+                ghe.setdefault("riscos_mapeados", []).append(ag)
+    return dados_ghe
 
 
-def processar_pcmso(dados_pgr, tipo_ambiente='misto'):
-    linhas = []
-    for ghe in dados_pgr:
-        nome_ghe_raw = ghe.get('ghe', 'Sem GHE')
-        nome_ghe = _limpar_nome_ghe(str(nome_ghe_raw))
-        cod_ghe = _ghe_codigo(nome_ghe)
-        cargos = (ghe.get('cargos') or [])[:15]
-        riscos = (ghe.get('riscos_mapeados') or [])[:25]
-        if not _ghe_valido(nome_ghe):
+# ============================================================================
+# 4 — MOTOR DE EXAMES
+# ============================================================================
+
+_EXAMES_MINIMOS_CANTEIRO = [
+    {"nome": "Exame Clínico",      "adm": True,  "per": "12", "mro": True,  "ret": True,  "dem": True},
+    {"nome": "Audiometria",        "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": True},
+    {"nome": "Acuidade Visual",    "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
+    {"nome": "Hemograma Completo", "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
+    {"nome": "Glicemia em Jejum",  "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
+    {"nome": "ECG",                "adm": True,  "per": "12", "mro": True,  "ret": False, "dem": False},
+    {"nome": "Espirometria",       "adm": True,  "per": "24", "mro": True,  "ret": False, "dem": True},
+    {"nome": "RX de Tórax OIT",   "adm": True,  "per": "60", "mro": True,  "ret": False, "dem": True},
+]
+
+_EXAMES_MINIMOS_ESCRIT = [
+    {"nome": "Exame Clínico", "adm": True, "per": "12", "mro": True, "ret": True, "dem": True},
+]
+
+
+def _bool_para_x(val) -> str:
+    if isinstance(val, bool):
+        return "X" if val else "-"
+    if isinstance(val, str):
+        return val.upper().strip() or "-"
+    return "-"
+
+
+def _per_para_str(per) -> str:
+    try:
+        return f"{int(per)}M"
+    except (TypeError, ValueError):
+        return str(per).upper().strip() if per else ""
+
+
+def _riscos_para_lista_str(riscos_mapeados: list) -> list:
+    resultado = []
+    for r in riscos_mapeados:
+        if isinstance(r, dict):
+            nome = r.get("nome_agente") or r.get("nome") or ""
+            perigo = r.get("perigo_especifico") or ""
+            s = " ".join(filter(None, [nome, perigo])).strip()
+            if s:
+                resultado.append(s)
+        elif isinstance(r, str) and r.strip():
+            resultado.append(r.strip())
+    return resultado
+
+
+def _contexto_do_ghe(ghe_nome: str, riscos_str: list) -> dict:
+    t = _normalizar(ghe_nome + " " + " ".join(riscos_str))
+    return {
+        "altura": any(x in t for x in ["altura", "nr-35", "nr35", "andaime", "cremalheira", "grua", "telhado"]),
+        "confinado": any(x in t for x in ["confinado", "cisterna", "poco"]),
+        "eletricidade": any(x in t for x in ["eletric", "nr-10", "nr10", "energizado", "choque"]),
+        "maquinas_pesadas": any(x in t for x in ["maquina", "betoneira", "guindaste", "grua", "cremalheira"]),
+    }
+
+
+def _resolver_exames_cargo(cargo, riscos_str, contexto, e_canteiro, ghe_nome=""):
+    if _AGENTE_IA_DISPONIVEL:
+        resultado = processar_cargo_ia(
+            cargo=cargo, riscos=riscos_str, contexto=contexto,
+            e_canteiro=e_canteiro, ghe_nome=ghe_nome,
+        )
+        return resultado.get("exames", []), resultado.get("chave_mestra", ""), resultado.get("auditoria_nr7", {})
+    base = deepcopy(_EXAMES_MINIMOS_CANTEIRO if e_canteiro else _EXAMES_MINIMOS_ESCRIT)
+    return base, None, {}
+
+
+# ============================================================================
+# 5 — processar_pcmso
+# ============================================================================
+
+# Padrão para extrair número e título de um nome de GHE existente.
+# Aceita "GHE 01 - Foo", "GHE 7: Bar", "GHE 12 — Baz", etc.
+_RE_GHE_PREFIX = re.compile(
+    r'^\s*GHE\s*(\d+)\s*[-:–—]?\s*',
+    re.IGNORECASE,
+)
+
+
+# ---------------------------------------------------------------------------
+# Prompt 7 — Deduplicação intra-GHE + redistribuição admin/técnico
+# ---------------------------------------------------------------------------
+# Keywords (forma normalizada) que identificam cargos administrativos.
+# Usadas para mover cargos admin de GHEs técnicos para GHE administrativo.
+_ADMIN_CARGO_KEYS = (
+    'administrativo', 'aprendiz', 'engenheiro',
+    'estagiari', 'assistente administrativo',
+)
+
+# Tipos de GHE considerados administrativos pelo _tipo_do_ghe()
+_TIPOS_GHE_ADMIN = {'engenharia', 'seguranca', 'administracao', 'almoxarifado'}
+
+
+def _norm_cargo_para_dedup(cargo: str) -> str:
+    """Wrapper: usa normalizar_cargo() do Prompt 1 com fallback para _normalizar."""
+    if not cargo:
+        return ""
+    if _normalizar_cargo_aud is not None:
+        try:
+            return _normalizar_cargo_aud(cargo)
+        except Exception:
+            pass
+    return _normalizar(cargo).strip()
+
+
+def _consolidar_cargos_dados_ghe(dados_ghe: list) -> None:
+    """
+    Pré-processamento IN PLACE de dados_ghe (Prompt 7):
+
+      1. DEDUP intra-GHE: remove cargos duplicados dentro de cada GHE,
+         comparando pela forma normalizada via normalizar_cargo() do Prompt 1.
+         Preserva a primeira ocorrência (forma original para exibição).
+         "Servente" pode aparecer em múltiplos GHEs diferentes — apenas
+         duplicatas DENTRO do mesmo GHE são removidas.
+
+      2. REDISTRIBUIÇÃO: cargos administrativos (Administrativo,
+         Administrativo De Obra, Aprendiz, Engenheiro, Estagiário) que
+         aparecem em GHEs técnicos (Pintura, Serralheria, etc.) são
+         movidos para o primeiro GHE administrativo encontrado. Se não
+         houver GHE admin de destino, cargos permanecem onde estão
+         (preferível a perda silenciosa).
+
+    Aplicado no início de processar_pcmso() — antes da geração do DataFrame.
+    """
+    if not dados_ghe:
+        return
+
+    # ── Etapa 1: dedup intra-GHE ─────────────────────────────────────────
+    for ghe in dados_ghe:
+        cargos_orig = list(ghe.get('cargos', []))
+        seen = set()
+        cargos_dedup = []
+        for c in cargos_orig:
+            norm = _norm_cargo_para_dedup(c)
+            if norm and norm not in seen:
+                seen.add(norm)
+                cargos_dedup.append(c)  # preserva forma ORIGINAL para exibição
+        ghe['cargos'] = cargos_dedup
+
+    # ── Etapa 2: redistribuir cargos admin de GHEs técnicos ──────────────
+    # Identifica primeiro GHE administrativo como destino
+    ghe_destino = None
+    for ghe in dados_ghe:
+        if _tipo_do_ghe(ghe.get('ghe', '')) in _TIPOS_GHE_ADMIN:
+            ghe_destino = ghe
+            break
+    if ghe_destino is None:
+        return  # sem GHE admin → não move (mantém integridade)
+
+    # Conjunto de cargos já presentes no destino (forma normalizada)
+    nomes_no_destino = {
+        _norm_cargo_para_dedup(c) for c in ghe_destino.get('cargos', [])
+    }
+
+    for ghe in dados_ghe:
+        if ghe is ghe_destino:
             continue
-        if tipo_ambiente == 'canteiro':
+        if _tipo_do_ghe(ghe.get('ghe', '')) in _TIPOS_GHE_ADMIN:
+            continue  # outro GHE admin existente — não mexe
+
+        # GHE técnico — extrai cargos admin
+        cargos = list(ghe.get('cargos', []))
+        cargos_kept = []
+        for c in cargos:
+            c_norm = _norm_cargo_para_dedup(c)
+            is_admin = any(kw in c_norm for kw in _ADMIN_CARGO_KEYS)
+            if is_admin:
+                # Move para destino se ainda não está lá
+                if c_norm and c_norm not in nomes_no_destino:
+                    ghe_destino.setdefault('cargos', []).append(c)
+                    nomes_no_destino.add(c_norm)
+            else:
+                cargos_kept.append(c)
+        ghe['cargos'] = cargos_kept
+
+
+def _renumerar_ghe_sequencial(nome_original: str, novo_num: int, hint: str = "") -> str:
+    """
+    Reconstrói o nome do GHE com numeração sequencial (1, 2, 3, ...) e
+    título descritivo preservado a partir do nome original.
+
+    Comportamento:
+      - "GHE 07: Estrutura - Alvenaria"  -> "GHE 01 - Estrutura - Alvenaria"
+      - "GHE 03 - Forma de pilar"        -> "GHE 02 - Forma de pilar"
+      - "GHE 99" (sem descrição) + hint  -> "GHE 03 - <hint>"
+      - "GHE 99" (sem descrição) s/hint  -> "GHE 03 - Grupo 3"
+      - ""                               -> "GHE 04 - Grupo 4"
+
+    hint: título derivado do primeiro cargo ou do risco predominante do bloco,
+          calculado em processar_pcmso() quando o nome não contém descrição.
+
+    Garante que o nome NUNCA fica em branco (sempre tem título), conforme
+    spec do Prompt 6 (Parte A — fallback obrigatório).
+    """
+    titulo = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
+    if not titulo:
+        titulo = hint if hint else f"Grupo {novo_num}"
+    return f"GHE {novo_num:02d} - {titulo}"
+
+
+def _extrair_hint_titulo(cargos: list, riscos_mapeados: list) -> str:
+    """
+    Deriva um título descritivo a partir dos cargos ou riscos de um bloco GHE
+    quando o nome original não contém descrição (ex: apenas "GHE 07").
+
+    Prioridade:
+      1. Primeiro cargo real (não é nome de GHE)
+      2. Primeiro risco mapeado
+      3. "" (vazio — _renumerar_ghe_sequencial usará "Grupo N")
+    """
+    # Tenta primeiro cargo real
+    for c in cargos:
+        if c and not _RE_CARGO_EH_GHE.match(c.strip()):
+            return c.strip().title()
+    # Fallback: primeiro risco mapeado
+    for r in riscos_mapeados:
+        if isinstance(r, dict):
+            nome = (r.get("nome_agente") or r.get("perigo_especifico") or "").strip()
+        else:
+            nome = str(r).strip()
+        if nome:
+            return nome.title()
+    return ""
+
+
+def _num_ghe_para_sort(item: dict) -> int:
+    """Extrai o número do campo 'ghe' para ordenação — fallback 9999."""
+    m = re.search(r'\d+', item.get('ghe', '') or item.get('nome_ghe', ''))
+    return int(m.group()) if m else 9999
+
+
+def processar_pcmso(dados_ghe: list, tipo_ambiente: str = "canteiro") -> pd.DataFrame:
+    # Ordena GHEs pelo número original do PGR antes de qualquer processamento.
+    # Garante que GHE 01 vem antes de GHE 02, independente da ordem de chegada.
+    dados_ghe.sort(key=_num_ghe_para_sort)
+
+    # Prompt 7: dedup intra-GHE + redistribuição cargos admin/técnico.
+    # Modifica dados_ghe in place APÓS o sort.
+    _consolidar_cargos_dados_ghe(dados_ghe)
+
+    linhas = []
+    # Renumera GHEs sequencialmente por posição na lista (Parte B do Prompt 6).
+    # `enumerate(start=1)` reinicia a cada chamada — sem estado global.
+    for idx, ghe_item in enumerate(dados_ghe, start=1):
+        nome_original   = ghe_item.get("ghe") or ghe_item.get("nome_ghe") or ""
+        cargos          = ghe_item.get("cargos", [])
+        riscos_mapeados = ghe_item.get("riscos_mapeados", [])
+
+        # Deriva hint de título quando o nome original não tem descrição
+        _titulo_check = _RE_GHE_PREFIX.sub('', str(nome_original or ''), count=1).strip()
+        _hint = _extrair_hint_titulo(cargos, riscos_mapeados) if not _titulo_check else ""
+
+        nome_ghe        = _renumerar_ghe_sequencial(nome_original, idx, hint=_hint)
+        riscos_str      = _riscos_para_lista_str(riscos_mapeados)
+        exames_pre      = ghe_item.get("exames", [])
+
+        if tipo_ambiente == "canteiro":
             e_canteiro = True
-        elif tipo_ambiente == 'escritorio':
+        elif tipo_ambiente == "escritorio":
             e_canteiro = False
         else:
-            e_canteiro = _ghe_e_canteiro_misto(nome_ghe, riscos)
+            nome_n = _normalizar(nome_ghe)
+            e_canteiro = not any(
+                x in nome_n for x in ["escritorio", "administrativo", "engenharia", "planejamento", "gerencia"]
+            )
+            if "almoxarifado" in nome_n:
+                e_canteiro = True
+
+        contexto = _contexto_do_ghe(nome_ghe, riscos_str)
+
         for cargo in cargos:
-            cargo_norm = normalizar_cargo(cargo)
-            exames = {}
-            adicionar_exame_dedup(exames, _forcar_regras_exame(_novo_exame('Exame Clinico', adm=True, per='12 MESES', mro=True, rt=True, dem=True, motivo='NR-07 Básico'), cod_ghe))
-            if cod_ghe:
-                _adicionar_base_por_ghe(exames, cod_ghe)
-            elif not e_canteiro:
-                _aplicar_funcao_matriz(exames, cargo_norm, cod_ghe)
-            _aplicar_funcao_matriz(exames, cargo_norm, cod_ghe)
-            riscos_expand = list(riscos)
-            for risco_trivial in _riscos_triviais_para_cargo(cod_ghe, cargo_norm):
-                riscos_expand.append({'nome_agente': risco_trivial, 'perigo_especifico': 'Risco trivial obrigatório PDF referência'})
-            _aplicar_riscos_matriz(exames, riscos_expand, cod_ghe)
-            exames = _filtrar_por_restricao_ghe(exames, cod_ghe)
-            rows_cargo = []
-            for ex_info in exames.values():
-                nome_exame = _nome_oficial_exame(ex_info.get('exame', ''))
-                rt = bool(ex_info.get('rt', False)) if nome_exame == 'Exame Clinico' else False
-                rows_cargo.append({
-                    'GHE / Setor': nome_ghe,
-                    'Cargo': cargo,
-                    'Exame': nome_exame,
-                    'ADM': _flag(ex_info.get('adm', True)),
-                    'PER': _fmt_per(ex_info.get('per')),
-                    'MRO': _flag(ex_info.get('mro', True)),
-                    'RT': _flag(rt),
-                    'DEM': _flag(ex_info.get('dem', False)),
-                    'Justificativa': ex_info.get('motivo', ''),
-                })
-            linhas.extend(_ordenar_exames(rows_cargo))
-    return pd.DataFrame(linhas)
-
-
-def gerar_html_pcmso(df, cabecalho=None):
-    if not cabecalho:
-        cabecalho = {}
-    razao = cabecalho.get('razao_social', 'Empresa não informada')
-    cnpj = cabecalho.get('cnpj', '---')
-    obra = cabecalho.get('obra', '---')
-    medico = cabecalho.get('medico_rt', 'Não informado')
-    vig_i = cabecalho.get('vig_ini', '---')
-    vig_f = cabecalho.get('vig_fim', '---')
-    tec = cabecalho.get('responsavel_tec', '---')
-    ghe_grupos = {}
-    for _, row in df.iterrows():
-        ghe_grupos.setdefault(row['GHE / Setor'], {}).setdefault(row['Cargo'], []).append(row)
-    linhas_html = ''
-    for ghe_nome, cargos_dict in ghe_grupos.items():
-        total_rows = sum(len(v) for v in cargos_dict.values())
-        primeiro_ghe = True
-        for cargo, rows in cargos_dict.items():
-            primeiro_cargo = True
-            for row in rows:
-                def cel(val, bg='#d4edda'):
-                    return f'<td style="text-align:center;background:{bg};">X</td>' if val == 'X' else '<td style="text-align:center;color:#999;">-</td>'
-                per_td = f'<td style="text-align:center;font-weight:bold;">{row["PER"]}</td>' if row['PER'] != '-' else '<td style="text-align:center;color:#999;">-</td>'
-                ghe_td = ''
-                if primeiro_ghe:
-                    ghe_td = f'<td rowspan="{total_rows}" style="background:#084D22;color:#fff;font-weight:bold;vertical-align:middle;text-align:center;padding:8px;">{ghe_nome}</td>'
-                    primeiro_ghe = False
-                cargo_td = ''
-                if primeiro_cargo:
-                    cargo_td = f'<td rowspan="{len(rows)}" style="vertical-align:middle;font-weight:bold;">{cargo}</td>'
-                    primeiro_cargo = False
-                linhas_html += f"<tr>{ghe_td}{cargo_td}<td>{row['Exame']}</td>{cel(row['ADM'])}{per_td}{cel(row['MRO'])}{cel(row['RT'])}{cel(row['DEM'])}<td style='font-size:11px;color:#555;'>{row['Justificativa']}</td></tr>"
-    return f'''<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><style>body{{font-family:Arial,sans-serif;font-size:13px;margin:20px;}}table{{width:100%;border-collapse:collapse;margin-top:10px;}}th{{background:#1AA04B;color:#fff;padding:10px 6px;border:1px solid #084D22;font-size:12px;}}th.c{{text-align:center;}}td{{border:1px solid #ccc;padding:8px 6px;vertical-align:middle;}}tr:nth-child(even) td{{background:#F4F8F5;}}</style></head><body><table style="margin-bottom:12px;border:2px solid #084D22;"><tr style="background:#084D22;color:#fff;"><td colspan="5" style="padding:8px;font-size:12pt;font-weight:bold;text-align:center;">PROGRAMA DE CONTROLE MÉDICO DE SAÚDE OCUPACIONAL — PCMSO</td></tr><tr><td><b>Empresa:</b> {razao}</td><td><b>CNPJ:</b> {cnpj}</td><td><b>Obra:</b> {obra}</td><td><b>Vigência:</b> {vig_i} a {vig_f}</td><td><b>Emissão:</b> {datetime.now().strftime('%d/%m/%Y')}</td></tr><tr><td colspan="3"><b>Médico(a):</b> {medico}</td><td colspan="2"><b>Técnico SST:</b> {tec}</td></tr></table><table><tr><th style="width:12%">GHE</th><th style="width:14%">Função</th><th style="width:30%">Exame Solicitado</th><th class="c" style="width:5%">ADM</th><th class="c" style="width:6%">PER</th><th class="c" style="width:5%">MRO</th><th class="c" style="width:4%">RT</th><th class="c" style="width:5%">DEM</th><th style="width:19%">Justificativa</th></tr>{linhas_html}</table><p style="font-size:8pt;color:#555;margin-top:12px;">Gerado por Sistema Automação SST Seconci-GO.</p></body></html>'''
-
-
-def gerar_docx_rq61(df, cabecalho=None):
-    from docx import Document
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
-    from docx.oxml import OxmlElement
-    from docx.oxml.ns import qn
-    from docx.shared import Cm, Pt, RGBColor
-    if not cabecalho:
-        cabecalho = {}
-    razao    = cabecalho.get('razao_social',    'Empresa não informada')
-    cnpj     = cabecalho.get('cnpj',            '---')
-    obra     = cabecalho.get('obra',            '---')
-    medico   = cabecalho.get('medico_rt',       'Não informado')
-    crm      = cabecalho.get('crm',             '')
-    resp_tec = cabecalho.get('responsavel_tec', '---')
-    vig_i    = cabecalho.get('vig_ini',         '---')
-    tipo     = cabecalho.get('tipo_obra',       'Renovação')
-    VERDE_ESC = '084D22'
-    VERDE_MED = '1AA04B'
-    BRANCO = RGBColor(0xFF, 0xFF, 0xFF)
-    def shd(cell, hex_color):
-        tc = cell._tc
-        tcPr = tc.get_or_add_tcPr()
-        s = OxmlElement('w:shd')
-        s.set(qn('w:val'), 'clear')
-        s.set(qn('w:color'), 'auto')
-        s.set(qn('w:fill'), hex_color)
-        tcPr.append(s)
-    def set_borders(cell, color='084D22'):
-        tc = cell._tc
-        tcPr = tc.get_or_add_tcPr()
-        tcBorders = OxmlElement('w:tcBorders')
-        for side in ('top', 'left', 'bottom', 'right'):
-            border = OxmlElement(f'w:{side}')
-            border.set(qn('w:val'), 'single')
-            border.set(qn('w:sz'), '4')
-            border.set(qn('w:space'), '0')
-            border.set(qn('w:color'), color)
-            tcBorders.append(border)
-        tcPr.append(tcBorders)
-    def txt(cell, text, bold=False, color=None, size=9, align=WD_ALIGN_PARAGRAPH.LEFT, italic=False):
-        cell.text = ''
-        p = cell.paragraphs[0]
-        p.alignment = align
-        r = p.add_run(str(text))
-        r.bold = bold
-        r.italic = italic
-        r.font.size = Pt(size)
-        if color:
-            r.font.color.rgb = color
-    def _fmt_exame_rq61(row):
-        partes = []
-        if str(row.get('ADM', '-')) == 'X':
-            partes.append('ADM')
-        per = str(row.get('PER', '-')).strip().upper()
-        if per and per != '-':
-            per_num = per.replace('M', '').strip()
-            try:
-                partes.append(f'PER {int(per_num)} meses')
-            except Exception:
-                partes.append(f'PER {per}')
-        if str(row.get('MRO', '-')) == 'X':
-            partes.append('MRO')
-        if str(row.get('RT', '-')) == 'X':
-            partes.append('RET')
-        if str(row.get('DEM', '-')) == 'X':
-            partes.append('DEM')
-        return f"{row['Exame']} ({', '.join(partes)})" if partes else str(row['Exame'])
-    doc = Document()
-    for sec in doc.sections:
-        sec.top_margin = Cm(1.5)
-        sec.bottom_margin = Cm(1.5)
-        sec.left_margin = Cm(2.0)
-        sec.right_margin = Cm(1.5)
-    cab = doc.add_table(rows=5, cols=4)
-    cab.style = 'Table Grid'
-    # Linha 0 — título (largura total)
-    cab.rows[0].cells[0].merge(cab.rows[0].cells[3])
-    shd(cab.rows[0].cells[0], VERDE_ESC)
-    txt(cab.rows[0].cells[0], 'MATRIZ FUNÇÃO – EXAMES PCMSO', bold=True, color=BRANCO, size=13, align=WD_ALIGN_PARAGRAPH.CENTER)
-    # Linha 1 — Empresa | CNPJ
-    cab.rows[1].cells[0].merge(cab.rows[1].cells[1])
-    cab.rows[1].cells[2].merge(cab.rows[1].cells[3])
-    txt(cab.rows[1].cells[0], f'Empresa: {razao}', bold=True, size=9)
-    txt(cab.rows[1].cells[2], f'CNPJ: {cnpj}', bold=True, size=9)
-    # Linha 2 — Obra | Tipo
-    cab.rows[2].cells[0].merge(cab.rows[2].cells[1])
-    cab.rows[2].cells[2].merge(cab.rows[2].cells[3])
-    txt(cab.rows[2].cells[0], f'Obra/Unidade: {obra}', bold=True, size=9)
-    adendo_txt = f'Obra Nova (   )   {tipo} ( X )' if str(tipo).lower() == 'renovação' else 'Obra Nova ( X )   Renovação (   )'
-    txt(cab.rows[2].cells[2], adendo_txt, size=9)
-    # Linha 3 — Resp. SST | Data
-    cab.rows[3].cells[0].merge(cab.rows[3].cells[1])
-    cab.rows[3].cells[2].merge(cab.rows[3].cells[3])
-    txt(cab.rows[3].cells[0], f'Resp. SST: {resp_tec}', size=9)
-    txt(cab.rows[3].cells[2], f"Data: {datetime.now().strftime('%d/%m/%Y')}", bold=True, size=9)
-    # Linha 4 — Médico (largura total)
-    cab.rows[4].cells[0].merge(cab.rows[4].cells[3])
-    crm_txt = f'  CRM-GO {crm}' if crm else ''
-    txt(cab.rows[4].cells[0], f'Médico(a) Coordenador(a) do PCMSO: {medico}{crm_txt}', size=9, align=WD_ALIGN_PARAGRAPH.CENTER)
-    doc.add_paragraph()
-    ghe_grupos = {}
-    for _, row in df.iterrows():
-        ghe_grupos.setdefault(row['GHE / Setor'], {}).setdefault(row['Cargo'], []).append(row)
-    for ghe_nome, cargos_dict in ghe_grupos.items():
-        tbl = doc.add_table(rows=0, cols=2)
-        tbl.style = 'Table Grid'
-        tbl.columns[0].width = Cm(5.5)
-        tbl.columns[1].width = Cm(12.0)
-        row_ghe = tbl.add_row()
-        row_ghe.cells[0].merge(row_ghe.cells[1])
-        shd(row_ghe.cells[0], VERDE_ESC)
-        set_borders(row_ghe.cells[0])
-        txt(row_ghe.cells[0], ghe_nome.upper(), bold=True, color=BRANCO, size=10, align=WD_ALIGN_PARAGRAPH.CENTER)
-        row_h = tbl.add_row()
-        shd(row_h.cells[0], VERDE_MED)
-        shd(row_h.cells[1], VERDE_MED)
-        txt(row_h.cells[0], 'FUNÇÃO', bold=True, color=BRANCO, size=9)
-        txt(row_h.cells[1], 'EXAMES SOLICITADOS', bold=True, color=BRANCO, size=9)
-        for cargo, rows_cargo in cargos_dict.items():
-            exames_fmt = [_fmt_exame_rq61(r) for r in rows_cargo]
-            primeira = True
-            for exame_str in exames_fmt:
-                row_ex = tbl.add_row()
-                if primeira:
-                    txt(row_ex.cells[0], cargo, bold=True, size=9)
-                    primeira = False
+            auditoria_nr7_cargo = {}
+            if exames_pre:
+                exames_base = deepcopy(exames_pre) if isinstance(exames_pre[0], dict) else [
+                    {"nome": str(e), "adm": True, "per": "12", "mro": True, "ret": False, "dem": False}
+                    for e in exames_pre
+                ]
+                if _AGENTE_IA_DISPONIVEL:
+                    res_ia = processar_cargo_ia(
+                        cargo=cargo, riscos=riscos_str, contexto=contexto,
+                        e_canteiro=e_canteiro, ghe_nome=nome_ghe,
+                    )
+                    nomes_ok = {_normalizar(e.get("nome", "")) for e in exames_base}
+                    for ex in res_ia.get("exames", []):
+                        if _normalizar(ex.get("nome", "")) not in nomes_ok:
+                            exames_base.append(ex)
+                            nomes_ok.add(_normalizar(ex.get("nome", "")))
+                    fonte = f"banco+agente_ia:{res_ia.get('chave_mestra', '')}|ghe:{res_ia.get('chave_ghe','')}"
+                    auditoria_nr7_cargo = res_ia.get("auditoria_nr7", {})
                 else:
-                    row_ex.cells[0].text = ''
-                set_borders(row_ex.cells[0])
-                set_borders(row_ex.cells[1])
-                txt(row_ex.cells[1], exame_str, size=9)
-            # Nota de risco químico: merge horizontal (única vez por cargo)
-            notas_risco = sorted({
-                str(r.get('Justificativa', ''))
-                for r in rows_cargo
-                if str(r.get('Justificativa', '')).startswith('Exposição:')
-            })
-            if notas_risco:
-                row_nota = tbl.add_row()
-                row_nota.cells[0].merge(row_nota.cells[1])
-                set_borders(row_nota.cells[0])
-                txt(row_nota.cells[0], 'Nota risco químico: ' + ' | '.join(notas_risco),
-                    size=8, italic=True)
-        doc.add_paragraph()
-    p = doc.add_paragraph(f"Médico(a) Responsável pela validação: {medico}{(' CRM-GO ' + crm) if crm else ''}\nData do PCMAT/PGR: {vig_i}")
-    p.runs[0].font.size = Pt(8)
+                    fonte = "banco_pre_definido"
+                    auditoria_nr7_cargo = {}
+                exames_finais = exames_base
+            else:
+                exames_finais, chave, auditoria_nr7_cargo = _resolver_exames_cargo(
+                    cargo, riscos_str, contexto, e_canteiro, ghe_nome=nome_ghe
+                )
+                fonte = f"agente_ia:{chave}|ghe:{nome_ghe}" if _AGENTE_IA_DISPONIVEL else "fallback_minimo"
+
+            for ex in exames_finais:
+                nome_ex = ex.get("nome", "") if isinstance(ex, dict) else str(ex)
+                adm = _bool_para_x(ex.get("adm", True) if isinstance(ex, dict) else True)
+                per = _per_para_str(ex.get("per", "12") if isinstance(ex, dict) else "12")
+                mro = _bool_para_x(ex.get("mro", True) if isinstance(ex, dict) else True)
+                ret = _bool_para_x(ex.get("ret", False) if isinstance(ex, dict) else False)
+                dem = _bool_para_x(ex.get("dem", False) if isinstance(ex, dict) else False)
+                linhas.append({
+                    "GHE / Setor": nome_ghe, "Cargo": cargo, "Exame": nome_ex,
+                    "ADM": adm, "PER": per, "MRO": mro, "RT": ret, "DEM": dem,
+                    "Justificativa": fonte,
+                })
+
+    cols = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM", "Justificativa"]
+    df_final = pd.DataFrame(linhas) if linhas else pd.DataFrame(columns=cols)
+
+    # --- v9.4: Auditoria NR-7 por cargo (agente_medico_ia v2.2) ---
+    if _AGENTE_IA_DISPONIVEL and not df_final.empty:
+        try:
+            import streamlit as st
+            divergencias_total = []
+            for idx_aud, ghe_item in enumerate(dados_ghe, start=1):
+                # Usa o nome renumerado para que a auditoria exiba o mesmo
+                # número que aparece no PCMSO gerado (Parte B do Prompt 6).
+                nome_ghe_exp = _renumerar_ghe_sequencial(ghe_item.get("ghe", ""), idx_aud)
+                riscos_str_exp = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
+                contexto_exp = _contexto_do_ghe(nome_ghe_exp, riscos_str_exp)
+                e_canteiro_exp = tipo_ambiente == "canteiro"
+                for cargo_exp in ghe_item.get("cargos", []):
+                    _, _, aud = _resolver_exames_cargo(
+                        cargo_exp, riscos_str_exp, contexto_exp, e_canteiro_exp, ghe_nome=nome_ghe_exp
+                    )
+                    faltando = aud.get("faltando", [])
+                    divs = aud.get("divergencias", [])
+                    if faltando or divs:
+                        divergencias_total.append({
+                            "ghe": nome_ghe_exp,
+                            "cargo": cargo_exp,
+                            "faltando": faltando,
+                            "divergencias": divs,
+                        })
+            if divergencias_total:
+                with st.expander(
+                    f"⚠️ Auditoria NR-7 por cargo — {len(divergencias_total)} divergência(s) detectada(s)",
+                    expanded=False,
+                ):
+                    for item in divergencias_total:
+                        st.markdown(f"**{item['ghe']} → {item['cargo']}**")
+                        if item["faltando"]:
+                            st.warning("Faltando: " + ", ".join(e["nome"] for e in item["faltando"]))
+                        if item["divergencias"]:
+                            for d in item["divergencias"]:
+                                divs_str = ", ".join(
+                                    f"{dd['campo']}: esperado={dd['esperado']} gerado={dd['gerado']}"
+                                    for dd in d.get("divergencias", [])
+                                )
+                                st.info(f"↔ {d['nome']}: {divs_str}")
+        except Exception:
+            pass
+
+    # --- F1: Auditoria NR-7 ---
+    if _AGENTE_IA_DISPONIVEL and not df_final.empty:
+        try:
+            import streamlit as st
+            audit = auditar_pcmso(df_final, dados_ghe)
+            icon = "✅" if audit["aprovado"] else "❌"
+            expanded_audit = not audit["aprovado"]
+            with st.expander(
+                f"{icon} Auditoria NR-7 — {audit['resumo']}",
+                expanded=expanded_audit,
+            ):
+                if audit["pendencias"]:
+                    st.error("**Pendências críticas — corrigir antes de assinar:**")
+                    for p in audit["pendencias"]:
+                        st.write(p)
+                if audit["avisos"]:
+                    st.warning("**Avisos de conformidade:**")
+                    for a in audit["avisos"]:
+                        st.write(a)
+                if not audit["pendencias"] and not audit["avisos"]:
+                    st.success("Nenhuma pendência ou aviso encontrado. PCMSO pronto para assinatura.")
+        except Exception:
+            pass
+
+    # --- F6: Justificativas técnicas por GHE (expander colapsado) ---
+    if _AGENTE_IA_DISPONIVEL and dados_ghe:
+        try:
+            import streamlit as st
+            justificativas = gerar_justificativas_pcmso(dados_ghe)
+            if justificativas:
+                with st.expander("📝 Justificativas técnicas por GHE (para o médico RT)", expanded=False):
+                    for j in justificativas:
+                        st.markdown(f"**{j['ghe']}**")
+                        st.info(j["justificativa"])
+        except Exception:
+            pass
+
+    return df_final
+
+
+# ============================================================================
+# 6 — gerar_justificativas_pcmso  (F6 — função pública)
+# ============================================================================
+
+def gerar_justificativas_pcmso(dados_ghe: list) -> list:
+    if not _AGENTE_IA_DISPONIVEL:
+        return []
+    resultado = []
+    # Renumera consistentemente com processar_pcmso (Parte B do Prompt 6)
+    for idx_just, ghe_item in enumerate(dados_ghe, start=1):
+        nome_ghe = _renumerar_ghe_sequencial(ghe_item.get("ghe", ""), idx_just)
+        cargos = ghe_item.get("cargos", [])
+        riscos_str = _riscos_para_lista_str(ghe_item.get("riscos_mapeados", []))
+        try:
+            texto_j = gerar_justificativa_ghe(
+                ghe_nome=nome_ghe,
+                cargos=cargos,
+                riscos=riscos_str,
+                exames_nomes=[],
+            )
+        except Exception:
+            texto_j = f"Justificativa não disponível para {nome_ghe}."
+        resultado.append({"ghe": nome_ghe, "justificativa": texto_j})
+    return resultado
+
+
+# ============================================================================
+# 6b — Notas de risco químico por cargo (Prompt 6)
+# ============================================================================
+
+# Mapeamento: cargo normalizado → nota de risco obrigatória (NR-7 Anexo II).
+# Referência: Matriz Dra. Patrícia Montalvo 06/2025.
+# Chaves em forma normalizada: resultado de normalizar_cargo() aplicado.
+NOTAS_RISCO_QUIMICO = {
+    "serralheiro": {
+        "agente":          "Cromo hexavalente",
+        "exame_controle":  "Carboxihemoglobina no Sangue",
+    },
+    "meio oficial de serralheiro": {
+        "agente":          "Cromo hexavalente",
+        "exame_controle":  "Carboxihemoglobina no Sangue",
+    },
+    "eletricista industrial": {
+        "agente":          "Tricloroetileno",
+        "exame_controle":  "Ácido Tricloroacético na Urina",
+    },
+    "manutencao eletricista industrial": {
+        "agente":          "Tricloroetileno",
+        "exame_controle":  "Ácido Tricloroacético na Urina",
+    },
+    "encanador": {
+        "agente":          "Metietilcetona (MEK)",
+        "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
+    },
+    "meio oficial de encanador": {
+        "agente":          "Metietilcetona (MEK)",
+        "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
+    },
+}
+
+
+def _coletar_notas_ghe(cargos: list) -> list:
+    """
+    Retorna lista de notas de risco únicas para os cargos de um GHE.
+    Deduplicação por agente: se dois cargos (ex: Serralheiro + Meio Oficial de
+    Serralheiro) mapeiam para o mesmo agente, emite a nota apenas uma vez.
+
+    Retorna lista de dicts com: cargo, agente, exame_controle.
+    """
+    notas: list = []
+    agentes_vistos: set = set()
+    for cargo in cargos:
+        cargo_n = _norm_cargo_para_dedup(cargo)
+        nota = NOTAS_RISCO_QUIMICO.get(cargo_n)
+        if nota and nota["agente"] not in agentes_vistos:
+            notas.append({"cargo": cargo, **nota})
+            agentes_vistos.add(nota["agente"])
+    return notas
+
+
+def _formatar_nota_texto(nota: dict) -> str:
+    """Formata o bloco de texto de uma nota de risco para uso em HTML/docx."""
+    return (
+        f"⚠️ NOTA DE RISCO QUÍMICO — {nota['cargo']}\n"
+        f"Agente: {nota['agente']}\n"
+        f"Fundamento: NR-7 Anexo II / Matriz Dra. Patrícia 06/2025\n"
+        f"Exame de controle: {nota['exame_controle']} — periodicidade semestral"
+    )
+
+
+# ============================================================================
+# 7 — gerar_html_pcmso  (v9.5 — rowspan em GHE e Cargo)
+# ============================================================================
+
+def gerar_html_pcmso(df: pd.DataFrame, cabecalho: dict = None) -> str:
+    """
+    v9.5 — Gera HTML com células GHE e Cargo mergeadas (rowspan) para
+    eliminar a repetição linha a linha.
+    Estrutura: GHE (rowspan = total de linhas do GHE) |
+               Cargo (rowspan = total de exames do cargo) |
+               Exame | ADM | PER | MRO | RT | DEM
+    """
+    if cabecalho is None:
+        cabecalho = {}
+
+    cs       = "border:1px solid #ccc;padding:6px 8px;font-size:12px;vertical-align:top;"
+    cs_ghe   = f"{cs}background:#084D22;color:white;font-weight:bold;text-align:center;"
+    cs_cargo = f"{cs}font-weight:bold;"
+    th       = f"{cs}background:#084D22;color:white;text-align:center;font-weight:bold;"
+    cols_vis = ["GHE / Setor", "Cargo", "Exame", "ADM", "PER", "MRO", "RT", "DEM"]
+    hoje     = date.today().strftime("%d/%m/%Y")
+
+    cab_html = f"""
+    <div style="font-family:Arial,sans-serif;margin:0 auto;max-width:1100px;padding:20px;">
+    <h2 style="color:#084D22;text-align:center;">PROGRAMA DE CONTROLE MÉDICO DE SAÚDE OCUPACIONAL</h2>
+    <h3 style="color:#084D22;text-align:center;">NR-07 — PCMSO</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
+      <tr><td><b>Empresa:</b> {cabecalho.get('razao_social','')}</td><td><b>CNPJ:</b> {cabecalho.get('cnpj','')}</td></tr>
+      <tr><td><b>Médico RT:</b> {cabecalho.get('medico_rt','')}</td><td><b>Obra:</b> {cabecalho.get('obra','')}</td></tr>
+      <tr><td><b>Vigência:</b> {cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}</td><td><b>Resp. SST:</b> {cabecalho.get('responsavel_tec','')}</td></tr>
+      <tr><td colspan="2"><b>Gerado em:</b> {hoje} — {VERSAO_MODULO_PCMSO}</td></tr>
+    </table>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr>{''.join(f'<th style="{th}">{c}</th>' for c in cols_vis)}</tr></thead><tbody>
+    """
+
+    cs_nota = (
+        "background:#FFF8E1;border:1px solid #F9A825;padding:8px 10px;"
+        "font-size:11px;color:#5D4037;white-space:pre-line;"
+    )
+    rows_html = []
+    if not df.empty:
+        ghes = df["GHE / Setor"].unique() if "GHE / Setor" in df.columns else []
+        for ghe_nome in ghes:
+            df_ghe = df[df["GHE / Setor"] == ghe_nome]
+            rowspan_ghe = len(df_ghe)
+            cargos = df_ghe["Cargo"].unique() if "Cargo" in df_ghe.columns else []
+            primeira_linha_ghe = True
+            for cargo in cargos:
+                df_cargo = df_ghe[df_ghe["Cargo"] == cargo]
+                rowspan_cargo = len(df_cargo)
+                primeira_linha_cargo = True
+                for _, row in df_cargo.iterrows():
+                    tr = "<tr>"
+                    if primeira_linha_ghe:
+                        tr += f'<td style="{cs_ghe}" rowspan="{rowspan_ghe}">{ghe_nome}</td>'
+                        primeira_linha_ghe = False
+                    if primeira_linha_cargo:
+                        tr += f'<td style="{cs_cargo}" rowspan="{rowspan_cargo}">{cargo}</td>'
+                        primeira_linha_cargo = False
+                    for col in ["Exame", "ADM", "PER", "MRO", "RT", "DEM"]:
+                        val = row.get(col, "") if col in df.columns else ""
+                        tr += f'<td style="{cs}">{val}</td>'
+                    tr += "</tr>\n"
+                    rows_html.append(tr)
+
+            # Notas de risco químico — injetadas após o último cargo do GHE
+            notas_ghe = _coletar_notas_ghe(list(cargos))
+            for nota in notas_ghe:
+                texto_html = _formatar_nota_texto(nota).replace("\n", "<br>")
+                rows_html.append(
+                    f'<tr><td colspan="8" style="{cs_nota}">{texto_html}</td></tr>\n'
+                )
+
+    return (
+        f"<!DOCTYPE html><html><body>{cab_html}"
+        + "".join(rows_html)
+        + f"</tbody></table>"
+        + f"<p style='font-size:11px;color:#888;text-align:center;'>Gerado pelo Sistema SST Seconci GO | {hoje}</p>"
+        + "</div></body></html>"
+    )
+
+
+# ============================================================================
+# 8 — gerar_docx_rq61  (v9.5 — merge vertical de células GHE e Cargo)
+# ============================================================================
+
+def _set_cell_background(cell, hex_color: str) -> None:
+    """Aplica cor de fundo a uma célula .docx via XML."""
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    tcp = cell._tc.get_or_add_tcPr()
+    shd = OxmlElement("w:shd")
+    shd.set(qn("w:fill"), hex_color)
+    shd.set(qn("w:color"), "auto")
+    shd.set(qn("w:val"), "clear")
+    tcp.append(shd)
+
+
+def _merge_cells_vertical(table, col_idx: int, start_row: int, end_row: int) -> None:
+    """
+    Faz merge vertical de células em `col_idx` de `start_row` até `end_row` (inclusive).
+    Usa a API nativa do python-docx: merge() entre primeira e última célula.
+    """
+    if end_row <= start_row:
+        return
+    a = table.rows[start_row].cells[col_idx]
+    b = table.rows[end_row].cells[col_idx]
+    a.merge(b)
+
+
+def gerar_docx_rq61(df: pd.DataFrame, cabecalho: dict = None) -> bytes:
+    """
+    v9.5 — Gera .docx com células GHE e Cargo mergeadas verticalmente.
+    Estrutura idêntica ao modelo de referência (PDF VIVERDE):
+      - Linha de cabeçalho GHE: célula mergeada horizontalmente (todas as colunas),
+        fundo verde escuro, texto centralizado.
+      - Para cada cargo: célula "Cargo" mergeada verticalmente pelo nº de exames,
+        exames em linhas separadas.
+    """
+    if cabecalho is None:
+        cabecalho = {}
+    try:
+        from docx import Document
+        from docx.shared import RGBColor, Cm, Pt
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
+    except ImportError:
+        return df.to_csv(index=False).encode("utf-8")
+
+    doc = Document()
+    for section in doc.sections:
+        section.top_margin = section.bottom_margin = Cm(2)
+        section.left_margin = section.right_margin = Cm(2)
+
+    h1 = doc.add_heading("PROGRAMA DE CONTROLE MÉDICO DE SAÚDE OCUPACIONAL", level=1)
+    h1.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if h1.runs:
+        h1.runs[0].font.color.rgb = RGBColor(0x08, 0x4D, 0x22)
+    doc.add_heading("NR-07 — PCMSO", level=2).alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    meta = [
+        ("Empresa", cabecalho.get("razao_social", "")),
+        ("CNPJ", cabecalho.get("cnpj", "")),
+        ("Médico RT", cabecalho.get("medico_rt", "")),
+        ("Obra/Unidade", cabecalho.get("obra", "")),
+        ("Vigência", f"{cabecalho.get('vig_ini','')} a {cabecalho.get('vig_fim','')}"),
+        ("Resp. SST", cabecalho.get("responsavel_tec", "")),
+        ("Gerado em", date.today().strftime("%d/%m/%Y") + f" — {VERSAO_MODULO_PCMSO}"),
+    ]
+    t_meta = doc.add_table(rows=len(meta), cols=2)
+    t_meta.style = "Table Grid"
+    for i, (k, v) in enumerate(meta):
+        t_meta.rows[i].cells[0].text = k
+        t_meta.rows[i].cells[1].text = v
+    doc.add_paragraph()
+
+    COLS = ["FUNÇÃO", "EXAMES SOLICITADOS", "ADM", "PER", "MRO", "RT", "DEM"]
+    COL_MAP = {
+        "FUNÇÃO":            "Cargo",
+        "EXAMES SOLICITADOS": "Exame",
+        "ADM": "ADM", "PER": "PER", "MRO": "MRO", "RT": "RT", "DEM": "DEM",
+    }
+
+    if df.empty:
+        buf = io.BytesIO()
+        doc.save(buf)
+        return buf.getvalue()
+
+    ghes_ordem = list(dict.fromkeys(df["GHE / Setor"].tolist())) if "GHE / Setor" in df.columns else []
+
+    estrutura = []
+    for ghe_nome in ghes_ordem:
+        df_ghe = df[df["GHE / Setor"] == ghe_nome]
+        cargos_ordem = list(dict.fromkeys(df_ghe["Cargo"].tolist())) if "Cargo" in df_ghe.columns else []
+        estrutura.append(("ghe_header", ghe_nome))
+        estrutura.append(("col_header", None))
+        for cargo in cargos_ordem:
+            df_cargo = df_ghe[df_ghe["Cargo"] == cargo]
+            rows_cargo = list(df_cargo.itertuples(index=False))
+            for idx, row in enumerate(rows_cargo):
+                estrutura.append(("cargo_exame", (cargo, row, idx == 0, len(rows_cargo))))
+        # Notas de risco químico após o último cargo do GHE
+        for nota in _coletar_notas_ghe(cargos_ordem):
+            estrutura.append(("nota_risco", nota))
+
+    num_linhas = len(estrutura)
+    t = doc.add_table(rows=num_linhas, cols=len(COLS))
+    t.style = "Table Grid"
+
+    row_idx = 0
+    merge_ops = []
+
+    for tipo, dados in estrutura:
+        cells = t.rows[row_idx].cells
+
+        if tipo == "ghe_header":
+            merged = cells[0]
+            for ci in range(1, len(COLS)):
+                merged = merged.merge(cells[ci])
+            merged.text = dados
+            p = merged.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            if p.runs:
+                p.runs[0].bold = True
+                p.runs[0].font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+            else:
+                run = p.add_run(dados)
+                run.bold = True
+                run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+            _set_cell_background(merged, "084D22")
+
+        elif tipo == "col_header":
+            for ci, col in enumerate(COLS):
+                p = cells[ci].paragraphs[0]
+                run = p.add_run(col)
+                run.bold = True
+                run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                _set_cell_background(cells[ci], "084D22")
+
+        elif tipo == "cargo_exame":
+            cargo, row, is_first, rowspan = dados
+
+            if is_first:
+                cells[0].text = cargo
+                if rowspan > 1:
+                    merge_ops.append((0, row_idx, row_idx + rowspan - 1))
+
+            exame_val = getattr(row, "Exame", "") if hasattr(row, "Exame") else ""
+            adm_val   = getattr(row, "ADM",   "") if hasattr(row, "ADM")   else ""
+            per_val   = getattr(row, "PER",   "") if hasattr(row, "PER")   else ""
+            mro_val   = getattr(row, "MRO",   "") if hasattr(row, "MRO")   else ""
+            rt_val    = getattr(row, "RT",    "") if hasattr(row, "RT")    else ""
+            dem_val   = getattr(row, "DEM",   "") if hasattr(row, "DEM")   else ""
+
+            cells[1].text = str(exame_val)
+            cells[2].text = str(adm_val)
+            cells[3].text = str(per_val)
+            cells[4].text = str(mro_val)
+            cells[5].text = str(rt_val)
+            cells[6].text = str(dem_val)
+
+        elif tipo == "nota_risco":
+            nota = dados
+            texto_nota = _formatar_nota_texto(nota)
+            merged = cells[0]
+            for ci in range(1, len(COLS)):
+                merged = merged.merge(cells[ci])
+            p = merged.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            run = p.add_run(texto_nota)
+            run.font.size = Pt(9)
+            _set_cell_background(merged, "FFF8E1")
+
+        row_idx += 1
+
+    for col_idx, start_row, end_row in merge_ops:
+        _merge_cells_vertical(t, col_idx, start_row, end_row)
+
     buf = io.BytesIO()
     doc.save(buf)
-    buf.seek(0)
-    return buf.read()
+    return buf.getvalue()

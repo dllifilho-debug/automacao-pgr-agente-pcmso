@@ -1,344 +1,309 @@
 """
 data/matriz_exames.py
 Banco de dados de exames validado pela Dra. Patrícia — versão 06/2025
-Gerado automaticamente a partir da planilha:
-  Matriz-funcao-risco-exames-validado-Dra.-Patricia-06.2025-1.xlsx
-
-Estrutura MATRIZ_RISCO_EXAME:
-  chave      → palavra-chave normalizada (uppercase sem acento) buscada no texto do PGR
-  exame      → nome oficial do exame a solicitar
-  adm        → realizar no admissional
-  per        → periodicidade ("6 MESES", "12 MESES", "24 MESES", "60 MESES", None)
-  mro        → realizar no periódico (MRO = Monitoramento Regular Ocupacional)
-  rt         → realizar no retorno ao trabalho
-  dem        → realizar no demissional
-  obs        → observação / fundamentação legal
+Atualizado v6.2 — correções de divergência auditoria Vistamerica 04/2026
 """
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MATRIZ POR RISCO (chave no texto do PGR → exame(s))
-# Fonte: Planilha validada Dra. Patrícia | NR-7 Anexos I e II | NR-33 | NR-35
-# ─────────────────────────────────────────────────────────────────────────────
-
 MATRIZ_RISCO_EXAME = {
-
     # ── FÍSICOS ───────────────────────────────────────────────────────────────
     "RUIDO": {
-        "exame": "Audiometria Tonal (PTA)",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": True, "dem": True,
+        "exame": "Audiometria",
+        "adm": True, "per": "12 MESES", "mro": True, "rt": True, "dem": True,
         "obs": "NR-7 Anexo I — Ruído. Demissional se último exame > 120 dias.",
     },
     "VIBRACAO CORPO INTEIRO": {
-        "exame": "Raio-X Coluna Lombo-Sacra",
-        "adm": True, "periodico": None, "mro": False, "rt": False, "dem": False,
+        "exame": "RX de coluna lombo-sacra",
+        "adm": True, "per": None, "mro": True, "rt": False, "dem": False,
         "obs": "Vibração de corpo inteiro — avaliação radiológica admissional.",
-    },
-    "VIBRACAO": {
-        "exame": "Avaliação Psicossocial (NR-35)",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "Vibração — risco psicossocial associado ao trabalho em altura/maquinário.",
     },
 
     # ── QUÍMICOS — Benzeno e derivados ───────────────────────────────────────
     "BENZENO": {
-        "exame": "Ácido Trans-Trans Mucônico na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": True, "dem": True,
+        "exame": "Ácido trans-trans mucônico",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": True, "dem": True,
         "obs": "NR-7 Anexo II — Benzeno. Inclui hemograma e reticulócitos.",
     },
     "TOLUENO": {
-        "exame": "Ortocresol na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Ortocresol na urina",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Tolueno (solvente orgânico).",
     },
     "XILENO": {
-        "exame": "Ác. Metil-Hipúrico na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Ác. Metil-hipúrico na urina",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Xileno.",
     },
     "ACETONA": {
-        "exame": "Acetona na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Acetona na urina",
+        "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False,
         "obs": "NR-7 — Acetona / 2-Propanol.",
     },
     "METIL-ETIL-CETONA": {
-        "exame": "Metil-Etil-Cetona (MEK) na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Metil-Etil-Cetona",
+        "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False,
         "obs": "NR-7 — Metil-Etil-Cetona.",
     },
     "TETRAHIDROFURANO": {
-        "exame": "Tetrahidrofurnano na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Tetrahidrofurnano na urina",
+        "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False,
         "obs": "NR-7 — Tetrahidrofurano.",
     },
     "DICLOROMETANO": {
-        "exame": "Diclorometano na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Diclorometano na urina",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Diclorometano.",
     },
     "TRICLOROETILENO": {
-        "exame": "Ác. Tricloroacético na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Ácido tricloroacético na urina",
+        "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False,
         "obs": "NR-7 — Tricloroetileno.",
     },
     "ESTIRENO": {
         "exame": "Soma dos Ácidos Mandélico e Fenilglioxílico na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Estireno.",
     },
     "N-HEXANO": {
         "exame": "2,5 Hexanodiona na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — N-Hexano.",
     },
     "FENOL": {
         "exame": "Fenol na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Fenol.",
     },
     "MERCURIO": {
         "exame": "Mercúrio na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Mercúrio metálico.",
     },
     "METANOL": {
         "exame": "Metanol na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Metanol.",
     },
     "CICLOHEXANONA": {
-        "exame": "Ciclohexanol (H) na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Ciclohexanol na urina",
+        "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False,
         "obs": "NR-7 — Ciclohexanona.",
     },
 
     # ── QUÍMICOS — Metais ─────────────────────────────────────────────────────
     "CHUMBO": {
         "exame": "Chumbo no Sangue + ALA-U",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": True, "dem": True,
-        "obs": "NR-7 Anexo II — Chumbo. Reaproveitável no DEM se < 6 meses.",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "NR-7 Anexo II — Chumbo.",
     },
     "MANGANES": {
-        "exame": "Manganês no Sangue",
-        "adm": True, "periodico": "6 MESES", "mro": False, "rt": False, "dem": False,
+        "exame": "Manganês sanguíneo",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "Eletrodo de solda que libera manganês.",
     },
     "CROMO": {
         "exame": "Cromo na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "NR-7 — Cromo hexavalente (compostos solúveis).",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "obs": "NR-7 — Cromo hexavalente.",
     },
     "CADMIO": {
         "exame": "Cádmio na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": True, "dem": True,
-        "obs": "NR-7 Anexo II — Cádmio. Reaproveitável no DEM se < 6 meses.",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "NR-7 Anexo II — Cádmio.",
     },
     "ARSENICO": {
         "exame": "Arsênio Inorgânico + Metabólitos Metilados na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "NR-7 — Arsênico elementar e compostos inorgânicos.",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "obs": "NR-7 — Arsênico elementar.",
     },
     "COBALTO": {
         "exame": "Cobalto na Urina",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
+        "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "NR-7 — Cobalto e compostos inorgânicos.",
     },
     "FLUOR": {
         "exame": "Fluoreto Urinário",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": True, "dem": True,
-        "obs": "NR-7 — Flúor e fluoretos inorgânicos.",
+        "adm": True, "per": "6 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "NR-7 — Flúor e fluoretos.",
     },
 
     # ── FÍSICO-QUÍMICO — Fumos / Solda / Combustão ───────────────────────────
-    "SOLDA": {
-        "exame": "Carboxihemoglobina no Sangue",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "Policorte / Solda — CO liberado.",
-    },
-    "MONOXIDO DE CARBONO": {
-        "exame": "Carboxihemoglobina no Sangue",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "Monóxido de Carbono.",
-    },
+    # CORREÇÃO 1: SOLDA e MONOXIDO DE CARBONO REMOVIDOS daqui.
+    # Carboxiemoglobina agora é gerada SOMENTE via MATRIZ_FUNCAO_EXAME
+    # (Soldador, Serralheiro, Impermeabilizador) — evita contaminação
+    # de todos os GHEs que citam solda em texto genérico do PGR.
     "POLICORTE": {
-        "exame": "Carboxihemoglobina no Sangue",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "Policorte — CO liberado.",
+        "exame": "Carboxiemoglobina",
+        "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False,
+        "obs": "Policorte — CO liberado. Gatilho específico, não genérico.",
     },
     "COMBUSTIVEL": {
-        "exame": "Hemograma Completo",
-        "adm": True, "periodico": "6 MESES", "mro": True, "rt": True, "dem": False,
-        "obs": "Exposto a combustíveis / benzeno / radiação ionizante.",
+        "exame": "Hemograma",
+        "adm": True, "per": "12 MESES", "mro": True, "rt": True, "dem": False,
+        "obs": "Exposto a combustíveis / benzeno.",
     },
 
     # ── FÍSICO — Poeiras / Fibras / Pulmão ───────────────────────────────────
+    # CORREÇÃO 3: Periodicidade de RX Tórax OIT.
+    # - SILICA pura (quartzo) e ASBESTO = 12M (NR-7 específica).
+    # - CIMENTO, POEIRA MINERAL, FUMOS METALICOS, MADEIRA = 60M (PNOS).
+    #   Cimento é mencionado de forma genérica em toda a obra — manter 12M
+    #   aqui contaminava todos os GHEs com periodicidade errada.
     "SILICA": {
-        "exame": "Raio-X de Tórax OIT",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": True, "dem": False,
-        "obs": "Sílica / Quartzo / Poeira mineral — NR-7.",
+        "exame": "RX de Tórax OIT",
+        "adm": True, "per": "12 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "Sílica livre / Quartzo — NR-7 Anexo I. Periodicidade 12M.",
     },
     "POEIRA MINERAL": {
-        "exame": "Raio-X de Tórax OIT",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": True, "dem": False,
-        "obs": "Poeira mineral / sílica / carvão.",
+        "exame": "RX de Tórax OIT",
+        "adm": True, "per": "60 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "Poeira mineral genérica — PNOS 60M.",
     },
     "CIMENTO": {
-        "exame": "Raio-X de Tórax OIT",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": True, "dem": False,
-        "obs": "Cimento / betoneira / azulejista — NR-7.",
+        "exame": "RX de Tórax OIT",
+        "adm": True, "per": "60 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "Cimento / betoneira — PNOS 60M. Não confundir com sílica pura.",
     },
     "ASBESTO": {
-        "exame": "Raio-X de Tórax OIT",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": True, "dem": False,
-        "obs": "Asbesto / Amianto.",
+        "exame": "RX de Tórax OIT",
+        "adm": True, "per": "12 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "Asbesto / Amianto — NR-7 12M.",
     },
     "FUMOS METALICOS": {
-        "exame": "Raio-X de Tórax OIT",
-        "adm": True, "periodico": "60 MESES", "mro": True, "rt": True, "dem": False,
+        "exame": "RX de Tórax OIT",
+        "adm": True, "per": "60 MESES", "mro": True, "rt": True, "dem": True,
         "obs": "PNOS — Fumos metálicos / poeira metálica.",
     },
     "MADEIRA": {
-        "exame": "Raio-X de Tórax OIT",
-        "adm": True, "periodico": "60 MESES", "mro": True, "rt": True, "dem": False,
+        "exame": "RX de Tórax OIT",
+        "adm": True, "per": "60 MESES", "mro": True, "rt": True, "dem": True,
         "obs": "PNOS — Poeira de madeira.",
     },
+    # CORREÇÃO 4: TINTA não ativa mais Hemograma/Exame Clínico semestral.
+    # TINTA → Espirometria (agressor pulmonar). A lógica de tem_quimico
+    # no modulo_pcmso deve excluir TINTA da detecção de químico pesado.
     "TINTA": {
-        "exame": "Espirometria (somente)",
-        "adm": True, "periodico": "24 MESES", "mro": True, "rt": True, "dem": False,
-        "obs": "Névoas/neblinas/tintas/colas — agressor pulmonar.",
+        "exame": "Espirometria",
+        "adm": True, "per": "24 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "Névoas/neblinas/tintas/colas — agressor pulmonar. NÃO ativa Hemograma semestral.",
     },
     "IMPERMEABILIZACAO": {
-        "exame": "Espirometria (somente)",
-        "adm": True, "periodico": "24 MESES", "mro": True, "rt": True, "dem": False,
+        "exame": "Espirometria",
+        "adm": True, "per": "24 MESES", "mro": True, "rt": True, "dem": True,
         "obs": "Impermeabilização — agressor pulmonar.",
     },
     "MASCARA RESPIRATORIA": {
         "exame": "Espirometria",
-        "adm": True, "periodico": "24 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "Uso de máscara de proteção respiratória sem risco químico específico no PGR.",
+        "adm": True, "per": "24 MESES", "mro": True, "rt": True, "dem": True,
+        "obs": "Uso de máscara de proteção respiratória.",
     },
 
     # ── RISCO DE ACIDENTE — Altura / Confinado / Eletricidade ────────────────
-    "QUEDA DE ALTURA": {
-        "exame": "Avaliação Psicossocial (NR-35)",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "Trabalho em altura — NR-35 obrigatória.",
-    },
-    "ESPACO CONFINADO": {
-        "exame": "Avaliação Psicossocial (NR-35)",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": False, "dem": False,
-        "obs": "Espaço confinado — NR-33 obrigatória.",
-    },
+    # CORREÇÃO 2: QUEDA DE ALTURA e ESPACO CONFINADO removidos como gatilho
+    # de Avaliação Psicossocial aqui. A Psicossocial agora é gerada SOMENTE
+    # via MATRIZ_FUNCAO_EXAME (cargos que realmente trabalham em altura) e
+    # pela flag tem_altura_confinado no processar_pcmso.
+    # Manter aqui causava: qualquer GHE que mencionasse 'trabalho em altura'
+    # no PGR recebia Psicossocial mesmo sem cargo específico de NR-35.
     "RISCO ELETRICO": {
-        "exame": "Acuidade Visual (Avaliação Oftalmológica)",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Acuidade Visual",
+        "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "Eletricidade — NR-10.",
     },
 
     # ── BIOLÓGICO ─────────────────────────────────────────────────────────────
     "AGENTE BIOLOGICO": {
-        "exame": "Anti-HBs + HBsAg",
-        "adm": True, "periodico": "24 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Anti-HBs + HBsAg + Anti-HCV",
+        "adm": True, "per": "24 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "Trabalhadores da saúde / risco biológico.",
     },
     "ESGOTO": {
         "exame": "EPF (Coproparasitológico) + Anti-HBs",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": False, "dem": False,
+        "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "Contato com esgoto / efluentes.",
     },
 
     # ── MOTORISTA / OPERADOR DE MÁQUINAS PESADAS ──────────────────────────────
     "MOTORISTA": {
-        "exame": "Acuidade Visual (Avaliação Oftalmológica)",
-        "adm": True, "periodico": "12 MESES", "mro": True, "rt": False, "dem": False,
+        "exame": "Acuidade Visual",
+        "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False,
         "obs": "Motorista veículos leves.",
     },
 }
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# MATRIZ POR FUNÇÃO (cargo específico → exames adicionais)
-# Fonte: Aba "Exames x função" — Planilha Dra. Patrícia
-# ─────────────────────────────────────────────────────────────────────────────
-
 MATRIZ_FUNCAO_EXAME = {
-
-    # Toda função de canteiro recebe pacote base (definido em modulo_pcmso.py)
-    # Aqui ficam apenas exames EXTRAS por função específica
-
     "SOLDADOR": [
-        {"exame": "Manganês no Sangue",           "adm": True, "per": "6 MESES",  "mro": False, "rt": False, "dem": False, "obs": "Eletrodo libera manganês"},
-        {"exame": "Carboxihemoglobina no Sangue", "adm": True, "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "CO — policorte/solda"},
-        {"exame": "Acuidade Visual (Avaliação Oftalmológica)", "adm": True, "per": "12 MESES", "mro": True, "rt": True, "dem": False, "obs": "Solda — NR-7"},
+        {"exame": "Manganês sanguíneo", "adm": True,  "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "Eletrodo libera manganês"},
+        {"exame": "Carboxiemoglobina",  "adm": False, "per": "6 MESES",  "mro": False, "rt": False, "dem": False, "obs": "CO — policorte/solda"},
+        {"exame": "Acuidade Visual",    "adm": True,  "per": "12 MESES", "mro": True,  "rt": False, "dem": False, "obs": "Solda — NR-7"},
     ],
     "SERRALHEIRO": [
-        {"exame": "Manganês no Sangue",           "adm": True, "per": "6 MESES",  "mro": False, "rt": False, "dem": False, "obs": "Solda — eletrodo manganês"},
-        {"exame": "Carboxihemoglobina no Sangue", "adm": True, "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "CO — solda/policorte"},
+        {"exame": "Manganês sanguíneo", "adm": True,  "per": "6 MESES", "mro": True,  "rt": False, "dem": False, "obs": "Solda — eletrodo manganês"},
+        {"exame": "Carboxiemoglobina",  "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False, "obs": "CO — solda/policorte"},
     ],
     "PINTOR": [
-        {"exame": "Ácido Trans-Trans Mucônico na Urina", "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False, "obs": "Tinta — benzeno/solventes"},
-        {"exame": "Contagem de Reticulócitos",    "adm": True, "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "Exposto benzeno/combustíveis"},
-        {"exame": "Ortocresol na Urina",          "adm": True, "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "Tolueno — tintas"},
-        {"exame": "EPF (Coproparasitológico) + Anti-HBs", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "GHE 13 Supervisão — biológico"},
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Risco psicossocial — altura/supervisão"},
+        {"exame": "Ácido trans-trans mucônico", "adm": False, "per": "6 MESES",  "mro": False, "rt": False, "dem": False, "obs": "Tinta — benzeno/solventes"},
+        {"exame": "Contagem de Reticulócitos",  "adm": True,  "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "Exposto benzeno/combustíveis"},
+        {"exame": "Ortocresol na urina",        "adm": False, "per": "6 MESES",  "mro": False, "rt": False, "dem": False, "obs": "Tolueno — tintas"},
+        {"exame": "Avaliação Psicossocial",     "adm": True,  "per": "12 MESES", "mro": True,  "rt": False, "dem": False, "obs": "Risco psicossocial — altura/supervisão"},
     ],
     "IMPERMEABILIZADOR": [
-        {"exame": "Ácido Trans-Trans Mucônico na Urina", "adm": True, "per": "6 MESES", "mro": True, "rt": False, "dem": False, "obs": "Benzeno — impermeabilizante"},
-        {"exame": "Contagem de Reticulócitos",    "adm": True, "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "Benzeno — impermeabilização"},
-        {"exame": "Carboxihemoglobina no Sangue", "adm": True, "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "CO — impermeabilização"},
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Risco altura/confinado"},
+        {"exame": "Ácido trans-trans mucônico", "adm": False, "per": "6 MESES",  "mro": False, "rt": False, "dem": False, "obs": "Benzeno — impermeabilizante"},
+        {"exame": "Contagem de Reticulócitos",  "adm": True,  "per": "6 MESES",  "mro": True,  "rt": False, "dem": False, "obs": "Benzeno — impermeabilização"},
+        {"exame": "Carboxiemoglobina",          "adm": False, "per": "6 MESES",  "mro": False, "rt": False, "dem": False, "obs": "CO — impermeabilização"},
+        {"exame": "Avaliação Psicossocial",     "adm": True,  "per": "12 MESES", "mro": True,  "rt": False, "dem": False, "obs": "Risco altura/confinado"},
     ],
-    "ENCARREGADO": [
-        {"exame": "EPF (Coproparasitológico) + Anti-HBs", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "GHE 13 — supervisão biológico"},
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Supervisor de equipes — NR-35"},
-    ],
-    "MESTRE DE OBRA": [
-        {"exame": "EPF (Coproparasitológico) + Anti-HBs", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "GHE 13 — supervisão"},
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Supervisor — NR-35"},
-    ],
+    # CORREÇÃO 2b: ENCARREGADO e MESTRE DE OBRA — Avaliação Psicossocial
+    # REMOVIDA. Esses cargos não têm NR-35 explícita na Matriz Vistamerica.
+    # EPF (Coproparasitológico) também removido — só para GHEs com esgoto real.
+    "ENCARREGADO": [],
+    "MESTRE DE OBRA": [],
     "ELETRICISTA": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Eletricista — risco altura/eletricidade"},
-        {"exame": "EPF (Coproparasitológico) + Anti-HBs", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "GHE 13 — supervisão"},
+        # CORREÇÃO 2c: Avaliação Psicossocial removida de Eletricista genérico.
+        # Eletricista recebe Psicossocial apenas quando o GHE tem QUEDA DE ALTURA
+        # ou ESPACO CONFINADO mapeado (via flag tem_altura_confinado no processar_pcmso).
+        # CORREÇÃO 5: RX de coluna lombo-sacra removido de Eletricista.
+        # Só ELETRICISTA INDUSTRIAL tem vibração justificável.
     ],
     "ELETRICISTA INDUSTRIAL": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Eletricista industrial — NR-35"},
-        {"exame": "Raio-X Coluna Lombo-Sacra", "adm": True, "per": "24 MESES", "mro": True, "rt": False, "dem": False, "obs": "Carga/vibração — eletricista industrial"},
+        {"exame": "Avaliação Psicossocial",   "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Eletricista industrial — NR-35"},
+        {"exame": "RX de coluna lombo-sacra", "adm": True, "per": "24 MESES", "mro": True, "rt": False, "dem": False, "obs": "Carga/vibração — eletricista industrial"},
     ],
     "OPERADOR DE CREMALHEIRA": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Op. cremalheira — risco altura"},
-        {"exame": "Raio-X Coluna Lombo-Sacra", "adm": True, "per": "24 MESES", "mro": True, "rt": False, "dem": False, "obs": "Vibração — operador cremalheira"},
+        {"exame": "RX de coluna lombo-sacra", "adm": True, "per": None, "mro": True, "rt": False, "dem": False, "obs": "Vibração — operador cremalheira. Per=None (admissional)"},
     ],
     "SINALEIRO": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Sinaleiro grua — NR-35"},
+        {"exame": "Avaliação Psicossocial", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Sinaleiro grua — NR-35"},
     ],
     "TECNICO DE SEGURANCA DO TRABALHO": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Técnico SST — circula em toda a obra"},
+        {"exame": "Avaliação Psicossocial", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Técnico SST — circula em toda a obra"},
     ],
     "ESTAGIARIO DE SEGURANCA DO TRABALHO": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Estagiário SST — circula em obra"},
+        {"exame": "Avaliação Psicossocial", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Estagiário SST — circula em obra"},
     ],
-    "ALMOXARIFE": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Almoxarife — área de obra"},
-    ],
-    "ENGENHEIRO": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Engenheiro — fiscalização em obra/altura"},
-    ],
+    # CORREÇÃO 2d: ALMOXARIFE e ENGENHEIRO — Psicossocial removida.
+    # Esses cargos não têm NR-35 na Matriz Vistamerica das doutoras.
+    "ALMOXARIFE": [],
+    "ENGENHEIRO": [],
     "MECANICO DE MANUTENCAO": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Manutenção — risco altura/confinado"},
-        {"exame": "Raio-X Coluna Lombo-Sacra", "adm": True, "per": "24 MESES", "mro": True, "rt": False, "dem": False, "obs": "Vibração — manutenção"},
+        {"exame": "Avaliação Psicossocial",   "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Manutenção — risco altura/confinado"},
+        {"exame": "RX de coluna lombo-sacra", "adm": True, "per": "24 MESES", "mro": True, "rt": False, "dem": False, "obs": "Vibração — manutenção"},
     ],
+    # CORREÇÃO 5: RX de coluna lombo-sacra removido de MONTADOR.
+    # Montador não tem vibração de corpo inteiro justificável na Vistamerica.
     "MONTADOR": [
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Montador — risco altura"},
-        {"exame": "Raio-X Coluna Lombo-Sacra", "adm": True, "per": "24 MESES", "mro": True, "rt": False, "dem": False, "obs": "Vibração — montador"},
+        {"exame": "Avaliação Psicossocial", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Montador — risco altura"},
     ],
     "MOTORISTA": [
-        {"exame": "Audiometria Tonal (PTA)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista — risco de batida"},
-        {"exame": "Acuidade Visual (Avaliação Oftalmológica)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista"},
-        {"exame": "Hemograma Completo", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista/op. máq. pesadas"},
-        {"exame": "Glicemia de Jejum", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista/op. máq. pesadas"},
-        {"exame": "Eletrocardiograma (ECG)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista/op. máq. pesadas"},
+        {"exame": "Audiometria",       "adm": True, "per": "12 MESES", "mro": True, "rt": True,  "dem": True,  "obs": "Motorista — risco de batida"},
+        {"exame": "Acuidade Visual",   "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista"},
+        {"exame": "Hemograma",         "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista/op. máq. pesadas"},
+        {"exame": "Glicemia em Jejum", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista/op. máq. pesadas"},
+        {"exame": "ECG",               "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Motorista/op. máq. pesadas"},
     ],
     "ENCANADOR": [
-        {"exame": "EPF (Coproparasitológico) + Anti-HBs", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Encanador — risco biológico/esgoto"},
-        {"exame": "Avaliação Psicossocial (NR-35)", "adm": True, "per": "12 MESES", "mro": True, "rt": False, "dem": False, "obs": "Risco altura/confinado"},
+        {"exame": "Acetona na urina",           "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False, "obs": "Cetonaster — risco solvente encanador"},
+        {"exame": "Metil-Etil-Cetona",          "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False, "obs": "Cetonaster — risco solvente encanador"},
+        {"exame": "Ciclohexanol na urina",      "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False, "obs": "Cetonaster — risco solvente encanador"},
+        {"exame": "Tetrahidrofurnano na urina", "adm": False, "per": "6 MESES", "mro": False, "rt": False, "dem": False, "obs": "Cetonaster — risco solvente encanador"},
     ],
 }

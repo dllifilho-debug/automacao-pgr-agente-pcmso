@@ -1,70 +1,3241 @@
 {
-  "GHE_ESTRUTURA_BETONEIRA": {
-    "titulo_referencia": "Preparação argamassa / Operação betoneira",
-    "riscos_tipicos": ["Poeira Mineral", "Ruído", "Sílica"],
+  "GHE_ESTRUTURA_FORMA:CARPINTEIRO": {
+    "ghe_descricao": "Estrutura de concreto armado - Execução fôrma de pilar e laje",
+    "cargo": "Carpinteiro",
     "exames": [
-      {"nome": "Exame Clínico", "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
-      {"nome": "Audiometria",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Espirometria",  "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT", "adm": true, "per": "12", "mro": true, "ret": false, "dem": true}
-    ]
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
   },
-  "GHE_ESTRUTURA_SERRALHERIA": {
-    "titulo_referencia": "Solda / Serralheria",
-    "riscos_tipicos": ["Fumos Metálicos", "Manganês", "Cromo", "Ruído"],
+  "GHE_ESTRUTURA_FORMA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura de concreto armado - Execução fôrma de pilar e laje",
+    "cargo": "Servente",
     "exames": [
-      {"nome": "Exame Clínico",     "adm": true,  "per": "6",  "mro": true,  "ret": true,  "dem": true},
-      {"nome": "Audiometria",       "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": true},
-      {"nome": "Acuidade Visual",   "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
-      {"nome": "Hemograma",         "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
-      {"nome": "ECG",               "adm": true,  "per": "12", "mro": true,  "ret": false, "dem": false},
-      {"nome": "Manganês sanguíneo","adm": true,  "per": "6",  "mro": true,  "ret": false, "dem": false},
-      {"nome": "Carboxiemoglobina", "adm": false, "per": "6",  "mro": false, "ret": false, "dem": false},
-      {"nome": "Espirometria",      "adm": true,  "per": "24", "mro": true,  "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT",  "adm": true,  "per": "60", "mro": true,  "ret": false, "dem": true}
-    ]
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": false,
+        "per": "24",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
   },
-  "GHE_ESTRUTURA_FORMA": {
-    "titulo_referencia": "Estrutura de concreto armado / Execução fôrma de pilar e laje",
-    "riscos_tipicos": ["Poeira Mineral", "Ruído", "Sílica", "Trabalho em Altura"],
+  "GHE_ESTRUTURA_ARMACAO:ARMADOR": {
+    "ghe_descricao": "Estrutura de concreto armado - Execução de viga, pilar e laje",
+    "cargo": "Armador",
     "exames": [
-      {"nome": "Exame Clínico",     "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
-      {"nome": "Audiometria",       "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma",         "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG",               "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria",      "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT",  "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
-    ]
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
   },
-  "GHE_ESTRUTURA_CREMALHEIRA_MONT": {
-    "titulo_referencia": "Elevador cremalheira / Montagem, manutenção",
-    "riscos_tipicos": ["Trabalho em Altura", "Ruído", "Risco Elétrico"],
+  "GHE_ESTRUTURA_ARMACAO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura de concreto armado - Execução de viga, pilar e laje",
+    "cargo": "Servente",
     "exames": [
-      {"nome": "Exame Clínico",     "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
-      {"nome": "Audiometria",       "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma",         "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG",               "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria",      "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT",  "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
-    ]
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
   },
-  "GHE_ESTRUTURA_HIDRO": {
-    "titulo_referencia": "Tubulação de parede e teto / Instalações hidro-sanitárias",
-    "riscos_tipicos": ["Ruído", "Poeira Mineral", "Agentes Químicos Diversos"],
+  "GHE_ESTRUTURA_BETONEIRA:OPERADOR_BETONEIRA": {
+    "ghe_descricao": "Estrutura Preparação argamassa - Operação betoneira",
+    "cargo": "Operador de betoneira",
     "exames": [
-      {"nome": "Exame Clínico",     "adm": true, "per": "12", "mro": true, "ret": true,  "dem": true},
-      {"nome": "Audiometria",       "adm": true, "per": "12", "mro": true, "ret": false, "dem": true},
-      {"nome": "Acuidade Visual",   "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Hemograma",         "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Glicemia em Jejum", "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "ECG",               "adm": true, "per": "12", "mro": true, "ret": false, "dem": false},
-      {"nome": "Espirometria",      "adm": true, "per": "24", "mro": true, "ret": false, "dem": true},
-      {"nome": "RX de Tórax OIT",  "adm": true, "per": "60", "mro": true, "ret": false, "dem": true}
-    ]
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_BETONEIRA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura Preparação argamassa - Operação betoneira",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_MONT:ELETRICISTA_ENERGIZADO": {
+    "ghe_descricao": "Estrutura - Elevador cremalheira - Montagem, manutenção e desmontagem",
+    "cargo": "Eletricista industrial",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Tricloroetileno, 1,3-Propanediamine, N- [3 Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_MONT:MECANICO_MANUTENCAO": {
+    "ghe_descricao": "Estrutura - Elevador cremalheira - Montagem, manutenção e desmontagem",
+    "cargo": "Mecânico de manutenção",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": false,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_MONT:ELETRICISTA": {
+    "ghe_descricao": "Estrutura - Elevador cremalheira - Montagem, manutenção e desmontagem",
+    "cargo": "Eletricista",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": false,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido tricloroacético na urina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_OP:OPERADOR_CREMALHEIRA": {
+    "ghe_descricao": "Estrutura - Elevador cremalheira",
+    "cargo": "Operador de elevador de cremalheira",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_CREMALHEIRA_OP:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura - Elevador cremalheira",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_GRUA_SINALIZACAO:SINALEIRO": {
+    "ghe_descricao": "Estrutura - Grua",
+    "cargo": "Sinaleiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_GRUA_SINALIZACAO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura - Grua",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_ALVENARIA:PEDREIRO": {
+    "ghe_descricao": "Estrutura - Alvenaria interna e externa",
+    "cargo": "Pedreiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_ALVENARIA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura - Alvenaria interna e externa",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_PRUMADA:ELETRICISTA": {
+    "ghe_descricao": "Estrutura - Prumada elétrica - Eletricidade desenergizada",
+    "cargo": "Eletricista",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_PRUMADA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura - Prumada elétrica - Eletricidade desenergizada",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_HIDRO:ENCANADOR": {
+    "ghe_descricao": "Estrutura - Tubulação de parede e teto Hidro-Sanitária",
+    "cargo": "Encanador",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_HIDRO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura - Tubulação de parede e teto Hidro-Sanitária",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": false,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_SERRALHERIA:SERRALHEIRO": {
+    "ghe_descricao": "Estrutura - Serralheria",
+    "cargo": "Serralheiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Manganês sanguíneo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_SERRALHERIA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura - Serralheria",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Manganês sanguíneo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_LIMPEZA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura - Limpeza",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_SERVICOS_GERAIS:PEDREIRO": {
+    "ghe_descricao": "Estrutura- Serviço gerais",
+    "cargo": "Pedreiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_SERVICOS_GERAIS:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura- Serviço gerais",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_PINTURA:PINTOR": {
+    "ghe_descricao": "Estrutura- Pintura",
+    "cargo": "Pintor",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "tolueno, xileno, estireno abaixo DEM) Raio X Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_PINTURA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Estrutura- Pintura",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "tolueno, xileno, estireno abaixo DEM) Raio X Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_PORTARIA:PORTEIRO_VIGIA": {
+    "ghe_descricao": "Estrutura- Portaria",
+    "cargo": "Porteiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_GRUA_OPERACAO:OPERADOR_GRUA": {
+    "ghe_descricao": "Estrutura - Operação Grua",
+    "cargo": "Operador de Grua",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ESTRUTURA_ELETRICA_TEMP:ELETRICISTA": {
+    "ghe_descricao": "Estrutura - Instalação elétrica temporária - Eletricidade energizada",
+    "cargo": "Eletricista",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_REBOCO:PEDREIRO": {
+    "ghe_descricao": "Acabamento - Reboco interno e externo",
+    "cargo": "Pedreiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_REBOCO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento - Reboco interno e externo",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_CONTRAPISO:PEDREIRO": {
+    "ghe_descricao": "Acabamento - Contrapiso",
+    "cargo": "Pedreiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_CONTRAPISO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento - Contrapiso",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "RX de Tórax",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_IMPERMEABILIZACAO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento – Impermeabilização",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans Trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_GESSO:GESSEIRO": {
+    "ghe_descricao": "Acabamento – Gesso corrido e placa",
+    "cargo": "Gesseiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_GESSO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento – Gesso corrido e placa",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_PINTURA:PINTOR": {
+    "ghe_descricao": "Acabamento – Pintura interna e externa",
+    "cargo": "Pintor",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans Trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_PINTURA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento – Pintura interna e externa",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans Trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_REVESTIMENTO:PEDREIRO": {
+    "ghe_descricao": "Acabamento – Revestimento",
+    "cargo": "Pedreiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_REVESTIMENTO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento – Revestimento",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_REJUNTE:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento – Rejunte e Limpeza grossa e fina",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Acetona urinária , Ácido Metil – Hipúrico ,Metil Etil Cetona ,O-Cresol urinário Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_ASSENTAMENTO:PEDREIRO": {
+    "ghe_descricao": "Acabamento – Assentamento bancada",
+    "cargo": "Pedreiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_ASSENTAMENTO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento – Assentamento bancada",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_MANTA_ASFALTICA:ENCARREGADO_SUPERVISAO": {
+    "ghe_descricao": "Acabamento – Impermeabilização manta asfáltica",
+    "cargo": "Encarregado",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans Trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Av. Psicossocial",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_MANTA_ASFALTICA:IMPERMEABILIZADOR": {
+    "ghe_descricao": "Acabamento – Impermeabilização manta asfáltica",
+    "cargo": "Aplicador de asfalto impermeabilizante",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans Trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Av. Psicossocial",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ACABAMENTO_MANTA_ASFALTICA:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Acabamento – Impermeabilização manta asfáltica",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Ácido Trans Trans Mucônico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Contagem de reticulócitos",
+        "adm": true,
+        "per": "6",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Carboxihemoglobina Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Av. Psicossocial",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_ENGENHARIA:ENGENHEIRO": {
+    "ghe_descricao": "Administração de campo – Engenharia planejamento de obra",
+    "cargo": "Engenheiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_ENGENHARIA:ESTAGIARIO": {
+    "ghe_descricao": "Administração de campo – Engenharia planejamento de obra",
+    "cargo": "Estagiário",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_SST:TECNICO_SST": {
+    "ghe_descricao": "Administração de campo – Segurança do trabalho",
+    "cargo": "Técnico de segurança do trabalho",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_SST:ESTAGIARIO": {
+    "ghe_descricao": "Administração de campo – Segurança do trabalho",
+    "cargo": "Estagiário",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_EXECUCAO:MESTRE_OBRA": {
+    "ghe_descricao": "Administração de campo – Execução de obra",
+    "cargo": "Mestre de obra",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_EXECUCAO:ENCARREGADO_GERAL": {
+    "ghe_descricao": "Administração de campo – Execução de obra",
+    "cargo": "Encarregado de pedreiro",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Acuidade Visual",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Hemograma Completo",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Glicemia em Jejum",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "ECG",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_SUPERVISAO_REJUNTE:ENCARREGADO_SUPERVISAO": {
+    "ghe_descricao": "Administração de campo – Supervisão Rejunte/limpeza",
+    "cargo": "Encarregado",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_ADMINISTRATIVO:AUXILIAR_ADMINISTRATIVO": {
+    "ghe_descricao": "Administração de campo – Administrativo",
+    "cargo": "Administrativo de obra",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_ADMINISTRATIVO:JOVEM_APRENDIZ": {
+    "ghe_descricao": "Administração de campo – Administrativo",
+    "cargo": "Jovem aprendiz",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_ALMOXARIFADO:ALMOXARIFE": {
+    "ghe_descricao": "Administração de campo – Almoxarifado",
+    "cargo": "Almoxarife",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
+  },
+  "GHE_ADMIN_ALMOXARIFADO:SERVENTE_CANTEIRO": {
+    "ghe_descricao": "Administração de campo – Almoxarifado",
+    "cargo": "Servente",
+    "exames": [
+      {
+        "nome": "Exame Clinico",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": true,
+        "dem": true
+      },
+      {
+        "nome": "Audiometria",
+        "adm": true,
+        "per": "12",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Raio X Tórax OIT",
+        "adm": true,
+        "per": "60",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      },
+      {
+        "nome": "Espirometria",
+        "adm": true,
+        "per": "24",
+        "mro": true,
+        "ret": false,
+        "dem": true
+      }
+    ],
+    "fonte": "RQ.61 Viverde 06.03.2025"
   }
 }

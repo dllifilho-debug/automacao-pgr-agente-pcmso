@@ -1,8 +1,9 @@
+[server]
+maxUploadSize = 50
+
 [theme]
-primaryColor="#084D22"
-backgroundColor="#FFFFFF"
-secondaryBackgroundColor="#F2F9F4"
-textColor="#1E1E1E"
-font="sans serif"
-USUARIO_SISTEMA = "diovanni"
-SENHA_SISTEMA = "seconci@2026"
+primaryColor = "#084D22"
+backgroundColor = "#F0F2F5"
+secondaryBackgroundColor = "#F7F9FB"
+textColor = "#1A1D23"
+font = "sans serif"

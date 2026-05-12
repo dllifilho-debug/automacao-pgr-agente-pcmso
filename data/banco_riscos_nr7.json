@@ -1,0 +1,1199 @@
+{
+  "1": [
+    {
+      "exame": "Ácido Tricloroacético Na Urina Ou Tricloroetanol Total Na Urina Ou  Tricloroetanol Total No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    },
+    {
+      "exame": "Ácido Tricloroacético Na Urina Ou Tricloroetanol Total Na Urina Ou  Tricloroetanol Total No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    },
+    {
+      "exame": "1,2 Dihidro-4 (Nacetilcisteína) Butano Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    },
+    {
+      "exame": "1,6 Hexametilenodiamina Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "1 TRICLOROETANO": [
+    {
+      "exame": "Ácido Tricloroacético Na Urina Ou Tricloroetanol Total Na Urina Ou  Tricloroetanol Total No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "3 BUTADIENO": [
+    {
+      "exame": "1,2 Dihidro-4 (Nacetilcisteína) Butano Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "6  \nDIISOCIANATO DE HEXAMETILENO (HDI)": [
+    {
+      "exame": "1,6 Hexametilenodiamina Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "2-METOXIETANOL E": [
+    {
+      "exame": "Ácido 2- Metóxiacético Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "2-\nMETOXIETILACETATO": [
+    {
+      "exame": "Ácido 2- Metóxiacético Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "2": [
+    {
+      "exame": "Isômeros 2,4 E 2,6 Toluenodiamino Na Urina(H) (Soma Dos Isômeros)",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "4 E 2": [
+    {
+      "exame": "Isômeros 2,4 E 2,6 Toluenodiamino Na Urina(H) (Soma Dos Isômeros)",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "6 TOLUENO DIISOCIANATO (PUROS OU EM MISTURA DOS DOIS ISÔMEROS)": [
+    {
+      "exame": "Isômeros 2,4 E 2,6 Toluenodiamino Na Urina(H) (Soma Dos Isômeros)",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "2-BUTOXIETANOL": [
+    {
+      "exame": "Ácido Butoxiacético Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "2-PROPANOL": [
+    {
+      "exame": "Acetona Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ACETONA": [
+    {
+      "exame": "Acetona Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ANILINA": [
+    {
+      "exame": "Metahemoglobina No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ARSÊNICO ELEMENTAR E SEUS COMPOSTOS INORGÂNICOS SOLÚVEIS": [
+    {
+      "exame": "Arsênio Inorgânico Mais Metabólitos Metilados Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "EXCETO ARSINA E ARSENATO DE GÁLIO": [
+    {
+      "exame": "Arsênio Inorgânico Mais Metabólitos Metilados Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ASO PADRÃO": [
+    {
+      "exame": "Exame Clínico",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "BENZENO": [
+    {
+      "exame": "Ácido Trans Trans Mucônico Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    },
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    },
+    {
+      "exame": "Contagem De Reticulócitos",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "CÁDMIO E SEUS COMPOSTOS INORGÂNICOS": [
+    {
+      "exame": "Cádmio Na Urina",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "CHUMBO E SEUS COMPOSTOS INORGÂNICOS": [
+    {
+      "exame": "Ác. Delta Amino Levulínico Na Urina (Ala-U)",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    },
+    {
+      "exame": "Chumbo (Sangue) E",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "CHUMBO TETRAETILA": [
+    {
+      "exame": "Chumbo Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "CICLOHEXANONA": [
+    {
+      "exame": "Ciclohexanol (H) Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "CLOROBENZENO": [
+    {
+      "exame": "4Clororocatecol Na Urina Ou P-Clorofenol Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    },
+    {
+      "exame": "4Clorocatecol(H) Ou P-Clorofenol (H) Na\nUrina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "COBALTO E SEUS COMPOSTOS INORGÂNICOS": [
+    {
+      "exame": "Cobalto Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "INCLUINDO ÓXIDOS DE COBALTO": [
+    {
+      "exame": "Cobalto Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "MAS NÃO COMBINADOS COM CARBETO DE TUNGSTÊNIO": [
+    {
+      "exame": "Cobalto Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "CROMO HEXAVALENTE (COMPOSTOS SOLÚVEIS)": [
+    {
+      "exame": "Cromo Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "DICLOROMETANO": [
+    {
+      "exame": "Diclorometano Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ESPAÇO CONFINADO": [
+    {
+      "exame": "Avaliação Psicossocial",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    },
+    {
+      "exame": "Espirometria",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    },
+    {
+      "exame": "Acuidade Visual",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Glicemia De Jejum",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Audiometria",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Ecg",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "ESTIRENO": [
+    {
+      "exame": "Soma Dos Ácidos Mandélico E Fenilglioxílico Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ETILBENZENO": [
+    {
+      "exame": "Soma Dos Ácidos Mandélico E Fenilglioxílico Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ETOXIETANOL E \nETOXIETILACETATO": [
+    {
+      "exame": "Ácido Etoxiacético Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "EXPOSTO À COMBUSTÍVEIS": [
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "RADIAÇÃO IONIZANTE": [
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "EXPOSTO PRODUTOS QUÍMICOS CONTEMPLATDOS NO ANEXO  II DA NR-7": [
+    {
+      "exame": "Exame Clínico (Exposto Produtos Químicos Contemplatdos No Anexo Ii Da Nr-7)",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "EXPOSTO PRODUTOS QUÍMICOS CONTEMPLATDOS NO ANEXO I DA NR-7 OU MANGANÊS": [
+    {
+      "exame": "Exame Clínico (Exposto Produtos Químicos Contemplatdos No Anexo I  Da Nr-7)",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "EXPOSTOS A COMBUSTÍVEIS": [
+    {
+      "exame": "Contagem De Reticulócitos",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "EXPOSTOS A MANGANÊS( EXEMPLO ELETRODO DE SOLDA QUE LIBERA MANGANÊS)": [
+    {
+      "exame": "Manganês No Sangue",
+      "adm": true,
+      "per": "6",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "FENOL": [
+    {
+      "exame": "Fenol Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "FLÚOR": [
+    {
+      "exame": "Fluoreto Urinário",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "ÁCIDO FLUORÍDRIC O   E  FLUORETOS NORGÂNICOS": [
+    {
+      "exame": "Fluoreto Urinário",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "FURFURAL": [
+    {
+      "exame": "Ácido Furóico (H) Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "INDUTORES DE METAHEMOGLOBINA OU": [
+    {
+      "exame": "Metahemoglobina No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "INSETICIDAS INIBIDORES DA COLINESTERASE": [
+    {
+      "exame": "Atividade De Acetilcolinesterase Eritrocitária Ou",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    },
+    {
+      "exame": "Atividade Da Buticolinesterase No Plama Ou Sor0",
+      "adm": true,
+      "per": "6",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "MANIPULAR ALIMENTOS": [
+    {
+      "exame": "Eas",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Coprológico (Epf)",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Coprocultura",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Micológico De Unhas",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "TRABALHADORES DA SAÚDE": [
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Hbsag",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Anti-Hbs",
+      "adm": true,
+      "per": "24",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Anti-Hcv",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "MERCÚRIO METÁLICO": [
+    {
+      "exame": "Mercúrio Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "METANOL": [
+    {
+      "exame": "Metanol Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "METIL BUTIL CETONA": [
+    {
+      "exame": "2,5 Hexanodiona Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "METIL-ETIL-CETONA": [
+    {
+      "exame": "Metil-Etil-Cetona (Mek) Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "METILISOBUTILCETONA\n(MIBK)": [
+    {
+      "exame": "Mibk Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "MONÓXIDO DE CARBONO": [
+    {
+      "exame": "Carboxihemoglobina No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "N": [
+    {
+      "exame": "N-Metilacetamida Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    },
+    {
+      "exame": "N-Metilformamida Total Da Urina (Soma Da Nmetilformamida E\nN-(Hidroximetil)-Nmetilformamida) Ou N-Acetil-S- (Nmetilcarbemoil) Cisteína Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "N DIMETILACETAMIDA": [
+    {
+      "exame": "N-Metilacetamida Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "N DIMETILFORMAMIDA": [
+    {
+      "exame": "N-Metilformamida Total Da Urina (Soma Da Nmetilformamida E\nN-(Hidroximetil)-Nmetilformamida) Ou N-Acetil-S- (Nmetilcarbemoil) Cisteína Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "N-HEXANO OU HEXANO": [
+    {
+      "exame": "2,5 Hexanodiona Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "NITROBENZENO": [
+    {
+      "exame": "Metahemoglobina No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "N-METIL-2-\nPIRROLIDONA": [
+    {
+      "exame": "5-Hidroxi-N-Metil2 -Pirrolidona(Sh) Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "ÓXIDO DE ETILENO **": [
+    {
+      "exame": "Aduto De  N-(2- Hidroxietil) Valina (Hev) Em Hemoglobina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "PNOS": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "POEIRA GESSO": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "MADEIRA": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "POEIRA METÁLICA": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "AMIDO": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "ALFAFA": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "CELULOSE (PAPEL)": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "FARINHA DE TRIGO": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "PÓLEN": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "SABÃO EM PÓ": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "TALCO E FIBRAS DE VIDRO;FUMOS METÁLICOS": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "60",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "NÉVOAS": [
+    {
+      "exame": "Espirometria ( Somente)",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "NEBLINAS": [
+    {
+      "exame": "Espirometria ( Somente)",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "TINTAS": [
+    {
+      "exame": "Espirometria ( Somente)",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "COLAS": [
+    {
+      "exame": "Espirometria ( Somente)",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "IMPERMEABILIZAÇÃO": [
+    {
+      "exame": "Espirometria ( Somente)",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "POEIRA MINERAL": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "SÍLICA": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "QUARTZO": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "ABESTO": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "CARVÃO": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "POEIRA SEM CLASSIFICAÇÃO": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "OPERADOR DE BETONEIRA": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "AZULEGISTA": [
+    {
+      "exame": "Rx Tórax Oit",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "CONTATO COM PRODUTOS QUÍMICOS AGRESSORES PULMONARES": [
+    {
+      "exame": "Espirometria",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "CIMENTO SEM SÍLICA": [
+    {
+      "exame": "Espirometria",
+      "adm": true,
+      "per": "24",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "POLICORTE": [
+    {
+      "exame": "Carboxihemoglobina No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "SOLDA": [
+    {
+      "exame": "Carboxihemoglobina No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    },
+    {
+      "exame": "Acuidade Visual",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "PORTEIRO": [
+    {
+      "exame": "Acuidade Visual",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "ELETRICIDADE": [
+    {
+      "exame": "Acuidade Visual",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Audiometria",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Ecg",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "TRABALHO EM ALTURA": [
+    {
+      "exame": "Acuidade Visual",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Glicemia De Jejum",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Audiometria",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Ecg",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "MOTORISTA( OP. MÁQUINAS PESADAS)": [
+    {
+      "exame": "Acuidade Visual",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Hemograma",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Glicemia De Jejum",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Audiometria",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Ecg",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "RUÍDO": [
+    {
+      "exame": "Audiometria",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "MOTORISTA VEÍCULOS LEVES (BATIDA CONTRA)": [
+    {
+      "exame": "Audiometria (Sem Exposição A Ruído)",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    },
+    {
+      "exame": "Audiometria (Com Exposição A Risco Ruído)",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    },
+    {
+      "exame": "Acuidade Visual",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "SULFETO DE CARBONO": [
+    {
+      "exame": "Ácido 2- Tioxotiazolidina 4Carboxílico (Ttca)Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "TETRACLOROETILENO": [
+    {
+      "exame": "Tetracloroetileno No Sangue",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "TETRAHIDROFURANO": [
+    {
+      "exame": "Tetrahidrofurnano Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "TOLUENO": [
+    {
+      "exame": "Ortocresol Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "VIBRAÇÃO E SUBSTÃNCIAS OTOTÓXICAS (TOLUENO - XILENO- ESTIRENO - N-HEXANO - DISSULFETO DE CARBONO – TRICLOROETILENO- MONÓXIDO DE CARBONO - CIANETO DE HIDROGÊNIO-CHUMBO - MERCÚRIO - ARSÊNIO - MANGANÊS)": [
+    {
+      "exame": "Audiometria",
+      "adm": true,
+      "per": "12",
+      "dem": true,
+      "mro": true
+    }
+  ],
+  "TRICLOROETILENO": [
+    {
+      "exame": "Ác. Tricloroacético Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "USO DE MÁSCARA DE PROTEÇÃO RESPIRATÓRIA(EPI)": [
+    {
+      "exame": "Espirometria",
+      "adm": true,
+      "per": "24",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "SEM MENCONAR RISCO QUÍMICO NO PGR": [
+    {
+      "exame": "Espirometria",
+      "adm": true,
+      "per": "24",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "VIBRAÇÃO CORPO INTEIRO": [
+    {
+      "exame": "Rx Coluna Lombo-Sacra",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "XILENO": [
+    {
+      "exame": "Ác. Metil-Hipúrico Na Urina",
+      "adm": false,
+      "per": "6",
+      "dem": false,
+      "mro": false
+    }
+  ],
+  "TRABALHO EM ALTURA E": [
+    {
+      "exame": "Avaliação Psicossocial",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ],
+  "OU MÁQUINAS( VEÍCULOS) PESADAS COM RECONHECIMENTO DE RISCOS PISICOSSOCIAIS": [
+    {
+      "exame": "Avaliação Psicossocial",
+      "adm": true,
+      "per": "12",
+      "dem": false,
+      "mro": true
+    }
+  ]
+}
