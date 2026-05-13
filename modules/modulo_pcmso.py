@@ -1437,11 +1437,11 @@ def gerar_justificativas_pcmso(dados_ghe: list) -> list:
 NOTAS_RISCO_QUIMICO = {
     "serralheiro": {
         "agente":          "Cromo hexavalente",
-        "exame_controle":  "Carboxihemoglobina no Sangue",
+        "exame_controle":  "Cromo na Urina",
     },
     "meio oficial de serralheiro": {
         "agente":          "Cromo hexavalente",
-        "exame_controle":  "Carboxihemoglobina no Sangue",
+        "exame_controle":  "Cromo na Urina",
     },
     "eletricista industrial": {
         "agente":          "Tricloroetileno",
@@ -1452,11 +1452,11 @@ NOTAS_RISCO_QUIMICO = {
         "exame_controle":  "Ácido Tricloroacético na Urina",
     },
     "encanador": {
-        "agente":          "Metietilcetona (MEK)",
+        "agente":          "Metil-Etil-Cetona (MEK)",
         "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
     },
     "meio oficial de encanador": {
-        "agente":          "Metietilcetona (MEK)",
+        "agente":          "Metil-Etil-Cetona (MEK)",
         "exame_controle":  "Metil-etil-cetona (MEK) na Urina",
     },
 }

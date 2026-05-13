@@ -915,7 +915,7 @@ class TestNotasRiscoQuimico:
         )
         assert "NOTA DE RISCO" in html, "Bloco de nota ausente para Serralheiro"
         assert "Cromo hexavalente" in html, "Agente 'Cromo hexavalente' ausente"
-        assert "Carboxihemoglobina no Sangue" in html, "Exame de controle ausente"
+        assert "Cromo na Urina" in html, "Exame de controle ausente"
         assert "NR-7 Anexo II" in html, "Fundamento legal ausente"
 
     def test_nota_risco_eletricista_industrial_presente(self):
@@ -935,7 +935,7 @@ class TestNotasRiscoQuimico:
             [("encanador", "Exame Clínico")],
         )
         assert "NOTA DE RISCO" in html, "Bloco de nota ausente para Encanador"
-        assert "Metietilcetona" in html, "Agente 'Metietilcetona' ausente"
+        assert "Metil-Etil-Cetona" in html, "Agente 'Metil-Etil-Cetona' ausente"
         assert "Metil-etil-cetona (MEK) na Urina" in html, "Exame de controle ausente"
 
     # ── Deduplicação por agente ──────────────────────────────────────────────
@@ -976,7 +976,7 @@ class TestNotasRiscoQuimico:
         )
         assert "Cromo hexavalente" not in html
         assert "Tricloroetileno" not in html
-        assert "Metietilcetona" not in html
+        assert "Metil-Etil-Cetona" not in html
 
     # ── Verificação da estrutura da nota ────────────────────────────────────
 
@@ -988,7 +988,7 @@ class TestNotasRiscoQuimico:
         )
         assert "NOTA DE RISCO QUÍMICO" in html
         assert "encanador" in html.lower()
-        assert "Metietilcetona (MEK)" in html
+        assert "Metil-Etil-Cetona (MEK)" in html
         assert "Matriz Dra. Patrícia 06/2025" in html
         assert "periodicidade semestral" in html
 
@@ -1008,4 +1008,4 @@ class TestNotasRiscoQuimico:
             f"Esperado 2 notas (1 por GHE), obtido {html.count('NOTA DE RISCO')}"
         )
         assert "Cromo hexavalente" in html
-        assert "Metietilcetona" in html
+        assert "Metil-Etil-Cetona" in html
