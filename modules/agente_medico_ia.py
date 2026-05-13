@@ -1116,67 +1116,71 @@ def processar_cargo_ia(
                 ]
             fonte = f'heuristica_base:sem_perfil_para_{cargo}'
 
-    # ── Camada 2: Enriquecimento NR-7 via agente_medico_nr7
     auditoria_nr7 = {}
-    if riscos:
-        try:
-            from modules.agente_medico_nr7 import montar_exames_ghe as _nr7_montar
-            from modules.agente_medico_nr7 import auditar_exames_ghe as _nr7_auditar
-            exames_nr7 = _nr7_montar(riscos)
-            auditoria_nr7 = _nr7_auditar(riscos, exames)
-            nomes_atuais = {_norm(e['nome']) for e in exames}
-            for ex_faltando in auditoria_nr7.get('faltando', []):
-                if _norm(ex_faltando['nome']) not in nomes_atuais:
-                    exames.append({
-                        'nome':  ex_faltando['nome'],
-                        'adm':   ex_faltando.get('adm', False),
-                        'per':   ex_faltando.get('per'),
-                        'mro':   ex_faltando.get('rt', False),
-                        'ret':   False,
-                        'dem':   ex_faltando.get('dem', False),
-                        'fonte': 'nr7_complemento',
-                    })
-                    nomes_atuais.add(_norm(ex_faltando['nome']))
-            for div in auditoria_nr7.get('divergencias', []):
-                nome_n = _norm(div['nome'])
-                per_nr7 = next(
-                    (d['esperado'] for d in div.get('divergencias', []) if d['campo'] == 'per'),
-                    None
-                )
-                if per_nr7:
-                    for ex in exames:
-                        if _norm(ex['nome']) == nome_n:
-                            try:
-                                per_atual = ex.get('per')
-                                if per_atual and int(per_nr7) < int(per_atual):
-                                    ex['per'] = per_nr7
-                            except (ValueError, TypeError):
-                                pass
-        except Exception:
-            pass
+    fonte_banco_ghe = fonte.startswith('banco_ghe_cargo:')
 
-    # ── Camada 3: Ajustes por contexto
-    exames = _aplicar_ajustes_contexto(exames, contexto)
-    # ── Camada 4: Riscos químicos / IBE laboratorial
-    exames = _aplicar_riscos_quimicos(exames, riscos)
-    # ── Camada 5: Validação universal NR-7
+    if not fonte_banco_ghe:
+        # ── Camada 2: Enriquecimento NR-7 via agente_medico_nr7
+        if riscos:
+            try:
+                from modules.agente_medico_nr7 import montar_exames_ghe as _nr7_montar
+                from modules.agente_medico_nr7 import auditar_exames_ghe as _nr7_auditar
+                exames_nr7 = _nr7_montar(riscos)
+                auditoria_nr7 = _nr7_auditar(riscos, exames)
+                nomes_atuais = {_norm(e['nome']) for e in exames}
+                for ex_faltando in auditoria_nr7.get('faltando', []):
+                    if _norm(ex_faltando['nome']) not in nomes_atuais:
+                        exames.append({
+                            'nome':  ex_faltando['nome'],
+                            'adm':   ex_faltando.get('adm', False),
+                            'per':   ex_faltando.get('per'),
+                            'mro':   ex_faltando.get('rt', False),
+                            'ret':   False,
+                            'dem':   ex_faltando.get('dem', False),
+                            'fonte': 'nr7_complemento',
+                        })
+                        nomes_atuais.add(_norm(ex_faltando['nome']))
+                for div in auditoria_nr7.get('divergencias', []):
+                    nome_n = _norm(div['nome'])
+                    per_nr7 = next(
+                        (d['esperado'] for d in div.get('divergencias', []) if d['campo'] == 'per'),
+                        None
+                    )
+                    if per_nr7:
+                        for ex in exames:
+                            if _norm(ex['nome']) == nome_n:
+                                try:
+                                    per_atual = ex.get('per')
+                                    if per_atual and int(per_nr7) < int(per_atual):
+                                        ex['per'] = per_nr7
+                                except (ValueError, TypeError):
+                                    pass
+            except Exception:
+                pass
+
+        # ── Camada 3: Ajustes por contexto
+        exames = _aplicar_ajustes_contexto(exames, contexto)
+        # ── Camada 4: Riscos químicos / IBE laboratorial
+        exames = _aplicar_riscos_quimicos(exames, riscos)
+
+        # ── Prompt 3 — Exame Clínico 6M para cargos com exposição química (NR-7)
+        # Aplica APÓS todas as camadas para garantir prevalência sobre o banco
+        # (ELETRICISTA_ENERGIZADO e ENCANADOR têm per='12' no banco_matrizes_v2).
+        _cargo_n = _normalizar_cargo_risco_quimico(cargo)
+        if _cargo_n in CARGOS_RISCO_QUIMICO_6M:
+            for ex in exames:
+                if _norm(ex.get('nome', '')) == 'exame clinico':
+                    ex['per'] = '6'
+
+        # ── Prompt 4 — Exames de risco específicos + reordenação (padrões → risco)
+        exames = _processar_exames_risco_cargo(cargo, exames)
+
+        # ── Prompt 5 — Protocolo específico (substitui template se cargo mapeado)
+        # Deve ser o ÚLTIMO passo: sobrepõe _aplicar_ajustes_contexto e o banco.
+        exames = _aplicar_protocolo_especifico(cargo, exames)
+
+    # ── Camada 5: Validação universal NR-7 (sempre executa)
     exames = _validacao_universal(exames, e_canteiro=e_canteiro)
-
-    # ── Prompt 3 — Exame Clínico 6M para cargos com exposição química (NR-7)
-    # Aplica APÓS todas as camadas para garantir prevalência sobre o banco
-    # (ELETRICISTA_ENERGIZADO e ENCANADOR têm per='12' no banco_matrizes_v2).
-    _cargo_n = _normalizar_cargo_risco_quimico(cargo)
-    if _cargo_n in CARGOS_RISCO_QUIMICO_6M:
-        for ex in exames:
-            if _norm(ex.get('nome', '')) == 'exame clinico':
-                ex['per'] = '6'
-
-    # ── Prompt 4 — Exames de risco específicos + reordenação (padrões → risco)
-    exames = _processar_exames_risco_cargo(cargo, exames)
-
-    # ── Prompt 5 — Protocolo específico (substitui template se cargo mapeado)
-    # Deve ser o ÚLTIMO passo: sobrepõe _aplicar_ajustes_contexto e o banco.
-    exames = _aplicar_protocolo_especifico(cargo, exames)
 
     return {
         'cargo':             cargo,
