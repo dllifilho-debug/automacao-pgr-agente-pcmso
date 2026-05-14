@@ -2460,7 +2460,39 @@
         "dem": false
       },
       {
-        "nome": "Acetona urinária , Ácido Metil – Hipúrico ,Metil Etil Cetona ,O-Cresol urinário Raio X Tórax OIT",
+        "nome": "Acetona urinária",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Ácido Metil-Hipúrico",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Metil Etil Cetona",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "O-Cresol urinário",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Raio X Tórax OIT",
         "adm": true,
         "per": "12",
         "mro": true,
@@ -2585,7 +2617,15 @@
         "dem": true
       },
       {
-        "nome": "Carboxihemoglobina Espirometria",
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
         "adm": true,
         "per": "24",
         "mro": true,
@@ -2672,7 +2712,15 @@
         "dem": true
       },
       {
-        "nome": "Carboxihemoglobina Espirometria",
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
         "adm": true,
         "per": "24",
         "mro": true,
@@ -2759,7 +2807,15 @@
         "dem": true
       },
       {
-        "nome": "Carboxihemoglobina Espirometria",
+        "nome": "Carboxihemoglobina",
+        "adm": false,
+        "per": "6",
+        "mro": false,
+        "ret": false,
+        "dem": false
+      },
+      {
+        "nome": "Espirometria",
         "adm": true,
         "per": "24",
         "mro": true,
