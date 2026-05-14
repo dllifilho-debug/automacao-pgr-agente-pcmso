@@ -1273,7 +1273,13 @@ def auditar_pcmso(df, dados_ghe: list = None) -> dict:
             df_ghe = df[df[ghe_col] == ghe]
             exames_ghe = [_norm(e) for e in df_ghe[exame_col].tolist()]
             ghe_n = _norm(ghe)
-            is_adm = any(x in ghe_n for x in ['administrativo', 'engenharia', 'planejamento', 'gerencia'])
+            is_adm_nome = any(x in ghe_n for x in ['administrativo', 'engenharia', 'planejamento', 'gerencia'])
+            cargos_no_ghe = list(df_ghe[cargo_col].unique())
+            is_adm_cargos = bool(cargos_no_ghe) and all(
+                any(token in _norm(c) for token in _CARGOS_ADMIN_TOKENS)
+                for c in cargos_no_ghe
+            )
+            is_adm = is_adm_nome or is_adm_cargos
 
             obrig = _EXAMES_OBRIGATORIOS_ADM if is_adm else _EXAMES_OBRIGATORIOS_CANTEIRO
             for ex_ob in obrig:
