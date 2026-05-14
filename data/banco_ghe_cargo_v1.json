@@ -350,7 +350,7 @@
         "dem": false
       },
       {
-        "nome": "Tricloroetileno, 1,3-Propanediamine, N- [3 Hemograma Completo",
+        "nome": "Hemograma Completo",
         "adm": true,
         "per": "12",
         "mro": true,
@@ -1452,7 +1452,7 @@
         "dem": false
       },
       {
-        "nome": "tolueno, xileno, estireno abaixo DEM) Raio X Tórax OIT",
+        "nome": "Raio X Tórax OIT",
         "adm": true,
         "per": "24",
         "mro": true,
@@ -1491,7 +1491,7 @@
         "dem": false
       },
       {
-        "nome": "tolueno, xileno, estireno abaixo DEM) Raio X Tórax OIT",
+        "nome": "Raio X Tórax OIT",
         "adm": true,
         "per": "24",
         "mro": true,
