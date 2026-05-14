@@ -56,6 +56,31 @@ CARGOS_RISCO_QUIMICO_6M = {
     "meio oficial de encanador",         # idem
 }
 
+# Tokens (em forma normalizada) que identificam cargos administrativos/gestão.
+# Cargos que contenham qualquer um desses tokens não recebem IBEs da Camada 2.
+_CARGOS_ADMIN_TOKENS = {
+    'administrativo',
+    'auxiliar administrativo',
+    'jovem aprendiz',
+    'aprendiz',
+    'estagiari',
+    'engenheiro',
+    'tecnico de seguranca',
+    'mestre de obra',
+    'encarregado',
+    'almoxarife',
+}
+
+# Mapa de aliases para deduplicação de exames por nome canônico.
+# Chaves em forma normalizada (_norm); valores são os nomes canônicos.
+_ALIASES_EXAME = {
+    'hemograma':          'Hemograma Completo',
+    'rx torax oit':       'Raio X Tórax OIT',
+    'raio x torax oit':   'Raio X Tórax OIT',
+    'glicemia de jejum':  'Glicemia em Jejum',
+    'exame clinico':      'Exame Clínico',
+}
+
 
 def _normalizar_cargo_risco_quimico(cargo: str) -> str:
     """
@@ -655,8 +680,11 @@ _MAPA_GHE_CHAVE = {
     'montagem desmontagem': 'GHE_ESTRUTURA_CREMALHEIRA_MONT',
     'elevador cremalheira': 'GHE_ESTRUTURA_CREMALHEIRA_OP',
     'operador cremalheira': 'GHE_ESTRUTURA_CREMALHEIRA_OP',
-    'grua sinalizacao': 'GHE_ESTRUTURA_GRUA_SINALIZACAO',
-    'estrutura grua':   'GHE_ESTRUTURA_GRUA_SINALIZACAO',
+    'grua sinalizacao':  'GHE_ESTRUTURA_GRUA_SINALIZACAO',
+    'estrutura grua':    'GHE_ESTRUTURA_GRUA_SINALIZACAO',
+    'icamento materiais': 'GHE_ESTRUTURA_GRUA_SINALIZACAO',
+    'icamento':           'GHE_ESTRUTURA_GRUA_SINALIZACAO',
+    'grua icamento':      'GHE_ESTRUTURA_GRUA_SINALIZACAO',
     'alvenaria interna': 'GHE_ESTRUTURA_ALVENARIA',
     'alvenaria externa': 'GHE_ESTRUTURA_ALVENARIA',
     'alvenaria':         'GHE_ESTRUTURA_ALVENARIA',
@@ -766,6 +794,7 @@ _ASSINATURAS_RISCO_GHE = [
     ({'ceramica', 'argamassa'},                       'GHE_ACABAMENTO_REVESTIMENTO'),
     # ── Grua (altura + sinaleiro)
     ({'grua', 'altura'},                              'GHE_ESTRUTURA_GRUA_OPERACAO'),
+    ({'icamento'},                                    'GHE_ESTRUTURA_GRUA_SINALIZACAO'),
     ({'grua'},                                        'GHE_ESTRUTURA_GRUA_SINALIZACAO'),
     # ── Carpintaria (forma/madeira)
     ({'madeira', 'forma'},                            'GHE_ESTRUTURA_FORMA'),
@@ -1012,9 +1041,11 @@ def _aplicar_riscos_quimicos(exames: list, riscos: list) -> list:
 # Camada 4 — Validação universal NR-7
 # ---------------------------------------------------------------------------
 
-def _validacao_universal(exames: list, e_canteiro: bool = True) -> list:
+def _validacao_universal(exames: list, e_canteiro: bool = True, is_admin: bool = False) -> list:
     if not _exame_ja_existe(exames, 'Exame Clínico'):
         exames.insert(0, {'nome': 'Exame Clínico', 'adm': True, 'per': '12', 'mro': True, 'ret': True, 'dem': True})
+    if is_admin:
+        return exames
     if e_canteiro and not _exame_ja_existe(exames, 'Audiometria'):
         exames = _merge_exame(exames, {
             'nome': 'Audiometria', 'adm': True, 'per': '12', 'mro': True, 'ret': False, 'dem': False
@@ -1119,7 +1150,10 @@ def processar_cargo_ia(
     auditoria_nr7 = {}
     fonte_banco_ghe = fonte.startswith('banco_ghe_cargo:')
 
-    if not fonte_banco_ghe:
+    cargo_n_admin = _norm(cargo)
+    is_cargo_admin = any(token in cargo_n_admin for token in _CARGOS_ADMIN_TOKENS)
+
+    if not fonte_banco_ghe and not is_cargo_admin:
         # ── Camada 2: Enriquecimento NR-7 via agente_medico_nr7
         if riscos:
             try:
@@ -1180,7 +1214,21 @@ def processar_cargo_ia(
         exames = _aplicar_protocolo_especifico(cargo, exames)
 
     # ── Camada 5: Validação universal NR-7 (sempre executa)
-    exames = _validacao_universal(exames, e_canteiro=e_canteiro)
+    exames = _validacao_universal(exames, e_canteiro=e_canteiro, is_admin=is_cargo_admin)
+
+    # ── Deduplicação final: colapsa aliases e mantém apenas primeira ocorrência
+    _seen: dict = {}
+    _exames_dedup = []
+    for _ex in exames:
+        _nome_n = _norm(_ex.get('nome', ''))
+        _canonical = _ALIASES_EXAME.get(_nome_n, _ex.get('nome', ''))
+        _canonical_n = _norm(_canonical)
+        if _canonical_n not in _seen:
+            _seen[_canonical_n] = True
+            _ex_copy = dict(_ex)
+            _ex_copy['nome'] = _canonical
+            _exames_dedup.append(_ex_copy)
+    exames = _exames_dedup
 
     return {
         'cargo':             cargo,
