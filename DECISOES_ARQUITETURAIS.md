@@ -219,6 +219,73 @@ ainda não foram. Cresce e diminui ao longo do projeto.*
 - **Multitenancy:** sistema atende múltiplas Seconcis ou apenas Seconci-GO?
 - **API ou apenas Streamlit:** sistema vira API consumível por terceiros?
 
+## ADR-004: Pipeline de formalização de conhecimento clínico
+
+**Status:** Aceito
+**Data:** 2025-05-15
+**Decisores:** Diovanni Lisita, Claude (Arquiteto)
+
+### Contexto
+
+O projeto extrai conhecimento clínico tácito da Dra. Carolini Polesso
+(coordenadora PCMSO) — e potencialmente de outros especialistas no futuro
+— por meio de entrevistas assíncronas. As respostas vêm em áudio
+transcrito ou texto: matéria-prima narrativa, não regras codificáveis.
+
+Sem um pipeline explícito, o risco é colar trechos da transcrição direto
+no `PROTOCOLO_AGENTE_MEDICO.md`. Isso produz três problemas:
+
+1. Protocolo vira documento de prosa, não de regras formalizadas
+2. Perde-se rastreabilidade entre regra e fonte original
+3. Impossível revalidar uma regra contestada sem reentrevistar
+
+### Decisão
+
+Conhecimento clínico flui em três camadas, na seguinte ordem:
+
+```
+entrevistas/<especialista>_<YYYY-MM-DD>.md   ← transcrição bruta (fonte)
+            ↓
+            análise + extração (sessão CONHECIMENTO)
+            ↓
+PROTOCOLO_AGENTE_MEDICO.md                   ← regras formalizadas (derivado)
+```
+
+#### Camada 1 — Transcrição bruta
+
+- Localização: pasta `entrevistas/` na raiz do repositório
+- Granularidade: **um arquivo por sessão de resposta**, não por pergunta
+- Sessão = conjunto de respostas dadas em um momento contínuo
+- Nomenclatura: `<especialista>_<YYYY-MM-DD>.md`
+- Conteúdo: transcrição literal, sem edição interpretativa
+- Imutável após commit. Correções viram nova entrevista, não edição.
+
+#### Camada 2 — Análise
+
+- Não tem artefato próprio
+- Acontece em sessões CONHECIMENTO
+- Saída: regras candidatas para o protocolo
+
+#### Camada 3 — Regra formalizada
+
+- Localização: `PROTOCOLO_AGENTE_MEDICO.md`
+- Cada regra tem três campos obrigatórios:
+  - **ID:** identificador único (R-001, R-002, ...)
+  - **Conteúdo:** regra em linguagem precisa, sem ambiguidade
+  - **Fonte:** referência ao arquivo de entrevista + bloco/pergunta
+
+### Consequências
+
+**Positivas:**
+- Toda regra do protocolo é rastreável até a fonte original
+- Entrevistas futuras (Dra. Patrícia, outros especialistas) seguem o mesmo padrão
+- Auditoria clínica e contestação de regras se tornam possíveis
+- Versionamento Git preserva histórico narrativo da construção do protocolo
+
+**Negativas:**
+- Exige disciplina: nunca pular a camada 1
+- A análise (camada 2) não fica registrada — só seu resultado
+- Pasta `entrevistas/` cresce indefinidamente
 ---
 
 ## Histórico de Versões
