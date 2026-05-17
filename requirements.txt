@@ -22,6 +22,9 @@ requests>=2.31.0
 # ── Fuzzy matching (Passo 2) ──────────────────────────────────────────────────
 rapidfuzz>=3.6.0
 
+# ── Motor de inferência ───────────────────────────────────────────────────────
+PyYAML>=6.0
+
 # ── IA Gemini (fallback extracao PGR) ────────────────────────────────────────
 google-generativeai>=0.5.0
 PyMuPDF
