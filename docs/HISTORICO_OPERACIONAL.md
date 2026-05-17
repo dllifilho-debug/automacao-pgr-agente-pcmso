@@ -154,4 +154,108 @@ agente_medico/
 
 ---
 
+## Sessão 002.A — 17/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude Code (Sonnet 4.6, v2.1.143)
+**Objetivo:** Estrutura inicial do motor — tipos + carregamento de protocolo
+
+### O que foi feito
+
+1. Patch dos docs `DECISOES_ARQUITETURAIS.md` (v3) e `HISTORICO_OPERACIONAL.md` (Sessão 002) commitado em `main`
+2. Branch `feature/motor-002a-tipos` criada
+3. Prompt cirúrgico (`prompt_002a.txt`) executado no Claude Code via `Get-Content -Raw prompt_002a.txt | claude`
+4. Estrutura `agente_medico/` criada: 16 dataclasses/enums em `tipos.py`, função `carregar()` em `protocolo.py`, 7 YAMLs mínimos do protocolo, 5 testes
+5. PyYAML adicionado ao `requirements.txt`
+6. `.gitignore` adicionado na raiz do projeto (cobre `**/__pycache__/`, `**/*.pyc`, `.mypy_cache/`)
+7. Commits: `6f48f8c feat(motor): estrutura inicial (002.A)` + `ba0b03c chore: adiciona .gitignore`
+8. Push da branch `feature/motor-002a-tipos` pro GitHub
+
+### Resultados
+
+- **Critério 1** — `pytest agente_medico/tests/` → 5/5 verdes (3 mínimos + 2 extras)
+- **Critério 2** — `carregar('agente_medico/protocolo/')` → sem erro
+- **Critério 3** — `mypy --strict agente_medico/motor/tipos.py` → no issues found
+- 23 arquivos criados, 315 linhas de código
+
+### Problemas operacionais durante a sessão
+
+**P-1. Repositório local com `.git/` corrompido.**
+Antes de executar a 002.A, ao tentar `git push` o repositório acusou `fatal: You are not currently on a branch` e em seguida `fatal: your current branch appears to be broken`. Causa provável: remoção manual de um worktree do Claude Code (`.claude/worktrees/romantic-margulis-dcccad`) deixou refs órfãs no `.git/`. Diagnóstico: `.git/objects` com apenas 41 objetos (esperado: 1229+), pack files perdidos.
+
+**Reparo aplicado:**
+1. Backup do diretório inteiro (`automacao-pgr-seconci_BACKUP_20260517_134236`)
+2. Clone fresh em pasta paralela (`automacao-pgr-seconci_FRESH`) — 1229 objetos baixados do GitHub
+3. Cópia dos 2 docs novos (DECISOES v3, HISTORICO Sessão 002) pra `docs/` do clone fresh
+4. Commit + push dos docs no clone fresh
+5. Renomeação: pasta quebrada → `_BROKEN`, fresh → oficial
+
+**P-2. Crash do computador durante a primeira tentativa de executar o prompt 002.A.**
+Provável causa: VS Code + PowerShell + navegador + Claude Code rodando simultaneamente saturaram a RAM. Computador travou e foi reiniciado. Nada foi perdido (Code ainda não tinha criado arquivos). Segunda tentativa rodou só com PowerShell aberto.
+
+**P-3. Pipe `Get-Content | claude` conflitou com menu de confirmação interativo.**
+Ao adicionar a flag `--dangerously-skip-permissions`, o menu de warning bloqueava a stdin (já consumida pelo pipe), impossibilitando confirmar com `2`. Solução: rodar `claude` normalmente sem pipe e usar `@prompt_002a.txt` dentro da sessão interativa pra referenciar o arquivo. Funcionou na primeira tentativa.
+
+**P-4. Claude Code tentou usar caminhos Linux (`/mnt/c/...`) em ambiente Windows.**
+Primeira chamada de `Bash(cd /mnt/c/Users/...)` falhou. Code corrigiu automaticamente substituindo por `PowerShell(New-Item ...)`. Sem intervenção necessária — adicionado lembrete pra futuras sessões priorizarem comandos Windows nativos.
+
+### Lições aprendidas
+
+- **Worktrees do Claude Code não devem ser removidos manualmente.** Se for limpar `.claude/worktrees/`, usar comando do próprio Code, não `rm -rf`.
+- **Antes de executar Code, fechar tudo exceto PowerShell.** RAM é gargalo real em máquinas de dev.
+- **Pipe pra Code só funciona sem flags interativas.** Pra modo bypass, abrir Code sem pipe e usar `@arquivo.txt` dentro da sessão.
+- **Backup físico do diretório antes de qualquer operação destrutiva de git.** Saved a vida hoje.
+
+### Próxima sessão planejada
+
+**Tipo:** IMPLEMENTAÇÃO (Sessão 002.B)
+**Branch:** `feature/motor-002b-predicados-gates` (já criada a partir de 002.A)
+**Objetivo:** Implementar `predicados.py` (registro de primitivos via decorator, avaliador de compostos com tri-estado conforme D-ARQ-13) + `estagios/gates.py` (R-PGR-01 e R-PGR-06) + testes
+**Escopo de primitivos:** ~5 primitivos básicos (`altura`, `espaco_confinado`, `maquina_pesada`, `ruido`, `ruido_acima_acao`) — suficiente pra deixar `atividade_critica` testável. Demais primitivos entram nas sessões 002.C e 002.D conforme as regras que os usam forem implementadas.
+
+---
+
+## Sessão 002.B — 17/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude Code (Sonnet 4.6, v2.1.143)
+**Branch:** `feature/motor-002b-predicados-gates`
+**Objetivo:** Predicados primitivos + Stage 1 (gates)
+
+### O que foi feito
+
+1. Criado `agente_medico/motor/predicados.py` — decorator `@primitivo`, registro `REGISTRO_PRIMITIVOS`, 5 primitivos físicos (`altura`, `espaco_confinado`, `maquina_pesada`, `ruido`, `ruido_acima_acao`), avaliador de compostos com tri-estado (`e`/`ou`/`nao`), `avaliar_predicado` com detecção de ciclo via exceção `CicloPredicados`
+2. Criado `agente_medico/motor/estagios/__init__.py` + `gates.py` — `stage_1_gates(pgr, hoje=None)` implementando R-PGR-01 (assinatura de engenheiro) e R-PGR-06 (validade do PGR, prazo de 730 dias = 2 anos), com `hoje` injetável para testes
+3. Criados `agente_medico/tests/test_predicados.py` e `test_gates.py` — cobertura completa: registro, todos os 5 primitivos, tri-estado em todas as combinações (e/ou/nao com bool e Ausente), resolução de primitivo vs composto, ciclo, boundaries de R-PGR-06 (1a11m, 2 anos exatos, 2 anos + 1 dia)
+4. Commit único `6d011c1 feat(motor): predicados primitivos + stage_1_gates (002.B)` pushed para origin
+
+### Resultados
+
+- **pytest** — 41/41 verdes (5 da 002.A + 36 novos)
+- **mypy --strict** em `predicados.py` e `estagios/gates.py` — `Success: no issues found in 2 source files`
+- 5 arquivos novos, 453 linhas adicionadas
+
+### Decisão de implementação registrada
+
+**Semântica de `pgr.validade`:** interpretada como "data de emissão do PGR" (não data limite). Gate R-PGR-06 falha se `(hoje - pgr.validade) >= timedelta(days=730)`. Justificativa: R-PGR-06 diz "validade emitida há 2 anos ou mais" — implementação em "data de emissão" se alinha melhor com a redação do protocolo. Caso o parser de PGR (camada anterior) entregue "data limite" em vez de emissão, o tipo precisará ser desambiguado em 002.C.
+
+### Problemas operacionais durante a sessão
+
+**P-5. Paste direto no Claude Code travou (mesmo problema da 002.A).**
+Colar o conteúdo do prompt diretamente no terminal do Claude Code não funcionou — o input não foi aceito. Solução consolidada (já validada em 002.A): copiar `prompt_002b.txt` pra raiz do projeto e digitar comando curto `Leia o arquivo prompt_002b.txt e execute todas as tarefas descritas nele.` Funcionou na primeira tentativa.
+
+### Lições aprendidas
+
+- **Paste de prompts longos no Code é instável.** Padrão consolidado: salvar prompt como `.txt` na raiz do projeto, instruir o Code via comando curto referenciando o arquivo. Vale anotar isso como protocolo permanente.
+- **Manter `hoje` injetável em funções com `date.today()` desde o início.** Sem isso, testes de boundary em datas ficam frágeis.
+
+### Próxima sessão planejada
+
+**Tipo:** IMPLEMENTAÇÃO (Sessão 002.C)
+**Branch:** `feature/motor-002c-emissao` (a criar a partir de 002.B)
+**Objetivo:** Stage 5 (emissão de exames via `regras.yaml`) + Stage 8 (consolidação/dedup) + regra `R-PKG-ATIVCRIT` completa end-to-end com `atividade_critica` testável
+**Pré-requisito:** popular `predicados_compostos.yaml` com `atividade_critica`; popular `regras.yaml` com R-PKG-ATIVCRIT; validar que pipeline gates → predicados → emissão funciona end-to-end em fixture mockado
+
+---
+
 *Entradas futuras abaixo desta linha*
