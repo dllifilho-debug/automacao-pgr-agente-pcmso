@@ -136,9 +136,111 @@ Cada regra carrega:
 
 ---
 
+## D-ARQ-08 — Pendência tem nível: bloqueante vs operacional
+
+**Contexto.** D-ARQ-05 estabelece pendência operacional como saída de primeira classe (TODOs após matriz pronta). Mas há um segundo tipo de pendência, conceitualmente distinto: dado essencial faltando que impede o motor de fechar a matriz para um GHE (ex: composição química de produto ausente, vibração mencionada sem qualificar tipo).
+
+**Decisão.** Modelar `Pendencia.bloqueante: bool` como atributo de primeira classe.
+- **Bloqueante (`True`)** — interrompe o pipeline naquele GHE no estágio em que surge. A `MatrizGHE` retornada vem com `linhas: []` e a lista de pendências bloqueantes. Status global do `Resultado` vira `PRELIMINAR`.
+- **Operacional (`False`)** — matriz fecha normalmente, pendência acompanha como TODO para o executor (ex: R-OP-01).
+
+**Consequência.**
+- O motor nunca produz matriz "incompleta sem aviso" — bloqueio é explícito.
+- A camada de orquestração superior (humano + LLM de extração) pode reagir a bloqueantes solicitando dados faltantes e rerodando o motor.
+- Pendências bloqueantes têm prioridade visual no relatório de saída.
+
+---
+
+## D-ARQ-09 — Motor é determinístico; LLM fica fora do caminho crítico
+
+**Contexto.** O sistema completo envolve etapas com LLM (extração de PGR, leitura de FDS, normalização de vocabulário). A tentação é deixar o motor de inferência também consultar LLM em casos ambíguos.
+
+**Decisão.** O motor de inferência é função pura `(PGR_estruturado, Protocolo) → Resultado`. Determinístico, idempotente, sem chamadas a LLM. LLM atua exclusivamente nas camadas a montante (parsing de PGR/FDS) e a jusante (geração de relatório em prosa).
+
+**Consequência.**
+- Auditabilidade total: mesmo input → mesmo output, sempre.
+- Testes unitários e de integração são triviais (sem mocks de API).
+- Toda ambiguidade que o motor encontra vira pendência bloqueante (D-ARQ-08), nunca "chute" via LLM.
+- A cascata multi-IA gratuita (Gemini → Groq → OpenRouter) é assunto da camada de extração, não do motor.
+
+---
+
+## D-ARQ-10 — Predicados: primitivos em código, compostos em YAML
+
+**Contexto.** D-ARQ-07 estabelece "regras como dados". A pergunta operacional: predicados (`atividade_critica`, `ruido_acima_acao`) também são dados, ou são código?
+
+**Decisão.** Separar em duas camadas:
+- **Primitivos** — funções Python registradas por nome (`@primitivo("ruido_acima_acao")`). Acessam diretamente o `GHEContext` e a estrutura do PGR. Conjunto pequeno (~30) e estável (muda só se o schema do PGR mudar).
+- **Compostos** — expressões declarativas em `predicados_compostos.yaml` usando `e/ou/nao` sobre primitivos e outros compostos. Conjunto maior, sujeito a evolução pela especialista clínica.
+
+Exemplo: `atividade_critica` é composto (`ou: [altura, espaco_confinado, maquina_pesada]`), mas `altura` é primitivo (lê `ctx.riscos`).
+
+**Consequência.**
+- A Dra. Carolini pode revisar a composição de `atividade_critica` (D-ARQ-03) sem desenvolvedor.
+- Mudanças no schema do PGR exigem dev (primitivos), mas mudanças clínicas não.
+- Avaliador de compostos é único e simples (~50 linhas).
+
+---
+
+## D-ARQ-11 — Reaproveitamento de exames é responsabilidade do agendador, não do motor
+
+**Contexto.** R-REAPR-01 (biomonitoramento válido por 6M) e R-REAPR-02 (audiometria > 120 dias refaz no demissional) operam sobre o histórico de exames do trabalhador, não sobre o PGR.
+
+**Decisão.** O motor de inferência produz a matriz "ideal" — o que pedir se o trabalhador fosse exame zero. Reaproveitamento é responsabilidade de uma camada superior (chamada de **agendador**) que confronta a matriz ideal com o prontuário e marca o que pode ser reaproveitado.
+
+**Consequência.**
+- Motor não toca em datas, prontuários ou histórico individual.
+- R-REAPR-01 e R-REAPR-02 não viram regras do protocolo do motor — viram regras do agendador (especificação separada, ainda não desenhada).
+- Separação limpa: motor trabalha com função/risco; agendador trabalha com pessoa/histórico.
+
+---
+
+## D-ARQ-12 — Vocabulário é dado tipado de primeira classe
+
+**Contexto.** As regras do protocolo referenciam agentes (`silica`, `manganes`, `benzeno`), cargos (`soldador`, `porteiro`, `armador`), exames (`audiometria`, `espirometria`, `hemograma`) e EPIs (`mascara_pff2`, `protetor_auricular`). Sem definição centralizada desses identificadores e seus metadados, as regras viram strings opacas e o motor não consegue, por exemplo, decidir se um agente é Anexo I ou Anexo II.
+
+**Decisão.** Vocabulário mora em `protocolo/vocabulario/` em 4 YAMLs:
+
+- `agentes.yaml` — cada agente com `anexo_nr07`, `cas`, `is_carcinogeno_iarc`, `tem_lt`, `protocolos_especiais`.
+- `cargos.yaml` — cada cargo com `riscos_implicitos` (alimenta R-GHE-02), `pacotes_aplicaveis`.
+- `exames.yaml` — cada exame com `momentos_default`, `categoria` (clínico, biomonitoramento, imagem, funcional).
+- `epis.yaml` — cada EPI com `riscos_inferidos` (alimenta R-PGR-03 e similares).
+
+Stage 2 do motor hidrata cada `Risco` com metadados do agente (Anexo NR-07 entra direto no objeto `Risco`).
+
+**Consequência.**
+- Adicionar agente novo (ex: cromo hexavalente) = inserir entrada no YAML, sem código.
+- Stage 5 (emissão) pode escrever regras genéricas tipo "se risco com `anexo_nr07 == 'II'` → ...", em vez de listar cada agente.
+- Vocabulário vira o contrato entre o parser de PGR (a camada que LLM normaliza para esses identificadores) e o motor.
+
+---
+
+## D-ARQ-13 — Predicados são tri-estado: True / False / Ausente
+
+**Contexto.** Operacionalização de B-5 (dado ausente = pendência bloqueante). O caso âncora: PGR menciona "vibração" sem qualificar se é corpo inteiro ou mãos-braços. Predicado `vibracao_corpo_inteiro` não consegue retornar `True` (não há confirmação) nem `False` (há evidência parcial). Forçar `False` faz o motor subestimar risco silenciosamente.
+
+**Decisão.** Primitivos retornam `bool | Ausente`. `Ausente` é sentinela com mensagem descritiva. Avaliador de compostos propaga:
+
+- `e: [A, B, Ausente]` → `Ausente`
+- `ou: [A, True, Ausente]` → `True`
+- `ou: [False, False, Ausente]` → `Ausente`
+- `nao: Ausente` → `Ausente`
+
+Predicado que avalia para `Ausente` no estágio 4 gera **pendência bloqueante automática** com a mensagem do sentinela. A regra que dependia desse predicado não dispara. A matriz daquele GHE não fecha.
+
+Regras podem declarar `quando_ausente: false` (default: `bloquear`) para cair como `False` em vez de bloquear — usado quando o protocolo aceita a ausência como evidência negativa.
+
+**Consequência.**
+- Não há subestimação silenciosa por dado parcial.
+- A pendência aponta diretamente para o predicado e o GHE, com mensagem descritiva (auditável).
+- O autor da regra escolhe explicitamente o comportamento quando o dado falta — decisão visível no YAML.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
 |--------|------|------------|
 | v1 | 17/05/2026 | Versão inicial — D-ARQ-01 a D-ARQ-07 derivadas da entrevista da Dra. Carolini |
 | v2 | 17/05/2026 | D-ARQ-04 atualizada: confirmação de que ANAC é o único regime regulatório sobreposto identificado pela Dra. Carolini; camada arquitetural mantida por argumento de custo evolutivo |
+| v3 | 17/05/2026 | Sessão 002 (ARQUITETURA do motor): D-ARQ-08 a D-ARQ-13 adicionadas — níveis de pendência, motor determinístico, predicados primitivos vs compostos, agendador fora do motor, vocabulário tipado, predicados tri-estado |
