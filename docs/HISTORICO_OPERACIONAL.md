@@ -154,4 +154,65 @@ agente_medico/
 
 ---
 
+## Sessão 002.A — 17/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude Code (Sonnet 4.6, v2.1.143)
+**Objetivo:** Estrutura inicial do motor — tipos + carregamento de protocolo
+
+### O que foi feito
+
+1. Patch dos docs `DECISOES_ARQUITETURAIS.md` (v3) e `HISTORICO_OPERACIONAL.md` (Sessão 002) commitado em `main`
+2. Branch `feature/motor-002a-tipos` criada
+3. Prompt cirúrgico (`prompt_002a.txt`) executado no Claude Code via `Get-Content -Raw prompt_002a.txt | claude`
+4. Estrutura `agente_medico/` criada: 16 dataclasses/enums em `tipos.py`, função `carregar()` em `protocolo.py`, 7 YAMLs mínimos do protocolo, 5 testes
+5. PyYAML adicionado ao `requirements.txt`
+6. `.gitignore` adicionado na raiz do projeto (cobre `**/__pycache__/`, `**/*.pyc`, `.mypy_cache/`)
+7. Commits: `6f48f8c feat(motor): estrutura inicial (002.A)` + `ba0b03c chore: adiciona .gitignore`
+8. Push da branch `feature/motor-002a-tipos` pro GitHub
+
+### Resultados
+
+- **Critério 1** — `pytest agente_medico/tests/` → 5/5 verdes (3 mínimos + 2 extras)
+- **Critério 2** — `carregar('agente_medico/protocolo/')` → sem erro
+- **Critério 3** — `mypy --strict agente_medico/motor/tipos.py` → no issues found
+- 23 arquivos criados, 315 linhas de código
+
+### Problemas operacionais durante a sessão
+
+**P-1. Repositório local com `.git/` corrompido.**
+Antes de executar a 002.A, ao tentar `git push` o repositório acusou `fatal: You are not currently on a branch` e em seguida `fatal: your current branch appears to be broken`. Causa provável: remoção manual de um worktree do Claude Code (`.claude/worktrees/romantic-margulis-dcccad`) deixou refs órfãs no `.git/`. Diagnóstico: `.git/objects` com apenas 41 objetos (esperado: 1229+), pack files perdidos.
+
+**Reparo aplicado:**
+1. Backup do diretório inteiro (`automacao-pgr-seconci_BACKUP_20260517_134236`)
+2. Clone fresh em pasta paralela (`automacao-pgr-seconci_FRESH`) — 1229 objetos baixados do GitHub
+3. Cópia dos 2 docs novos (DECISOES v3, HISTORICO Sessão 002) pra `docs/` do clone fresh
+4. Commit + push dos docs no clone fresh
+5. Renomeação: pasta quebrada → `_BROKEN`, fresh → oficial
+
+**P-2. Crash do computador durante a primeira tentativa de executar o prompt 002.A.**
+Provável causa: VS Code + PowerShell + navegador + Claude Code rodando simultaneamente saturaram a RAM. Computador travou e foi reiniciado. Nada foi perdido (Code ainda não tinha criado arquivos). Segunda tentativa rodou só com PowerShell aberto.
+
+**P-3. Pipe `Get-Content | claude` conflitou com menu de confirmação interativo.**
+Ao adicionar a flag `--dangerously-skip-permissions`, o menu de warning bloqueava a stdin (já consumida pelo pipe), impossibilitando confirmar com `2`. Solução: rodar `claude` normalmente sem pipe e usar `@prompt_002a.txt` dentro da sessão interativa pra referenciar o arquivo. Funcionou na primeira tentativa.
+
+**P-4. Claude Code tentou usar caminhos Linux (`/mnt/c/...`) em ambiente Windows.**
+Primeira chamada de `Bash(cd /mnt/c/Users/...)` falhou. Code corrigiu automaticamente substituindo por `PowerShell(New-Item ...)`. Sem intervenção necessária — adicionado lembrete pra futuras sessões priorizarem comandos Windows nativos.
+
+### Lições aprendidas
+
+- **Worktrees do Claude Code não devem ser removidos manualmente.** Se for limpar `.claude/worktrees/`, usar comando do próprio Code, não `rm -rf`.
+- **Antes de executar Code, fechar tudo exceto PowerShell.** RAM é gargalo real em máquinas de dev.
+- **Pipe pra Code só funciona sem flags interativas.** Pra modo bypass, abrir Code sem pipe e usar `@arquivo.txt` dentro da sessão.
+- **Backup físico do diretório antes de qualquer operação destrutiva de git.** Saved a vida hoje.
+
+### Próxima sessão planejada
+
+**Tipo:** IMPLEMENTAÇÃO (Sessão 002.B)
+**Branch:** `feature/motor-002b-predicados-gates` (já criada a partir de 002.A)
+**Objetivo:** Implementar `predicados.py` (registro de primitivos via decorator, avaliador de compostos com tri-estado conforme D-ARQ-13) + `estagios/gates.py` (R-PGR-01 e R-PGR-06) + testes
+**Escopo de primitivos:** ~5 primitivos básicos (`altura`, `espaco_confinado`, `maquina_pesada`, `ruido`, `ruido_acima_acao`) — suficiente pra deixar `atividade_critica` testável. Demais primitivos entram nas sessões 002.C e 002.D conforme as regras que os usam forem implementadas.
+
+---
+
 *Entradas futuras abaixo desta linha*
