@@ -1,0 +1,176 @@
+from __future__ import annotations
+
+from typing import Any
+
+import pytest
+
+from agente_medico.motor.estagios.emissao import stage_5_emissao
+from agente_medico.motor.predicados import PredicadoDesconhecido
+from agente_medico.motor.protocolo import Protocolo, Vocabulario
+from agente_medico.motor.tipos import (
+    Ausente,
+    GHEContext,
+    GHEPGR,
+    Momento,
+    Quantificacao,
+    Risco,
+)
+
+
+def _ghe(ghe_id: str = "GHE-01") -> GHEPGR:
+    return GHEPGR(
+        id=ghe_id,
+        nome="Teste",
+        cargos=(),
+        riscos=(),
+        epis=(),
+        produtos_quimicos=(),
+        psicossocial=False,
+    )
+
+
+def _vocab() -> Vocabulario:
+    return Vocabulario(agentes={}, cargos={}, exames={}, epis={})
+
+
+def _protocolo_ativcrit() -> Protocolo:
+    return Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={
+            "atividade_critica": {"ou": ["altura", "espaco_confinado", "maquina_pesada"]}
+        },
+        regras=[
+            {
+                "id": "R-PKG-ATIVCRIT",
+                "quando": "atividade_critica",
+                "emite": [
+                    {"exame": "hemograma",       "periodicidade_meses": 12, "momentos": ["adm", "per", "MR"]},
+                    {"exame": "glicemia",        "periodicidade_meses": 12, "momentos": ["adm", "per", "MR"]},
+                    {"exame": "audiometria",     "periodicidade_meses": 12, "momentos": ["adm", "per", "MR"]},
+                    {"exame": "acuidade_visual", "periodicidade_meses": 12, "momentos": ["adm", "per", "MR"]},
+                    {"exame": "ecg",             "periodicidade_meses": 12, "momentos": ["adm", "per", "MR"]},
+                ],
+                "base_normativa": "Protocolo Dra. Carolini",
+                "status": "VALIDADO",
+            }
+        ],
+        regimes={},
+    )
+
+
+def _protocolo_ausente(quando_ausente: Any = None) -> Protocolo:
+    regra: dict[str, Any] = {
+        "id": "R-TESTE-AUSENTE",
+        "quando": "ruido_acima_acao",
+        "emite": [
+            {"exame": "teste", "periodicidade_meses": 12, "momentos": ["adm"]}
+        ],
+        "base_normativa": "teste",
+        "status": "VALIDADO",
+    }
+    if quando_ausente is not None:
+        regra["quando_ausente"] = quando_ausente
+    return Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={},
+        regras=[regra],
+        regimes={},
+    )
+
+
+def _ctx_com_risco(agente: str, ghe_id: str = "GHE-01") -> GHEContext:
+    risco = Risco(agente=agente, fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None)
+    return GHEContext(pgr_ghe=_ghe(ghe_id), riscos=[risco])
+
+
+def _ctx_ruido_sem_quantificacao(ghe_id: str = "GHE-01") -> GHEContext:
+    risco = Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None)
+    return GHEContext(pgr_ghe=_ghe(ghe_id), riscos=[risco])
+
+
+_MOMENTOS_ESPERADOS = {Momento.ADM, Momento.PER, Momento.MR}
+
+
+def test_emite_pacote_atividade_critica_quando_altura_presente() -> None:
+    ctx = _ctx_com_risco("trabalho_altura")
+    result = stage_5_emissao(ctx, _protocolo_ativcrit())
+    assert len(result) == 5
+    for exame in result:
+        assert exame.motivos[0].regra_id == "R-PKG-ATIVCRIT"
+        assert exame.periodicidade_meses == 12
+        assert exame.momentos == _MOMENTOS_ESPERADOS
+    assert ctx.pendencias == []
+
+
+def test_emite_pacote_atividade_critica_quando_espaco_confinado() -> None:
+    ctx = _ctx_com_risco("espaco_confinado")
+    result = stage_5_emissao(ctx, _protocolo_ativcrit())
+    assert len(result) == 5
+    for exame in result:
+        assert exame.motivos[0].regra_id == "R-PKG-ATIVCRIT"
+        assert exame.periodicidade_meses == 12
+        assert exame.momentos == _MOMENTOS_ESPERADOS
+    assert ctx.pendencias == []
+
+
+def test_nao_emite_quando_nenhum_risco_critico() -> None:
+    ctx = _ctx_com_risco("ruido")
+    result = stage_5_emissao(ctx, _protocolo_ativcrit())
+    assert result == []
+    assert ctx.pendencias == []
+
+
+def test_ausente_gera_pendencia_bloqueante_e_nao_emite() -> None:
+    ctx = _ctx_ruido_sem_quantificacao()
+    result = stage_5_emissao(ctx, _protocolo_ausente())
+    assert result == []
+    assert len(ctx.pendencias) == 1
+    p = ctx.pendencias[0]
+    assert p.tipo == "predicado_ausente"
+    assert p.bloqueante is True
+    assert p.regra_origem == "R-TESTE-AUSENTE"
+    assert p.ghe_id == "GHE-01"
+
+
+def test_quando_ausente_false_silencia_pendencia() -> None:
+    ctx = _ctx_ruido_sem_quantificacao()
+    result = stage_5_emissao(ctx, _protocolo_ausente(quando_ausente=False))
+    assert result == []
+    assert ctx.pendencias == []
+
+
+def test_predicado_desconhecido_propaga_excecao() -> None:
+    ctx = GHEContext(pgr_ghe=_ghe(), riscos=[])
+    proto = Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={},
+        regras=[{
+            "id": "R-TESTE",
+            "quando": "predicado_inexistente",
+            "emite": [{"exame": "teste", "periodicidade_meses": 12, "momentos": ["adm"]}],
+        }],
+        regimes={},
+    )
+    with pytest.raises(PredicadoDesconhecido):
+        stage_5_emissao(ctx, proto)
+
+
+def test_conversao_momento_case_insensitive() -> None:
+    ctx = _ctx_com_risco("trabalho_altura")
+    proto = Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={
+            "atividade_critica": {"ou": ["altura"]}
+        },
+        regras=[{
+            "id": "R-TESTE-CI",
+            "quando": "atividade_critica",
+            "emite": [
+                {"exame": "teste", "periodicidade_meses": 12, "momentos": ["ADM", "Per", "mr"]}
+            ],
+        }],
+        regimes={},
+    )
+    result = stage_5_emissao(ctx, proto)
+    assert len(result) == 1
+    assert result[0].momentos == {Momento.ADM, Momento.PER, Momento.MR}
