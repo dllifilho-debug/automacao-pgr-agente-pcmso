@@ -1,1 +1,7 @@
-predicados_compostos: {}
+predicados_compostos:
+  atividade_critica:
+    ou:
+      - altura
+      - espaco_confinado
+      - maquina_pesada
+

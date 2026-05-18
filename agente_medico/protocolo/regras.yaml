@@ -1,1 +1,12 @@
-regras: []
+regras:
+  - id: R-PKG-ATIVCRIT
+    quando: atividade_critica
+    emite:
+      - {exame: hemograma,       periodicidade_meses: 12, momentos: [adm, per, MR]}
+      - {exame: glicemia,        periodicidade_meses: 12, momentos: [adm, per, MR]}
+      - {exame: audiometria,     periodicidade_meses: 12, momentos: [adm, per, MR]}
+      - {exame: acuidade_visual, periodicidade_meses: 12, momentos: [adm, per, MR]}
+      - {exame: ecg,             periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "Protocolo Dra. Carolini — rastreio de comorbidade para atividade crítica"
+    status: VALIDADO
+
