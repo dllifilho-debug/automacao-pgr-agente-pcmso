@@ -1,6 +1,15 @@
-
 # Python
 **/__pycache__/
 **/*.pyc
 **/*.pyo
 .mypy_cache/
+
+# Prompts cirúrgicos (uso único)
+PROMPT_CODE_*.md
+prompt_*.txt
+
+# Artefatos runtime do motor legado
+data/cargos_desconhecidos.json
+
+# Claude Code (worktrees, config local)
+.claude/
