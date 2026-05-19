@@ -65,9 +65,27 @@ def carregar(diretorio: Path | str) -> Protocolo:
         for yaml_file in sorted(regimes_dir.glob("*.yaml")):
             regimes[yaml_file.stem] = _load_yaml(yaml_file) or {}
 
+    _validar_exames_em_regras(vocabulario.exames, regras)
+
     return Protocolo(
         vocabulario=vocabulario,
         predicados_compostos=predicados_compostos,
         regras=regras,
         regimes=regimes,
     )
+
+
+def _validar_exames_em_regras(
+    exames: dict[str, Any], regras: list[dict[str, Any]]
+) -> None:
+    slugs = set(exames.keys())
+    for regra in regras:
+        regra_id = regra.get("id", "<sem id>")
+        for item in regra.get("emite", []):
+            slug = item["exame"]
+            if slug not in slugs:
+                slugs_disponiveis = sorted(slugs)
+                raise ValueError(
+                    f"Exame '{slug}' referenciado pela regra '{regra_id}' não existe no vocabulário.\n"
+                    f"Slugs disponíveis: {slugs_disponiveis}"
+                )

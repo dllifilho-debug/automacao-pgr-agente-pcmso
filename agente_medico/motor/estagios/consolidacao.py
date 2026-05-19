@@ -9,7 +9,7 @@ class ConflitoProtocolo(RuntimeError):
 
 def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
     """
-    R-GHE-03: dedup por nome de exame (normalizado).
+    R-GHE-03: dedup por slug canônico de exame.
 
     Regras:
     - Mesmo exame normalizado + mesma periodicidade_meses → MERGE:
@@ -18,7 +18,7 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
         mantém primeira ocorrência (string exame e ordem na lista)
     - Mesmo exame normalizado + periodicidade_meses DIFERENTE → raise ConflitoProtocolo
 
-    Identidade do exame: nome.strip().lower()
+    Identidade do exame: slug canônico do vocabulário (já normalizado por construção).
 
     Função pura. Não muta entrada. Retorna lista nova preservando ordem de
     primeira ocorrência.
@@ -27,7 +27,7 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
     result: list[ExameEmitido] = []
 
     for exame in exames:
-        norm = exame.exame.strip().lower()
+        norm = exame.exame
 
         if norm not in indices:
             indices[norm] = len(result)

@@ -1,0 +1,98 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from agente_medico.motor.protocolo import carregar
+
+
+PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
+
+
+def test_vocabulario_exames_carrega_com_5_slugs() -> None:
+    p = carregar(PROTOCOLO_DIR)
+    assert set(p.vocabulario.exames.keys()) == {
+        "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg"
+    }
+
+
+def test_todo_exame_tem_nome_exibicao_e_categoria() -> None:
+    p = carregar(PROTOCOLO_DIR)
+    categorias_validas = {"clinico", "ocupacional", "laboratorial"}
+    for slug, meta in p.vocabulario.exames.items():
+        assert isinstance(meta, dict), f"Meta de '{slug}' não é dict"
+        assert meta.get("nome_exibicao", "").strip(), f"'{slug}' sem nome_exibicao"
+        assert meta.get("categoria") in categorias_validas, (
+            f"'{slug}' tem categoria inválida: {meta.get('categoria')}"
+        )
+
+
+def test_regra_ativcrit_referencia_apenas_slugs_validos() -> None:
+    p = carregar(PROTOCOLO_DIR)
+    slugs = set(p.vocabulario.exames.keys())
+    regra = next(r for r in p.regras if r["id"] == "R-PKG-ATIVCRIT")
+    for item in regra["emite"]:
+        assert item["exame"] in slugs, (
+            f"Regra R-PKG-ATIVCRIT referencia slug inexistente: '{item['exame']}'"
+        )
+
+
+def test_carregar_falha_quando_regra_referencia_slug_inexistente(tmp_path: Path) -> None:
+    """
+    Cria um protocolo temporário com regra referenciando exame que não
+    existe no vocabulário e verifica que carregar() levanta ValueError.
+    """
+    proto = tmp_path / "protocolo"
+    (proto / "vocabulario").mkdir(parents=True)
+    (proto / "vocabulario" / "exames.yaml").write_text(
+        "exames:\n  hemograma:\n    nome_exibicao: Hemograma\n"
+        "    categoria: laboratorial\n    fonte_matriz: teste\n",
+        encoding="utf-8",
+    )
+    (proto / "vocabulario" / "agentes.yaml").write_text("agentes: {}\n", encoding="utf-8")
+    (proto / "vocabulario" / "cargos.yaml").write_text("cargos: {}\n", encoding="utf-8")
+    (proto / "vocabulario" / "epis.yaml").write_text("epis: {}\n", encoding="utf-8")
+    (proto / "predicados_compostos.yaml").write_text(
+        "predicados_compostos: {}\n", encoding="utf-8"
+    )
+    (proto / "regras.yaml").write_text(
+        "regras:\n"
+        "  - id: R-TESTE\n"
+        "    quando: sempre\n"
+        "    emite:\n"
+        "      - {exame: exame_que_nao_existe, periodicidade_meses: 12, momentos: [adm]}\n"
+        "    base_normativa: teste\n"
+        "    status: VALIDADO\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        carregar(proto)
+
+    msg = str(exc_info.value)
+    assert "exame_que_nao_existe" in msg
+    assert "R-TESTE" in msg
+    assert "hemograma" in msg  # mostra os disponíveis
+
+
+def test_carregar_aceita_vocabulario_vazio_se_nenhuma_regra_referencia_exame(tmp_path: Path) -> None:
+    """
+    Vocabulário vazio + regras sem campo 'emite' (ou emite vazio) deve carregar OK.
+    Garante que a validação só dispara quando há referência real.
+    """
+    proto = tmp_path / "protocolo"
+    (proto / "vocabulario").mkdir(parents=True)
+    for nome, raiz in [("exames", "exames"), ("agentes", "agentes"),
+                        ("cargos", "cargos"), ("epis", "epis")]:
+        (proto / "vocabulario" / f"{nome}.yaml").write_text(
+            f"{raiz}: {{}}\n", encoding="utf-8"
+        )
+    (proto / "predicados_compostos.yaml").write_text(
+        "predicados_compostos: {}\n", encoding="utf-8"
+    )
+    (proto / "regras.yaml").write_text("regras: []\n", encoding="utf-8")
+
+    p = carregar(proto)
+    assert p.vocabulario.exames == {}
+    assert p.regras == []
