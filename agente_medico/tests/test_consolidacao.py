@@ -41,14 +41,55 @@ def test_dedup_merge_momentos() -> None:
     assert result[0].momentos == {Momento.ADM, Momento.PER, Momento.MR}
 
 
-def test_dedup_case_insensitive() -> None:
-    entrada = [
-        _exame("Hemograma", 12, {Momento.ADM}, "R-A"),
-        _exame("hemograma ", 12, {Momento.PER}, "R-B"),
+def test_dedup_slug_canonico() -> None:
+    """
+    Dedup agora opera sobre slug canônico do vocabulário, não sobre
+    normalização de string humana. Dois exames com o mesmo slug são
+    deduplicados; slugs diferentes (mesmo que humanamente parecidos)
+    são tratados como exames distintos.
+    """
+    exames = [
+        ExameEmitido(
+            exame="hemograma",
+            periodicidade_meses=12,
+            momentos={Momento.ADM},
+            motivos=[Motivo(regra_id="R1", predicado="p1", risco_origem=None, detalhe=None)],
+        ),
+        ExameEmitido(
+            exame="hemograma",
+            periodicidade_meses=12,
+            momentos={Momento.PER},
+            motivos=[Motivo(regra_id="R2", predicado="p2", risco_origem=None, detalhe=None)],
+        ),
     ]
-    result = stage_8_consolidacao(entrada)
+    result = stage_8_consolidacao(exames)
     assert len(result) == 1
-    assert result[0].exame == "Hemograma"
+    assert result[0].momentos == {Momento.ADM, Momento.PER}
+    assert len(result[0].motivos) == 2
+
+
+def test_dedup_slugs_diferentes_nao_mergem() -> None:
+    """
+    Slugs diferentes (ex: 'hemograma' vs 'hemograma_completo') são exames
+    distintos no vocabulário e não devem ser deduplicados, mesmo que
+    humanamente pareçam o mesmo.
+    """
+    exames = [
+        ExameEmitido(
+            exame="hemograma",
+            periodicidade_meses=12,
+            momentos={Momento.ADM},
+            motivos=[Motivo(regra_id="R1", predicado="p1", risco_origem=None, detalhe=None)],
+        ),
+        ExameEmitido(
+            exame="hemograma_completo",
+            periodicidade_meses=12,
+            momentos={Momento.ADM},
+            motivos=[Motivo(regra_id="R2", predicado="p2", risco_origem=None, detalhe=None)],
+        ),
+    ]
+    result = stage_8_consolidacao(exames)
+    assert len(result) == 2
 
 
 def test_conflito_periodicidade_levanta_excecao() -> None:

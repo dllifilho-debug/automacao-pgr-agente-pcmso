@@ -1,1 +1,33 @@
-exames: {}
+# Vocabulário canônico de exames PCMSO.
+# Fonte de verdade: Matriz Dra. Patrícia Montalvo 06/2025.
+# Slug é estável; nome_exibicao pode evoluir sem migração.
+#
+# Esta sessão (002.D1) popula APENAS os exames atualmente referenciados
+# em regras.yaml. Demais exames da matriz entram conforme novas regras
+# forem adicionadas (sessões futuras).
+
+exames:
+  hemograma:
+    nome_exibicao: "Hemograma"
+    categoria: laboratorial
+    fonte_matriz: "ASO PADRÃO / TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
+
+  glicemia:
+    nome_exibicao: "Glicemia de Jejum"
+    categoria: laboratorial
+    fonte_matriz: "TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
+
+  audiometria:
+    nome_exibicao: "Audiometria"
+    categoria: ocupacional
+    fonte_matriz: "RUÍDO / MOTORISTA"
+
+  acuidade_visual:
+    nome_exibicao: "Acuidade Visual"
+    categoria: ocupacional
+    fonte_matriz: "PORTEIRO / ELETRICIDADE / TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
+
+  ecg:
+    nome_exibicao: "ECG"
+    categoria: ocupacional
+    fonte_matriz: "TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA / ELETRICIDADE"
