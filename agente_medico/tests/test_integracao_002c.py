@@ -7,13 +7,13 @@ from agente_medico.motor.estagios.consolidacao import stage_8_consolidacao
 from agente_medico.motor.estagios.emissao import stage_5_emissao
 from agente_medico.motor.estagios.gates import stage_1_gates
 from agente_medico.motor.estagios.predicados_stage import stage_4_predicados
+from agente_medico.motor.estagios.riscos import stage_2_riscos
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import (
     GHEContext,
     GHEPGR,
     Momento,
     PGR,
-    Risco,
     RiscoPGR,
 )
 
@@ -50,18 +50,8 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     assert pendencias_globais == []
 
     ghe = pgr.ghes[0]
-    ctx = GHEContext(
-        pgr_ghe=ghe,
-        riscos=[
-            Risco(
-                agente="trabalho_altura",
-                fonte="explicito",
-                detalhe=None,
-                quantificacao=None,
-                anexo_nr07=None,
-            )
-        ],
-    )
+    ctx = GHEContext(pgr_ghe=ghe)
+    stage_2_riscos(ctx, proto)
 
     stage_4_predicados(ctx, proto)
 
@@ -85,4 +75,7 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
         assert e.momentos == {Momento.ADM, Momento.PER, Momento.MR}
         assert e.motivos[0].regra_id == "R-PKG-ATIVCRIT"
 
-    assert ctx.pendencias == []
+    # carpinteiro não está em cargos.yaml → Stage 2 emite pendência não-bloqueante (R-GHE-02)
+    assert len(ctx.pendencias) == 1
+    assert ctx.pendencias[0].bloqueante is False
+    assert ctx.pendencias[0].regra_origem == "R-GHE-02"

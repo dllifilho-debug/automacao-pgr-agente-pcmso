@@ -1,1 +1,19 @@
-agentes: {}
+agentes:
+  fumos_metalicos:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: [R-PKG-SOLD, R-OP-01, R-RX-02]
+  radiacao_uv_ir:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: [R-VIS-01]
+  trabalho_altura:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: [R-PKG-ATIVCRIT, R-VIS-01, R-ECG-01]
