@@ -94,11 +94,17 @@ def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[st
 
 
 def avaliar_predicado(nome: str, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:
+    if nome in ctx.predicados:
+        return ctx.predicados[nome]
     if nome in REGISTRO_PRIMITIVOS:
-        return REGISTRO_PRIMITIVOS[nome](ctx)
+        resultado = REGISTRO_PRIMITIVOS[nome](ctx)
+        ctx.predicados[nome] = resultado
+        return resultado
     compostos: dict[str, Any] = protocolo.predicados_compostos
     if nome in compostos:
         if nome in _visitados:
             raise CicloPredicados(f"Ciclo detectado ao avaliar predicado '{nome}'")
-        return avaliar(compostos[nome], ctx, protocolo, _visitados | {nome})
+        resultado = avaliar(compostos[nome], ctx, protocolo, _visitados | {nome})
+        ctx.predicados[nome] = resultado
+        return resultado
     raise PredicadoDesconhecido(nome)

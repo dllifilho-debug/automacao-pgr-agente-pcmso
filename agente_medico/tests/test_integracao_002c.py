@@ -6,6 +6,7 @@ from pathlib import Path
 from agente_medico.motor.estagios.consolidacao import stage_8_consolidacao
 from agente_medico.motor.estagios.emissao import stage_5_emissao
 from agente_medico.motor.estagios.gates import stage_1_gates
+from agente_medico.motor.estagios.predicados_stage import stage_4_predicados
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import (
     GHEContext,
@@ -61,6 +62,14 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
             )
         ],
     )
+
+    stage_4_predicados(ctx, proto)
+
+    assert ctx.predicados["atividade_critica"] is True
+    assert ctx.predicados["altura"] is True
+    # espaco_confinado e maquina_pesada não entram no cache porque o `ou`
+    # curto-circuita após altura=True (ver PROMPT_CODE_002_D2)
+    assert set(ctx.predicados.keys()) == {"altura", "atividade_critica"}
 
     exames = stage_5_emissao(ctx, proto)
     assert len(exames) == 5
