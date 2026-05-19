@@ -1,1 +1,4 @@
-cargos: {}
+cargos:
+  soldador:
+    riscos_implicitos: [fumos_metalicos, radiacao_uv_ir]
+    pacotes_aplicaveis: [R-PKG-SOLD]
