@@ -68,7 +68,7 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     assert ctx.predicados["atividade_critica"] is True
     assert ctx.predicados["altura"] is True
     # espaco_confinado e maquina_pesada não entram no cache porque o `ou`
-    # curto-circuita após altura=True (ver PROMPT_CODE_002_D2)
+    # curto-circuita após altura=True. Ver docs/HISTORICO_OPERACIONAL.md § Sessão 002.D2.
     assert set(ctx.predicados.keys()) == {"altura", "atividade_critica"}
 
     exames = stage_5_emissao(ctx, proto)

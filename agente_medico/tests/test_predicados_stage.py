@@ -53,9 +53,9 @@ def test_popula_primitivos_referenciados() -> None:
     assert "ruido" not in ctx.predicados
 
     # Nota: espaco_confinado e maquina_pesada NÃO são avaliados porque o `ou`
-    # curto-circuita assim que altura=True é encontrado. Ver PROMPT_CODE_002_D2
-    # para decisão arquitetural: o avaliador mantém short-circuit, Stage 4 só
-    # pré-popula o que o caminho de avaliação real percorre.
+    # curto-circuita assim que altura=True é encontrado. Decisão arquitetural:
+    # Stage 4 preserva semântica preguiçosa, cacheia apenas o caminho real de
+    # avaliação. Ver docs/HISTORICO_OPERACIONAL.md § Sessão 002.D2.
     assert "espaco_confinado" not in ctx.predicados
     assert "maquina_pesada" not in ctx.predicados
 
