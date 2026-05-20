@@ -340,6 +340,36 @@ Síntese narrativa fornecida pela Dra. Carolini em resposta a 10.1:
 
 ---
 
+## 11. PENDÊNCIAS CLÍNICAS EM ABERTO
+
+Itens identificados durante a implementação do motor que precisam de validação clínica em sessões CONHECIMENTO futuras com a Dra. Carolini.
+
+### DT-D3-02 — Granularidade de `fumos_metalicos` `[A VALIDAR]`
+
+**Origem:** Sessão 002.D3 (19/05/2026), durante a implementação do Stage 2.
+
+**Situação atual no vocabulário:** `agentes.yaml` contém `fumos_metalicos` como **agente único**, categoria genérica para soldador (R-GHE-02, R-PKG-SOLD, R-OP-01, R-RX-02). Metadados aproximados: `anexo_nr07: null`, `is_carcinogeno_iarc: false`, `tem_lt: true`.
+
+**Lacuna clínica.** Fumos metálicos é, na prática, uma mistura de metais individuais (Mn, Cr hexavalente, Pb, Ni, Cd, etc.), cada um com:
+- Anexo NR-07 próprio (Mn em Anexo II, Cr⁶⁺ Anexo I por carcinogenicidade IARC)
+- CAS específico
+- Biomonitoramento específico (ácido transmuconico para benzeno é precedente análogo)
+- Toxicologia distinta
+
+Manter `fumos_metalicos` como categoria única faz o motor emitir matriz correta para o caso âncora (soldador padrão), mas perde resolução para:
+- Eletrodos que liberam metais específicos (R-OP-01 já pede FDS do eletrodo)
+- Soldagem em aço inox (Cr⁶⁺ → carcinogênico, conduta especial)
+- Soldagem com alumínio, manganês de alta concentração
+
+**Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura):**
+1. Em que momento da análise você decompõe "fumos metálicos" em metais individuais?
+2. Quais metais individuais merecem entrada própria em `agentes.yaml` desde já?
+3. R-OP-01 ("verificar FDS do eletrodo") deveria virar gatilho automático para granularização, ou continua como TODO operacional?
+
+**Status:** A VALIDAR. Não bloqueia o motor — caso âncora soldador continua funcional com a categoria única. Refinamento entra quando houver método extraído da especialista.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -363,3 +393,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 |--------|------|------------|
 | v1 | 17/05/2026 | Versão inicial — consolidação dos 47 áudios da Dra. Carolini |
 | v2 | 17/05/2026 | Segunda rodada — 6 lacunas (A-VAL-01 a A-VAL-06) fechadas; R-GHE-04 e R-FDS-06 promovidas a VALIDADO; R-RX-01 saiu de INFERIDO para VALIDADO; bases normativas confirmadas em R-ESP-01, R-PGR-03 e R-RX-01; matriz Viverde validada como correta; ANAC confirmada como único regime regulatório sobreposto |
+| v3 | 19/05/2026 | Sessão 002.D3: seção 11 "Pendências clínicas em aberto" adicionada com DT-D3-02 (granularidade de fumos_metalicos a refinar com Dra. Carolini) |

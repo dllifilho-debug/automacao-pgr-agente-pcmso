@@ -417,4 +417,73 @@ Nenhuma nascida nesta sessão. **DT-002C-01** (audit trail incompleto) continua 
 
 ---
 
+## Sessão 002.D3 — 19/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude Code (Sonnet 4.6) + Claude (Arquiteto)
+**Objetivo:** Stage 2 do motor — expansão de riscos do PGR para `ctx.riscos`, hidratando com metadados de `vocabulario/agentes.yaml` e expandindo com risco implícito por cargo (R-GHE-02) via `vocabulario/cargos.yaml`.
+
+### O que foi feito
+
+1. **Vocabulário mínimo populado:**
+   - `agentes.yaml`: adicionados `fumos_metalicos`, `radiacao_uv_ir`, `trabalho_altura` com metadados clínicos aproximados (anexo NR-07, CAS, IARC, protocolos especiais)
+   - `cargos.yaml`: adicionado `soldador` com `riscos_implicitos: [fumos_metalicos, radiacao_uv_ir]`
+2. **Stage 2 implementado** em `agente_medico/motor/estagios/riscos.py`:
+   - Fase A: hidrata `RiscoPGR` → `Risco` consultando `agentes.yaml`
+   - Fase B: expande riscos implícitos do cargo via `cargos.yaml`
+   - Dedup: mesmo agente vindo das duas fontes resulta em um único `Risco` (`fonte="explicito"` vence), com nota concatenada em `detalhe`
+   - Vocabulário ausente em runtime gera `Pendencia` operacional (não-bloqueante)
+3. **Testes:** 6 novos em `test_riscos_stage.py` + ajuste em `test_integracao_002c.py` (pipeline agora usa Stage 2 em vez de construir `Risco` manualmente)
+4. **Higiene:** removidos do tracking dois `.pyc` residuais em `tests/__pycache__/` que escapavam do `.gitignore` antigo
+5. Commits: `96d2de1` (vocabulário) + `a10dae0` (motor + testes) + `badb824` (higiene .pyc)
+6. PR #17 mergeado em main (merge commit `ff8f715`)
+
+### Resultados
+
+- **Critério 1** — `python -m pytest agente_medico/tests/ tests/` → 221/221 verdes (215 base + 6 novos)
+- **Critério 2** — `python -m mypy --strict agente_medico/motor/estagios/riscos.py` → no issues
+- **Critério 3** — `python -m mypy --strict agente_medico/motor/` → regressão zero
+- Stage 2 não toca disco, não chama LLM (D-ARQ-09 preservada)
+
+### Decisões arquiteturais aplicadas
+
+1. **Stage 2 muta `ctx`** (não retorna) — consistência com Stage 4
+2. **`RiscoPGR.severidade` não migra para `Risco`** — protocolo da Dra. Carolini usa anexo NR-07 e quantificação relativa ao LT, não severidade do PGR
+3. **Dedup explícito > implícito** — mesmo agente das duas fontes vira 1 `Risco` com `fonte="explicito"`, preservando `quantificacao` do PGR; informação do cargo implícito vai concatenada no `detalhe` para preservar audit trail
+4. **Vocabulário ausente gera `Pendencia` operacional, não exceção nem persistência em disco** — promovida a D-ARQ-14 (ver `DECISOES_ARQUITETURAIS.md`)
+
+### Problemas operacionais
+
+**P-11. Branch D3 criada antes do merge da D2.** Diovanni criou `feature/motor-002d3-stage2-riscos` ainda na D2, antes do PR #16 ser mergeado. Resultado: branch local carregava commits da D2 + `.gitignore` staged + dois diffs documentais de teste não-commitados. Recuperação: `git stash` do gitignore, commit dos diffs documentais ainda na branch D2, push, PR D2 mergeado, cherry-pick do commit documental pra main, `.gitignore` aplicado em main, branch D3 antiga apagada (`git branch -D`) e recriada limpa a partir de main atualizada. Lição: **criar branch da próxima sessão SÓ depois do merge da sessão anterior em main**.
+
+**P-12. `.pyc` antigos reaparecendo como modified mesmo após `.gitignore` cobrir o padrão.** Causa: arquivos já estavam trackeados de antes — `.gitignore` só impede *novos* arquivos, não desfaz tracking existente. Solução: `git rm --cached` nos `.pyc` específicos. Adicionado como commit de higiene `badb824`.
+
+**P-13. Display do PowerShell mostrando caracteres UTF-8 quebrados.** `Get-Content arquivo.yaml` sem `-Encoding UTF8` mostra `Vocabulário` como `VocabulÃ¡rio`. Arquivos estão íntegros em disco — é só o display do PowerShell assumindo CP1252. Solução: sempre usar `-Encoding UTF8` quando o output tiver acentos.
+
+**P-14. Confusão sobre "215 testes verdes".** Kickoff da sessão dizia 215, mas `pytest agente_medico/tests/` rodou 66. Hipótese confirmada: 215 = motor novo (66) + suite legada (149). Comando completo é `python -m pytest agente_medico/tests/ tests/`. Documentar isso evita repetir o susto.
+
+### Lições aprendidas
+
+- **Não criar branch da próxima sessão antes do merge da atual em main.** Custou 6 comandos de recuperação na D3.
+- **`.gitignore` não desfaz tracking existente.** Para parar de trackear arquivo já trackeado: `git rm --cached <arquivo>`.
+- **Vocabulário ausente em runtime é decisão recorrente.** Promovida a D-ARQ-14 para evitar relitígio em D4, D5, etc.
+- **`-Encoding UTF8` no `Get-Content`** quando o output tiver acentos.
+
+### Dívida técnica
+
+**Nascida nesta sessão:**
+- **DT-D3-02 — Granularidade de `fumos_metalicos` em agentes.yaml é aproximação.** Hoje é categoria única; granularidade fina por metal individual (Mn, Cr, Pb), cada com seu anexo NR-07, é tema de sessão CONHECIMENTO futura com Dra. Carolini. Registrada como pendência clínica em `PROTOCOLO_AGENTE_MEDICO.md`.
+
+**Continuam abertas:**
+- **DT-002C-01** — audit trail incompleto (fora de escopo desde 002.C)
+
+### Próxima sessão planejada
+
+**Tipo:** IMPLEMENTAÇÃO (Sessão 002.D4)
+**Branch:** `feature/motor-002d4-stage-pendencias` (a criar de main após este merge)
+**Objetivo:** Stage 3 — pendências bloqueantes derivadas dos predicados tri-estado (D-ARQ-13). Quando primitivo retorna `Ausente`, o Stage 3 emite `Pendencia` bloqueante, a matriz daquele GHE não fecha, e o `Resultado.status` cai para `PRELIMINAR`. Completa a espinha dorsal do pipeline antes do orquestrador.
+**Pré-requisito:** D3 mergeada em main ✓
+
+---
+
 *Entradas futuras abaixo desta linha*
