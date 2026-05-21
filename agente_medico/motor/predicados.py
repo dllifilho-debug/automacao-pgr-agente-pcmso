@@ -61,6 +61,18 @@ def _ruido_acima_acao(ctx: GHEContext) -> ResultadoPredicado:
     return False
 
 
+@primitivo("vibracao_corpo_inteiro")
+def _vibracao_corpo_inteiro(ctx: GHEContext) -> ResultadoPredicado:
+    if any(r.agente == "vibracao_corpo_inteiro" for r in ctx.riscos):
+        return True
+    if any(r.agente == "vibracao" for r in ctx.riscos):
+        return Ausente(
+            mensagem="Vibração presente sem qualificação de tipo — necessário "
+                     "especificar corpo inteiro ou mãos-braços para avaliar"
+        )
+    return False
+
+
 def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:
     if isinstance(expr, str):
         return avaliar_predicado(expr, ctx, protocolo, _visitados)

@@ -49,8 +49,10 @@ def test_popula_primitivos_referenciados() -> None:
     assert ctx.predicados["altura"] is True
     assert ctx.predicados["atividade_critica"] is True
 
-    # ruido não é referenciado por nenhuma regra vigente
-    assert "ruido" not in ctx.predicados
+    # R-RUI-01 e R-RUI-02 referenciam ruido/ruido_acima_acao/vibracao_corpo_inteiro
+    assert "ruido" in ctx.predicados
+    assert "ruido_acima_acao" in ctx.predicados
+    assert "vibracao_corpo_inteiro" in ctx.predicados
 
     # Nota: espaco_confinado e maquina_pesada NÃO são avaliados porque o `ou`
     # curto-circuita assim que altura=True é encontrado. Decisão arquitetural:

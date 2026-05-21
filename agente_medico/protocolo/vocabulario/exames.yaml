@@ -31,3 +31,8 @@ exames:
     nome_exibicao: "ECG"
     categoria: ocupacional
     fonte_matriz: "TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA / ELETRICIDADE"
+
+  rx_coluna_lombo_sacra:
+    nome_exibicao: "RX Coluna Lombo-Sacra"
+    categoria: imagem
+    fonte_matriz: "VIBRAÇÃO CORPO INTEIRO"
