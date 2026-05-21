@@ -479,10 +479,52 @@ Nenhuma nascida nesta sessão. **DT-002C-01** (audit trail incompleto) continua 
 
 ### Próxima sessão planejada
 
-**Tipo:** IMPLEMENTAÇÃO (Sessão 002.D4)
-**Branch:** `feature/motor-002d4-stage-pendencias` (a criar de main após este merge)
-**Objetivo:** Stage 3 — pendências bloqueantes derivadas dos predicados tri-estado (D-ARQ-13). Quando primitivo retorna `Ausente`, o Stage 3 emite `Pendencia` bloqueante, a matriz daquele GHE não fecha, e o `Resultado.status` cai para `PRELIMINAR`. Completa a espinha dorsal do pipeline antes do orquestrador.
-**Pré-requisito:** D3 mergeada em main ✓
+**Tipo:** a definir (provável IMPLEMENTAÇÃO — integração Viverde)
+**Objetivo:** primeiro teste end-to-end do motor contra a matriz RQ.61 Viverde (`tests/integracao/test_viverde.py`, previsto na 002.A, ainda inexistente). Valida o motor contra matriz real, não fixtures. Stage 6 (regime/ANAC) fica em fila atrás disso — só entra se o Viverde exercitar cargo aeronáutico.
+**Pré-requisito:** orquestrador em main ✓ (D4)
+
+---
+
+## Sessão 002.D4 — 21/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude Code
+**Branch:** `feature/motor-002d4-orquestrador`
+**Objetivo final:** orquestrador `executar()` — encadeamento do pipeline
+
+### Re-escopagem (Stage 3 → orquestrador)
+
+A D4 entrou planejada como Stage 3 (pendências bloqueantes por predicado `Ausente`). Em sessão, a leitura do código real revelou duas coisas que mudaram o escopo:
+
+1. **O tratamento `Ausente → Pendencia bloqueante` já existia no Stage 5** (`stage_5_emissao`, implementado na 002.C), com o flag `quando_ausente: false` lido lá — porque a política é por-regra. O Stage 4 (002.D2) documenta explicitamente que delega esse tratamento ao Stage 5. Implementar o Stage 3 como planejado duplicaria lógica viva e testada.
+2. **Não existia orquestrador.** Os cinco estágios eram funções soltas — nada compunha o pipeline, fechava a matriz de GHE bloqueado ou definia `Resultado.status`. A segunda metade do objetivo da D4 ("a matriz não fecha, status cai para PRELIMINAR") dependia dessa peça inexistente.
+
+Decisão do Arquiteto, autorizada pelo Diovanni: re-escopar a D4 para o orquestrador — a ponta que de fato travava a espinha dorsal. O Stage 3 (validação estrutural de dado essencial ausente, ex: produto químico sem composição via D-ARQ-08) foi **adiado para sessão CONHECIMENTO**, porque "que dado ausente bloqueia o GHE" é decisão clínica da Dra. Carolini, não de implementação.
+
+### O que foi feito
+
+1. `agente_medico/motor/orquestrador.py` — `executar(pgr, protocolo, hoje=None) -> Resultado` (D-ARQ-15). Gate bloqueante → REJEITADO imediato; loop por GHE (riscos → predicados → emissão → consolidação) fechando `MatrizGHE` com `linhas=[]` em GHE bloqueado; `ConflitoProtocolo` capturado por-GHE como `Pendencia` bloqueante; status global OK/PRELIMINAR. Pontos de extensão Stage 3 e Stage 6 marcados por comentário, sem stub.
+2. `agente_medico/tests/test_orquestrador.py` — 8 testes (REJEITADO por assinatura e por validade, OK, predicado Ausente bloqueia GHE, `quando_ausente: false` não bloqueia, dois GHEs com um bloqueando, end-to-end trabalho_altura, ConflitoProtocolo vira pendência).
+
+### Resultados
+
+- **pytest** `agente_medico/tests/ tests/` — 229/229 verdes (221 anteriores + 8 novos)
+- **mypy --strict** em `orquestrador.py` — Success: no issues found
+- Commit único `0acf4bf`; merge via PR #18 (`a611ae7`)
+
+### Decisão registrada
+
+D-ARQ-15 (orquestrador + política de status). Gate bloqueante classificado como `REJEITADO` (não `PRELIMINAR`): PGR inadmissível na entrada não tem matriz preliminar a produzir.
+
+### Dívida técnica
+
+**Nascida nesta sessão:**
+- **DT-D4-01 — Stage 3 (validação estrutural) adiado para sessão CONHECIMENTO.** Critério de "dado essencial ausente que bloqueia o GHE" é clínico (Dra. Carolini). Caso âncora a levar: produto químico sem composição resolvível (`ProdutoQuimico.fds is None`), já previsto em D-ARQ-08. Ponto de encaixe no orquestrador já demarcado.
+- **DT-D4-02 — Stage 6 (regime/ANAC) ausente.** Próximo da espinha dorsal, atrás da integração Viverde. Ponto de encaixe já demarcado.
+
+**Continuam abertas:**
+- **DT-002C-01** — audit trail incompleto (fora de escopo desde 002.C)
+- **DT-D3-02** — granularidade de `fumos_metalicos` (sessão CONHECIMENTO)
 
 ---
 
