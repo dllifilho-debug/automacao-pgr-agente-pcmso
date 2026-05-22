@@ -10,16 +10,17 @@ from agente_medico.motor.protocolo import carregar
 PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
-def test_vocabulario_exames_carrega_com_5_slugs() -> None:
+def test_vocabulario_exames_carrega_com_6_slugs() -> None:
     p = carregar(PROTOCOLO_DIR)
     assert set(p.vocabulario.exames.keys()) == {
-        "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg"
+        "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg",
+        "rx_coluna_lombo_sacra",
     }
 
 
 def test_todo_exame_tem_nome_exibicao_e_categoria() -> None:
     p = carregar(PROTOCOLO_DIR)
-    categorias_validas = {"clinico", "ocupacional", "laboratorial"}
+    categorias_validas = {"clinico", "ocupacional", "laboratorial", "imagem"}
     for slug, meta in p.vocabulario.exames.items():
         assert isinstance(meta, dict), f"Meta de '{slug}' não é dict"
         assert meta.get("nome_exibicao", "").strip(), f"'{slug}' sem nome_exibicao"

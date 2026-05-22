@@ -10,3 +10,27 @@ regras:
     base_normativa: "Protocolo Dra. Carolini — rastreio de comorbidade para atividade crítica"
     status: VALIDADO
 
+  - id: R-VIB-01
+    quando: vibracao_corpo_inteiro
+    emite:
+      - {exame: rx_coluna_lombo_sacra, periodicidade_meses: 0, momentos: [adm, MR]}
+    base_normativa: "Protocolo Dra. Carolini — vibração corpo inteiro; ADM e mudança de risco (sem demissional). Matriz Patrícia registra ADM+DEM; protocolo vivo prevalece (D-ARQ-16)"
+    status: VALIDADO
+
+  - id: R-RUI-01
+    quando: ruido_acima_acao
+    emite:
+      - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per]}
+    base_normativa: "Matriz Dra. Patrícia — RUÍDO acima do nível de ação → audiometria 12M (a revalidar com Dra. Carolini)"
+    status: A_VALIDAR
+
+  - id: R-RUI-02
+    quando:
+      e:
+        - ruido
+        - vibracao_corpo_inteiro
+    emite:
+      - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per]}
+    base_normativa: "Protocolo Dra. Carolini — ruído associado a vibração corpo inteiro pede audiometria mesmo abaixo do nível de ação"
+    status: VALIDADO
+

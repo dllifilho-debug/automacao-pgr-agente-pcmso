@@ -17,3 +17,21 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-PKG-ATIVCRIT, R-VIS-01, R-ECG-01]
+  vibracao_corpo_inteiro:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: [R-VIB-01]
+  vibracao_mao_braco:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
+  vibracao:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
