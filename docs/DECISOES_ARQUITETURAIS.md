@@ -315,6 +315,17 @@ vibração mãos-braços (R-VIB-02). Audiometria converge de R-PKG-ATIVCRIT / R-
 R-AUD-02 / R-VIB-02 e é resolvida por dedup (R-GHE-03 em consolidacao.py), nunca por
 fusão de regras.
 
+**Atualização 002.G (23/05/2026).** Dois dos três diferidos implementados: primitivo
+`motorista_equipamento_pesado` (gatilho de R-AUD-01) e primitivo `vibracao_mao_braco`,
+composto em `vibracao_qualquer` = `ou:[vibracao_corpo_inteiro, vibracao_mao_braco]`
+(R-VIB-02 migra de `vibracao_corpo_inteiro` para `vibracao_qualquer`). **Diferido
+remanescente: ototóxico** (gatilho de R-AUD-01 + branch `e:[ruido, ototoxico,
+vibracao_qualquer]` de R-AUD-02) → Sessão 002.H. O gatilho de promoção desta decisão
+**não disparou**: nenhum dos três exige qualificador-tipo sem casa própria (ototóxico
+= flag booleana por agente; motorista = slug de atividade; VMB = slug que completa a
+família de vibração). Modelo por slug permanece. Motorista nasce dormente até
+`cargos.yaml` mapear cargo→slug (DT-002G-01).
+
 ---
 
 ## Histórico de revisões
@@ -330,3 +341,4 @@ fusão de regras.
 | v7 | 21/05/2026 | Sessão 002.D4: D-ARQ-15 adicionada — orquestrador `executar()` compõe os estágios e define política de status (REJEITADO/PRELIMINAR/OK); captura de ConflitoProtocolo por-GHE |
 | v8 | 21/05/2026 | Sessão 002.E (ARQUITETURA): D-ARQ-16 adicionada — arquétipo de exposição física qualificável, subtipo de vibração via identidade de agente (não campo em RiscoPGR), regras componíveis com dedup no Stage 8 |
 | v9 | 22/05/2026 | Sessão 002.F: correção de IDs/escopo da 002.E — R-RUI-01/02 (IDs inexistentes no protocolo) viram R-AUD-01, R-AUD-02 (nova) e R-VIB-02; momentos corrigidos para incluir MR; parágrafo de aplicação do D-ARQ-16 reescrito |
+| v10 | 23/05/2026 | Sessão 002.G: D-ARQ-16 atualizado — motorista_equipamento_pesado e vibracao_mao_braco (composto vibracao_qualquer) implementados; diferido remanescente é ototóxico (002.H); gatilho de promoção não disparou |
