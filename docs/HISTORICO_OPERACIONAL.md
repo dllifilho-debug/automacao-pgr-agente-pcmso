@@ -528,4 +528,120 @@ D-ARQ-15 (orquestrador + política de status). Gate bloqueante classificado como
 
 ---
 
+## Sessão 002.E — 21/05/2026 (arquitetura) + entrega defeituosa
+
+**Tipo:** ARQUITETURA + IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude (Arquiteto) + Claude Code
+**Branch:** `feature/motor-002e-exposicao-fisica` (mergeada — PR #19, commit `d8ad8f8`)
+**Objetivo:** Arquétipo de exposição física (vibração + audiometria) sobre o motor
+
+### O que foi feito
+
+1. D-ARQ-16 formalizada: arquétipo de exposição física qualificável; subtipo de
+   vibração via identidade de agente (3 slugs em `agentes.yaml`), não campo em
+   `RiscoPGR`; regras componíveis com dedup no Stage 8 (R-GHE-03), nunca fusão.
+2. Primitivo `vibracao_corpo_inteiro` (tri-estado: True / Ausente / False).
+3. Regras de exposição em `regras.yaml`.
+
+### Defeito entregue (corrigido na 002.F)
+
+A leva 002.E implementou as regras de audiometria/ruído com **IDs inexistentes no
+protocolo** e escopo infiel:
+
+- `R-RUI-01` (`ruido_acima_acao` → audiometria `[adm, per]`, status A_VALIDAR) — ID
+  inventado. O protocolo já tinha `R-AUD-01` (audiometria `[adm, per, MR]` por gatilho,
+  VALIDADO) e `R-AUD-02` (demissional separado).
+- `R-RUI-02` (`e[ruido, vibracao_corpo_inteiro]` → audiometria) — ID inventado e escopo
+  estreito demais. O protocolo tem `R-VIB-02`: qualquer vibração dispara audiometria,
+  **sem exigir ruído**.
+- `R-AUD-02` não foi implementada.
+- Momentos omitiram `MR` em ambas.
+
+**Causa-raiz.** O Arquiteto construiu sobre a Matriz Dra. Patrícia (fonte item 3) e
+resposta verbal, **sem ler `PROTOCOLO_AGENTE_MEDICO.md` (fonte item 1)**, que já tinha
+as regras formalizadas e VALIDADAS — inclusive com os IDs estáveis corretos. R-VIB-01
+(o único correto na leva) coincidiu por acaso. Sintoma revelador: R-RUI-01 entrou como
+`A_VALIDAR` "a revalidar com a Dra. Carolini" — rebaixando para pendente uma regra que
+já estava validada no protocolo.
+
+**Lição (caso-âncora da regra de ouro).** Este é o custo empírico de pular o item 1 da
+hierarquia de fontes. Um ID infiel não fica contido: mergeou em main e contaminou o
+audit trail por `regra_id` de tudo a jusante, exigindo uma sessão inteira de
+reconciliação (002.F) para corrigir. A regra de ouro — ler os docs vivos inteiros,
+começando pelo protocolo, antes de formalizar ou codificar — não é cerimônia; é o que
+teria evitado a 002.F por completo. IDs de regra são contrato: nunca inventados sem
+confirmar ausência no protocolo.
+
+---
+
+## Sessão 002.F — 22/05/2026
+
+**Tipo:** CONHECIMENTO/ARQUITETURA (reconciliação) + IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude (Arquiteto) + Claude Code
+**Branch:** `feature/motor-002f-correcao-ids-audiometria` (mergeada — commit `8affedd`)
+**Objetivo:** Corrigir os IDs/escopo infiéis da 002.E, reconciliando com o protocolo
+
+### O que foi feito
+
+1. Reconciliação do estado da 002.E contra `PROTOCOLO_AGENTE_MEDICO.md` (lido inteiro)
+   e `DECISOES_ARQUITETURAIS.md` (git HEAD — cache do project knowledge estava stale,
+   parava em D-ARQ-13 / 002.D1).
+2. Correção cirúrgica (caminho A — sem reverter a 002.E; vocabulário, primitivos,
+   R-VIB-01 e o corpo do D-ARQ-16 estavam corretos):
+   - `R-RUI-01` → `R-AUD-01` (`ruido_acima_acao` → audiometria `[adm, per, MR]` 12M,
+     VALIDADO).
+   - `R-AUD-02` criada (`ruido_acima_acao` → audiometria `[dem]` 12M, VALIDADO).
+   - `R-RUI-02` → `R-VIB-02` (`vibracao_corpo_inteiro` → audiometria `[adm, per, MR]`
+     12M; deixa de exigir ruído).
+   - Momentos corrigidos (incluem MR).
+3. Testes da 002.E reescritos: renomes R-RUI→R-AUD/R-VIB, asserts de momentos,
+   contagem de pendências (vibração genérica → 2 bloqueantes: R-VIB-01 + R-VIB-02) e de
+   motivos (dedup altura+ruído → 3 motivos: R-PKG-ATIVCRIT + R-AUD-01 + R-AUD-02, com
+   DEM no merge). Comentários de IDs em `test_integracao_002c.py` e
+   `test_predicados_stage.py` atualizados.
+4. D-ARQ-16: parágrafo "Aplicação na leva 002.E" reescrito com os IDs corretos; tabela
+   de revisões → v9.
+
+### Resultados
+
+- **pytest** `agente_medico/tests/ tests/` — 242/242 verdes
+- **mypy --strict** `agente_medico/motor/` — no issues found (11 arquivos)
+- `git grep "R-RUI" -- agente_medico/` — zero ocorrências (trava objetiva do rename)
+
+### Decisão de design relevante
+
+R-AUD-01 e R-AUD-02 compartilham `quando: ruido_acima_acao` hoje, mas ficam **regras
+separadas** (D-ARQ-16: uma regra por gatilho clínico, dedup resolve convergência).
+Fundir destruiria o audit trail e a extensão futura — R-AUD-02 ganhará o branch
+ruído+ototóxico+vibração quando `is_ototoxico` existir. R-AUD-01 e R-VIB-02 **não**
+re-listam altura/confinado/máquina: esses já emitem audiometria via R-PKG-ATIVCRIT, e a
+convergência é resolvida pela dedup (R-GHE-03), não por re-listagem. Guard-rail: toda
+regra de audiometria tem de ser 12M, senão R-GHE-03 levanta ConflitoProtocolo e o
+orquestrador (D-ARQ-15) derruba o GHE para PRELIMINAR.
+
+### Dívida técnica
+
+**DT-002F-01 — primitivo `ruido` puro sem consumidor.** Registrado em `predicados.py`,
+mas nenhuma regra o referencia após a 002.F (`R-RUI-02` era o único uso — usava
+`e[ruido, vibracao_corpo_inteiro]`). **Não remover:** é candidato a gatilho futuro
+(ruído isolado abaixo da ação em combinação que o protocolo venha a formalizar).
+Documentado para evitar remoção acidental como "código morto". Teste
+`test_predicados_stage.py` agora afirma `"ruido" not in ctx.predicados` — coerente com
+o cache preguiçoso de predicados (D-ARQ-10 / 002.D2).
+
+### Escopo diferido (não é dívida da 002.F — falta de primitivo/flag)
+
+- `is_ototoxico` em `agentes.yaml` + primitivo `ototoxico` — gatilho ototóxico de
+  R-AUD-01 e branch ruído+ototóxico+vibração de R-AUD-02.
+- primitivo `motorista_equipamento_pesado` — gatilho motorista de R-AUD-01.
+- primitivo `vibracao_maos_bracos` — para R-VIB-02 cobrir "qualquer vibração".
+
+### Próxima sessão planejada
+
+A definir pelo Diovanni. Candidatos naturais: implementar os gatilhos diferidos acima
+(ototóxico / motorista / vibração mãos-braços) ou retomar a sequência original do motor
+(Stage 3 — pendências estruturais, demarcado em D-ARQ-15).
+
+---
+
 *Entradas futuras abaixo desta linha*
