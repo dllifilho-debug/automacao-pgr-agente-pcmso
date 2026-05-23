@@ -137,19 +137,20 @@ def test_rvib01_vibracao_generica_sem_emissao_com_pendencia_bloqueante() -> None
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
     assert result == []
-    assert len(ctx.pendencias) == 1
-    p = ctx.pendencias[0]
-    assert p.bloqueante is True
-    assert p.tipo == "predicado_ausente"
-    assert p.regra_origem == "R-VIB-01"
-    assert p.ghe_id == "GHE-01"
+    # R-VIB-01 e R-VIB-02 ambos usam vibracao_corpo_inteiro → 2 pendências bloqueantes
+    assert len(ctx.pendencias) == 2
+    assert all(p.bloqueante for p in ctx.pendencias)
+    assert all(p.tipo == "predicado_ausente" for p in ctx.pendencias)
+    assert any(p.regra_origem == "R-VIB-01" for p in ctx.pendencias)
+    assert any(p.regra_origem == "R-VIB-02" for p in ctx.pendencias)
+    assert all(p.ghe_id == "GHE-01" for p in ctx.pendencias)
 
 
 # ---------------------------------------------------------------------------
-# Testes 7-8: R-RUI-01
+# Testes 7-8: R-AUD-01
 # ---------------------------------------------------------------------------
 
-def test_rrui01_ruido_acima_acao_emite_audiometria_adm_per() -> None:
+def test_raud01_ruido_acima_acao_emite_audiometria_adm_per_mr() -> None:
     ctx = _ctx_ruido_quant("acima_acao")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
@@ -157,33 +158,31 @@ def test_rrui01_ruido_acima_acao_emite_audiometria_adm_per() -> None:
     audio = next(e for e in result if e.exame == "audiometria")
     assert Momento.ADM in audio.momentos
     assert Momento.PER in audio.momentos
+    assert Momento.MR in audio.momentos
     assert audio.periodicidade_meses == 12
     assert ctx.pendencias == []
 
 
-def test_rrui01_ruido_sem_quantificacao_gera_pendencia_bloqueante() -> None:
+def test_raud01_ruido_sem_quantificacao_gera_pendencia_bloqueante() -> None:
     ctx = _ctx("ruido")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
     assert result == []
-    assert any(p.bloqueante and p.regra_origem == "R-RUI-01" for p in ctx.pendencias)
+    assert any(p.bloqueante and p.regra_origem == "R-AUD-01" for p in ctx.pendencias)
 
 
 # ---------------------------------------------------------------------------
-# Testes 9-10: R-RUI-02
+# Testes 9-10: R-VIB-02
 # ---------------------------------------------------------------------------
 
-def test_rrui02_ruido_e_vci_emite_audiometria() -> None:
-    ctx = GHEContext(pgr_ghe=_ghe(), riscos=[
-        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None),
-        Risco(agente="vibracao_corpo_inteiro", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None),
-    ])
+def test_rvib02_vci_sozinho_emite_audiometria() -> None:
+    ctx = _ctx("vibracao_corpo_inteiro")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
     assert any(e.exame == "audiometria" for e in result)
 
 
-def test_rrui02_ruido_abaixo_acao_e_vci_ainda_emite_audiometria() -> None:
+def test_rvib02_vci_com_ruido_abaixo_acao_ainda_emite_audiometria() -> None:
     ctx = _ctx_ruido_quant_e_vci("abaixo_acao")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
@@ -220,7 +219,7 @@ def test_execucao_vibracao_generica_status_preliminar_linhas_vazias() -> None:
     assert matriz.linhas == []
 
 
-def test_execucao_dedup_audiometria_dois_motivos_sem_conflito() -> None:
+def test_execucao_dedup_audiometria_tres_motivos_sem_conflito() -> None:
     pgr = _pgr_com_riscos("GHE-01", (
         _risco_pgr("trabalho_altura"),
         _risco_pgr("ruido", _quant_acima_acao()),
@@ -235,5 +234,8 @@ def test_execucao_dedup_audiometria_dois_motivos_sem_conflito() -> None:
     assert audio.periodicidade_meses == 12
     regras_motivos = [m.regra_id for m in audio.motivos]
     assert "R-PKG-ATIVCRIT" in regras_motivos
-    assert "R-RUI-01" in regras_motivos
-    assert len(regras_motivos) == 2
+    assert "R-AUD-01" in regras_motivos
+    assert "R-AUD-02" in regras_motivos
+    assert len(regras_motivos) == 3
+    audio_momentos = audio.momentos
+    assert Momento.DEM in audio_momentos

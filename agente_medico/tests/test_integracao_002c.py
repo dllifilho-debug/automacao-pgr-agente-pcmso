@@ -59,7 +59,7 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     assert ctx.predicados["altura"] is True
     # espaco_confinado e maquina_pesada não entram no cache porque o `ou`
     # curto-circuita após altura=True. Ver docs/HISTORICO_OPERACIONAL.md § Sessão 002.D2.
-    # R-VIB-01, R-RUI-01, R-RUI-02 adicionam vibracao_corpo_inteiro, ruido_acima_acao, ruido
+    # R-VIB-01, R-AUD-01, R-AUD-02, R-VIB-02 adicionam vibracao_corpo_inteiro, ruido_acima_acao, ruido
     # ao cache a partir de 002.E.
     assert {"altura", "atividade_critica"}.issubset(ctx.predicados.keys())
     assert "espaco_confinado" not in ctx.predicados
