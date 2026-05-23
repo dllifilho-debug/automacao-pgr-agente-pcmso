@@ -17,20 +17,24 @@ regras:
     base_normativa: "Protocolo Dra. Carolini — vibração corpo inteiro; ADM e mudança de risco (sem demissional). Matriz Patrícia registra ADM+DEM; protocolo vivo prevalece (D-ARQ-16)"
     status: VALIDADO
 
-  - id: R-RUI-01
+  - id: R-AUD-01
     quando: ruido_acima_acao
     emite:
-      - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per]}
-    base_normativa: "Matriz Dra. Patrícia — RUÍDO acima do nível de ação → audiometria 12M (a revalidar com Dra. Carolini)"
-    status: A_VALIDAR
+      - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "Protocolo Dra. Carolini R-AUD-01 — audiometria 12M adm/per/MR por gatilho. Gatilho ruido implementado; motorista equip. pesado e ototoxico diferidos. Altura/confinado vem de R-PKG-ATIVCRIT; vibracao de R-VIB-02"
+    status: VALIDADO
 
-  - id: R-RUI-02
-    quando:
-      e:
-        - ruido
-        - vibracao_corpo_inteiro
+  - id: R-AUD-02
+    quando: ruido_acima_acao
     emite:
-      - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per]}
-    base_normativa: "Protocolo Dra. Carolini — ruído associado a vibração corpo inteiro pede audiometria mesmo abaixo do nível de ação"
+      - {exame: audiometria, periodicidade_meses: 12, momentos: [dem]}
+    base_normativa: "Protocolo Dra. Carolini R-AUD-02 — demissional de audiometria com ruido acima da acao. Branch ruido+ototoxico+vibracao diferido (depende de is_ototoxico)"
+    status: VALIDADO
+
+  - id: R-VIB-02
+    quando: vibracao_corpo_inteiro
+    emite:
+      - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "Protocolo Dra. Carolini R-VIB-02 — qualquer vibracao -> audiometria 12M mesmo abaixo do nivel de acao. Maos-bracos diferido (falta primitivo)"
     status: VALIDADO
 
