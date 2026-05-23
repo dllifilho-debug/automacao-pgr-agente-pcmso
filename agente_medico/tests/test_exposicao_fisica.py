@@ -219,6 +219,42 @@ def test_execucao_vibracao_generica_status_preliminar_linhas_vazias() -> None:
     assert matriz.linhas == []
 
 
+# ---------------------------------------------------------------------------
+# Testes 14-15: motorista_equipamento_pesado dispara R-AUD-01
+# ---------------------------------------------------------------------------
+
+def test_raud01_motorista_equipamento_pesado_emite_audiometria_adm_per_mr() -> None:
+    ctx = _ctx("motorista_equipamento_pesado")
+    proto = carregar(_PROTOCOLO_DIR)
+    result = stage_5_emissao(ctx, proto)
+    assert any(e.exame == "audiometria" for e in result)
+    audio = next(e for e in result if e.exame == "audiometria")
+    assert Momento.ADM in audio.momentos
+    assert Momento.PER in audio.momentos
+    assert Momento.MR in audio.momentos
+    assert audio.periodicidade_meses == 12
+    assert any(m.regra_id == "R-AUD-01" for m in audio.motivos)
+    assert ctx.pendencias == []
+
+
+# ---------------------------------------------------------------------------
+# Testes 16: R-VIB-02 dispara com vibracao_mao_braco sozinho
+# ---------------------------------------------------------------------------
+
+def test_rvib02_vmb_sozinho_emite_audiometria() -> None:
+    ctx = _ctx("vibracao_mao_braco")
+    proto = carregar(_PROTOCOLO_DIR)
+    result = stage_5_emissao(ctx, proto)
+    assert any(e.exame == "audiometria" for e in result)
+    audio = next(e for e in result if e.exame == "audiometria")
+    assert any(m.regra_id == "R-VIB-02" for m in audio.motivos)
+    assert ctx.pendencias == []
+
+
+# ---------------------------------------------------------------------------
+# Testes de integração (continuação)
+# ---------------------------------------------------------------------------
+
 def test_execucao_dedup_audiometria_tres_motivos_sem_conflito() -> None:
     pgr = _pgr_com_riscos("GHE-01", (
         _risco_pgr("trabalho_altura"),

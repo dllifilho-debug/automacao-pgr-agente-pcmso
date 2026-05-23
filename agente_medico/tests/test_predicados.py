@@ -226,3 +226,64 @@ def test_avaliar_predicado_ciclo_levanta_CicloPredicados() -> None:
     proto = _protocolo_stub(compostos)
     with pytest.raises(CicloPredicados):
         avaliar_predicado("pred_a", _ctx(), proto)
+
+
+# ---------------------------------------------------------------------------
+# motorista_equipamento_pesado
+# ---------------------------------------------------------------------------
+
+def test_motorista_equipamento_pesado_true_quando_presente() -> None:
+    assert REGISTRO_PRIMITIVOS["motorista_equipamento_pesado"](_ctx("motorista_equipamento_pesado")) is True
+
+
+def test_motorista_equipamento_pesado_false_quando_ausente() -> None:
+    assert REGISTRO_PRIMITIVOS["motorista_equipamento_pesado"](_ctx()) is False
+
+
+# ---------------------------------------------------------------------------
+# vibracao_mao_braco
+# ---------------------------------------------------------------------------
+
+def test_vibracao_mao_braco_true_slug_especifico() -> None:
+    assert REGISTRO_PRIMITIVOS["vibracao_mao_braco"](_ctx("vibracao_mao_braco")) is True
+
+
+def test_vibracao_mao_braco_ausente_slug_generico() -> None:
+    result = REGISTRO_PRIMITIVOS["vibracao_mao_braco"](_ctx("vibracao"))
+    assert isinstance(result, Ausente)
+
+
+def test_vibracao_mao_braco_false_vci_presente() -> None:
+    assert REGISTRO_PRIMITIVOS["vibracao_mao_braco"](_ctx("vibracao_corpo_inteiro")) is False
+
+
+def test_vibracao_mao_braco_false_sem_vibracao() -> None:
+    assert REGISTRO_PRIMITIVOS["vibracao_mao_braco"](_ctx()) is False
+
+
+# ---------------------------------------------------------------------------
+# vibracao_qualquer (composto)
+# ---------------------------------------------------------------------------
+
+_compostos_vibracao = {"vibracao_qualquer": {"ou": ["vibracao_corpo_inteiro", "vibracao_mao_braco"]}}
+
+
+def test_vibracao_qualquer_true_por_vci() -> None:
+    proto = _protocolo_stub(_compostos_vibracao)
+    assert avaliar_predicado("vibracao_qualquer", _ctx("vibracao_corpo_inteiro"), proto) is True
+
+
+def test_vibracao_qualquer_true_por_vmb() -> None:
+    proto = _protocolo_stub(_compostos_vibracao)
+    assert avaliar_predicado("vibracao_qualquer", _ctx("vibracao_mao_braco"), proto) is True
+
+
+def test_vibracao_qualquer_ausente_por_generico() -> None:
+    proto = _protocolo_stub(_compostos_vibracao)
+    result = avaliar_predicado("vibracao_qualquer", _ctx("vibracao"), proto)
+    assert isinstance(result, Ausente)
+
+
+def test_vibracao_qualquer_false_por_nenhum() -> None:
+    proto = _protocolo_stub(_compostos_vibracao)
+    assert avaliar_predicado("vibracao_qualquer", _ctx(), proto) is False

@@ -23,6 +23,12 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: [R-VIB-01]
+  motorista_equipamento_pesado:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: [R-AUD-01, R-VIS-01]
   vibracao_mao_braco:
     anexo_nr07: null
     cas: null
