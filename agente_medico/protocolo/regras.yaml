@@ -18,10 +18,10 @@ regras:
     status: VALIDADO
 
   - id: R-AUD-01
-    quando: ruido_acima_acao
+    quando: {ou: [ruido_acima_acao, motorista_equipamento_pesado]}
     emite:
       - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR]}
-    base_normativa: "Protocolo Dra. Carolini R-AUD-01 — audiometria 12M adm/per/MR por gatilho. Gatilho ruido implementado; motorista equip. pesado e ototoxico diferidos. Altura/confinado vem de R-PKG-ATIVCRIT; vibracao de R-VIB-02"
+    base_normativa: "Protocolo Dra. Carolini R-AUD-01 — audiometria 12M adm/per/MR por gatilho. Gatilhos ruido e motorista equip. pesado implementados; ototoxico diferido (002.H). Altura/confinado vem de R-PKG-ATIVCRIT; vibracao de R-VIB-02"
     status: VALIDADO
 
   - id: R-AUD-02
@@ -32,9 +32,9 @@ regras:
     status: VALIDADO
 
   - id: R-VIB-02
-    quando: vibracao_corpo_inteiro
+    quando: vibracao_qualquer
     emite:
       - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR]}
-    base_normativa: "Protocolo Dra. Carolini R-VIB-02 — qualquer vibracao -> audiometria 12M mesmo abaixo do nivel de acao. Maos-bracos diferido (falta primitivo)"
+    base_normativa: "Protocolo Dra. Carolini R-VIB-02 — qualquer vibracao (corpo inteiro ou maos-bracos) -> audiometria 12M mesmo abaixo do nivel de acao. Vibracao generica sem qualificar tipo -> Ausente -> bloqueante (D-ARQ-13/16)"
     status: VALIDADO
 

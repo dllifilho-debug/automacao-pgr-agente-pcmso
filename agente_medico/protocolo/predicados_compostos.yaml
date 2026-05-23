@@ -5,3 +5,8 @@ predicados_compostos:
       - espaco_confinado
       - maquina_pesada
 
+  vibracao_qualquer:
+    ou:
+      - vibracao_corpo_inteiro
+      - vibracao_mao_braco
+
