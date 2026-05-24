@@ -326,6 +326,19 @@ vibracao_qualquer]` de R-AUD-02) → Sessão 002.H. O gatilho de promoção dest
 família de vibração). Modelo por slug permanece. Motorista nasce dormente até
 `cargos.yaml` mapear cargo→slug (DT-002G-01).
 
+**Atualização 002.H (23/05/2026) — arquétipo completo.** Terceiro e último diferido
+implementado: campo `is_ototoxico: bool = False` em `Risco`, 12 agentes ototóxicos em
+`agentes.yaml`, primitivo `ototoxico` (bi-estado), R-AUD-01 ganha `ototoxico` no `ou`,
+R-AUD-02 ganha branch `{e: [ruido, ototoxico, vibracao_qualquer]}`. Com isso o arquétipo
+de exposição física está **completo** — todos os gatilhos de R-AUD-01/R-AUD-02/R-VIB-01/
+R-VIB-02 alcançados. O **gatilho de promoção desta decisão nunca disparou** ao longo de
+002.E–002.H: nenhum dos qualificadores (nível de ruído → `Quantificacao`; tipo de vibração
+→ slug; ototóxico → flag por agente; motorista → slug de atividade) exigiu campo `subtipo`
+genérico em `RiscoPGR`. O modelo por slug/flag se sustentou; a promoção permanece como
+caminho estrutural ainda não necessário. Paliativo registrado: metadata química dos
+agentes ototóxicos entra pobre (DT-002H-01, append-only) — não afeta o arquétipo físico,
+afeta regras químicas futuras.
+
 ---
 
 ## Histórico de revisões
@@ -342,3 +355,4 @@ família de vibração). Modelo por slug permanece. Motorista nasce dormente at�
 | v8 | 21/05/2026 | Sessão 002.E (ARQUITETURA): D-ARQ-16 adicionada — arquétipo de exposição física qualificável, subtipo de vibração via identidade de agente (não campo em RiscoPGR), regras componíveis com dedup no Stage 8 |
 | v9 | 22/05/2026 | Sessão 002.F: correção de IDs/escopo da 002.E — R-RUI-01/02 (IDs inexistentes no protocolo) viram R-AUD-01, R-AUD-02 (nova) e R-VIB-02; momentos corrigidos para incluir MR; parágrafo de aplicação do D-ARQ-16 reescrito |
 | v10 | 23/05/2026 | Sessão 002.G: D-ARQ-16 atualizado — motorista_equipamento_pesado e vibracao_mao_braco (composto vibracao_qualquer) implementados; diferido remanescente é ototóxico (002.H); gatilho de promoção não disparou |
+| v11 | 23/05/2026 | Sessão 002.H: D-ARQ-16 atualizado — gatilho ototóxico implementado, arquétipo de exposição física completo; gatilho de promoção não disparou em 002.E–002.H; metadata química pobre dos ototóxicos registrada como DT-002H-01 |
