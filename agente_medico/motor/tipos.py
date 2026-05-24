@@ -66,6 +66,7 @@ class Risco:
     detalhe: Optional[str]
     quantificacao: Optional[Quantificacao]
     anexo_nr07: Optional[str]
+    is_ototoxico: bool = False
 
 
 @dataclass(frozen=True)

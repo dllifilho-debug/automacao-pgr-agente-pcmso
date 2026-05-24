@@ -22,6 +22,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     detalhe=None,
                     quantificacao=risco_pgr.quantificacao,
                     anexo_nr07=meta.get("anexo_nr07"),
+                    is_ototoxico=meta.get("is_ototoxico", False),
                 )
             )
         else:
@@ -94,5 +95,6 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                         detalhe=f"derivado do cargo {cargo}",
                         quantificacao=None,
                         anexo_nr07=meta.get("anexo_nr07") if meta is not None else None,
+                        is_ototoxico=meta.get("is_ototoxico", False) if meta is not None else False,
                     )
                 )

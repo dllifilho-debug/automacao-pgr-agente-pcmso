@@ -88,6 +88,11 @@ def _vibracao_mao_braco(ctx: GHEContext) -> ResultadoPredicado:
     return False
 
 
+@primitivo("ototoxico")
+def _ototoxico(ctx: GHEContext) -> bool:
+    return any(r.is_ototoxico for r in ctx.riscos)
+
+
 def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:
     if isinstance(expr, str):
         return avaliar_predicado(expr, ctx, protocolo, _visitados)

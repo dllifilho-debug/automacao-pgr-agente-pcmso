@@ -18,17 +18,17 @@ regras:
     status: VALIDADO
 
   - id: R-AUD-01
-    quando: {ou: [ruido_acima_acao, motorista_equipamento_pesado]}
+    quando: {ou: [ruido_acima_acao, motorista_equipamento_pesado, ototoxico]}
     emite:
       - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR]}
-    base_normativa: "Protocolo Dra. Carolini R-AUD-01 — audiometria 12M adm/per/MR por gatilho. Gatilhos ruido e motorista equip. pesado implementados; ototoxico diferido (002.H). Altura/confinado vem de R-PKG-ATIVCRIT; vibracao de R-VIB-02"
+    base_normativa: "Protocolo Dra. Carolini R-AUD-01 — audiometria 12M adm/per/MR por gatilho (ruido acima acao, motorista equip. pesado ou ototoxico). Altura/confinado vem de R-PKG-ATIVCRIT; vibracao de R-VIB-02"
     status: VALIDADO
 
   - id: R-AUD-02
-    quando: ruido_acima_acao
+    quando: {ou: [ruido_acima_acao, {e: [ruido, ototoxico, vibracao_qualquer]}]}
     emite:
       - {exame: audiometria, periodicidade_meses: 12, momentos: [dem]}
-    base_normativa: "Protocolo Dra. Carolini R-AUD-02 — demissional de audiometria com ruido acima da acao. Branch ruido+ototoxico+vibracao diferido (depende de is_ototoxico)"
+    base_normativa: "Protocolo Dra. Carolini R-AUD-02 — demissional de audiometria com ruido acima da acao OU combinacao ruido+ototoxico+vibracao (D-ARQ-13/16)"
     status: VALIDADO
 
   - id: R-VIB-02
