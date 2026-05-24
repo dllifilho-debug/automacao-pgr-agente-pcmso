@@ -766,4 +766,42 @@ R-PGR-05 (PGR mal escrito) não vira Stage 3 v1 — limiar de genericidade é de
 
 ---
 
+## Sessão 002.J — 24/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude (Arquiteto) + Claude Code (Sonnet 4.6)
+**Branch:** `feature/motor-002j-stage3-estrutural` — commit `e86ed77` → PR #24 (merge commit `6017b96`)
+**Objetivo:** Stage 3 — pendências estruturais (R-PGR-04), demarcado em D-ARQ-15 e desenhado em D-ARQ-17. Implementação fechada na 002.I; esta sessão confirmou estado, validou não-duplicação e codificou.
+
+### O que foi feito
+
+1. **Pré-requisito de não-duplicação confirmado (escrito em D-ARQ-17):** `grep` por `fds`/`composic`/`produtos_quimic`/`ProdutoQuimico` em `agente_medico/motor` + `agente_medico/protocolo` retornou hits **apenas em `tipos.py`** (definição de `FDS`/`ProdutoQuimico`/`produtos_quimicos`) — zero consumo em `predicados.py`, `predicados_stage.py`, `emissao.py`, `regras.yaml` ou qualquer outro estágio. Stage 3 é o **primeiro e único consumidor** de `ProdutoQuimico.fds`. Gate limpo, sem bloqueador.
+2. **NOVO `agente_medico/motor/estagios/pendencias_estruturais.py`** — `stage_3_pendencias_estruturais(ctx, proto) -> None`, função pura (D-ARQ-09), lê `ctx.pgr_ghe.produtos_quimicos`, muta só `ctx.pendencias`. Três sub-casos de R-PGR-04, todos `bloqueante=True`, `tipo="composicao_ausente"`, `destinatario="empresa"`, `regra_origem="R-PGR-04"`, `ghe_id=ctx.pgr_ghe.id`: (a) `fds is None`; (b) `fds.composicao` vazia; (c) componente com `cas.strip()` vazio (uma pendência por componente sem CAS). `proto` na assinatura por simetria com os demais estágios — não consultado.
+3. **EDITADO `orquestrador.py`** — import alfabético (entre `gates` e `predicados_stage`); comentário `# Stage 3 (...) encaixará aqui` substituído por `stage_3_pendencias_estruturais(ctx, protocolo)`. Nada mais na composição mudou. `tipos.py` intocado (`Pendencia` já carregava `ghe_id`/`bloqueante`).
+4. **9 testes** em `test_stage_3_pendencias_estruturais.py` cobrindo os casos 1–8 da spec (3 = `cas=""` + `cas="   "`), incluindo integração via `executar()` (PRELIMINAR, `linhas=[]`, pendência R-PGR-04) e universalidade fora de construção (óxido de etileno / GHE de saúde — prova que o predicado é sobre `ProdutoQuimico`, não sobre cargo, D-ARQ-06).
+
+### Resultados
+
+- **pytest** `agente_medico/tests/ tests/` — **269/269 verdes** (260 anteriores + 9 novos; as duas suites)
+- **mypy --strict** `agente_medico` — `Success: no issues found in 27 source files`
+- **Regressão:** nenhuma. Todos os GHEs pré-existentes das duas suites usam `produtos_quimicos=()` — verificado pelo Code *antes* de implementar, materializando a checagem que a 2ª passada do prompt previu.
+
+### Não-short-circuit verificado (não só pretendido)
+
+D-ARQ-17 exige que Stage 4/5 rodem após o bloqueio (acúmulo num passe, não early-return). O teste de integração roda `executar()` com protocolo vazio e GHE bloqueado por R-PGR-04 sem estourar: Stage 4/5 atravessam (sem regras → sem exames), e o ramo `if any(p.bloqueante ...)` pós-emissão fecha `linhas=[]`. O trilho PRELIMINAR do orquestrador (D-ARQ-08/D-ARQ-15) absorveu o bloqueio sem qualquer alteração — Stage 3 só precisou mutar `ctx.pendencias`.
+
+### Dívida técnica
+
+Nenhuma nascida nesta sessão. **Continuam abertas:** DT-002C-01 (audit trail incompleto), DT-D3-02 (granularidade de `fumos_metalicos` — sessão CONHECIMENTO), DT-002G-01 (motorista dormente), DT-002G-02 (slugs de atividade fora do vocabulário), DT-002H-01 (metadata química pobre dos ototóxicos), DT-002I-01 (limiar de genericidade de R-PGR-05 — sessão CONHECIMENTO). DT-D4-01 (Stage 3 adiado) **encerrada** — Stage 3 implementado nesta sessão.
+
+### Categoria Stage 3 aberta para crescimento append-only
+
+D-ARQ-17 prevê novos checks estruturais (PGR sem GHE, GHE sem cargo, unidade de quantificação inválida) entrando em `pendencias_estruturais.py` sem novo estágio. Nenhum implementado nesta sessão — só R-PGR-04. Os demais entram quando houver caso de uso ou regra clínica que os exija.
+
+### Próxima sessão planejada
+
+A definir pelo Diovanni. Candidatos naturais: Stage 6 (regime regulatório / ANAC — D-ARQ-04, ponto de encaixe demarcado no orquestrador), integração Viverde end-to-end (`tests/integracao/test_viverde.py`, previsto desde a 002.A e ainda inexistente), ou sessão de vocabulário (fechar DT-002G-01 mapeando cargos→slug de motorista; ou DT-002H-01 enriquecendo metadata química). Pendência paralela fora do motor: estado da cascata de API gratuita da camada de extração (D-ARQ-09), não verificada desde a 002.
+
+---
+
 *Entradas futuras abaixo desta linha*
