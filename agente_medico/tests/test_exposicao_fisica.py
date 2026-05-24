@@ -275,3 +275,88 @@ def test_execucao_dedup_audiometria_tres_motivos_sem_conflito() -> None:
     assert len(regras_motivos) == 3
     audio_momentos = audio.momentos
     assert Momento.DEM in audio_momentos
+
+
+# ---------------------------------------------------------------------------
+# Testes 17-22: gatilho ototóxico (002.H)
+# ---------------------------------------------------------------------------
+
+def _risco_ototoxico(agente: str = "tolueno") -> Risco:
+    return Risco(
+        agente=agente, fonte="pgr", detalhe=None,
+        quantificacao=None, anexo_nr07=None, is_ototoxico=True,
+    )
+
+
+def test_primitivo_ototoxico_com_risco_ototoxico_retorna_true() -> None:
+    ctx = GHEContext(pgr_ghe=_ghe(), riscos=[_risco_ototoxico()])
+    assert REGISTRO_PRIMITIVOS["ototoxico"](ctx) is True
+
+
+def test_primitivo_ototoxico_sem_ototoxico_retorna_false() -> None:
+    assert REGISTRO_PRIMITIVOS["ototoxico"](_ctx("ruido")) is False
+
+
+def test_raud01_ototoxico_isolado_emite_audiometria_adm_per_mr() -> None:
+    ctx = GHEContext(pgr_ghe=_ghe(), riscos=[_risco_ototoxico()])
+    proto = carregar(_PROTOCOLO_DIR)
+    result = stage_5_emissao(ctx, proto)
+    audio = next(e for e in result if e.exame == "audiometria")
+    assert {Momento.ADM, Momento.PER, Momento.MR} <= audio.momentos
+    assert Momento.DEM not in audio.momentos
+    assert audio.periodicidade_meses == 12
+    assert any(m.regra_id == "R-AUD-01" for m in audio.motivos)
+    assert ctx.pendencias == []
+
+
+def test_raud02_ruido_abaixo_ototoxico_vibracao_emite_demissional_via_branch_composto() -> None:
+    q = Quantificacao(
+        valor=80.0, unidade="dB(A)", relacao_LT="abaixo_acao",
+        pct_LT=None, apenas_qualitativa=False,
+    )
+    ctx = GHEContext(pgr_ghe=_ghe(), riscos=[
+        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, anexo_nr07=None),
+        _risco_ototoxico(),
+        Risco(agente="vibracao_mao_braco", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None),
+    ])
+    proto = carregar(_PROTOCOLO_DIR)
+    # Garante que o demissional NÃO veio do ramo ruido_acima_acao do `ou`,
+    # e sim do branch composto e:[ruido, ototoxico, vibracao_qualquer].
+    assert REGISTRO_PRIMITIVOS["ruido_acima_acao"](ctx) is False
+    result = stage_5_emissao(ctx, proto)
+    dem = [e for e in result if e.exame == "audiometria" and Momento.DEM in e.momentos]
+    assert dem
+    assert any(m.regra_id == "R-AUD-02" for e in dem for m in e.motivos)
+    assert ctx.pendencias == []
+
+
+def test_raud02_vibracao_generica_com_ruido_e_ototoxico_bloqueia() -> None:
+    # Branch e:[ruido, ototoxico, vibracao_qualquer] com vibracao sem qualificar tipo
+    # → vibracao_qualquer=Ausente → branch=Ausente. Com ruido_acima_acao=False,
+    # R-AUD-02 inteiro = Ausente → pendência bloqueante (D-ARQ-13/16).
+    q = Quantificacao(
+        valor=80.0, unidade="dB(A)", relacao_LT="abaixo_acao",
+        pct_LT=None, apenas_qualitativa=False,
+    )
+    ctx = GHEContext(pgr_ghe=_ghe(), riscos=[
+        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, anexo_nr07=None),
+        _risco_ototoxico(),
+        Risco(agente="vibracao", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None),
+    ])
+    proto = carregar(_PROTOCOLO_DIR)
+    stage_5_emissao(ctx, proto)
+    assert any(p.bloqueante and p.regra_origem == "R-AUD-02" for p in ctx.pendencias)
+
+
+def test_execucao_ototoxico_via_agente_status_ok_sem_demissional() -> None:
+    pgr = _pgr_com_riscos("GHE-01", (
+        RiscoPGR(tipo="quimico", agente="tolueno", quantificacao=None, severidade=None),
+    ))
+    proto = carregar(_PROTOCOLO_DIR)
+    resultado = executar(pgr, proto, hoje=HOJE)
+    assert resultado.status == "OK"
+    matriz = resultado.matrizes[0]
+    audio = next(e for e in matriz.linhas if e.exame == "audiometria")
+    assert Momento.DEM not in audio.momentos
+    assert any(m.regra_id == "R-AUD-01" for m in audio.motivos)
+    assert all(p.tipo != "vocabulario_ausente" for p in matriz.pendencias)

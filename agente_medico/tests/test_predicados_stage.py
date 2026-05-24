@@ -49,11 +49,13 @@ def test_popula_primitivos_referenciados() -> None:
     assert ctx.predicados["altura"] is True
     assert ctx.predicados["atividade_critica"] is True
 
-    # R-AUD-01, R-AUD-02 e R-VIB-02 referenciam ruido_acima_acao e vibracao_corpo_inteiro
-    # (ruido não entra no cache: nenhuma regra o referencia diretamente após 002.F)
+    # R-AUD-01 referencia ruido_acima_acao; R-AUD-02 referencia ruido_acima_acao e
+    # também `ruido` no branch e:[ruido, ototoxico, vibracao_qualquer]. Neste cenário
+    # ruido_acima_acao=False (ruído sem quantificação), então o `ou` não curto-circuita
+    # e avança ao branch `e`, que avalia e cacheia `ruido` (002.H). Cf. D-ARQ-10.
     assert "ruido_acima_acao" in ctx.predicados
     assert "vibracao_corpo_inteiro" in ctx.predicados
-    assert "ruido" not in ctx.predicados
+    assert "ruido" in ctx.predicados
 
     # Nota: espaco_confinado e maquina_pesada NÃO são avaliados porque o `ou`
     # curto-circuita assim que altura=True é encontrado. Decisão arquitetural:
