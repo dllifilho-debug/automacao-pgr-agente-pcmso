@@ -736,4 +736,34 @@ A definir pelo Diovanni. O arquétipo de exposição física está fechado; cand
 
 ---
 
+## Sessão 002.I — 23/05/2026
+
+**Tipo:** ARQUITETURA (sem código)
+**Participantes:** Diovanni Lisita + Claude (Arquiteto)
+**Branch:** nenhuma (decisão arquitetural; implementação fica para 002.J)
+**Objetivo:** Fechar o desenho de Stage 3 (pendências estruturais), demarcado em D-ARQ-15 entre Stage 2 e Stage 4.
+
+### Decisão
+
+D-ARQ-17 adicionada. Stage 3 existe como verificação de integridade do input por-GHE, centralizada, antes dos predicados. Âncora: R-PGR-04 (produto químico sem FDS resolvível → bloqueante por-GHE → PRELIMINAR). Contrato espelha `stage_2_riscos`: função pura `(ctx, proto) -> None`, muta só `ctx.pendencias`; não toca `tipos.py` (`Pendencia` já carrega `ghe_id`/`bloqueante`). Encaixa substituindo o comentário no orquestrador, sem reescrever a composição.
+
+### 2ª passada do Arquiteto — 5 erros corrigidos antes do fechamento
+
+1. Argumento da lacuna reescrito: a justificativa de Stage 3 é **centralização** da integridade de FDS (vs. obrigação tri-estado distribuída por primitivo), não um buraco em D-ARQ-13 — o desenho v1 afirmava erradamente que o predicado "retornaria False".
+2. Removida a afirmação categórica "nenhum estágio lê `ProdutoQuimico.fds`" — `predicados.py`/stage_4-5-8 não foram lidos nesta sessão. Virou pré-requisito de verificação da 002.J.
+3. Exemplo de `Pendencia` sem `motivo` (campo obrigatório) — corrigido.
+4. Numeração: implementação é 002.J, não "002.I-impl".
+5. `Componente.cas` é `str` não-Optional → checagem é string-vazia, não `is None`.
+
+### Fora de escopo (registrado)
+
+R-PGR-05 (PGR mal escrito) não vira Stage 3 v1 — limiar de genericidade é decisão clínica (DT-002I-01 no protocolo, sessão CONHECIMENTO futura).
+
+### Próxima sessão planejada
+
+**Tipo:** IMPLEMENTAÇÃO (Sessão 002.J)
+**Objetivo:** Stage 3, só R-PGR-04, bloqueante por-GHE. Pré-requisito: confirmar via git show que nenhum estágio já lê `fds`. Confirmar numeração contra git log antes de nomear a branch (criada de main na hora).
+
+---
+
 *Entradas futuras abaixo desta linha*
