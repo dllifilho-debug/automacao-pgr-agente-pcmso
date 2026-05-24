@@ -5,6 +5,7 @@ from datetime import date
 from agente_medico.motor.estagios.consolidacao import ConflitoProtocolo, stage_8_consolidacao
 from agente_medico.motor.estagios.emissao import stage_5_emissao
 from agente_medico.motor.estagios.gates import stage_1_gates
+from agente_medico.motor.estagios.pendencias_estruturais import stage_3_pendencias_estruturais
 from agente_medico.motor.estagios.predicados_stage import stage_4_predicados
 from agente_medico.motor.estagios.riscos import stage_2_riscos
 from agente_medico.motor.protocolo import Protocolo
@@ -33,7 +34,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
     for ghe in pgr.ghes:
         ctx = GHEContext(pgr_ghe=ghe)
         stage_2_riscos(ctx, protocolo)
-        # Stage 3 (pendências estruturais) encaixará aqui
+        stage_3_pendencias_estruturais(ctx, protocolo)
         stage_4_predicados(ctx, protocolo)
         exames: list[ExameEmitido] = stage_5_emissao(ctx, protocolo)
         # Stage 6 (regime) encaixará aqui
