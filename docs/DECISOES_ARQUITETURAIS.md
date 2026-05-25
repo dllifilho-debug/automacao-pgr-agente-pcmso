@@ -390,6 +390,21 @@ Fronteira com as camadas vizinhas:
 
 ---
 
+## D-ARQ-19 — Periodicidade dependente de tempo de exposição acumulado é do agendador, não do motor
+
+**Contexto.** R-RX-01 refinada (002.L-estudo) introduz periodicidades de RX que mudam conforme **tempo de exposição acumulado** do trabalhador (cortes em 15 anos: ex. sílica/asbesto sem medição = 24M até 15 anos, depois 12M). Tempo acumulado é atributo do **histórico individual**, não do PGR nem da função — o motor (função pura `(PGR, Protocolo) → Resultado`, D-ARQ-09) não tem acesso a ele.
+
+**Decisão.** O motor emite sempre a **faixa inicial** (≤ 15 anos) e anexa ao exame um **metadado de encurtamento** declarando a regra (ex.: `apos_anos_exposicao: 15 → periodicidade: 12M`). O **agendador** (D-ARQ-11), que já confronta a matriz ideal com o histórico do trabalhador, resolve o encurtamento.
+
+**Consequência.**
+- Motor permanece determinístico e sem estado individual; não lê tempo de serviço.
+- A regra de encurtamento vive como dado anexo ao `ExameEmitido`, consumido pelo agendador — mesma separação motor/agendador de R-REAPR-01/02.
+- Refina o tipo `Quantificacao` (trilha D-ARQ-16 / F-3): além de `pct_LT`, discretizar **4 faixas de %LEO** e um estado **`sem_avaliacao_quantitativa`** de primeira classe — distinto de `apenas_qualitativa`, porque "sem medição" dispara 24M enquanto a v2 colapsava qualitativa → 12M.
+
+**Base.** Aplicação de D-ARQ-09 e D-ARQ-11 a R-RX-01 refinada. Origem: 002.L-estudo.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
