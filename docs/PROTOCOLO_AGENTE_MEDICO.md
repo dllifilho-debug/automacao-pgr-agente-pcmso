@@ -64,11 +64,17 @@ Não rejeitar o PGR por essa razão.
 A análise é feita **GHE a GHE**. Todas as funções dentro de um mesmo GHE recebem **matriz idêntica de exames e periodicidade**. Não há diferenciação por cargo dentro do mesmo GHE.
 
 ### R-GHE-02 — Risco implícito pelo cargo `[VALIDADO]`
-Cargos com risco característico recebem os exames do risco **mesmo quando o inventário do PGR não declara explicitamente** a exposição.
+Cargos cuja **operação geradora de risco é indissociável da função-fim** recebem os exames desse risco **mesmo quando o inventário do PGR não declara explicitamente** a exposição.
 
-**Caso âncora — soldador:** mesmo que o inventário não cite fumos metálicos, a presença do cargo "soldador" implica exposição. Aplicar protocolo de fumos metálicos (ver R-PKG-SOLD).
+**Critério de aplicabilidade (refino 002.L-estudo).** O risco implícito por cargo só vale quando a operação causadora é a atividade-fim do cargo — nunca pela mera denominação. A NR-01/NR-07 (Portaria 567/2022) não reconhece "risco por denominação de cargo"; o risco é definido pela exposição real classificada no PGR. Quando a operação de risco é **contingente** (pode ou não ocorrer na função), o risco não é atribuído automaticamente — recai em confirmação documental (ver R-GHE-05).
 
-Esta regra é a expressão clínica do princípio: *"não existe solda sem fumos metálicos"*. O sistema deve aceitar **risco implícito por cargo** como cidadão de primeira classe.
+**Caso âncora — soldador (industrial):** soldar é a atividade-fim → fumos metálicos são indissociáveis. Mesmo sem o inventário citar, a presença do cargo implica exposição. Aplicar protocolo de fumos metálicos (ver R-PKG-SOLD).
+
+**Contra-exemplo — serralheiro de obra:** solda é contingente (a função pode ser só corte a frio, dobra, gradil, esquadria). NÃO atribuir fumos/Mn/CO por cargo. Ver R-GHE-05.
+
+Esta regra é a expressão clínica do princípio *"não existe solda sem fumos metálicos"* — **desde que soldar seja a atividade-fim**. O sistema aceita risco implícito por cargo como cidadão de primeira classe, condicionado ao critério de indissociabilidade.
+
+**Base:** Dra. Carolini, R1 (05/2025); NR-01/NR-07 (Portaria 567/2022).
 
 ### R-GHE-03 — Múltiplos riscos, mesmo exame `[VALIDADO]`
 Quando o mesmo exame é exigido por riscos distintos no mesmo GHE → **linha única** na matriz. A periodicidade não se altera em função do número de riscos que pedem o exame.
@@ -77,6 +83,18 @@ Quando o mesmo exame é exigido por riscos distintos no mesmo GHE → **linha ú
 Quando o PGR lista um risco que parece não realista para o GHE, a Dra. Carolini **segue o inventário** sem reinterpretar nem rejeitar. O documento é a fonte de verdade do escopo de risco.
 
 **Implicação para o agente:** não implementar lógica de "filtragem clínica de riscos do PGR". O inventário é canonical.
+
+### R-GHE-05 — Risco contingente exige confirmação documental `[VALIDADO]`
+Cargo cuja operação de risco é **contingente** (não indissociável da função-fim) não recebe o risco por atribuição implícita. O risco entra como **pendência de confirmação documental**: solicitar PGR/FDS que confirme a operação (ver R-FDS-01, R-PGR-04, R-PGR-05).
+
+- **PGR/FDS confirma a operação de risco** (ex.: serralheiro que solda — MIG/TIG/eletrodo) → aciona exatamente os exames do risco confirmado (ex.: pacote de fumos metálicos, idêntico ao soldador).
+- **PGR/FDS descreve apenas operações sem o risco** (ex.: serralheiro só com corte a frio, dobra, fixação de gradil, montagem de esquadria) → não aciona os exames daquele risco.
+
+**Caso âncora — serralheiro de obra.** No caso Viverde (RQ.61, GHE 10), o pacote de fumos/Mn disparou porque o PCMSO declarava agente medido ("Risco Cromo abaixo de 10% LT da ACGIH") — exposição confirmada documentalmente, não atribuição por cargo.
+
+**Implicação para a taxonomia (`cargos.yaml.riscos_implicitos`, D-ARQ-02/D-ARQ-12):** o campo `riscos_implicitos` só contém riscos indissociáveis. Serralheiro NÃO recebe `{solda, fumos_metalicos, manganes}` ali. (O hardcode `serralheiro → cromo` do motor legado em `modules/agente_medico_ia.py` está obsoleto e contradiz esta regra — não replicar no motor novo.)
+
+**Base:** Dra. Carolini, R1 (05/2025); NR-01/NR-07 (Portaria 567/2022). Resolve DT-002K-02.
 
 ---
 
@@ -161,14 +179,32 @@ Audiometria realizada há **mais de 120 dias** → refazer no demissional.
 
 ### 5.4 Raio-X de Tórax (OIT)
 
-#### R-RX-01 — Sílica e PNOS `[VALIDADO]`
-- **Sílica com medição quantitativa < 10% do LT** → RX 60 meses
-- **Sílica com medição quantitativa ≥ 10% do LT** → RX 12 meses
-- **Sílica com avaliação apenas qualitativa** → RX 12 meses (precaucional)
-- **PNOS** (poeira não classificada) → RX 60 meses
-- **Poeira não caracterizada no PGR** (sem distinção mineral / PNOS / orgânica) → tratar como sílica → RX 12 meses
+#### R-RX-01 — RX de tórax OIT (sílica/asbesto e PNOS) `[VALIDADO]`
+Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portaria 567/2022)**. Depende de: agente, faixa de exposição vs. LEO, existência de avaliação quantitativa e tempo de exposição acumulado.
 
-**Base normativa:** NR-07, item de RX de tórax para exposição a sílicas. Confirmado pela Dra. Carolini.
+**Sílica / asbesto — COM avaliação quantitativa periódica:**
+
+| Faixa (CLSC vs. LEO) | RX tórax OIT |
+|---|---|
+| ≤ 10% LEO | admissional apenas |
+| 10% < CLSC < 50% LEO | adm + 60M até 15 anos → 36M após |
+| 50% < CLSC < 100% LEO | adm + 36M até 15 anos → **24M** após |
+| > 100% LEO | adm + 12M desde o início |
+
+**Sílica / asbesto — SEM avaliação quantitativa** (canteiro sem laudo de higienista; caso mais comum):
+- adm + **24M** até 15 anos de exposição → 12M após.
+
+**PNOS** (poeiras de menor toxicidade), com ou sem medição:
+- adm + **60M**. Nunca 24M.
+
+**Notas:**
+- "Sem avaliação quantitativa" é estado distinto de "qualitativa": dispara **24M**, não 12M. Corrige A-VAL-06 (v2), que simplificou demais.
+- A periodicidade da **espirometria** (adm + 24M, R-ESP-01) é independente do RX — não confundir o 24M dos dois exames.
+- O corte de 15 anos é **tempo de exposição acumulado** → resolvido pelo agendador, não pelo motor (ver D-ARQ-19).
+
+**Base normativa:** Anexo III da NR-07 (Portaria 567/2022). Validação clínica: Dra. Carolini, 05/2025.
+
+**TODO normativo (002.L-estudo):** conferir faixas de %LEO, periodicidades e cortes de 15 anos contra a redação literal do Anexo III antes da 002.M. Estrutura (4 faixas + estado "sem avaliação quantitativa") fechada; valores exatos a confirmar.
 
 #### R-RX-02 — Fumos metálicos `[VALIDADO]`
 Cargo com exposição a fumos metálicos (incluindo soldador) → RX **60 meses** em adm/per/MR/dem.
@@ -388,7 +424,12 @@ Manter `fumos_metalicos` como categoria única faz o motor emitir matriz correta
 
 **Pergunta para a Dra. Carolini (sessão CONHECIMENTO):** o que dispara RX de tórax em 24 meses, em distinção a 12M e 60M? É um nível de exposição intermediário? Um tipo de poeira específico? Buscar o **método** (o gatilho), não o caso Viverde.
 
-**Status:** A VALIDAR. Bloqueia a 002.M (test_viverde.py) parcialmente — casos com RX 24M não podem virar asserção até saber se são conduta a reproduzir (lacuna do protocolo) ou se R-RX-01 está correta e o motor deve divergir. Alimenta o estudo cruzado multi-matriz (D-ARQ-18).
+**Status:** RESOLVIDA (002.L-estudo, 25/05/2026). Resolvida por R-RX-01 refinada (Anexo III NR-07): existe RX 24M legítimo para **sílica/asbesto sem avaliação quantitativa** (adm + 24M até 15 anos) — banda ausente em R-RX-01 v2 e na matriz Patrícia. Não é nível "intermediário" genérico nem poeira específica: é o estado "sem medição quantitativa".
+
+**Veredito sobre a RQ.61 Viverde** (a confirmar contra o inventário de cada GHE na auditoria da 002.M):
+- RX 24M para PNOS (madeira/gesso) → **erro** (correto 60M).
+- RX 24M para sílica/asbesto sem medição → **correto**.
+- RX 24M no pintor (agente = tinta) → **confusão de exames**: tinta pede espirometria 24M (R-ESP-01), não RX.
 
 ### DT-002K-02 — Serralheiro e o pacote de fumos metálicos `[A VALIDAR]`
 
@@ -398,7 +439,9 @@ Manter `fumos_metalicos` como categoria única faz o motor emitir matriz correta
 
 **Pergunta para a Dra. Carolini (sessão CONHECIMENTO):** serralheiro dispara o pacote de fumos metálicos por qual via — o cargo em si (risco implícito, como soldador em R-GHE-02), ou o agente químico (cromo/Mn) declarado no PCMSO daquela obra? Se for o agente, qual o predicado universal? Buscar o método.
 
-**Status:** A VALIDAR. Não bloqueia o motor (R-PKG-SOLD funciona para o caso âncora soldador). Candidato a refinamento de R-GHE-02 / `cargos.yaml` (riscos_implícitos). Alimenta o estudo cruzado multi-matriz — testar se o Mn no serralheiro se repete entre empresas (regra de cargo) ou varia com o PCMSO (regra de agente).
+**Status:** RESOLVIDA (002.L-estudo, 25/05/2026). Resposta da Dra. Carolini (R1): **risco é por exposição real, não por denominação de cargo** — NR-01/NR-07 não reconhece "risco implícito por denominação". O princípio "não existe solda sem fumos" (R-GHE-02) só vale quando soldar é a atividade-fim (soldador industrial). Serralheiro de obra: solda é **contingente** → exige confirmação documental. Formalizado em R-GHE-05; R-GHE-02 refinada com o critério indissociável vs. contingente.
+
+**Confirmação no caso Viverde:** o pacote disparou pelo **agente declarado** (nota do GHE 10: "Risco Cromo abaixo de 10% LT da ACGIH"), não pela denominação "serralheiro" — a via-agente operando. A hipótese inicial do Arquiteto (serralheiro como cargo-de-solda) foi **revertida** pela médica.
 
 ---
 
@@ -428,3 +471,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v3 | 19/05/2026 | Sessão 002.D3: seção 11 "Pendências clínicas em aberto" adicionada com DT-D3-02 (granularidade de fumos_metalicos a refinar com Dra. Carolini) |
 | v4 | 23/05/2026 | Sessão 002.I: DT-002I-01 adicionada (limiar de genericidade de R-PGR-05) |
 | v5 | 24/05/2026 | Sessão 002.K: DT-002K-01 (gatilho de RX 24M ausente em R-RX-01) e DT-002K-02 (serralheiro e pacote de fumos metálicos) adicionadas — ambas para sessão CONHECIMENTO, originadas da auditoria da RQ.61 contra o protocolo |
+| v6 | 25/05/2026 | Sessão 002.L-estudo: DT-002K-01 e DT-002K-02 RESOLVIDAS. R-GHE-02 refinada (indissociável vs. contingente); R-GHE-05 nova (risco contingente → confirmação documental); R-RX-01 refinada com tabela do Anexo III (4 faixas %LEO + estado sem-medição = gatilho do 24M; PNOS 60M). |

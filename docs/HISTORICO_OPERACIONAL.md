@@ -877,4 +877,40 @@ O kickoff modelava K→L→M. A 002.K revelou um passo faltante: divergências m
 
 ---
 
+## Sessão 002.L-estudo — 25/05/2026
+
+**Tipo:** CONHECIMENTO
+**Participantes:** Diovanni Lisita + Dra. Carolini Polesso (assíncrona, com fundamentação normativa) + Claude (Arquiteto)
+**Objetivo:** Extrair o método da Dra. Carolini para DT-002K-01 (RX 24M) e DT-002K-02 (serralheiro/fumos), via estudo cruzado das matrizes.
+
+### O que foi feito
+
+1. Releitura do protocolo (item 1) e da Matriz Patrícia (item 3). Achado de estado: project knowledge defasado (protocolo v2, D-ARQ até 13) — confirmado contra git real (HEAD 4dbec6d, último D-ARQ-18, R-GHE até 04). Git venceu o cache, como previsto.
+2. A Matriz Patrícia mostrou RX OIT só em 12M/60M e 24M pertencendo à espirometria — gerou hipótese (parcial) de que o RX-24M da RQ.61 fosse artefato.
+3. A Dra. Carolini respondeu com fundamentação no Anexo III da NR-07 (Portaria 567/2022), o que **dispensou o cruzamento das 4 matrizes** para extração do método. Cruzamento ficou como auditoria opcional, não executada.
+
+### Resultados (método extraído)
+
+- **DT-002K-02 (serralheiro) — RESOLVIDA, hipótese do Arquiteto revertida.** Não há risco por denominação de cargo (NR-01/NR-07). Risco implícito (R-GHE-02) só vale quando a operação é a atividade-fim (soldador industrial); serralheiro de obra = solda contingente → confirmação documental. Formalizado: R-GHE-02 refinada + R-GHE-05 nova. Caso Viverde confirmou a via-agente (cromo medido <10% LT ACGIH, GHE 10).
+- **DT-002K-01 (RX 24M) — RESOLVIDA.** Existe RX 24M legítimo: sílica/asbesto **sem avaliação quantitativa** (adm + 24M até 15 anos). Banda ausente na Patrícia e em R-RX-01 v2. R-RX-01 refinada com a tabela completa do Anexo III. A v2 (A-VAL-06) simplificou demais.
+- **D-ARQ-19 nova:** periodicidade dependente de tempo de exposição acumulado (corte 15 anos) é do agendador, não do motor.
+
+### Lições
+
+- Quando a especialista fundamenta na norma, a fonte (item 1 + item 2) dispensa o cruzamento empírico (item 3/4). O cruzamento serve para o que a norma não decide.
+- Hipótese de Arquiteto não é método: a R1 da Carolini reverteu "serralheiro = cargo-de-solda". Buscar o método via fonte, não inferir do padrão das matrizes.
+
+### Dívidas / pré-requisitos registrados
+
+- **Pré-requisito da 002.M:** auditar a RQ.61 Viverde antes de `test_viverde.py` — o gabarito pode conter PNOS-24M errado (correto 60M) e pintor-RX-24M (confusão com espirometria). Não validar contra valor errado. Toca D-ARQ-18 (RQ.61 vira gabarito após correção).
+- **TODO normativo (R-RX-01):** conferir faixas/anos do Anexo III contra a redação literal da Portaria 567/2022 antes de codar.
+- **DT-D3-02 (granularidade de `fumos_metalicos`):** ganha relevância — Cr⁶⁺ em soldagem de inox é o caso concreto. Não resolvida aqui.
+- **`matrizes_originais/` (~35 arquivos untracked):** decidir destino (commitar como dado de auditoria vs. `.gitignore`). Não resolvido nesta sessão.
+
+### Próxima sessão planejada
+
+**Tipo:** IMPLEMENTAÇÃO (002.M) — `test_viverde.py`, precedida da auditoria da RQ.61 (pré-requisito acima).
+
+---
+
 *Entradas futuras abaixo desta linha*
