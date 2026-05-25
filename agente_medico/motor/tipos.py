@@ -13,6 +13,7 @@ class Quantificacao:
     relacao_LT: Optional[str]
     pct_LT: Optional[float]
     apenas_qualitativa: bool
+    sem_avaliacao_quantitativa: bool = False
 
 
 @dataclass(frozen=True)
@@ -96,6 +97,7 @@ class ExameEmitido:
     periodicidade_meses: int
     momentos: set[Momento] = field(default_factory=set)
     motivos: list[Motivo] = field(default_factory=list)
+    periodicidade_apos_15a: Optional[int] = None
 
 
 @dataclass(frozen=True)

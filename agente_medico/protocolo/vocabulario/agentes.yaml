@@ -125,3 +125,21 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+  silica:
+    anexo_nr07: "I"
+    cas: "14808-60-7"
+    is_carcinogeno_iarc: true
+    tem_lt: true
+    protocolos_especiais: [R-RX-01]
+  asbesto:
+    anexo_nr07: "I"
+    cas: "1332-21-4"
+    is_carcinogeno_iarc: true
+    tem_lt: true
+    protocolos_especiais: [R-RX-01]
+  poeira_nao_classificada:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: [R-RX-01]
