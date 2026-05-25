@@ -101,15 +101,25 @@ _PCT_LEO_ALTO: float = 100.0   # 50_100: prev <= pct_LT < this; acima_100: >= th
 
 def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
     risco = next((r for r in ctx.riscos if r.agente in {"silica", "asbesto"}), None)
-    if risco is None:
+    if risco is None:                                               # (a)
         return False
     q = risco.quantificacao
-    if q is None or (q.pct_LT is None and not q.sem_avaliacao_quantitativa):
+    if q is None:                                                   # (b)
         return Ausente(
             "Sílica/asbesto sem quantificação nem indicação de ausência de "
             "avaliação — medir ou declarar ausência de laudo"
         )
-    return q
+    if q.pct_LT is not None and q.sem_avaliacao_quantitativa:      # (c)
+        return Ausente(
+            "Sílica/asbesto declara medição (pct_LT) e ausência de avaliação "
+            "quantitativa ao mesmo tempo — input contraditório, corrigir no PGR"
+        )
+    if q.pct_LT is None and not q.sem_avaliacao_quantitativa:      # (d)
+        return Ausente(
+            "Sílica/asbesto sem quantificação nem indicação de ausência de "
+            "avaliação — medir ou declarar ausência de laudo"
+        )
+    return q                                                        # (e)
 
 
 @primitivo("fumos_metalicos")

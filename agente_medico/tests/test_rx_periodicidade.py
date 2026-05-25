@@ -1,3 +1,5 @@
+# VALORES DE PERIODICIDADE A-CONFERIR vs Anexo III Portaria 567/2022
+# (002.L-estudo, opção B). Ao conferir a norma, atualizar AQUI + regras.yaml juntos.
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -209,3 +211,31 @@ def test_stage8_merge_preserva_apos15a() -> None:
     assert len(result) == 1
     assert result[0].periodicidade_apos_15a == 12
     assert result[0].momentos == {Momento.ADM, Momento.PER}
+
+
+# ---------------------------------------------------------------------------
+# Dado contraditório: pct_LT e sem_avaliacao_quantitativa ao mesmo tempo
+# ---------------------------------------------------------------------------
+
+def test_rx_silica_contradictorio_bloqueante_sem_emissao() -> None:
+    q_contradictoria = Quantificacao(
+        valor=70.0,
+        unidade="%LT",
+        relacao_LT=None,
+        pct_LT=70.0,
+        apenas_qualitativa=False,
+        sem_avaliacao_quantitativa=True,
+    )
+    ctx, proto = _ctx_com_agente("silica", q_contradictoria)
+    exames = stage_5_emissao(ctx, proto)
+    rx_list = [e for e in exames if e.exame == "rx_torax_oit"]
+    assert rx_list == [], "Estado contraditório não deve emitir rx_torax_oit"
+    bloqueantes = [p for p in ctx.pendencias if p.bloqueante]
+    assert bloqueantes, "Deve haver pendência bloqueante"
+    assert any("contraditório" in p.motivo for p in bloqueantes), (
+        "Motivo da pendência deve mencionar 'contraditório'"
+    )
+    for pred in _PREDICADOS_FAIXA + ["silica_asbesto_sem_medicao"]:
+        assert ctx.predicados.get(pred) is not True, (
+            f"Predicado {pred!r} não deve ser True em estado contraditório"
+        )
