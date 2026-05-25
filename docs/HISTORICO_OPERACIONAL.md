@@ -804,4 +804,77 @@ A definir pelo Diovanni. Candidatos naturais: Stage 6 (regime regulatório / ANA
 
 ---
 
+## Sessão 002.K — 24/05/2026
+
+**Tipo:** ARQUITETURA (auditoria da camada de dados Viverde + estratégia de validação end-to-end)
+**Participantes:** Diovanni Lisita + Claude (Arquiteto)
+**Branch:** `docs/fechamento-002k` (commit de docs; sem branch de motor — sessão de arquitetura pura)
+**Objetivo:** auditar o que existe na camada de dados Viverde/legado, decidir a estratégia de comparação motor↔gabarito, e documentar a camada que vivia fora dos docs vivos. Saída: D-ARQ-18 + esta entrada. Sem código de motor.
+
+### Camada de dados "sessao2" — ponto cego fechado
+
+Existia uma camada de dados Viverde/legado, datada de 17/05/2026 (tag de commit "feat(sessao2)"), **nunca documentada em doc vivo**. Inventário e destino de cada parte:
+
+- **`scripts/migrar_pdf_rq61.py`** — parser regex do PDF da RQ.61 → `banco_ghe_cargo_v1.json`. **Legado.** Será substituído pela re-extração do `.docx` na 002.L. **Bug conhecido (ver abaixo), não corrigido por decisão.**
+- **`scripts/migrar_matrizes_pdf.py`, `scripts/migrar_riscos_excel.py`** — migradores alimentados pela Matriz Patrícia (`.xlsx`). Paradigma legado (lookup), não tocam o motor novo.
+- **`data/banco_ghe_cargo_v1.json`** — 57 chaves `GHE:cargo`, 31 GHEs. Extração lossy da RQ.61. **Legado — aposentado como gabarito (D-ARQ-18).**
+- **`data/banco_matrizes_v1_1.json`, `banco_matrizes_v2.json`, `banco_riscos_nr7.json`** — bancos do motor legado (Streamlit, `modules/agente_medico_ia.py`). Não alimentam o motor novo.
+- **`data/dicionario_cas.py`, `sinonimos_quimicos.json`** — **candidatos** a enriquecer `agentes.yaml` (a verificar no estudo cruzado; não decidido).
+- **`data/mapa_cbo_cargo.json`, `cargos_desconhecidos.json`, `matriz_exames.py`** — legado. `cargos_desconhecidos.json` é o padrão de persistência que D-ARQ-14 **rejeitou** para o motor novo — confirma que `data/` é legado.
+
+**Conclusão:** `data/` + os 3 `scripts/` são legado. Não alimentam o motor nem a validação. Ponto cego documental fechado.
+
+### Auditoria do banco contra o PDF da RQ.61 (Viverde Areião)
+
+Confronto do `banco_ghe_cargo_v1.json` contra `matrizes_originais/MATRIZ DE EXAMES(ATUALIZAÇÃO)CMO VIVERDE AREIAO 06.03.2025.pdf` (15 págs, lido inteiro, tabela limpa). Achados detalhados em D-ARQ-18. Síntese:
+
+- **Cobertura parcial:** o PDF tem três blocos com numeração reutilizada (Estrutura 01–16, Acabamento 01–09, Administração 01–06); o banco perdeu funções inteiras (meios-oficiais, encarregados, vigia, etc.).
+- **17 linhas-fantasma** (exame com todos os momentos `False`): todas são exames "(P)" = só Periódico que o parser não soube ler. Bug de notação, não diferenciação clínica. Recuperáveis, mas defeito que o original não tem.
+- **Divergências intra-GHE do banco** eram artefato das fantasmas; no PDF os cargos do mesmo GHE batem (consistente com R-GHE-01) nos casos checados.
+- **Divergência inter-GHE real e fiel ao PDF:** pintor Estrutura (4 exames, sem químico) ≠ pintor Acabamento (10 exames, com pacote benzeno). Inventários diferentes por GHE — o banco acertou.
+
+### Bug conhecido não corrigido (decisão do Arquiteto)
+
+`migrar_pdf_rq61.py` é cego à notação "(P)" da RQ.61 (biomonitoramento só-periódico), gravando esses exames com todos os momentos `False`. **Não será corrigido:** o script é legado e será substituído pela re-extração do `.docx` na 002.L. Corrigi-lo é trabalho jogado fora. Registrado aqui para um próximo chat não reinvestigar o mesmo defeito como se fosse novo.
+
+### Autoria clínica da RQ.61 — esclarecido
+
+O PDF mostra duas médicas: Dra. Patrícia Montalvo Moraes (cabeçalho, coordenadora) e Dra. Carolini Polesso (rodapé, validação). Esclarecido pelo Diovanni: **a validação clínica de todo o conteúdo é da Dra. Carolini; a Dra. Patrícia, como coordenadora, assina os documentos validados pela Carolini.** Não há duas fontes clínicas divergentes — a RQ.61 é conduta da Carolini. Consequência arquitetural na cláusula 4 de D-ARQ-18 (política de divergência: bug OU lacuna, nunca "fonte divergente").
+
+### Inventário de matrizes e PCMSOs (`matrizes_originais/`)
+
+Levantado para dimensionar o estudo cruzado. 7 matrizes, 5 PCMSOs:
+
+- **Pares completos (matriz + PCMSO) — 4:** Viverde Areião, CMO Construtora ADM, Vistamerica, GPL-R78 / Naturia (mesma obra, nome variando entre os dois arquivos).
+- **Matrizes órfãs (sem PCMSO):** Dinâmica Engenharia (`.doc`, 07.01.26), Seconci Goiás (`.doc`, 20.03.26).
+- **PCMSO órfão (sem matriz):** Ricco Construtora (`.docx`).
+- **Também presentes:** `Matriz função-risco-exames - validado Dra. Patrícia 06.2025.xlsx` (Matriz Patrícia — item 3 da hierarquia, template genérico, distinto das RQ.61 por-obra; é o `.xlsx` anexado ao project knowledge); PGR Viverde V02 em `.pdf` **e `.docx`** (o `.docx`, 01/05/2026, é o insumo da 002.L — leitura por tabela).
+
+O estudo do método roda nos **4 pares completos**; órfãs entram como reforço (matriz-só confirma repetição de resultado; PCMSO-só ativa quando surgir matriz).
+
+### Decisões (D-ARQ-18)
+
+Gabarito = RQ.61 PDF/DOCX, não o banco. Granularidade por-GHE (R-GHE-01 a verificar contra o PDF na 002.M). Mapa nome↔slug na fixture. Política de divergência motor↔PDF = bug OU lacuna. Estratégia de validação do método = estudo cruzado multi-matriz (proposta do Diovanni, adotada como oficial).
+
+### Mapa da fase corrigido
+
+O kickoff modelava K→L→M. A 002.K revelou um passo faltante: divergências motor↔PDF podem ser lacunas clínicas (não-bugs) que precisam da Carolini antes de virarem asserção de teste. Fase corrigida:
+
+**K (estratégia) → estudo cruzado das 4 matrizes [CONHECIMENTO, nova] → L (estruturar PGR Viverde) → M (test_viverde.py).**
+
+### Dívida técnica / clínica
+
+- **Novas (clínicas, sessão CONHECIMENTO):** DT-002K-01 (gatilho de RX 24M ausente em R-RX-01), DT-002K-02 (serralheiro e pacote de fumos metálicos). Ambas no protocolo, ambas alimentam o estudo cruzado.
+- **Continuam abertas:** DT-002C-01, DT-D3-02, DT-002G-01, DT-002G-02, DT-002H-01, DT-002I-01.
+- **Bug legado registrado (não-dívida do motor):** cegueira de `migrar_pdf_rq61.py` à notação "P" — não corrigido por decisão (script legado, será substituído).
+
+### Próxima sessão planejada
+
+**Tipo:** CONHECIMENTO — estudo cruzado das 4 matrizes + PCMSOs (Viverde, CMO, Vistamerica, R78).
+**Objetivo:** separar regra-por-cargo de regra-por-agente-químico, com foco inicial em DT-002K-01 (RX 24M) e DT-002K-02 (serralheiro/fumos). Por divergência, buscar o método (o gatilho universal), não o resultado por empresa.
+**Primeira ação:** cruzar a conduta do serralheiro e do RX 24M entre as 4 matrizes; onde divergir, abrir o PCMSO da obra para checar o agente químico declarado (hipótese do Diovanni: o produto da FDS dispara a periodicidade). Material para levar à Dra. Carolini ao fim do estudo.
+**Pré-requisito:** confirmar se há matrizes/PCMSOs além de `matrizes_originais/` (o Diovanni mencionou ter mais salvas localmente).
+
+---
+
 *Entradas futuras abaixo desta linha*
