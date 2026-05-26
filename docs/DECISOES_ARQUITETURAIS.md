@@ -421,6 +421,23 @@ Fronteira com as camadas vizinhas:
 
 ---
 
+## D-ARQ-21 — O agrupamento em GHE é canônico: o motor respeita o GHE do PGR, não re-agrupa
+
+**Contexto.** O motor consome `PGR.ghes: tuple[GHEPGR]` como unidade de entrada. Mas o agrupamento de trabalhadores em GHE **varia por elaborador do PGR**: a CMO (PGR Viverde) separa o pedreiro em GHEs distintos por atividade (alvenaria, serviços gerais, reboco, contrapiso, cerâmica, bancada); outras empresas agrupam tudo num único GHE "pedreiro". Mesma obra, mesmo risco, modelagem diferente conforme quem escreveu o PGR. Isso levanta a dúvida: o motor deve respeitar o agrupamento do PGR, ou reconstruir os GHEs por critério próprio (cargo + perfil de exposição) antes de emitir?
+
+**Decisão.** O motor **respeita o agrupamento do PGR como canônico** e emite matriz por-GHE conforme o PGR trouxe. Não normaliza, não re-agrupa, não reconstrói GHEs. Validação: a Dra. Carolini confirma que respeita o agrupamento do PGR recebido (não reorganiza os trabalhadores antes de decidir exames). O agrupamento é input confiável no mesmo sentido em que o inventário de risco é (R-GHE-04).
+
+**Consequência.**
+- O motor não ganha estágio de normalização de GHE — `GHEPGR` continua sendo a unidade de entrada dada.
+- A mesma obra modelada por dois elaboradores produz matrizes diferentes, e **isso é correto**: fidelidade ao PGR vence consistência inter-PGR. A variabilidade é responsabilidade do elaborador, não do agente.
+- Universalidade preservada (D-ARQ-06): o motor funciona para qualquer agrupamento porque não impõe nenhum.
+- A saída deve registrar o agrupamento aplicado (auditoria — qual GHE do PGR originou cada matriz).
+- Estende R-GHE-04 ("inventário é canônico") ao agrupamento: **o agrupamento também é canônico**.
+
+**Base.** Sessão 002.L (25/05/2026). Confirmado por Diovanni (conhecimento do domínio: agrupamento varia por elaborador) e pela conduta da Dra. Carolini (respeita o PGR). Caso-âncora: pedreiro em 6 GHEs no PGR Viverde-CMO.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -441,3 +458,4 @@ Fronteira com as camadas vizinhas:
 | v14 | 24/05/2026 | Sessão 002.K (ARQUITETURA): D-ARQ-18 adicionada — gabarito de validação é a RQ.61 (PDF/DOCX), não `banco_ghe_cargo_v1.json` (extração lossy: funções perdidas, cega à notação "P", 17 linhas-fantasma); granularidade por-GHE; mapa nome↔slug na fixture; política de divergência motor↔PDF (bug OU lacuna, nunca fonte divergente); estratégia de estudo cruzado multi-matriz |
 | v15 | 25/05/2026 | Sessão 002.L-estudo: D-ARQ-19 adicionada (periodicidade por tempo de exposição = agendador) |
 | v16 | 25/05/2026 | Sessão 002.L0: D-ARQ-20 adicionada (periodicidade condicional via família de regras por faixa); D-ARQ-19 refinado (segundo valor `periodicidade_apos_15a`, não metadado) |
+| v17 | 25/05/2026 | Sessão 002.L: D-ARQ-21 adicionada — agrupamento em GHE é canônico, motor respeita o GHE do PGR sem re-agrupar (origem: PGR Viverde-CMO, pedreiro em 6 GHEs; Carolini respeita o agrupamento) |

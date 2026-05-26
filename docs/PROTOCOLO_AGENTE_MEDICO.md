@@ -458,6 +458,26 @@ Manter `fumos_metalicos` como categoria única faz o motor emitir matriz correta
 
 **Confirmação no caso Viverde:** o pacote disparou pelo **agente declarado** (nota do GHE 10: "Risco Cromo abaixo de 10% LT da ACGIH"), não pela denominação "serralheiro" — a via-agente operando. A hipótese inicial do Arquiteto (serralheiro como cargo-de-solda) foi **revertida** pela médica.
 
+### DT-002L-01 — Conversão de concentração medida (mg/m³) em faixa de %LEO para RX `[A VALIDAR]`
+
+**Origem:** Sessão 002.L (25/05/2026), estruturação do PGR Viverde.
+
+**Situação.** R-RX-01 (Anexo III NR-07) roteia a periodicidade do RX de tórax por
+faixa de exposição vs. LEO (≤10%, 10–50%, 50–100%, >100%). Mas os PGRs declaram a
+exposição à sílica como **concentração absoluta medida** (ex.: PGR Viverde — sílica
+0,0050 a 0,0071 mg/m³), não como percentual do LEO. O motor espera `pct_LT`; o PGR
+fornece mg/m³. Falta a regra de conversão.
+
+**Pergunta para a Dra. Carolini (sessão CONHECIMENTO):** como se converte a
+concentração medida (mg/m³) na faixa de %LEO que decide a periodicidade do RX? Qual
+o limite de exposição de referência e a fonte (NR-15 Anexo 12? ACGIH TLV? depende do
+%quartzo da amostra)? Buscar o método (a fórmula/critério), não o valor do caso Viverde.
+
+**Impacto até resolver:** sílica medida em mg/m³ entra no fixture com `pct_LT=None` →
+o motor a trata como quantificação incompleta (pendência), não emite RX por faixa. Os
+valores do Viverde são baixíssimos (provável ≤10% LEO = só admissional), mas o motor
+não crava isso sem a regra de conversão validada.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -488,3 +508,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v5 | 24/05/2026 | Sessão 002.K: DT-002K-01 (gatilho de RX 24M ausente em R-RX-01) e DT-002K-02 (serralheiro e pacote de fumos metálicos) adicionadas — ambas para sessão CONHECIMENTO, originadas da auditoria da RQ.61 contra o protocolo |
 | v6 | 25/05/2026 | Sessão 002.L-estudo: DT-002K-01 e DT-002K-02 RESOLVIDAS. R-GHE-02 refinada (indissociável vs. contingente); R-GHE-05 nova (risco contingente → confirmação documental); R-RX-01 refinada com tabela do Anexo III (4 faixas %LEO + estado sem-medição = gatilho do 24M; PNOS 60M). |
 | v7 | 25/05/2026 | Sessão 002.L0: R-RX-01 implementada como família R-RX-01-* (D-ARQ-20); R-RX-02 virou regra executável; estado contraditório de quantificação → pendência bloqueante. |
+| v8 | 25/05/2026 | Sessão 002.L: DT-002L-01 adicionada (conversão mg/m³ → %LEO para rotear faixa de RX — pergunta de método para a Carolini, originada da estruturação do PGR Viverde) |
