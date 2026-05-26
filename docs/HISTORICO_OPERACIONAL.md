@@ -947,10 +947,46 @@ A 002.M (test_viverde) estava bloqueada: o PGR Viverde estruturado não existe (
 - **Cópias mortas na raiz:** existem `DECISOES_ARQUITETURAIS.md` e `HISTORICO_OPERACIONAL.md` na raiz do repo (formato antigo `ADR-NNN`), divergentes dos vivos em `docs/`. São fósseis de 15/05 que nunca foram removidos e já causaram confusão de leitura. Limpeza dedicada futura (`git rm` das cópias da raiz após confirmar que nada as referencia).
 - **`matrizes_originais/` (~35 untracked):** destino indefinido (corpus de auditoria multi-setor vs. `.gitignore`), com triagem de PII obrigatória antes de qualquer `git add`. Destaques: Engeseg Metalúrgica (soldador atividade-fim puro) e Fazenda Jamaica/JBJ (primeiro PGR não-construção, validação D-ARQ-06).
 
-### Próxima sessão planejada
-
-**Tipo:** IMPLEMENTAÇÃO (dados/fixture) — **002.L: estruturar PGR Viverde** no schema do motor (PGR/GHEPGR/RiscoPGR/Quantificacao). Vai destravar dívidas de vocabulário (`cargos.yaml`/`agentes.yaml`) conforme cargos/agentes do Viverde aparecerem. Manualmente, não via cascata de extração (sessão futura própria). Pré-requisito da 002.M.
+### Próxima sessão planejada (registrada na 002.K0/L0 — agora executada, ver abaixo)
+Tipo: IMPLEMENTAÇÃO (dados/fixture) — 002.L: estruturar PGR Viverde. **Executada em 25/05/2026 — virou CONHECIMENTO+ARQUITETURA (ver entrada da sessão abaixo).**
 
 ---
+
+## Sessão 002.L — 25/05/2026
+
+**Tipo:** CONHECIMENTO + ARQUITETURA (planejada como IMPLEMENTAÇÃO; mudou de natureza no meio)
+**Participantes:** Diovanni + Claude (Arquiteto, Chat)
+**Branch:** docs/fechamento-002l-mapa-ghe
+**Objetivo planejado:** estruturar o PGR Viverde no schema do motor (fixture).
+**Objetivo real entregue:** mapa de GHE do Viverde + decisão arquitetural sobre agrupamento. O fixture Python foi adiado para a 002.L-fixture.
+
+### Por que mudou de natureza
+
+Ao estruturar o PGR, o Diovanni apontou que o **agrupamento em GHE varia por elaborador**: a CMO (PGR Viverde) separa o pedreiro em 6 GHEs por atividade; outras empresas agrupam num único GHE "pedreiro". Isso levantou a dúvida de se o motor deve respeitar o agrupamento do PGR ou re-agrupar por critério próprio. A dúvida é arquitetural e precedia qualquer fixture — estruturar o Viverde "como veio" antes de resolvê-la seria construir sobre premissa não-validada. A sessão passou de transcrição para decisão de design.
+
+### Decisão de arquitetura
+
+**D-ARQ-21** (registrada em DECISOES_ARQUITETURAIS.md): o agrupamento em GHE é canônico; o motor respeita o GHE do PGR, não re-agrupa. Base: a Dra. Carolini respeita o agrupamento do PGR recebido (Hipótese A, confirmada pelo Diovanni). Consequência: a mesma obra modelada por dois elaboradores produz matrizes diferentes, e isso é correto — fidelidade ao PGR vence consistência inter-PGR. Estende R-GHE-04 (inventário canônico) ao agrupamento.
+
+### O que foi entregue
+
+- **docs/MAPA_GHE_VIVERDE.md** (novo): transcrição fiel dos ~28 GHEs declarados pela CMO (16 Estrutura + 9 Acabamento + 6 Administração + 1 Fundação-pendência), com cargos, riscos, quantificações e EPIs de cada um. É a spec da 002.L-fixture.
+- **DT-002L-01** (PROTOCOLO): conversão mg/m³ → %LEO para rotear faixa de RX — pergunta de método para a Carolini.
+
+### Achados do PGR Viverde (dívidas herdadas pela 002.M)
+
+- **Serralheiro = Dióxido de Titânio, não cromo/Mn.** O PGR mede TiO₂ (0,008 mg/m³) na solda; a nota da RQ.61 dizia "Cromo <10% LT". Divergência PGR↔RQ.61 (D-ARQ-18) a resolver na 002.M. O pacote-soldador não é disparado pelo agente declarado neste PGR.
+- **Sílica sempre em mg/m³** (4 ocorrências, 0,005–0,0071), nunca em %LEO → DT-002L-01.
+- **Fundação sem inventário de risco** (op. retroescavadeira/escavadeira/motorista/perfuratriz na matriz cargo×tarefa, sem bloco ET próprio) → pendência R-PGR-04 no fixture (GHE com riscos vazios).
+- **Gás e marceneiro** citados na matriz, sem bloco de risco — confirmar na 002.L-fixture se é lacuna ou absorção por outro GHE.
+- **Ruído "aguardando medição"** em Adm-03 (ADC12) → pendência de medição.
+- **Numeração de GHE da CMO tem saltos/repetições** — preservados nome e cargos declarados; id estável no fixture, nome = SETOR/FUNÇÃO da CMO.
+
+### Próxima sessão planejada
+
+**002.L-fixture — IMPLEMENTAÇÃO (dados):** transcrever o MAPA_GHE_VIVERDE.md validado para fixture Python (instanciando os dataclasses do motor, sem loader novo — não há conftest/fixtures no projeto). Aparece a cascata de vocabulário: popular cargos.yaml (~29 cargos do Viverde) e agentes.yaml (~13 agentes: metil_etil_cetona, etanol, estireno, dioxido_de_titanio, monoxido_de_carbono, cloreto_de_hidrogenio, etc.). Serralheiro entra sem riscos_implicitos de solda (R-GHE-05). Pré-requisito da 002.M (test_viverde).
+
+---
+*Entradas futuras abaixo desta linha*
 
 *Entradas futuras abaixo desta linha*
