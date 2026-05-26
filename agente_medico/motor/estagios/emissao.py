@@ -85,6 +85,7 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
                     periodicidade_meses=int(item["periodicidade_meses"]),
                     momentos=momentos,
                     motivos=[motivo],
+                    periodicidade_apos_15a=item.get("periodicidade_apos_15a"),
                 )
             )
 

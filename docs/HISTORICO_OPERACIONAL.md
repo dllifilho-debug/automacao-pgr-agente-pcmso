@@ -913,4 +913,44 @@ O kickoff modelava K→L→M. A 002.K revelou um passo faltante: divergências m
 
 ---
 
+## Sessão 002.L0 — 25/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO (motor)
+**Participantes:** Diovanni Lisita + Claude (Arquiteto) + Claude Code (Sonnet)
+**Branch:** `feature/motor-002l0-rx-periodicidade-condicional`
+**Objetivo:** Implementar R-RX-01 refinada (periodicidade condicional de RX) destravando a 002.L (estruturar PGR Viverde).
+
+### Contexto / por que esta sessão existe
+
+A 002.M (test_viverde) estava bloqueada: o PGR Viverde estruturado não existe (só PDF/DOCX crus). E a 002.L (estruturar PGR) esbarrava em duas lacunas de tipo que a 002.L-estudo deixou só no papel: (1) `Quantificacao` não representava "sem avaliação quantitativa" (gatilho do RX 24M); (2) o motor não suportava periodicidade dependente de quantificação. A 002.L0 resolve as duas antes de estruturar qualquer PGR. Sequência revisada: **002.L0 → 002.L (estruturar PGR) → 002.M (test_viverde)**.
+
+### Decisões de arquitetura tomadas
+
+- **D-ARQ-20:** periodicidade condicional via família de regras por faixa (Caminho B), sem estender o schema de regra. Motor intocado; condicionalidade em primitivos+compostos (D-ARQ-10).
+- **D-ARQ-19 refinado:** encurtamento de 15 anos como segundo valor `periodicidade_apos_15a` no `ExameEmitido`; gatilho temporal no `Motivo`, não no schema.
+- **Estado contraditório → pendência, não precedência.** Avaliada e rejeitada a opção de `sem_avaliacao` ter precedência sobre `pct_LT` — seria formalizar regra clínica não-validada. Input contraditório vira `Ausente` bloqueante (D-ARQ-08/13).
+
+### O que foi entregue
+
+- `Quantificacao.sem_avaliacao_quantitativa` + `ExameEmitido.periodicidade_apos_15a`.
+- 3 agentes novos (`silica`, `asbesto`, `poeira_nao_classificada`), slug `rx_torax_oit`.
+- 7 primitivos de faixa + helper `_helper_silica_asbesto` (5 ramos; estado contraditório → Ausente).
+- Família `R-RX-01-*` (6 regras) + R-RX-02 executável.
+- Stage 8 compara `periodicidade_apos_15a` no conflito/merge.
+- `test_rx_periodicidade.py`: 15 testes (roteamento, Ausente, exclusividade de fronteiras, contraditório, Stage 8).
+- **284 testes verdes / mypy --strict limpo** (era 269).
+
+### Dívidas registradas (não resolvidas nesta sessão)
+
+- **DT-D3-02 ganha corpo:** `anexo_nr07: null` em `manganes` e `fumos_metalicos` no `agentes.yaml` — inconsistente com Mn=Anexo II e Cr⁶⁺=Anexo I. Os agentes novos (sílica/asbesto) entraram com Anexo I correto; os antigos ficaram como estavam (fora de escopo da L0).
+- **Valores a-conferir (opção B):** periodicidades e limiares de %LEO em `regras.yaml` + `predicados.py` (`_PCT_LEO_*`) são transcrição da Carolini, não verbatim do Anexo III. `test_rx_periodicidade.py` crava os valores literais nas asserções de roteamento (âncora-comentário no topo do arquivo). Ao conferir a Portaria 567/2022: atualizar regras.yaml + predicados.py + asserções do teste juntos.
+- **Cópias mortas na raiz:** existem `DECISOES_ARQUITETURAIS.md` e `HISTORICO_OPERACIONAL.md` na raiz do repo (formato antigo `ADR-NNN`), divergentes dos vivos em `docs/`. São fósseis de 15/05 que nunca foram removidos e já causaram confusão de leitura. Limpeza dedicada futura (`git rm` das cópias da raiz após confirmar que nada as referencia).
+- **`matrizes_originais/` (~35 untracked):** destino indefinido (corpus de auditoria multi-setor vs. `.gitignore`), com triagem de PII obrigatória antes de qualquer `git add`. Destaques: Engeseg Metalúrgica (soldador atividade-fim puro) e Fazenda Jamaica/JBJ (primeiro PGR não-construção, validação D-ARQ-06).
+
+### Próxima sessão planejada
+
+**Tipo:** IMPLEMENTAÇÃO (dados/fixture) — **002.L: estruturar PGR Viverde** no schema do motor (PGR/GHEPGR/RiscoPGR/Quantificacao). Vai destravar dívidas de vocabulário (`cargos.yaml`/`agentes.yaml`) conforme cargos/agentes do Viverde aparecerem. Manualmente, não via cascata de extração (sessão futura própria). Pré-requisito da 002.M.
+
+---
+
 *Entradas futuras abaixo desta linha*

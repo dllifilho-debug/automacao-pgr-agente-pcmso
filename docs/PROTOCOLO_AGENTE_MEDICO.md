@@ -202,12 +202,27 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 - A periodicidade da **espirometria** (adm + 24M, R-ESP-01) é independente do RX — não confundir o 24M dos dois exames.
 - O corte de 15 anos é **tempo de exposição acumulado** → resolvido pelo agendador, não pelo motor (ver D-ARQ-19).
 
+**Implementação (002.L0, D-ARQ-20).** R-RX-01 é implementada como família de regras de periodicidade constante em `regras.yaml`, uma por faixa:
+
+| Entrada | Predicado (`quando`) | Periodicidade | Encurtamento (>15a) |
+|---|---|---|---|
+| R-RX-01-adm | silica_asbesto_leo_ate_10 | só admissional | — |
+| R-RX-01-sem | silica_asbesto_sem_medicao | 24M | → 12M |
+| R-RX-01-baixa | silica_asbesto_leo_10_50 | 60M | → 36M |
+| R-RX-01-media | silica_asbesto_leo_50_100 | 36M | → 24M |
+| R-RX-01-alta | silica_asbesto_leo_acima_100 | 12M | — |
+| R-RX-01-pnos | pnos | 60M | — |
+
+`R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores a-conferir (opção B):** periodicidades e limiares de %LEO acima são transcrição com apoio do Anexo III, pendente conferência contra a redação literal da Portaria 567/2022.
+
 **Base normativa:** Anexo III da NR-07 (Portaria 567/2022). Validação clínica: Dra. Carolini, 05/2025.
 
 **TODO normativo (002.L-estudo):** conferir faixas de %LEO, periodicidades e cortes de 15 anos contra a redação literal do Anexo III antes da 002.M. Estrutura (4 faixas + estado "sem avaliação quantitativa") fechada; valores exatos a confirmar.
 
 #### R-RX-02 — Fumos metálicos `[VALIDADO]`
 Cargo com exposição a fumos metálicos (incluindo soldador) → RX **60 meses** em adm/per/MR/dem.
+
+**Implementação (002.L0).** R-RX-02 passou a existir como regra executável em `regras.yaml` (`quando: fumos_metalicos → RX 60M`). Até a 002.L0 constava apenas como `protocolos_especiais` documental em `agentes.yaml`, sem regra correspondente — fumos metálicos não emitia RX no motor.
 
 ### 5.5 ECG
 
@@ -472,3 +487,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v4 | 23/05/2026 | Sessão 002.I: DT-002I-01 adicionada (limiar de genericidade de R-PGR-05) |
 | v5 | 24/05/2026 | Sessão 002.K: DT-002K-01 (gatilho de RX 24M ausente em R-RX-01) e DT-002K-02 (serralheiro e pacote de fumos metálicos) adicionadas — ambas para sessão CONHECIMENTO, originadas da auditoria da RQ.61 contra o protocolo |
 | v6 | 25/05/2026 | Sessão 002.L-estudo: DT-002K-01 e DT-002K-02 RESOLVIDAS. R-GHE-02 refinada (indissociável vs. contingente); R-GHE-05 nova (risco contingente → confirmação documental); R-RX-01 refinada com tabela do Anexo III (4 faixas %LEO + estado sem-medição = gatilho do 24M; PNOS 60M). |
+| v7 | 25/05/2026 | Sessão 002.L0: R-RX-01 implementada como família R-RX-01-* (D-ARQ-20); R-RX-02 virou regra executável; estado contraditório de quantificação → pendência bloqueante. |

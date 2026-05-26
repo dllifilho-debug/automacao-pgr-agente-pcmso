@@ -38,3 +38,72 @@ regras:
     base_normativa: "Protocolo Dra. Carolini R-VIB-02 — qualquer vibracao (corpo inteiro ou maos-bracos) -> audiometria 12M mesmo abaixo do nivel de acao. Vibracao generica sem qualificar tipo -> Ausente -> bloqueante (D-ARQ-13/16)"
     status: VALIDADO
 
+  - id: R-RX-01-adm
+    quando: silica_asbesto_leo_ate_10
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 0
+        momentos: [adm]
+    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto ≤10%LT, somente admissional (padrão R-VIB-01)"
+    status: VALIDADO
+
+  - id: R-RX-01-sem
+    quando: silica_asbesto_sem_medicao
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 24
+        periodicidade_apos_15a: 12
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto sem medição declarada; encurta para 12M após 15 anos de exposição (corte resolvido pelo agendador, D-ARQ-19)"
+    status: VALIDADO
+
+  - id: R-RX-01-baixa
+    quando: silica_asbesto_leo_10_50
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: 36
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto 10%<LEO<50%; encurta para 36M após 15 anos de exposição (corte resolvido pelo agendador, D-ARQ-19)"
+    status: VALIDADO
+
+  - id: R-RX-01-media
+    quando: silica_asbesto_leo_50_100
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 36
+        periodicidade_apos_15a: 24
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto 50%≤LEO<100%; encurta para 24M após 15 anos de exposição (corte resolvido pelo agendador, D-ARQ-19)"
+    status: VALIDADO
+
+  - id: R-RX-01-alta
+    quando: silica_asbesto_leo_acima_100
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 12
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto ≥100%LT; periodicidade constante"
+    status: VALIDADO
+
+  - id: R-RX-01-pnos
+    quando: pnos
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — poeira não classificada; periodicidade constante"
+    status: VALIDADO
+
+  - id: R-RX-02
+    quando: fumos_metalicos
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — fumos metálicos → RX tórax OIT 60M"
+    status: VALIDADO
+

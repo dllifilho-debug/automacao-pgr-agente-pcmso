@@ -394,14 +394,30 @@ Fronteira com as camadas vizinhas:
 
 **Contexto.** R-RX-01 refinada (002.L-estudo) introduz periodicidades de RX que mudam conforme **tempo de exposição acumulado** do trabalhador (cortes em 15 anos: ex. sílica/asbesto sem medição = 24M até 15 anos, depois 12M). Tempo acumulado é atributo do **histórico individual**, não do PGR nem da função — o motor (função pura `(PGR, Protocolo) → Resultado`, D-ARQ-09) não tem acesso a ele.
 
-**Decisão.** O motor emite sempre a **faixa inicial** (≤ 15 anos) e anexa ao exame um **metadado de encurtamento** declarando a regra (ex.: `apos_anos_exposicao: 15 → periodicidade: 12M`). O **agendador** (D-ARQ-11), que já confronta a matriz ideal com o histórico do trabalhador, resolve o encurtamento.
+**Decisão.** O motor emite sempre a **faixa inicial** (≤ 15 anos) em `periodicidade_meses` e, quando há encurtamento por tempo, a periodicidade pós-corte em **`periodicidade_apos_15a: Optional[int]`** (None quando não há corte). Não é metadado abstrato — é a segunda metade da mesma grandeza, tipada como `int`. O gatilho temporal ("15 anos") vive em `Motivo.detalhe` (texto), não no schema do exame. O **agendador** (D-ARQ-11), que já confronta a matriz ideal com o histórico do trabalhador, seleciona qual valor aplicar.
 
 **Consequência.**
 - Motor permanece determinístico e sem estado individual; não lê tempo de serviço.
-- A regra de encurtamento vive como dado anexo ao `ExameEmitido`, consumido pelo agendador — mesma separação motor/agendador de R-REAPR-01/02.
-- Refina o tipo `Quantificacao` (trilha D-ARQ-16 / F-3): além de `pct_LT`, discretizar **4 faixas de %LEO** e um estado **`sem_avaliacao_quantitativa`** de primeira classe — distinto de `apenas_qualitativa`, porque "sem medição" dispara 24M enquanto a v2 colapsava qualitativa → 12M.
+- O segundo valor (`periodicidade_apos_15a`) vive como campo do `ExameEmitido`, consumido pelo agendador — mesma separação motor/agendador de R-REAPR-01/02. `stage_8_consolidacao` compara ambos os valores ao detectar `ConflitoProtocolo`.
+- Refina o tipo `Quantificacao` (trilha D-ARQ-16 / F-3): além de `pct_LT`, discretizar **4 faixas de %LEO** (≤10 / 10–50 / 50–100 / >100) mais o estado **`sem_avaliacao_quantitativa`** de primeira classe — distinto de `apenas_qualitativa`, porque "sem medição" dispara 24M enquanto a v2 colapsava qualitativa → 12M.
 
-**Base.** Aplicação de D-ARQ-09 e D-ARQ-11 a R-RX-01 refinada. Origem: 002.L-estudo.
+**Base.** Aplicação de D-ARQ-09 e D-ARQ-11 a R-RX-01 refinada. Origem: 002.L-estudo. Refinado na 002.L0 (modelagem por segundo valor `periodicidade_apos_15a`, não metadado).
+
+---
+
+## D-ARQ-20 — Periodicidade condicional via família de regras por faixa, não via schema de regra estendido
+
+**Contexto.** R-RX-01 refinada tem periodicidade que varia conforme a quantificação do risco-origem (faixa de %LEO + estado de avaliação). O formato de regra do motor é `quando (predicado) → emite [periodicidade constante]` — não suporta periodicidade como função da quantificação. Duas saídas: (A) estender o schema de regra (toca emissão, carregador, schema e todos os testes que assumem periodicidade constante); (B) explodir em família de regras de periodicidade constante, cada uma disparada por um predicado de faixa.
+
+**Decisão.** Caminho B. R-RX-01 vira a família `R-RX-01-{adm, sem, baixa, media, alta, pnos}` em `regras.yaml`, cada entrada com periodicidade constante, disparada por um primitivo de faixa (`silica_asbesto_leo_ate_10`, `silica_asbesto_sem_medicao`, etc.). A condicionalidade clínica vive em primitivos (código) + compostos (YAML), onde D-ARQ-10 a colocou. O contrato do motor (`predicado → emite constante`) permanece intocado.
+
+**Consequência.**
+- Motor não muda (emissão, carregador e schema de regra preservados) — Caminho B usa o mecanismo predicado→regra existente.
+- Cada faixa tem ID próprio e `base_normativa` própria → audit trail por faixa (o motor já referencia `regra_id`).
+- Exclusividade das faixas é responsabilidade dos predicados, não do motor: cobrir a reta sem buraco nem sobreposição; estado contraditório (medição + ausência de medição declaradas juntas) vira `Ausente`/pendência bloqueante, nunca `ConflitoProtocolo`.
+- **Contrato de ID:** `R-RX-01` permanece o nome clínico no protocolo; `R-RX-01-*` são entradas de implementação. ID estável honrado.
+
+**Base.** Sessão 002.L0 (25/05/2026). Caso-âncora: R-RX-01.
 
 ---
 
@@ -423,3 +439,5 @@ Fronteira com as camadas vizinhas:
 | v12 | 23/05/2026 | Sessão 002.I (ARQUITETURA): D-ARQ-17 adicionada — Stage 3 pendências estruturais, âncora R-PGR-04, bloqueante por-GHE; R-PGR-05 vira DT-002I-01 |
 | v13 | 24/05/2026 | Sessão 002.J: D-ARQ-17 ganha parágrafo "Aplicação na sessão 002.J" — Stage 3 implementado, não-duplicação confirmada (único consumidor de `ProdutoQuimico.fds`), não-short-circuit verificado por teste de integração |
 | v14 | 24/05/2026 | Sessão 002.K (ARQUITETURA): D-ARQ-18 adicionada — gabarito de validação é a RQ.61 (PDF/DOCX), não `banco_ghe_cargo_v1.json` (extração lossy: funções perdidas, cega à notação "P", 17 linhas-fantasma); granularidade por-GHE; mapa nome↔slug na fixture; política de divergência motor↔PDF (bug OU lacuna, nunca fonte divergente); estratégia de estudo cruzado multi-matriz |
+| v15 | 25/05/2026 | Sessão 002.L-estudo: D-ARQ-19 adicionada (periodicidade por tempo de exposição = agendador) |
+| v16 | 25/05/2026 | Sessão 002.L0: D-ARQ-20 adicionada (periodicidade condicional via família de regras por faixa); D-ARQ-19 refinado (segundo valor `periodicidade_apos_15a`, não metadado) |

@@ -36,3 +36,8 @@ exames:
     nome_exibicao: "RX Coluna Lombo-Sacra"
     categoria: imagem
     fonte_matriz: "VIBRAÇÃO CORPO INTEIRO"
+
+  rx_torax_oit:
+    nome_exibicao: "RX Tórax OIT"
+    categoria: imagem
+    fonte_matriz: "SÍLICA / ASBESTO / POEIRAS"

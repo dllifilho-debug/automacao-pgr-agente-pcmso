@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Union
 
-from agente_medico.motor.tipos import Ausente, GHEContext
+from agente_medico.motor.tipos import Ausente, GHEContext, Quantificacao
 
 ResultadoPredicado = Union[bool, Ausente]
 
@@ -91,6 +91,85 @@ def _vibracao_mao_braco(ctx: GHEContext) -> ResultadoPredicado:
 @primitivo("ototoxico")
 def _ototoxico(ctx: GHEContext) -> bool:
     return any(r.is_ototoxico for r in ctx.riscos)
+
+
+# TODO normativo: conferir vs Anexo III Portaria 567/2022 — opção B
+_PCT_LEO_BAIXO: float = 10.0   # ate_10: pct_LT <= this
+_PCT_LEO_MEDIO: float = 50.0   # 10_50: prev < pct_LT < this
+_PCT_LEO_ALTO: float = 100.0   # 50_100: prev <= pct_LT < this; acima_100: >= this
+
+
+def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
+    risco = next((r for r in ctx.riscos if r.agente in {"silica", "asbesto"}), None)
+    if risco is None:                                               # (a)
+        return False
+    q = risco.quantificacao
+    if q is None:                                                   # (b)
+        return Ausente(
+            "Sílica/asbesto sem quantificação nem indicação de ausência de "
+            "avaliação — medir ou declarar ausência de laudo"
+        )
+    if q.pct_LT is not None and q.sem_avaliacao_quantitativa:      # (c)
+        return Ausente(
+            "Sílica/asbesto declara medição (pct_LT) e ausência de avaliação "
+            "quantitativa ao mesmo tempo — input contraditório, corrigir no PGR"
+        )
+    if q.pct_LT is None and not q.sem_avaliacao_quantitativa:      # (d)
+        return Ausente(
+            "Sílica/asbesto sem quantificação nem indicação de ausência de "
+            "avaliação — medir ou declarar ausência de laudo"
+        )
+    return q                                                        # (e)
+
+
+@primitivo("fumos_metalicos")
+def _fumos_metalicos(ctx: GHEContext) -> bool:
+    return any(r.agente == "fumos_metalicos" for r in ctx.riscos)
+
+
+@primitivo("silica_asbesto_sem_medicao")
+def _silica_asbesto_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_silica_asbesto(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.sem_avaliacao_quantitativa
+
+
+@primitivo("silica_asbesto_leo_ate_10")
+def _silica_asbesto_leo_ate_10(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_silica_asbesto(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.pct_LT is not None and r.pct_LT <= _PCT_LEO_BAIXO
+
+
+@primitivo("silica_asbesto_leo_10_50")
+def _silica_asbesto_leo_10_50(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_silica_asbesto(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.pct_LT is not None and _PCT_LEO_BAIXO < r.pct_LT < _PCT_LEO_MEDIO
+
+
+@primitivo("silica_asbesto_leo_50_100")
+def _silica_asbesto_leo_50_100(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_silica_asbesto(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.pct_LT is not None and _PCT_LEO_MEDIO <= r.pct_LT < _PCT_LEO_ALTO
+
+
+@primitivo("silica_asbesto_leo_acima_100")
+def _silica_asbesto_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_silica_asbesto(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.pct_LT is not None and r.pct_LT >= _PCT_LEO_ALTO
+
+
+@primitivo("pnos")
+def _pnos(ctx: GHEContext) -> bool:
+    return any(r.agente == "poeira_nao_classificada" for r in ctx.riscos)
 
 
 def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:

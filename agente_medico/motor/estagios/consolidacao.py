@@ -37,17 +37,23 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
                     periodicidade_meses=exame.periodicidade_meses,
                     momentos=set(exame.momentos),
                     motivos=list(exame.motivos),
+                    periodicidade_apos_15a=exame.periodicidade_apos_15a,
                 )
             )
         else:
             existing = result[indices[norm]]
-            if existing.periodicidade_meses != exame.periodicidade_meses:
+            if (
+                existing.periodicidade_meses != exame.periodicidade_meses
+                or existing.periodicidade_apos_15a != exame.periodicidade_apos_15a
+            ):
                 regras_a = [m.regra_id for m in existing.motivos]
                 regras_b = [m.regra_id for m in exame.motivos]
                 raise ConflitoProtocolo(
                     f"Conflito de periodicidade para '{existing.exame}': "
-                    f"regras {regras_a} pedem {existing.periodicidade_meses}M; "
+                    f"regras {regras_a} pedem {existing.periodicidade_meses}M"
+                    f"(apos_15a={existing.periodicidade_apos_15a}); "
                     f"regras {regras_b} pedem {exame.periodicidade_meses}M"
+                    f"(apos_15a={exame.periodicidade_apos_15a})"
                 )
             existing.momentos |= exame.momentos
             existing.motivos.extend(exame.motivos)
