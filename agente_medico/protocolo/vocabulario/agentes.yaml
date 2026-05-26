@@ -143,3 +143,35 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-RX-01]
+  etanol:
+    anexo_nr07: "11"
+    cas: "64-17-5"
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
+  metil_etil_cetona:
+    anexo_nr07: "11"
+    cas: "78-93-3"
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
+  cloreto_de_hidrogenio:
+    anexo_nr07: "11"
+    cas: "7647-01-0"
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
+  dioxido_de_titanio:
+    # [A VALIDAR] anexo NR-07 e tem_lt: TiO2 e poeira (IARC 2B inalacao), nao esta no Anexo 11 de vapores. Carolini confirma via de exame (RX?).
+    anexo_nr07: null
+    cas: "13463-67-7"
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: []
+  propanediamina_tridecyloxy:
+    # [A VALIDAR] 1,3-Propanediamine N-[3-(tridecyloxy)propyl] (componente de graxa/betume). CAS, anexo e LT nao confirmados.
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
