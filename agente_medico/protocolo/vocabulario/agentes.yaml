@@ -175,3 +175,33 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+  ruido:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
+  espaco_confinado:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  eletricidade:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  umidade:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  microrganismos:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
