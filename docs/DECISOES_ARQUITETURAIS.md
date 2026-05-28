@@ -438,6 +438,79 @@ Fronteira com as camadas vizinhas:
 
 ---
 
+## D-ARQ-22 — Modelo de qualidade: erro-zero, revisão de saída e PDCA
+
+**Contexto.** Até 002.M a incerteza clínica era resolvida perguntando à Dra. Carolini
+(validação prévia, regra a regra). A partir de 002.M ela não faz mais isso; o protocolo
+v8 fica congelado. A validação clínica não desaparece — desloca-se para REVISÃO DE SAÍDA:
+quando o sistema extrai a matriz de um PGR, uma médica do trabalho (Patrícia/Carolini) lê
+a matriz gerada e caça erros de escrita/geração. O desenvolvimento mira erro zero para
+minimizar esse trabalho; erros achados viram correções (PDCA).
+
+**Decisão — duas partes.**
+
+*Parte A — hierarquia de resolução de incerteza clínica nova.* Resolver na ordem, parando
+no primeiro nível que resolver:
+1. Norma vigente (texto literal, conferido no site oficial do MTE) → `[DERIVADO — NR-x item y]`.
+2. Matriz validada como precedente (RQ.61 Carolini / matriz Patrícia) → `[DERIVADO — RQ.61/Patrícia]`.
+3. Analogia com regra `[VALIDADO]` existente → `[DERIVADO — analogia R-XXX]`.
+4. Interpretação do Arquiteto, só quando 1-3 não resolvem → `[INTERPRETADO — prioridade na
+   revisão de saída]`. Marca explícita, nunca disfarçada de validada.
+
+*Parte B — o que torna erro-zero alcançável.* O motor se apoia em três pernas que já existem
+e devem ser preservadas em toda regra futura:
+- Determinismo (D-ARQ-09): mesmo PGR → mesma matriz; correção PDCA é testável e regressão detectável.
+- Pendência-em-vez-de-chute (D-ARQ-08/13): ambiguidade vira pendência bloqueante, nunca exame
+  errado silencioso.
+- Rastreabilidade por linha (D-ARQ-03, audit trail granular): cada exame emitido carrega regra
+  de origem, gatilho e — NOVO a partir de 002.M — o status de validação da regra (VALIDADO/
+  DERIVADO/INTERPRETADO). A revisão de saída usa isso para priorizar: olha primeiro os
+  `[INTERPRETADO]`, depois os `[DERIVADO]` por analogia, por último os `[VALIDADO]`.
+
+**Consequência.**
+- O status `[A VALIDAR — Carolini]` é descontinuado (ver PROTOCOLO § convenções e § pendências).
+- O risco residual do modelo é o ERRO SILENCIOSO PLAUSÍVEL: erro que pareça correto na matriz e
+  escape da leitura. Mitigação direta = a rastreabilidade por linha acima; quanto melhor a saída
+  expõe origem e status, menor a chance de erro silencioso passar pela revisão.
+- Toda regra criada após 002.M nomeia sua fonte no corpo (norma, matriz-precedente, analogia, ou
+  marca de interpretação). Rastreabilidade regulatória: da regra à fonte.
+- A saída do agente deve, quando implementada a camada de relatório, distinguir por exame o status
+  de validação da regra que o gerou — requisito de produto derivado deste modelo.
+
+**Base.** Sessão 002.M (28/05/2026). Decisão de metodologia — sem caso-âncora de código.
+
+---
+
+## D-ARQ-23 — Operação/atividade é dado de primeira classe do GHE
+
+**Contexto.** R-GHE-05 (risco contingente → confirmação documental) é validada e completa,
+mas não é implementável: seu gatilho é "operação de risco confirmada documentalmente" (ex.:
+serralheiro que solda), e `GHEPGR` (`tipos.py`) não modela operações/tarefas — só agentes
+(`riscos`), cargos, EPIs, produtos químicos, psicossocial. O motor não tem onde ler "este GHE
+solda". Caso âncora: serralheiro Viverde (Est-09), cujas tarefas ET38-ET42 descrevem solda mas
+se perdem na modelagem atual; o motor não dispara o pacote de fumos que a RQ.61 atribuiu.
+
+**Decisão (PROPOSTA — a implementar em sessão futura).** Modelar operação/atividade confirmada
+como dado de primeira classe do GHE, distinto de agente. Esboço:
+- Campo novo em `GHEPGR` (ex.: `operacoes: tuple[str, ...]`), alimentado pelo parser de PGR a
+  partir das tarefas declaradas (ET38-ET42 → `solda`).
+- Stage 2 (expansão de riscos) ganha regra de inferência: operação confirmada → risco implícito
+  (solda → `fumos_metalicos`), mesma família de R-PGR-03 (sinal via EPI) e R-GHE-02/05.
+- Universal: "operação Y confirmada → risco implícito Z" serve a qualquer setor.
+
+**Consequência.**
+- Destrava R-GHE-05 e a reprodução do serralheiro Viverde no motor.
+- Exige: alterar `tipos.py` (campo novo), atualizar fixture `pgr_viverde.py` (popular `operacoes`),
+  regra de inferência em Stage 2, ajuste do parser a montante. Cada regra nova com teste (metodologia).
+- Modelagem fina (nome do campo, vocabulário de operações, onde mora a inferência) decide-se no
+  início da sessão de implementação.
+
+**Status:** PROPOSTA. Não implementada. Originada em 002.M.
+
+**Base.** Sessão 002.M (28/05/2026). Caso-âncora: serralheiro Viverde (Est-09), tarefas ET38-ET42.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -459,3 +532,4 @@ Fronteira com as camadas vizinhas:
 | v15 | 25/05/2026 | Sessão 002.L-estudo: D-ARQ-19 adicionada (periodicidade por tempo de exposição = agendador) |
 | v16 | 25/05/2026 | Sessão 002.L0: D-ARQ-20 adicionada (periodicidade condicional via família de regras por faixa); D-ARQ-19 refinado (segundo valor `periodicidade_apos_15a`, não metadado) |
 | v17 | 25/05/2026 | Sessão 002.L: D-ARQ-21 adicionada — agrupamento em GHE é canônico, motor respeita o GHE do PGR sem re-agrupar (origem: PGR Viverde-CMO, pedreiro em 6 GHEs; Carolini respeita o agrupamento) |
+| v18 | 28/05/2026 | Sessão 002.M: D-ARQ-22 adicionada (modelo erro-zero + revisão de saída + PDCA; hierarquia de resolução de incerteza; status [A VALIDAR — Carolini] descontinuado); D-ARQ-23 adicionada (operação como dado de primeira classe do GHE — PROPOSTA, não implementada) |
