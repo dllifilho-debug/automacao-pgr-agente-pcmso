@@ -7,9 +7,22 @@
 Cada regra tem ID estável (`R-CATEGORIA-NN`). O ID **não muda** entre versões — alterações de conteúdo geram nota de revisão na própria regra.
 
 Convenções de status:
-- `[VALIDADO]` — extraído diretamente da entrevista, sem ambiguidade
-- `[INFERIDO]` — extraído por dedução de outras respostas, precisa confirmação
-- `[A VALIDAR]` — lacuna ou ponto em que a resposta foi parcial
+- `[VALIDADO]` — extraído diretamente da entrevista com a Dra. Carolini (16-17/05/2026),
+  sem ambiguidade. CONGELADO a partir de 002.M: a fonte primária não faz mais validação
+  prévia. Regras `[VALIDADO]` são base estável; não reabrem exceto por norma vigente que
+  as contradiga.
+- `[INFERIDO]` — deduzido de outras respostas da entrevista. Não será mais promovido pela
+  Dra. Carolini; resolução segue a hierarquia de D-ARQ-22.
+- `[A VALIDAR — Carolini]` — DESCONTINUADO a partir de 002.M. Itens reclassificados em
+  `[DERIVADO]` ou `[INTERPRETADO]`.
+- `[DERIVADO — fonte]` — resolvido após 002.M por fonte objetiva: norma vigente (citar NR
+  e item, conferida no site oficial do MTE), matriz já validada como precedente (RQ.61
+  Carolini / matriz Patrícia), ou analogia direta com regra `[VALIDADO]`. Alta confiança;
+  a fonte é nomeada no corpo da regra.
+- `[INTERPRETADO — prioridade na revisão de saída]` — decisão do Arquiteto onde norma/
+  matriz/analogia não foram conclusivas. NÃO houve crivo clínico prévio. É a categoria que
+  a revisão de saída (médica lendo a matriz gerada) deve inspecionar PRIMEIRO. Não é um
+  buraco permanente: é o item de maior incerteza no ciclo PDCA, marcado para atenção.
 
 ---
 
@@ -93,6 +106,27 @@ Cargo cuja operação de risco é **contingente** (não indissociável da funç�
 **Caso âncora — serralheiro de obra.** No caso Viverde (RQ.61, GHE 10), o pacote de fumos/Mn disparou porque o PCMSO declarava agente medido ("Risco Cromo abaixo de 10% LT da ACGIH") — exposição confirmada documentalmente, não atribuição por cargo.
 
 **Implicação para a taxonomia (`cargos.yaml.riscos_implicitos`, D-ARQ-02/D-ARQ-12):** o campo `riscos_implicitos` só contém riscos indissociáveis. Serralheiro NÃO recebe `{solda, fumos_metalicos, manganes}` ali. (O hardcode `serralheiro → cromo` do motor legado em `modules/agente_medico_ia.py` está obsoleto e contradiz esta regra — não replicar no motor novo.)
+
+**Nota de implementação (002.M).** R-GHE-05 é clinicamente completa, mas depende de um
+dado que o motor ainda não modela: a **operação confirmada** do GHE. `GHEPGR` (`tipos.py`)
+carrega `cargos`, `riscos` (agentes), `epis`, `produtos_quimicos`, `psicossocial` — não
+carrega operações/tarefas. Sem isso o motor não avalia "a operação de solda foi confirmada".
+Endereçado por D-ARQ-23 (operação como dado de primeira classe). Até lá, R-GHE-05 não é
+executável no motor novo.
+
+**Caso âncora documentado — serralheiro Viverde (Est-09).** O PGR Viverde declara, para o
+serralheiro, os agentes `radiacao_uv_ir` (solda) e `dioxido_de_titanio` (0,008 mg/m³), além
+de ruído e acidente; descreve nas tarefas ET38-ET42 "solda com eletrodo revestido". NÃO
+declara `fumos_metalicos` nem cromo no inventário de entrada. O cromo ("Risco Cromo abaixo
+de 10% LT da ACGIH") aparece só na RQ.61, que é a matriz de SAÍDA validada — não na entrada.
+Logo, o motor processando o PGR puro vê marcadores de solda (radiação UV de solda + TiO2,
+constituinte do revestimento rutílico do eletrodo) mas nenhum agente que dispare R-PKG-SOLD/
+R-RX-02 (gatilho `fumos_metalicos`). Sem modelar a operação (D-ARQ-23), o motor NÃO reproduz
+o pacote de fumos da RQ.61 — divergência esperada e rastreada, não erro do fixture. Fundamento
+técnico: fumo de solda de eletrodo revestido é mistura (Fe, Mn, Cr, Ni + constituintes do
+revestimento como TiO2 e fluoretos); TiO2 e cromo são dois constituintes do mesmo fumo, não
+agentes contraditórios; Mn está presente em praticamente todo eletrodo (R-FDS-05). Fontes
+técnicas: OSHA FS-3647; literatura de composição de eletrodo revestido.
 
 **Base:** Dra. Carolini, R1 (05/2025); NR-01/NR-07 (Portaria 567/2022). Resolve DT-002K-02.
 
@@ -417,7 +451,11 @@ Manter `fumos_metalicos` como categoria única faz o motor emitir matriz correta
 2. Quais metais individuais merecem entrada própria em `agentes.yaml` desde já?
 3. R-OP-01 ("verificar FDS do eletrodo") deveria virar gatilho automático para granularização, ou continua como TODO operacional?
 
-**Status:** A VALIDAR. Não bloqueia o motor — caso âncora soldador continua funcional com a categoria única. Refinamento entra quando houver método extraído da especialista.
+**Status:** REABERTA SOB NOVA METODOLOGIA (002.M). Era `[A VALIDAR — Carolini]`; fonte
+indisponível. Resolução por D-ARQ-22: decompor `fumos_metalicos` em metais individuais
+(Mn, Cr⁶⁺, Ni, Pb) conforme Anexos I/II da NR-07 e LTs do Anexo 11/13 da NR-15 vigentes —
+conferir texto literal no site oficial do MTE antes de formalizar (`[DERIVADO]`). Não bloqueia
+(categoria única mantém o caso âncora funcional).
 
 ### DT-002I-01 — Limiar de genericidade de R-PGR-05 `[A VALIDAR]`
 
@@ -427,7 +465,9 @@ Manter `fumos_metalicos` como categoria única faz o motor emitir matriz correta
 
 **Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura):** a partir de que ponto a generalidade do inventário te faz parar e exigir reescrita do PGR, vs. seguir montando a matriz com ressalva operacional? Buscar o **método** (o limiar), não o resultado por empresa.
 
-**Status:** A VALIDAR. Não bloqueia o motor — R-PGR-04/Stage 3 cobrem o caso âncora (FDS faltante).
+**Status:** REABERTA SOB NOVA METODOLOGIA (002.M). Era `[A VALIDAR — Carolini]`. Sem norma
+objetiva que fixe o limiar de vagueza — candidata a `[INTERPRETADO — prioridade na revisão
+de saída]` quando decidida. Não bloqueia (R-PGR-04 / Stage 3 cobrem o caso âncora).
 
 ---
 
@@ -478,6 +518,11 @@ o motor a trata como quantificação incompleta (pendência), não emite RX por 
 valores do Viverde são baixíssimos (provável ≤10% LEO = só admissional), mas o motor
 não crava isso sem a regra de conversão validada.
 
+**Status:** REABERTA SOB NOVA METODOLOGIA (002.M). Era `[A VALIDAR — Carolini]`. Tem âncora
+normativa objetiva: LEO/LT da sílica no Anexo 12 da NR-15 vigente; conversão depende do
+%quartzo da amostra → resolver por `[DERIVADO]` conferindo texto literal no site oficial do
+MTE, não por opinião clínica. Prioridade alta (afeta roteamento de R-RX-01 para sílica em mg/m³).
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -509,3 +554,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v6 | 25/05/2026 | Sessão 002.L-estudo: DT-002K-01 e DT-002K-02 RESOLVIDAS. R-GHE-02 refinada (indissociável vs. contingente); R-GHE-05 nova (risco contingente → confirmação documental); R-RX-01 refinada com tabela do Anexo III (4 faixas %LEO + estado sem-medição = gatilho do 24M; PNOS 60M). |
 | v7 | 25/05/2026 | Sessão 002.L0: R-RX-01 implementada como família R-RX-01-* (D-ARQ-20); R-RX-02 virou regra executável; estado contraditório de quantificação → pendência bloqueante. |
 | v8 | 25/05/2026 | Sessão 002.L: DT-002L-01 adicionada (conversão mg/m³ → %LEO para rotear faixa de RX — pergunta de método para a Carolini, originada da estruturação do PGR Viverde) |
+| v9 | 28/05/2026 | Sessão 002.M: fonte primária congelada; validação migra para revisão de saída (erro-zero + PDCA, D-ARQ-22). Convenções de status revisadas. Nota de implementação em R-GHE-05 (depende de D-ARQ-23). DT-D3-02/002I-01/002L-01 reclassificadas. Divergência serralheiro Est-09 documentada. |

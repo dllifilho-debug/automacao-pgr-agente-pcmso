@@ -1117,4 +1117,55 @@ divergir.
 endereçar divergência PGR↔RQ.61 do serralheiro — Est-09 TiO2 vs cromo/Mn).
 
 ---
+
+## Sessão 002.M — virada de metodologia + encaminhamento do serralheiro (28/05/2026)
+
+**Tipo:** CONHECIMENTO + META + ARQUITETURA
+**Participantes:** Diovanni Lisita + Claude (Arquiteto). SEM Claude Code (sessão sem código).
+**Branch:** docs (sem alteração de motor/fixture/vocabulário).
+
+### Contexto
+A Dra. Carolini não fará mais validação prévia de regras. Protocolo v8 congelado. A validação
+clínica migra para REVISÃO DE SAÍDA: a médica (Patrícia/Carolini) lê a matriz gerada de um PGR
+real e procura erros. Desenvolvimento mira erro zero; erros viram correções (PDCA). A 002.M,
+planejada como pergunta à Carolini sobre o serralheiro, foi reescrita: a questão clínica já
+estava resolvida (R-GHE-05) e a indisponibilidade da fonte exigiu formalizar o novo modelo.
+
+### O que foi decidido
+1. **Modelo de qualidade erro-zero + revisão de saída + PDCA (D-ARQ-22).** Hierarquia nova de
+   resolução de incerteza: norma vigente → matriz validada (RQ.61/Patrícia) → analogia com
+   `[VALIDADO]` → interpretação do Arquiteto marcada. Status `[A VALIDAR — Carolini]` descontinuado;
+   novos `[DERIVADO — fonte]` e `[INTERPRETADO — prioridade na revisão de saída]`. Erro-zero apoia-se
+   em determinismo (D-ARQ-09) + pendência-em-vez-de-chute (D-ARQ-08/13) + rastreabilidade por linha
+   com status de validação (D-ARQ-03 estendido). Risco residual: erro silencioso plausível, mitigado
+   pela rastreabilidade.
+2. **Operação como dado de primeira classe (D-ARQ-23, PROPOSTA).** A divergência do serralheiro é
+   estrutural, não clínica: o motor não modela operações, então não avalia "solda confirmada".
+   D-ARQ-23 propõe campo `operacoes` no `GHEPGR` + inferência em Stage 2. A implementar.
+3. **Serralheiro Est-09 documentado.** PGR Viverde declara TiO2 + radiação de solda (não declara
+   fumos_metalicos nem cromo — cromo só na RQ.61, que é saída). Sem D-ARQ-23 o motor não dispara o
+   pacote de fumos. Divergência esperada, rastreada. Nota em R-GHE-05 + comentário do fixture Est-09
+   a atualizar quando D-ARQ-23 for implementada. Técnico: fumo de solda é mistura; TiO2 e cromo são
+   constituintes do mesmo fumo (OSHA FS-3647; literatura de eletrodo).
+4. **Três pendências órfãs reclassificadas** (DT-D3-02, DT-002I-01, DT-002L-01): de "perguntar à
+   Carolini" para a hierarquia de D-ARQ-22. DT-002L-01 e DT-D3-02 têm âncora normativa (resolver
+   `[DERIVADO]` no site oficial); DT-002I-01 sem âncora objetiva (candidata a `[INTERPRETADO]`).
+
+### Fontes normativas confirmadas (site oficial MTE, vigentes em 28/05/2026)
+- Índice oficial: gov.br/trabalho-e-emprego .../ctpp-nrs/normas-regulamentadoras-nrs
+- NR-7 (PCMSO), NR-9 (avaliação/controle de exposições — NÃO é mais o PPRA; gerenciamento de risco
+  migrou para NR-1), NR-15 (insalubridade): links de "texto vigente" na página índice. Anexos da
+  NR-15 (PDFs separados) a conferir ao resolver DT-002L-01 e DT-D3-02.
+- TODO normativo herdado (R-RX-01, "transcrição a-conferir"): conferir faixas de %LEO,
+  periodicidades e corte de 15 anos contra o Anexo III da NR-07 vigente. Agora `[DERIVADO]`, não
+  pergunta à Carolini.
+
+### Próxima sessão planejada
+Decisão do Diovanni. Candidatas:
+- IMPLEMENTAÇÃO D-ARQ-23 (operação como dado + inferência de solda em Stage 2 + fixture Est-09).
+- IMPLEMENTAÇÃO 002.D2 (Stage 4 — `ctx.predicados`), roadmap do motor.
+- Normativa `[DERIVADO]`: resolver DT-002L-01 + TODO de R-RX-01 conferindo texto literal das NRs
+  no site oficial (sem dependência de terceiros; fecha valores "a-conferir" do regras.yaml).
+
+---
 *Entradas futuras abaixo desta linha*
