@@ -1054,4 +1054,67 @@ Dividas herdadas do MAPA: serralheiro=TiO2 vs RQ.61 (D-ARQ-18); DT-002L-01 (conv
 gas/marceneiro a confirmar.
 
 ---
+
+## Sessão 002.L1 parte 2 — fixture Viverde — 27/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude Code (Sonnet 4.6).
+**Branch:** `feature/motor-002l1-fixture-viverde` (não mergeada).
+
+### Entregue (3 commits)
+
+- `18b7d15` — feat(vocab): adiciona 11 agentes-marcador para inventário canônico (decisões 10-12)
+- `bc0066c` — feat(tests): fixture pgr_viverde - 32 GHEs em 3 blocos (002.L1 parte 2)
+- `3301e8e` — test(fixture): smoke tests sobre fixture pgr_viverde + Stage 1 (002.L1 parte 2)
+
+Suite: 290 testes verdes em `python -m pytest agente_medico/tests/ tests/`.
+mypy --strict: clean nos arquivos novos.
+
+### 3 decisões novas
+
+**Decisão 10 — Ergonômico/acidente/dermatite no inventário canônico.**
+Riscos ergonômicos, de acidente e dermatite entram no GHE como `RiscoPGR` com
+slug próprio em `agentes.yaml` (R-GHE-04, MAPA linha 14: "inventário é
+canônico"). Não disparam propósito clínico hoje (nenhuma R-PROP-* consome
+agentes-marcador). Substitui decisão 7.
+
+**Decisão 11 — Flag `disparador_clinico` em agentes.yaml.**
+Agentes que não disparam regra clínica do motor recebem `disparador_clinico: false`.
+Agentes pré-existentes (commitados antes de 002.L1 parte 2) não recebem o campo
+e contam como `true` por convenção. Auditoria de PCMSO consegue, daqui em diante,
+listar os agentes-marcador com um grep.
+
+**Decisão 12 — Químico declarado sem agente nominal / sem medição.**
+Quando o PGR cita exposição química sem agente identificável (ex: "primer,
+cimento polimérico, mastique sem mg/m³") ou sem medição (CO em manta a quente),
+modela-se como `RiscoPGR(agente="quimico_nao_especificado", quantificacao=None)`.
+Pendência de FDS (R-PGR-04) é responsabilidade do Stage 3 do motor, não do
+fixture. O fixture só transcreve o PGR como o engenheiro escreveu.
+
+### Decisão deprecada
+
+**Decisão 7 (parte 1) DEPRECATED em 27/05/2026.**
+Redação original: "ergonômico/acidente fora do vocabulário de propósito (sinalização
+via vocabulario_ausente)". Interpretação ambígua durante a parte 2 levaria a omitir
+esses riscos do fixture, contrariando R-GHE-04 + MAPA linha 14 (inventário
+canônico). Sucessora: decisão 10.
+
+### Dívidas técnicas registradas
+
+**DT-002L1-01:** Cargo `motorista` commitado genérico, fora da convenção
+`operador_<máquina>` da decisão 1. Renomear para `motorista_cacamba` quando
+convier (sem urgência clínica).
+
+**DT-002L1-02:** Grafia de `relacao_LT` no helper `_ruido` (`abaixo_acao` /
+`acima_acao` / `acima_LT`) ainda não validada contra `predicados.py`. Revisar
+quando Stage 4 consumir o fixture; ajustar helper se a convenção do motor
+divergir.
+
+### Próxima sessão planejada
+
+**Tipo:** decisão do Arquiteto (provável: PR único da branch
+`feature/motor-002l1-fixture-viverde` em main, depois sessão 002.M para
+endereçar divergência PGR↔RQ.61 do serralheiro — Est-09 TiO2 vs cromo/Mn).
+
+---
 *Entradas futuras abaixo desta linha*
