@@ -987,6 +987,134 @@ Ao estruturar o PGR, o Diovanni apontou que o **agrupamento em GHE varia por ela
 **002.L-fixture — IMPLEMENTAÇÃO (dados):** transcrever o MAPA_GHE_VIVERDE.md validado para fixture Python (instanciando os dataclasses do motor, sem loader novo — não há conftest/fixtures no projeto). Aparece a cascata de vocabulário: popular cargos.yaml (~29 cargos do Viverde) e agentes.yaml (~13 agentes: metil_etil_cetona, etanol, estireno, dioxido_de_titanio, monoxido_de_carbono, cloreto_de_hidrogenio, etc.). Serralheiro entra sem riscos_implicitos de solda (R-GHE-05). Pré-requisito da 002.M (test_viverde).
 
 ---
-*Entradas futuras abaixo desta linha*
 
+## Sessao 002.L1 (parte 1 — vocabulario) — 25/05/2026
+
+**Tipo:** IMPLEMENTACAO (dados/vocabulario)
+**Branch:** feature/motor-002l1-fixture-viverde (NAO mergeada — continua na parte 2)
+**Objetivo:** preparar vocabulario + fixture do PGR Viverde. Parte 1 (vocabulario)
+concluida; parte 2 (fixture Python) segue em chat novo, mesma branch.
+
+### Entregue (3 commits, suite 284 verde, sem regressao)
+
+- b9d8368 — 5 agentes quimicos: etanol, metil_etil_cetona, cloreto_de_hidrogenio
+  (Anexo 11, cadastraveis); dioxido_de_titanio e propanediamina_tridecyloxy ([A VALIDAR]).
+- 49272fb — 43 cargos, TODOS magros (riscos_implicitos: [], pacotes_aplicaveis: []),
+  por R-GHE-05 + D-ARQ-21 (risco vem do PGR, nao da denominacao). Ajustou 2 testes
+  que documentavam ausencia de cargo (test_integracao_002c usa __NAO_EXISTE__).
+- 0e89468 — 5 agentes de exposicao: ruido, espaco_confinado, eletricidade, umidade,
+  microrganismos. ruido e espaco_confinado ja eram predicados primitivos orfaos
+  (faltava o slug no vocabulario); ruido destrava a cadeia de audiometria (R-AUD-01/02).
+
+### Decisao de design (registrar)
+
+**Cargos entram magros por padrao.** Exame vem do risco inventariado no PGR, nao de
+pacote colado ao nome do cargo. Unica excecao e soldador (legado), cuja atividade-fim
+e indissociavel do risco (R-GHE-02). Aplicacao de R-GHE-05 a todo o vocabulario de cargos.
+
+### Decisoes de MODELAGEM do fixture (travadas nesta sessao, valem para a parte 2)
+
+1. **Cargos:** meio-oficial = slug proprio (meio_oficial_<cargo>); servente = slug
+   unico; operadores = operador_<maquina>; estagiario/encarregado = slug unico.
+2. **EPIs:** texto livre fiel ao PGR (ex: "protetor auditivo NRRsf>=15"), sem
+   vocabulario de EPI. Motor nao consome epis para decidir exame.
+3. **Quimico medido = RiscoPGR** (tipo="quimico", agente=slug, quantificacao=...),
+   NAO ProdutoQuimico. produtos_quimicos=() em todos os GHEs (Viverde nao tem FDS
+   de produto comercial estruturada).
+4. **Arquivo:** agente_medico/tests/fixtures/pgr_viverde.py (pasta nova), funcao
+   unica build_pgr_viverde() -> PGR, GHE a GHE, legivel. Sem conftest (nao existe no projeto).
+5. **RUIDO classificado no fixture** (criterio normativo firme NR-15: nivel de acao
+   80 dB(A), LT 85). Mapeamento relacao_LT: <80 = "abaixo_acao"; 80-85 = "entre_acao_LT";
+   >85 = "acima_LT". O predicado ruido_acima_acao le relacao_LT (string), NAO o dB(A).
+   Valores por GHE: betoneira 89,6 / bancada 89,3 / serralheria 88,7 = acima_LT;
+   hidro 83,3 / prumada 82,8 / carpintaria 82,2 = entre_acao_LT; demais <80 = abaixo_acao.
+   EXCECAO: Adm-03 (mestre de obra) ruido "aguardando medicao" → relacao_LT=None +
+   apenas_qualitativa=True → Ausente → pendencia bloqueante (fiel ao PGR).
+6. **SILICA permanece pendente** (DT-002L-01): valor mg/m3 + unidade, mas pct_LT=None
+   e sem_avaliacao_quantitativa=FALSE (tem medicao, falta conversao mg/m3->%LEO).
+   NAO usar sem_avaliacao_quantitativa=True (seria estado contraditorio — fix 85ef43b da 002.L0).
+   Diferenca para o ruido: silica tem criterio ambiguo (%quartzo, fonte de LEO) → pendencia;
+   ruido tem criterio firme (80/85) → classificado.
+7. **Ergonomico e acidente FORA do vocabulario de proposito:** esforco_fisico,
+   movimento_repetitivo, queda entram no fixture como RiscoPGR mas SEM slug cadastrado
+   → Stage 2 gera pendencia "vocabulario_ausente" nao-bloqueante = sinal "fora de escopo
+   de exame do agente medico" (decisao ii). Cadastra-los mataria a sinalizacao.
+8. **radiacao nao-ionizante (solda) reusa o slug existente radiacao_uv_ir** (do soldador) —
+   nao criar slug duplicado.
+9. **Fundacao:** GHE-FUN com riscos=() (op. retroescavadeira/escavadeira/motorista/
+   perfuratriz na matriz cargo×tarefa, sem bloco de risco no PGR) → pendencia estrutural R-PGR-04.
+
+### Proxima sessao
+
+**002.L1 parte 2 (fixture) — chat novo, mesma branch feature/motor-002l1-fixture-viverde.**
+Construir agente_medico/tests/fixtures/pgr_viverde.py a partir de docs/MAPA_GHE_VIVERDE.md
+(fonte) aplicando as 9 decisoes acima, em 3 blocos (Estrutura / Acabamento / Admin+Fundacao)
++ teste minimo de Stage 1 aceitar o PGR. Depois: 002.M (test_viverde.py).
+Dividas herdadas do MAPA: serralheiro=TiO2 vs RQ.61 (D-ARQ-18); DT-002L-01 (conversao mg/m3);
+gas/marceneiro a confirmar.
+
+---
+
+## Sessão 002.L1 parte 2 — fixture Viverde — 27/05/2026
+
+**Tipo:** IMPLEMENTAÇÃO
+**Participantes:** Diovanni Lisita + Claude Code (Sonnet 4.6).
+**Branch:** `feature/motor-002l1-fixture-viverde` (não mergeada).
+
+### Entregue (3 commits)
+
+- `18b7d15` — feat(vocab): adiciona 11 agentes-marcador para inventário canônico (decisões 10-12)
+- `bc0066c` — feat(tests): fixture pgr_viverde - 32 GHEs em 3 blocos (002.L1 parte 2)
+- `3301e8e` — test(fixture): smoke tests sobre fixture pgr_viverde + Stage 1 (002.L1 parte 2)
+
+Suite: 290 testes verdes em `python -m pytest agente_medico/tests/ tests/`.
+mypy --strict: clean nos arquivos novos.
+
+### 3 decisões novas
+
+**Decisão 10 — Ergonômico/acidente/dermatite no inventário canônico.**
+Riscos ergonômicos, de acidente e dermatite entram no GHE como `RiscoPGR` com
+slug próprio em `agentes.yaml` (R-GHE-04, MAPA linha 14: "inventário é
+canônico"). Não disparam propósito clínico hoje (nenhuma R-PROP-* consome
+agentes-marcador). Substitui decisão 7.
+
+**Decisão 11 — Flag `disparador_clinico` em agentes.yaml.**
+Agentes que não disparam regra clínica do motor recebem `disparador_clinico: false`.
+Agentes pré-existentes (commitados antes de 002.L1 parte 2) não recebem o campo
+e contam como `true` por convenção. Auditoria de PCMSO consegue, daqui em diante,
+listar os agentes-marcador com um grep.
+
+**Decisão 12 — Químico declarado sem agente nominal / sem medição.**
+Quando o PGR cita exposição química sem agente identificável (ex: "primer,
+cimento polimérico, mastique sem mg/m³") ou sem medição (CO em manta a quente),
+modela-se como `RiscoPGR(agente="quimico_nao_especificado", quantificacao=None)`.
+Pendência de FDS (R-PGR-04) é responsabilidade do Stage 3 do motor, não do
+fixture. O fixture só transcreve o PGR como o engenheiro escreveu.
+
+### Decisão deprecada
+
+**Decisão 7 (parte 1) DEPRECATED em 27/05/2026.**
+Redação original: "ergonômico/acidente fora do vocabulário de propósito (sinalização
+via vocabulario_ausente)". Interpretação ambígua durante a parte 2 levaria a omitir
+esses riscos do fixture, contrariando R-GHE-04 + MAPA linha 14 (inventário
+canônico). Sucessora: decisão 10.
+
+### Dívidas técnicas registradas
+
+**DT-002L1-01:** Cargo `motorista` commitado genérico, fora da convenção
+`operador_<máquina>` da decisão 1. Renomear para `motorista_cacamba` quando
+convier (sem urgência clínica).
+
+**DT-002L1-02:** Grafia de `relacao_LT` no helper `_ruido` (`abaixo_acao` /
+`acima_acao` / `acima_LT`) ainda não validada contra `predicados.py`. Revisar
+quando Stage 4 consumir o fixture; ajustar helper se a convenção do motor
+divergir.
+
+### Próxima sessão planejada
+
+**Tipo:** decisão do Arquiteto (provável: PR único da branch
+`feature/motor-002l1-fixture-viverde` em main, depois sessão 002.M para
+endereçar divergência PGR↔RQ.61 do serralheiro — Est-09 TiO2 vs cromo/Mn).
+
+---
 *Entradas futuras abaixo desta linha*

@@ -79,7 +79,5 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
         assert e.momentos == {Momento.ADM, Momento.PER, Momento.MR}
         assert e.motivos[0].regra_id == "R-PKG-ATIVCRIT"
 
-    # carpinteiro não está em cargos.yaml → Stage 2 emite pendência não-bloqueante (R-GHE-02)
-    assert len(ctx.pendencias) == 1
-    assert ctx.pendencias[0].bloqueante is False
-    assert ctx.pendencias[0].regra_origem == "R-GHE-02"
+    # carpinteiro cadastrado na 002.L1 — nao gera mais pendencia de cargo
+    assert ctx.pendencias == []

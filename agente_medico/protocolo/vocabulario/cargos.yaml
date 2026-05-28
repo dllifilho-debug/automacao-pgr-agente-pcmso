@@ -2,3 +2,126 @@ cargos:
   soldador:
     riscos_implicitos: [fumos_metalicos, radiacao_uv_ir]
     pacotes_aplicaveis: [R-PKG-SOLD]
+  carpinteiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_carpinteiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  armador:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_armador:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  operador_betoneira:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  eletricista_industrial:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  mecanico_de_manutencao:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  eletricista:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_eletricista:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  operador_elevador_cremalheira:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  sinaleiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  pedreiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_pedreiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  encanador:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_encanador:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  serralheiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_serralheiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  operador_grua:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  pintor:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_pintor:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  porteiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  vigia:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  servente:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  gesseiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  meio_oficial_gesseiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  encarregado:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  aplicador_de_asfalto:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  marceneiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  mecanico_industrial:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  engenheiro:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  estagiario:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  tecnico_de_seguranca:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  mestre_de_obra:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  administrativo:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  auxiliar_administrativo:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  jovem_aprendiz:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  almoxarife:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  operador_retroescavadeira:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  operador_escavadeira:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  motorista:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []
+  operador_perfuratriz:
+    riscos_implicitos: []
+    pacotes_aplicaveis: []

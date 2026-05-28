@@ -142,7 +142,7 @@ def test_dedup_explicito_vence_implicito(proto):  # type: ignore[no-untyped-def]
 
 
 def test_cargo_desconhecido_gera_pendencia(proto):  # type: ignore[no-untyped-def]
-    ghe = _ghe(cargos=("pedreiro",))
+    ghe = _ghe(cargos=("__NAO_EXISTE__",))
     ctx = GHEContext(pgr_ghe=ghe)
     stage_2_riscos(ctx, proto)
 
@@ -151,7 +151,7 @@ def test_cargo_desconhecido_gera_pendencia(proto):  # type: ignore[no-untyped-de
     pend = ctx.pendencias[0]
     assert pend.regra_origem == "R-GHE-02"
     assert pend.bloqueante is False
-    assert "pedreiro" in pend.motivo
+    assert "__NAO_EXISTE__" in pend.motivo
 
 
 def test_ghe_sem_cargos_nem_riscos_resulta_em_ctx_riscos_vazio(proto):  # type: ignore[no-untyped-def]
