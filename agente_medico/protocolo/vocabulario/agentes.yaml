@@ -205,3 +205,73 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+  piso_escorregadio:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  queimadura_termica:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  queda_de_materiais:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  acidente_disco_corte:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  acidente_perfurocortante:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  esforco_fisico:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  movimento_repetitivo:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  postura_inadequada:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  dermatite_contato:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
+  quimico_nao_especificado:
+    anexo_nr07: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    disparador_clinico: false
