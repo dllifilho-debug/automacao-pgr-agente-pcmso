@@ -534,6 +534,21 @@ não fixa o LEO" é [INTERPRETADO]: não há norma conclusiva nem crivo clínico
 inspecionar na revisão de saída. Pendência derivada (sessão futura): contrato de LEO-resolver
 no motor e classificador de R-RX-01 roteando por CLSC.
 
+### DT-002N-01 — PNOS achata as 4 faixas do Quadro 2 do Anexo III `[DERIVADO — fonte]`
+
+**Origem:** Sessão 002.N (28/05/2026), conferência do Anexo III contra o texto literal (MTE).
+
+**Situação.** `R-RX-01-pnos` em regras.yaml emite RX OIT 60M constante para o predicado `pnos`. Mas o Quadro 2 do Anexo III (PNOS — partículas insolúveis ou pouco solúveis de baixa toxicidade) tem QUATRO comportamentos por faixa de CLSC/LEO, não um:
+- CLSC ≤ 10% LEO → admissional apenas
+- 10% < CLSC ≤ 100% LEO → adm + após 5 anos + repetir a critério clínico
+- CLSC > 100% LEO → adm + a cada 5 anos (60M)
+- sem avaliação quantitativa → adm + a cada 5 anos (60M)
+A regra única de 60M só está correta para as duas últimas faixas. Subdimensiona ≤10% (que é só admissional) e a faixa intermediária.
+
+**Resolução `[DERIVADO — fonte]`:** explodir `R-RX-01-pnos` em família por faixa do Quadro 2, espelhando o padrão D-ARQ-20 já usado no Quadro 1. Predicados de faixa para PNOS (`pnos_leo_ate_10`, `pnos_leo_10_100`, `pnos_leo_acima_100`, `pnos_sem_medicao`). Fonte: NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022), conferido no site do MTE. A faixa intermediária ("após 5 anos + repetir a critério clínico") tem componente clínico não-periódico — modelar como lembrete operacional (D-ARQ-05), não periodicidade fixa.
+
+**Impacto:** baixo no caso âncora (Viverde tem PNOS de madeira/gesso, provável faixa baixa). Não bloqueia. Implementação na sessão de código que tratar o classificador de faixa (mesma que R-RX-01 CLSC).
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)

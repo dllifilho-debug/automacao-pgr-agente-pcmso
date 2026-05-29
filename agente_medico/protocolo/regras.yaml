@@ -94,8 +94,8 @@ regras:
         periodicidade_meses: 60
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
-    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — poeira não classificada; periodicidade constante"
-    status: VALIDADO
+    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO]. ATENÇÃO: regra única de 60M achata as 4 faixas do Quadro 2 (≤10% só adm; 10-100% adm+5a+repetir clínico; >100% e sem-medição 60M). Subdimensiona faixas baixas. Explodir em família por faixa — ver DT-002N-01."
+    status: INTERPRETADO
 
   - id: R-RX-02
     quando: fumos_metalicos
