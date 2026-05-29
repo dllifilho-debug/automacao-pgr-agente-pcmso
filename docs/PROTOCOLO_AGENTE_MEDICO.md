@@ -253,8 +253,9 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 
 **TODO normativo — RESOLVIDO em 002.N `[DERIVADO]`:** faixas, periodicidades e corte de 15 anos do Quadro 1 (sílica/asbesto) conferidos contra o texto literal do Anexo III (Portaria 567/2022, site do MTE). Resíduos abertos: (a) classificador de faixa deve rotear por CLSC e tratar bordas com `≤` (fix de código); (b) PNOS achata o Quadro 2 (DT); (c) R-RX-02 fumos sem âncora no Anexo III (DT).
 
-#### R-RX-02 — Fumos metálicos `[VALIDADO]`
+#### R-RX-02 — Fumos metálicos `[INTERPRETADO — prioridade na revisão de saída]`
 Cargo com exposição a fumos metálicos (incluindo soldador) → RX **60 meses** em adm/per/MR/dem.
+**Ressalva normativa (002.N):** o 60M NÃO tem âncora no Anexo III da NR-07 — fumos metálicos não são poeira mineral (Quadro 1) nem PNOS (Quadro 2). O valor provém da matriz Patrícia ou de analogia, não de norma vigente conferida. Além disso, DT-002K-02 (resolvida) firmou que o risco é por exposição real ao metal individual (Mn, Cr⁶⁺...), não pela categoria genérica "fumos metálicos". O roteamento correto de RX por fumos depende da decomposição em metais individuais — ver DT-D3-02. Até lá, R-RX-02 mantém o caso âncora (soldador) funcional, mas o 60M é [INTERPRETADO], não [VALIDADO].
 
 **Implementação (002.L0).** R-RX-02 passou a existir como regra executável em `regras.yaml` (`quando: fumos_metalicos → RX 60M`). Até a 002.L0 constava apenas como `protocolos_especiais` documental em `agentes.yaml`, sem regra correspondente — fumos metálicos não emitia RX no motor.
 

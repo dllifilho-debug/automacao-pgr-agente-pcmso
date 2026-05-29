@@ -104,6 +104,6 @@ regras:
         periodicidade_meses: 60
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
-    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — fumos metálicos → RX tórax OIT 60M"
-    status: VALIDADO
+    base_normativa: "Fumos metálicos → RX OIT 60M. SEM âncora no Anexo III da NR-07 (fumos não é Quadro 1 nem Quadro 2) — origem matriz Patrícia/analogia, não norma conferida [INTERPRETADO]. DT-002K-02 firmou risco por metal individual (Mn/Cr⁶⁺), não categoria 'fumos'. Roteamento correto depende da decomposição em metais — ver DT-D3-02."
+    status: INTERPRETADO
 
