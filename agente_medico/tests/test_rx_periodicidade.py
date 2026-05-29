@@ -1,5 +1,5 @@
-# VALORES DE PERIODICIDADE A-CONFERIR vs Anexo III Portaria 567/2022
-# (002.L-estudo, opção B). Ao conferir a norma, atualizar AQUI + regras.yaml juntos.
+# Periodicidades e bordas de faixa conferidas vs Quadro 1 Anexo III NR-07 (Portaria MTP 567/2022)
+# [DERIVADO — 002.N]. Bordas: ate_10 ≤10; 10_50: >10 e ≤50; 50_100: >50 e ≤100; acima_100: >100.
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -159,6 +159,31 @@ def test_exclusividade_faixas(pct: float) -> None:
     assert len(disparados) == 1, (
         f"pct={pct}: esperava exatamente 1 faixa, got {disparados}"
     )
+
+
+# Regressão de bordas: Quadro 1 usa ≤ no limite superior de cada faixa (NR-07 / Portaria 567/2022)
+# pct=50 pertence à faixa 10_50 (≤50); pct=100 pertence à faixa 50_100 (≤100). [DERIVADO — 002.N]
+
+def test_borda_pct50_pertence_faixa_10_50() -> None:
+    """CLSC=50% LEO → faixa 10_50 (60M/36M), não 50_100. Bordas ≤ confirmadas no Quadro 1."""
+    ctx, proto = _ctx_com_agente("silica", _q(50.0))
+    assert ctx.predicados.get("silica_asbesto_leo_10_50") is True
+    assert ctx.predicados.get("silica_asbesto_leo_50_100") is not True
+    exames = stage_5_emissao(ctx, proto)
+    rx = next(e for e in exames if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 60
+    assert rx.periodicidade_apos_15a == 36
+
+
+def test_borda_pct100_pertence_faixa_50_100() -> None:
+    """CLSC=100% LEO → faixa 50_100 (36M/24M), não acima_100. Bordas ≤ confirmadas no Quadro 1."""
+    ctx, proto = _ctx_com_agente("silica", _q(100.0))
+    assert ctx.predicados.get("silica_asbesto_leo_50_100") is True
+    assert ctx.predicados.get("silica_asbesto_leo_acima_100") is not True
+    exames = stage_5_emissao(ctx, proto)
+    rx = next(e for e in exames if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 36
+    assert rx.periodicidade_apos_15a == 24
 
 
 # ---------------------------------------------------------------------------

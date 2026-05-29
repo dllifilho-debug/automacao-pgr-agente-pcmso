@@ -221,8 +221,8 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | Faixa (CLSC vs. LEO) | RX tórax OIT |
 |---|---|
 | ≤ 10% LEO | admissional apenas |
-| 10% < CLSC < 50% LEO | adm + 60M até 15 anos → 36M após |
-| 50% < CLSC < 100% LEO | adm + 36M até 15 anos → **24M** após |
+| 10% < CLSC ≤ 50% LEO | adm + 60M até 15 anos → 36M após |
+| 50% < CLSC ≤ 100% LEO | adm + 36M até 15 anos → **24M** após |
 | > 100% LEO | adm + 12M desde o início |
 
 **Sílica / asbesto — SEM avaliação quantitativa** (canteiro sem laudo de higienista; caso mais comum):
@@ -247,14 +247,15 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | R-RX-01-alta | silica_asbesto_leo_acima_100 | 12M | — |
 | R-RX-01-pnos | pnos | 60M | — |
 
-`R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores a-conferir (opção B):** periodicidades e limiares de %LEO acima são transcrição com apoio do Anexo III, pendente conferência contra a redação literal da Portaria 567/2022.
+`R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores conferidos `[DERIVADO — fonte]`:** periodicidades, limiares e corte de 15 anos conferidos contra o texto literal do Anexo III da NR-07, Quadro 1 (Portaria MTP 567/2022), no site do MTE (002.N). Faixas fechadas com limite superior inclusivo (`≤`): >10 e ≤50; >50 e ≤100; >100. Variável de roteamento é o CLSC = limite superior do IC 95% da média aritmética (distribuição lognormal), conforme definição literal do Quadro 1 — NÃO é percentil 95. NOTA 2 do Quadro 1: trabalhador com exposição reduzida que esteve em concentração maior por ≥1 ano mantém o intervalo do período de maior exposição (a modelar — ver DT). PNOS segue o Quadro 2, não o Quadro 1 (ver R-RX-01-pnos e DT própria).
 
 **Base normativa:** Anexo III da NR-07 (Portaria 567/2022). Validação clínica: Dra. Carolini, 05/2025.
 
-**TODO normativo (002.L-estudo):** conferir faixas de %LEO, periodicidades e cortes de 15 anos contra a redação literal do Anexo III antes da 002.M. Estrutura (4 faixas + estado "sem avaliação quantitativa") fechada; valores exatos a confirmar.
+**TODO normativo — RESOLVIDO em 002.N `[DERIVADO]`:** faixas, periodicidades e corte de 15 anos do Quadro 1 (sílica/asbesto) conferidos contra o texto literal do Anexo III (Portaria 567/2022, site do MTE). Resíduos abertos: (a) classificador de faixa deve rotear por CLSC e tratar bordas com `≤` (fix de código); (b) PNOS achata o Quadro 2 (DT); (c) R-RX-02 fumos sem âncora no Anexo III (DT).
 
-#### R-RX-02 — Fumos metálicos `[VALIDADO]`
+#### R-RX-02 — Fumos metálicos `[INTERPRETADO — prioridade na revisão de saída]`
 Cargo com exposição a fumos metálicos (incluindo soldador) → RX **60 meses** em adm/per/MR/dem.
+**Ressalva normativa (002.N):** o 60M NÃO tem âncora no Anexo III da NR-07 — fumos metálicos não são poeira mineral (Quadro 1) nem PNOS (Quadro 2). O valor provém da matriz Patrícia ou de analogia, não de norma vigente conferida. Além disso, DT-002K-02 (resolvida) firmou que o risco é por exposição real ao metal individual (Mn, Cr⁶⁺...), não pela categoria genérica "fumos metálicos". O roteamento correto de RX por fumos depende da decomposição em metais individuais — ver DT-D3-02. Até lá, R-RX-02 mantém o caso âncora (soldador) funcional, mas o 60M é [INTERPRETADO], não [VALIDADO].
 
 **Implementação (002.L0).** R-RX-02 passou a existir como regra executável em `regras.yaml` (`quando: fumos_metalicos → RX 60M`). Até a 002.L0 constava apenas como `protocolos_especiais` documental em `agentes.yaml`, sem regra correspondente — fumos metálicos não emitia RX no motor.
 
@@ -518,10 +519,36 @@ o motor a trata como quantificação incompleta (pendência), não emite RX por 
 valores do Viverde são baixíssimos (provável ≤10% LEO = só admissional), mas o motor
 não crava isso sem a regra de conversão validada.
 
-**Status:** REABERTA SOB NOVA METODOLOGIA (002.M). Era `[A VALIDAR — Carolini]`. Tem âncora
-normativa objetiva: LEO/LT da sílica no Anexo 12 da NR-15 vigente; conversão depende do
-%quartzo da amostra → resolver por `[DERIVADO]` conferindo texto literal no site oficial do
-MTE, não por opinião clínica. Prioridade alta (afeta roteamento de R-RX-01 para sílica em mg/m³).
+**Status:** [DERIVADO — fonte] (método) + [INTERPRETADO — prioridade na revisão de saída]
+(leitura do arranjo). Resolvida na 002.N. A NR-7 Anexo III não fixa o LEO; roteia por CLSC/LEO,
+onde CLSC = limite superior do IC 95% da média lognormal (definição literal do Quadro 1 do
+Anexo III — NÃO é percentil 95). O valor do LEO vem do arranjo NR-9 + anexo setorial, por
+agente e cenário:
+- sílica fora de mineração: LEO = LT do Anexo 12 da NR-15 (transitório NR-9, item 9.6.1) —
+  fração respirável 8/(%quartzo+2), total 24/(%quartzo+3). [DERIVADO — NR-15 Anexo 12
+  (Portaria SSST 1/1991); NR-9 item 9.6.1, conferidas no site do MTE]
+- sílica em mineração: LEO = 0,05 mg/m³ na poeira respirável (NR-22 Anexo V, Portaria MTE
+  261/2026), que sobrepõe a fórmula do Anexo 12 nesse setor. [DERIVADO — gov.br, Portaria
+  MTE 261/2026]
+%quartzo é entrada obrigatória fora de mineração (denominador da fórmula). A leitura "a NR-7
+não fixa o LEO" é [INTERPRETADO]: não há norma conclusiva nem crivo clínico sobre o ponto —
+inspecionar na revisão de saída. Pendência derivada (sessão futura): contrato de LEO-resolver
+no motor e classificador de R-RX-01 roteando por CLSC.
+
+### DT-002N-01 — PNOS achata as 4 faixas do Quadro 2 do Anexo III `[DERIVADO — fonte]`
+
+**Origem:** Sessão 002.N (28/05/2026), conferência do Anexo III contra o texto literal (MTE).
+
+**Situação.** `R-RX-01-pnos` em regras.yaml emite RX OIT 60M constante para o predicado `pnos`. Mas o Quadro 2 do Anexo III (PNOS — partículas insolúveis ou pouco solúveis de baixa toxicidade) tem QUATRO comportamentos por faixa de CLSC/LEO, não um:
+- CLSC ≤ 10% LEO → admissional apenas
+- 10% < CLSC ≤ 100% LEO → adm + após 5 anos + repetir a critério clínico
+- CLSC > 100% LEO → adm + a cada 5 anos (60M)
+- sem avaliação quantitativa → adm + a cada 5 anos (60M)
+A regra única de 60M só está correta para as duas últimas faixas. Subdimensiona ≤10% (que é só admissional) e a faixa intermediária.
+
+**Resolução `[DERIVADO — fonte]`:** explodir `R-RX-01-pnos` em família por faixa do Quadro 2, espelhando o padrão D-ARQ-20 já usado no Quadro 1. Predicados de faixa para PNOS (`pnos_leo_ate_10`, `pnos_leo_10_100`, `pnos_leo_acima_100`, `pnos_sem_medicao`). Fonte: NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022), conferido no site do MTE. A faixa intermediária ("após 5 anos + repetir a critério clínico") tem componente clínico não-periódico — modelar como lembrete operacional (D-ARQ-05), não periodicidade fixa.
+
+**Impacto:** baixo no caso âncora (Viverde tem PNOS de madeira/gesso, provável faixa baixa). Não bloqueia. Implementação na sessão de código que tratar o classificador de faixa (mesma que R-RX-01 CLSC).
 
 ---
 
@@ -555,3 +582,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v7 | 25/05/2026 | Sessão 002.L0: R-RX-01 implementada como família R-RX-01-* (D-ARQ-20); R-RX-02 virou regra executável; estado contraditório de quantificação → pendência bloqueante. |
 | v8 | 25/05/2026 | Sessão 002.L: DT-002L-01 adicionada (conversão mg/m³ → %LEO para rotear faixa de RX — pergunta de método para a Carolini, originada da estruturação do PGR Viverde) |
 | v9 | 28/05/2026 | Sessão 002.M: fonte primária congelada; validação migra para revisão de saída (erro-zero + PDCA, D-ARQ-22). Convenções de status revisadas. Nota de implementação em R-GHE-05 (depende de D-ARQ-23). DT-D3-02/002I-01/002L-01 reclassificadas. Divergência serralheiro Est-09 documentada. |
+| v10 | 29/05/2026 | Sessão 002.N: R-RX-01 sílica/asbesto sai de a-conferir → [DERIVADO] (NR-7 Anexo III Quadro 1, 567/2022; bordas ≤, CLSC, NOTA 2); DT-002L-01 RESOLVIDA (LEO sourcing NR-9/NR-15/NR-22); D-ARQ-24 (LEO-resolver); DT-002N-01 aberta (PNOS achata Quadro 2); R-RX-01-pnos e R-RX-02 rebaixados VALIDADO→INTERPRETADO. |

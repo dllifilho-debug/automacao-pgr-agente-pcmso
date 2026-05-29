@@ -1168,4 +1168,63 @@ Decisão do Diovanni. Candidatas:
   no site oficial (sem dependência de terceiros; fecha valores "a-conferir" do regras.yaml).
 
 ---
+
+## Sessão 002.N — 29/05/2026 — CONHECIMENTO normativo + correção de borda
+Branch: feature/regras-002n-rx01-leo (7 commits). Foco: conferência [DERIVADO] das entradas
+"a-conferir" de R-RX-01 contra o texto literal vigente das NRs (site MTE) + resolução de DT-002L-01.
+
+### Conferência normativa (texto literal, site oficial MTE)
+- **NR-7 Anexo III, Quadro 1 (Portaria MTP 567/2022)** conferido. As 5 entradas de sílica/asbesto
+  de R-RX-01 saíram de "a-conferir" para [DERIVADO]: periodicidades (≤10% só adm; >10–50% 60M→36M;
+  >50–100% 36M→24M; >100% 12M sem corte; sem-medição 24M→12M) e corte de 15 anos confirmados.
+  Achado: bordas fecham com ≤ no topo de cada faixa; variável de roteamento é CLSC (limite sup. do
+  IC 95% da média aritmética lognormal — NÃO percentil 95).
+- **NR-9 item 9.6.1** (transitório: usar LT da NR-15 enquanto não há anexo NR-9) e **9.6.1.1**
+  (ACGIH na ausência de LT) confirmados.
+- **NR-15 Anexo 12** (Portaria SSST 1/1991): LT da sílica = f(%quartzo) — respirável 8/(%quartzo+2),
+  total 24/(%quartzo+3).
+- **NR-22 Anexo V**: Portaria MTE 105/2026 fixou 0,05 ppm (unidade incoerente); Portaria MTE 261/2026
+  corrigiu para 0,05 mg/m³ poeira respirável e revogou o §2º do art. 4º da 105. LEO de sílica na
+  mineração = 0,05 mg/m³.
+
+### Decisões e pendências
+- **DT-002L-01 RESOLVIDA** [DERIVADO]+[INTERPRETADO]: a NR-7 não fixa o LEO; roteia por CLSC/LEO.
+  O valor do LEO vem do arranjo NR-9 + anexo setorial por agente/cenário (sílica não-mineração: LT
+  Anexo 12 NR-15; mineração: 0,05 mg/m³ NR-22). %quartzo é entrada obrigatória fora de mineração.
+- **D-ARQ-24** criado: contrato do LEO-resolver (origem do LEO por agente/cenário, cadeia de
+  precedência NR-9). Ortogonal a D-ARQ-04 (regime do PCMSO ≠ fonte do LEO). Implementação pendente.
+- **DT-002N-01** aberta: R-RX-01-pnos achata as 4 faixas do Quadro 2 do Anexo III num único 60M.
+  R-RX-01-pnos rebaixado VALIDADO→INTERPRETADO. Explodir em família por faixa (pendente).
+- **R-RX-02 (fumos)** rebaixado VALIDADO→INTERPRETADO: 60M sem âncora no Anexo III (fumos não é
+  Quadro 1 nem Quadro 2). Roteamento correto depende de decompor fumos em metais individuais —
+  aponta DT-D3-02 (já existente).
+
+### Correção de código (commit fix 002.N)
+- predicados.py: bordas de faixa LEO corrigidas de </>= para ≤ no topo (silica_asbesto_leo_10_50,
+  _50_100, _acima_100). pct=50 agora cai em 10_50 (era 50_100); pct=100 em 50_100 (era acima_100).
+  Erro estava duplicado em 3 funções; era divergência da norma, achada na conferência.
+- test_rx_periodicidade.py: header A-CONFERIR→[DERIVADO]; +2 testes de regressão de borda (pct=50→60M/36M,
+  pct=100→36M/24M) que falhavam antes do fix.
+- Suíte: 290→292, verde. mypy --strict limpo.
+
+### Lições / método
+- Resumo do Code ≠ literal do arquivo: várias vezes o "idêntico/N linhas" mascarou o conteúdo real;
+  só o dump literal (Get-Content) permitiu conferência e edição cirúrgica sem adivinhar.
+- A borda ≤ era achado de conferência contra a norma, não suposição — virou teste de regressão.
+- Carolini fora do loop até a conclusão (PDCA, D-ARQ-22): conferência por fonte objetiva, não crivo
+  clínico prévio. Tags [DERIVADO]/[INTERPRETADO] carregam a validação até a revisão de saída final.
+
+### Residuais abertos (próximas sessões)
+- IMPLEMENTAÇÃO D-ARQ-24: LEO-resolver (mg/m³ + %quartzo → CLSC/LEO → faixa). Destrava sílica do
+  Viverde (hoje pct_LT=None). Pré-requisito: campo pct_quartzo em Quantificacao + cenário de
+  exposição derivado do PGR (GHEPGR não tem CNAE/atividade/local hoje).
+- IMPLEMENTAÇÃO DT-002N-01: explodir R-RX-01-pnos em família por faixa do Quadro 2.
+- IMPLEMENTAÇÃO Fatia B: janela demissional condicional do Quadro 1 (no agendador).
+- D-ARQ-23 (operação como dado), DT-D3-02 (fumos → metais individuais): herdados, abertos.
+
+### Próxima sessão planejada
+Decisão do Diovanni. Recomendação do Arquiteto: IMPLEMENTAÇÃO D-ARQ-24 (LEO-resolver) — é a fundação
+que destrava o roteamento de sílica em mg/m³ e da qual dependem as fatias B/C.
+
+---
 *Entradas futuras abaixo desta linha*

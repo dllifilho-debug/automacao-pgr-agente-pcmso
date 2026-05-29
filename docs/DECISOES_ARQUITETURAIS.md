@@ -511,6 +511,34 @@ como dado de primeira classe do GHE, distinto de agente. Esboço:
 
 ---
 
+## D-ARQ-24 — Origem do LEO é resolvida por agente e cenário, separada do regime do PCMSO
+
+**Contexto.** R-RX-01 roteia a periodicidade do RX OIT pela razão CLSC/LEO (CLSC = limite superior do IC 95% da média aritmética lognormal, definição literal do Quadro 1 do Anexo III da NR-07 — não percentil 95). O motor hoje recebe `pct_LT` pronto e morre quando o PGR só traz concentração absoluta (sílica Viverde: mg/m³, `pct_LT=None`). Falta a peça que produz a faixa a partir de mg/m³ + %quartzo + cenário. Resolvido o método em DT-002L-01: a NR-07 Anexo III NÃO fixa o LEO — só usa a fração CLSC/LEO; quem fornece o valor é o arranjo NR-09 (item 9.6.1, transitório) + anexo setorial, por agente e cenário de exposição.
+
+**Decisão.** Introduzir um **LEO-resolver** como camada de dados entre o input fático do PGR e o classificador de faixa. Assinatura conceitual: `resolve_leo(agente, fracao, contexto_exposicao) -> (leo, fonte_normativa)`. Cadeia de precedência, agnóstica a agente:
+1. LEO setorial específico para (agente, cenário) — ex.: sílica cristalina respirável em mineração = 0,05 mg/m³ (NR-22 Anexo V, Portaria MTE 261/2026).
+2. Anexo próprio da NR-09 para o agente, quando existir.
+3. LT da NR-15 e anexos, via transitório NR-09 item 9.6.1 — ex.: sílica fora de mineração = LT do Anexo 12, função do %quartzo (respirável 8/(%quartzo+2); total 24/(%quartzo+3)).
+4. ACGIH (NR-09 item 9.6.1.1), na ausência de LT na NR-15.
+
+O cenário ("isto é mineração NR-22") nasce como DERIVAÇÃO de dados fáticos do PGR por GHE (CNAE, atividade de lavra/beneficiamento, local), nunca como string normativa no YAML/fixture. A fração (respirável/total) pareia CLSC e LEO na mesma fração; o roteamento do RX OIT usa respirável.
+
+**Fronteira com decisões existentes (não confundir):**
+- NÃO é instância de D-ARQ-04. D-ARQ-04 trata de **qual regime rege o PCMSO do GHE** (ANAC sobrescreve; mineração segue NR-07 padrão — confirmado pela Dra. Carolini). O LEO-resolver NÃO sobrescreve o PCMSO: o minerador segue NR-07; a NR-22 Anexo V só fornece o **valor do LEO** de um agente que alimenta a razão CLSC/LEO da própria NR-07. São eixos ortogonais: D-ARQ-04 = norma do programa; D-ARQ-24 = fonte do número do LEO por agente.
+- D-ARQ-19/20 consomem a faixa já resolvida (discretização + família de regras). O LEO-resolver é upstream: produz a faixa que eles consomem.
+- A validade da unidade de quantificação (mg/m³, %quartzo presente) é pré-condição estrutural do Stage 3 (D-ARQ-17), não responsabilidade do resolver.
+
+**Consequência.**
+- A escolha do LEO mora no resolver/classificador, como dado tabelado (precedência), não como `if agente == X` espalhado. Novo anexo setorial = novo registro, não novo branch.
+- Retorno carrega `(leo, fonte_normativa)` — procedência rastreável da linha à norma (NR + portaria), coerente com a exigência de rastreabilidade regulatória do PCMSO.
+- Destrava o `pct_LT=None` da sílica medida: dado mg/m³ + %quartzo + cenário, o resolver produz LEO → CLSC/LEO → faixa.
+- %quartzo é entrada obrigatória fora de mineração (denominador da fórmula do Anexo 12); em mineração o LEO é fixo e %quartzo não é necessário para o LEO.
+- A via mppdc legada do Anexo 12 (8,5/(%quartzo+10)) fica fora de escopo (abandonada na prática) — decisão consciente, não silenciosa.
+
+**Base.** Sessão 002.N (28/05/2026). Resolução de DT-002L-01. Fontes [DERIVADO]: NR-07 Anexo III (Portaria 567/2022); NR-09 item 9.6.1/9.6.1.1; NR-15 Anexo 12 (Portaria SSST 1/1991); NR-22 Anexo V (Portaria MTE 261/2026) — todas conferidas no site do MTE. Implementação (resolver + classificador CLSC + testes) é sessão de código futura, não fechada aqui.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
