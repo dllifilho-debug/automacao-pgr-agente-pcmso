@@ -221,8 +221,8 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | Faixa (CLSC vs. LEO) | RX tórax OIT |
 |---|---|
 | ≤ 10% LEO | admissional apenas |
-| 10% < CLSC < 50% LEO | adm + 60M até 15 anos → 36M após |
-| 50% < CLSC < 100% LEO | adm + 36M até 15 anos → **24M** após |
+| 10% < CLSC ≤ 50% LEO | adm + 60M até 15 anos → 36M após |
+| 50% < CLSC ≤ 100% LEO | adm + 36M até 15 anos → **24M** após |
 | > 100% LEO | adm + 12M desde o início |
 
 **Sílica / asbesto — SEM avaliação quantitativa** (canteiro sem laudo de higienista; caso mais comum):
@@ -247,11 +247,11 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | R-RX-01-alta | silica_asbesto_leo_acima_100 | 12M | — |
 | R-RX-01-pnos | pnos | 60M | — |
 
-`R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores a-conferir (opção B):** periodicidades e limiares de %LEO acima são transcrição com apoio do Anexo III, pendente conferência contra a redação literal da Portaria 567/2022.
+`R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores conferidos `[DERIVADO — fonte]`:** periodicidades, limiares e corte de 15 anos conferidos contra o texto literal do Anexo III da NR-07, Quadro 1 (Portaria MTP 567/2022), no site do MTE (002.N). Faixas fechadas com limite superior inclusivo (`≤`): >10 e ≤50; >50 e ≤100; >100. Variável de roteamento é o CLSC = limite superior do IC 95% da média aritmética (distribuição lognormal), conforme definição literal do Quadro 1 — NÃO é percentil 95. NOTA 2 do Quadro 1: trabalhador com exposição reduzida que esteve em concentração maior por ≥1 ano mantém o intervalo do período de maior exposição (a modelar — ver DT). PNOS segue o Quadro 2, não o Quadro 1 (ver R-RX-01-pnos e DT própria).
 
 **Base normativa:** Anexo III da NR-07 (Portaria 567/2022). Validação clínica: Dra. Carolini, 05/2025.
 
-**TODO normativo (002.L-estudo):** conferir faixas de %LEO, periodicidades e cortes de 15 anos contra a redação literal do Anexo III antes da 002.M. Estrutura (4 faixas + estado "sem avaliação quantitativa") fechada; valores exatos a confirmar.
+**TODO normativo — RESOLVIDO em 002.N `[DERIVADO]`:** faixas, periodicidades e corte de 15 anos do Quadro 1 (sílica/asbesto) conferidos contra o texto literal do Anexo III (Portaria 567/2022, site do MTE). Resíduos abertos: (a) classificador de faixa deve rotear por CLSC e tratar bordas com `≤` (fix de código); (b) PNOS achata o Quadro 2 (DT); (c) R-RX-02 fumos sem âncora no Anexo III (DT).
 
 #### R-RX-02 — Fumos metálicos `[VALIDADO]`
 Cargo com exposição a fumos metálicos (incluindo soldador) → RX **60 meses** em adm/per/MR/dem.
