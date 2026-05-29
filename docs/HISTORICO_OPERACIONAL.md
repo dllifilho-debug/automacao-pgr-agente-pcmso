@@ -1220,6 +1220,10 @@ Branch: feature/regras-002n-rx01-leo (7 commits). Foco: conferência [DERIVADO] 
   exposição derivado do PGR (GHEPGR não tem CNAE/atividade/local hoje).
 - IMPLEMENTAÇÃO DT-002N-01: explodir R-RX-01-pnos em família por faixa do Quadro 2.
 - IMPLEMENTAÇÃO Fatia B: janela demissional condicional do Quadro 1 (no agendador).
+- META: DT-002N-02 — notação de status DERIVADO diverge entre D-ARQ-22 Parte A (três sabores
+  tipados) e convenção v9 (um `[DERIVADO — fonte]`). A 002.N operou na notação v9; fonte real nos
+  corpos (sem erro silencioso). Reconciliar os dois documentos antes de propagar a notação —
+  preferível como primeira pauta da 002.O. Não reabrir a 002.N.
 - D-ARQ-23 (operação como dado), DT-D3-02 (fumos → metais individuais): herdados, abertos.
 
 ### Próxima sessão planejada

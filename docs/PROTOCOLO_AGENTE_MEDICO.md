@@ -552,6 +552,27 @@ A regra única de 60M só está correta para as duas últimas faixas. Subdimensi
 
 ---
 
+### DT-002N-02 — Notação de status DERIVADO: convenção v9 diverge do D-ARQ-22 Parte A `[INTERPRETADO — prioridade na revisão de saída]`
+
+**Origem:** Sessão 002.N (29/05/2026), revisão de método (META) ao final da sessão.
+
+**Situação.** Há divergência entre dois documentos vivos sobre a notação do status DERIVADO:
+- **D-ARQ-22 Parte A** define TRÊS sabores tipados: `[DERIVADO — NR-x item y]` (norma), `[DERIVADO — RQ.61/Patrícia]` (precedente), `[DERIVADO — analogia R-XXX]` (analogia).
+- **Convenção de status v9** (§ convenções do protocolo) define UM só: `[DERIVADO — fonte]`, com a fonte livre no corpo.
+
+A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-22 usa os sabores para priorizar a revisão de saída — "olha primeiro os `[INTERPRETADO]`, depois os `[DERIVADO]` **por analogia**, por último os `[VALIDADO]`". Se a revisão prioriza DERIVADO-analogia diferente de DERIVADO-norma, achatar tudo em `[DERIVADO — fonte]` **perde informação que o modelo de qualidade usa**. Leitura do Arquiteto: a v9 enfraqueceu o D-ARQ-22 sem intenção (divergência), não o consolidou deliberadamente — mas a decisão final é do Diovanni.
+
+**Impacto.** A sessão 002.N inteira operou na notação v9 (`[DERIVADO — fonte]`, e em alguns pontos `[DERIVADO]` solto ou `[DERIVADO — 002.N]` com a sessão no lugar da fonte; `[INTERPRETADO]` por vezes sem o sufixo "— prioridade na revisão de saída"). A fonte real está nomeada nos corpos das regras/DTs, então NÃO há erro silencioso — é não-conformidade de marca, não erro de conteúdo. Atinge: convenção v9, base_normativa das 5 R-RX-01, status de R-RX-01-pnos/R-RX-02, DT-002L-01, comentário de predicados.py e header de test_rx_periodicidade.py.
+
+**Resolução (sessão META ou abertura da 002.O — NÃO reabrir a 002.N):**
+1. Decidir entre (a) manter os três sabores tipados do D-ARQ-22 e corrigir a convenção v9 para refleti-los; ou (b) consolidar deliberadamente em um `[DERIVADO]` único e adicionar nota no D-ARQ-22 Parte A registrando a consolidação (com justificativa de que a priorização da revisão não depende do sabor).
+2. Se (a): varrer os `[DERIVADO — fonte]`/`[DERIVADO]` da 002.N para a forma tipada (`[DERIVADO — NR-7 Anexo III ...]` etc.) e completar os `[INTERPRETADO]` truncados com o sufixo canônico.
+3. Reconciliar D-ARQ-22 ↔ convenção v9 como fonte única de verdade da notação (hierarquia: D-ARQ é decisão-mãe; convenção do protocolo deve refleti-la, não simplificá-la em silêncio).
+
+**Não bloqueia** o merge da 002.N (conteúdo correto, fonte rastreável nos corpos). É dívida de conformidade de método, prioridade média.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
