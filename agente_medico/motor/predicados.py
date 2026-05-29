@@ -93,10 +93,11 @@ def _ototoxico(ctx: GHEContext) -> bool:
     return any(r.is_ototoxico for r in ctx.riscos)
 
 
-# TODO normativo: conferir vs Anexo III Portaria 567/2022 — opção B
-_PCT_LEO_BAIXO: float = 10.0   # ate_10: pct_LT <= this
-_PCT_LEO_MEDIO: float = 50.0   # 10_50: prev < pct_LT < this
-_PCT_LEO_ALTO: float = 100.0   # 50_100: prev <= pct_LT < this; acima_100: >= this
+# Bordas conferidas vs Quadro 1 Anexo III NR-07 (Portaria MTP 567/2022) — [DERIVADO — 002.N]
+# Quadro 1 usa "≤" nos limites superiores de cada faixa; CLSC = limite sup IC 95% da média aritmética
+_PCT_LEO_BAIXO: float = 10.0   # ate_10:    pct_LT <= 10  (adm only)
+_PCT_LEO_MEDIO: float = 50.0   # 10_50:  10 < pct_LT <= 50  (60M/36M)
+_PCT_LEO_ALTO: float = 100.0   # 50_100: 50 < pct_LT <= 100 (36M/24M); acima_100: > 100 (12M)
 
 
 def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
@@ -148,7 +149,7 @@ def _silica_asbesto_leo_10_50(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
         return r
-    return r.pct_LT is not None and _PCT_LEO_BAIXO < r.pct_LT < _PCT_LEO_MEDIO
+    return r.pct_LT is not None and _PCT_LEO_BAIXO < r.pct_LT <= _PCT_LEO_MEDIO
 
 
 @primitivo("silica_asbesto_leo_50_100")
@@ -156,7 +157,7 @@ def _silica_asbesto_leo_50_100(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
         return r
-    return r.pct_LT is not None and _PCT_LEO_MEDIO <= r.pct_LT < _PCT_LEO_ALTO
+    return r.pct_LT is not None and _PCT_LEO_MEDIO < r.pct_LT <= _PCT_LEO_ALTO
 
 
 @primitivo("silica_asbesto_leo_acima_100")
@@ -164,7 +165,7 @@ def _silica_asbesto_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
         return r
-    return r.pct_LT is not None and r.pct_LT >= _PCT_LEO_ALTO
+    return r.pct_LT is not None and r.pct_LT > _PCT_LEO_ALTO
 
 
 @primitivo("pnos")
