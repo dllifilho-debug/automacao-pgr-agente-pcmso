@@ -518,10 +518,21 @@ o motor a trata como quantificação incompleta (pendência), não emite RX por 
 valores do Viverde são baixíssimos (provável ≤10% LEO = só admissional), mas o motor
 não crava isso sem a regra de conversão validada.
 
-**Status:** REABERTA SOB NOVA METODOLOGIA (002.M). Era `[A VALIDAR — Carolini]`. Tem âncora
-normativa objetiva: LEO/LT da sílica no Anexo 12 da NR-15 vigente; conversão depende do
-%quartzo da amostra → resolver por `[DERIVADO]` conferindo texto literal no site oficial do
-MTE, não por opinião clínica. Prioridade alta (afeta roteamento de R-RX-01 para sílica em mg/m³).
+**Status:** [DERIVADO — fonte] (método) + [INTERPRETADO — prioridade na revisão de saída]
+(leitura do arranjo). Resolvida na 002.N. A NR-7 Anexo III não fixa o LEO; roteia por CLSC/LEO,
+onde CLSC = limite superior do IC 95% da média lognormal (definição literal do Quadro 1 do
+Anexo III — NÃO é percentil 95). O valor do LEO vem do arranjo NR-9 + anexo setorial, por
+agente e cenário:
+- sílica fora de mineração: LEO = LT do Anexo 12 da NR-15 (transitório NR-9, item 9.6.1) —
+  fração respirável 8/(%quartzo+2), total 24/(%quartzo+3). [DERIVADO — NR-15 Anexo 12
+  (Portaria SSST 1/1991); NR-9 item 9.6.1, conferidas no site do MTE]
+- sílica em mineração: LEO = 0,05 mg/m³ na poeira respirável (NR-22 Anexo V, Portaria MTE
+  261/2026), que sobrepõe a fórmula do Anexo 12 nesse setor. [DERIVADO — gov.br, Portaria
+  MTE 261/2026]
+%quartzo é entrada obrigatória fora de mineração (denominador da fórmula). A leitura "a NR-7
+não fixa o LEO" é [INTERPRETADO]: não há norma conclusiva nem crivo clínico sobre o ponto —
+inspecionar na revisão de saída. Pendência derivada (sessão futura): contrato de LEO-resolver
+no motor e classificador de R-RX-01 roteando por CLSC.
 
 ---
 
