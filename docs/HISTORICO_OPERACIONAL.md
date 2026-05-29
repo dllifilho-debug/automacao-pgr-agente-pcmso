@@ -1213,6 +1213,12 @@ Branch: feature/regras-002n-rx01-leo (7 commits). Foco: conferência [DERIVADO] 
 - A borda ≤ era achado de conferência contra a norma, não suposição — virou teste de regressão.
 - Carolini fora do loop até a conclusão (PDCA, D-ARQ-22): conferência por fonte objetiva, não crivo
   clínico prévio. Tags [DERIVADO]/[INTERPRETADO] carregam a validação até a revisão de saída final.
+- **Quebra de protocolo de merge (ba38c74).** O commit da DT-002N-02 foi direto em `main`, fora de
+  PR — os 9 commits anteriores entraram corretamente via PR #32. Causa: após o merge do PR #32 a
+  branch ativa virou `main`, e o prompt do commit não foi precedido de checagem de branch (higiene
+  de abertura). Aceito como está (doc-only, conteúdo correto, história linear — reverter custaria
+  mais que o defeito). Regra reforçada: TODO prompt que vai commitar deve ser precedido de
+  `git branch --show-current`; trabalho entra em `main` só via PR com merge commit autorizado.
 
 ### Residuais abertos (próximas sessões)
 - IMPLEMENTAÇÃO D-ARQ-24: LEO-resolver (mg/m³ + %quartzo → CLSC/LEO → faixa). Destrava sílica do
