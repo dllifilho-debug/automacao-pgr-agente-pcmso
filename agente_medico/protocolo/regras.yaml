@@ -44,7 +44,7 @@ regras:
       - exame: rx_torax_oit
         periodicidade_meses: 0
         momentos: [adm]
-    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto ≤10%LT, somente admissional (padrão R-VIB-01)"
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto CLSC ≤10% LEO: admissional; demissional se último exame > 2 anos (janela no agendador)"
     status: VALIDADO
 
   - id: R-RX-01-sem
@@ -54,7 +54,7 @@ regras:
         periodicidade_meses: 24
         periodicidade_apos_15a: 12
         momentos: [adm, per, MR, dem]
-    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto sem medição declarada; encurta para 12M após 15 anos de exposição (corte resolvido pelo agendador, D-ARQ-19)"
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto sem avaliação quantitativa; 24M, encurta para 12M após 15 anos (corte no agendador, D-ARQ-19); demissional se último > 1 ano"
     status: VALIDADO
 
   - id: R-RX-01-baixa
@@ -64,7 +64,7 @@ regras:
         periodicidade_meses: 60
         periodicidade_apos_15a: 36
         momentos: [adm, per, MR, dem]
-    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto 10%<LEO<50%; encurta para 36M após 15 anos de exposição (corte resolvido pelo agendador, D-ARQ-19)"
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto >10% e ≤50% LEO; 60M, encurta para 36M após 15 anos (D-ARQ-19); demissional se último > 2 anos"
     status: VALIDADO
 
   - id: R-RX-01-media
@@ -74,7 +74,7 @@ regras:
         periodicidade_meses: 36
         periodicidade_apos_15a: 24
         momentos: [adm, per, MR, dem]
-    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto 50%≤LEO<100%; encurta para 24M após 15 anos de exposição (corte resolvido pelo agendador, D-ARQ-19)"
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto >50% e ≤100% LEO; 36M, encurta para 24M após 15 anos (D-ARQ-19); demissional se último > 1 ano"
     status: VALIDADO
 
   - id: R-RX-01-alta
@@ -84,7 +84,7 @@ regras:
         periodicidade_meses: 12
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
-    base_normativa: "Anexo III Portaria 567/2022 (transcrição a-conferir) — sílica/asbesto ≥100%LT; periodicidade constante"
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto >100% LEO; 12M constante, sem corte de 15 anos; demissional se último > 1 ano"
     status: VALIDADO
 
   - id: R-RX-01-pnos
