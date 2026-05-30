@@ -548,6 +548,79 @@ O cenário ("isto é mineração NR-22") nasce como DERIVAÇÃO de dados fático
 
 ---
 
+## D-ARQ-25 — Camada de extração: contrato LLM→motor e normalização de vocabulário a montante
+
+**Contexto.** O motor é função pura `(PGR_estruturado, Protocolo) → Resultado` (D-ARQ-09) e
+consome `tipos.PGR`. Hoje a única fonte de `tipos.PGR` é fixture escrita à mão (Viverde). Para
+o objetivo de produção — rodar sobre qualquer PGR real de qualquer setor, não só o caso-teste —
+falta a camada que transforma PGR real (PDF/docx) em `tipos.PGR`. Essa é a etapa 3 do plano
+original do projeto ("voltar à camada de extração e adaptar o prompt do Gemini ao schema novo"),
+adiada até o motor existir. O motor agora existe. Dois extratores legados coexistem e nenhum
+serve: `parser_pgr.py` (regex) devolve dict de chaves cruas (`"RUIDO"`), sem quantificação, sem
+vocabulário canônico, e mistura extração com decisão de exames (viola D-ARQ-09);
+`extrair_pgr_estruturado_via_gemini` (LLM) devolve GHEs em linguagem natural com cargos e riscos
+como texto, mas sem quantificação e sem slugs canônicos. Ambos ficam abaixo do contrato que
+`tipos.PGR` exige.
+
+**Decisão — três partes.**
+
+*Parte A — o contrato de fronteira é `tipos.PGR`, sem intermediário.* A camada de extração produz
+diretamente `tipos.PGR`/`GHEPGR`/`RiscoPGR`/`Quantificacao`. Não há formato intermediário próprio
+da extração. O motor não muda para acomodar a extração; a extração produz o que o motor já exige.
+O parser legado (`parser_pgr.py`) NÃO é portado — fica no legado Streamlit, aposentado com ele.
+
+*Parte B — normalização de vocabulário é responsabilidade da extração, a montante do motor.* A
+tradução de risco/cargo/EPI em linguagem natural para o slug canônico do `vocabulario/*.yaml`
+acontece na camada de extração, antes de instanciar `RiscoPGR.agente`. O motor recebe slugs
+canônicos e permanece puro (D-ARQ-09 preservada). Risco/cargo sem slug correspondente vira
+`Pendencia(tipo="vocabulario_ausente", bloqueante=False)` conforme D-ARQ-14 — a extração não
+inventa slug nem descarta o agente. Mecanismo de normalização (LLM com vocabulário no prompt,
+dicionário de sinônimos, ou híbrido) é decisão de implementação, não deste D-ARQ.
+
+*Parte C — forma final de `tipos.PGR` (contrato-alvo completo).* A extração precisa preencher
+campos que `tipos.py` hoje não tem. O contrato-alvo é especificado aqui de uma vez; a
+implementação de cada campo é fatiada em sessões futuras. Conferido contra `tipos.py` (002.P):
+
+- JÁ EXISTEM e a extração preenche: `PGR.ghes`, `GHEPGR.{id,nome,cargos,riscos}`,
+  `RiscoPGR.{tipo,agente}`, `Quantificacao.{valor,unidade,relacao_LT,pct_LT,apenas_qualitativa,
+  sem_avaliacao_quantitativa}`.
+- EXISTEM no tipo mas nenhum extrator legado preenche (gap de extração, não de tipo):
+  `PGR.validade`, `PGR.assinatura_engenheiro` (gates R-PGR-01/R-PGR-06); `GHEPGR.{epis,
+  produtos_quimicos,psicossocial}` (R-PGR-03 sinal por EPI; R-FDS-* via produtos; R-PSY-01);
+  `ProdutoQuimico.fds`; `Componente.cas`.
+- NÃO EXISTEM no tipo — extensão futura: `Quantificacao.pct_quartzo` (denominador Anexo 12,
+  D-ARQ-24); cenário de exposição em `GHEPGR` (CNAE, atividade, local) que alimenta o
+  LEO-resolver a decidir mineração-NR-22 vs. não-mineração (D-ARQ-24). Forma exata da extensão
+  (campos diretos vs. sub-objeto `CenarioExposicao`) é decisão de implementação da sessão que
+  encostar em D-ARQ-24.
+
+**Fronteira com decisões existentes (não confundir):**
+- Preserva D-ARQ-09: motor puro; toda LLM (extração, normalização) fica a montante.
+- Consome D-ARQ-12: o vocabulário tipado é o alvo da normalização da Parte B.
+- Consome D-ARQ-14: vocabulário ausente em runtime → Pendencia, não exceção; aplica-se à extração.
+- Destrava D-ARQ-24: os campos `pct_quartzo` e cenário de exposição (Parte C) são pré-requisito
+  do LEO-resolver. D-ARQ-24 não implementa até a extração entregar esses dados (ou fixture supri-los).
+- Substitui o caminho de extração do legado, não o motor: o parser regex e o Gemini atual são
+  referência histórica, não base de código a evoluir.
+
+**Consequência.**
+- Roadmap de produção: (1) estender `tipos.py` com os campos faltantes (Parte C); (2) implementar
+  a extração LLM→`tipos.PGR` com normalização de vocabulário; (3) validar a extração contra a
+  fixture Viverde (extrair um PGR Viverde real deve reproduzir, ou aproximar-se de, a fixture
+  escrita à mão — gabarito de forma, D-ARQ-18); (4) validar contra um PGR não-construção
+  (D-ARQ-06, universalidade). Fatias independentes, ordem revisável.
+- Determinismo do motor intacto: a extração pode ser não-determinística (LLM), mas seu output é
+  `tipos.PGR` congelado que o motor processa deterministicamente. A fronteira LLM/determinístico
+  é exatamente `tipos.PGR`.
+- Rastreabilidade: cada campo extraído deve poder apontar para o trecho do PGR de origem
+  (requisito de auditoria do PCMSO) — exigência registrada, detalhe de implementação futuro.
+
+**Base.** Sessão 002.P (30/05/2026). Decisão de arquitetura — sem caso-âncora de código.
+Origem: leitura dos contratos reais (`tipos.py`, `parser_pgr.py`, `ia_client.py`, fixture Viverde)
+e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementação é sessão futura.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -571,3 +644,4 @@ O cenário ("isto é mineração NR-22") nasce como DERIVAÇÃO de dados fático
 | v17 | 25/05/2026 | Sessão 002.L: D-ARQ-21 adicionada — agrupamento em GHE é canônico, motor respeita o GHE do PGR sem re-agrupar (origem: PGR Viverde-CMO, pedreiro em 6 GHEs; Carolini respeita o agrupamento) |
 | v18 | 28/05/2026 | Sessão 002.M: D-ARQ-22 adicionada (modelo erro-zero + revisão de saída + PDCA; hierarquia de resolução de incerteza; status [A VALIDAR — Carolini] descontinuado); D-ARQ-23 adicionada (operação como dado de primeira classe do GHE — PROPOSTA, não implementada) |
 | v19 | 29/05/2026 | Sessão 002.O (META): DT-002N-02 resolvida — nota de resolução em D-ARQ-22; notação `[DERIVADO]` canônica = fonte no marcador (Parte A); convenção do PROTOCOLO alinhada. Doc-only, sem reclassificação de regra |
+| v20 | 30/05/2026 | Sessão 002.P (ARQUITETURA): D-ARQ-25 adicionada — camada de extração, contrato de fronteira é `tipos.PGR` (sem intermediário); normalização de vocabulário a montante do motor (preserva D-ARQ-09); contrato-alvo completo de `tipos.PGR` especificado (campos existentes vs. extensão futura: pct_quartzo + cenário de exposição para D-ARQ-24). Parser legado não portado. |
