@@ -1237,4 +1237,43 @@ Decisão do Diovanni. Recomendação do Arquiteto: IMPLEMENTAÇÃO D-ARQ-24 (LEO
 que destrava o roteamento de sílica em mg/m³ e da qual dependem as fatias B/C.
 
 ---
+## Sessão 002.O — 29/05/2026 — META (reconciliação de notação)
+Branch: docs/meta-002o-notacao-derivado. Foco: resolver DT-002N-02 —
+reconciliar a notação de status `[DERIVADO]` entre D-ARQ-22 Parte A e a convenção do PROTOCOLO.
+
+### Achado central
+A DT-002N-02 estava mal formulada. Não havia conflito de conteúdo entre D-ARQ-22 e a convenção do
+PROTOCOLO — havia descrição imprecisa no resumo da 002.N. D-ARQ-22 Parte A NÃO define "três sabores
+tipados": define um único formato `[DERIVADO — <fonte>]`, fonte preenchida conforme o nível 1-3 da
+hierarquia; `[INTERPRETADO]` é o nível 4 (marcador irmão, não sabor de DERIVADO). A convenção do
+PROTOCOLO nunca foi "genérica" — sempre exigiu fonte objetiva nomeada, com a mesma hierarquia. Os
+dois sempre concordaram no fundo; divergiam só em ONDE a fonte aparece: corpo (PROTOCOLO) vs.
+marcador (D-ARQ-22).
+
+### Decisões
+- Notação canônica: fonte NO MARCADOR (`[DERIVADO — NR-x item y]`, `[DERIVADO — RQ.61/Patrícia]`,
+  `[DERIVADO — analogia R-XXX]`). Rastreabilidade no token vence economia visual.
+- Convenção `[DERIVADO]` do PROTOCOLO reescrita (hierarquia de 4 níveis + fonte no marcador).
+- R-RX-01 "Valores conferidos": `[DERIVADO — fonte]` → `[DERIVADO — NR-7 Anexo III Quadro 1]`
+  (alinhamento de formato; mesma ID, sem mudança de semântica).
+- Nota de resolução em D-ARQ-22 (corpo de D-ARQ-22 não muda).
+- Sem reclassificação de regra. Sem código. Sem alteração de suíte (doc-only).
+
+### Lições / método
+- "Três sabores tipados" foi conclusão do resumo da 002.N, não do literal de D-ARQ-22. Só o dump
+  literal da Parte A desfez — reforça a lição da 002.N (resumo ≠ literal).
+- DT de "divergência entre dois textos" exige ler os dois literais antes de abrir, não os resumos.
+
+### Residuais abertos (próximas sessões)
+- IMPLEMENTAÇÃO D-ARQ-24: LEO-resolver (mg/m³ + %quartzo → CLSC/LEO → faixa). Destrava sílica do
+  Viverde. Recomendação do Arquiteto para a próxima sessão.
+- IMPLEMENTAÇÃO DT-002N-01: explodir R-RX-01-pnos em família por faixa do Quadro 2.
+- IMPLEMENTAÇÃO Fatia B: janela demissional condicional do Quadro 1 (agendador).
+- D-ARQ-23 (operação como dado), DT-D3-02 (fumos → metais individuais): herdados, abertos.
+
+### Próxima sessão planejada
+Decisão do Diovanni. Recomendação do Arquiteto: IMPLEMENTAÇÃO D-ARQ-24 (LEO-resolver).
+
+---
+
 *Entradas futuras abaixo desta linha*

@@ -15,10 +15,13 @@ Convenções de status:
   Dra. Carolini; resolução segue a hierarquia de D-ARQ-22.
 - `[A VALIDAR — Carolini]` — DESCONTINUADO a partir de 002.M. Itens reclassificados em
   `[DERIVADO]` ou `[INTERPRETADO]`.
-- `[DERIVADO — fonte]` — resolvido após 002.M por fonte objetiva: norma vigente (citar NR
-  e item, conferida no site oficial do MTE), matriz já validada como precedente (RQ.61
-  Carolini / matriz Patrícia), ou analogia direta com regra `[VALIDADO]`. Alta confiança;
-  a fonte é nomeada no corpo da regra.
+- `[DERIVADO — fonte]` — resolvido após 002.M por fonte objetiva, seguindo a hierarquia de
+  4 níveis de D-ARQ-22 Parte A (parar no primeiro que resolver): (1) norma vigente conferida
+  no site oficial do MTE → `[DERIVADO — NR-x item y]`; (2) matriz validada como precedente
+  (RQ.61 Carolini / matriz Patrícia) → `[DERIVADO — RQ.61/Patrícia]`; (3) analogia direta com
+  regra `[VALIDADO]` → `[DERIVADO — analogia R-XXX]`. Alta confiança; a fonte é nomeada NO
+  PRÓPRIO MARCADOR, não apenas no corpo. O nível 4 (norma/matriz/analogia não resolvem) produz
+  `[INTERPRETADO]`, abaixo — saída da mesma árvore de decisão, não um estado paralelo.
 - `[INTERPRETADO — prioridade na revisão de saída]` — decisão do Arquiteto onde norma/
   matriz/analogia não foram conclusivas. NÃO houve crivo clínico prévio. É a categoria que
   a revisão de saída (médica lendo a matriz gerada) deve inspecionar PRIMEIRO. Não é um
@@ -247,7 +250,7 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | R-RX-01-alta | silica_asbesto_leo_acima_100 | 12M | — |
 | R-RX-01-pnos | pnos | 60M | — |
 
-`R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores conferidos `[DERIVADO — fonte]`:** periodicidades, limiares e corte de 15 anos conferidos contra o texto literal do Anexo III da NR-07, Quadro 1 (Portaria MTP 567/2022), no site do MTE (002.N). Faixas fechadas com limite superior inclusivo (`≤`): >10 e ≤50; >50 e ≤100; >100. Variável de roteamento é o CLSC = limite superior do IC 95% da média aritmética (distribuição lognormal), conforme definição literal do Quadro 1 — NÃO é percentil 95. NOTA 2 do Quadro 1: trabalhador com exposição reduzida que esteve em concentração maior por ≥1 ano mantém o intervalo do período de maior exposição (a modelar — ver DT). PNOS segue o Quadro 2, não o Quadro 1 (ver R-RX-01-pnos e DT própria).
+`R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores conferidos `[DERIVADO — NR-7 Anexo III Quadro 1]`:** periodicidades, limiares e corte de 15 anos conferidos contra o texto literal do Anexo III da NR-07, Quadro 1 (Portaria MTP 567/2022), no site do MTE (002.N). Faixas fechadas com limite superior inclusivo (`≤`): >10 e ≤50; >50 e ≤100; >100. Variável de roteamento é o CLSC = limite superior do IC 95% da média aritmética (distribuição lognormal), conforme definição literal do Quadro 1 — NÃO é percentil 95. NOTA 2 do Quadro 1: trabalhador com exposição reduzida que esteve em concentração maior por ≥1 ano mantém o intervalo do período de maior exposição (a modelar — ver DT). PNOS segue o Quadro 2, não o Quadro 1 (ver R-RX-01-pnos e DT própria).
 
 **Base normativa:** Anexo III da NR-07 (Portaria 567/2022). Validação clínica: Dra. Carolini, 05/2025.
 
@@ -604,3 +607,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v8 | 25/05/2026 | Sessão 002.L: DT-002L-01 adicionada (conversão mg/m³ → %LEO para rotear faixa de RX — pergunta de método para a Carolini, originada da estruturação do PGR Viverde) |
 | v9 | 28/05/2026 | Sessão 002.M: fonte primária congelada; validação migra para revisão de saída (erro-zero + PDCA, D-ARQ-22). Convenções de status revisadas. Nota de implementação em R-GHE-05 (depende de D-ARQ-23). DT-D3-02/002I-01/002L-01 reclassificadas. Divergência serralheiro Est-09 documentada. |
 | v10 | 29/05/2026 | Sessão 002.N: R-RX-01 sílica/asbesto sai de a-conferir → [DERIVADO] (NR-7 Anexo III Quadro 1, 567/2022; bordas ≤, CLSC, NOTA 2); DT-002L-01 RESOLVIDA (LEO sourcing NR-9/NR-15/NR-22); D-ARQ-24 (LEO-resolver); DT-002N-01 aberta (PNOS achata Quadro 2); R-RX-01-pnos e R-RX-02 rebaixados VALIDADO→INTERPRETADO. |
+| v11 | 29/05/2026 | Sessão 002.O (META): DT-002N-02 resolvida. Convenção `[DERIVADO]` alinhada a D-ARQ-22 Parte A — fonte vai no marcador (`[DERIVADO — NR-x item y]` etc.), não só no corpo. R-RX-01 "Valores conferidos" passa a `[DERIVADO — NR-7 Anexo III Quadro 1]`. Sem reclassificação de regra. |
