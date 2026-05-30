@@ -1354,3 +1354,31 @@ Cenário vira sub-objeto `CenarioExposicao` (não campos soltos em `GHEPGR`). Ra
 Decisão do Diovanni.
 
 ---
+
+## Sessão de rename — "Agente PCMSO" (30/05/2026) [META + manutenção app]
+
+Duas frentes distintas, registradas separadas por escopo e natureza diferentes.
+
+### Frente 1 — Rename do projeto (doc-only, escopo do kickoff)
+Fase 1 (identidade): decidido "Agente PCMSO" (display) / `agente-pcmso` (slug-alvo) — domínio carregado pelo PCMSO, sem cola em construção, sem "Médico" redundante. Fase 2 (propagação): 6 edições doc em PROTOCOLO/DECISOES/HISTORICO (3 títulos H1 + remoção de vínculo Seconci-GO em header do PROTOCOLO e D-ARQ-04; procedência `[VALIDADO]` preservada, fonte = entrevista Dra. Carolini). PR #37, merge commit 24df3fa.
+
+Itens manuais fora do git, todos concluídos: repo GitHub renomeado; subdomínio Streamlit; system prompt do projeto (instruções claude.ai — "(Seconci-GO)" removido, vale a partir do próximo chat).
+
+DIVERGÊNCIA slug decidido vs. slug real: a Fase 1 decidiu `agente-pcmso` puro, mas o rename efetivo (repo GitHub + Streamlit) ficou `automacao-pgr-agente-pcmso` — o nome técnico antigo do pipeline (`automacao-pgr-`) permaneceu como prefixo. Repo real: dllifilho-debug/automacao-pgr-agente-pcmso. App real: automacao-pgr-agente-pcmso.streamlit.app. Não é resíduo Seconci (limpo); é o slug do pipeline não removido. Alinhar ao slug puro é renomeação futura opcional (repo + Streamlit de novo), decisão de Diovanni.
+
+Nota de método: o grep de verificação de resíduo errou na 1ª passada por case-sensitivity — buscou "Agente Médico" e não casou o título em caixa alta "AGENTE MÉDICO PCMSO". Verificação de rename deve ser case-insensitive. Buraco pego no passo 4 pelo Code antes do commit, fechado com 6ª edição (título H1 do HISTORICO).
+
+### Frente 2 — Remoção de branding Seconci do app legado (fora do escopo doc-only)
+Frente aberta conscientemente durante a sessão, NÃO prevista no kickoff doc-only. Toca app.py (casca Streamlit do legado). logo.png removido do git; 5 ocorrências "Seconci" em app.py (docstring, set_page_config, fallback login, rodapé, sidebar) → "Agente PCMSO"; fallback visual escudo + Agente PCMSO, sem dependência de imagem. 297/297 verde. PR #38, merge commit e7d6a73.
+
+Ressalva de validade (D-ARQ-25 Parte A): o legado Streamlit será aposentado e app.py morre com ele. A limpeza do nome se justifica enquanto o app está vivo e em uso (confirmado por Diovanni: app funcionando), não como investimento de longo prazo.
+
+### Nota de método — commit direto em main fora de PR
+Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit f9a9ced ("Added Dev Container Folder"), commitado direto em main pela UI do GitHub, sem branch nem PR. Origem legítima (autoria do Diovanni, config de ambiente de dev, inofensivo), confirmada por git log. Registrado como desvio do protocolo de merge (branch → PR → merge commit): commit direto em main fura o fluxo silenciosamente. Tolerável para config de ambiente; não normalizar para código de motor/protocolo.
+
+### Pendências ortogonais não tratadas
+- matrizes_originais/ (37 não-rastreados) — decidir gitignore vs. versionar quando abrir a sessão de validação (D-ARQ-18).
+- Slug com prefixo `automacao-pgr-` (ver divergência na Frente 1) — alinhamento opcional futuro.
+- Descasamento aceito: display "Agente PCMSO" ↔ pasta de código `agente_medico/`. Refactor de pasta é sessão de código futura, não bloqueia.
+
+---
