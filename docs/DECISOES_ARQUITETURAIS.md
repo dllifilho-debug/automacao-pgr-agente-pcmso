@@ -543,6 +543,7 @@ O cenário ("isto é mineração NR-22") nasce como DERIVAÇÃO de dados fático
 - Destrava o `pct_LT=None` da sílica medida: dado mg/m³ + %quartzo + cenário, o resolver produz LEO → CLSC/LEO → faixa.
 - %quartzo é entrada obrigatória fora de mineração (denominador da fórmula do Anexo 12); em mineração o LEO é fixo e %quartzo não é necessário para o LEO.
 - A via mppdc legada do Anexo 12 (8,5/(%quartzo+10)) fica fora de escopo (abandonada na prática) — decisão consciente, não silenciosa.
+- **002.Q:** os dados que o resolver exige (`Quantificacao.pct_quartzo`, `GHEPGR.cenario`) passam a existir no tipo (D-ARQ-25 Parte C, PR #36). Destrava parcial: o contrato de dados está pronto; o resolver e o classificador CLSC continuam não implementados.
 
 **Base.** Sessão 002.N (28/05/2026). Resolução de DT-002L-01. Fontes [DERIVADO]: NR-07 Anexo III (Portaria 567/2022); NR-09 item 9.6.1/9.6.1.1; NR-15 Anexo 12 (Portaria SSST 1/1991); NR-22 Anexo V (Portaria MTE 261/2026) — todas conferidas no site do MTE. Implementação (resolver + classificador CLSC + testes) é sessão de código futura, não fechada aqui.
 
@@ -619,6 +620,8 @@ implementação de cada campo é fatiada em sessões futuras. Conferido contra `
 Origem: leitura dos contratos reais (`tipos.py`, `parser_pgr.py`, `ia_client.py`, fixture Viverde)
 e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementação é sessão futura.
 
+**Aplicação na sessão 002.Q (30/05/2026).** A forma da extensão da Parte C foi decidida e implementada: cenário de exposição vira sub-objeto `CenarioExposicao` (dataclass frozen, campos `cnae`/`atividade`/`local` todos `Optional`, default `None`), e `GHEPGR` ganha `cenario: Optional[CenarioExposicao] = None`. `pct_quartzo: Optional[float] = None` fica direto em `Quantificacao`. Razão da escolha de sub-objeto sobre campos soltos: coesão (cenário é unidade fática), evolução prevista por D-ARQ-24 (mais dados de cenário virão), opcionalidade limpa. `CenarioExposicao` carrega só dado fático — a derivação normativa (mineração-NR-22) permanece no LEO-resolver downstream, preservando D-ARQ-24. PR #36, commit 46e32dc. Testes: 5 novos (pct_quartzo materializa R-RX-01/D-ARQ-24 — falha sem o campo; cenário só construção/serialização, sem consumidor clínico). Os itens (2) da extração e o LEO-resolver seguem como sessões futuras.
+
 ---
 
 ## Histórico de revisões
@@ -645,3 +648,4 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 | v18 | 28/05/2026 | Sessão 002.M: D-ARQ-22 adicionada (modelo erro-zero + revisão de saída + PDCA; hierarquia de resolução de incerteza; status [A VALIDAR — Carolini] descontinuado); D-ARQ-23 adicionada (operação como dado de primeira classe do GHE — PROPOSTA, não implementada) |
 | v19 | 29/05/2026 | Sessão 002.O (META): DT-002N-02 resolvida — nota de resolução em D-ARQ-22; notação `[DERIVADO]` canônica = fonte no marcador (Parte A); convenção do PROTOCOLO alinhada. Doc-only, sem reclassificação de regra |
 | v20 | 30/05/2026 | Sessão 002.P (ARQUITETURA): D-ARQ-25 adicionada — camada de extração, contrato de fronteira é `tipos.PGR` (sem intermediário); normalização de vocabulário a montante do motor (preserva D-ARQ-09); contrato-alvo completo de `tipos.PGR` especificado (campos existentes vs. extensão futura: pct_quartzo + cenário de exposição para D-ARQ-24). Parser legado não portado. |
+| v21 | 30/05/2026 | Sessão 002.Q (IMPLEMENTAÇÃO): D-ARQ-25 Parte C implementada — `Quantificacao.pct_quartzo` + sub-objeto `CenarioExposicao` em `GHEPGR.cenario`; nota de aplicação em D-ARQ-25 e D-ARQ-24 (destrava parcial). Suíte 292→297, mypy --strict limpo. PR #36, commit 46e32dc. |
