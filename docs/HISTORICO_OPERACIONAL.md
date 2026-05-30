@@ -1318,3 +1318,40 @@ Decisão do Diovanni. Recomendação do Arquiteto: IMPLEMENTAÇÃO da extensão 
 ---
 
 *Entradas futuras abaixo desta linha*
+
+---
+
+## Sessão 002.Q — 30/05/2026 — IMPLEMENTAÇÃO (tipos.py Parte C)
+Branch: `feature/tipos-002q-cenario-pct-quartzo` — PR #36 (merge commit b1294c2). Foco: estender `tipos.py` com os campos da Parte C de D-ARQ-25 — `pct_quartzo` e cenário de exposição, pré-requisitos de dados do LEO-resolver (D-ARQ-24).
+
+### O que foi feito
+
+1. `Quantificacao.pct_quartzo: Optional[float] = None` — denominador da fórmula do Anexo 12 (NR-15), pré-requisito do LEO-resolver (R-RX-01 / D-ARQ-24).
+2. Novo `CenarioExposicao` (dataclass frozen; `cnae`/`atividade`/`local`, todos `Optional`, default `None`) — definido imediatamente antes de `GHEPGR`.
+3. `GHEPGR.cenario: Optional[CenarioExposicao] = None` — contexto fático por GHE.
+4. 5 testes em `agente_medico/tests/test_tipos.py`.
+
+### Resultados
+
+- **pytest** `agente_medico/tests/ tests/` — 297/297 verdes (292 + 5 novos). Nenhum pré-existente quebrou.
+- **mypy --strict** `agente_medico/motor` — Success: no issues found (12 source files).
+- Commit `46e32dc`; merge via PR #36 (merge commit b1294c2).
+
+### Decisão de design
+
+Cenário vira sub-objeto `CenarioExposicao` (não campos soltos em `GHEPGR`). Razão: coesão (cenário é unidade fática), evolução prevista por D-ARQ-24 (mais dados de cenário virão), opcionalidade limpa. `pct_quartzo` fica direto em `Quantificacao` (pertence à quantificação, sem coesão externa). `CenarioExposicao` carrega só dado fático — a derivação normativa (mineração-NR-22) permanece no LEO-resolver downstream, preservando D-ARQ-24. Confirmada com o Diovanni nesta sessão (proposta da 002.P, aprovada na 002.Q).
+
+### Cobertura de teste
+
+`pct_quartzo` materializa caminho de regra clínica (R-RX-01 / D-ARQ-24) → 2 testes que falham sem o campo (default None + aceitação de valor). Cenário ainda sem consumidor clínico (D-ARQ-24 não implementado) → 3 testes de construção/serialização (`asdict`), sem lógica clínica.
+
+### Residuais abertos (próximas sessões)
+- IMPLEMENTAÇÃO D-ARQ-24 (LEO-resolver): destravada — campos existem; falta o resolver + classificador CLSC.
+- IMPLEMENTAÇÃO extração LLM→`tipos.PGR` (D-ARQ-25 itens A/B restantes).
+- IMPLEMENTAÇÃO DT-002N-01 (PNOS família por faixa); Fatia B (janela demissional, agendador).
+- D-ARQ-23 (operação como dado), DT-D3-02 (fumos → metais individuais): herdados, abertos.
+
+### Próxima sessão planejada
+Decisão do Diovanni.
+
+---
