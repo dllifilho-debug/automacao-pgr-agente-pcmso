@@ -1276,4 +1276,45 @@ Decisão do Diovanni. Recomendação do Arquiteto: IMPLEMENTAÇÃO D-ARQ-24 (LEO
 
 ---
 
+## Sessão 002.P — 30/05/2026 — ARQUITETURA (camada de extração)
+Branch: docs/arq-002p-ponte-parser-motor. Foco: especificar a camada que transforma PGR real
+em tipos.PGR, destravando o objetivo de produção (qualquer PGR, qualquer setor).
+
+### Achado central
+O motor nunca recebeu PGR real — só a fixture Viverde escrita à mão. O caminho de produção atual
+(Streamlit) usa parser_pgr.py (regex), que cospe chaves cruas sem quantificação nem vocabulário
+canônico, três níveis abaixo do que tipos.PGR exige. A extração-LLM (extrair_pgr_estruturado_via_
+gemini) existe mas devolve linguagem natural sem quantificação nem slugs. A camada de extração que
+o motor novo precisa é a etapa 3 do plano original do projeto, adiada até o motor existir — nunca feita.
+
+### Decisões
+- D-ARQ-25 criada (três partes): (A) contrato de fronteira é tipos.PGR, sem intermediário; parser
+  legado não portado. (B) normalização de vocabulário (linguagem natural → slug) é responsabilidade
+  da extração, a montante; motor permanece puro (D-ARQ-09). (C) contrato-alvo completo de tipos.PGR
+  especificado, conferido contra o arquivo real: campos existentes preenchidos, campos existentes
+  não-preenchidos pelos extratores legados (gates, EPI, psicossocial, FDS/CAS), campos inexistentes
+  para extensão futura (pct_quartzo + cenário de exposição, ambos pré-requisito de D-ARQ-24).
+- Roadmap de produção fixado: estender tipos.py → implementar extração LLM→tipos.PGR → validar
+  contra fixture Viverde (gabarito de forma) → validar contra PGR não-construção (universalidade).
+
+### Lições / método
+- Cache do project knowledge estava atrás do disco: tipos.py indexado faltava periodicidade_apos_15a
+  e is_ototoxico. Contrato campo-a-campo (Parte C) só foi fechado após dump literal do tipos.py atual.
+  Reforça a regra de ouro: índice serve para ler arquitetura; git/disco vence para a verdade do estado.
+
+### Residuais abertos (próximas sessões)
+- IMPLEMENTAÇÃO: estender tipos.py (Parte C de D-ARQ-25) — campos de gate/EPI/psicossocial/FDS já
+  existem; faltam pct_quartzo e cenário de exposição.
+- IMPLEMENTAÇÃO D-ARQ-24 (LEO-resolver): destravada assim que cenário + pct_quartzo existirem.
+- IMPLEMENTAÇÃO DT-002N-01 (PNOS família por faixa); Fatia B (janela demissional, agendador).
+- META herdada: remover menções a Seconci-GO dos docs (não é patrocinador/dono), preservando a
+  procedência das regras [VALIDADO] (fonte = entrevista Dra. Carolini). Decidir nome/identidade do projeto.
+- D-ARQ-23 (operação como dado), DT-D3-02 (fumos → metais individuais): herdados, abertos.
+
+### Próxima sessão planejada
+Decisão do Diovanni. Recomendação do Arquiteto: IMPLEMENTAÇÃO da extensão de tipos.py (Parte C) —
+é o pré-requisito mecânico de tudo (extração e D-ARQ-24 dependem dos campos novos).
+
+---
+
 *Entradas futuras abaixo desta linha*
