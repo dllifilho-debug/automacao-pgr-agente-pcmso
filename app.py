@@ -1,5 +1,5 @@
 """
-Automacao SST - Seconci GO
+Agente PCMSO
 app.py v9.3 — fix: preserva cargos do parser_pgr ao montar dados_ghe_raw
                v9.2 — login visual: fundo verde escuro, card branco, st.form (Enter submete),
                logo acima do form + rodapé de versão
@@ -42,7 +42,7 @@ from modules.modulo_pcmso import (
 )
 
 st.set_page_config(
-    page_title="Automacao SST - Seconci GO",
+    page_title="Agente PCMSO",
     layout="wide",
     page_icon=":shield:",
     initial_sidebar_state="expanded",
@@ -267,7 +267,7 @@ def check_password():
         st.markdown(
             "<div class='login-header'>"
             "<span style='font-size:3rem;'>🛡️</span>"
-            "<h3>SECONCI GO</h3>"
+            "<h3>Agente PCMSO</h3>"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -297,7 +297,7 @@ def check_password():
 
     st.markdown(
         "<div class='login-footer'>"
-        "Sistema SST Seconci GO &nbsp;·&nbsp; v9.3 &nbsp;·&nbsp; Acesso monitorado"
+        "Agente PCMSO &nbsp;·&nbsp; v9.3 &nbsp;·&nbsp; Acesso monitorado"
         "</div>",
         unsafe_allow_html=True,
     )
@@ -316,7 +316,7 @@ for logo in ("logo.png", "logo.jpg"):
         break
 else:
     st.sidebar.markdown(
-        "<h2 style='text-align:center;color:#084D22;'>SECONCI-GO</h2>",
+        "<h2 style='text-align:center;color:#084D22;'>Agente PCMSO</h2>",
         unsafe_allow_html=True,
     )
 
