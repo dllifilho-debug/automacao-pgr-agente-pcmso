@@ -477,6 +477,15 @@ e devem ser preservadas em toda regra futura:
 - A saída do agente deve, quando implementada a camada de relatório, distinguir por exame o status
   de validação da regra que o gerou — requisito de produto derivado deste modelo.
 
+**Resolução de DT-002N-02 (002.O).** A divergência registrada na 002.N — "Parte A (três sabores
+tipados) vs. convenção v9 (genérico)" — era imprecisão do resumo, não conflito de conteúdo. A Parte A
+não define "três sabores tipados": define UM formato (`[DERIVADO — <fonte>]`) com a fonte preenchida
+conforme o nível 1-3 da hierarquia que resolveu; `[INTERPRETADO]` é o nível 4 (marcador irmão, não
+um sabor de DERIVADO). A convenção do PROTOCOLO também nunca foi "genérica" — sempre exigiu fonte
+nomeada. Os dois concordavam no fundo; divergiam só em ONDE a fonte aparece. Notação canônica:
+fonte NO MARCADOR. Convenção do PROTOCOLO alinhada. Sem reclassificação de regra. Rastreabilidade no
+marcador vence economia visual (mesma lógica da exceção ID+NR em código).
+
 **Base.** Sessão 002.M (28/05/2026). Decisão de metodologia — sem caso-âncora de código.
 
 ---
@@ -561,3 +570,4 @@ O cenário ("isto é mineração NR-22") nasce como DERIVAÇÃO de dados fático
 | v16 | 25/05/2026 | Sessão 002.L0: D-ARQ-20 adicionada (periodicidade condicional via família de regras por faixa); D-ARQ-19 refinado (segundo valor `periodicidade_apos_15a`, não metadado) |
 | v17 | 25/05/2026 | Sessão 002.L: D-ARQ-21 adicionada — agrupamento em GHE é canônico, motor respeita o GHE do PGR sem re-agrupar (origem: PGR Viverde-CMO, pedreiro em 6 GHEs; Carolini respeita o agrupamento) |
 | v18 | 28/05/2026 | Sessão 002.M: D-ARQ-22 adicionada (modelo erro-zero + revisão de saída + PDCA; hierarquia de resolução de incerteza; status [A VALIDAR — Carolini] descontinuado); D-ARQ-23 adicionada (operação como dado de primeira classe do GHE — PROPOSTA, não implementada) |
+| v19 | 29/05/2026 | Sessão 002.O (META): DT-002N-02 resolvida — nota de resolução em D-ARQ-22; notação `[DERIVADO]` canônica = fonte no marcador (Parte A); convenção do PROTOCOLO alinhada. Doc-only, sem reclassificação de regra |
