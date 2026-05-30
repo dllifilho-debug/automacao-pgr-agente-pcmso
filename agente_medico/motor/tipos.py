@@ -14,6 +14,7 @@ class Quantificacao:
     pct_LT: Optional[float]
     apenas_qualitativa: bool
     sem_avaliacao_quantitativa: bool = False
+    pct_quartzo: Optional[float] = None  # denominador da fórmula do Anexo 12 NR-15 (D-ARQ-24 / R-RX-01)
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,15 @@ class ProdutoQuimico:
 
 
 @dataclass(frozen=True)
+class CenarioExposicao:
+    # Dados fáticos do PGR por GHE; alimentam o LEO-resolver (D-ARQ-24).
+    # Não carrega derivação normativa (ex.: é_mineração) — decidido downstream.
+    cnae: Optional[str] = None
+    atividade: Optional[str] = None
+    local: Optional[str] = None
+
+
+@dataclass(frozen=True)
 class GHEPGR:
     id: str
     nome: str
@@ -51,6 +61,7 @@ class GHEPGR:
     epis: tuple[str, ...]
     produtos_quimicos: tuple[ProdutoQuimico, ...]
     psicossocial: bool
+    cenario: Optional[CenarioExposicao] = None  # contexto fático p/ LEO-resolver (D-ARQ-24)
 
 
 @dataclass(frozen=True)
