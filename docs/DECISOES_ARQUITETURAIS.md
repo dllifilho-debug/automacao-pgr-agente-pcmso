@@ -1,4 +1,4 @@
-# DECISÕES ARQUITETURAIS — AGENTE MÉDICO PCMSO
+# DECISÕES ARQUITETURAIS — AGENTE PCMSO
 
 Decisões de design do sistema, derivadas da formalização do protocolo da Dra. Carolini Polesso. Cada decisão tem ID estável (`D-ARQ-NN`). O ID **não muda** entre versões.
 
@@ -74,7 +74,7 @@ Esse predicado tem composição definida: trabalho em altura, espaço confinado,
 
 Regimes setoriais **adicionam** exames e **sobrescrevem** periodicidades, mas não removem exames da NR-07 (a menos que explicitamente declarado).
 
-**Justificativa para manter a camada mesmo com apenas um caso:** mais barato modelar como dado agora que como código hardcoded depois. Se surgirem novos regimes (revisão regulatória, novos setores atendidos pelo Seconci), adicionam-se como dados sem mudança de arquitetura.
+**Justificativa para manter a camada mesmo com apenas um caso:** mais barato modelar como dado agora que como código hardcoded depois. Se surgirem novos regimes (revisão regulatória, novos setores), adicionam-se como dados sem mudança de arquitetura.
 
 **Consequência.**
 - Não tratar ANAC como `if cargo == "aviador"` espalhado pelo código — é uma camada estrutural com **um único registro** hoje.

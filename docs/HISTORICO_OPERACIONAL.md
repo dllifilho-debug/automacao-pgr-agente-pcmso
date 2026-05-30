@@ -1,4 +1,4 @@
-# HISTÓRICO OPERACIONAL — AGENTE MÉDICO PCMSO
+# HISTÓRICO OPERACIONAL — AGENTE PCMSO
 
 Registro cronológico de sessões, decisões operacionais e lições aprendidas.
 Não substituir — apenas acrescentar entradas ao final.
@@ -1307,8 +1307,7 @@ o motor novo precisa é a etapa 3 do plano original do projeto, adiada até o mo
   existem; faltam pct_quartzo e cenário de exposição.
 - IMPLEMENTAÇÃO D-ARQ-24 (LEO-resolver): destravada assim que cenário + pct_quartzo existirem.
 - IMPLEMENTAÇÃO DT-002N-01 (PNOS família por faixa); Fatia B (janela demissional, agendador).
-- META herdada: remover menções a Seconci-GO dos docs (não é patrocinador/dono), preservando a
-  procedência das regras [VALIDADO] (fonte = entrevista Dra. Carolini). Decidir nome/identidade do projeto.
+- META herdada [RESOLVIDA na sessão de rename]: nome/identidade decidido — "Agente PCMSO" (display) / `agente-pcmso` (slug). Menções a Seconci-GO removidas de PROTOCOLO (header) e DECISOES (D-ARQ-04); procedência `[VALIDADO]` preservada (fonte = entrevista Dra. Carolini). Linha 849 mantida — "Seconci Goiás" ali é nome de matriz órfã em matrizes_originais/, dado de inventário, não vínculo institucional. Itens manuais fora do git: rename repo GitHub, subdomínio Streamlit, system prompt do projeto.
 - D-ARQ-23 (operação como dado), DT-D3-02 (fumos → metais individuais): herdados, abertos.
 
 ### Próxima sessão planejada

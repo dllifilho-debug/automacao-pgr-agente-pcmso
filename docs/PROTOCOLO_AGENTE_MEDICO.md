@@ -1,6 +1,6 @@
-# PROTOCOLO DO AGENTE MÉDICO PCMSO — v2
+# PROTOCOLO DO AGENTE PCMSO — v2
 
-**Fonte primária:** Entrevista assíncrona com Dra. Carolini Polesso (Coordenadora PCMSO, Seconci-GO), 47 áudios em 16/05/2026 + segunda rodada de validação em 17/05/2026.
+**Fonte primária:** Entrevista assíncrona com Dra. Carolini Polesso (Coordenadora PCMSO), 47 áudios em 16/05/2026 + segunda rodada de validação em 17/05/2026.
 **Caso de referência:** PGR Viverde V02 (03.02.2025) + Matriz RQ.61 Viverde (06.03.2025) — **validada como correta** pela Dra. Carolini.
 **Status:** Protocolo validado. Pendências de v1 fechadas.
 
