@@ -527,7 +527,7 @@ como dado de primeira classe do GHE, distinto de agente. Esboço:
 **Contexto.** R-RX-01 roteia a periodicidade do RX OIT pela razão CLSC/LEO (CLSC = limite superior do IC 95% da média aritmética lognormal, definição literal do Quadro 1 do Anexo III da NR-07 — não percentil 95). O motor hoje recebe `pct_LT` pronto e morre quando o PGR só traz concentração absoluta (sílica Viverde: mg/m³, `pct_LT=None`). Falta a peça que produz a faixa a partir de mg/m³ + %quartzo + cenário. Resolvido o método em DT-002L-01: a NR-07 Anexo III NÃO fixa o LEO — só usa a fração CLSC/LEO; quem fornece o valor é o arranjo NR-09 (item 9.6.1, transitório) + anexo setorial, por agente e cenário de exposição.
 
 **Decisão.** Introduzir um **LEO-resolver** como camada de dados entre o input fático do PGR e o classificador de faixa. Assinatura conceitual: `resolve_leo(agente, fracao, contexto_exposicao) -> (leo, fonte_normativa)`. Cadeia de precedência, agnóstica a agente:
-1. LEO setorial específico para (agente, cenário) — ex.: sílica cristalina respirável em mineração = 0,05 mg/m³ (NR-22 Anexo V, Portaria MTE 261/2026).
+1. LEO setorial específico para (agente, cenário) — ex.: sílica cristalina respirável em mineração = 0,05 mg/m³ (NR-22 Anexo V, Portaria MTE 105/2026, alt. 261/2026).
 2. Anexo próprio da NR-09 para o agente, quando existir.
 3. LT da NR-15 e anexos, via transitório NR-09 item 9.6.1 — ex.: sílica fora de mineração = LT do Anexo 12, função do %quartzo (respirável 8/(%quartzo+2); total 24/(%quartzo+3)).
 4. ACGIH (NR-09 item 9.6.1.1), na ausência de LT na NR-15.
@@ -548,6 +548,10 @@ O cenário ("isto é mineração NR-22") nasce como DERIVAÇÃO de dados fático
 - **002.Q:** os dados que o resolver exige (`Quantificacao.pct_quartzo`, `GHEPGR.cenario`) passam a existir no tipo (D-ARQ-25 Parte C, PR #36). Destrava parcial: o contrato de dados está pronto; o resolver e o classificador CLSC continuam não implementados.
 
 **Base.** Sessão 002.N (28/05/2026). Resolução de DT-002L-01. Fontes [DERIVADO]: NR-07 Anexo III (Portaria 567/2022); NR-09 item 9.6.1/9.6.1.1; NR-15 Anexo 12 (Portaria SSST 1/1991); NR-22 Anexo V (Portaria MTE 261/2026) — todas conferidas no site do MTE. Implementação (resolver + classificador CLSC + testes) é sessão de código futura, não fechada aqui.
+
+**Changelog.**
+- **002.S** — Procedência do nível (1) corrigida: o Anexo V da NR-22 foi aprovado pela Portaria MTE 105/2026 e o LEO da sílica corrigido para 0,05 mg/m³ respirável pela Portaria MTE 261/2026 (que revogou o "0,05 ppm" da 105). Citar a cadeia 105→261, não só a 261. Refinamento de procedência — valor e cadeia de precedência inalterados, mesma ID.
+- **002.S** — Materialização B.1: `resolve_leo(silica, total, MINERACAO)` retorna LEO indefinido por desenho (NR-22 Anexo V só fixa respirável; total-mineração é vazio normativo). A tabela de precedência mantém as 4 posições mesmo com n2/n4 vazios para sílica (universalidade: novo anexo setorial = novo registro). CNAE-mineração = 05/07/08/099; 06 e 091 (petróleo) fora.
 
 ---
 
