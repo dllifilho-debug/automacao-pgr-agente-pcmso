@@ -1355,6 +1355,26 @@ Decisão do Diovanni.
 
 ---
 
+## Sessão 002.R — 30/05/2026 — IMPLEMENTAÇÃO → ARQUITETURA → META (gate de A, repriorização para B, gate de procedência)
+
+**Foco declarado:** IMPLEMENTAÇÃO (fechar tipos.py Parte C, D-ARQ-25). Arco real: o gate mostrou a Parte C já 100% materializada pela 002.Q → a sessão virou ARQUITETURA (spec de B.1, recorte, decisão tabela Python-vs-YAML) e terminou em META (nota de método). Os três focos numa sessão, registrados no cabeçalho.
+
+**Gate de A (D-ARQ-25 Parte C).** Cruzamento da Parte C literal (DECISOES vivo) × tipos.py real: todos os campos dos três baldes presentes. "Existem mas ninguém preenche" são gap de extração, não de tipo (fora de escopo, confirmado pelo próprio D-ARQ-25). pct_quartzo + CenarioExposicao criados na 002.Q. Passo (1) de D-ARQ-25 concluído; (A) morto. Não codar sobre tipo fechado.
+
+**Repriorização para (B) D-ARQ-24.** LEO-resolver + classificador CLSC. Spec de B.1 fechada (classificador de cenário + LEO-resolver, sem CLSC/plug no pipeline): tipos Fracao/CenarioNormativo em tipos.py, ResultadoLeo + lógica + tabela de precedência em motor/leo_resolver.py novo, teste em tests/test_leo_resolver.py. Tabela de precedência como módulo Python tabelado, não YAML (a tabela LEO não é regra clínica — muda por portaria, não por opinião da Carolini; argumento YAML de D-ARQ-07 não se aplica). B.1 NÃO foi implementada — segue para próxima sessão de código.
+
+**2ª passada (gatilho do Diovanni).** Revisão adversarial do prompt de B.1 achou: (1) CRÍTICO — CNAE "06" (petróleo/NR-37) cravado como mineração/NR-22, valor que rodada anterior marcava como incerto, degradado a hardcode na transcrição para o prompt; lista correta para sílica/NR-22 é 05/07/08/09 e volta a marcador de procedência até confirmação; (2) B.2 (CLSC→faixa) anunciada como trivial sem investigar que CLSC exige amostra de medições que Quantificacao.valor (float único) não modela — possível gap de tipo antes de B.2, a investigar; (3) ResultadoLeo é output interno, não pertence a tipos.py (vai em leo_resolver.py).
+
+**Nota de método (META) — D-ARQ-22 v22.** Gate de procedência factual no ponto de emissão do prompt cirúrgico, gêmeo do gate de estado. Origem empírica: o CNAE "06". Gravada em DECISOES (D-ARQ-22, nota de aplicação, mesma ID), PR mergeado em main. Doc-only.
+
+**Pendências abertas para a próxima sessão de código:**
+- B.1 (classificador de cenário + LEO-resolver) — spec fechada, prompt cirúrgico a reemitir com o CNAE corrigido (06 = petróleo/NR-37 está fora; 05/07/08/09 são candidatos [DERIVADO — confirmar contra NR-22 Anexo V + CNAE 2.0], não cravar sem confirmar).
+- Antes de B.2: confirmar o que alimenta o CLSC (Quantificacao já basta como CLSC pronto, ou falta campo de amostra) e ler o texto vivo de R-RX-01 (até aqui veio do cache).
+
+**Suíte:** 297 verde / mypy limpo, herdado da 002.Q; 002.R não rodou código (doc-only). Reconfirmar na abertura de B.1 por higiene, não por suspeita de regressão.
+
+---
+
 ## Sessão de rename — "Agente PCMSO" (30/05/2026) [META + manutenção app]
 
 Duas frentes distintas, registradas separadas por escopo e natureza diferentes.
