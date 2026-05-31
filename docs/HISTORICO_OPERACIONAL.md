@@ -1425,3 +1425,22 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 - `_NivelLeo` com forward refs em string — cosmético, limpar se tocar o módulo.
 
 ---
+
+## Sessão 002.T — 31/05/2026 — META (desenho da skill /kickoff) + higiene
+
+**Foco:** META — desenhar a skill de abertura de sessão. Não tocou motor, protocolo nem regra clínica. Gravou D-ARQ-26.
+
+**Higiene de ambiente (feito nesta sessão):**
+- Pasta local renomeada de automacao-pgr-seconci → automacao-pgr-pcmso. git grep confirmou zero referências funcionais ao nome antigo (só narrativa no HISTORICO 187-188 e um comentário em tests/test_regressao_pcmso.py:19, ambos sem impacto). Rename transparente ao git e ao Code (reapontar a sessão do Code à pasta nova; o erro "working directory no longer exists" era o ponteiro velho, não perda).
+
+**Desenho da skill /kickoff → D-ARQ-26.** Ver DECISOES. Resumo: skill versionada em .claude/skills/kickoff/, invocação explícita, híbrida (coleta factual no Code, julgamento no Arquiteto), burra por design (lê/reporta, não calcula/seleciona), saída em tela. Material externo (vídeos via NotebookLM) confirmou a arquitetura de "verificação antes da entrega" (independente da nossa — as três zonas) e alertou sobre consumo de contexto; mecânica de instalação do vídeo (UI/skill-creator) foi descartada por não ser versionada. Doc oficial do Claude Code confirmou onde mora e como dispara.
+
+**Pendências abertas:**
+- IMPLEMENTAR a skill /kickoff (sessão de Code): criar .claude/skills/kickoff/SKILL.md a partir do desenho em D-ARQ-26; o Code confirma frontmatter + allowed-tools contra um SKILL.md real (/mnt/skills/public/*) ANTES de gravar; reiniciar o Code uma vez (diretório de skills novo); testar /kickoff. Eval: reproduzir o estado que geraria o kickoff de B.2, lendo só git + HISTORICO.
+- B.2 (D-ARQ-24, próxima de CÓDIGO): CLSC → faixa → plug no pipeline. ANTES de codar, resolver (CONHECIMENTO/ARQUITETURA): Quantificacao.valor é float único; CLSC (limite superior do IC 95% da média lognormal, R-RX-01) exige amostra de medições — confirmar se valor serve como CLSC pronto ou se falta campo de tipo (pode encostar em D-ARQ-25 Parte C). Ler texto vivo de R-RX-01 (até aqui veio do cache).
+- Dívidas da B.1 (registradas na 002.S): slug silica → canônico de agentes.yaml; tolerância do re.sub ao plugar extração real; cosmético _NivelLeo.
+- DÍVIDA DE HIGIENE (nova, baixa urgência): raiz do projeto poluída — prompt_*.txt consumidos (002.A–002.M) e três cópias-fantasma de doc na raiz (DECISOES/HISTORICO/PROTOCOLO de 17/05, congeladas em D-ARQ-13) com mesmo nome dos docs vivos de docs/. Risco: Get-Content sem docs\ na frente lê a versão velha achando que é a viva. Resolver em sessão de higiene: apagar/arquivar prompts mortos, apagar as cópias-fantasma (docs/ é canônico). Encosta na decisão .gitignore vs versionar adiada em D-ARQ-18.
+
+**Suíte:** 297 verde / mypy limpo, herdado da 002.S; sessão META não rodou código.
+
+---

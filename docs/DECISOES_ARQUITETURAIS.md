@@ -630,6 +630,33 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 
 ---
 
+## D-ARQ-26 — Ritual de abertura de sessão é uma skill /kickoff: coletor de estado determinístico, julgamento no Arquiteto
+
+**Contexto.** A abertura de cada sessão repete um ritual de precisão obrigatória: reler docs vivos na ordem, rodar o gate de estado (git log/status), cruzar git × HISTORICO, derivar o número da próxima sessão e o foco das pendências. Feito de memória turno a turno, o ritual degrada — a 002.R registrou o caso: valor factual ([INCERTO]) virou hardcode na transcrição (CNAE "06"). O kickoff que o Arquiteto escreve à mão carrega [INTERPRETADO] recorrentes — número da sessão, topo de main esperado — inferidos da leitura do estado, não do estado real. A raiz é a mesma do D-ARQ-22: estado inferido virando estado afirmado.
+
+**Decisão.** Materializar o ritual de abertura como uma skill do Claude Code, `/kickoff`, versionada no repo em `.claude/skills/kickoff/SKILL.md` (sob git — não na área de skills da UI, que não é versionada e seria cópia-fantasma, contra a regra de fonte-de-verdade). Quatro propriedades, decididas na sessão de desenho:
+
+1. **Invocação explícita** (`/kickoff`), não auto-load. O ritual dispara por ato consciente na abertura, como `git status` — não "quando o agente acha relevante". Auto-load reintroduz o não-determinismo que se combate.
+2. **Híbrida: a skill coleta, o Arquiteto julga.** A skill roda a parte factual (git + HISTORICO) e reporta estado; o Arquiteto destila o kickoff final no chat (foco declarado vs. real, gate de 2ª passada, prioridade, número da próxima sessão). A skill nunca decide foco, prioridade, recorte, nem calcula o sucessor da série.
+3. **Skill burra por design.** Regra-mestra: entre calcular/selecionar e ler/reportar, sempre ler e reportar. Toda vez que a skill calcula ou seleciona, erra em caso de borda (virada de bloco 00X.Z, sessão sem número de série como o rename, bloco de pendências resumido); toda vez que lê e reporta verbatim, acerta. Menos lógica embutida = menos coisa a desatualizar.
+4. **Saída só em tela, nenhum arquivo.** Evita criar artefato-fantasma (a própria poluição que o projeto combate na raiz) e remove dependência de permissão de escrita.
+
+**Estrutura (três zonas, padrão Agent Skills):** Definição (o que faz / o que nunca faz — incl. nunca inventar estado, nunca criar branch, nunca ler docs-fantasma da raiz) → Lógica (coleta: git log/status; último cabeçalho de sessão do HISTORICO verbatim; cruzamento git × HISTORICO com PARADA na divergência; cópia literal-integral do bloco de pendências; suíte herdada) → Verificação (todo valor factual tem origem real ou marca [INTERPRETADO]; divergência git×HISTORICO vira o relato principal, não o esqueleto).
+
+**Fronteira com decisões existentes (não confundir):**
+- Operacionaliza parcialmente D-ARQ-22 (gate de procedência): a skill embute "nunca cravar valor sem origem", mas referencia o D-ARQ-22 vigente em vez de fixar versão — a skill aponta para a fonte viva, não a copia (mesma disciplina anti-cache).
+- Não toca D-ARQ-09 nem o motor: é META, fora do caminho de inferência clínica.
+- O cruzamento git × HISTORICO que PARA na divergência é o mecanismo central — é o que pegaria "sessão fechada incompleta" (ex.: código em main que o HISTORICO não reflete). Divergência é sinal de bug de processo, reportado, nunca silenciado escolhendo o git.
+
+**Consequência.**
+- O [INTERPRETADO] recorrente do número de sessão e do estado esperado some do kickoff: passa a vir do HISTORICO/git reais coletados pela skill.
+- Skill fina é descartável sem custo se na prática não economizar sobre rodar os comandos à mão — é META, não toca motor. O valor não é complexidade; é tornar o ritual não-opcional e idêntico toda vez.
+- Implementação (gravar o SKILL.md, confirmar frontmatter/allowed-tools contra exemplo real, testar /kickoff) é sessão de Code futura. O eval de aceitação: /kickoff reproduzir, lendo só git + HISTORICO, o estado que um kickoff manual produziria (gabarito disponível: rascunho de B.2 da 002.S).
+
+**Base.** Sessão META (31/05/2026). Origem: intuição do Diovanni a partir de material externo sobre skills (NotebookLM de 3 vídeos); mecânica de skills confirmada na doc oficial do Claude Code (.claude/skills/, frontmatter controla invoke-mode, padrão Agent Skills aberto). Desenho do SKILL.md fechado nesta sessão; allowed-tools e sintaxe exata do frontmatter ficam [INCERTO — Code confirma contra SKILL.md real antes de gravar]. Implementação não fechada aqui.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -656,3 +683,4 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 | v20 | 30/05/2026 | Sessão 002.P (ARQUITETURA): D-ARQ-25 adicionada — camada de extração, contrato de fronteira é `tipos.PGR` (sem intermediário); normalização de vocabulário a montante do motor (preserva D-ARQ-09); contrato-alvo completo de `tipos.PGR` especificado (campos existentes vs. extensão futura: pct_quartzo + cenário de exposição para D-ARQ-24). Parser legado não portado. |
 | v21 | 30/05/2026 | Sessão 002.Q (IMPLEMENTAÇÃO): D-ARQ-25 Parte C implementada — `Quantificacao.pct_quartzo` + sub-objeto `CenarioExposicao` em `GHEPGR.cenario`; nota de aplicação em D-ARQ-25 e D-ARQ-24 (destrava parcial). Suíte 292→297, mypy --strict limpo. PR #36, commit 46e32dc. |
 | v22 | 30/05/2026 | Sessão 002.R (META): nota de aplicação em D-ARQ-22 — gate de procedência factual no ponto de emissão do prompt cirúrgico; estende o alvo da mitigação de erro silencioso (Consequência) ao prompt do Code; sem reclassificação de regra |
+| v23 | 31/05/2026 | Sessão META 002.T: D-ARQ-26 adicionada — ritual de abertura de sessão como skill /kickoff (coletor de estado determinístico, julgamento no Arquiteto; invocação explícita, híbrida, skill-fina, saída em tela). Implementação é sessão de Code futura. |
