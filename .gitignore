@@ -11,5 +11,6 @@ prompt_*.txt
 # Artefatos runtime do motor legado
 data/cargos_desconhecidos.json
 
-# Claude Code (worktrees, config local)
-.claude/
+# Claude Code (worktrees, config local fora; skills versionadas)
+.claude/*
+!.claude/skills/
