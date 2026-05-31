@@ -1402,3 +1402,26 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 - Descasamento aceito: display "Agente PCMSO" ↔ pasta de código `agente_medico/`. Refactor de pasta é sessão de código futura, não bloqueia.
 
 ---
+
+## Sessão 002.S — B.1: LEO-resolver + classificador de cenário (D-ARQ-24)
+
+**Foco:** CONHECIMENTO normativo (bloqueio de procedência) → IMPLEMENTAÇÃO.
+**Commit:** c1e2be6 (merge em main via PR). 3 arquivos, 241 linhas. 312 verdes (297+15), mypy --strict limpo.
+
+**Bloqueio resolvido (CONHECIMENTO).** O prompt da 002.R trazia CNAE "06" como mineração/NR-22 — erro: 06 = petróleo/gás (NR-37). Confirmado contra fonte vigente (CNAE 2.0 IBGE/Concla + campo de aplicação NR-22):
+- Mineração/NR-22 = divisões **05, 07, 08** + grupo **099** (apoio a mineral).
+- Fora: **06** (petróleo) e **091** (apoio a petróleo/gás → NR-37). A divisão 09 é split — cravar "09" a 2 dígitos repetiria o defeito do "06".
+- `09` puro (divisão sem grupo) → GERAL por ambiguidade; mineração legítima sem CNAE granular entra pela keyword.
+
+**Achado de procedência da sílica (105→261).** D-ARQ-24 citava só "Portaria MTE 261/2026". Cadeia real: Anexo V da NR-22 **aprovado pela Portaria MTE 105/2026** (trazia "0,05 ppm", unidade inconsistente) e **corrigido pela 261/2026** para **0,05 mg/m³ respirável** (revogou §2º art. 4º da 105). Valor vigente confirmado; código e D-ARQ-24 passam a citar a cadeia 105→261.
+
+**Entregue.** `Fracao`/`CenarioNormativo` (tipos.py); `classifica_cenario` + `resolve_leo` + `ResultadoLeo` (leo_resolver.py, fora de tipos.py); 15 testes. Cadeia de precedência D-ARQ-24 como tabela de 4 níveis por agente (n2/n4 vazios para sílica, estrutura preservada p/ universalidade).
+
+**Decisão de B.1: `(silica, total, MINERACAO)` = LEO indefinido** (`leo=None`, fonte não-vazia), não fallback ao Anexo 12. NR-22 Anexo V só fixa respirável; total-mineração é vazio normativo. Não exercido pelo RX OIT (que usa respirável, R-RX-01/D-ARQ-24).
+
+**Dívidas registradas (revisitar em B.2):**
+- Slug `silica` duplicado em leo_resolver.py — paliativo consciente; B.2 deve referenciar o canônico de agentes.yaml.
+- `re.sub(r"\D","",cnae)` é tolerante a lixo (`"x05y"`→`"05"`) — ok em B.1 (input estruturado), pressuposto que a extração real (B.2) herda.
+- `_NivelLeo` com forward refs em string — cosmético, limpar se tocar o módulo.
+
+---
