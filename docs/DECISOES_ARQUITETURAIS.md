@@ -655,6 +655,13 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 
 **Base.** Sessão META (31/05/2026). Origem: intuição do Diovanni a partir de material externo sobre skills (NotebookLM de 3 vídeos); mecânica de skills confirmada na doc oficial do Claude Code (.claude/skills/, frontmatter controla invoke-mode, padrão Agent Skills aberto). Desenho do SKILL.md fechado nesta sessão; allowed-tools e sintaxe exata do frontmatter ficam [INCERTO — Code confirma contra SKILL.md real antes de gravar]. Implementação não fechada aqui.
 
+**Aplicação na sessão 002.U (31/05/2026).** Frontmatter resolvido contra a doc oficial (code.claude.com/docs/en/skills), não blog — os [INCERTO] da Base ficam fechados:
+- Command e skill foram fundidos no Claude Code; o artefato é `.claude/skills/kickoff/SKILL.md` (skill, forma recomendada) — não command, não skill auto-invocada.
+- A propriedade 1 (invocação explícita, sem auto-load) materializa-se com `disable-model-invocation: true`: só o usuário invoca `/kickoff` e a descrição nem entra em contexto até a invocação. `user-invocable: false` seria erro — esconde do menu `/` e deixa só o Claude invocar, o oposto da propriedade 1.
+- `allowed-tools` pré-aprova tools sem prompt; para skill de projeto só vale após o trust dialog do workspace. Escopo read-only `Bash(git log *) Bash(git status *) Read` — sem escrita (propriedade 4). O token exato é validado em `/permissions` antes de gravar.
+- Coleta de estado na v1: a skill instrui o Claude a rodar os comandos com as próprias tools, não injeção `!`comando`` — robustez no ambiente Windows/PowerShell (injeção default-bash arrisca não rodar; output com acento arrisca CP1252). Injeção fica como upgrade se o eval mostrar passo pulado.
+- Versionamento: `.claude/` era ignorado inteiro; exceção cirúrgica `.claude/*` + `!.claude/skills/` põe a skill sob git sem expor worktrees/config local. Resolve para skills o caso da dívida de versionamento adiada em D-ARQ-18; a decisão geral .gitignore-vs-versionar segue adiada.
+
 ---
 
 ## Histórico de revisões
@@ -684,3 +691,4 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 | v21 | 30/05/2026 | Sessão 002.Q (IMPLEMENTAÇÃO): D-ARQ-25 Parte C implementada — `Quantificacao.pct_quartzo` + sub-objeto `CenarioExposicao` em `GHEPGR.cenario`; nota de aplicação em D-ARQ-25 e D-ARQ-24 (destrava parcial). Suíte 292→297, mypy --strict limpo. PR #36, commit 46e32dc. |
 | v22 | 30/05/2026 | Sessão 002.R (META): nota de aplicação em D-ARQ-22 — gate de procedência factual no ponto de emissão do prompt cirúrgico; estende o alvo da mitigação de erro silencioso (Consequência) ao prompt do Code; sem reclassificação de regra |
 | v23 | 31/05/2026 | Sessão META 002.T: D-ARQ-26 adicionada — ritual de abertura de sessão como skill /kickoff (coletor de estado determinístico, julgamento no Arquiteto; invocação explícita, híbrida, skill-fina, saída em tela). Implementação é sessão de Code futura. |
+| v24 | 31/05/2026 | Sessão 002.U (IMPLEMENTAÇÃO): nota de aplicação em D-ARQ-26 — frontmatter resolvido contra doc oficial (`disable-model-invocation: true`; `allowed-tools` read-only); SKILL.md `/kickoff` gravado em `.claude/skills/kickoff/`; coleta via tools (não injeção) na v1. Correção de transcrição: suíte 002.T 297→312. |

@@ -1441,6 +1441,32 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 - Dívidas da B.1 (registradas na 002.S): slug silica → canônico de agentes.yaml; tolerância do re.sub ao plugar extração real; cosmético _NivelLeo.
 - DÍVIDA DE HIGIENE (nova, baixa urgência): raiz do projeto poluída — prompt_*.txt consumidos (002.A–002.M) e três cópias-fantasma de doc na raiz (DECISOES/HISTORICO/PROTOCOLO de 17/05, congeladas em D-ARQ-13) com mesmo nome dos docs vivos de docs/. Risco: Get-Content sem docs\ na frente lê a versão velha achando que é a viva. Resolver em sessão de higiene: apagar/arquivar prompts mortos, apagar as cópias-fantasma (docs/ é canônico). Encosta na decisão .gitignore vs versionar adiada em D-ARQ-18.
 
-**Suíte:** 297 verde / mypy limpo, herdado da 002.S; sessão META não rodou código.
+**Suíte:** 312 verde / mypy limpo, herdado da 002.S; sessão META não rodou código.
+
+---
+
+## Sessão 002.U — 31/05/2026 — IMPLEMENTAÇÃO/META (skill /kickoff gravada)
+
+**Foco:** IMPLEMENTAÇÃO/META — gravar a skill /kickoff desenhada em D-ARQ-26 e fechar os [INCERTO] de frontmatter. Não tocou motor, protocolo nem regra clínica.
+
+**Branch:** `feature/skill-kickoff` (de main dd5682b).
+
+**Frontmatter resolvido contra doc oficial** (code.claude.com/docs/en/skills, não blog):
+- `disable-model-invocation: true` materializa a propriedade 1 (invocação explícita, sem auto-load; descrição fora de contexto até invocar). `user-invocable: false` seria erro — esconde do menu `/`, deixa só o Claude invocar.
+- Command e skill foram fundidos no Claude Code; o artefato é skill (`.claude/skills/kickoff/SKILL.md`), forma recomendada.
+- `allowed-tools` read-only `Bash(git log *) Bash(git status *) Read` — sem escrita (propriedade 4).
+- Coleta via tools próprias do Code, não injeção `!`comando`` — robustez Windows/PowerShell (default-bash arrisca não rodar; acento arrisca CP1252). Injeção fica como upgrade se eval mostrar passo pulado.
+
+**Bloqueador resolvido — `.claude/` era gitignored inteiro.** D-ARQ-26 exige a skill "sob git". `.gitignore` tinha `.claude/` (config local). Exceção cirúrgica: `.claude/*` + `!.claude/skills/` (re-incluir filho exige abrir o parent — `!.claude/skills/` sozinho não destrava). `git check-ignore` confirmou destravado. Resolve versionamento para skills; decisão geral .gitignore-vs-versionar (D-ARQ-18) segue adiada.
+
+**Correção de transcrição.** 002.T declarava suíte "297 verde herdado da 002.S" — 002.S fechou em 312 (297+15 da B.1). Corrigido 297→312. Pego pelo cruzamento manual git×HISTORICO na abertura desta sessão, não pela skill (skill lê só o último bloco; cruzamento entre sessões é do Arquiteto — coerente com "skill fina").
+
+**Eval do /kickoff — VERDE.** Reproduziu o estado lendo só git + HISTORICO: log verbatim (topo dd5682b/c1e2be6), status, bloco 002.T integral com B.2 e dívidas da B.1, suíte 312 (valor corrigido, não resumido), cruzamento sem divergência. Devolveu foco/prioridade/numeração ao Arquiteto. Detectou que roda dentro da própria sessão que a implementou (pendência "IMPLEMENTAR /kickoff" ainda aberta no 002.T) e reportou como trabalho em curso, não divergência. Comportamento "burro por design" confirmado.
+
+**Entregue.** `.claude/skills/kickoff/SKILL.md` (novo); nota de aplicação 002.U + linha v24 no D-ARQ-26; correção 297→312 no 002.T; exceção de gitignore. 4 arquivos.
+
+**Suíte:** 312 verde / mypy limpo, herdado da 002.S; sessão de implementação de skill (META), não rodou o motor.
+
+**Próxima sessão de CÓDIGO — B.2 (D-ARQ-24):** CLSC → faixa → plug no pipeline. Bloqueio a resolver ANTES de codar (CONHECIMENTO/ARQUITETURA): `Quantificacao.valor` é float único; CLSC (limite superior do IC 95% da média lognormal, R-RX-01) exige amostra de medições — confirmar se valor serve como CLSC pronto ou se falta campo de tipo (encosta em D-ARQ-25 Parte C). Ler texto vivo de R-RX-01 (até aqui veio do cache). Abrir com /kickoff.
 
 ---
