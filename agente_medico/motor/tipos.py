@@ -94,6 +94,16 @@ class Momento(Enum):
     DEM = "DEM"
 
 
+class Fracao(Enum):
+    RESPIRAVEL = "respiravel"
+    TOTAL = "total"
+
+
+class CenarioNormativo(Enum):
+    MINERACAO = "mineracao"
+    GERAL = "geral"
+
+
 @dataclass(frozen=True)
 class Motivo:
     regra_id: str
