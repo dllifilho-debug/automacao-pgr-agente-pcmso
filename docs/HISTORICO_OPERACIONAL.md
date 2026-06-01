@@ -1470,3 +1470,25 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 **Próxima sessão de CÓDIGO — B.2 (D-ARQ-24):** CLSC → faixa → plug no pipeline. Bloqueio a resolver ANTES de codar (CONHECIMENTO/ARQUITETURA): `Quantificacao.valor` é float único; CLSC (limite superior do IC 95% da média lognormal, R-RX-01) exige amostra de medições — confirmar se valor serve como CLSC pronto ou se falta campo de tipo (encosta em D-ARQ-25 Parte C). Ler texto vivo de R-RX-01 (até aqui veio do cache). Abrir com /kickoff.
 
 ---
+
+## Sessão 002.V — 01/06/2026 — CONHECIMENTO/ARQUITETURA (bloqueio do plug B.2 fechado)
+
+**Foco:** CONHECIMENTO/ARQUITETURA — resolver o bloqueio da B.2 (D-ARQ-24) antes de virar código: decidir se `Quantificacao.valor` (float único) serve como CLSC pronto ou se falta campo no modelo. Não tocou código, motor nem regra clínica.
+
+**Reformulação do bloqueio.** A pergunta da 002.U ("`valor` float vs. amostra de medições") era a errada. `valor: float` único basta — o motor **consome** o CLSC do laudo, não o calcula (cálculo do IC 95% lognormal é trabalho de higienista/NR-09, a montante; a amostra nunca entra no motor). A premissa "médica lê CLSC, não recalcula" ficou registrada como DT-002V-01 (A VALIDAR com Carolini).
+
+**Campo que de fato faltava — a fração.** Leitura de `leo_resolver.py` (B.1): `resolve_leo` exige `fracao: Fracao` como primeiro argumento e a fração decide a fórmula do Anexo 12 (respirável `8/(%q+2)` vs. total `24/(%q+3)`). Mas `Quantificacao` não tem campo de fração — o Enum `Fracao` e o resolver existem desde a B.1, faltava o campo na medição que os liga (gêmeo do `pct_quartzo` da 002.Q). O plug da B.2 não tinha de onde ler a fração.
+
+**Decisão de modelo:** `Quantificacao.fracao: Optional[Fracao] = None`. Ao lado de `valor` (fração é propriedade da medição, pareada à concentração), não em `CenarioExposicao` (fração e cenário são ortogonais na assinatura do resolver), não derivada de `unidade`. Pendência bloqueante quando sílica/asbesto + quantitativa + `fracao is None`.
+
+**Testes especificados (para a sessão de código):** (1) sílica fora de mineração, mesmo `valor`+`pct_quartzo`, `fracao=RESPIRAVEL` vs. `TOTAL` → LEOs/faixas diferentes (falha sem o campo, passa com); (2) borda — sílica/mineração/`TOTAL` → resolver indefinido → Pendencia (cobre o vazio normativo que a B.1 deixou explícito, changelog 002.S).
+
+**Docs atualizados:** DT-002V-01 nova (PROTOCOLO, tabela → v12); changelog 002.V em D-ARQ-24 (mesma ID — premissa refinada, saída inalterada); nota 002.V em D-ARQ-25 Parte C (DECISOES, tabela → v25).
+
+**Dívida de conformidade detectada (não tratada aqui).** Duas DTs estão resolvidas no corpo mas mantêm marca de pendência no título — DT-002N-02 (resolvida na 002.O, ainda `[INTERPRETADO]` sem linha `Status: RESOLVIDA`) e DT-002L-01 (resolvida na 002.N, título ainda `[A VALIDAR]` embora o campo Status diga "Resolvida na 002.N"). Uma varredura por `[A VALIDAR]`/`[INTERPRETADO]` as confunde com pendência aberta. Não corrigido nesta sessão (escopo da 002.V é o bloqueio da B.2; correção de marca é META à parte, não mistura no commit de fechamento). Registrado para não se perder.
+
+**Próxima sessão de CÓDIGO — B.2 (D-ARQ-24):** adicionar `fracao` a `Quantificacao` + 2 testes → classificador CLSC (faixa) → plug `resolve_leo` no pipeline. Abrir com /kickoff. O prompt cirúrgico do Code exige o gate de estado real (git log/status + leitura de `tipos.py`, `leo_resolver.py`, `regras.yaml`) no início daquela sessão.
+
+**Suíte:** 312 verde / mypy limpo, herdado da 002.U. Sessão de CONHECIMENTO/ARQUITETURA, não rodou o motor.
+
+---

@@ -574,6 +574,20 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 
 **Não bloqueia** o merge da 002.N (conteúdo correto, fonte rastreável nos corpos). É dívida de conformidade de método, prioridade média.
 
+### DT-002V-01 — `Quantificacao.valor` não discrimina qual estatística carrega `[A VALIDAR]`
+
+**Origem:** Sessão 002.V (01/06/2026), CONHECIMENTO/ARQUITETURA.
+
+**Lacuna.** R-RX-01 roteia a faixa de RX OIT pelo CLSC (limite superior do IC 95% da média aritmética lognormal — "NÃO é percentil 95"). Mas `Quantificacao.valor` é um `float` anônimo: o tipo não garante que o número ali é o CLSC, e não média simples, pico, ou percentil 95. Enquanto `valor` vinha de fixture escrita à mão (sempre CLSC por construção), a garantia era humana. Com a extração de PGRs reais (D-ARQ-25) preenchendo `valor`, a garantia desaparece: um laudo que reporte outra estatística no campo faz o motor rotear faixa sobre o número errado e emitir periodicidade de exame errada **sem sinal** — erro clínico silencioso (a classe que D-ARQ-22 combate).
+
+**Por que abre agora.** A B.2 (plug do LEO-resolver no pipeline) é a primeira vez que o motor roteia faixa de RX por `valor` real, não de fixture. O consumidor que torna a premissa perigosa nasce aqui.
+
+**Premissa de fundo (a confirmar com a Dra. Carolini).** O motor **consome** o CLSC pronto do laudo, não o calcula — a médica do trabalho lê o CLSC da avaliação ambiental (NR-09), não refaz a estatística. Se isso vale sempre, a cardinalidade `valor: float` único basta e a amostra de medições nunca entra no motor. Confiança alta pela separação estrutural NR-07-consome / NR-09-produz, mas é premissa, não fato verificado.
+
+**Pergunta de método para a Carolini** (método, não resultado): *quando um laudo traz uma estatística que não é o CLSC do Quadro 1 — média simples, pico, percentil 95 — qual é a conduta?* Recusar e pedir CLSC? Tratar como sem-avaliação-quantitativa (R-RX-01-sem, 24M)? Converter? A resposta define se o gap fecha por sinalização na extração (D-ARQ-25 Parte B → Pendencia), por campo discriminador com regra consumidora, ou por fallback clínico.
+
+**Não bloqueia a B.2.** O plug roteia sob a premissa "valor é CLSC quando há avaliação quantitativa"; esta DT registra a premissa como dívida, não como impedimento. Continuação operacional de DT-002L-01 (método de conversão mg/m³ → faixa, resolvido na 002.N) e D-ARQ-24 (LEO-resolver). Independe da decisão de modelo da B.2 (`Quantificacao.fracao`).
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -608,3 +622,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v9 | 28/05/2026 | Sessão 002.M: fonte primária congelada; validação migra para revisão de saída (erro-zero + PDCA, D-ARQ-22). Convenções de status revisadas. Nota de implementação em R-GHE-05 (depende de D-ARQ-23). DT-D3-02/002I-01/002L-01 reclassificadas. Divergência serralheiro Est-09 documentada. |
 | v10 | 29/05/2026 | Sessão 002.N: R-RX-01 sílica/asbesto sai de a-conferir → [DERIVADO] (NR-7 Anexo III Quadro 1, 567/2022; bordas ≤, CLSC, NOTA 2); DT-002L-01 RESOLVIDA (LEO sourcing NR-9/NR-15/NR-22); D-ARQ-24 (LEO-resolver); DT-002N-01 aberta (PNOS achata Quadro 2); R-RX-01-pnos e R-RX-02 rebaixados VALIDADO→INTERPRETADO. |
 | v11 | 29/05/2026 | Sessão 002.O (META): DT-002N-02 resolvida. Convenção `[DERIVADO]` alinhada a D-ARQ-22 Parte A — fonte vai no marcador (`[DERIVADO — NR-x item y]` etc.), não só no corpo. R-RX-01 "Valores conferidos" passa a `[DERIVADO — NR-7 Anexo III Quadro 1]`. Sem reclassificação de regra. |
+| v12 | 01/06/2026 | Sessão 002.V (CONHECIMENTO/ARQUITETURA): DT-002V-01 adicionada — `Quantificacao.valor` não discrimina se o número é o CLSC; premissa "motor consome CLSC, não calcula" a validar com Carolini. Sem reclassificação de regra. |
