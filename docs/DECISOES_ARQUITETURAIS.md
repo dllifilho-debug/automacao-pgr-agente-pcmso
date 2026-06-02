@@ -667,6 +667,22 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 
 ---
 
+## D-ARQ-27 — Método de construção: derivação normativa via PDCA, Carolini valida saídas (não método)
+
+**Sessão:** 002.W (02/06/2026)
+
+**Decisão.** Durante a construção do agente, a fonte operante de método clínico é a leitura direta das normas (NR-07, NR-09, NR-15 e correlatas, versão vigente). A Dra. Carolini participa como **validadora das saídas** (as matrizes de exames geradas), ao final do projeto — não como consultora de método durante a formalização das regras. O time estuda a norma, deriva a regra, marca o que é interpretação, e roda o ciclo PDCA.
+
+**Efeito sobre a hierarquia de fontes.** A hierarquia original põe o protocolo da Carolini no topo (item 1). Esta decisão estabelece que, na fase de construção, esse item está em aberto — a regra é derivada da norma (item 2) e marcada `[INTERPRETADO]` quando a norma não crava o critério. A validação da Carolini no aceite final é o que promove uma regra de `[INTERPRETADO]` para `VALIDADO`. A hierarquia não muda; muda quando cada item entra em vigor.
+
+**Risco aceito e mitigação.** Derivar método só da norma tem ponto cego: periodicidade por faixa, critério de encurtamento e leitura de CLSC são frequentemente interpretação clínica que a NR não fixa. Mitigação obrigatória: toda regra derivada por interpretação carrega `status: INTERPRETADO` e a marca da fonte normativa de origem. A Matriz da Dra. Patrícia segue como referência (item 3), não gabarito. O teste-final-PGR gera as matrizes que vão ao aceite da Carolini — é o ponto de validação do ciclo.
+
+**PDCA aplicado:** Plan (ler a norma, formular a regra) → Do (implementar com teste) → Check (marcar INTERPRETADO o que é interpretação; rodar o PGR de teste) → Act (validação final da Carolini promove INTERPRETADO→VALIDADO ou corrige).
+
+**Primeira instância do método:** DT-002L-01 — pergunta de método originalmente endereçada à Carolini ("como converter mg/m³ em faixa de %LEO?") foi respondida por derivação normativa própria (NR-15 Anexo 12 via NR-09 9.6.1) e materializada em código na B.2 (002.W). A validação da conversão segue para o aceite final, conforme esta decisão.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
