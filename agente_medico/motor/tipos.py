@@ -15,6 +15,7 @@ class Quantificacao:
     apenas_qualitativa: bool
     sem_avaliacao_quantitativa: bool = False
     pct_quartzo: Optional[float] = None  # denominador da fórmula do Anexo 12 NR-15 (D-ARQ-24 / R-RX-01)
+    fracao: Optional[Fracao] = None  # R-RX-01 / D-ARQ-24: fração da medição (respirável/total), decide fórmula Anexo 12 NR-15
 
 
 @dataclass(frozen=True)
