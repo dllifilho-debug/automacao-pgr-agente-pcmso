@@ -1492,3 +1492,31 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 **Suíte:** 312 verde / mypy limpo, herdado da 002.U. Sessão de CONHECIMENTO/ARQUITETURA, não rodou o motor.
 
 ---
+
+## Sessão 002.W — 02/06/2026 — IMPLEMENTAÇÃO (B.2: plug resolve_leo + Quantificacao.fracao) + virada de método
+
+**Foco:** IMPLEMENTAÇÃO — fechar a B.2 (D-ARQ-24) especificada na 002.V: campo `fracao` em `Quantificacao` + 2 testes → plug `resolve_leo` no pipeline via `_helper_silica_asbesto`. Escopo e ordem herdados da 002.V.
+
+**Gate de leitura ampliado.** A revisão crítica do prompt (3 passadas) expôs que o plug atravessa `estagios/riscos.py`, fora do gate original. Leitura confirmou: (1) `stage_2_riscos` passa `quantificacao` por referência → `fracao` sobrevive à conversão PGR→Risco sem tocar `riscos.py`; (2) `Risco.agente` mantém o slug do PGR sem normalização → `_PRECEDENCIA` acerta. Lição: o gate cobre todo arquivo que o código atravessa, não só os que edita.
+
+**Decisão arquitetural (changelog D-ARQ-24, mesma ID):** `pct_LT` do PGR tem precedência sobre `resolve_leo`. O ramo do plug só dispara quando `pct_LT is None`. Saída inalterada para quem já mandava `pct_LT`.
+
+**Entrega.** `Quantificacao.fracao: Optional[Fracao] = None`. Ramo em `_helper_silica_asbesto` antes da guarda (c): medição bruta sem `pct_LT` → `fracao is None` devolve Ausente; fração presente resolve LEO e calcula `pct_LT`; LEO indefinido devolve Ausente. Conversão Ausente→Pendencia(bloqueante) já em `emissao.py` via `quando_ausente`. Predicado puro; 5 predicados de faixa intocados.
+
+**Testes (+3, `test_b2_fracao_resolver.py`):** A — RESPIRAVEL→75%→36M vs. TOTAL→27%→60M (borda 50 cruzada); B — `fracao=None`→PRELIMINAR, sem RX, bloqueante; C — sílica/mineração/TOTAL→LEO indefinido→bloqueante (fecha o teste-borda da 002.V).
+
+**Dívidas registradas (não tratadas):** asbesto fora de `_PRECEDENCIA` (medição bruta→Pendencia, correto para B.2); `resolve_leo` não valida `valor`/`pct_quartzo` negativos.
+
+**Virada de método (D-ARQ-27).** Decidido: durante a construção, a fonte operante de método é a derivação direta das normas via PDCA; a Dra. Carolini valida as saídas (matrizes de exames) no aceite final, não consulta de método durante a build. Regras derivadas por interpretação carregam `INTERPRETADO` até a validação. DT-002L-01 é a primeira instância — pergunta de método respondida por derivação própria e materializada na B.2. Risco aceito e mitigação em D-ARQ-27.
+
+**Higiene de conformidade (dívida da 002.V, fechada aqui).** Títulos de DT-002L-01 (`[A VALIDAR]` removido, `Status: RESOLVIDA`) e DT-002N-02 (`[INTERPRETADO]` removido, `Status: RESOLVIDA na 002.O`, caminho (a)) corrigidos — paravam de dar falso-positivo em varredura de pendência aberta. DT-002V-01 permanece `[A VALIDAR]` corretamente (item de aceite final sob D-ARQ-27).
+
+**Incidente operacional — commit em `main` em vez da branch.** O Code commitou `87c650c` em `main` local (não fez checkout em `feature/b2-fracao-classificador`, que já existia). Detectado pelo Arquiteto via `git log --all --decorate` no gate de push; o relatório do Code não nomeou a branch. Correção sem perda: `git branch -f feature/b2-fracao-classificador 87c650c` → `git reset --hard origin/main`. Nada pushado durante o erro. Mergeado depois via PR (merge commit `052ef77`).
+
+**Reforço de gate (toda sessão de código futura):** gate de abertura exige `git branch --show-current`, PARA se for `main`; relatório de fechamento do Code declara a branch do commit.
+
+**Suíte:** 315 verde (312 baseline + 3) / mypy --strict limpo (33 files). Commit `87c650c`, merge `052ef77`.
+
+**Próxima sessão — 002.X (CONHECIMENTO):** derivar das normas, sob D-ARQ-27, o método para os buracos remanescentes — asbesto no `_PRECEDENCIA` (existe Anexo/LEO setorial próprio?) e PNOS por faixa do Quadro 2 (DT-002N-01). Depois dos buracos fechados: PGR como teste de integração final (rodar, não implementar — o que quebrar volta pra fila).
+
+---

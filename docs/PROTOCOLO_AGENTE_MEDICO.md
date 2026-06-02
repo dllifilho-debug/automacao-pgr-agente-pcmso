@@ -502,7 +502,7 @@ de saída]` quando decidida. Não bloqueia (R-PGR-04 / Stage 3 cobrem o caso ân
 
 **Confirmação no caso Viverde:** o pacote disparou pelo **agente declarado** (nota do GHE 10: "Risco Cromo abaixo de 10% LT da ACGIH"), não pela denominação "serralheiro" — a via-agente operando. A hipótese inicial do Arquiteto (serralheiro como cargo-de-solda) foi **revertida** pela médica.
 
-### DT-002L-01 — Conversão de concentração medida (mg/m³) em faixa de %LEO para RX `[A VALIDAR]`
+### DT-002L-01 — Conversão de concentração medida (mg/m³) em faixa de %LEO para RX
 
 **Origem:** Sessão 002.L (25/05/2026), estruturação do PGR Viverde.
 
@@ -538,6 +538,8 @@ não fixa o LEO" é [INTERPRETADO]: não há norma conclusiva nem crivo clínico
 inspecionar na revisão de saída. Pendência derivada (sessão futura): contrato de LEO-resolver
 no motor e classificador de R-RX-01 roteando por CLSC.
 
+**Status: RESOLVIDA.** Derivação normativa fechada na 002.N (método: CLSC vs. LEO do Anexo 12 NR-15 / NR-22 setorial). Materializada em código na B.2 (002.W, commit `87c650c`): `resolve_leo` + plug em `_helper_silica_asbesto` calculam `pct_LT` a partir de `valor` + `pct_quartzo` + `fracao`. A pergunta de método que era endereçada à Carolini foi respondida por derivação própria (D-ARQ-27); a validação da conversão segue para o aceite final das matrizes, não bloqueia o motor.
+
 ### DT-002N-01 — PNOS achata as 4 faixas do Quadro 2 do Anexo III `[DERIVADO — fonte]`
 
 **Origem:** Sessão 002.N (28/05/2026), conferência do Anexo III contra o texto literal (MTE).
@@ -555,7 +557,7 @@ A regra única de 60M só está correta para as duas últimas faixas. Subdimensi
 
 ---
 
-### DT-002N-02 — Notação de status DERIVADO: convenção v9 diverge do D-ARQ-22 Parte A `[INTERPRETADO — prioridade na revisão de saída]`
+### DT-002N-02 — Notação de status DERIVADO: convenção v9 diverge do D-ARQ-22 Parte A
 
 **Origem:** Sessão 002.N (29/05/2026), revisão de método (META) ao final da sessão.
 
@@ -573,6 +575,8 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 3. Reconciliar D-ARQ-22 ↔ convenção v9 como fonte única de verdade da notação (hierarquia: D-ARQ é decisão-mãe; convenção do protocolo deve refleti-la, não simplificá-la em silêncio).
 
 **Não bloqueia** o merge da 002.N (conteúdo correto, fonte rastreável nos corpos). É dívida de conformidade de método, prioridade média.
+
+**Status: RESOLVIDA na 002.O.** Caminho (a) adotado: mantidos os três sabores tipados do D-ARQ-22 Parte A; convenção v9 corrigida para refleti-los (fonte no marcador, alinhada à decisão-mãe). Convenção do protocolo passa a refletir o D-ARQ-22, não simplificá-lo.
 
 ### DT-002V-01 — `Quantificacao.valor` não discrimina qual estatística carrega `[A VALIDAR]`
 
@@ -623,3 +627,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v10 | 29/05/2026 | Sessão 002.N: R-RX-01 sílica/asbesto sai de a-conferir → [DERIVADO] (NR-7 Anexo III Quadro 1, 567/2022; bordas ≤, CLSC, NOTA 2); DT-002L-01 RESOLVIDA (LEO sourcing NR-9/NR-15/NR-22); D-ARQ-24 (LEO-resolver); DT-002N-01 aberta (PNOS achata Quadro 2); R-RX-01-pnos e R-RX-02 rebaixados VALIDADO→INTERPRETADO. |
 | v11 | 29/05/2026 | Sessão 002.O (META): DT-002N-02 resolvida. Convenção `[DERIVADO]` alinhada a D-ARQ-22 Parte A — fonte vai no marcador (`[DERIVADO — NR-x item y]` etc.), não só no corpo. R-RX-01 "Valores conferidos" passa a `[DERIVADO — NR-7 Anexo III Quadro 1]`. Sem reclassificação de regra. |
 | v12 | 01/06/2026 | Sessão 002.V (CONHECIMENTO/ARQUITETURA): DT-002V-01 adicionada — `Quantificacao.valor` não discrimina se o número é o CLSC; premissa "motor consome CLSC, não calcula" a validar com Carolini. Sem reclassificação de regra. |
+| v13 | 02/06/2026 | Sessão 002.W: DT-002L-01 e DT-002N-02 resolvidas (marca de pendência removida do título, Status RESOLVIDA no corpo); higiene de conformidade da dívida 002.V. |
