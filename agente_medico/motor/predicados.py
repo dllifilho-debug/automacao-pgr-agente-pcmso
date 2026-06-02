@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Callable, Union
 
+from agente_medico.motor.leo_resolver import classifica_cenario, resolve_leo
 from agente_medico.motor.tipos import Ausente, GHEContext, Quantificacao
 
 ResultadoPredicado = Union[bool, Ausente]
@@ -110,6 +112,26 @@ def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausent
             "Sílica/asbesto sem quantificação nem indicação de ausência de "
             "avaliação — medir ou declarar ausência de laudo"
         )
+    if (
+        q.pct_LT is None
+        and not q.sem_avaliacao_quantitativa
+        and q.valor is not None
+        and q.pct_quartzo is not None
+    ):
+        if q.fracao is None:
+            return Ausente(
+                "Sílica/asbesto com medição quantitativa mas sem fração informada — "
+                "declarar respirável ou total para resolver o LEO (Anexo 12 NR-15)"
+            )
+        cenario_norm = classifica_cenario(ctx.pgr_ghe.cenario)
+        res = resolve_leo(risco.agente, q.fracao, cenario_norm, q.pct_quartzo)
+        leo = res.leo
+        if leo is None:
+            return Ausente(
+                f"Sílica/asbesto: LEO indefinido para o cenário — {res.fonte_normativa}"
+            )
+        q = replace(q, pct_LT=(q.valor / leo) * 100.0)
+
     if q.pct_LT is not None and q.sem_avaliacao_quantitativa:      # (c)
         return Ausente(
             "Sílica/asbesto declara medição (pct_LT) e ausência de avaliação "
