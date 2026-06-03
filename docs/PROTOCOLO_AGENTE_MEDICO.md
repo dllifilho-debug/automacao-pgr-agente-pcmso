@@ -248,9 +248,28 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | R-RX-01-baixa | silica_asbesto_leo_10_50 | 60M | → 36M |
 | R-RX-01-media | silica_asbesto_leo_50_100 | 36M | → 24M |
 | R-RX-01-alta | silica_asbesto_leo_acima_100 | 12M | — |
-| R-RX-01-pnos | pnos | 60M | — |
+| R-RX-01-pnos-ate10 | pnos_leo_ate_10 | só admissional | — |
+| R-RX-01-pnos-10a100 | pnos_leo_10_100 | só admissional (motor) | — |
+| R-RX-01-pnos-acima100 | pnos_leo_acima_100 | 60M | — |
+| R-RX-01-pnos-sem | pnos_sem_medicao | 60M | — |
 
 `R-RX-01` permanece o ID clínico estável; as entradas `R-RX-01-*` são implementação (D-ARQ-20). **Estado contraditório:** se o PGR declara `pct_LT` e ausência de avaliação quantitativa ao mesmo tempo, o motor emite pendência bloqueante (não escolhe faixa) — input incoerente vira pedido de correção, não chute (D-ARQ-08/13). **Valores conferidos `[DERIVADO — NR-7 Anexo III Quadro 1]`:** periodicidades, limiares e corte de 15 anos conferidos contra o texto literal do Anexo III da NR-07, Quadro 1 (Portaria MTP 567/2022), no site do MTE (002.N). Faixas fechadas com limite superior inclusivo (`≤`): >10 e ≤50; >50 e ≤100; >100. Variável de roteamento é o CLSC = limite superior do IC 95% da média aritmética (distribuição lognormal), conforme definição literal do Quadro 1 — NÃO é percentil 95. NOTA 2 do Quadro 1: trabalhador com exposição reduzida que esteve em concentração maior por ≥1 ano mantém o intervalo do período de maior exposição (a modelar — ver DT). PNOS segue o Quadro 2, não o Quadro 1 (ver R-RX-01-pnos e DT própria).
+
+**PNOS — refinamento do Quadro 2 (002.X).** A entrada única `R-RX-01-pnos` (60M constante) está DEPRECATED, sucedida pela família de 4 faixas acima (mesma razão de D-ARQ-20 já usada no Quadro 1). Texto literal do Quadro 2 conferido (Anexo III NR-07, Portaria 567/2022, site MTE):
+- pnos_leo_ate_10 (CLSC ≤ 10% LEO) → só admissional.
+- pnos_leo_10_100 (10% < CLSC ≤ 100% LEO) → admissional; RX único **após 5 anos** de exposição (gatilho de tempo acumulado → agendador, D-ARQ-19, em Motivo.detalhe); **repetir a critério clínico** (não-periódico → lembrete operacional, D-ARQ-05). NÃO é 60M recorrente. `[DERIVADO — NR-7 Anexo III Quadro 2 (Portaria 567/2022)]`; a modelagem "evento único + lembrete" (vs. periodicidade) é `[INTERPRETADO]`.
+- pnos_leo_acima_100 / pnos_sem_medicao → adm + 60M ("a cada 5 anos").
+Fração do PNOS é sempre RESPIRAVEL (Quadro 2 mede "poeira respirável"); sem ramo TOTAL.
+
+**LEO do PNOS — reconciliação (002.X).** O rodapé do Quadro 2 define PNOS pela condição "não possuir um LEO definido", mas a tabela roteia por % do LEO. Reconciliação: o material é PNOS porque não tem LEO *próprio*; o roteamento usa o LEO *genérico* de PNOS = TLV-PNOS da ACGIH = **3 mg/m³ (respirável)**, via NR-09 item 9.6.1.1 (nível 4 do LEO-resolver, D-ARQ-24). `[DERIVADO — ACGIH TLV-PNOS, via NR-9 9.6.1.1]` no valor; `[INTERPRETADO]` na articulação "este genérico alimenta o Quadro 2" — não está escrita na norma; é o item de maior incerteza desta sessão, inspecionar PRIMEIRO na revisão de saída (D-ARQ-27).
+
+**Pré-requisito para o predicado `pnos` ser computável.** Para o motor classificar um agente como PNOS, `agentes.yaml` precisa carregar as 3 condições ACGIH 2017 (rodapé do Quadro 2): (a) sem LEO próprio definido; (b) insolúvel/pouco solúvel; (c) baixa toxicidade (não citotóxico/genotóxico/reativo, não radioativo, não sensibilizante). Sem esse metadado o predicado `pnos` não tem como ser decidido. Implementação futura.
+
+**Asbesto — origem do LEO (002.X).** A periodicidade do asbesto NÃO muda: o Quadro 1 já o cobre nas mesmas faixas de sílica. O que faltava era a origem do LEO. Resolvido: não há LEO setorial de mineração para asbesto (nível 1 vazio); LEO = nível (3) do resolver = LT da NR-15 Anexo 12 = **2,0 f/cm³** (fibras respiráveis), FIXO (não fórmula), unidade f/cm³ (não mg/m³), fração sempre respirável, pct_quartzo irrelevante. Fibra respirável = Ø<3µm, comprimento>5µm, razão L/D>3:1. Anfibólios (crocidolita/amosita/etc.) proibidos, sem LT. `[DERIVADO — NR-15 Anexo 12 itens 12/12.1 (Portaria SSST 1/1991 e 22/1994); confirmar texto oficial MTE antes de considerar VALIDADO]`. Detalhe arquitetural em D-ARQ-24 changelog 002.X.
+
+**Carvão mineral — lacuna (002.X).** O Quadro 1 vigente é "Sílica, Asbesto **ou Carvão Mineral**" (incluído pela 567/2022). O predicado `silica_asbesto_*` cobre 2 dos 3 agentes do Quadro 1 — fere D-ARQ-06. Ver DT-002X-01 (LEO do carvão a resolver). Até lá o carvão não entra na família de roteamento.
+
+**Demissional condicional do Quadro 1 (002.X) — dado para o agendador.** A norma adiciona demissional condicionado ao reaproveitamento (D-ARQ-11/19): último exame há mais de **2 anos** nas faixas ≤10% e 10–50%; há mais de **1 ano** nas faixas 50–100%, >100% e **sem-avaliação**. A fronteira é em 50%; sem-avaliação usa 1 ano. Motor emite a faixa-base; o agendador aplica o demissional condicional com essa granularidade.
 
 **Base normativa:** Anexo III da NR-07 (Portaria 567/2022). Validação clínica: Dra. Carolini, 05/2025.
 
@@ -555,6 +574,8 @@ A regra única de 60M só está correta para as duas últimas faixas. Subdimensi
 
 **Impacto:** baixo no caso âncora (Viverde tem PNOS de madeira/gesso, provável faixa baixa). Não bloqueia. Implementação na sessão de código que tratar o classificador de faixa (mesma que R-RX-01 CLSC).
 
+**Status: RESOLVIDA (002.X).** Quadro 2 conferido contra o texto literal (Portaria 567/2022, MTE): as 4 faixas batem. Refinamentos: (i) faixa intermediária 10–100% é evento único aos 5 anos + critério clínico, NÃO 60M recorrente; (ii) LEO do PNOS = TLV-PNOS ACGIH 3 mg/m³ respirável (nível 4 do resolver) — a DT original explodia as faixas sem definir o denominador; sem o LEO o classificador não roda. Família R-RX-01-pnos-* especificada em R-RX-01. Implementação (predicados de faixa + LEO ACGIH + testes) é sessão de código futura.
+
 ---
 
 ### DT-002N-02 — Notação de status DERIVADO: convenção v9 diverge do D-ARQ-22 Parte A
@@ -594,6 +615,22 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 
 ---
 
+### DT-002X-01 — LEO do carvão mineral (3º agente do Quadro 1) `[INCERTO — LEO do carvão a confirmar em fonte vigente]`
+**Origem:** 002.X, conferência do Anexo III vigente.
+**Situação.** Carvão mineral foi incluído no Quadro 1 (567/2022) mas não está no Anexo 12 da NR-15 (que tem só asbesto, Mn, sílica). LEO a resolver: candidato a nível (4) ACGIH (coal dust tem TLV próprio, variável por tipo e teor de sílica) ou nível (1) se houver anexo setorial de mineração de carvão. Valor NÃO cravado — exige busca dedicada no texto vigente.
+**Impacto:** baixo no caso âncora (Viverde não tem carvão). Não bloqueia. Resolver antes de adicionar `carvao_mineral` à família de roteamento do Quadro 1.
+
+### DT-002X-02 — Vigilância pós-ocupacional do asbesto (30 anos) `[DERIVADO — fonte]`
+**Origem:** 002.X, leitura literal do Anexo III item 2.17.
+**Situação.** Após término de contrato com exposição a asbesto, o empregador disponibiliza exames de controle por ≥30 anos, periodicidade por tempo de exposição acumulado: a cada 3 anos (≤12a), a cada 2 anos (>12 a 20a), anual (>20a); espirometria pós-demissional segue a mesma periodicidade do RX (item 3.5). Casa com a guarda de 30 anos da avaliação ambiental (NR-15 Anexo 12 item 11.1). `[DERIVADO — NR-7 Anexo III 2.17/2.17.1/3.5; NR-15 Anexo 12 11.1 (Portaria 567/2022; SSST 1/1991)]`.
+**Lacuna estrutural.** É uma 4ª dimensão temporal (pós-vínculo, fora de adm/per/MR/RT/dem) e tempo-acumulado-dependente — não tem casa no motor nem no agendador atual. Proposta: motor emite lembrete operacional (D-ARQ-05) "vigilância pós-ocupacional 30 anos exigida (asbesto)" quando há exposição a asbesto; agendamento real fica para camada futura. Modelar a 4ª dimensão é decisão arquitetural própria — adiada, não fechada nesta sessão.
+
+### DT-002X-03 — NOTA 1 do Quadro 1: leitura radiológica 0/1+ → encaminhamento `[DERIVADO — fonte]`
+**Origem:** 002.X.
+**Situação.** A NOTA 1 do Quadro 1 manda encaminhar a médico especializado o trabalhador com leitura radiológica OIT ≥ 0/1. É conduta condicionada ao **resultado** do exame — o motor é função pura sobre o PGR (D-ARQ-09), não lê resultado. `[DERIVADO — NR-7 Anexo III Quadro 1 NOTA 1 (Portaria 567/2022)]`. Conduta para lembrete operacional (D-ARQ-05) ou camada de laudo/agendador. Não bloqueia. Registrada para não se perder.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -628,3 +665,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v11 | 29/05/2026 | Sessão 002.O (META): DT-002N-02 resolvida. Convenção `[DERIVADO]` alinhada a D-ARQ-22 Parte A — fonte vai no marcador (`[DERIVADO — NR-x item y]` etc.), não só no corpo. R-RX-01 "Valores conferidos" passa a `[DERIVADO — NR-7 Anexo III Quadro 1]`. Sem reclassificação de regra. |
 | v12 | 01/06/2026 | Sessão 002.V (CONHECIMENTO/ARQUITETURA): DT-002V-01 adicionada — `Quantificacao.valor` não discrimina se o número é o CLSC; premissa "motor consome CLSC, não calcula" a validar com Carolini. Sem reclassificação de regra. |
 | v13 | 02/06/2026 | Sessão 002.W: DT-002L-01 e DT-002N-02 resolvidas (marca de pendência removida do título, Status RESOLVIDA no corpo); higiene de conformidade da dívida 002.V. |
+| v14 | 03/06/2026 | Sessão 002.X (CONHECIMENTO): DT-002N-01 RESOLVIDA (PNOS Quadro 2: 4 faixas + LEO ACGIH 3 mg/m³ resp; faixa 10–100% = evento único + critério clínico, não 60M); R-RX-01-pnos DEPRECATED → família R-RX-01-pnos-* (ID clínico R-RX-01 inalterado); asbesto LEO 2,0 f/cm³ (f/cm³, fixo, NR-15 Anexo 12); DT-002X-01 (LEO carvão), DT-002X-02 (pós-ocupacional asbesto 30a), DT-002X-03 (NOTA 1) adicionadas. Nada implementado — especificação para sessão de código. |
