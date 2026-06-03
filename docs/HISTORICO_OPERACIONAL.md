@@ -1520,3 +1520,25 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 **Próxima sessão — 002.X (CONHECIMENTO):** derivar das normas, sob D-ARQ-27, o método para os buracos remanescentes — asbesto no `_PRECEDENCIA` (existe Anexo/LEO setorial próprio?) e PNOS por faixa do Quadro 2 (DT-002N-01). Depois dos buracos fechados: PGR como teste de integração final (rodar, não implementar — o que quebrar volta pra fila).
 
 ---
+
+**Sessão 002.X — 03/06/2026 — CONHECIMENTO (derivação normativa: asbesto-LEO + PNOS Quadro 2)**
+
+**Foco:** fechar os dois buracos do kickoff — asbesto fora do `_PRECEDENCIA` e PNOS achatado no Quadro 2 — por derivação da norma vigente (D-ARQ-27), conferida no texto literal (MTE).
+
+**Conferência (texto literal).** Anexo III NR-07 (Portaria 567/2022) e Anexo 12 NR-15 (SSST 1/1991 + 22/1994). Periodicidades do Quadro 1 do protocolo reconfirmadas corretas.
+
+**Buraco 2 (PNOS) — RESOLVIDO.** 4 faixas do Quadro 2 confirmadas (DT-002N-01 estava certa). Refinamentos: faixa 10–100% é evento único aos 5 anos + critério clínico (não 60M); LEO do PNOS = TLV-PNOS ACGIH 3 mg/m³ resp (nível 4). R-RX-01-pnos DEPRECATED → família de 4.
+
+**Buraco 1 (asbesto) — RESOLVIDO.** LEO = 2,0 f/cm³ (NR-15 Anexo 12), unidade f/cm³, fixo, fração respirável. Periodicidade não muda (Quadro 1 já cobre). Exige unit-awareness no resolver. Detalhe em D-ARQ-24 changelog 002.X.
+
+**Reauditoria crítica (2ª passada).** Achou 1 buraco grave próprio (LEO do PNOS não tratado na 1ª passada — a explosão em faixas estava sem denominador), 1 médio (carvão afirmado com "LT próprio" sem base — corrigido: LEO via ACGIH), e fronteira do demissional condicional imprecisa (corrigida: 50% / 1 vs 2 anos). PNOS-LEO só fechou após a reauditoria.
+
+**Lacunas novas rastreadas:** DT-002X-01 (LEO carvão mineral), DT-002X-02 (vigilância pós-ocupacional asbesto 30a — 4ª dimensão temporal adiada), DT-002X-03 (NOTA 1, leitura 0/1+ → encaminhamento).
+
+**Higiene de conformidade.** Reposta a linha de changelog da 002.W no DECISOES (D-ARQ-27 estava no corpo sem linha na tabela de revisões).
+
+**Não implementado.** Sessão de CONHECIMENTO: tudo é especificação. Nenhuma regra a código, nenhum teste — implementação (família PNOS + LEO ACGIH/asbesto no resolver + classificador CLSC + unit-awareness, cada um com teste que falha sem a regra) é sessão de código futura.
+
+**Suíte: 315 verde** (inalterada — sem código). **Próxima sessão:** decidir entre (a) sessão de código materializando PNOS/asbesto-LEO no resolver, ou (b) PGR como teste de integração (rodar, não implementar). Carvão (DT-002X-01) pede busca dedicada antes de virar código.
+
+---
