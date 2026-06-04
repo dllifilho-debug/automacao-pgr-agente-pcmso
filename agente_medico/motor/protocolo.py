@@ -58,7 +58,11 @@ def carregar(diretorio: Path | str) -> Protocolo:
 
     regras_path = raiz / "regras.yaml"
     regras_raw = _exigir_chave(_load_yaml(regras_path), "regras", regras_path)
-    regras: list[dict[str, Any]] = regras_raw if regras_raw else []
+    # Regras marcadas status: DEPRECATED são excluídas do motor de avaliação.
+    # Mantidas no YAML por contrato de ID e rastreabilidade histórica (PCMSO).
+    regras: list[dict[str, Any]] = [
+        r for r in (regras_raw or []) if r.get("status") != "DEPRECATED"
+    ]
 
     regimes: dict[str, Any] = {}
     if regimes_dir.exists():

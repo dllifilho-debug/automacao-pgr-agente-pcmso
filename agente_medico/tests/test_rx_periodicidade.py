@@ -85,7 +85,8 @@ def test_rx_silica_sem_medicao_roteia_24m_apos12() -> None:
     assert ctx.pendencias == []
 
 
-def test_rx_pnos_roteia_60m_sem_apos15a() -> None:
+def test_rx_pnos_sem_medicao_roteia_60m() -> None:
+    # q=None -> sem_medicao (faixa válida Quadro 2: adm+60M). NÃO bloqueia (vs sílica).
     ctx, proto = _ctx_com_agente("poeira_nao_classificada")
     exames = stage_5_emissao(ctx, proto)
     rx = next(e for e in exames if e.exame == "rx_torax_oit")
@@ -264,3 +265,74 @@ def test_rx_silica_contradictorio_bloqueante_sem_emissao() -> None:
         assert ctx.predicados.get(pred) is not True, (
             f"Predicado {pred!r} não deve ser True em estado contraditório"
         )
+
+
+# ---------------------------------------------------------------------------
+# PNOS — Quadro 2 Anexo III NR-07 (Portaria 567/2022) [DERIVADO — 002.X/002.Y]
+# ---------------------------------------------------------------------------
+
+def _q_pnos_mgm3(valor: float) -> Quantificacao:
+    """Quantificação em mg/m³ sem pct_LT — exercita conversão via resolve_leo (D-ARQ-29)."""
+    return Quantificacao(
+        valor=valor,
+        unidade="mg/m³",
+        relacao_LT=None,
+        pct_LT=None,
+        apenas_qualitativa=False,
+    )
+
+
+def test_rx_pnos_pct5_roteia_apenas_adm() -> None:
+    ctx, proto = _ctx_com_agente("poeira_nao_classificada", _q(5.0))
+    rx = next(e for e in stage_5_emissao(ctx, proto) if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 0
+    assert rx.momentos == {Momento.ADM}
+
+
+def test_rx_pnos_pct50_roteia_apenas_adm() -> None:
+    # faixa 10_100: 50% cai em (10,100] -> só adm (NÃO 60M)
+    ctx, proto = _ctx_com_agente("poeira_nao_classificada", _q(50.0))
+    rx = next(e for e in stage_5_emissao(ctx, proto) if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 0
+    assert rx.momentos == {Momento.ADM}
+
+
+def test_rx_pnos_pct150_roteia_60m() -> None:
+    ctx, proto = _ctx_com_agente("poeira_nao_classificada", _q(150.0))
+    rx = next(e for e in stage_5_emissao(ctx, proto) if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 60
+    assert rx.periodicidade_apos_15a is None
+
+
+def test_rx_pnos_mgm3_baixo_converte_e_nao_bloqueia() -> None:
+    # 0.163 / 3.0 = 5.43% -> ate_10 -> só adm. D-ARQ-29: NÃO bloqueia por fracao ausente (vs sílica).
+    ctx, proto = _ctx_com_agente("poeira_nao_classificada", _q_pnos_mgm3(0.163))
+    rx = next(e for e in stage_5_emissao(ctx, proto) if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 0
+    assert rx.momentos == {Momento.ADM}
+    assert [p for p in ctx.pendencias if p.bloqueante] == []
+
+
+def test_rx_pnos_mgm3_alto_roteia_60m() -> None:
+    # 21.94 / 3.0 = 731% -> acima_100 -> 60M
+    ctx, proto = _ctx_com_agente("poeira_nao_classificada", _q_pnos_mgm3(21.94))
+    rx = next(e for e in stage_5_emissao(ctx, proto) if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 60
+
+
+_PREDICADOS_FAIXA_PNOS = ["pnos_leo_ate_10", "pnos_leo_10_100", "pnos_leo_acima_100"]
+
+
+@pytest.mark.parametrize("pct", [0.0, _PCT_LEO_BAIXO, 50.0, _PCT_LEO_ALTO, 150.0])
+def test_exclusividade_faixas_pnos(pct: float) -> None:
+    ctx, proto = _ctx_com_agente("poeira_nao_classificada", _q(pct))
+    disparados = [p for p in _PREDICADOS_FAIXA_PNOS if ctx.predicados.get(p) is True]
+    assert len(disparados) == 1, f"pct={pct}: esperava 1 faixa PNOS, got {disparados}"
+
+
+def test_rx_pnos_deprecated_nao_emite_dupla() -> None:
+    # R-RX-01-pnos DEPRECATED filtrado pelo carregador: garante que só 1 rx_torax_oit é emitido.
+    ctx, proto = _ctx_com_agente("poeira_nao_classificada", _q(5.0))
+    rx_list = [e for e in stage_5_emissao(ctx, proto) if e.exame == "rx_torax_oit"]
+    assert len(rx_list) == 1, f"R-RX-01-pnos DEPRECATED não deve coexistir com a faixa: {rx_list}"
+    assert rx_list[0].periodicidade_meses == 0
