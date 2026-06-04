@@ -31,3 +31,20 @@ def test_carrega_diretorio_minimo(tmp_path: Path) -> None:
 def test_falha_se_diretorio_vocabulario_ausente(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError, match="vocabulario"):
         carregar(tmp_path)
+
+
+def test_regra_deprecated_e_excluida_do_carregamento(tmp_path: Path) -> None:
+    """Filtro do carregador: status DEPRECATED não entra em .regras.
+    Mecanismo universal (002.Y), independe do regras.yaml real.
+    emite: [] em ambas as regras — evita validar exame em vocab vazio;
+    o objeto do teste é o filtro de ids, não o emite."""
+    _montar_estrutura_minima(tmp_path)
+    (tmp_path / "regras.yaml").write_text(
+        "regras:\n"
+        "  - {id: R-ATIVA, quando: altura, emite: [], base_normativa: teste, status: INTERPRETADO}\n"
+        "  - {id: R-MORTA, quando: altura, emite: [], base_normativa: teste, status: DEPRECATED}\n",
+        encoding="utf-8",
+    )
+    proto = carregar(tmp_path)
+    ids = [r["id"] for r in proto.regras]
+    assert ids == ["R-ATIVA"]

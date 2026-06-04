@@ -4,7 +4,7 @@ from dataclasses import replace
 from typing import Any, Callable, Union
 
 from agente_medico.motor.leo_resolver import classifica_cenario, resolve_leo
-from agente_medico.motor.tipos import Ausente, GHEContext, Quantificacao
+from agente_medico.motor.tipos import Ausente, Fracao, GHEContext, Quantificacao
 
 ResultadoPredicado = Union[bool, Ausente]
 
@@ -192,7 +192,80 @@ def _silica_asbesto_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
 
 @primitivo("pnos")
 def _pnos(ctx: GHEContext) -> bool:
+    # DEPRECATED (002.Y): usado só por R-RX-01-pnos (aposentada). Faixas usam pnos_leo_*/pnos_sem_medicao.
     return any(r.agente == "poeira_nao_classificada" for r in ctx.riscos)
+
+
+# Quadro 2 Anexo III NR-07 (Portaria 567/2022) — PNOS [DERIVADO — 002.X/002.Y]
+# Faixas agrupam diferente do Quadro 1: ate_10 (≤10), 10_100 (>10 e ≤100), acima_100 (>100)
+def _helper_pnos(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
+    risco = next((r for r in ctx.riscos if r.agente == "poeira_nao_classificada"), None)
+    if risco is None:
+        return False
+    q = risco.quantificacao
+    if q is None:
+        # Sem laudo = sem_medicao (faixa válida do Quadro 2: adm+60M). NÃO bloqueia.
+        # Distinto de sílica: PNOS sem laudo é faixa válida, não pendência.
+        return Quantificacao(
+            valor=None,
+            unidade=None,
+            relacao_LT=None,
+            pct_LT=None,
+            apenas_qualitativa=False,
+            sem_avaliacao_quantitativa=True,
+        )
+    if (
+        q.pct_LT is None
+        and not q.sem_avaliacao_quantitativa
+        and q.valor is not None
+    ):
+        # D-ARQ-29: fração do PNOS é INVARIANTE (Quadro 2 só mede respirável; LEO fixo
+        # 3 mg/m³ resp). Diferente de sílica (D-ARQ-24/002.V), injeta RESPIRAVEL quando
+        # None em vez de bloquear — a fração não é grau de liberdade do laudo aqui.
+        fracao = q.fracao if q.fracao is not None else Fracao.RESPIRAVEL
+        cenario_norm = classifica_cenario(ctx.pgr_ghe.cenario)
+        res = resolve_leo("poeira_nao_classificada", fracao, cenario_norm, q.pct_quartzo)
+        if res.leo is None:
+            return Ausente(f"PNOS: LEO indefinido — {res.fonte_normativa}")
+        q = replace(q, pct_LT=(q.valor / res.leo) * 100.0)
+    if q.pct_LT is not None and q.sem_avaliacao_quantitativa:
+        return Ausente(
+            "PNOS declara medição (pct_LT) e ausência de avaliação quantitativa ao "
+            "mesmo tempo — input contraditório, corrigir no PGR"
+        )
+    return q
+
+
+@primitivo("pnos_sem_medicao")
+def _pnos_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_pnos(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.sem_avaliacao_quantitativa
+
+
+@primitivo("pnos_leo_ate_10")
+def _pnos_leo_ate_10(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_pnos(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.pct_LT is not None and r.pct_LT <= _PCT_LEO_BAIXO
+
+
+@primitivo("pnos_leo_10_100")
+def _pnos_leo_10_100(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_pnos(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.pct_LT is not None and _PCT_LEO_BAIXO < r.pct_LT <= _PCT_LEO_ALTO
+
+
+@primitivo("pnos_leo_acima_100")
+def _pnos_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
+    r = _helper_pnos(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.pct_LT is not None and r.pct_LT > _PCT_LEO_ALTO
 
 
 def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:

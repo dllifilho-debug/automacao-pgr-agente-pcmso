@@ -17,6 +17,7 @@ class ResultadoLeo:
 # PALIATIVO B.1: slug duplicado de agentes.yaml (silica). B.2 deve referenciar o
 # canônico do vocabulário, não esta string. Dívida registrada (002.S).
 SILICA = "silica"  # se divergir de agentes.yaml -> PARAR e reportar, não inventar
+PNOS = "poeira_nao_classificada"  # se divergir de agentes.yaml -> PARAR e reportar
 
 # --- classificador de cenário ---
 # Inclusão/exclusão como tabela (CNAE 2.0 Seção B ∩ campo de aplicação NR-22):
@@ -99,8 +100,40 @@ def _silica_n4_acgih(
     return None
 
 
+def _pnos_n1_setorial(
+    fracao: Fracao, cenario: CenarioNormativo, pct_quartzo: float | None
+) -> tuple[float, str] | None:
+    # D-ARQ-24 nível (1). PNOS não tem LEO setorial próprio (rodapé Quadro 2).
+    return None
+
+
+def _pnos_n2_anexo_nr09(
+    fracao: Fracao, cenario: CenarioNormativo, pct_quartzo: float | None
+) -> tuple[float, str] | None:
+    # D-ARQ-24 nível (2). PNOS não tem anexo próprio NR-09.
+    return None
+
+
+def _pnos_n3_anexo12(
+    fracao: Fracao, cenario: CenarioNormativo, pct_quartzo: float | None
+) -> tuple[float, str] | None:
+    # D-ARQ-24 nível (3). PNOS não tem fórmula NR-15 Anexo 12.
+    return None
+
+
+def _pnos_n4_acgih(
+    fracao: Fracao, cenario: CenarioNormativo, pct_quartzo: float | None
+) -> tuple[float, str] | None:
+    # D-ARQ-24 nível (4). PNOS sem LEO próprio (rodapé Quadro 2) -> TLV-PNOS ACGIH.
+    # [DERIVADO — ACGIH TLV-PNOS 3 mg/m³ resp via NR-09 9.6.1.1]. Fração sempre respirável (Quadro 2).
+    if fracao is Fracao.RESPIRAVEL:
+        return (3.0, "ACGIH TLV-PNOS 3 mg/m³ resp via NR-09 9.6.1.1")
+    return None
+
+
 _PRECEDENCIA: dict[str, tuple[_NivelLeo, ...]] = {
     SILICA: (_silica_n1_setorial, _silica_n2_anexo_nr09, _silica_n3_anexo12, _silica_n4_acgih),
+    PNOS: (_pnos_n1_setorial, _pnos_n2_anexo_nr09, _pnos_n3_anexo12, _pnos_n4_acgih),
 }
 
 

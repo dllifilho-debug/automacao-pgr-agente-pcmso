@@ -94,7 +94,45 @@ regras:
         periodicidade_meses: 60
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
-    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO]. ATENÇÃO: regra única de 60M achata as 4 faixas do Quadro 2 (≤10% só adm; 10-100% adm+5a+repetir clínico; >100% e sem-medição 60M). Subdimensiona faixas baixas. Explodir em família por faixa — ver DT-002N-01."
+    base_normativa: "DEPRECATED (002.Y) — 60M único achatava as 4 faixas do Quadro 2. Sucedida por R-RX-01-pnos-ate10/-10a100/-acima100/-sem. Mantida por contrato de ID (rastreabilidade PCMSO). NR-07 Anexo III Quadro 2 (Portaria 567/2022)."
+    status: DEPRECATED
+
+  - id: R-RX-01-pnos-ate10
+    quando: pnos_leo_ate_10
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 0
+        momentos: [adm]
+    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022), conferido no MTE [DERIVADO] — PNOS CLSC ≤10% LEO (TLV-PNOS ACGIH 3 mg/m³ resp): só admissional."
+    status: INTERPRETADO
+
+  - id: R-RX-01-pnos-10a100
+    quando: pnos_leo_10_100
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 0
+        momentos: [adm]
+    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS 10% < CLSC ≤100% LEO: admissional. Repetição única após 5 anos a critério clínico NÃO materializada (lembrete operacional — DT-002Y-01). NÃO é 60M recorrente."
+    status: INTERPRETADO
+
+  - id: R-RX-01-pnos-acima100
+    quando: pnos_leo_acima_100
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS CLSC >100% LEO: adm + 60M (a cada 5 anos)."
+    status: INTERPRETADO
+
+  - id: R-RX-01-pnos-sem
+    quando: pnos_sem_medicao
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS sem avaliação quantitativa: adm + 60M."
     status: INTERPRETADO
 
   - id: R-RX-02
