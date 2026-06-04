@@ -554,6 +554,7 @@ O cenário ("isto é mineração NR-22") nasce como DERIVAÇÃO de dados fático
 - **002.S** — Materialização B.1: `resolve_leo(silica, total, MINERACAO)` retorna LEO indefinido por desenho (NR-22 Anexo V só fixa respirável; total-mineração é vazio normativo). A tabela de precedência mantém as 4 posições mesmo com n2/n4 vazios para sílica (universalidade: novo anexo setorial = novo registro). CNAE-mineração = 05/07/08/099; 06 e 091 (petróleo) fora.
 - **002.V** — Bloqueio do plug B.2 (continuação operacional de DT-002L-01, resolvida na 002.N) fechado em CONHECIMENTO/ARQUITETURA, antes de virar código. Duas premissas explicitadas: (a) o motor **consome** o CLSC pronto do laudo, não o calcula — `Quantificacao.valor` `float` único basta; a amostra de medições e o cálculo do IC 95% lognormal são trabalho de higienista (NR-09), a montante, e não entram em `tipos.PGR`. [Premissa de fundo: médica lê CLSC, não recalcula — registrada como DT-002V-01, A VALIDAR com Carolini; confiança alta pela separação NR-07/NR-09.] (b) a **fração** (respirável/total) é dado da `Quantificacao` que alimenta `resolve_leo`, não do cenário — `leo_resolver.py` já trata `fracao` e `cenario` como argumentos ortogonais (`nivel(fracao, cenario, pct_quartzo)`). Faltava `Quantificacao.fracao` (gêmeo de `pct_quartzo`/002.Q: o Enum `Fracao` e o resolver já existiam desde a B.1, faltava o campo na medição que os liga). Decisão: `fracao: Optional[Fracao] = None` em `Quantificacao`. Quando sílica/asbesto com avaliação quantitativa e `fracao is None`, o plug emite Pendencia bloqueante (não chuta RESPIRAVEL) — coerente com o "estado contraditório" de R-RX-01 e D-ARQ-08/13. Implementação (campo + classificador CLSC + plug + testes) é sessão de código futura.
 - **002.X** — Asbesto e PNOS entram na tabela de precedência do LEO-resolver. **Asbesto:** níveis (1)/(2) vazios; LEO = nível (3) NR-15 Anexo 12 = **2,0 f/cm³** FIXO (não fórmula), unidade **f/cm³** (não mg/m³), fração sempre respirável, pct_quartzo=None. **PNOS:** níveis (1)–(3) vazios por definição (PNOS = "sem LEO próprio", rodapé Quadro 2); LEO = nível (4) ACGIH TLV-PNOS = **3 mg/m³ respirável** `[DERIVADO — ACGIH via NR-9 9.6.1.1]`; articulação "genérico ACGIH alimenta o roteamento do Quadro 2" é `[INTERPRETADO]` (a norma define PNOS como sem-LEO mas roteia por %LEO — reconciliação técnica, valida na saída por D-ARQ-27). **Consequência sobre a arquitetura:** o nível (4) ACGIH deixa de ser fallback raro e vira caminho normal (PNOS, e provável carvão) → `agentes.yaml` passa a carregar valores ACGIH tabelados como dado de primeira classe. Exige **unit-awareness** no resolver/classificador (f/cm³ vs mg/m³): laudo em unidade incompatível com o agente é erro estrutural → Stage 3 (D-ARQ-17), mesmo ponto onde DT-002V-01 ataca a estatística do CLSC. **Carvão mineral:** 3º agente do Quadro 1 (567/2022); LEO fora da NR-15 → candidato a nível (4), valor a resolver (DT-002X-01). Implementação (ramos asbesto/PNOS no resolver + classificador CLSC + testes) é sessão de código futura.
+- **002.Y** — Ramo PNOS materializado no resolver (`_pnos_n1..n4`; n1–n3 → None, n4 ACGIH → 3,0 mg/m³ resp se fração RESPIRAVEL). PNOS entra em `_PRECEDENCIA`. O nível (4) ACGIH, antes fallback raro, é agora caminho normal (confirmado em código, não só especificado). Consumido por `_helper_pnos` (predicados.py) via injeção de fração — ver D-ARQ-29.
 
 ---
 
@@ -684,6 +685,37 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 
 ---
 
+## D-ARQ-28 — Caminho declarativo regra→lembrete operacional (PROPOSTA, não implementada)
+
+**Contexto.** D-ARQ-05 estabelece lembrete operacional como saída de primeira classe (TODO não-bloqueante para o executor). Mas o motor não tem caminho para uma *regra* de `regras.yaml` emitir um lembrete: `stage_5_emissao` produz apenas `ExameEmitido`, e `R-OP-01` ("verificar FDS do eletrodo") existe só como string em `agentes.yaml.protocolos_especiais`, sem mecanismo que a transforme em `Pendencia`. Caso âncora: a faixa `pnos_leo_10_100` (R-RX-01-pnos-10a100) — o Quadro 2 prevê "repetir RX após 5 anos a critério clínico", uma repetição não-periódica que é exatamente um lembrete operacional. Em 002.Y a faixa emite só o admissional; o lembrete clínico ficou sem casa (DT-002Y-01).
+
+**Decisão (PROPOSTA).** Estender o emissor para que uma entrada de regra possa declarar um lembrete que vira `Pendencia(bloqueante=False)`. Esboço: campo opcional `lembrete` na regra (`{tipo, destinatario, motivo}`); `stage_5_emissao` o converte em `Pendencia` quando a regra dispara, mutando `ctx.pendencias` como já faz para Ausente. Universal: serve a R-OP-01 (FDS de eletrodo), à repetição clínica do PNOS, e a qualquer "faça X após a matriz" futuro.
+
+**Consequência.** Toca `emissao.py` + schema de regra + carregador + testes — mudança de mecanismo, não de dado. Por isso ficou fora de 002.Y (que era materialização de dado clínico): empacotar as duas violaria "uma implementação por sessão" e misturaria naturezas. Quando implementada, R-RX-01-pnos-10a100 ganha o lembrete e DT-002Y-01 fecha.
+
+**Status:** PROPOSTA. Não implementada. Originada em 002.Y. Caso-âncora duplo: R-OP-01 (preexistente, sem trilho) e R-RX-01-pnos-10a100 (002.Y).
+
+**Base.** Sessão 002.Y (04/06/2026).
+
+---
+
+## D-ARQ-29 — Fração do PNOS é invariante normativa: helper injeta RESPIRAVEL, não bloqueia
+
+**Contexto.** D-ARQ-24/002.V fixou que sílica/asbesto com medição quantitativa e `fracao=None` gera `Ausente` bloqueante — a fração (respirável/total) é fato do laudo que muda a fórmula do Anexo 12 (respirável `8/(%q+2)`, total `24/(%q+3)`), e chutá-la inventaria um número de exposição (erro silencioso, a classe que D-ARQ-22 combate). Ao materializar PNOS (002.Y), `_helper_pnos` enfrenta o mesmo `fracao=None`: a fixture Viverde traz 11 PNOS medidos em mg/m³ sem fração declarada. Aplicar a regra da sílica (bloquear) deixaria todo PNOS medido sem rotear.
+
+**Decisão.** Para PNOS, o helper **injeta `fracao=RESPIRAVEL` quando `None`**, não bloqueia. Justificativa: em PNOS a fração não é grau de liberdade do laudo — o Quadro 2 do Anexo III só define comportamento para poeira respirável ("sem ramo TOTAL", R-RX-01/002.X), e o LEO é fixo (TLV-PNOS ACGIH 3 mg/m³ resp), não fórmula que dependa da fração. Injetar RESPIRAVEL não chuta um fato ausente: codifica uma invariante da norma. A assimetria com sílica (sílica bloqueia, PNOS injeta) é **intencional e documentada no helper** — não é inconsistência, é a norma sendo diferente: fração é fato em sílica, invariante em PNOS.
+
+**Fronteira com D-ARQ-24/002.V (não confundir).** D-ARQ-24 manda bloquear em sílica/asbesto porque lá a fração altera o denominador. D-ARQ-29 não revoga isso — vale só para PNOS, onde o denominador é fixo. As duas regras coexistem: o `_helper_silica_asbesto` bloqueia, o `_helper_pnos` injeta. Não unificar os helpers nesse ponto é decisão, não dívida.
+
+**Consequência.**
+- PNOS medido em mg/m³ roteia por faixa sem pendência de fração — destrava o roteamento que o Viverde exige.
+- O erro silencioso que D-ARQ-22 combate **não** reaparece: não há número de exposição inventado, porque o LEO do PNOS é fixo independentemente da fração.
+- Validação contra Viverde real (os 11 PNOS em contexto completo) fica para a sessão de integração — ver DT-002Y-02. Em 002.Y a decisão é coberta por testes sintéticos de conversão (`mg/m³ → faixa`, com asserção de não-bloqueio).
+
+**Base.** Sessão 002.Y (04/06/2026). Caso-âncora: PNOS medido do PGR Viverde. Materializa R-RX-01 (Quadro 2, 002.X) em código.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -715,3 +747,4 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 | v25 | 01/06/2026 | Sessão 002.V (CONHECIMENTO/ARQUITETURA): changelog 002.V em D-ARQ-24 (premissa "motor consome CLSC pronto" + decisão `Quantificacao.fracao: Optional[Fracao]`, mesma ID); nota 002.V em D-ARQ-25 Parte C (`fracao` no contrato-alvo). Sem código — bloqueio do plug B.2 fechado antes de implementar. |
 | v26 | 02/06/2026 | Sessão 002.W: D-ARQ-27 adicionada — método de construção (derivação normativa via PDCA; Carolini valida saídas, não método); primeira instância DT-002L-01. Linha de changelog omitida no fechamento da 002.W, reposta na 002.X (higiene de conformidade). |
 | v27 | 03/06/2026 | Sessão 002.X (CONHECIMENTO): changelog 002.X em D-ARQ-24 — asbesto (LEO 2,0 f/cm³, f/cm³, NR-15 Anexo 12) e PNOS (LEO ACGIH 3 mg/m³ resp, nível 4) na tabela de precedência; nível (4) ACGIH vira caminho normal; unit-awareness exigida. R-RX-01-pnos DEPRECATED → família; ID clínico R-RX-01 inalterado. |
+| v28 | 04/06/2026 | Sessão 002.Y (IMPLEMENTAÇÃO): D-ARQ-29 adicionada (PNOS injeta fração RESPIRAVEL — invariante do Quadro 2; assimetria intencional com D-ARQ-24/002.V); D-ARQ-28 adicionada (PROPOSTA — caminho declarativo regra→lembrete operacional); changelog 002.Y em D-ARQ-24 (ramo PNOS no resolver materializado, nível 4 ACGIH vira caminho normal). Família R-RX-01-pnos-* em código. Suíte 315→327. PR #49, commit 9bb243e. |
