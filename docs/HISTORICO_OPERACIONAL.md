@@ -1542,3 +1542,31 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 **Suíte: 315 verde** (inalterada — sem código). **Próxima sessão:** decidir entre (a) sessão de código materializando PNOS/asbesto-LEO no resolver, ou (b) PGR como teste de integração (rodar, não implementar). Carvão (DT-002X-01) pede busca dedicada antes de virar código.
 
 ---
+
+**Sessão 002.Y — 04/06/2026 — IMPLEMENTAÇÃO (a1-PNOS: família R-RX-01-pnos-* em código)**
+
+**Foco.** Materializar a família R-RX-01-pnos-* especificada na 002.X (Quadro 2 do Anexo III, 4 faixas) — primeira sessão de código tocando PNOS. Recorte decidido em ARQUITETURA na abertura: "a1-cheio" (4 faixas + conversão mg/m³ + injeção de fração), não "a1-núcleo" (só faixas com pct_LT sintético).
+
+**Decisão de recorte (abertura).** Bifurcação 002.X "(a) código PNOS/asbesto-LEO vs (b) PGR como integração" recortada: 002.Y = só PNOS (a1), separado de asbesto (tem dívida própria — confirmação MTE de 2,0 f/cm³, unit-awareness f/cm³). Asbesto e carvão (DT-002X-01) ficam para sessões próprias. Leitura "(a) é pré-requisito de (b)" revalidada contra o código: parcialmente — sílica já roteia (B.2/002.W), mas PNOS do Viverde emitia 60M único (deprecated), logo materializar PNOS é pré-requisito das linhas de PNOS do (b).
+
+**D-ARQ-29 (decidida em sessão).** PNOS injeta fração RESPIRAVEL quando ausente, não bloqueia — invariante do Quadro 2 (só mede respirável, LEO fixo 3 mg/m³ resp ACGIH), assimetria intencional com sílica (D-ARQ-24/002.V bloqueia porque lá fração é fato do laudo). Decisão inicial do Arquiteto era "a1-núcleo" (bloquear como sílica, adiar a fração); revertida na mesma sessão ao reconhecer que fração em PNOS não é grau de liberdade — é norma.
+
+**D-ARQ-28 (proposta).** Caminho declarativo regra→lembrete operacional (`Pendencia` não-bloqueante emitida por regra). Não implementado — `emissao.py` só emite `ExameEmitido`, `R-OP-01` é string sem trilho. Caso-âncora duplo: R-OP-01 e a repetição clínica da faixa PNOS 10–100%.
+
+**Entregue.** 6 arquivos, +241/−4, commit 9bb243e, PR #49 merge commit em main (65b8bc4):
+- `leo_resolver.py` — slug PNOS + 4 níveis (n4 ACGIH 3,0 resp) + entrada _PRECEDENCIA
+- `predicados.py` — `_helper_pnos` (injeta RESPIRAVEL, nunca retorna None) + 4 primitivos de faixa; import de Fracao; `pnos` binário marcado DEPRECATED
+- `protocolo.py` — carregador filtra `status: DEPRECATED` (universal, não só PNOS)
+- `regras.yaml` — R-RX-01-pnos → DEPRECATED (mantida, contrato de ID) + 4 entradas R-RX-01-pnos-ate10/-10a100/-acima100/-sem (INTERPRETADO)
+- `test_rx_periodicidade.py` — 12 testes PNOS (faixas sintéticas, conversão mg/m³, exclusividade, dupla-emissão, sem_medicao renomeado)
+- `test_protocolo_carregamento.py` — 1 teste do filtro DEPRECATED
+
+**Fase 1 (gate antes de editar).** 3 incertos resolvidos por leitura: (1a) carregador NÃO filtrava DEPRECATED → filtro adicionado; (1b) pct_LT resolvido em stage_4 via avaliar() → testes PNOS espelham sílica; (1c) factory = build_pgr_viverde(), executar(pgr, protocolo, hoje=None). Ajuste do Code: teste do carregador usa `emite: []` (validação de exames roda sobre lista já filtrada; fixture tem exames vazio).
+
+**Suíte: 327 verde** (315 baseline → 326 com 12 PNOS → 327 com filtro DEPRECATED). mypy --strict limpo, 13 arquivos.
+
+**Pendências abertas.** DT-002Y-01 (lembrete 10–100% — depende de D-ARQ-28); DT-002Y-02 (validação PNOS contra Viverde real — sessão de integração); DT-002X-01 (LEO carvão, busca MTE); asbesto-LEO (confirmação MTE 2,0 f/cm³ + unit-awareness); item de processo: `.gitignore` para dumps de inspeção (`*_diff.txt`), micro-commit isolado.
+
+**Próxima sessão.** (b) PGR Viverde como teste de integração — agora destravado do lado PNOS. Sílica já roteia, PNOS roteia; faltam asbesto (não está no Viverde) e o comportamento em contexto completo. DT-002Y-02 fecha aqui.
+
+---

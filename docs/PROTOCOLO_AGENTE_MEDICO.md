@@ -261,6 +261,8 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 - pnos_leo_acima_100 / pnos_sem_medicao → adm + 60M ("a cada 5 anos").
 Fração do PNOS é sempre RESPIRAVEL (Quadro 2 mede "poeira respirável"); sem ramo TOTAL.
 
+**PNOS — implementação (002.Y).** A família `R-RX-01-pnos-*` foi materializada em código (PR #49, commit 9bb243e): predicados de faixa `pnos_leo_ate_10`/`pnos_leo_10_100`/`pnos_leo_acima_100`/`pnos_sem_medicao` (predicados.py) + ramo PNOS no LEO-resolver (3 mg/m³ resp, nível 4) + 4 entradas em regras.yaml (status INTERPRETADO) + `R-RX-01-pnos` única marcada DEPRECATED (mantida por contrato de ID; carregador passa a filtrar DEPRECATED). Periodicidades: ate_10 e 10_100 → só admissional; acima_100 e sem_medicao → adm + 60M. O roteamento de PNOS medido em mg/m³ usa injeção de fração RESPIRAVEL (D-ARQ-29). Pendências abertas: lembrete "repetir após 5 anos a critério clínico" da faixa 10_100 não materializado (DT-002Y-01); validação contra Viverde real adiada (DT-002Y-02).
+
 **LEO do PNOS — reconciliação (002.X).** O rodapé do Quadro 2 define PNOS pela condição "não possuir um LEO definido", mas a tabela roteia por % do LEO. Reconciliação: o material é PNOS porque não tem LEO *próprio*; o roteamento usa o LEO *genérico* de PNOS = TLV-PNOS da ACGIH = **3 mg/m³ (respirável)**, via NR-09 item 9.6.1.1 (nível 4 do LEO-resolver, D-ARQ-24). `[DERIVADO — ACGIH TLV-PNOS, via NR-9 9.6.1.1]` no valor; `[INTERPRETADO]` na articulação "este genérico alimenta o Quadro 2" — não está escrita na norma; é o item de maior incerteza desta sessão, inspecionar PRIMEIRO na revisão de saída (D-ARQ-27).
 
 **Pré-requisito para o predicado `pnos` ser computável.** Para o motor classificar um agente como PNOS, `agentes.yaml` precisa carregar as 3 condições ACGIH 2017 (rodapé do Quadro 2): (a) sem LEO próprio definido; (b) insolúvel/pouco solúvel; (c) baixa toxicidade (não citotóxico/genotóxico/reativo, não radioativo, não sensibilizante). Sem esse metadado o predicado `pnos` não tem como ser decidido. Implementação futura.
@@ -631,6 +633,18 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 
 ---
 
+### DT-002Y-01 — Lembrete "repetir a critério clínico" da faixa PNOS 10–100% `[INTERPRETADO]`
+**Origem:** 002.Y, materialização da família R-RX-01-pnos-*.
+**Situação.** O Quadro 2 do Anexo III, faixa 10% < CLSC ≤ 100% LEO, prescreve admissional + RX único após 5 anos + **repetir a critério clínico**. A repetição clínica é um lembrete operacional não-periódico (D-ARQ-05), mas o motor não tem caminho regra→lembrete: `stage_5_emissao` só emite `ExameEmitido`. Em 002.Y a regra `R-RX-01-pnos-10a100` emite só o admissional; o "após 5 anos" vive em `base_normativa` (texto), e a repetição clínica não é emitida.
+**Resolução.** Depende de D-ARQ-28 (proposta — caminho declarativo regra→`Pendencia` não-bloqueante). Quando implementada, a faixa ganha o lembrete e esta DT fecha. Paliativo aceito (sinalizado): admissional + gatilho de 5 anos corretos; falta só a repetição clínica. NÃO bloqueia — a reta de faixas está coberta e nenhuma subdimensiona.
+
+### DT-002Y-02 — Validação PNOS contra Viverde real adiada para integração `[A VALIDAR — integração]`
+**Origem:** 002.Y, decisão de recorte de teste.
+**Situação.** D-ARQ-29 (injeção RESPIRAVEL para PNOS) foi coberta em 002.Y por testes sintéticos de conversão (`mg/m³ → faixa`, com asserção de não-bloqueio), não pela fixture Viverde completa — a fixture tem 3 sub-funções de GHEs e isolar um GHE-PNOS limpo seria andaime desproporcional numa sessão de dado. Os 11 PNOS medidos do Viverde (0,08 a 21,94 mg/m³, cruzando as faixas ate_10/10_100/acima_100) só serão exercitados em contexto completo na sessão de integração.
+**Resolução.** Cobrir na 002.Z (b — PGR Viverde como teste de integração): rodar o PGR inteiro e confirmar que os GHEs com PNOS roteiam por faixa sem bloquear, em presença dos demais riscos. NÃO bloqueia — é o teste de integração que sempre seria da 002.Z, não buraco da a1.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -666,3 +680,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v12 | 01/06/2026 | Sessão 002.V (CONHECIMENTO/ARQUITETURA): DT-002V-01 adicionada — `Quantificacao.valor` não discrimina se o número é o CLSC; premissa "motor consome CLSC, não calcula" a validar com Carolini. Sem reclassificação de regra. |
 | v13 | 02/06/2026 | Sessão 002.W: DT-002L-01 e DT-002N-02 resolvidas (marca de pendência removida do título, Status RESOLVIDA no corpo); higiene de conformidade da dívida 002.V. |
 | v14 | 03/06/2026 | Sessão 002.X (CONHECIMENTO): DT-002N-01 RESOLVIDA (PNOS Quadro 2: 4 faixas + LEO ACGIH 3 mg/m³ resp; faixa 10–100% = evento único + critério clínico, não 60M); R-RX-01-pnos DEPRECATED → família R-RX-01-pnos-* (ID clínico R-RX-01 inalterado); asbesto LEO 2,0 f/cm³ (f/cm³, fixo, NR-15 Anexo 12); DT-002X-01 (LEO carvão), DT-002X-02 (pós-ocupacional asbesto 30a), DT-002X-03 (NOTA 1) adicionadas. Nada implementado — especificação para sessão de código. |
+| v15 | 04/06/2026 | Sessão 002.Y (IMPLEMENTAÇÃO): família R-RX-01-pnos-* materializada em código (predicados de faixa + ramo PNOS no resolver + 4 regras INTERPRETADO + R-RX-01-pnos DEPRECATED); D-ARQ-29 (injeção fração RESPIRAVEL); DT-002Y-01 (lembrete 10–100% não materializado, depende de D-ARQ-28) e DT-002Y-02 (validação Viverde real adiada p/ integração) adicionadas. Suíte 315→327. PR #49, commit 9bb243e. |
