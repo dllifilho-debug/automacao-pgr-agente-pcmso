@@ -716,6 +716,69 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 
 ---
 
+## D-ARQ-30 — Rotina de briefing diário é informativa; /kickoff permanece o gate de abertura
+
+**Contexto.** Claude Code Routines (research preview, abril/2026) permite rodar uma sessão do Code na nuvem por agendamento, sem máquina local ligada. Tentação: usar isso para substituir o ritual de abertura (/kickoff, D-ARQ-26). Mas o /kickoff tem duas metades — coleta factual (git/HISTORICO) e julgamento do Arquiteto (foco, prioridade, recorte, número da sessão) — e só a primeira é automatizável. A segunda exige o Diovanni e o chat.
+
+**Decisão.** Uma rotina agendada (03:30 BRT, diária, somente leitura) gera um briefing de ESTADO FACTUAL do projeto e o envia por e-mail: git log -10, git status, último bloco do HISTORICO verbatim, contagem da suíte, DTs abertas. A rotina NUNCA julga foco/prioridade/recorte, nunca calcula o número da próxima sessão, nunca escreve no repo (sem commit/push/branch/edição). É pré-aquecimento informativo, não decisão.
+
+O /kickoff (D-ARQ-26) permanece o gate canônico de abertura de sessão, de invocação consciente. Razão de não ser redundante: o briefing roda 03:30 e pode estar VELHO quando a sessão abre (outro merge entre o briefing e o início do trabalho); o /kickoff recoleta o estado real NAQUELE instante. Confiar no briefing como estado de abertura seria usar cache em vez da fonte — o que o protocolo proíbe (git vence sempre).
+
+**Fronteira com D-ARQ-26 (não confundir).** D-ARQ-26 = ritual de abertura, invocação consciente, coleta + julgamento, na hora de trabalhar. D-ARQ-30 = briefing desassistido, agendado, só coleta, antes de acordar. Momentos e responsabilidades distintos; nenhum cobre o outro.
+
+**Papel: aponta, não afirma.** O briefing levanta bandeiras para o /kickoff conferir — não estabelece fatos. Evidência empírica (05/06/2026, 1º briefing): acertou ao detectar uma dívida de formatação que o /kickoff é estruturalmente cego para ver (sessões 002.X–Z gravadas com negrito em vez de cabeçalho ##, invisíveis ao grep de cabeçalho do próprio kickoff) — valor que o gate sozinho não tem. Mas errou a confiança da suíte: rodou em branch sandbox sem pandas, reportou "328 verde" como alegação do HISTORICO, não medição própria. Lição: o briefing é bom a apontar, fraco a afirmar; tratar achados como pistas a verificar, nunca como estado.
+
+**Consequência.**
+- A rotina respeita read-only por design: permissões limitadas a git log/status, pytest, leitura de arquivo, envio de e-mail. Qualquer escrita seria decisão silenciosa (a classe que D-ARQ-22 combate).
+- Roda em ambiente sandbox (branch própria, sem suíte legada por falta de pandas) — confirma na prática que valida só parcialmente e NÃO substitui o /kickoff no ambiente real.
+- Não substitui o /kickoff; se o briefing e o /kickoff divergirem, o /kickoff (mais recente, ambiente real) vence.
+- Research preview: comportamento e limites podem mudar; Pro = 5 execuções/dia (1 rotina diária cabe folgado).
+
+**Base.** Sessão META (04/06/2026), aceite empírico 05/06/2026. Origem: feature Routines do Claude Code. Implementação: rotina criada na UI, não versionada no repo (config de produto, não código do projeto).
+
+---
+
+## D-ARQ-31 — Bloqueio é por-risco/por-linha, não por-GHE: MatrizGHE tri-estado (VÁLIDA/PARCIAL/BLOQUEADA) com pendência anexada à linha
+
+**Contexto.** D-ARQ-15 definiu a política de status do orquestrador: um GHE com `Pendencia(bloqueante=True)` fecha aquela `MatrizGHE` com `linhas=[]` e o `Resultado` global cai para `PRELIMINAR`; os demais GHEs fecham normalmente. Isso resolve o cross-GHE (um GHE bloqueado não derruba os outros), mas dentro de um GHE a `MatrizGHE` é binária: ou linhas completas, ou vazia. O primeiro risco bloqueante zera as linhas que outros riscos do mesmo GHE já rotearam. Caso-âncora — Acab-05 (Viverde): sílica sem fração bloqueia (`Ausente` em todas as faixas R-RX-01-*, D-ARQ-24/D-ARQ-29) e o `rx_torax_oit` que o PNOS justificaria (faixa baixa → admissional) some junto, porque o orquestrador zera `linhas` no primeiro bloqueante. O contraste Est-08 (MEK+PNOS, sem sílica: PNOS roteia 0M sem bloquear) prova que o problema é o achatamento, não o PNOS. Universal, não só sílica×PNOS: qualquer GHE com um risco resolvido e outro com dado faltando sofre o mesmo (química: um agente com FDS + um sem; etc.).
+
+A pergunta de método (DT-002Z-01): GHE com um risco pendente vai ao PCMSO como parcial, ou o risco pendente invalida o GHE inteiro?
+
+**Resolução normativa.** A NR-07 vigente (Portaria 567/2022) não legisla emissão de motor, mas fixa a postura diante de dado insuficiente/inconsistente: o item 7.5.1 estabelece que o PCMSO é elaborado considerando os riscos ocupacionais identificados e classificados pelo PGR; o item 7.5.5 manda o médico reavaliar inconsistências no inventário de riscos em conjunto com os responsáveis pelo PGR (reconciliar, não descartar); o item 7.6.4 manda registrar a insuficiência de informação, não suprimir o programa. Em nenhum ponto a norma manda apagar os exames determinados de um trabalhador porque um agente do mesmo GHE está com dado faltando — o padrão é sinalizar + reconciliar + registrar, com o resto seguindo. Reforço por regra `[VALIDADO]`: R-PGR-04 e R-PGR-05 mandam solicitar o dado, não rejeitar. O all-or-nothing intra-GHE é uma rejeição silenciosa que contradiz essa postura. `[DERIVADO — NR-07 7.5.5/7.6.4 (Portaria 567/2022); analogia R-PGR-04/R-PGR-05]`.
+
+**Decisão.** Bloqueio passa a ser por-risco/por-linha, nunca por-GHE. A matriz de um GHE é a composição das contribuições por-risco independentes (já o que D-ARQ-16 e R-GHE-03 afirmam); um risco sem dado não apaga a contribuição determinada de outro.
+
+1. `MatrizGHE` ganha `status ∈ {VÁLIDA, PARCIAL, BLOQUEADA}`:
+   - **VÁLIDA** — todas as contribuições de risco determinaram.
+   - **PARCIAL** — algumas determinaram (linhas emitidas), outras estão bloqueadas (pendências carregadas).
+   - **BLOQUEADA** — nenhuma contribuição pôde ser determinada (único risco do GHE bloqueado; ou bloqueio estrutural Stage 3 que impede sequer conhecer o agente, sem nenhum outro risco determinável no GHE).
+2. O orquestrador deixa de zerar `linhas` no primeiro bloqueante. Emite as linhas determináveis e carrega as `Pendencia(bloqueante=True)` junto, na mesma `MatrizGHE`.
+3. Pendência bloqueante que incide sobre uma linha emitida fica anexada à linha, não solta no nível do GHE. Caso convergente (R-GHE-03, linha única): quando um risco bloqueado e um determinado convergem no mesmo exame (Acab-05: sílica `Ausente` + PNOS admissional → `rx_torax_oit`), a linha sai com o piso determinado (admissional) e a pendência da sílica anexada ("periodicidade pode escalar quando a fração for fornecida"). Isto é condição de segurança, não opcional — ver Consequência.
+4. `Resultado.status` global cai para `PRELIMINAR` se qualquer GHE for PARCIAL ou BLOQUEADA (trilho de D-ARQ-15 preservado; muda só a granularidade da `MatrizGHE`, não a política de status global). REJEITADO segue exclusivo dos gates Stage 1.
+
+Direção da decisão (parcial sobre binário; bloqueio por-risco) é `[DERIVADO — NR-07 7.5.5/7.6.4; analogia R-PGR-04/R-PGR-05]`. O modelo tri-estado específico e a anexação pendência-à-linha são `[INTERPRETADO — prioridade na revisão de saída]`: a norma não fixa a forma técnica.
+
+**Por que não o binário (2ª passada).** O único argumento real pró-binário é o subdimensionamento silencioso do caso convergente — emitir "admissional" para uma linha que a sílica poderia escalar a 12M/24M é um teto silencioso, a classe de erro que D-ARQ-22 combate. Esse argumento não derruba o parcial: impõe a restrição da cláusula 3 (pendência anexada à linha torna o teto visível, não silencioso). O outro argumento pró-binário — proteger contra assinar matriz incompleta — já é coberto por `status=PRELIMINAR` + pendência. Em troca, o binário suprime exame determinado (subexame — a direção de dano), sem âncora normativa. O parcial tem âncora (7.5.5/7.6.4) e não subexamina.
+
+**Fronteira com decisões existentes (não confundir):**
+- **D-ARQ-15** — não revoga a política de status global (REJEITADO/PRELIMINAR/OK). Refina a granularidade: a `MatrizGHE` deixa de ser binária (linhas-completas vs. `linhas=[]`) e ganha o estado PARCIAL. PRELIMINAR continua sendo o status global de "não-apto a assinatura".
+- **D-ARQ-08** — `Pendencia(bloqueante=True)` permanece; muda como ela interage com a emissão: bloqueia a contribuição do risco dela, não o GHE inteiro. A distinção bloqueante/operacional é intocada.
+- **D-ARQ-16 / R-GHE-03** — base conceitual: regras de exposição são independentes e componíveis, convergência resolvida por dedup no Stage 8. Esta decisão é a consequência lógica de tratar a composição como de fato independente também sob bloqueio.
+- **D-ARQ-22** — a anexação pendência-à-linha (cláusula 3) é a mitigação direta do erro silencioso plausível no caso convergente. A rastreabilidade por linha (`regra_id`) é o que torna a anexação possível.
+- **D-ARQ-24 / D-ARQ-29** — preservadas. Sílica sem fração continua gerando `Ausente` bloqueante (a fração altera o denominador do Anexo 12); PNOS continua injetando RESPIRAVEL (invariante do Quadro 2). O que muda é que esse bloqueio da sílica não contamina o GHE — fica contido na contribuição da sílica e anexado à linha de RX.
+- **D-ARQ-28** — distinta, não é o veículo: D-ARQ-28 adiciona trilho regra→`Pendencia(bloqueante=False)` (lembrete operacional). D-ARQ-31 trata de como `Pendencia` bloqueante interage com a emissão. Podem compartilhar encanamento (uma regra/estágio emitindo `Pendencia` carregada na `MatrizGHE`), mas são mecanismos conceitualmente separados — não unificar sem decisão própria.
+
+**Consequência.**
+- Toca, na mesma leva lógica (mas fatiável em sessões de Code): contrato/tipo de `MatrizGHE` (campo `status` + anexação de pendência à linha emitida); orquestrador (parar de zerar `linhas`; computar o tri-estado a partir das contribuições); `stage_8_consolidacao` (dedup do caso convergente preservando piso determinado + pendência anexada); propagação de `Resultado.status`; auditor; regressão. Cada mudança com teste que falhe sem ela e passe com ela (metodologia).
+- Requisito de segurança (não-negociável): a pendência bloqueante que incide sobre uma linha emitida tem de ser anexável à linha. A arquitetura suporta (audit trail por `regra_id`, D-ARQ-08). Se, para uma linha específica, a anexação for inviável na implementação, aquela linha volta a ser bloqueante — o piso determinado nunca é emitido sem o teto pendente visível ao lado.
+- Universalidade (D-ARQ-06): expresso em termos de contribuição-por-risco, vale para construção, química, saúde, mineração. Não é regra de sílica×PNOS.
+- BLOQUEADA não é "erro" — é estado legítimo e auditável (GHE cujo único risco não determinou). PARCIAL e BLOQUEADA ambos rebaixam o global a PRELIMINAR; a distinção entre eles é informativa para a revisão de saída.
+- Implementação (tipo + orquestrador + Stage 8 + status + auditor + testes) é multi-fatia, sessões de Code futuras — não fechada aqui. Esta sessão fecha a decisão de método/arquitetura (CONHECIMENTO→ARQUITETURA). Fecha DT-002Z-01.
+
+**Base.** Sessão 003.A (05/06/2026). Resolução de DT-002Z-01. Fontes: NR-07 itens 7.5.1/7.5.5/7.6.4 (Portaria MTP 567/2022), conferidas no texto oficial do MTE (gov.br). Reforço: analogia R-PGR-04/R-PGR-05 (`[VALIDADO]`). Caso-âncora: Acab-05 Viverde (sílica×PNOS no mesmo GHE; `diagnostico_zona_cinza()` em `test_integracao_viverde.py`).
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -748,3 +811,5 @@ e do plano original em HISTORICO § Sessão 002 (etapa 3 adiada). Implementaçã
 | v26 | 02/06/2026 | Sessão 002.W: D-ARQ-27 adicionada — método de construção (derivação normativa via PDCA; Carolini valida saídas, não método); primeira instância DT-002L-01. Linha de changelog omitida no fechamento da 002.W, reposta na 002.X (higiene de conformidade). |
 | v27 | 03/06/2026 | Sessão 002.X (CONHECIMENTO): changelog 002.X em D-ARQ-24 — asbesto (LEO 2,0 f/cm³, f/cm³, NR-15 Anexo 12) e PNOS (LEO ACGIH 3 mg/m³ resp, nível 4) na tabela de precedência; nível (4) ACGIH vira caminho normal; unit-awareness exigida. R-RX-01-pnos DEPRECATED → família; ID clínico R-RX-01 inalterado. |
 | v28 | 04/06/2026 | Sessão 002.Y (IMPLEMENTAÇÃO): D-ARQ-29 adicionada (PNOS injeta fração RESPIRAVEL — invariante do Quadro 2; assimetria intencional com D-ARQ-24/002.V); D-ARQ-28 adicionada (PROPOSTA — caminho declarativo regra→lembrete operacional); changelog 002.Y em D-ARQ-24 (ramo PNOS no resolver materializado, nível 4 ACGIH vira caminho normal). Família R-RX-01-pnos-* em código. Suíte 315→327. PR #49, commit 9bb243e. |
+| v29 | 05/06/2026 | Sessão 003.A: D-ARQ-30 adicionada — rotina de briefing diário informativa; /kickoff permanece o gate de abertura (aceite empírico 05/06; briefing aponta, não afirma). Sem código. |
+| v30 | 05/06/2026 | Sessão 003.A: D-ARQ-31 adicionada — bloqueio por-risco/por-linha (não por-GHE); MatrizGHE tri-estado VÁLIDA/PARCIAL/BLOQUEADA; pendência bloqueante anexada à linha emitida; resolve DT-002Z-01 por fonte documental (NR-07 7.5.5/7.6.4 + analogia R-PGR-04/05). Sem código — decisão de arquitetura, implementação multi-fatia futura. |
