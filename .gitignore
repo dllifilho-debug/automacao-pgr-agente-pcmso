@@ -14,3 +14,6 @@ data/cargos_desconhecidos.json
 # Claude Code (worktrees, config local fora; skills versionadas)
 .claude/*
 !.claude/skills/
+
+# Dumps de inspeção (uso único)
+**/*_diff.txt
