@@ -645,6 +645,16 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 
 ---
 
+### DT-002Z-01 — Orquestrador all-or-nothing por GHE: matriz parcial vs. binário `[DERIVADO — fonte]`
+
+**Origem:** Sessão 002.Z (04/06/2026), integração Viverde — diagnóstico da zona-cinza (`diagnostico_zona_cinza()` em `test_integracao_viverde.py`).
+
+**Situação.** D-ARQ-15 fecha um GHE com `Pendencia(bloqueante=True)` zerando `linhas` — `MatrizGHE` binária (completa ou vazia). O primeiro risco bloqueante apaga os exames que outros riscos do mesmo GHE já rotearam. Caso-âncora Acab-05: sílica sem fração bloqueia (`Ausente` em todas as faixas R-RX-01-*, D-ARQ-24/29) e o `rx_torax_oit` que o PNOS justificaria (admissional) some junto. Universal, não só sílica×PNOS. Pergunta de método: GHE com um risco pendente vai ao PCMSO como parcial, ou o risco pendente invalida o GHE inteiro?
+
+**Status: RESOLVIDA (003.A) — por fonte documental, virou D-ARQ-31.** A NR-07 (Portaria 567/2022) não tem âncora para all-or-nothing: a postura diante de dado insuficiente é sinalizar + reconciliar + registrar (7.5.1 PCMSO derivado dos riscos do PGR; 7.5.5 reavalia inconsistências com o PGR; 7.6.4 registra insuficiência), nunca suprimir exames determinados. Reforço `[VALIDADO]`: R-PGR-04/R-PGR-05 (solicitar dado, não rejeitar). Decisão: bloqueio é por-risco/por-linha; `MatrizGHE` ganha tri-estado VÁLIDA/PARCIAL/BLOQUEADA; pendência bloqueante incidente sobre linha emitida fica anexada à linha (mata o subdimensionamento silencioso do caso convergente — D-ARQ-22). Direção `[DERIVADO — NR-07 7.5.5/7.6.4]`; modelo tri-estado + anexação `[INTERPRETADO]`. Não é regra clínica (R-*) — é contrato de motor → **D-ARQ-31**. Implementação multi-fatia, sessões de Code futuras.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -681,3 +691,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v13 | 02/06/2026 | Sessão 002.W: DT-002L-01 e DT-002N-02 resolvidas (marca de pendência removida do título, Status RESOLVIDA no corpo); higiene de conformidade da dívida 002.V. |
 | v14 | 03/06/2026 | Sessão 002.X (CONHECIMENTO): DT-002N-01 RESOLVIDA (PNOS Quadro 2: 4 faixas + LEO ACGIH 3 mg/m³ resp; faixa 10–100% = evento único + critério clínico, não 60M); R-RX-01-pnos DEPRECATED → família R-RX-01-pnos-* (ID clínico R-RX-01 inalterado); asbesto LEO 2,0 f/cm³ (f/cm³, fixo, NR-15 Anexo 12); DT-002X-01 (LEO carvão), DT-002X-02 (pós-ocupacional asbesto 30a), DT-002X-03 (NOTA 1) adicionadas. Nada implementado — especificação para sessão de código. |
 | v15 | 04/06/2026 | Sessão 002.Y (IMPLEMENTAÇÃO): família R-RX-01-pnos-* materializada em código (predicados de faixa + ramo PNOS no resolver + 4 regras INTERPRETADO + R-RX-01-pnos DEPRECATED); D-ARQ-29 (injeção fração RESPIRAVEL); DT-002Y-01 (lembrete 10–100% não materializado, depende de D-ARQ-28) e DT-002Y-02 (validação Viverde real adiada p/ integração) adicionadas. Suíte 315→327. PR #49, commit 9bb243e. |
+| v16 | 05/06/2026 | Sessão 003.A (CONHECIMENTO→ARQUITETURA): DT-002Z-01 catalogada na seção 11 e RESOLVIDA — orquestrador all-or-nothing por GHE resolvido por fonte documental (NR-07 7.5.5/7.6.4), virou D-ARQ-31 (bloqueio por-risco/por-linha, MatrizGHE tri-estado, pendência anexada à linha). Sem reclassificação nem regra clínica nova. |

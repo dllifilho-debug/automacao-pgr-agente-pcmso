@@ -1521,7 +1521,7 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 
 ---
 
-**Sessão 002.X — 03/06/2026 — CONHECIMENTO (derivação normativa: asbesto-LEO + PNOS Quadro 2)**
+## Sessão 002.X — 03/06/2026 — CONHECIMENTO (derivação normativa: asbesto-LEO + PNOS Quadro 2)
 
 **Foco:** fechar os dois buracos do kickoff — asbesto fora do `_PRECEDENCIA` e PNOS achatado no Quadro 2 — por derivação da norma vigente (D-ARQ-27), conferida no texto literal (MTE).
 
@@ -1543,7 +1543,7 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 
 ---
 
-**Sessão 002.Y — 04/06/2026 — IMPLEMENTAÇÃO (a1-PNOS: família R-RX-01-pnos-* em código)**
+## Sessão 002.Y — 04/06/2026 — IMPLEMENTAÇÃO (a1-PNOS: família R-RX-01-pnos-* em código)
 
 **Foco.** Materializar a família R-RX-01-pnos-* especificada na 002.X (Quadro 2 do Anexo III, 4 faixas) — primeira sessão de código tocando PNOS. Recorte decidido em ARQUITETURA na abertura: "a1-cheio" (4 faixas + conversão mg/m³ + injeção de fração), não "a1-núcleo" (só faixas com pct_LT sintético).
 
@@ -1572,7 +1572,7 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 ---
 
 ---
-**Sessão 002.Z — 04/06/2026 — IMPLEMENTAÇÃO (integração Viverde: PNOS em contexto completo, DT-002Y-02)**
+## Sessão 002.Z — 04/06/2026 — IMPLEMENTAÇÃO (integração Viverde: PNOS em contexto completo, DT-002Y-02)
 **Foco.** Fechar DT-002Y-02: validar a família R-RX-01-pnos-* (materializada na 002.Y, testes sintéticos) contra o PGR Viverde inteiro via `executar()` — provar que os PNOS reais roteiam por faixa sem achatar e sem bloquear na presença dos demais riscos.
 **Abertura.** PR #51 (`chore/abertura-002z`): `.gitignore` ignora `*_diff.txt` — item de processo aberto na 002.X, fechado. D-ARQ-30 (briefing diário informativo) não entrou — condicionado a evidência do briefing das 03:30, que só roda 05/06; texto validado aguarda aceite na próxima abertura.
 **Entregue.** `agente_medico/tests/test_integracao_viverde.py` (1 teste + função diagnóstica `diagnostico_zona_cinza()` sob `if __name__ == "__main__"`, não coletada pelo pytest). Commit `9651bb3`, +144. Chama `executar(build_pgr_viverde(), carregar(_PROTOCOLO_DIR), hoje=date(2025,6,1))` — `hoje` fixo imuniza contra R-PGR-06 (validade do PGR 10/01/2025; 730 dias cruzam em 01/2027, teste viraria vermelho sozinho com `date.today()`).
