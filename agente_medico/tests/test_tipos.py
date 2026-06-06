@@ -5,6 +5,7 @@ from agente_medico.motor.tipos import (
     CenarioExposicao,
     GHEContext,
     GHEPGR,
+    MatrizGHE,
     Momento,
     Pendencia,
     Quantificacao,
@@ -67,3 +68,14 @@ def test_ghepgr_com_cenario_serializa() -> None:
                produtos_quimicos=(), psicossocial=False, cenario=c)
     d = dataclasses.asdict(g)
     assert d["cenario"] == {"cnae": "0710-3/01", "atividade": "lavra", "local": "frente de mina"}
+
+
+def test_matriz_ghe_status_default_valida() -> None:
+    m = MatrizGHE(ghe_id="GHE-01")
+    assert m.status == "VÁLIDA"
+
+
+def test_matriz_ghe_status_aceita_tri_estado() -> None:
+    for s in ("VÁLIDA", "PARCIAL", "BLOQUEADA"):
+        m = MatrizGHE(ghe_id="GHE-01", status=s)
+        assert m.status == s

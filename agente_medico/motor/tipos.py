@@ -147,6 +147,10 @@ class MatrizGHE:
     linhas: list[ExameEmitido] = field(default_factory=list)
     pendencias: list[Pendencia] = field(default_factory=list)
     regime_aplicado: Optional[str] = None
+    # D-ARQ-31: status tri-estado da matriz por-GHE. Campo inerte nesta fatia
+    # (default VÁLIDA); produtor de status (PARCIAL/BLOQUEADA) entra na fatia 2
+    # junto com o fim do zeramento de linhas no orquestrador.
+    status: Literal["VÁLIDA", "PARCIAL", "BLOQUEADA"] = "VÁLIDA"
 
 
 @dataclass
