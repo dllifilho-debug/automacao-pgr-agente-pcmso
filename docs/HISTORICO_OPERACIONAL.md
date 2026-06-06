@@ -1600,3 +1600,30 @@ Durante a sessão, `.devcontainer/devcontainer.json` apareceu em main via commit
 **Pendências abertas.** **DT-002Z-01 FECHADA.** Implementação de D-ARQ-31 entra na fila IMPLEMENTAÇÃO (primeira fatia a recortar na abertura da sessão de código: tipo `MatrizGHE.status` + orquestrador, ou Stage 8 dedup). **DH-003A-01 (nova, higiene doc, próxima abertura):** conformidade estrutural do PROTOCOLO — header "v2" desatualizado (tabela em v16) + duas seções "## 11" (renumerar a 2ª para "## 12"). Doc-only, não-bloqueante, fora do foco. Demais inalteradas: DT-002Y-01 (lembrete PNOS 10–100%, dep. D-ARQ-28), DT-002X-01 (LEO carvão), asbesto-LEO (MTE 2,0 f/cm³ + unit-awareness). Norte estratégico (estabilizar o motor): após D-ARQ-31, frente FDS lado-motor (formalizar regras químicas, fechar `quimico_nao_especificado`).
 
 **Próxima sessão.** Implementação fatiada de D-ARQ-31 (IMPLEMENTAÇÃO) OU frente FDS lado-motor — prioridade a decidir na abertura. Gate de estado real (`git log --oneline -10`, `git status`, leitura via PowerShell dos arquivos a tocar) obrigatório antes do prompt cirúrgico.
+
+## Sessão 003.B — 06/06/2026 — IMPLEMENTAÇÃO (D-ARQ-31 fatia 1: MatrizGHE.status tri-estado inerte)
+
+**Foco.** Primeira fatia da implementação de D-ARQ-31: introduzir o campo `status` em `MatrizGHE` como vocabulário inerte, sem produtor. Decisão de recorte tomada na abertura (ver "Recorte").
+
+**Abertura.** main em `2c413f7` (herdado da 003.A `642491c`); 328 verde herdado. Gate de estado real cumprido: git log/status (main limpa), localização dos tipos (`agente_medico/motor/tipos.py` linhas 126/145/153), leitura de `tipos.py`, `orquestrador.py` e `test_tipos.py` antes de fechar a spec. Branch gate disparou corretamente — Code parou em `main`, branch `feature/darq-31-fatia1-status-inerte` criada com autorização.
+
+**Recorte (decisão de Arquiteto — refina o handoff da 003.A).** O handoff previa fatia 1 = "tipo + orquestrador deixa de zerar `linhas`". 2ª passada derrubou isso: marcar `status` mantendo o zeramento carimbaria `BLOQUEADA` em GHE que o modelo-alvo classifica como `PARCIAL` (`PARCIAL` só se distingue de `BLOQUEADA` quando há linhas determináveis presentes — e o zeramento remove exatamente essas linhas). Status correto depende de deixar de zerar; logo, status e fim-do-zeramento são inseparáveis. Recorte adotado **(a')**: fatia 1 = só o campo inerte (default `VÁLIDA`), nenhum toque no orquestrador.
+
+**Confirmação no orquestrador real.** `MatrizGHE` é construída em TRÊS sítios de `orquestrador.py`: ramo bloqueante (`if any(p.bloqueante...)` → `linhas=[]` antes de consolidar; alvo PARCIAL), ramo `ConflitoProtocolo` (→ `linhas=[]`; alvo BLOQUEADA) e ramo sucesso (`linhas` consolidadas; alvo VÁLIDA). Assimetria real entre os dois ramos de zeramento, registrada para a fatia 2.
+
+**Refatiamento de D-ARQ-31 (substitui o plano 2-fatias do handoff).**
+- Fatia 1 (FEITA): campo `MatrizGHE.status` inerte.
+- Fatia 2: orquestrador deixa de zerar `linhas` + produtor de status (VÁLIDA/PARCIAL/BLOQUEADA, respeitando a assimetria dos três sítios) + propagação `Resultado.status`.
+- Fatia 3: anexação pendência-à-linha (D-ARQ-22) + dedup convergente Stage 8 (Acab-05 sílica×PNOS).
+- Fatia 4: auditor + regressão Viverde.
+Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de status tem de setar `status` explicitamente nos três — não confiar no default `VÁLIDA` no ramo de sucesso, senão o default vaza por omissão em vez de ser afirmado por intenção.
+
+**Implementado.** `agente_medico/motor/tipos.py`: campo `status: Literal["VÁLIDA","PARCIAL","BLOQUEADA"] = "VÁLIDA"` em `MatrizGHE`, com comentário de rastreabilidade D-ARQ-31. `agente_medico/tests/test_tipos.py`: 2 testes novos (`test_matriz_ghe_status_default_valida`, `test_matriz_ghe_status_aceita_tri_estado`). `orquestrador.py` NÃO tocado.
+
+**Verificação.** Suíte completa (`agente_medico/tests/ + tests/`): 328 → **330 verde** (+2, zero regressão). Motor novo isolado: 181. mypy --strict em `tipos.py`: limpo. Commit `7a188de` na branch; merge `2c413f7` em main via PR #54 ("Create a merge commit").
+
+**Decisão de processo (D-ARQ-32).** Gravada nesta sessão: handoff é a 4ª entrega do ritual de encerramento. Emenda a D-ARQ-26/SKILL.md considerada e descartada — garantia via solicitação do Diovanni no encerramento de cada chat. Ver DECISOES v31.
+
+**Pendências abertas.** D-ARQ-31 fatias 2/3/4 na fila IMPLEMENTAÇÃO (próxima: fatia 2 — orquestrador para de zerar + produtor de status + propagação; gate de estado real obrigatório, reler `orquestrador.py` real pois linhas mudam após merges). Demais inalteradas: DH-003A-01 (higiene doc PROTOCOLO — header "v2" vs tabela v16; duas seções "## 11"), DT-002Y-01 (PNOS 10–100%, dep. D-ARQ-28), DT-002X-01 (LEO carvão), asbesto-LEO. Norte estratégico: após D-ARQ-31, frente FDS lado-motor.
+
+**Próxima sessão.** D-ARQ-31 fatia 2 (IMPLEMENTAÇÃO). Gate de estado real obrigatório antes do prompt cirúrgico.
