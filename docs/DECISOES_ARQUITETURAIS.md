@@ -779,6 +779,20 @@ Direção da decisão (parcial sobre binário; bloqueio por-risco) é `[DERIVADO
 
 ---
 
+## D-ARQ-32 — Handoff de sessão é a 4ª entrega do ritual de encerramento
+
+**Contexto.** O encerramento de sessão já produzia três entregas (update dos docs vivos; prompt de gravação p/ o Code quando há doc; as 3 perguntas de fechamento — entra em DECISOES/PROTOCOLO/HISTORICO?). Faltava formalizar a quarta, que sustenta a continuidade entre chats: o handoff colado na abertura seguinte.
+
+**Decisão.** Todo fechamento de sessão produz quatro entregas: (1) update dos docs vivos; (2) prompt de gravação p/ o Code quando houver doc a gravar; (3) as 3 perguntas de fechamento; (4) handoff atualizado p/ a próxima abertura.
+
+**Natureza do handoff.** É DERIVADO dos docs vivos + git, reescrito do zero a cada sessão, nunca versionado, nunca crava estado (SHA, contagem de testes, número de sessão — isso é do /kickoff e do briefing). Orienta, não é estado. Se divergir do git, o git vence.
+
+**Fronteira.** D-ARQ-26 (/kickoff) e D-ARQ-30 (briefing) cobrem ESTADO na abertura; D-ARQ-32 cobre ORIENTAÇÃO no encerramento.
+
+**Garantia de execução — emenda a D-ARQ-26 considerada e descartada.** Cogitou-se emendar o SKILL.md do /kickoff com um lembrete das 4 entregas, para a regra ser recarregada por toda sessão (inclusive IMPLEMENTAÇÃO pura, que pode não reler este DECISOES). Descartada: (a) o kickoff é coletor de abertura read-only/não-decisório — instruir encerramento ali contraria seu desenho e adiciona risco ao gate de abertura; (b) o lembrete chegaria na abertura, distante do momento de uso (o encerramento), e sairia do contexto antes de ser útil. Veículo de garantia adotado: Diovanni solicita o handoff ao Arquiteto no encerramento de cada chat. Gatilho no momento certo, sem tocar engrenagem. D-ARQ-26 permanece intocado.
+
+`[META — decisão de processo. Não toca motor nem protocolo clínico.]`
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -813,3 +827,4 @@ Direção da decisão (parcial sobre binário; bloqueio por-risco) é `[DERIVADO
 | v28 | 04/06/2026 | Sessão 002.Y (IMPLEMENTAÇÃO): D-ARQ-29 adicionada (PNOS injeta fração RESPIRAVEL — invariante do Quadro 2; assimetria intencional com D-ARQ-24/002.V); D-ARQ-28 adicionada (PROPOSTA — caminho declarativo regra→lembrete operacional); changelog 002.Y em D-ARQ-24 (ramo PNOS no resolver materializado, nível 4 ACGIH vira caminho normal). Família R-RX-01-pnos-* em código. Suíte 315→327. PR #49, commit 9bb243e. |
 | v29 | 05/06/2026 | Sessão 003.A: D-ARQ-30 adicionada — rotina de briefing diário informativa; /kickoff permanece o gate de abertura (aceite empírico 05/06; briefing aponta, não afirma). Sem código. |
 | v30 | 05/06/2026 | Sessão 003.A: D-ARQ-31 adicionada — bloqueio por-risco/por-linha (não por-GHE); MatrizGHE tri-estado VÁLIDA/PARCIAL/BLOQUEADA; pendência bloqueante anexada à linha emitida; resolve DT-002Z-01 por fonte documental (NR-07 7.5.5/7.6.4 + analogia R-PGR-04/05). Sem código — decisão de arquitetura, implementação multi-fatia futura. |
+| v31 | 06/06/2026 | Sessão 003.B: D-ARQ-32 adicionada — handoff de sessão como 4ª entrega do ritual de encerramento (derivado, não-versionado, não-crava-estado); emenda a D-ARQ-26/SKILL.md considerada e descartada (garantia via solicitação do Diovanni no encerramento de cada chat). Decisão de processo, sem código. |
