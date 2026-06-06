@@ -1627,3 +1627,23 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Pendências abertas.** D-ARQ-31 fatias 2/3/4 na fila IMPLEMENTAÇÃO (próxima: fatia 2 — orquestrador para de zerar + produtor de status + propagação; gate de estado real obrigatório, reler `orquestrador.py` real pois linhas mudam após merges). Demais inalteradas: DH-003A-01 (higiene doc PROTOCOLO — header "v2" vs tabela v16; duas seções "## 11"), DT-002Y-01 (PNOS 10–100%, dep. D-ARQ-28), DT-002X-01 (LEO carvão), asbesto-LEO. Norte estratégico: após D-ARQ-31, frente FDS lado-motor.
 
 **Próxima sessão.** D-ARQ-31 fatia 2 (IMPLEMENTAÇÃO). Gate de estado real obrigatório antes do prompt cirúrgico.
+
+## Sessão 003.C — 06/06/2026 — IMPLEMENTAÇÃO (D-ARQ-31 fatia 2: orquestrador para de zerar + produtor status tri-estado)
+
+**Foco.** Segunda fatia de D-ARQ-31: dar vida ao campo `MatrizGHE.status` (inerte desde a fatia 1). Consolidação passa a rodar SEMPRE; produtor de status carimba VÁLIDA/PARCIAL/BLOQUEADA por intenção.
+
+**Abertura.** main em `13bc09e` (Merge PR #55, fechamento docs 003.B); 330 verde herdado (181 motor novo isolado). Gate de estado real cumprido: leitura de `orquestrador.py`, `tipos.py`, `test_orquestrador.py`, `consolidacao.py`, `emissao.py` e `predicados.py` reais antes de fechar a spec. Branch gate disparou — Code parou em `main`, branch `feature/darq-31-fatia2-produtor-status` criada com autorização.
+
+**Decisão de recorte (refina o handoff).** O handoff previa propagação `Resultado.status→PRELIMINAR` dentro da fatia 2. 2ª passada contra o orquestrador real derrubou: `executar` JÁ mapeia `houve_bloqueio→PRELIMINAR` e reserva REJEITADO ao gate Stage 1 (coerente com a cláusula 4 do corpo de D-ARQ-31; D-ARQ-15 intocado). A propagação não precisava mudar — removida da fatia. Regra de agregação multi-GHE proposta na abertura (todas BLOQUEADA→REJEITADO) descartada na 2ª passada: contrariava D-ARQ-15 e o código vigente.
+
+**Refinamento de D-ARQ-31 (sítios de construção).** O "TRÊS sítios" citado no handoff e no bloco 003.B refere-se à estrutura ANTIGA do orquestrador (ramo bloqueante separado que pulava a consolidação). Pós-fatia 2 são DOIS sítios de construção de `MatrizGHE`: o `except ConflitoProtocolo` (→ BLOQUEADA) e o `else`, que ramifica em três valores de status (sem bloqueio→VÁLIDA; bloqueio+linhas→PARCIAL; bloqueio+sem linhas→BLOQUEADA). Ver DECISOES (nota de implementação sob D-ARQ-31). Não procurar um terceiro sítio: deixou de existir.
+
+**Implementado.** `agente_medico/motor/orquestrador.py`: bloco `if any bloqueante / else` substituído — `stage_8_consolidacao` roda sempre (inclusive sob pendência bloqueante), permitindo distinguir PARCIAL (linhas determináveis presentes) de BLOQUEADA (nenhuma linha); status setado por string literal direta no construtor (sem variável intermediária, sem import de `Literal` no orquestrador). `agente_medico/tests/test_orquestrador.py`: 3 testes novos (`test_ghe_status_valida`, `test_ghe_status_bloqueada_sem_linhas`, `test_ghe_parcial_linhas_presentes_com_bloqueio`). O teste PARCIAL é o falha-sem/passa-com da fatia, ancorado em fixtures de testes verdes pré-existentes (`test_ghe_sem_bloqueio_ok` para `trabalho_altura`→5 linhas; `test_dois_ghes_um_bloqueia` para `ruido`→`Ausente`).
+
+**Verificação.** Motor novo isolado: 181 → **184** (+3). Suíte completa (`agente_medico/tests/ + tests/`): 330 → **333** (+3, zero regressão). mypy --strict em `agente_medico/motor`: limpo (13 arquivos). Commit `76d5de1` na branch; merge `d0a68d4` em main via PR #56 ("Create a merge commit").
+
+**Paliativo registrado.** Linha PARCIAL carrega a pendência bloqueante só no nível da matriz, não anexada à linha específica (D-ARQ-22 / fatia 3). Não é erro silencioso — `status="PARCIAL"` denuncia incompletude. PARCIAL-sem-âncora-de-linha existe transitoriamente em main entre fatias 2 e 3, aceito conscientemente.
+
+**Pendências abertas.** D-ARQ-31 fatias 3 (anexação pendência-à-linha D-ARQ-22 + dedup convergente Stage 8, Acab-05 sílica×PNOS) e 4 (auditor + regressão Viverde) na fila IMPLEMENTAÇÃO. Demais inalteradas: DH-003A-01 (higiene doc PROTOCOLO — header "v2" vs tabela v16; duas seções "## 11"), DT-002Y-01 (PNOS 10–100%, dep. D-ARQ-28), DT-002X-01 (LEO carvão), asbesto-LEO. Norte estratégico: após D-ARQ-31, frente FDS lado-motor.
+
+**Próxima sessão.** D-ARQ-31 fatia 3 (IMPLEMENTAÇÃO) OU frente FDS lado-motor (CONHECIMENTO/ARQUITETURA) — prioridade a decidir na abertura. Gate de estado real obrigatório antes do prompt cirúrgico.

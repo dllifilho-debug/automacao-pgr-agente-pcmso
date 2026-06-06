@@ -777,6 +777,8 @@ Direção da decisão (parcial sobre binário; bloqueio por-risco) é `[DERIVADO
 
 **Base.** Sessão 003.A (05/06/2026). Resolução de DT-002Z-01. Fontes: NR-07 itens 7.5.1/7.5.5/7.6.4 (Portaria MTP 567/2022), conferidas no texto oficial do MTE (gov.br). Reforço: analogia R-PGR-04/R-PGR-05 (`[VALIDADO]`). Caso-âncora: Acab-05 Viverde (sílica×PNOS no mesmo GHE; `diagnostico_zona_cinza()` em `test_integracao_viverde.py`).
 
+**Nota de implementação (fatia 2, sessão 003.C).** O "três sítios de construção de `MatrizGHE`" citado no planejamento (handoff/003.B) refere-se à estrutura do orquestrador ANTERIOR à fatia 2 (ramo bloqueante separado que pulava `stage_8_consolidacao`). Na fatia 2 esse ramo foi eliminado — a consolidação roda sempre, para distinguir PARCIAL (linhas presentes) de BLOQUEADA (nenhuma linha). Restam DOIS sítios de construção: `except ConflitoProtocolo` (BLOQUEADA) e o `else` (que ramifica em VÁLIDA/PARCIAL/BLOQUEADA conforme bloqueio e presença de linhas). `Resultado.status` NÃO foi tocado: `executar` já mapeava `houve_bloqueio→PRELIMINAR` e REJEITADO segue exclusivo do gate Stage 1 (cláusula 4 acima) — D-ARQ-15 íntegro. Fatia 2 = cláusulas 1, 2 e 4 parciais; a anexação pendência-à-linha (cláusula 3) é fatia 3. Commit `76d5de1`, merge `d0a68d4` (PR #56). Suíte 330→333.
+
 ---
 
 ## D-ARQ-32 — Handoff de sessão é a 4ª entrega do ritual de encerramento
@@ -828,3 +830,4 @@ Direção da decisão (parcial sobre binário; bloqueio por-risco) é `[DERIVADO
 | v29 | 05/06/2026 | Sessão 003.A: D-ARQ-30 adicionada — rotina de briefing diário informativa; /kickoff permanece o gate de abertura (aceite empírico 05/06; briefing aponta, não afirma). Sem código. |
 | v30 | 05/06/2026 | Sessão 003.A: D-ARQ-31 adicionada — bloqueio por-risco/por-linha (não por-GHE); MatrizGHE tri-estado VÁLIDA/PARCIAL/BLOQUEADA; pendência bloqueante anexada à linha emitida; resolve DT-002Z-01 por fonte documental (NR-07 7.5.5/7.6.4 + analogia R-PGR-04/05). Sem código — decisão de arquitetura, implementação multi-fatia futura. |
 | v31 | 06/06/2026 | Sessão 003.B: D-ARQ-32 adicionada — handoff de sessão como 4ª entrega do ritual de encerramento (derivado, não-versionado, não-crava-estado); emenda a D-ARQ-26/SKILL.md considerada e descartada (garantia via solicitação do Diovanni no encerramento de cada chat). Decisão de processo, sem código. |
+| v32 | 06/06/2026 | Sessão 003.C (IMPLEMENTAÇÃO): nota de implementação sob D-ARQ-31 — fatia 2 colapsa o ramo bloqueante (consolidação roda sempre), restam dois sítios de construção; `Resultado.status` intocado (D-ARQ-15 íntegro); cláusula 3 (anexação à linha) fica para fatia 3. Suíte 330→333, commit 76d5de1, PR #56. |
