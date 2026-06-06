@@ -258,3 +258,43 @@ def test_conflito_protocolo_vira_pendencia() -> None:
     matriz = resultado.matrizes[0]
     assert matriz.linhas == []
     assert any(p.tipo == "conflito_protocolo" and p.bloqueante for p in matriz.pendencias)
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-31 fatia 2 — produtor de status tri-estado por-GHE
+# ---------------------------------------------------------------------------
+
+
+def test_ghe_status_valida() -> None:
+    # D-ARQ-31 fatia 2: GHE sem bloqueio → VÁLIDA.
+    ghe = _ghe(riscos=(_risco("trabalho_altura"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+    assert resultado.matrizes[0].status == "VÁLIDA"
+
+
+def test_ghe_status_bloqueada_sem_linhas() -> None:
+    # D-ARQ-31 fatia 2: bloqueio + nenhum exame determinável → BLOQUEADA.
+    ghe = _ghe(riscos=(_risco("ruido"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ausente(), hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.linhas == []
+    assert matriz.status == "BLOQUEADA"
+
+
+def test_ghe_parcial_linhas_presentes_com_bloqueio() -> None:
+    # D-ARQ-31 fatia 2 (falha-sem/passa-com): risco emissor (trabalho_altura →
+    # R-PKG-ATIVCRIT, 5 exames) + risco bloqueante (ruido → ruido_acima_acao
+    # Ausente) na MESMA GHE. Antes: linhas zeradas (BLOQUEADA falso).
+    # Depois: PARCIAL com linhas. Fixtures ancoradas em test_ghe_sem_bloqueio_ok
+    # (trabalho_altura→5 linhas) + test_dois_ghes_um_bloqueia (ruido→Ausente).
+    ghe = _ghe(riscos=(_risco("trabalho_altura"), _risco("ruido")))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_misto(), hoje=HOJE)
+    assert resultado.status == "PRELIMINAR"
+    assert len(resultado.matrizes) == 1
+    matriz = resultado.matrizes[0]
+    assert len(matriz.linhas) == 5
+    assert matriz.status == "PARCIAL"
+    assert any(p.bloqueante for p in matriz.pendencias)

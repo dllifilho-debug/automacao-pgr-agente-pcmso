@@ -39,32 +39,46 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
         exames: list[ExameEmitido] = stage_5_emissao(ctx, protocolo)
         # Stage 6 (regime) encaixará aqui
 
-        if any(p.bloqueante for p in ctx.pendencias):
+        # D-ARQ-31 fatia 2: consolidação roda SEMPRE (inclusive sob pendência
+        # bloqueante) para distinguir PARCIAL (linhas determináveis presentes)
+        # de BLOQUEADA (nenhuma linha). status carimbado por intenção nos dois sítios.
+        tem_bloqueio = any(p.bloqueante for p in ctx.pendencias)
+        try:
+            linhas = stage_8_consolidacao(exames)
+        except ConflitoProtocolo as e:
+            ctx.pendencias.append(
+                Pendencia(
+                    tipo="conflito_protocolo",
+                    destinatario="protocolo",
+                    motivo=str(e),
+                    bloqueante=True,
+                    regra_origem=None,
+                    ghe_id=ghe.id,
+                )
+            )
             matriz = MatrizGHE(
                 ghe_id=ghe.id,
                 linhas=[],
                 pendencias=list(ctx.pendencias),
                 regime_aplicado=ctx.regime,
+                status="BLOQUEADA",
             )
         else:
-            try:
-                linhas = stage_8_consolidacao(exames)
-            except ConflitoProtocolo as e:
-                ctx.pendencias.append(
-                    Pendencia(
-                        tipo="conflito_protocolo",
-                        destinatario="protocolo",
-                        motivo=str(e),
-                        bloqueante=True,
-                        regra_origem=None,
-                        ghe_id=ghe.id,
-                    )
-                )
+            if not tem_bloqueio:
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
-                    linhas=[],
+                    linhas=linhas,
                     pendencias=list(ctx.pendencias),
                     regime_aplicado=ctx.regime,
+                    status="VÁLIDA",
+                )
+            elif linhas:
+                matriz = MatrizGHE(
+                    ghe_id=ghe.id,
+                    linhas=linhas,
+                    pendencias=list(ctx.pendencias),
+                    regime_aplicado=ctx.regime,
+                    status="PARCIAL",
                 )
             else:
                 matriz = MatrizGHE(
@@ -72,6 +86,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     linhas=linhas,
                     pendencias=list(ctx.pendencias),
                     regime_aplicado=ctx.regime,
+                    status="BLOQUEADA",
                 )
         matrizes.append(matriz)
 
