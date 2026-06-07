@@ -88,18 +88,66 @@ def test_integracao_viverde_pnos_roteia_sem_achatar() -> None:
         )
 
     # --- Adm-03: bloqueante por ruído aguardando medição (não por PNOS quebrado) ---
+    # Fatia 3 (D-ARQ-31 cláusula 3): a pendência do ruído tem âncora 'audiometria',
+    # que é emitida → anexa à linha, não fica solta na matriz. Asserção mira a linha.
     m_adm03 = _matriz("Adm-03")
-    bloqueantes_adm03 = [p for p in m_adm03.pendencias if p.bloqueante]
-    assert len(bloqueantes_adm03) >= 1, (
-        "Adm-03: deveria ter ≥1 pendência bloqueante (ruído sem quantificação)"
+    anexadas_adm03 = [
+        p
+        for ln in m_adm03.linhas
+        if ln.exame == "audiometria"
+        for p in ln.pendencias_anexadas
+        if p.bloqueante
+    ]
+    assert len(anexadas_adm03) >= 1, (
+        "Adm-03: linha audiometria deveria carregar ≥1 pendência bloqueante anexada "
+        "(ruído sem quantificação)"
     )
     assert any(
         "Ruído" in p.motivo or "ruido" in p.motivo.lower()
-        for p in bloqueantes_adm03
+        for p in anexadas_adm03
     ), (
-        f"Adm-03: bloqueio deveria referenciar ruído/quantificação, "
-        f"motivos encontrados: {[p.motivo for p in bloqueantes_adm03]}"
+        f"Adm-03: bloqueio anexado deveria referenciar ruído/quantificação, "
+        f"motivos: {[p.motivo for p in anexadas_adm03]}"
     )
+    # espelho do Acab-05: a pendência do ruído NÃO resta solta na matriz (moveu p/ linha)
+    soltas_ruido_adm03 = [
+        p for p in m_adm03.pendencias
+        if p.bloqueante and ("ruído" in p.motivo.lower() or "ruido" in p.motivo.lower())
+    ]
+    assert soltas_ruido_adm03 == [], (
+        f"Adm-03: pendência de ruído não deveria restar solta na matriz: "
+        f"{[p.regra_origem for p in soltas_ruido_adm03]}"
+    )
+
+
+def test_acab05_pendencia_silica_anexada_a_linha_rx() -> None:
+    # D-ARQ-31 fatia 3, caso-âncora Acab-05. Saída real diagnostico_zona_cinza (003.D):
+    # sílica sem fração → 5 pendências família R-RX-01-{adm,sem,baixa,media,alta};
+    # PNOS >100% LEO → 1 linha rx_torax_oit 60M (R-RX-01-pnos-acima100).
+    # Fatia 3: as 5 pendências saem da matriz e anexam-se à linha de RX.
+    resultado = _executar()
+    m = next(x for x in resultado.matrizes if x.ghe_id == "Acab-05")
+    rx = [ln for ln in m.linhas if ln.exame == "rx_torax_oit"]
+    assert len(rx) == 1
+    linha = rx[0]
+    assert linha.periodicidade_meses == 60
+
+    familia_silica = {
+        "R-RX-01-adm", "R-RX-01-sem", "R-RX-01-baixa",
+        "R-RX-01-media", "R-RX-01-alta",
+    }
+    anexadas = {p.regra_origem for p in linha.pendencias_anexadas if p.bloqueante}
+    assert familia_silica <= anexadas, (
+        f"Acab-05: pendências da sílica deveriam estar anexadas à linha RX, "
+        f"anexadas: {anexadas}"
+    )
+    # e NÃO restam soltas no nível da matriz
+    soltas = {
+        p.regra_origem for p in m.pendencias
+        if p.bloqueante and p.regra_origem in familia_silica
+    }
+    assert soltas == set(), f"Acab-05: família sílica não deveria estar solta: {soltas}"
+    assert m.status == "PARCIAL"
 
 
 def diagnostico_zona_cinza() -> None:

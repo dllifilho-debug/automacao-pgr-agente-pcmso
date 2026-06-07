@@ -38,6 +38,7 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
                     momentos=set(exame.momentos),
                     motivos=list(exame.motivos),
                     periodicidade_apos_15a=exame.periodicidade_apos_15a,
+                    pendencias_anexadas=list(exame.pendencias_anexadas),
                 )
             )
         else:
@@ -57,5 +58,6 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
                 )
             existing.momentos |= exame.momentos
             existing.motivos.extend(exame.motivos)
+            existing.pendencias_anexadas.extend(exame.pendencias_anexadas)
 
     return result

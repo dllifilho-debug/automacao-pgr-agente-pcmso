@@ -120,6 +120,7 @@ class ExameEmitido:
     momentos: set[Momento] = field(default_factory=set)
     motivos: list[Motivo] = field(default_factory=list)
     periodicidade_apos_15a: Optional[int] = None
+    pendencias_anexadas: list[Pendencia] = field(default_factory=list)  # D-ARQ-31 fatia 3: pendência bloqueante que pode escalar a periodicidade desta linha
 
 
 @dataclass(frozen=True)
@@ -130,6 +131,7 @@ class Pendencia:
     bloqueante: bool = False
     regra_origem: Optional[str] = None
     ghe_id: Optional[str] = None
+    exames_alvo: tuple[str, ...] = ()  # D-ARQ-31 fatia 3: slugs que a pendência pode escalar; casa contra ExameEmitido.exame na anexação
 
 
 @dataclass
