@@ -17,6 +17,7 @@ from pathlib import Path
 from agente_medico.motor.orquestrador import executar
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import MatrizGHE, Resultado
+from agente_medico.tests.invariantes import auditar_invariante_piso_teto
 from agente_medico.tests.fixtures.pgr_viverde import build_pgr_viverde
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
@@ -174,18 +175,121 @@ def diagnostico_zona_cinza() -> None:
         rx_linhas = [ln for ln in m.linhas if ln.exame == "rx_torax_oit"]
 
         print(f"\n--- {rid} ---")
-        print(f"  bloqueou: {len(bloqueantes) > 0}")
+        print(f"  status   : {m.status}")
+        print(f"  bloqueou (solto na matriz): {len(bloqueantes) > 0}")
         for p in bloqueantes:
-            print(f"  [BLOQUEANTE]")
+            print(f"  [BLOQUEANTE SOLTO]")
             print(f"    tipo         : {p.tipo!r}")
             print(f"    regra_origem : {p.regra_origem!r}")
             print(f"    motivo       : {p.motivo}")
         print(f"  rx_torax_oit emitidos: {len(rx_linhas)}")
         for ln in rx_linhas:
             regras = [mo.regra_id for mo in ln.motivos]
+            anexadas = [p.regra_origem for p in ln.pendencias_anexadas if p.bloqueante]
             print(f"    periodicidade={ln.periodicidade_meses}M | regras={regras}")
+            print(f"    pendencias_anexadas (bloqueantes): {anexadas}")
 
     print("\n=== FIM DIAGNÓSTICO ===\n")
+
+
+# === D-ARQ-31 FATIA 4 — auditor da invariante + regressão tri-estado ===
+
+GHES_SILICA_ANEXADA = {"Acab-06", "Acab-08", "Est-07"}
+FAMILIA_SILICA = {
+    "R-RX-01-adm", "R-RX-01-sem", "R-RX-01-baixa",
+    "R-RX-01-media", "R-RX-01-alta",
+}
+
+
+def test_auditor_invariante_piso_teto_global_viverde() -> None:
+    # D-ARQ-31 cláusula 3: rede global sobre o Resultado inteiro. Sobre saída real
+    # é sempre [] (anexar_pendencias garante por construção); dispara só se uma
+    # fatia futura regredir a anexação. Rede contra regressão silenciosa.
+    resultado = _executar()
+    violacoes = auditar_invariante_piso_teto(resultado)
+    assert violacoes == [], (
+        f"invariante piso-sem-teto violada em: "
+        f"{[(v.ghe_id, v.exame, v.regra_origem) for v in violacoes]}"
+    )
+
+
+def test_tri_estado_32_ghes_forma() -> None:
+    # Congela a forma do vetor tri-estado dos 32 GHEs pós-fatia-3. Determinístico:
+    # motor puro (D-ARQ-09) + fixture e HOJE_FIXO congelados. Assere invariantes
+    # derivadas do diagnóstico real (003.E), não números cegos de 27 GHEs não medidos:
+    #   - soma dos três estados == 32 (todo GHE tem exatamente um status)
+    #   - PARCIAL >= 4 (Acab-05/06/08, Est-07 — sílica anexada à linha rx)
+    #   - VÁLIDA >= 1 (Est-08 — controle PNOS sem sílica)
+    #   - BLOQUEADA == 0 (PRELIMINAR global vem de PARCIAL; sem bloqueio solto medido)
+    resultado = _executar()
+    contagem = {"VÁLIDA": 0, "PARCIAL": 0, "BLOQUEADA": 0}
+    for m in resultado.matrizes:
+        contagem[m.status] += 1
+    assert sum(contagem.values()) == 32, f"esperado 32 GHEs, got {contagem}"
+    assert contagem["PARCIAL"] >= 4, (
+        f"esperado >=4 PARCIAL (zona cinza sílica×PNOS), got {contagem}"
+    )
+    assert contagem["VÁLIDA"] >= 1, (
+        f"esperado >=1 VÁLIDA (Est-08 controle), got {contagem}"
+    )
+    assert contagem["BLOQUEADA"] == 0, (
+        f"esperado 0 BLOQUEADA (PRELIMINAR vem de PARCIAL), got {contagem}"
+    )
+
+
+def test_zona_cinza_silica_anexada_a_linha_rx() -> None:
+    # Generaliza test_acab05_pendencia_silica_anexada_a_linha_rx aos demais GHEs
+    # sílica×PNOS. Asserção ESTRUTURAL (linha presente + família anexada + não-solta
+    # + PARCIAL), SEM cravar periodicidade — 0M/60M só Acab-05 testa.
+    resultado = _executar()
+    for rid in sorted(GHES_SILICA_ANEXADA):
+        m = next((x for x in resultado.matrizes if x.ghe_id == rid), None)
+        assert m is not None, f"GHE {rid} não encontrado"
+        rx = [ln for ln in m.linhas if ln.exame == "rx_torax_oit"]
+        assert len(rx) >= 1, f"{rid}: deveria ter >=1 linha rx_torax_oit"
+        anexadas = {
+            p.regra_origem
+            for ln in rx
+            for p in ln.pendencias_anexadas
+            if p.bloqueante
+        }
+        assert FAMILIA_SILICA <= anexadas, (
+            f"{rid}: família sílica deveria estar anexada à linha rx, got {anexadas}"
+        )
+        soltas = {
+            p.regra_origem for p in m.pendencias
+            if p.bloqueante and p.regra_origem in FAMILIA_SILICA
+        }
+        assert soltas == set(), (
+            f"{rid}: família sílica não deveria restar solta na matriz, got {soltas}"
+        )
+        assert m.status == "PARCIAL", f"{rid}: esperado PARCIAL, got {m.status}"
+
+
+def test_est08_controle_pnos_sem_silica_valida() -> None:
+    # Est-08: PNOS sem sílica coabitando. Emite linha rx pela faixa branda
+    # (pnos-ate10), MAS sem família sílica anexada → VÁLIDA. Prova que a anexação
+    # é dirigida por sílica, não por PNOS (a linha rx existe nos dois; a família
+    # anexada só onde há sílica).
+    resultado = _executar()
+    m = next((x for x in resultado.matrizes if x.ghe_id == "Est-08"), None)
+    assert m is not None, "GHE Est-08 não encontrado"
+    rx = [ln for ln in m.linhas if ln.exame == "rx_torax_oit"]
+    assert len(rx) >= 1, "Est-08: deveria ter >=1 linha rx_torax_oit (faixa PNOS branda)"
+    anexadas = {
+        p.regra_origem
+        for ln in rx
+        for p in ln.pendencias_anexadas
+        if p.bloqueante
+    }
+    assert anexadas == set(), (
+        f"Est-08: linha rx não deveria ter família sílica anexada, got {anexadas}"
+    )
+    bloqueantes_soltos = [p for p in m.pendencias if p.bloqueante]
+    assert bloqueantes_soltos == [], (
+        f"Est-08: não deveria ter bloqueante solto, got {bloqueantes_soltos}"
+    )
+    assert m.status == "VÁLIDA", f"Est-08: esperado VÁLIDA, got {m.status}"
 
 
 if __name__ == "__main__":
