@@ -297,4 +297,7 @@ def test_ghe_parcial_linhas_presentes_com_bloqueio() -> None:
     matriz = resultado.matrizes[0]
     assert len(matriz.linhas) == 5
     assert matriz.status == "PARCIAL"
-    assert any(p.bloqueante for p in matriz.pendencias)
+    # fatia 3: bloqueante do ruído anexado à linha audiometria, não solto na matriz
+    audiometria = next(ln for ln in matriz.linhas if ln.exame == "audiometria")
+    assert any(p.bloqueante for p in audiometria.pendencias_anexadas)
+    assert not any(p.bloqueante for p in matriz.pendencias)

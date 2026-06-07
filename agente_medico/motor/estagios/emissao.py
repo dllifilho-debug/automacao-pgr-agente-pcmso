@@ -44,6 +44,7 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
             quando_ausente = regra.get("quando_ausente")
             if quando_ausente is False:
                 continue
+            exames_alvo = tuple(str(item["exame"]) for item in regra["emite"])
             ctx.pendencias.append(
                 Pendencia(
                     tipo="predicado_ausente",
@@ -55,6 +56,7 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
                     bloqueante=True,
                     regra_origem=str(regra["id"]),
                     ghe_id=ctx.pgr_ghe.id,
+                    exames_alvo=exames_alvo,
                 )
             )
             continue

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from agente_medico.motor.estagios.anexacao import anexar_pendencias
 from agente_medico.motor.estagios.consolidacao import ConflitoProtocolo, stage_8_consolidacao
 from agente_medico.motor.estagios.emissao import stage_5_emissao
 from agente_medico.motor.estagios.gates import stage_1_gates
@@ -42,7 +43,6 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
         # D-ARQ-31 fatia 2: consolidação roda SEMPRE (inclusive sob pendência
         # bloqueante) para distinguir PARCIAL (linhas determináveis presentes)
         # de BLOQUEADA (nenhuma linha). status carimbado por intenção nos dois sítios.
-        tem_bloqueio = any(p.bloqueante for p in ctx.pendencias)
         try:
             linhas = stage_8_consolidacao(exames)
         except ConflitoProtocolo as e:
@@ -64,11 +64,19 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 status="BLOQUEADA",
             )
         else:
+            bloqueantes = [p for p in ctx.pendencias if p.bloqueante]
+            nao_bloqueantes = [p for p in ctx.pendencias if not p.bloqueante]
+            # D-ARQ-31 fatia 3: pendência bloqueante com âncora vai para a linha;
+            # sem match, volta ao nível da matriz. Status decidido PÓS-anexação.
+            linhas, bloqueantes_restantes = anexar_pendencias(linhas, bloqueantes)
+            tem_anexada = any(ln.pendencias_anexadas for ln in linhas)
+            tem_bloqueio = bool(bloqueantes_restantes) or tem_anexada
+            pendencias_matriz = nao_bloqueantes + bloqueantes_restantes
             if not tem_bloqueio:
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
                     linhas=linhas,
-                    pendencias=list(ctx.pendencias),
+                    pendencias=pendencias_matriz,
                     regime_aplicado=ctx.regime,
                     status="VÁLIDA",
                 )
@@ -76,7 +84,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
                     linhas=linhas,
-                    pendencias=list(ctx.pendencias),
+                    pendencias=pendencias_matriz,
                     regime_aplicado=ctx.regime,
                     status="PARCIAL",
                 )
@@ -84,13 +92,13 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
                     linhas=linhas,
-                    pendencias=list(ctx.pendencias),
+                    pendencias=pendencias_matriz,
                     regime_aplicado=ctx.regime,
                     status="BLOQUEADA",
                 )
         matrizes.append(matriz)
 
-    houve_bloqueio = any(any(p.bloqueante for p in m.pendencias) for m in matrizes)
+    houve_bloqueio = any(m.status in {"PARCIAL", "BLOQUEADA"} for m in matrizes)
     pendencias_globais = [p for p in pendencias_gate if not p.bloqueante]
     return Resultado(
         status="PRELIMINAR" if houve_bloqueio else "OK",
