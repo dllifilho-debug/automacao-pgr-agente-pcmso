@@ -653,6 +653,30 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 
 **Status: RESOLVIDA (003.A) — por fonte documental, virou D-ARQ-31.** A NR-07 (Portaria 567/2022) não tem âncora para all-or-nothing: a postura diante de dado insuficiente é sinalizar + reconciliar + registrar (7.5.1 PCMSO derivado dos riscos do PGR; 7.5.5 reavalia inconsistências com o PGR; 7.6.4 registra insuficiência), nunca suprimir exames determinados. Reforço `[VALIDADO]`: R-PGR-04/R-PGR-05 (solicitar dado, não rejeitar). Decisão: bloqueio é por-risco/por-linha; `MatrizGHE` ganha tri-estado VÁLIDA/PARCIAL/BLOQUEADA; pendência bloqueante incidente sobre linha emitida fica anexada à linha (mata o subdimensionamento silencioso do caso convergente — D-ARQ-22). Direção `[DERIVADO — NR-07 7.5.5/7.6.4]`; modelo tri-estado + anexação `[INTERPRETADO]`. Não é regra clínica (R-*) — é contrato de motor → **D-ARQ-31**. Implementação multi-fatia, sessões de Code futuras.
 
+### DT-FDS-01 — R-BIO-02 contradito pelo Anexo I vigente (eixo Quadro 1/Quadro 2, não "Anexo I/II")
+
+**Origem:** Sessão 003.F (07/06/2026), frente FDS (CONHECIMENTO), conferência do Anexo I da NR-07 vigente contra o texto oficial (gov.br/MTE), durante a derivação do esquema da ficha de agente químico.
+
+**Situação.** R-BIO-02 redige: "Anexo I (carcinógenos sem LT seguro) → biomonitoramento apenas no periódico; Anexo II (com LT) → adm + per + RT + MR + dem". Três problemas contra o texto literal vigente (Portaria 567/2022):
+
+1. **Rótulo desatualizado.** Na NR-07 vigente, "Anexo II" é *Controle médico da exposição a níveis de pressão sonora* (ruído), não "químico com LT". O eixo do biomonitoramento químico é **Quadro 1 vs Quadro 2, ambos dentro do Anexo I**. "Anexo I/II" é nomenclatura da NR-07 pré-567/2022.
+2. **Critério errado.** O que define o Quadro 1 não é "carcinógeno sem LT" — é ser *Indicador Biológico de Exposição Excessiva (IBE/EE)*: indicador sem caráter diagnóstico, que afere absorção e sinaliza exposição acima dos limites. O Quadro 2 é *Indicador Biológico de Exposição com Significado Clínico (IBE/SC)*: evidencia disfunção orgânica. Carcinógenos têm tratamento próprio no **Anexo V**, fora deste eixo.
+3. **Comportamento temporal sem âncora.** O texto fixa: Quadro 1 **não obrigatório** em adm/RT/MR/dem (7.5.15) → na prática só periódico; ambos a 6M ±45d (7.5.13). Quando alterado, o Quadro 2 dispara conduta (CAT/afastamento/Previdência, 7.5.19.5) e o Quadro 1 dispara reavaliação PGR↔PCMSO (7.5.19.4). A semântica "Anexo II → cinco momentos" do R-BIO-02 não tem âncora literal e precisa ser rederivada sobre o eixo correto.
+
+**Procedência do achado factual:** `[DERIVADO — NR-07 Anexo I (definições IBE/EE e IBE/SC) + itens 7.5.13/7.5.15/7.5.19.4/7.5.19.5, Portaria MTP 567/2022, texto oficial conferido no site do MTE]`. A leitura cobriu o corpo 7.x integral e o Quadro 1; **o Quadro 2 não foi lido por inteiro** (só fragmentos).
+
+**Por que não corrigir agora.** (a) Reabertura muda critério/escopo de saída → exige **nova ID + R-BIO-02 DEPRECATED** (versionamento de regra clínica), decisão do Diovanni. (b) A redação da sucessora exige o **Quadro 2 completo**, não lido nesta conferência. (c) É correção do lado-médico, independente da frente FDS (lado-engenheiro); acoplar viola "uma coisa por vez".
+
+**O que a reabertura exige (sessão CONHECIMENTO própria):**
+1. Ler o **Quadro 2 inteiro** no texto oficial.
+2. **Resolver a posição do benzeno (não cravada nesta sessão):** o benzeno tem indicadores listados no Anexo I (SPMA 45 µg/g creat; TTMA 750 µg/g creat), mas, sendo carcinógeno IARC 1, é preciso confirmar se está no Quadro 1, no Quadro 2, e/ou recebe tratamento no Anexo V — e como isso se concilia com R-PKG-BZ (hemograma + reticulócitos + t,t-mucônico). O hemograma do benzeno pode ter âncora diferente do Quadro 1 (rastreio hematológico).
+3. Mapear os demais agentes modelados (R-BIO-03 manganês; solventes) em Quadro 1 vs Quadro 2, conferindo se algum muda de comportamento temporal sob o eixo correto.
+4. Redigir a sucessora (nova ID) por eixo Quadro 1/Quadro 2, momentos derivados de 7.5.13/7.5.15; R-BIO-02 → DEPRECATED com link.
+
+**Status:** ABERTA. Não bloqueia a frente FDS. Não-conformidade de regra `[VALIDADO]` contra norma vigente — sinalizada, não silenciosa. R-BIO-02 segue vivo e marcado até a reabertura.
+
+**Apontamento-irmão (não confundir com esta DT):** R-CLI-02 e R-CLI-03 usam o mesmo vocabulário "Anexo I / Anexo II" e podem sofrer do mesmo rótulo pré-567/2022 — mas governam **clínico semestral**, não biomonitoramento, e são regra distinta. Verificar na mesma sessão de reabertura, como item separado.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -692,3 +716,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v14 | 03/06/2026 | Sessão 002.X (CONHECIMENTO): DT-002N-01 RESOLVIDA (PNOS Quadro 2: 4 faixas + LEO ACGIH 3 mg/m³ resp; faixa 10–100% = evento único + critério clínico, não 60M); R-RX-01-pnos DEPRECATED → família R-RX-01-pnos-* (ID clínico R-RX-01 inalterado); asbesto LEO 2,0 f/cm³ (f/cm³, fixo, NR-15 Anexo 12); DT-002X-01 (LEO carvão), DT-002X-02 (pós-ocupacional asbesto 30a), DT-002X-03 (NOTA 1) adicionadas. Nada implementado — especificação para sessão de código. |
 | v15 | 04/06/2026 | Sessão 002.Y (IMPLEMENTAÇÃO): família R-RX-01-pnos-* materializada em código (predicados de faixa + ramo PNOS no resolver + 4 regras INTERPRETADO + R-RX-01-pnos DEPRECATED); D-ARQ-29 (injeção fração RESPIRAVEL); DT-002Y-01 (lembrete 10–100% não materializado, depende de D-ARQ-28) e DT-002Y-02 (validação Viverde real adiada p/ integração) adicionadas. Suíte 315→327. PR #49, commit 9bb243e. |
 | v16 | 05/06/2026 | Sessão 003.A (CONHECIMENTO→ARQUITETURA): DT-002Z-01 catalogada na seção 11 e RESOLVIDA — orquestrador all-or-nothing por GHE resolvido por fonte documental (NR-07 7.5.5/7.6.4), virou D-ARQ-31 (bloqueio por-risco/por-linha, MatrizGHE tri-estado, pendência anexada à linha). Sem reclassificação nem regra clínica nova. |
+| v17 | 07/06/2026 | Sessão 003.F (CONHECIMENTO): frente FDS aberta. DT-FDS-01 adicionada — R-BIO-02 [VALIDADO] contradito pelo Anexo I vigente (eixo Quadro 1/IBE-EE vs Quadro 2/IBE-SC, não "Anexo I/II"; conferido no texto oficial MTE, 567/2022). Reabertura adiada para sessão própria (exige Quadro 2 inteiro). R-CLI-02/03 sob suspeita do mesmo rótulo. Nenhuma regra alterada nesta sessão. |
