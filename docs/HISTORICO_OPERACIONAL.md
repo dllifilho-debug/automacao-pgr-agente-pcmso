@@ -1712,3 +1712,25 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Pendências abertas.** DT-FDS-01 (R-BIO-02 contradito — reabertura em sessão própria). Estudo da frente FDS não escrito (a conferência mudou sua fundação — escrever sobre [DERIVADO], não [INCERTO]). Inalteradas: dedup convergente Stage 8, DH-003A-01 (header PROTOCOLO; agora há 2ª "## 11" + revisar), DT-002Y-01, DT-002X-01, asbesto-LEO, R-RX-02/DT-D3-02, DT-002V-01.
 
 **Próxima sessão.** Frente FDS (CONHECIMENTO→ARQUITETURA): ESCREVER O ESTUDO DA FRENTE FDS sobre a fundação verificada. Quatro eixos: (1) lado-engenheiro camada vs. motor irmão; (2) contrato da mesa com as colunas conferidas; (3) cutoff 5% e carcinógeno-independe (procedência); (4) sinergia/alvo-órgão (escopo declarado). NÃO reabrir R-BIO-02 aqui (sessão própria, exige Quadro 2). Ler docs vivos inteiros antes.
+
+## Sessão 003.G — 08/06/2026 — CONHECIMENTO→ARQUITETURA (estudo da frente FDS: motor irmão + contrato da mesa)
+
+**Foco.** Escrever o estudo da frente FDS sobre a fundação verificada na 003.F (Anexo I / 567/2022). Quatro eixos. Sem código.
+
+**Achado de abertura — "347 verde" não estava medido.** A 003.F propagou 347 completa / 198 isolado como herdado, marcado "não rodada". Rodado no container: motor isolado 198/198 VERDE; suíte completa 1 falha (`tests/test_regressao_pcmso.py::TestCabecalho::test_cabecalho_preenchido_docx`) por artefato de ambiente (`python-docx` ausente → fallback CSV), não regressão — nada em f25cd48..ded00d9 toca geração de docx. Nota processual, não DT: reconfirmar na máquina do Diovanni; parar de carregar contagem sem medir.
+
+**Eixo 1 — motor irmão (três passadas).** Lado-engenheiro = MOTOR IRMÃO, estreitado por refinamento adversarial. 1ª recomendação ("classifica risco") derrubada na 3ª passada: arrisca duplicar regra médica. Versão final: resolução determinística de COMPOSIÇÃO QUÍMICA (fichas→ProdutoQuimico), conduta toda no lado-médico. Topologia: extração LLM (descoberta CAS) → motor irmão (det.) → tipos.PGR (mesa entre ofícios) → motor médico. Refina D-ARQ-25 (fronteira = ofícios, não LLM/det.). Vira D-ARQ-33.
+
+**Eixo 2 — contrato da mesa.** Ficha de agente químico = extensão de agentes.yaml (D-ARQ-12), ZERO ID de regra novo. Colunas: cas validado (check-digit), tipo_ibe {EE,SC}, ibmp, momento_coleta, flags de perigo, orgao_alvo. Check-digit CAS como gate de admissão — verificado que pega os fantasmas 022-00-9/014-00-0 da 003.F. Fronteira fina: ficha carrega tipo_ibe (dado, esta frente); regra que o consome é R-BIO-02-sucessora (DT-FDS-01, sessão própria). Periodicidade NÃO entra (R-BIO-01 já universal; ±45d é agendador). Rejeitado como coluna: NA-NR9 (é predicado, 7.5.12 b).
+
+**Eixo 3 — cutoff 5% (caminho C).** Limiar 5% = dado (constante de protocolo, [VALIDADO] conduta Carolini, sem âncora NR); materialidade = predicado tri-estado derivado, não atributo armazenado. Dois consumidores (médico R-FDS-03; engenheiro pós-D-ARQ-33). (C) é carrega-tudo-e-marca, NUNCA filtro de entrada (supressão = D-ARQ-22/D-ARQ-31). Faixa cruzando cutoff → Ausente/pendência. Generalizado: bypasses do cutoff são LISTA (carcinógeno + sensibilizante + frase-H), não binário — furo achado via caso-saúde (glutaraldeído/isocianato <5% sumiria). R-FDS-03/04 mesma ID, só nota de procedência.
+
+**Eixo 4 — sinergia/órgão-alvo.** Fora de escopo de regra (Anexo I opera por agente isolado), declarado não omisso. orgao_alvo = dado de apoio à decisão, nunca disparador.
+
+**Conferência normativa (web, fonte secundária — marcada).** Glossário momento_coleta: códigos FJ/FS/AJ/FJFS confirmados EM USO agente-a-agente (mercúrio metálico=AJ), significado literal NÃO cravado de secundária [INCERTO — PDF oficial]. Reforço do eixo IBE/EE vs IBE/SC confirmado. TDI/isocianato com IBE/EE no Quadro 1 visto só em secundária [INCERTO].
+
+**Verificação.** Sem código. Suíte: motor isolado 198/198; completa 339 verde + 1 falha-de-ambiente (não regressão). DT-FDS-01 NÃO reaberta (trilho respeitado). Arco D-ARQ-31 intocado.
+
+**Pendências abertas.** D-ARQ-33 carrega: gap de tipo Componente.concentracao a conferir no git (implementação); glossário momento_coleta [INCERTO — PDF oficial]; TDI no Quadro 1 [INCERTO]; validação caso-químico (D-ARQ-06). DT-FDS-01 (R-BIO-02, sessão própria). Inalteradas: dedup convergente Stage 8, DH-003A-01 (2ª "## 11"), DT-002Y-01, DT-002X-01, asbesto-LEO, R-RX-02/DT-D3-02, DT-002V-01.
+
+**Próxima sessão.** Decisão do Diovanni na abertura. Candidatos: (a) reabertura R-BIO-02 (DT-FDS-01) — exige Quadro 2 inteiro lido no PDF oficial, lado-médico; (b) protocolo-engenheiro pós-D-ARQ-33 (formalizar materialidade do lado-engenheiro, bypasses do cutoff); (c) implementação D-ARQ-33 fatia 1 (extensão de tipos + agentes.yaml). Ler docs vivos inteiros antes.

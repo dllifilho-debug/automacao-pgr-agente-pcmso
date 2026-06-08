@@ -807,6 +807,64 @@ Regressão Viverde tri-estado (a entrega que fecha o arco; o auditor é a rede e
 
 `[META — decisão de processo. Não toca motor nem protocolo clínico.]`
 
+---
+
+## D-ARQ-33 — Lado-engenheiro é motor irmão de resolução de composição química; conduta permanece no lado-médico
+
+**Status:** DECISÃO DE ARQUITETURA (CONHECIMENTO→ARQUITETURA). Implementação multi-fatia futura. Autorização para virar D-ARQ é do Diovanni.
+
+**Contexto.** O reenquadramento da 003.F estabeleceu o par ENGENHEIRO/HIGIENISTA → MÉDICO: o engenheiro produz a base do PGR (inventário de risco por GHE, a partir da FDS), o médico produz a base do PCMSO. `tipos.PGR` (D-ARQ-25) é a mesa entre os dois. Hoje o lado-engenheiro só existe no legado Streamlit (`modulo_engenharia.py`), acoplando extração + decisão + UI (viola D-ARQ-09). A frente FDS construiu o estudo (003.G) sobre a fundação normativa verificada na 003.F. A pergunta de arquitetura: o lado-engenheiro é camada de extração (sub-componente do D-ARQ-25) ou motor irmão (segundo componente determinístico)?
+
+**Decisão.** Motor irmão — mas **estreitado a resolução de composição química**, não a um segundo motor de inventário completo. A decisão tem cinco partes:
+
+1. **Topologia.** A fronteira `tipos.PGR` separa dois OFÍCIOS (engenheiro/médico), não LLM/determinístico. A fronteira LLM↔determinístico existe *dentro* de cada lado:
+
+```
+   FDS → [extração LLM: resolvedor CAS→ficha + descoberta + revisão humana]   (D-ARQ-25, D-ARQ-14)
+       → fichas resolvidas
+       → [MOTOR IRMÃO: resolução de composição química, determinístico]        (D-ARQ-09)
+       → tipos.PGR (A MESA)                                                     (D-ARQ-25)
+       → [MOTOR MÉDICO: PGR → matriz]                                           (existente)
+       → Resultado (PCMSO)
+```
+
+   Refina D-ARQ-25: a extração vira sub-camada do lado-engenheiro; o motor irmão fica entre ela e `tipos.PGR`. A descoberta CAS via LLM permanece a montante do motor irmão (preserva D-ARQ-09 nos dois lados).
+
+2. **Escopo estreito.** O motor irmão vai de *fichas resolvidas → composição química estruturada em `ProdutoQuimico`*. NÃO reconstrói o esqueleto do PGR (GHEs/cargos/riscos físicos vêm do PGR do engenheiro); enriquece os `ProdutoQuimico` específicos cujos campos já existem no tipo (`GHEPGR.produtos_quimicos`, `ProdutoQuimico.fds`, `Componente.cas` — D-ARQ-25 Parte C). O lado-engenheiro **não decide conduta**: exame, periodicidade e momentos são todos do lado-médico (R-FDS-*, R-BIO-*, R-PKG-*). Duplicar regra médica no lado-engenheiro é o erro que esta cláusula proíbe.
+
+3. **Gate de admissão + pendência tipada.** O que torna isto motor (e não extração) é a topologia pendência-vs-chute (D-ARQ-08/09/13):
+   - CAS que falha o dígito verificador → `Pendencia`, nunca inventa agente. `[DERIVADO — algoritmo check-digit do CAS Registry]`. (Verificado: os fantasmas `022-00-9`/`014-00-0` da 003.F falham o dígito.)
+   - "Hidrocarbonetos aromáticos" sem CAS resolvível (R-FDS-04) → `Pendencia`.
+   - Concentração em faixa que cruza um limiar de materialidade → `Ausente`/`Pendencia` bloqueante (D-ARQ-13), não chute para um dos lados.
+
+4. **Saída é candidata, não classificação final autônoma.** Por NR-9 e responsabilidade técnica (ART), a composição classificada pelo motor irmão é candidata; a admissão final é ato do responsável técnico que assina o PGR — ancora no gate existente R-PGR-01, **não** numa camada de "revisão de saída" nova. `[DERIVADO — R-PGR-01 (assinatura por engenheiro de segurança); NR-9 (classificação de risco é ato técnico do empregador)]`. Espelha, sem replicar, o modelo de revisão de saída do lado-médico (D-ARQ-22).
+
+5. **Materialidade é predicado, não atributo armazenado (resolução do cutoff — caminho C).** O limiar `5%` (R-FDS-03) é **constante de protocolo**, `[VALIDADO — conduta Carolini, GHS/ABNT 14725]`, sem âncora NR. A materialidade de um componente é **predicado derivado** computado em cada lado sobre `concentração ∨ (qualquer bypass do cutoff)` — nunca um bool gravado na ficha. Os bypasses do cutoff são uma **lista** de dados, não um único critério:
+   - carcinógeno IARC — `[VALIDADO — R-FDS-03/04]`; a cláusula "independe de concentração / >0%" é `[INTERPRETADO — boa prática INCA/Anexo V]`, não literal na norma;
+   - sensibilizante respiratório/dérmico — `[INTERPRETADO — generalização]` (ex.: isocianatos, glutaraldeído, relevantes <5%);
+   - demais perigos da frase-H que a conduta justificar — append-only.
+   `agentes.yaml` ganha as flags de perigo correspondentes (D-ARQ-12). A mesa transporta `concentração` + flags; a materialidade é derivada onde consumida. **(C) é carrega-tudo-e-marca, nunca filtro de entrada:** descartar <5% não-bypass na admissão suprimiria componentes que o lado-médico filtraria por outra regra (ototóxico, órgão-alvo) — subdimensionamento silencioso (D-ARQ-22) e a mesma supressão que D-ARQ-31 matou intra-GHE. A partição limiar=dado / materialidade=predicado tri-estado / dois consumidores é `[INTERPRETADO]`, por analogia a 7.5.12 b e ao padrão NA-NR9 do contrato da mesa.
+
+**Consequência.**
+- Não infla escopo: encaixa em tipos que já existem, reusa a infra de `Pendencia` (D-ARQ-08/14) e regras-como-dado (D-ARQ-07). "Motor irmão" = segundo consumidor determinístico da mesma infra, não código duplicado.
+- O contrato da mesa (ficha de agente químico) é extensão de `agentes.yaml`, não ID de regra novo: `cas` validado, `tipo_ibe ∈ {EE,SC}`, `ibmp`/valor-ref, `momento_coleta`, flags de perigo, `orgao_alvo`. Procedências: `tipo_ibe`/`ibmp`/`momento_coleta` `[DERIVADO — NR-07 Anexo I, 567/2022]`; o vocabulário dos códigos de `momento_coleta` (FJ/FS/AJ…) `[INCERTO — glossário literal a confirmar no PDF oficial MTE]`.
+- A regra que consome `tipo_ibe` para fixar momentos do biomonitoramento é a sucessora de R-BIO-02 (DT-FDS-01, ABERTA, sessão própria, exige Quadro 2 inteiro, lado-médico). A ficha carrega o dado; a regra que o lê é fora desta frente. O dado precede a regra.
+- Periodicidade NÃO entra na ficha: "biomonitoramento = 6M" é R-BIO-01 (universal); a janela ±45d (7.5.13) é tolerância de agendamento (D-ARQ-11). Ambas fora da ficha e do motor.
+- Sinergia entre agentes está fora de escopo de regra (o Anexo I opera por agente isolado) — declarado, não omisso; `orgao_alvo` é dado de apoio à decisão (visão por sistema na revisão de saída), nunca disparador de exame/periodicidade.
+- Gap de tipo a verificar na implementação (gate de estado real, não afirmado aqui): a materialidade-predicado exige `Componente.concentracao`; D-ARQ-25 Parte C lista `Componente.cas`, não a concentração — candidato a extensão futura na categoria de `pct_quartzo`/`fracao`. Conferir no git antes de qualquer prompt cirúrgico.
+
+**Pré-condição de validação (D-ARQ-06).** Antes de selar, rodar a decisão contra um caso não-construção. Já exercitado parcialmente em 003.G: caso-saúde (óxido de etileno = carcinógeno IARC 1 → coberto pelo bypass-carcinógeno; glutaraldeído/isocianato sensibilizante <5% → **revelou** que materialidade não é binária `concentração|carcinógeno`, forçando a lista de bypasses da cláusula 5). O passo é necessário, não cerimônia: foi ele que achou o furo. Caso-químico (matéria-prima) a confirmar na sessão de implementação. `[INCERTO — confirmar no PDF oficial MTE se TDI/isocianatos têm IBE/EE próprio no Quadro 1; exemplo visto só em fonte secundária]`.
+
+**Fronteira com decisões existentes (não confundir):**
+- **D-ARQ-25** — não revoga. Refina: a fronteira `tipos.PGR` é entre ofícios; a extração LLM vira sub-camada do lado-engenheiro, a montante do motor irmão.
+- **D-ARQ-09** — preservada nos dois lados: toda LLM (descoberta CAS, extração) fica a montante; o motor irmão é função pura.
+- **D-ARQ-08/13/14** — reusados: ambiguidade de composição → `Pendencia` tipada/bloqueante, nunca chute.
+- **D-ARQ-22** — a cláusula 4 (candidato + admissão R-PGR-01) é o espelho-engenheiro do modelo de revisão de saída; não replica o aparato, ancora no gate existente.
+- **D-ARQ-31** — a cláusula 5 (não-filtro-de-entrada) é o mesmo princípio anti-supressão, aplicado à admissão de componente em vez do bloqueio intra-GHE.
+- **R-FDS-03/04, R-BIO-01/02/03, R-PKG-BZ/SOLD** — IDs intactas, semântica intacta. Esta decisão não cria nem altera regra clínica; cria contrato de dado e motor.
+
+**Base.** Sessão 003.G (08/06/2026), estudo da frente FDS. Fundação: conferência do Anexo I (Portaria MTP 567/2022) contra texto oficial MTE (003.F). Reforço: NR-9 (classificação de risco é ato do empregador), NR-07 7.5.5. Caso-âncora de método: FDS de pintura da 003.F (65 agentes; auto-descoberta poderosa-e-perigosa). Decisão de arquitetura — sem código. Resolve a tensão "camada vs. motor irmão" do estudo FDS.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -845,3 +903,4 @@ Regressão Viverde tri-estado (a entrega que fecha o arco; o auditor é a rede e
 | v32 | 06/06/2026 | Sessão 003.C (IMPLEMENTAÇÃO): nota de implementação sob D-ARQ-31 — fatia 2 colapsa o ramo bloqueante (consolidação roda sempre), restam dois sítios de construção; `Resultado.status` intocado (D-ARQ-15 íntegro); cláusula 3 (anexação à linha) fica para fatia 3. Suíte 330→333, commit 76d5de1, PR #56. |
 | v33 | 07/06/2026 | Sessão 003.D (IMPLEMENTAÇÃO): nota de implementação fatia 3 sob D-ARQ-31 — anexação pendência-à-linha por slug (`Pendencia.exames_alvo` + `ExameEmitido.pendencias_anexadas` + `estagios/anexacao.py`); status recomputado pós-anexação; `houve_bloqueio` deriva de `m.status`. Correção factual do exemplo canônico (Acab-05 piso 60M, não admissional). Universalidade comprovada via Adm-03 (ruído→audiometria). Dedup convergente Stage 8 fora de escopo (item próprio). Suíte 333→339, commit f25cd48, PR #58. |
 | v34 | 07/06/2026 | Sessão 003.E (IMPLEMENTAÇÃO): nota de implementação fatia 4 sob D-ARQ-31 — arco fechado; auditor `auditar_invariante_piso_teto` na camada de teste (não motor/, invariante garantida por construção); retorno estruturado `ViolacaoPisoSemTeto`; teste sintético fabrica violação que o pipeline nunca produz. Regressão Viverde tri-estado: 4 PARCIAL (Acab-05/06/08, Est-07 sílica anexada) + Est-08 VÁLIDA (PNOS sem sílica). Correção factual: família R-RX-01-pnos-* governada por PNOS, não sílica. Suíte 339→347, isolado 190→198, commit 6f80f46, merge fa11ba3, PR #60. |
+| v35 | 08/06/2026 | Sessão 003.G (CONHECIMENTO→ARQUITETURA): D-ARQ-33 adicionada — lado-engenheiro = motor irmão de resolução de composição química (estreitado por 3 passadas adversariais); conduta permanece no lado-médico; refina D-ARQ-25 (fronteira tipos.PGR = ofícios); cutoff 5% = limiar-dado + materialidade-predicado com lista de bypasses (caminho C). Sem código. |
