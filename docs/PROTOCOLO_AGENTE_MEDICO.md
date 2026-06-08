@@ -158,6 +158,9 @@ FDS com termo genérico (ex: "hidrocarbonetos aromáticos") sem especificar o co
 
 **Caso âncora — benzeno:** se o CAS revelar presença de benzeno, **independente da concentração**, aplicar protocolo benzeno (ver R-PKG-BZ).
 
+#### Nota de procedência — cutoff de 5% e carcinógeno-independe (003.G) `[INTERPRETADO]`
+O limiar **5%** de R-FDS-03 é conduta da Dra. Carolini alinhada a GHS/ABNT 14725, **sem âncora em NR** — mantém-se `[VALIDADO]` como conduta, **não** `[DERIVADO]`. A cláusula "carcinógeno independe de concentração" (R-FDS-03 IARC; R-FDS-04 benzeno via CAS) é boa prática INCA/Anexo V, `[INTERPRETADO]` — não é ">0%" escrito na norma. Por D-ARQ-33 (caminho C), o 5% é **limiar-dado** (constante de protocolo) e a materialidade é **predicado tri-estado derivado** consumido por cada lado da mesa (médico via R-FDS-03; engenheiro via protocolo-engenheiro futuro); os bypasses do cutoff são uma **lista** (carcinógeno IARC, sensibilizante, demais perigos da frase-H), não um critério binário. IDs R-FDS-03/04 inalteradas, semântica intacta — esta nota é só procedência.
+
 ### R-FDS-05 — Eletrodo de solda `[VALIDADO]`
 O metal de adição do eletrodo só é identificável pela FDS específica do eletrodo. **Solicitar à empresa.** Praticamente todos os eletrodos contêm manganês → presumir Mn na ausência de informação contrária.
 
@@ -717,3 +720,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v15 | 04/06/2026 | Sessão 002.Y (IMPLEMENTAÇÃO): família R-RX-01-pnos-* materializada em código (predicados de faixa + ramo PNOS no resolver + 4 regras INTERPRETADO + R-RX-01-pnos DEPRECATED); D-ARQ-29 (injeção fração RESPIRAVEL); DT-002Y-01 (lembrete 10–100% não materializado, depende de D-ARQ-28) e DT-002Y-02 (validação Viverde real adiada p/ integração) adicionadas. Suíte 315→327. PR #49, commit 9bb243e. |
 | v16 | 05/06/2026 | Sessão 003.A (CONHECIMENTO→ARQUITETURA): DT-002Z-01 catalogada na seção 11 e RESOLVIDA — orquestrador all-or-nothing por GHE resolvido por fonte documental (NR-07 7.5.5/7.6.4), virou D-ARQ-31 (bloqueio por-risco/por-linha, MatrizGHE tri-estado, pendência anexada à linha). Sem reclassificação nem regra clínica nova. |
 | v17 | 07/06/2026 | Sessão 003.F (CONHECIMENTO): frente FDS aberta. DT-FDS-01 adicionada — R-BIO-02 [VALIDADO] contradito pelo Anexo I vigente (eixo Quadro 1/IBE-EE vs Quadro 2/IBE-SC, não "Anexo I/II"; conferido no texto oficial MTE, 567/2022). Reabertura adiada para sessão própria (exige Quadro 2 inteiro). R-CLI-02/03 sob suspeita do mesmo rótulo. Nenhuma regra alterada nesta sessão. |
+| v18 | 08/06/2026 | Sessão 003.G: nota de procedência em R-FDS-03/04 (cutoff 5% = [VALIDADO] conduta Carolini sem âncora NR; carcinógeno-independe = [INTERPRETADO] INCA/Anexo V; ligação com D-ARQ-33 caminho C). Mesma ID, semântica intacta. Nenhuma regra criada/alterada. |
