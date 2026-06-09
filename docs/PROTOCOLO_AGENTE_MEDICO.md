@@ -682,6 +682,20 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 
 ---
 
+### DT-FDS-02 — Unidade do cutoff de 5% de materialidade `[INCERTO — confirmar % m/m em ABNT NBR 14725 / conduta Carolini no PDF oficial]`
+
+**Origem:** Sessão 003.H (09/06/2026), formalização de D-ARQ-34 (materialidade do lado-engenheiro), 2ª passada adversarial.
+
+**Situação.** O cutoff de 5% (R-FDS-03) e a concentração extraída da FDS precisam estar na mesma unidade (% m/m vs % v/v), senão o predicado de straddle (`min ≤ 5 < max`, D-ARQ-34 Parte 2) compara grandezas diferentes e a borda 5,0 (material vs. não-material) decide sobre bases incompatíveis. ABNT NBR 14725 tipicamente usa % m/m na seção 3 da FDS, mas o texto não foi conferido nesta sessão. Não bloqueia a forma faixa (a faixa carrega o número; unidade é metadado da ficha).
+
+**Pergunta de método:** o cutoff de 5% de R-FDS-03 é % m/m? A FDS reporta composição em que base, e há caso de divergência (v/v) que exija normalização antes do predicado? Buscar a base, não o caso.
+
+**Impacto até resolver:** a borda 5,0→não-material de D-ARQ-34 Parte 2 fica `[INTERPRETADO]`, não `[VALIDADO]`. Candidato: campo `unidade` na faixa de concentração, ou presumir % m/m com a presunção marcada. Decidir na sessão de implementação de D-ARQ-34 ou em sessão própria.
+
+**Status:** ABERTA. Não bloqueia. Lado-engenheiro, independente de DT-FDS-01 (lado-médico).
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -721,3 +735,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v16 | 05/06/2026 | Sessão 003.A (CONHECIMENTO→ARQUITETURA): DT-002Z-01 catalogada na seção 11 e RESOLVIDA — orquestrador all-or-nothing por GHE resolvido por fonte documental (NR-07 7.5.5/7.6.4), virou D-ARQ-31 (bloqueio por-risco/por-linha, MatrizGHE tri-estado, pendência anexada à linha). Sem reclassificação nem regra clínica nova. |
 | v17 | 07/06/2026 | Sessão 003.F (CONHECIMENTO): frente FDS aberta. DT-FDS-01 adicionada — R-BIO-02 [VALIDADO] contradito pelo Anexo I vigente (eixo Quadro 1/IBE-EE vs Quadro 2/IBE-SC, não "Anexo I/II"; conferido no texto oficial MTE, 567/2022). Reabertura adiada para sessão própria (exige Quadro 2 inteiro). R-CLI-02/03 sob suspeita do mesmo rótulo. Nenhuma regra alterada nesta sessão. |
 | v18 | 08/06/2026 | Sessão 003.G: nota de procedência em R-FDS-03/04 (cutoff 5% = [VALIDADO] conduta Carolini sem âncora NR; carcinógeno-independe = [INTERPRETADO] INCA/Anexo V; ligação com D-ARQ-33 caminho C). Mesma ID, semântica intacta. Nenhuma regra criada/alterada. |
+| v19 | 09/06/2026 | Sessão 003.H (ARQUITETURA): DT-FDS-02 adicionada — unidade do cutoff de 5% (% m/m a confirmar em ABNT NBR 14725); borda 5,0 de D-ARQ-34 fica [INTERPRETADO] até confirmar. Lado-engenheiro, independente de DT-FDS-01. Nenhuma regra criada/alterada. |
