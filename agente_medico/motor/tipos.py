@@ -27,10 +27,25 @@ class RiscoPGR:
 
 
 @dataclass(frozen=True)
+class FaixaConcentracao:
+    # D-ARQ-34 Parte 1: composição da FDS é faixa, não escalar (ABNT NBR 14725 seção 3).
+    # Sentinelas de leitura: minimo None -> piso 0; maximo None -> teto +inf.
+    # Validação min<=max NÃO mora aqui (erro de integridade -> Stage 3 / D-ARQ-17).
+    minimo: Optional[float]
+    maximo: Optional[float]
+
+    def piso_efetivo(self) -> float:
+        return self.minimo if self.minimo is not None else 0.0
+
+    def teto_efetivo(self) -> float:
+        return self.maximo if self.maximo is not None else float("inf")
+
+
+@dataclass(frozen=True)
 class Componente:
     cas: str
     nome: str
-    concentracao: Optional[float]
+    concentracao: Optional[FaixaConcentracao] = None
 
 
 @dataclass(frozen=True)
