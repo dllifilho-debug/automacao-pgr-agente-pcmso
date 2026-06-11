@@ -46,6 +46,13 @@ class Componente:
     cas: str
     nome: str
     concentracao: Optional[FaixaConcentracao] = None
+    # D-ARQ-34 Parte 2/3: agente=None -> CAS válido mas slug não resolvido no vocabulário
+    # (D-ARQ-14) -> ramo 0 do predicado de materialidade -> AUSENTE. Preenchido pela ficha
+    # normalizada (D-ARQ-25 Parte B, extração futura). Flags de perigo (bypasses do cutoff
+    # de 5%, R-FDS-03): default False, populadas pela ficha — NÃO desta fatia.
+    agente: Optional[str] = None
+    is_carcinogeno_iarc: bool = False
+    is_sensibilizante: bool = False
 
 
 @dataclass(frozen=True)
