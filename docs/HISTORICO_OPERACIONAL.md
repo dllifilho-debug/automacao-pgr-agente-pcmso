@@ -1798,3 +1798,33 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Pendências abertas.** Fatia 3 de D-ARQ-34 (candidata da 003.K) carrega: hidratação das flags do `Componente` a partir da ficha normalizada + plug do predicado em R-FDS-03 + integração com o motor irmão. PRÉ-REQUISITO herdado e ainda inexistente: a camada de extração/normalização (D-ARQ-25 Parte B, resolve CAS→slug→flags) só existe no legado — a fatia 3 não abre sem decidir essa fronteira. `is_sensibilizante` população = tarefa de dado com fonte. DT-FDS-02 (unidade do cutoff) aberta, não bloqueia. Inalteradas: dedup convergente Stage 8, DT-002V-01 (gêmea, não fechada por D-ARQ-34), DH-003A-01 (2ª "## 11"), DT-002Y-01, DT-002X-01, asbesto-LEO, R-RX-02/DT-D3-02, glossário momento_coleta [INCERTO], TDI Quadro 1 [INCERTO], DT-FDS-01 (reabertura R-BIO-02, lado-médico, Quadro 2 inteiro).
 
 **Próxima sessão.** Decisão do Diovanni na abertura. Candidato natural: D-ARQ-34 fatia 3 (hidratação de flags + plug em R-FDS-03) — mas herda a fronteira de extração (D-ARQ-25) não decidida; abrir como ARQUITETURA. Alternativa: (a) reabertura R-BIO-02 (DT-FDS-01) — CONHECIMENTO, lado-médico, Quadro 2 inteiro no PDF MTE. Ler docs vivos inteiros antes; checkout main && pull antes de criar branch.
+
+## Sessão 003.K — 12/06/2026 — ARQUITETURA (diagnóstico de travessia ponta-a-ponta)
+
+**Foco.** ARQUITETURA-diagnóstico (não fatia, não META): medir, com gate de estado real, o que impede um PGR de atravessar do documento à matriz. Mudança de lente herdada da 003.J — o motor amadureceu, frentes acumularam órfãs/desacopladas, a travessia "documento real → matriz" nunca foi atravessada. Diagnóstico antes de escolher a frente da 003.L.
+
+**Método.** Fases read-only dirigidas (sem despejo de bloco — PSReadLine), cada uma calibrando a seguinte. Três passadas adversariais sobre o próprio instrumento: (1) o grep de construtor `-SimpleMatch 'GHEPGR('` era frágil e confirmaria a hipótese por falha silenciosa — descartado; (2) o denominador "46% formato legado" misturava inputs e gabaritos — recomputado por papel; (3) a triagem nativo-vs-escaneado por byte cru é cega a stream FlateDecode — descartada como inconclusiva.
+
+**Medições (estado real).**
+- **Travessia fixture→motor→matriz NÃO é gargalo.** Consumada e congelada desde 003.E (`test_integracao_viverde.py`, 32 GHEs, regressão tri-estado). O gargalo é inteiramente a montante de `tipos.PGR`.
+- **Camada de extração (D-ARQ-25) não existe em código vivo.** Extratores legados congelados em 17/05/2026 (data zero): `parser_pgr.py` (regex, viola D-ARQ-09, não-portado), Gemini (sem quantificação/slug). Nenhum estado novo.
+- **Fixture sem lado-químico.** `pgr_viverde.py` (27/05): `produtos_quimicos=()` nos 32 GHEs; zero `ProdutoQuimico`/`FDS`/`Componente`. Usa helpers (`_quimico_mgm3`/`_ruido`) encapsulando `fracao`/`pct_quartzo`.
+- **PGR Viverde V02 não carrega composição química** (medido no texto do .docx-fonte): `composi`=0, `solvente`=0, `produto químico`=0, `n. CAS`=0; `FISPQ`=1 (conceito, não dado); `sílica`=4/`tinta`=22 (agentes físico-químicos, não FDS). Logo a fixture `produtos_quimicos=()` é FIEL à fonte, não buraco de fixture — é o cenário R-PGR-04 (composição ausente → exigir FDS).
+
+**Achado central.** A maquinaria de materialidade D-ARQ-33/34 (`FaixaConcentracao`, predicado tri-estado, flags — construída em 003.G→003.J) NÃO tem caso-âncora vivo no Viverde, porque o PGR-fonte não tem composição. Não há de onde popular o lado-químico da fixture a partir do Viverde. Fato não medido por nenhuma sessão anterior.
+
+**Três buracos da travessia (ordem de distância da fixture).**
+- Buraco 0 — fixture sem lado-químico: NÃO é gap de fixture (reflete fielmente PGR-sem-FDS). Caso-âncora de materialidade exige fonte externa.
+- Buraco 1 — extração-forma (.docx → tipos.PGR): caso fácil, piso de esforço; extratores legados reprovados por contrato (D-ARQ-25).
+- Buraco 2 — extração-real (formato adverso): NÃO-MENSURÁVEL nesta pasta. `matrizes_originais/` é material de validação histórica (4 pares D-ARQ-18), não amostra de produção — 1 único PDF de input, resto outputs Word. A pergunta nativo-vs-escaneado (texto+LLM vs. multimodal) não tem dado aqui; exige PGRs de produção, deliberadamente diferidos.
+
+**Achados laterais (mapa, não investigados).**
+- Árvore fantasma `refatoracao/` — cópias DIVERGENTES de `modulo_engenharia.py` (29.391 vs 28.971 B) e `ia_client.py` (6.058 vs 2.362 B), não documentada em doc vivo. Aposentar formalmente ou ignorar por declaração antes de qualquer frente de extração.
+- Recalibração: universo `matrizes_originais/` = 50 arquivos (36 untracked + 14 tracked), não 36. .doc=19, .docx=13, .pdf=13, .rtf=4, .xlsx=1. Dois projetos "Viverde" distintos (PGR Viverde V02 ≠ CMO Residencial Viverde Areião) — parear PGR↔gabarito com cuidado.
+- Anomalias não-confirmadas: "14 tracked" é inferência frágil do porcelain; "arquivo duplicado mesmo nome" é impossível em NTFS plano. Verificar se relevante.
+
+**Recomendação de frente para a 003.L.** Caçar o caso-âncora de materialidade nos outros 3 pares D-ARQ-18 (CMO, Vistamerica, GPL-R78/Naturia): algum traz FDS/composição? Se sim, primeiro caso-âncora vivo de D-ARQ-33/34 — a 003.L conecta a materialidade a dado real (não sintético) pela primeira vez. Se negativo, é informação que decide (materialidade fica bloqueada até coleta externa de FDS — saber, não supor). Barato: técnica do bloco B replicada sobre 3 arquivos. Abre como ARQUITETURA/diagnóstico com gate de estado real próprio. ALTERNATIVA LEGÍTIMA: validar travessia Viverde (PGR-sem-FDS → matriz PARCIAL + R-PGR-04) — mas já coberta por Stage 3/003.E, e deixa a materialidade órfã mais uma sessão (aprofunda a linearidade que a mudança de lente questiona). Decisão de foco da 003.L é do Diovanni.
+
+**Baseline.** Inalterada — sessão read-only, nenhum código tocado. Referência herdada 215 isolado / 364 completa (215 reproduzido no kickoff; 364 não-mensurável no container por falta de pandas, não refutado). Nada commitado nesta sessão exceto este bloco de fechamento.
+
+**Pendências inalteradas.** DT-FDS-01 (R-BIO-02, lado-médico, Quadro 2 inteiro), DT-FDS-02 (unidade cutoff 5%), DH-003A-01 (2ª `## 11`), Stage 8 dedup convergente, DT-002V-01, DT-002Y-01, DT-002X-01 (LEO carvão), DT-002Y-02, glossário momento_coleta [INCERTO], TDI Quadro 1 [INCERTO], asbesto-LEO, R-RX-02/DT-D3-02.
