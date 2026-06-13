@@ -696,6 +696,29 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 
 ---
 
+### DT-003L-01 — Mapa de formas de declaração de agente químico no PGR (input para D-ARQ-25) `[DERIVADO — medição de 15 PGRs, 003.L]`
+
+**Origem:** Sessão 003.L (13/06/2026), caça do caso-âncora de materialidade. Varredura read-only de 15 PGRs do acervo via pdfplumber (marcador "Químico" + agente nomeado + marcador de FDS-apontada).
+
+**Situação.** Não existe "o formato do PGR" para o lado-químico — a camada de extração (D-ARQ-25) terá de aguentar pelo menos 6 formas distintas:
+
+1. **Agente + link FISPQ por GHE** (T65, EURO Setor C) — caminho feliz; produto nomeado + FDS apontada por URL `acrobat.adobe.com`, agente a agente. Família de hashes compartilhada entre PGRs da mesma consultoria.
+2. **Carta pedindo FDS ao contratante** (CMO Floramazônia) — o PGR contém o pedido "encaminhar as FDS dos produtos utilizados"; R-PGR-04 literal em estado selvagem.
+3. **Template vazio** (Ricco-Adm) — tabela "Inventário de Produtos Químicos" com tudo "conforme FISPQ e Informações Técnicas em Anexo", sem dado inline nem link.
+4. **Boilerplate-only** (Cjr, TPB Andrade, Seconci REV3/REV4, Auro) — "Químico" só em texto regulatório NR-9/NR-32/EPI; FDS/FISPQ genéricos, nunca product-linked; sem agente real.
+5. **Agente genérico + composto inline** (CMO, Vistamérica, Viverde) — RISCO QUÍMICO por GHE com agente genérico, mais um nome de composto solto ("Graxa ET … tridecyloxy-propyl" — ver achado lateral 003.L).
+6. **Matriz por-cargo com dezenas de agentes nomeados + código e-Social, sem link** (Ricco Hetrin, Ricco Serra Dourada) — a forma mais densa; agente inline estruturado, FDS referenciada só genericamente, costura agente↔cargo na própria linha.
+
+Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1 é a exceção, não a norma.
+
+**Procedência:** `[DERIVADO — medição direta de 15 PGRs, 003.L]`. A taxonomia em 6 grupos é organização do Arquiteto sobre a medição.
+
+**Impacto na arquitetura.** A extração (D-ARQ-25 Parte B: normalização linguagem natural → slug; e a sub-camada de descoberta CAS de D-ARQ-33) precisa cobrir todas as 6 formas, não só a feliz. Formas 2/3 disparam R-PGR-04 (pendência, FDS a solicitar). Forma 4 é degrau-0 honesto (sem químico real). Formas 1/5/6 carregam agente nomeado em estruturas diferentes — cada uma exige estratégia de extração própria.
+
+**Status:** ABERTA. Não bloqueia. Insumo a consultar quando a camada de extração (D-ARQ-25) for desenhada — define o que o extrator/normalizador tem de aguentar.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -735,4 +758,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v16 | 05/06/2026 | Sessão 003.A (CONHECIMENTO→ARQUITETURA): DT-002Z-01 catalogada na seção 11 e RESOLVIDA — orquestrador all-or-nothing por GHE resolvido por fonte documental (NR-07 7.5.5/7.6.4), virou D-ARQ-31 (bloqueio por-risco/por-linha, MatrizGHE tri-estado, pendência anexada à linha). Sem reclassificação nem regra clínica nova. |
 | v17 | 07/06/2026 | Sessão 003.F (CONHECIMENTO): frente FDS aberta. DT-FDS-01 adicionada — R-BIO-02 [VALIDADO] contradito pelo Anexo I vigente (eixo Quadro 1/IBE-EE vs Quadro 2/IBE-SC, não "Anexo I/II"; conferido no texto oficial MTE, 567/2022). Reabertura adiada para sessão própria (exige Quadro 2 inteiro). R-CLI-02/03 sob suspeita do mesmo rótulo. Nenhuma regra alterada nesta sessão. |
 | v18 | 08/06/2026 | Sessão 003.G: nota de procedência em R-FDS-03/04 (cutoff 5% = [VALIDADO] conduta Carolini sem âncora NR; carcinógeno-independe = [INTERPRETADO] INCA/Anexo V; ligação com D-ARQ-33 caminho C). Mesma ID, semântica intacta. Nenhuma regra criada/alterada. |
-| v19 | 09/06/2026 | Sessão 003.H (ARQUITETURA): DT-FDS-02 adicionada — unidade do cutoff de 5% (% m/m a confirmar em ABNT NBR 14725); borda 5,0 de D-ARQ-34 fica [INTERPRETADO] até confirmar. Lado-engenheiro, independente de DT-FDS-01. Nenhuma regra criada/alterada. |
+| v19 | 09/06/2026 | Sessão 003.H (ARQUITETURA): DT-FDS-02 adicionada — unidade do cutoff de 5% (% m/m a confirmar em ABNT NBR 14725); borda 5,0 de D-ARQ-34 fica [INTERPRETADO] até confirmar. Lado-engenheiro, independente de DT-FDS-01. Nenhuma regra criada/alterada. |\r\n| v20 | 13/06/2026 | Sessão 003.L: DT-003L-01 adicionada (mapa de 6 formas de declaração químico no PGR — input empírico para D-ARQ-25; varredura read-only de 15 PGRs). Achados laterais (HISTORICO): tracking misto em matrizes_originais/; "Graxa ET" possível composição inline (veredito-Viverde sob suspeita). Caça do caso-âncora — sem código, sem regra clínica alterada. |
