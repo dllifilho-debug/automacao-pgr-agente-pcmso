@@ -719,6 +719,48 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 ---
 
+### DT-003M-01 — Ordem ramo-0-vs-bypass quando o CAS é oculto `[ABERTA — decisão de arquitetura]`
+
+**Origem:** Sessão 003.M (13/06/2026), leitura da FDS do Adesivo PVC Tigre (PGR ALT T65).
+
+**Situação.** O predicado de materialidade (003.J, `motor/materialidade.py`) avalia o ramo 0 (`agente is None` → AUSENTE) ANTES do ramo 1 (bypass de perigo → MATERIAL). A justificativa da 003.J: sem slug não há flags confiáveis. A FDS do Adesivo PVC traz um contra-exemplo: o componente "Segredo Industrial 2" declara H334 (sensibilização respiratória) + H317 (sensibilização dérmica) na própria FDS, mas tem CAS OCULTO (segredo industrial). Sem CAS → sem slug → `agente=None` → ramo 0 → AUSENTE, mascarando o bypass-sensibilizante que a flag justificaria.
+
+**Por que é arquitetura, não disciplina de fixture.** O estado `sem-slug + flag-de-perigo-declarada-no-documento` é alcançável pelo PIPELINE REAL, não só pela fixture-à-mão: a FDS declara perigo por frase-H em componente de CAS oculto; a extração (D-ARQ-25 Parte B) resolve CAS→slug→flag, e o CAS oculto quebra a cadeia. A flag de perigo é dado do documento, não conhecimento injetado. A pergunta de arquitetura: quando o documento declara sensibilização mas oculta o CAS, o sistema deve (a) bloquear por falta de slug (perde o sinal de perigo declarado) ou (b) honrar a flag mesmo sem slug?
+
+**O que a reabertura exige (sessão própria).** Decisão sobre a ordem ramo-0-vs-bypass — toca o predicado da 003.J e o gate-CAS de D-ARQ-33 cláusula 3 (CAS oculto ≠ CAS inválido — casos distintos que o gate hoje não separa). Provavelmente a mesma sessão de DT-003M-02 (expansão de vocabulário), porque "sem-slug + flag" e "popular slugs de FDS" são dois lados de cobrir composição-de-FDS.
+
+**Status:** ABERTA. Não bloqueia. Caso-âncora vivo capturado na fixture (`fds_t65.py`, Adesivo PVC componente "Segredo Industrial 2", comentado).
+
+---
+
+### DT-003M-02 — Vocabulário (agentes.yaml) não cobre composição-de-FDS `[ABERTA — input para expansão]`
+
+**Origem:** Sessão 003.M (13/06/2026), medição da fixture-FDS sobre `agentes.yaml`.
+
+**Situação.** Dos 24 componentes de 3 FDS reais (Tinta Acrílica, Cimento Ciplan, Adesivo PVC), 23 caem em ramo 0 do predicado de materialidade (`agente=None`, slug não resolvido). Só 2 substâncias têm slug em `agentes.yaml`: `dioxido_de_titanio` (TiO₂) e `metil_etil_cetona` (MEK). `agentes.yaml` é vocabulário de inventário-de-PGR (sílica, asbesto, poeira, ruído, ototóxicos, fumos, agentes-marcador) — não de composição-de-FDS. Os ingredientes típicos de produto comercial (carbonato de cálcio, silicato de alumínio, silicato tricálcico/dicálcico, óxido de ferro, polímeros acrílicos, isotiazolonas, acetona, acetato de etila, copolímero de PVC) NÃO estão no vocabulário.
+
+**Consequência.** A materialidade-por-concentração e a materialidade-por-bypass só são exercitáveis sobre componentes com slug. Enquanto o vocabulário não cobrir composição-de-FDS, a fixture-real rende majoritariamente AUSENTE (ramo 0) — fiel ao estado, mas sem travessia para MATERIAL/NÃO-MATERIAL na maioria. Ramo 5 (NÃO-MATERIAL fiel) não tem nenhum caso vivo nas 3 FDS (nenhum componente com slug tem faixa inteira ≤5%).
+
+**Irmã de DT-003L-01.** DT-003L-01 mapeia as formas de declaração química no PGR (lado-inventário); DT-003M-02 mede o vazio de vocabulário no lado-composição. Ambas são input empírico para a camada de extração/normalização (D-ARQ-25) e para a expansão de `agentes.yaml`.
+
+**O que a expansão exige (sessão de dado, não desta fatia).** Adicionar os agentes de FDS a `agentes.yaml` com `is_carcinogeno_iarc`/`is_sensibilizante` por agente, fonte marcada por agente (D-ARQ-27). É tarefa de dado com proveniência, maior que uma fixture e de natureza distinta — não empilhar com fixture.
+
+**Status:** ABERTA. Não bloqueia. Provável mesma sessão de DT-003M-01.
+
+---
+
+### DH-003M-01 — `\r\n` literal reincidente no HISTORICO `[ABERTA — higiene doc]`
+
+**Origem:** Sessão 003.M (13/06/2026), leitura do HISTORICO no kickoff.
+
+**Situação.** O bloco da Sessão 003.L em `docs/HISTORICO_OPERACIONAL.md` foi gravado com sequências de texto literal `\r\n` em vez de quebras de linha reais — mesmo defeito já observado no bloco 003.K. Consequência prática: `grep "^## Sess"` não casa o cabeçalho afetado, e o `/kickoff` (que depende de `^## Sess` para achar a última sessão) subconta sessões e pode não enxergar o bloco como última. É defeito de gravação, não de conteúdo.
+
+**Recomendação.** Conserto pontual (re-gravar o bloco com newlines reais) resolve o caso, não a CLASSE. Duas opções estruturais: (1) quebrar o HISTORICO em arquivo-por-sessão com índice — escala e mata a classe; (2) tirar o `/kickoff` da dependência de `^## Sess` (remenda). Decisão do Diovanni. O bloco 003.M desta sessão foi gravado com newlines reais (não reincide).
+
+**Status:** ABERTA. Doc-only, não-bloqueante. Distinta de DH-003A-01 (header "v2" + 2ª "## 11").
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -759,3 +801,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v17 | 07/06/2026 | Sessão 003.F (CONHECIMENTO): frente FDS aberta. DT-FDS-01 adicionada — R-BIO-02 [VALIDADO] contradito pelo Anexo I vigente (eixo Quadro 1/IBE-EE vs Quadro 2/IBE-SC, não "Anexo I/II"; conferido no texto oficial MTE, 567/2022). Reabertura adiada para sessão própria (exige Quadro 2 inteiro). R-CLI-02/03 sob suspeita do mesmo rótulo. Nenhuma regra alterada nesta sessão. |
 | v18 | 08/06/2026 | Sessão 003.G: nota de procedência em R-FDS-03/04 (cutoff 5% = [VALIDADO] conduta Carolini sem âncora NR; carcinógeno-independe = [INTERPRETADO] INCA/Anexo V; ligação com D-ARQ-33 caminho C). Mesma ID, semântica intacta. Nenhuma regra criada/alterada. |
 | v19 | 09/06/2026 | Sessão 003.H (ARQUITETURA): DT-FDS-02 adicionada — unidade do cutoff de 5% (% m/m a confirmar em ABNT NBR 14725); borda 5,0 de D-ARQ-34 fica [INTERPRETADO] até confirmar. Lado-engenheiro, independente de DT-FDS-01. Nenhuma regra criada/alterada. |\r\n| v20 | 13/06/2026 | Sessão 003.L: DT-003L-01 adicionada (mapa de 6 formas de declaração químico no PGR — input empírico para D-ARQ-25; varredura read-only de 15 PGRs). Achados laterais (HISTORICO): tracking misto em matrizes_originais/; "Graxa ET" possível composição inline (veredito-Viverde sob suspeita). Caça do caso-âncora — sem código, sem regra clínica alterada. |
+| v21 | 13/06/2026 | Sessão 003.M: DT-003M-01 (ramo-0-vs-bypass com CAS oculto — decisão de arquitetura), DT-003M-02 (vocabulário não cobre composição-de-FDS; medição 23/24 ramo 0) e DH-003M-01 (`\r\n` literal reincidente no HISTORICO) adicionadas. Fatia 3 de D-ARQ-34 (fixture-FDS real) — sem regra clínica criada/alterada. |
