@@ -102,6 +102,12 @@ class Risco:
     quantificacao: Optional[Quantificacao]
     anexo_nr07: Optional[str]
     is_ototoxico: bool = False
+    # D-ARQ-35 Parte 3: 4ª fonte de risco (químico de composição). materialidade = atributo
+    # do risco, não filtro de existência. Flags de materialidade copiadas-pra-frente do
+    # Componente (003.J).
+    materialidade: Optional[Materialidade] = None
+    is_carcinogeno_iarc: bool = False
+    is_sensibilizante: bool = False
 
 
 @dataclass(frozen=True)
@@ -125,6 +131,12 @@ class Fracao(Enum):
 class CenarioNormativo(Enum):
     MINERACAO = "mineracao"
     GERAL = "geral"
+
+
+class Materialidade(Enum):
+    MATERIAL = "MATERIAL"
+    NAO_MATERIAL = "NAO_MATERIAL"
+    AUSENTE = "AUSENTE"
 
 
 @dataclass(frozen=True)

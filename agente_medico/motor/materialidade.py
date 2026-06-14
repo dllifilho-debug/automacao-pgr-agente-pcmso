@@ -1,14 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum
-
-from agente_medico.motor.tipos import Componente
-
-
-class Materialidade(Enum):
-    MATERIAL = "MATERIAL"
-    NAO_MATERIAL = "NAO_MATERIAL"
-    AUSENTE = "AUSENTE"
+from agente_medico.motor.tipos import Componente, Materialidade
 
 
 def materialidade(componente: Componente) -> Materialidade:

@@ -3,8 +3,9 @@ from __future__ import annotations
 import dataclasses
 from typing import Any
 
+from agente_medico.motor.materialidade import materialidade
 from agente_medico.motor.protocolo import Protocolo
-from agente_medico.motor.tipos import GHEContext, Pendencia, Risco
+from agente_medico.motor.tipos import GHEContext, Materialidade, Pendencia, Risco
 
 
 def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
@@ -96,5 +97,65 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                         quantificacao=None,
                         anexo_nr07=meta.get("anexo_nr07") if meta is not None else None,
                         is_ototoxico=meta.get("is_ototoxico", False) if meta is not None else False,
+                    )
+                )
+
+    # Fase C — promoção de componentes químicos de FDS (D-ARQ-35 Parte 3, 4ª fonte de risco).
+    # Sem dedup: cada componente promovido vira um Risco próprio com
+    # fonte="quimico_composicao", mesmo que o slug já exista em ctx.riscos por outra
+    # fonte (D-ARQ-16 — convergência resolvida na consolidação, nunca por fusão de risco).
+    for produto in ctx.pgr_ghe.produtos_quimicos:
+        if produto.fds is None:
+            continue
+        for componente in produto.fds.composicao:
+            if componente.agente is None:
+                ctx.pendencias.append(
+                    Pendencia(
+                        tipo="materialidade_ausente",
+                        destinatario="empresa",
+                        motivo=f"componente '{componente.nome}' (produto {produto.nome}) sem slug resolvido — materialidade indeterminável",
+                        bloqueante=True,
+                        regra_origem="D-ARQ-35",
+                        ghe_id=ctx.pgr_ghe.id,
+                    )
+                )
+                continue
+
+            mat = materialidade(componente)
+            meta = agentes_vocab.get(componente.agente)
+            if meta is None:
+                ctx.pendencias.append(
+                    Pendencia(
+                        tipo="vocabulario_ausente",
+                        destinatario="protocolo",
+                        motivo=f"agente '{componente.agente}' ausente do vocabulário — hidratado com defaults",
+                        bloqueante=False,
+                        regra_origem=None,
+                        ghe_id=ctx.pgr_ghe.id,
+                    )
+                )
+            ctx.riscos.append(
+                Risco(
+                    agente=componente.agente,
+                    fonte="quimico_composicao",
+                    detalhe=f"componente {componente.nome} do produto {produto.nome}",
+                    quantificacao=None,
+                    anexo_nr07=meta.get("anexo_nr07") if meta is not None else None,
+                    is_ototoxico=meta.get("is_ototoxico", False) if meta is not None else False,
+                    materialidade=mat,
+                    is_carcinogeno_iarc=componente.is_carcinogeno_iarc,
+                    is_sensibilizante=componente.is_sensibilizante,
+                )
+            )
+
+            if mat == Materialidade.AUSENTE:
+                ctx.pendencias.append(
+                    Pendencia(
+                        tipo="materialidade_ausente",
+                        destinatario="empresa",
+                        motivo=f"componente '{componente.nome}' (produto {produto.nome}) com slug resolvido mas materialidade indeterminada (concentração ausente ou cruzando o cutoff de 5%)",
+                        bloqueante=True,
+                        regra_origem="D-ARQ-35",
+                        ghe_id=ctx.pgr_ghe.id,
                     )
                 )
