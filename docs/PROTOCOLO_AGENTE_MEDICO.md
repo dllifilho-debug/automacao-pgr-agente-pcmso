@@ -763,6 +763,18 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 ---
 
+### DH-003P-01 — Imports de `Materialidade` apontam para módulo re-exportador, não a fonte canônica `[ABERTA — higiene de código]`
+
+**Origem:** Sessão 003.P (14/06/2026), fatia 1 de D-ARQ-35.
+
+**Situação.** O enum `Materialidade` foi movido para `tipos.py` (fonte canônica do contrato; quebra de ciclo de import com `materialidade.py`). `materialidade.py` o re-exporta ao fazer `from ...tipos import Componente, Materialidade`. Dois testes (`test_materialidade.py`, `test_materialidade_fds.py`) ainda importam `Materialidade` de `agente_medico.motor.materialidade` — funciona por re-export, mas a fonte canônica passou a ser `tipos`. Frágil a um `__all__` ou lint futuro.
+
+**Recomendação.** Redirecionar os imports de `Materialidade` desses testes para `tipos`. Varredura única, teste-only. Não tocado nesta fatia (uma implementação por sessão; redirecionar import de teste mergeado é fora do escopo).
+
+**Status:** ABERTA. Higiene, não-bloqueante.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -805,3 +817,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v19 | 09/06/2026 | Sessão 003.H (ARQUITETURA): DT-FDS-02 adicionada — unidade do cutoff de 5% (% m/m a confirmar em ABNT NBR 14725); borda 5,0 de D-ARQ-34 fica [INTERPRETADO] até confirmar. Lado-engenheiro, independente de DT-FDS-01. Nenhuma regra criada/alterada. |\r\n| v20 | 13/06/2026 | Sessão 003.L: DT-003L-01 adicionada (mapa de 6 formas de declaração químico no PGR — input empírico para D-ARQ-25; varredura read-only de 15 PGRs). Achados laterais (HISTORICO): tracking misto em matrizes_originais/; "Graxa ET" possível composição inline (veredito-Viverde sob suspeita). Caça do caso-âncora — sem código, sem regra clínica alterada. |
 | v21 | 13/06/2026 | Sessão 003.M: DT-003M-01 (ramo-0-vs-bypass com CAS oculto — decisão de arquitetura), DT-003M-02 (vocabulário não cobre composição-de-FDS; medição 23/24 ramo 0) e DH-003M-01 (`\r\n` literal reincidente no HISTORICO) adicionadas. Fatia 3 de D-ARQ-34 (fixture-FDS real) — sem regra clínica criada/alterada. |
 | v22 | 13/06/2026 | Sessão 003.N: nota de andamento em DT-003M-02 (frente b-mínimo — 2 solventes de FDS populados em agentes.yaml: acetona, acetato_de_etila; DT segue ABERTA). Sem regra clínica alterada. |
+| v23 | 14/06/2026 | Sessão 003.P (IMPLEMENTAÇÃO): DH-003P-01 adicionada (imports de `Materialidade` apontam p/ módulo re-exportador, não `tipos` canônico — higiene de código). Nenhuma regra clínica criada/alterada (`regras.yaml` intocado; fatia 1 de D-ARQ-35 é contrato de risco, não conduta). |
