@@ -275,3 +275,23 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+  acetona:
+    # Solvente de FDS (Adesivo PVC Tigre, T65 GHE 11). CAS conferido fixture 003.M.
+    # is_carcinogeno_iarc=false [DERIVADO — IARC: não classificado nas Monografias].
+    # is_ototoxico ausente [DERIVADO — fora da lista NIOSH de solventes ototóxicos:
+    # CS2/tolueno/estireno/xileno/TCE (Arch Environ Health 1994;49(5):359-365)].
+    anexo_nr07: null
+    cas: "67-64-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  acetato_de_etila:
+    # Solvente de FDS (Adesivo PVC Tigre, T65 GHE 11). CAS conferido fixture 003.M.
+    # is_carcinogeno_iarc=false [DERIVADO — IARC: não classificado].
+    # is_ototoxico ausente [DERIVADO — fora da lista NIOSH de 5 solventes ototóxicos;
+    # perda auditiva em mistura tolueno+acetato+etanol atribuída ao tolueno, não isolada].
+    anexo_nr07: null
+    cas: "141-78-6"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []

@@ -39,6 +39,15 @@ def test_regra_ativcrit_referencia_apenas_slugs_validos() -> None:
         )
 
 
+def test_vocabulario_agentes_inclui_solventes_fds_t65() -> None:
+    p = carregar(PROTOCOLO_DIR)
+    agentes = p.vocabulario.agentes
+    for slug, cas in [("acetona", "67-64-1"), ("acetato_de_etila", "141-78-6")]:
+        assert slug in agentes
+        assert agentes[slug]["cas"] == cas
+        assert agentes[slug]["is_carcinogeno_iarc"] is False
+
+
 def test_carregar_falha_quando_regra_referencia_slug_inexistente(tmp_path: Path) -> None:
     """
     Cria um protocolo temporário com regra referenciando exame que não
