@@ -10,11 +10,12 @@ from agente_medico.motor.protocolo import carregar
 PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
-def test_vocabulario_exames_carrega_com_7_slugs() -> None:
+def test_vocabulario_exames_carrega_com_9_slugs() -> None:
     p = carregar(PROTOCOLO_DIR)
     assert set(p.vocabulario.exames.keys()) == {
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg",
         "rx_coluna_lombo_sacra", "rx_torax_oit",
+        "reticulocitos", "acido_transmuconico",
     }
 
 

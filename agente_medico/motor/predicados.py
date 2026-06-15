@@ -150,6 +150,11 @@ def _fumos_metalicos(ctx: GHEContext) -> bool:
     return any(r.agente == "fumos_metalicos" for r in ctx.riscos)
 
 
+@primitivo("benzeno")
+def _benzeno(ctx: GHEContext) -> bool:
+    return any(r.agente == "benzeno" for r in ctx.riscos)
+
+
 @primitivo("silica_asbesto_sem_medicao")
 def _silica_asbesto_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)

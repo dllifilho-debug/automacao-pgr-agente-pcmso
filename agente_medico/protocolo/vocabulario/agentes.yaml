@@ -295,3 +295,13 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+  # benzeno — [DERIVADO — CAS Registry 71-43-2; IARC grupo 1].
+  # anexo_nr07 e tem_lt = null: ambos pertencem ao eixo Quadro 1/2 / IBE do Anexo I sob
+  # NR-07 567/2022, débito DT-FDS-01 (lado-médico, sessão própria). R-PKG-BZ dispara por
+  # identidade de agente — não por anexo nem LT. null é honesto: não crava valor sem fonte.
+  benzeno:
+    anexo_nr07: null
+    cas: "71-43-2"
+    is_carcinogeno_iarc: true
+    tem_lt: null
+    protocolos_especiais: [R-PKG-BZ]

@@ -41,3 +41,13 @@ exames:
     nome_exibicao: "RX Tórax OIT"
     categoria: imagem
     fonte_matriz: "SÍLICA / ASBESTO / POEIRAS"
+
+  reticulocitos:
+    nome_exibicao: "Reticulócitos"
+    categoria: laboratorial
+    fonte_matriz: "BENZENO (R-PKG-BZ)"
+
+  acido_transmuconico:
+    nome_exibicao: "Ácido trans-trans-mucônico"
+    categoria: laboratorial
+    fonte_matriz: "BENZENO (R-PKG-BZ)"
