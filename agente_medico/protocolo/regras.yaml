@@ -145,3 +145,17 @@ regras:
     base_normativa: "Fumos metálicos → RX OIT 60M. SEM âncora no Anexo III da NR-07 (fumos não é Quadro 1 nem Quadro 2) — origem matriz Patrícia/analogia, não norma conferida [INTERPRETADO]. DT-002K-02 firmou risco por metal individual (Mn/Cr⁶⁺), não categoria 'fumos'. Roteamento correto depende da decomposição em metais — ver DT-D3-02."
     status: INTERPRETADO
 
+  - id: R-PKG-BZ
+    quando: benzeno
+    emite:
+      - {exame: hemograma,           periodicidade_meses: 6, momentos: [adm, per, MR, dem]}
+      - {exame: reticulocitos,       periodicidade_meses: 6, momentos: [adm, per, MR, dem]}
+      - {exame: acido_transmuconico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "Protocolo Dra. Carolini R-PKG-BZ — benzeno identificado na composição
+      (via FDS, mesmo <5%, mesmo via CAS de aromáticos genéricos R-FDS-04) → pacote benzeno.
+      hemograma 6M [adm/per/MR/dem] e t,t-mucônico 6M [per] [VALIDADO — R-PKG-BZ].
+      reticulócitos: momentos [adm/per/MR/dem] do protocolo; periodicidade 6M
+      [DERIVADO — analogia hemograma R-PKG-BZ] (protocolo declara momentos, não periodicidade).
+      Dispara por identidade de agente, agnóstico à fonte (4ª fonte D-ARQ-35) e à materialidade."
+    status: VALIDADO
+
