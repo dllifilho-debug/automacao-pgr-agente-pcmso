@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from agente_medico.motor.resolvedor import (
+    EntradaIndice,
     cas_bem_formado,
     construir_indice_cas,
     gate_cas,
@@ -46,16 +47,16 @@ def test_cas_curto_demais_falha() -> None:
 def test_indice_pula_agente_sem_cas() -> None:
     vocab = {
         "ruido": {"tipo_ibe": "EE"},
-        "benzeno": {"cas": "71-43-2", "tipo_ibe": "SC"},
+        "benzeno": {"cas": "71-43-2", "tipo_ibe": "SC", "is_carcinogeno_iarc": True},
     }
     indice = construir_indice_cas(vocab)
-    assert indice == {"71432": "benzeno"}
+    assert indice == {"71432": EntradaIndice(slug="benzeno", is_carcinogeno_iarc=True)}
 
 
 def test_indice_normaliza_hifens() -> None:
-    vocab = {"agua": {"cas": "7732-18-5"}}
+    vocab = {"agua": {"cas": "7732-18-5", "is_carcinogeno_iarc": False}}
     indice = construir_indice_cas(vocab)
-    assert indice.get("7732185") == "agua"
+    assert indice.get("7732185") == EntradaIndice(slug="agua", is_carcinogeno_iarc=False)
 
 
 def test_indice_colisao_levanta_value_error() -> None:
@@ -71,7 +72,10 @@ def test_indice_colisao_levanta_value_error() -> None:
 # gate_cas
 # ---------------------------------------------------------------------------
 
-_INDICE: dict[str, str] = {"71432": "benzeno", "7732185": "agua"}
+_INDICE: dict[str, EntradaIndice] = {
+    "71432": EntradaIndice("benzeno", True),
+    "7732185": EntradaIndice("agua", False),
+}
 
 
 def _comp(cas: str, nome: str = "teste") -> Componente:
@@ -81,6 +85,20 @@ def _comp(cas: str, nome: str = "teste") -> Componente:
 def test_gate_ramo_a_slug_resolvido() -> None:
     comp, pend = gate_cas(_comp("71-43-2", "benzeno"), _INDICE)
     assert comp.agente == "benzeno"
+    assert pend is None
+
+
+def test_gate_ramo_a_popula_carcinogeno_true() -> None:
+    comp, pend = gate_cas(_comp("71-43-2", "benzeno"), _INDICE)
+    assert comp.agente == "benzeno"
+    assert comp.is_carcinogeno_iarc is True
+    assert pend is None
+
+
+def test_gate_ramo_a_nao_carcinogeno_fica_false() -> None:
+    comp, pend = gate_cas(_comp("7732-18-5", "agua"), _INDICE)
+    assert comp.agente == "agua"
+    assert comp.is_carcinogeno_iarc is False
     assert pend is None
 
 
