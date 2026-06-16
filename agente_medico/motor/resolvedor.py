@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import dataclasses
+from dataclasses import dataclass
 from typing import Any, Optional
 
 from agente_medico.motor.tipos import Componente, Pendencia
+
+
+@dataclass(frozen=True)
+class EntradaIndice:
+    slug: str
+    is_carcinogeno_iarc: bool
 
 
 def _so_digitos(cas: str) -> str:
@@ -26,13 +33,14 @@ def cas_bem_formado(cas: str) -> bool:
     return soma % 10 == verificador
 
 
-def construir_indice_cas(agentes_vocab: dict[str, Any]) -> dict[str, str]:
-    """Inverte o vocabulário de agentes: CAS normalizado -> slug.
+def construir_indice_cas(agentes_vocab: dict[str, Any]) -> dict[str, EntradaIndice]:
+    """Inverte o vocabulário de agentes: CAS normalizado -> EntradaIndice (slug + flag de carcinogenicidade).
 
     Agentes físicos e de metadata pobre (sem campo "cas") são pulados.
     Colisão de CAS entre slugs distintos levanta ValueError (integridade do vocabulário).
+    is_sensibilizante deliberadamente fora — chave inexistente em agentes.yaml (DT-003T-01).
     """
-    indice: dict[str, str] = {}
+    indice: dict[str, EntradaIndice] = {}
     for slug, meta in agentes_vocab.items():
         cas_raw = meta.get("cas") if isinstance(meta, dict) else None
         if not cas_raw:
@@ -40,18 +48,21 @@ def construir_indice_cas(agentes_vocab: dict[str, Any]) -> dict[str, str]:
         cas_norm = _so_digitos(str(cas_raw))
         if not cas_norm:
             continue
-        if cas_norm in indice and indice[cas_norm] != slug:
+        if cas_norm in indice and indice[cas_norm].slug != slug:
             raise ValueError(
                 f"Colisão de CAS no vocabulário: {cas_raw!r} aponta para "
-                f"{indice[cas_norm]!r} e {slug!r}"
+                f"{indice[cas_norm].slug!r} e {slug!r}"
             )
-        indice[cas_norm] = slug
+        indice[cas_norm] = EntradaIndice(
+            slug=slug,
+            is_carcinogeno_iarc=bool(meta.get("is_carcinogeno_iarc", False)),
+        )
     return indice
 
 
 def gate_cas(
     componente: Componente,
-    indice_cas: dict[str, str],
+    indice_cas: dict[str, EntradaIndice],
 ) -> tuple[Componente, Optional[Pendencia]]:
     """Gate de boa-formação do CAS transcrito (D-ARQ-36 Parte 2).
 
@@ -61,8 +72,11 @@ def gate_cas(
       (c) inválido no dígito       -> Pendencia cas_invalido, bloqueante
       (d) ausente/oculto           -> Pendencia cas_ausente, não-bloqueante
 
-    NÃO popula is_carcinogeno_iarc / is_sensibilizante — unificação de
-    fonte-de-flag é diferida (D-ARQ-36 Parte 3).
+    Popula is_carcinogeno_iarc a partir do índice (D-ARQ-36 Parte 3).
+    is_sensibilizante NÃO é tocada — chave inexistente em agentes.yaml (DT-003T-01),
+    introduzi-la é sessão de dado própria (cruza DT-003M-01).
+    is_ototoxico / anexo_nr07 permanecem re-hidratados por-slug no lado-médico
+    (só existem em Risco, não em Componente).
     """
     cas_norm = _so_digitos(componente.cas)
 
@@ -94,8 +108,8 @@ def gate_cas(
         )
 
     # Ramo (b): CAS válido mas slug não resolvido no vocabulário (D-ARQ-14).
-    slug = indice_cas.get(cas_norm)
-    if slug is None:
+    entrada = indice_cas.get(cas_norm)
+    if entrada is None:
         return componente, Pendencia(
             tipo="vocabulario_ausente",
             destinatario="protocolo",
@@ -108,4 +122,8 @@ def gate_cas(
         )
 
     # Ramo (a): CAS válido com slug resolvido.
-    return dataclasses.replace(componente, agente=slug), None
+    return dataclasses.replace(
+        componente,
+        agente=entrada.slug,
+        is_carcinogeno_iarc=entrada.is_carcinogeno_iarc,  # D-ARQ-36 Parte 3
+    ), None
