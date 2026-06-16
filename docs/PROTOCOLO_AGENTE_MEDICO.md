@@ -775,6 +775,20 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 ---
 
+### DT-003T-01 — `is_sensibilizante` ausente do `agentes.yaml` `[ABERTA — input para sessão de dado]`
+
+**Origem:** Sessão 003.T (16/06/2026), gate de procedência da fatia 2 de D-ARQ-36 Parte 3.
+
+**Situação.** Ao popular as flags de perigo no gate-CAS, o gate de procedência (D-ARQ-22) sobre `agentes.yaml` revelou: `is_carcinogeno_iarc` existe e está explícita em todos os agentes, mas `is_sensibilizante` **não existe como chave em nenhum agente** do vocabulário. A fatia 003.T populou só `is_carcinogeno_iarc` (presente, honesta); `is_sensibilizante` ficou de fora — NÃO entra no `EntradaIndice`, o gate não a toca, o `Componente` a mantém no default `False` por ausência-de-dado (não por classificação).
+
+**Por que não popular agora.** Popular `is_sensibilizante` é dado-com-proveniência: exige decidir, por agente, quais recebem `true`, contra fonte marcada (frase-H H334/H317 da FDS, classificação GHS/ABNT 14725). É natureza distinta de mecânica (gate lê chave que já existe) — empacotar viola "uma coisa por vez". Foi considerado e descartado incluí-la no `EntradaIndice` degradando para `False` com marca-comentário: a marca viveria no código-fonte, não no dado, e um `False` tipado é indistinguível de "classificado como não-sensibilizante" — o erro silencioso plausível de D-ARQ-22.
+
+**O que a introdução exige (sessão de dado própria).** Campo `is_sensibilizante` no `EntradaIndice` + leitura no `construir_indice_cas` + população no `agentes.yaml` com proveniência por agente. **Cruza DT-003M-01** (sensibilizante de CAS oculto / frase-H sem slug, ABERTA): a forma de como sensibilizante entra no sistema pode mudar conforme aquela decisão — logo a forma do campo deve ser decidida COM a fonte e COM DT-003M-01 resolvida, não chutada antes. Mesma razão pela qual `is_ototoxico` entrou completo na 002.H (flag + agentes + primitivo + regra na mesma leva).
+
+**Status:** ABERTA. Não-bloqueante. Lado-engenheiro/vocabulário, não toca regra clínica.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -818,3 +832,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v21 | 13/06/2026 | Sessão 003.M: DT-003M-01 (ramo-0-vs-bypass com CAS oculto — decisão de arquitetura), DT-003M-02 (vocabulário não cobre composição-de-FDS; medição 23/24 ramo 0) e DH-003M-01 (`\r\n` literal reincidente no HISTORICO) adicionadas. Fatia 3 de D-ARQ-34 (fixture-FDS real) — sem regra clínica criada/alterada. |
 | v22 | 13/06/2026 | Sessão 003.N: nota de andamento em DT-003M-02 (frente b-mínimo — 2 solventes de FDS populados em agentes.yaml: acetona, acetato_de_etila; DT segue ABERTA). Sem regra clínica alterada. |
 | v23 | 14/06/2026 | Sessão 003.P (IMPLEMENTAÇÃO): DH-003P-01 adicionada (imports de `Materialidade` apontam p/ módulo re-exportador, não `tipos` canônico — higiene de código). Nenhuma regra clínica criada/alterada (`regras.yaml` intocado; fatia 1 de D-ARQ-35 é contrato de risco, não conduta). |
+| v24 | 16/06/2026 | Sessão 003.T: DT-003T-01 adicionada (`is_sensibilizante` ausente do `agentes.yaml`; gate-CAS popula só `is_carcinogeno_iarc`; introduzi-la é sessão de dado própria, cruza DT-003M-01). Fatia 2 de D-ARQ-36 Parte 3 — sem regra clínica criada/alterada (gate materializa D-ARQ, não R-*). |
