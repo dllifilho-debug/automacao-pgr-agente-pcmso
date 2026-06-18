@@ -38,6 +38,8 @@ def construir_indice_cas(agentes_vocab: dict[str, Any]) -> dict[str, EntradaIndi
 
     Agentes físicos e de metadata pobre (sem campo "cas") são pulados.
     Colisão de CAS entre slugs distintos levanta ValueError (integridade do vocabulário).
+    is_carcinogeno_iarc é carregado no índice mas não aplicado ao Componente nesta fatia
+    (reversão D-ARQ-36 nota 003.V — flag vem da transcrição, não do índice).
     is_sensibilizante deliberadamente fora — chave inexistente em agentes.yaml (DT-003T-01).
     """
     indice: dict[str, EntradaIndice] = {}
@@ -72,7 +74,9 @@ def gate_cas(
       (c) inválido no dígito       -> Pendencia cas_invalido, bloqueante
       (d) ausente/oculto           -> Pendencia cas_ausente, não-bloqueante
 
-    Popula is_carcinogeno_iarc a partir do índice (D-ARQ-36 Parte 3).
+    NÃO popula flags de perigo — a flag é da transcrição do Componente, não do índice
+    (D-ARQ-36 nota 003.V). EntradaIndice.is_carcinogeno_iarc fica carregado mas inerte
+    até a Parte 3 plena (tri-estado + is_sensibilizante, sessão própria).
     is_sensibilizante NÃO é tocada — chave inexistente em agentes.yaml (DT-003T-01),
     introduzi-la é sessão de dado própria (cruza DT-003M-01).
     is_ototoxico / anexo_nr07 permanecem re-hidratados por-slug no lado-médico
@@ -121,9 +125,5 @@ def gate_cas(
             regra_origem="D-ARQ-36",
         )
 
-    # Ramo (a): CAS válido com slug resolvido.
-    return dataclasses.replace(
-        componente,
-        agente=entrada.slug,
-        is_carcinogeno_iarc=entrada.is_carcinogeno_iarc,  # D-ARQ-36 Parte 3
-    ), None
+    # Ramo (a): CAS válido com slug resolvido. [DERIVADO — D-ARQ-36 nota 003.V (a); D-ARQ-34 Parte 4]
+    return dataclasses.replace(componente, agente=entrada.slug), None

@@ -6,12 +6,11 @@ Fonte: PGR - ALT T65 2024.2026 (matrizes_originais/). Pareamento produto -> GHE 
 - Tinta Acrílica (FISPQ 004/2008, Nova Rocha, notação europeia símbolos/frases R) =
   T65 GHE 15.
 
-Construção nível-Componente (não ProdutoQuimico/FDS — a fatia 4 decide o embrulho
-junto com a regra de promoção).
+Fixture CRUA: todos os componentes têm agente=None (default). Slug resolvido pelo
+gate_cas (resolver_composicao), não à mão. [DERIVADO — D-ARQ-36 nota 003.V (a)].
 
 Convenção de faixa (D-ARQ-34 Parte 1): "X - Y%" -> FaixaConcentracao(X, Y);
 "0 - Y%" -> FaixaConcentracao(0.0, Y).
-Convenção de slug: slug de agentes.yaml SE existir; senão agente=None (ramo 0).
 CAS ND/NA/oculto/vários no documento -> cas="".
 """
 from __future__ import annotations
@@ -25,18 +24,11 @@ def tinta_acrilica() -> tuple[Componente, ...]:
     return (
         Componente(cas="", nome="Derivados Isotiazolonas e Semi-Acetais",
                    concentracao=FaixaConcentracao(0.1, 0.4), agente=None),
-        # TiO2: CAS na FDS é 134363-67-7 e FALHA o dígito verificador. CAS oficial =
-        # 13463-67-7 (corrigido; o componente real bloquearia no gate-CAS da fatia 4).
-        # is_carcinogeno_iarc=False [INTERPRETADO — IARC Grupo 2B (Monografia vol.93,
-        # 2010) é por inalação de pó; a monografia ressalva que TiO2 ligado em matriz de
-        # tinta não gera exposição a partícula primária; produto é base água líquida → via
-        # não aplica; flag conservadora, inspecionar 1º na revisão de saída]. NOTA: agentes.yaml
-        # traz is_carcinogeno_iarc=true (a substância em abstrato); o predicado lê a flag do
-        # Componente, não do yaml (D-ARQ-34 Parte 4) — divergência legítima substância vs
-        # este-produto. slug dioxido_de_titanio existe.
-        Componente(cas="13463-67-7", nome="Dióxido de Titânio",
-                   concentracao=FaixaConcentracao(1.0, 15.0),
-                   agente="dioxido_de_titanio", is_carcinogeno_iarc=False),
+        # TiO2: CAS na FISPQ é 134363-67-7 — FALHA o dígito verificador (ramo c do gate).
+        # CAS oficial correto = 13463-67-7. Fixture crua traz o CAS ERRADO do documento,
+        # exercitando explicitamente o ramo (c). [DERIVADO — FISPQ 004/2008 + D-ARQ-36 nota 003.V].
+        Componente(cas="134363-67-7", nome="Dióxido de Titânio",
+                   concentracao=FaixaConcentracao(1.0, 15.0)),
         Componente(cas="51274-00-1", nome="Óxido de Ferro Amarelo",
                    concentracao=FaixaConcentracao(0.1, 3.0), agente=None),
         Componente(cas="", nome="Carbonato de Cálcio ppt",
@@ -83,10 +75,9 @@ def adesivo_pvc_tigre() -> tuple[Componente, ...]:
     return (
         Componente(cas="67-64-1", nome="Acetona",
                    concentracao=FaixaConcentracao(30.0, 70.0), agente=None),
-        # MEK: slug metil_etil_cetona existe (CAS bate). Sem flag. min 10 > 5 → ramo 4 → MATERIAL.
+        # MEK: CAS "78-93-3" válido; slug resolvido pelo gate (metil_etil_cetona). min 10 > 5 → MATERIAL.
         Componente(cas="78-93-3", nome="Metiletilcetona (MEK)",
-                   concentracao=FaixaConcentracao(10.0, 42.0),
-                   agente="metil_etil_cetona"),
+                   concentracao=FaixaConcentracao(10.0, 42.0)),
         Componente(cas="9003-22-9", nome="Copolímero de PVC",
                    concentracao=FaixaConcentracao(15.0, 35.0), agente=None),
         Componente(cas="141-78-6", nome="Acetato de Etila",

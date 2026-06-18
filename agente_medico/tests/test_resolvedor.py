@@ -88,10 +88,12 @@ def test_gate_ramo_a_slug_resolvido() -> None:
     assert pend is None
 
 
-def test_gate_ramo_a_popula_carcinogeno_true() -> None:
+def test_gate_ramo_a_nao_sobrescreve_flag_cru_false() -> None:
+    # Reversão 003.V: gate NÃO propaga is_carcinogeno_iarc do índice.
+    # Componente tem flag=False (default); índice benzeno=True; flag deve continuar False.
     comp, pend = gate_cas(_comp("71-43-2", "benzeno"), _INDICE)
     assert comp.agente == "benzeno"
-    assert comp.is_carcinogeno_iarc is True
+    assert comp.is_carcinogeno_iarc is False
     assert pend is None
 
 
@@ -128,3 +130,107 @@ def test_gate_ramo_d_cas_ausente() -> None:
     assert pend.tipo == "cas_ausente"
     assert pend.bloqueante is False
     assert pend.destinatario == "empresa"
+
+
+# ---------------------------------------------------------------------------
+# MUDANÇA 5a: reversão fonte-de-flag (D-ARQ-36 nota 003.V)
+# ---------------------------------------------------------------------------
+
+def test_gate_reversao_nao_sobrescreve_flag() -> None:
+    # gate_cas NÃO propaga is_carcinogeno_iarc do índice para o Componente.
+    # FALHA sob 003.T (sobrescrevia via entrada.is_carcinogeno_iarc),
+    # PASSA pós-reversão (D-ARQ-36 nota 003.V).
+    # Índice tem dioxido_de_titanio=True; componente tem is_carcinogeno_iarc=False → deve ficar False.
+    _idx_reversao = {"13463677": EntradaIndice("dioxido_de_titanio", True)}
+    comp_cru = Componente(cas="13463-67-7", nome="TiO2", is_carcinogeno_iarc=False)
+    comp, pend = gate_cas(comp_cru, _idx_reversao)
+    assert comp.agente == "dioxido_de_titanio"
+    assert comp.is_carcinogeno_iarc is False   # gate NÃO sobrescreveu, apesar do índice True
+    assert pend is None
+
+
+# ---------------------------------------------------------------------------
+# MUDANÇA 5b: ramos sobre CAS reais (índice de teste à mão; padrão _INDICE existente)
+# ---------------------------------------------------------------------------
+
+_INDICE_T65: dict[str, EntradaIndice] = {
+    "78933": EntradaIndice("metil_etil_cetona", False),  # MEK 78-93-3
+    "67641": EntradaIndice("acetona", False),            # acetona 67-64-1
+}
+
+
+def test_gate_ramo_a_mek() -> None:
+    # MEK CAS "78-93-3" → válido + slug → ramo(a)
+    comp, pend = gate_cas(_comp("78-93-3", "MEK"), _INDICE_T65)
+    assert comp.agente == "metil_etil_cetona"
+    assert pend is None
+
+
+def test_gate_ramo_a_acetona() -> None:
+    # acetona CAS "67-64-1" → válido + slug → ramo(a)
+    comp, pend = gate_cas(_comp("67-64-1", "acetona"), _INDICE_T65)
+    assert comp.agente == "acetona"
+    assert pend is None
+
+
+def test_gate_ramo_c_tio2_cas_errado() -> None:
+    # TiO2 CAS da FISPQ "134363-67-7" falha o dígito verificador → ramo(c)
+    comp, pend = gate_cas(_comp("134363-67-7", "TiO2 fispq"), _INDICE_T65)
+    assert comp.agente is None
+    assert pend is not None
+    assert pend.tipo == "cas_invalido"
+    assert pend.bloqueante is True
+
+
+def test_gate_ramo_b_copolimero_pvc() -> None:
+    # CAS "9003-22-9" (copolímero PVC): válido no dígito, sem slug no índice → ramo(b)
+    comp, pend = gate_cas(_comp("9003-22-9", "Copolimero PVC"), _INDICE_T65)
+    assert comp.agente is None
+    assert pend is not None
+    assert pend.tipo == "vocabulario_ausente"
+    assert pend.bloqueante is False
+
+
+def test_gate_ramo_c_aluminato_cas_invalido() -> None:
+    # CAS "1242-78-3" (aluminato tricálcico da fixture cimento): falha o dígito → ramo(c).
+    # [CONFERIR confirmado]: cas_bem_formado("1242-78-3") is False.
+    comp, pend = gate_cas(_comp("1242-78-3", "aluminato"), _INDICE_T65)
+    assert comp.agente is None
+    assert pend is not None
+    assert pend.tipo == "cas_invalido"
+    assert pend.bloqueante is True
+
+
+# ---------------------------------------------------------------------------
+# MUDANÇA 5c: cadeia resolver_composicao — recorte mínimo (NÃO executar, NÃO Fase C)
+# ---------------------------------------------------------------------------
+
+def test_resolver_composicao_hidrata_mek() -> None:
+    from datetime import date
+
+    from agente_medico.motor.composicao import resolver_composicao
+    from agente_medico.motor.tipos import FDS, GHEPGR, PGR, ProdutoQuimico
+
+    pgr_cru = PGR(
+        validade=date(2025, 1, 1),
+        assinatura_engenheiro=True,
+        ghes=(
+            GHEPGR(
+                id="ghe_test",
+                nome="GHE teste",
+                cargos=(),
+                riscos=(),
+                epis=(),
+                produtos_quimicos=(
+                    ProdutoQuimico(
+                        nome="Adesivo MEK",
+                        fds=FDS(composicao=(Componente(cas="78-93-3", nome="MEK"),)),
+                    ),
+                ),
+                psicossocial=False,
+            ),
+        ),
+    )
+    idx = {"78933": EntradaIndice("metil_etil_cetona", False)}
+    pgr_resolvido = resolver_composicao(pgr_cru, idx)
+    assert pgr_resolvido.ghes[0].produtos_quimicos[0].fds.composicao[0].agente == "metil_etil_cetona"
