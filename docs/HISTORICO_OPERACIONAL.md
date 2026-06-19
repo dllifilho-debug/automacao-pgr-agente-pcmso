@@ -2076,3 +2076,19 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Pendências.** Backlog triado por urgência no handoff 003.Y: DT-FDS-01 no topo (incorreção clínica ativa, próxima frente após o arco). (i') fecha DH-003P-01 e muda a asserção do teste 5. Demais inalteradas. DH-003M-01 vigiada nesta gravação (newlines reais).
 
 **Docs.** DECISOES → v47 (notas 003.X em D-ARQ-35/36). PROTOCOLO v24 intocado (nenhuma R-* tocada).
+
+## Sessão 003.Y — 19/06/2026 — ARQUITETURA: forma da propagação da pendência do gate-CAS (D-ARQ-37)
+
+**Foco.** Fechar a forma de DH-003P-01 — como a `Pendencia` que `resolver_composicao` descarta (003.W) chega ao `Resultado`. Só-ARQUITETURA por decisão do Diovanni; implementação é 003.Z.
+
+**Gate de abertura.** main em `e31edd1`, sincronizada (`git status` limpo). Baseline 261 isolado / 410 total RECONFIRMADO por pytest real do Diovanni. Literais relidos por `git show`: `tipos.py`, `orquestrador.py`, `riscos.py`, `composicao.py`, `resolvedor.py`, `protocolo.py`, `pendencias_estruturais.py`, `test_integracao_viverde.py`, DECISOES inteiro. Divergência de ambiente reconciliada: briefing do Code vinha de container (branch `claude/stoic-bohr-d8nwbz`, deps ausentes, "403+7 skipped"); estado real da máquina do Diovanni venceu (main, 261/410 verde).
+
+**Seis passadas adversariais (cada uma corrigiu a anterior).** (1ª) Inflei o leque com "plugar dentro de `executar`" — morto: regride D-ARQ-09/15. (2ª) Tratei a pendência do gate como redundante com a da Fase C — falso: a do gate distingue causa/destinatário (b=protocolo/não-bloq, c=empresa/bloq, d=empresa/não-bloq), a da Fase C achata tudo em empresa/bloq. (3ª) Propus "Stage 3 vira dono da boa-formação de CAS" — refutada pela ordem de estágios: Stage 2/Fase C roda ANTES do Stage 3, o componente já passou com `agente=None`; e a procedência c-vs-b só vive no `[1]` do gate antes do descarte, irreconstruível a jusante. (4ª) Localizei o achatamento na Fase C — corrigido: o achatamento c≡b nasce no descarte do `[1]` em `resolver_composicao`; a Fase C é só onde o sintoma aparece. (5ª) "wrapper sem propagação como fatia isolada segura" — refutado: gate (003.S) e predicado (003.J) isolados eram seguros por serem INERTES (sem chamador); um wrapper plugado em `executar` é consumidor ATIVO que regride sinalização no instante da chamada. (6ª) Ia gravar carimbo de `ghe_id` + destino `pendencias_globais` — incoerente: pendência com GHE vive em `MatrizGHE`, não no balde global. Resolvido (A): pendências do gate são globais, sem `ghe_id`; costura por `replace`, não mutação.
+
+**Entrega.** D-ARQ-37 (forma α: `resolver_composicao -> tuple[PGR, list[Pendencia]]`, pendências globais sem `ghe_id`, wrapper `executar_com_composicao` costura por `dataclasses.replace`). Realocação ao Stage 3 e forma β rejeitadas com razão registrada. DECISOES → v48. PROTOCOLO v24 intocado (nenhuma R-* tocada). DH-003P-01 fechada no sentido declarado (procedência chega ao Resultado, não "Fase C para de achatar").
+
+**DT-003Y-01 — achatamento residual da Fase C.** Mesmo com α, a Fase C continua emitindo `materialidade_ausente` para componente sem-slug (lê `agente=None`, não vê o `[1]` do gate); α adiciona a pendência precisa ao lado, não suprime a achatada → dupla pendência. Eliminar: Fase C consumir a pendência do gate em vez de re-derivar. Não-bloqueante; fatia/decisão própria.
+
+**Honestidade de escopo.** Zero código. `resolver_composicao` segue isolado em disco; a troca de assinatura, o wrapper e a costura são 003.Z. O salto de produção continua sendo a LLM-transcrição (D-ARQ-25 Parte B), a jusante desta fatia.
+
+**Docs.** DECISOES v47→v48 (D-ARQ-37 + linha de revisão). HISTORICO: este bloco + DT-003Y-01. PROTOCOLO intocado.
