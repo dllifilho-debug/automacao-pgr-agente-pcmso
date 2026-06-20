@@ -2092,3 +2092,21 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Honestidade de escopo.** Zero código. `resolver_composicao` segue isolado em disco; a troca de assinatura, o wrapper e a costura são 003.Z. O salto de produção continua sendo a LLM-transcrição (D-ARQ-25 Parte B), a jusante desta fatia.
 
 **Docs.** DECISOES v47→v48 (D-ARQ-37 + linha de revisão). HISTORICO: este bloco + DT-003Y-01. PROTOCOLO intocado.
+
+## Sessão 003.Z — 20/06/2026 — IMPLEMENTAÇÃO (D-ARQ-37 forma α: troca de assinatura + wrapper + costura)
+
+**Foco.** Materializar a forma α selada na 003.Y (DECISOES v48). Três movimentos: assinatura-tupla de `resolver_composicao`, wrapper `executar_com_composicao`, `executar()` intocado. Spec fechada na decisão — implementação pura.
+
+**Gate de abertura.** main em `e322ccf` (merge 003.Y), sincronizada, limpo. Baseline **261 isolado / 410 total RECONFIRMADO por pytest real** ANTES de tocar arquivo. Branch `feature/003z-impl-d-arq-37` de main limpa. Literais relidos por `git show`: `composicao.py`, `orquestrador.py`, `tipos.py`, `resolvedor.py` (corpo de `gate_cas` — retorno `tuple[Componente, Optional[Pendencia]]`), `test_integracao_composicao_fase_c.py`, `fds_t65.py`. `git grep` repo-inteiro mapeou os 3 call sites ativos (test_integracao:54,66; test_resolvedor:235) — zero em produção/legado.
+
+**Duas passadas de verificação sobre o prompt cirúrgico (regra de fatia que toca assinatura compartilhada).** 1ª passada pegou: grep sub-escopado (`-- agente_medico/`) → ampliado p/ repo inteiro; STOP-AND-REPORT estreito ("003.W/003.X") → "qualquer teste, novo ou legado"; asserções de ramo fundadas em comentário → confronto contra `fds_t65.py` literal (TiO₂ `134363-67-7` ramo c, aluminato `1242-78-3` 2º ramo c, copolímero `9003-22-9` ramo b, segredo industrial cas="" ramo d — dígitos verificados à mão); contagem exata por ramo → presença `>=1` (fixture tem múltiplos por ramo). 2ª passada pegou: asserção universal-negativa `not base_vocab` (dependia de ter lido todos os stages) → diferencial `n_wrap == n_base + n_gate`; gate de ambiente ausente (Code roda em container com deps faltando) → exigência explícita de máquina real.
+
+**Entrega.** `composicao.py`: assinatura-tupla, acúmulo do `[1]`, docstring atualizada. `orquestrador.py`: wrapper `executar_com_composicao` (imports `dataclasses`/`resolver_composicao`/`EntradaIndice` adicionados). 3 unpacks `pgr, _ = …`. `test_composicao_propaga_pendencias.py` novo (9 testes). `executar()` byte-idêntico. Commit `df3cad2`, merge `cba6048` (PR #90, "Create a merge commit"). Suíte 270 isolado / 419 total, 100% verde.
+
+**Verificação de mypy (registro honesto).** O prompt cirúrgico cravou "mypy zero erro" — critério MAL-ESCRITO. O baseline já tinha 26 erros (DH-003P-01 / imports `Materialidade`, fora de escopo). O Code reportou "26 pré-existentes" corretamente; o confronto real (`df3cad2` vs `df3cad2~1`, filtro `: error:`) deu 26=26 → delta ZERO, zero regressão. Lição de método: enquanto DH-003P-01 estiver aberta, o aceite de mypy em prompt cirúrgico é "delta zero vs. baseline", NUNCA "zero absoluto". O "27" intermediário foi a linha-sumário `Found N errors` casando com filtro `"error"` largo; `: error:` filtra limpo.
+
+**Pendências.** DH-003P-01: forma fechada em 003.Y, MATERIALIZADA EM CÓDIGO em 003.Z. DT-003Y-01 ABERTA (achatamento da Fase C: dupla pendência para componente sem-slug — `materialidade_ausente` da Fase C + pendência precisa do gate; eliminar é Fase C consumir a do gate em vez de re-derivar; fatia/decisão própria). DT-FDS-01 elevada como próxima frente (R-BIO-02 vs eixo Quadro 1/2 do Anexo I vigente da NR-07 — CONHECIMENTO, lado-médico). LLM-transcrição (D-ARQ-25 Parte B) segue sendo o salto de produção, a jusante.
+
+**Honestidade de escopo.** `executar_com_composicao` nasce SEM chamador de produção (espelha 003.J/003.S): só os 9 testes o exercitam. Não tira de produção — a entrada segue fixture. O plug no Streamlit/produção e a LLM-transcrição são fatias futuras. A 003.Z fecha o arco de composição no nível de motor (a pendência do gate agora chega ao Resultado), não no nível de produção.
+
+**Docs.** DECISOES v48→v49 (nota 003.Z em D-ARQ-37 + linha de versão). HISTORICO: este bloco. PROTOCOLO v24 intocado (nenhuma R-* tocada).
