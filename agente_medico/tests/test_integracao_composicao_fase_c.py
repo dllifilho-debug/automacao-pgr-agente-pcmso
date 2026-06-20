@@ -51,7 +51,7 @@ def _pgr_cru() -> PGR:
 
 
 def _ctx_resolvido(ghe_id: str) -> GHEContext:
-    pgr = resolver_composicao(_pgr_cru(), _INDICE)
+    pgr, _ = resolver_composicao(_pgr_cru(), _INDICE)
     ghe = next(g for g in pgr.ghes if g.id == ghe_id)
     ctx = GHEContext(pgr_ghe=ghe)
     stage_2_riscos(ctx, _PROTO)
@@ -63,7 +63,7 @@ def _quimicos(ctx: GHEContext) -> list[Risco]:
 
 
 def test_resolver_composicao_resolve_slugs_do_vocabulario_real() -> None:
-    pgr = resolver_composicao(_pgr_cru(), _INDICE)
+    pgr, _ = resolver_composicao(_pgr_cru(), _INDICE)
     adesivo = next(g for g in pgr.ghes if g.id == "adesivo")
     fds = adesivo.produtos_quimicos[0].fds
     assert fds is not None
