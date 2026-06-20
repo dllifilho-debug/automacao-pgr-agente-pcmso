@@ -232,5 +232,5 @@ def test_resolver_composicao_hidrata_mek() -> None:
         ),
     )
     idx = {"78933": EntradaIndice("metil_etil_cetona", False)}
-    pgr_resolvido = resolver_composicao(pgr_cru, idx)
+    pgr_resolvido, _ = resolver_composicao(pgr_cru, idx)
     assert pgr_resolvido.ghes[0].produtos_quimicos[0].fds.composicao[0].agente == "metil_etil_cetona"

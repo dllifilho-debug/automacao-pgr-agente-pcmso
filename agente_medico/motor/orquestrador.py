@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import dataclasses
 from datetime import date
 
+from agente_medico.motor.composicao import resolver_composicao
 from agente_medico.motor.estagios.anexacao import anexar_pendencias
 from agente_medico.motor.estagios.consolidacao import ConflitoProtocolo, stage_8_consolidacao
 from agente_medico.motor.estagios.emissao import stage_5_emissao
@@ -10,6 +12,7 @@ from agente_medico.motor.estagios.pendencias_estruturais import stage_3_pendenci
 from agente_medico.motor.estagios.predicados_stage import stage_4_predicados
 from agente_medico.motor.estagios.riscos import stage_2_riscos
 from agente_medico.motor.protocolo import Protocolo
+from agente_medico.motor.resolvedor import EntradaIndice
 from agente_medico.motor.tipos import (
     ExameEmitido,
     GHEContext,
@@ -105,4 +108,23 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
         matrizes=matrizes,
         pendencias_globais=pendencias_globais,
         motivo_rejeicao=None,
+    )
+
+
+def executar_com_composicao(
+    pgr: PGR,
+    protocolo: Protocolo,
+    indice_cas: dict[str, EntradaIndice],
+    hoje: date | None = None,
+) -> Resultado:
+    """Costura D-ARQ-37 (forma α, 003.Z): resolve a composição da FDS (gate-CAS) ANTES
+    de executar(), e remonta o Resultado anexando as pendências do gate ao balde global.
+    Pendências do gate são globais (sem ghe_id) — gate roda a montante da mesa de GHE.
+    Remontagem via dataclasses.replace; NUNCA mutação de pendencias_globais.
+    """
+    pgr_resolvido, pend_gate = resolver_composicao(pgr, indice_cas)
+    resultado = executar(pgr_resolvido, protocolo, hoje)
+    return dataclasses.replace(
+        resultado,
+        pendencias_globais=resultado.pendencias_globais + pend_gate,
     )
