@@ -2148,3 +2148,21 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Honestidade de escopo.** NÃO substitui o campo, NÃO toca motor, NÃO implementa R-BIO-04. Documenta o estado real de `anexo_nr07` (consumo-zero verificado por git nesta sessão) para que a implementação de R-BIO-04 não regrepe a semântica do zero. A substituição em si é da sessão de R-BIO-04.
 
 **Docs.** PROTOCOLO v26 (DT-003AB-01). HISTORICO: este bloco. DECISOES v50 (changelog 003.AB, sem alteração de conteúdo de D-ARQ).
+
+## Sessão 003.AC — 21/06/2026 — ARQUITETURA (consumo de `tipo_ibe`: D-ARQ-38)
+
+**Foco.** Abrir R-BIO-04 como ARQUITETURA. Decidir a forma do consumidor de `tipo_ibe` que DT-003AB-01 deixou como insumo herdado. Sem código.
+
+**Gate.** main em `f808efa` (merge PR #93, 003.AB), confirmado por kickoff colado — git venceu. PROTOCOLO v26 e DECISOES v50 lidos inteiros nesta sessão. pytest não reconfirmado (sessão não toca motor; baseline 270/419 herdada da 003.Z, [INTERPRETADO] no gate de procedência).
+
+**Gate de estado real (3 greps + 1 show, em disco).** (1) `git grep tipo_ibe`: campo NÃO existe em produção — só fixture `test_resolvedor.py:49-50` + docs. Migração é introduzir campo novo, não repopular. Achado: a fixture tagueia `benzeno: tipo_ibe SC` — errado por R-BIO-04 (benzeno via SPMA/TTMA = Quadro 1/EE); teste-verde-mentiroso latente, herdado pela CONHECIMENTO. (2) `git grep anexo_nr07 '*.py'`: reconfirmado blast radius — 3 hidratações vivas (riscos.py:25,98,143) + 1 fallback (riscos.py:36) + def (tipos.py:103) + 2 asserções semânticas (test_riscos_stage.py:66,85) + ~15 construções `=None` em 5 arquivos de teste (git venceu o handoff: ~15, não ~18). (3) `git grep emite '*.py'`: schema emite SLUG LITERAL FIXO (emissao.py:47,79), não biomarcador-do-agente. (4) `git show agentes.yaml`: mapa agente→biomarcador é ZERO-VOCABULÁRIO (nenhum campo biomarcador/ibmp em nenhum agente). etanol/MEK/HCl com anexo_nr07 "11" (NR-15 Anexo 11) — não mapeiam uniforme p/ tipo_ibe.
+
+**Passadas adversariais (4).** (1) Derrubou "DT-003Y-01 é IMPLEMENTAÇÃO contida" (turno anterior do Arquiteto): carrega seam de dedup wrapper-vs-Fase-C, e o caminho é sintético (sem D-ARQ-25 Parte B) — rebaixada. (2) Confirmou R-BIO-04 ≠ IMPLEMENTAÇÃO direta: derivação tipo_ibe é três-vias (EE/SC/None), não duas — agente "11"/NR-15 sem IBE no Anexo I viraria EE por engano (superdimensionamento, D-ARQ-22). (3) Sobre o fork de mecanismo: refutou "Opção 2 família-YAML" (schema emite slug fixo, não biomarcador-por-agente) E refutou o fechamento prematuro do fork — o mapa biomarcador inexistente bloqueia QUALQUER forma de emissor de biomonitoramento; decidir mecanismo agora é arquitetar sobre dado fantasma. Encontrou R-CLI-02 como consumidor barato (emite exame_clinico slug-fixo, schema basta, torna tipo_ibe vivo já). (4) Sobre o texto de D-ARQ-38: corrigiu R-CLI-03 NÃO consome tipo_ibe (Mn por identidade de agente, via NR-15); R-CLI-02 precisa só de {EE,SC}-vs-None (não distingue EE/SC); R-CLI-02 esbarra no dedup convergente clínico anual (R-CLI-01) × semestral — seam ABERTO de D-ARQ-31 nota fatia 3 [INCERTO — confirmar R-CLI-01 é regra emitindo exame_clinico 12M].
+
+**Entrega (docs-only).** D-ARQ-38 (DECISOES v50→v51): dois consumidores de tipo_ibe de prontidões distintas; campo-consumido-não-morto; emissor de biomonitoramento adiado por dependência do mapa biomarcador; ordem de fatias. Sem regra clínica (PROTOCOLO intocado, v26). Sem código.
+
+**Pendências.** DT-003AB-01 segue ABERTA (herdada por R-BIO-04, agora com a topologia de consumo decidida). DT-003Y-01 ABERTA (dupla pendência Fase C, rebaixada nesta sessão a "atrás da transcrição-LLM"). Colisão de ID DH-003P-01 detectada na leitura (PROTOCOLO seção 11 = redirect de imports ABERTA; D-ARQ-37 fronteira diz "fechada" referindo-se à propagação — dois débitos sob um ID) — registrar conserto em sessão futura; não tocada aqui. Demais DTs/DHs abertas intocadas. Achados de procedência p/ a CONHECIMENTO seguinte: fixture benzeno SC errada; três "11" não-uniformes.
+
+**Natureza do próximo passo.** CONHECIMENTO (derivar tipo_ibe três-vias + mapa agente→biomarcador contra texto MTE, uma sessão) antes de qualquer IMPL.
+
+**Docs.** DECISOES v51 (D-ARQ-38). HISTORICO: este bloco. PROTOCOLO v26 inalterado.
