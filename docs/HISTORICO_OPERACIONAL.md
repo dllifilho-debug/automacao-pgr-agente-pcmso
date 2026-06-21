@@ -2110,3 +2110,23 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Honestidade de escopo.** `executar_com_composicao` nasce SEM chamador de produção (espelha 003.J/003.S): só os 9 testes o exercitam. Não tira de produção — a entrada segue fixture. O plug no Streamlit/produção e a LLM-transcrição são fatias futuras. A 003.Z fecha o arco de composição no nível de motor (a pendência do gate agora chega ao Resultado), não no nível de produção.
 
 **Docs.** DECISOES v48→v49 (nota 003.Z em D-ARQ-37 + linha de versão). HISTORICO: este bloco. PROTOCOLO v24 intocado (nenhuma R-* tocada).
+
+## Sessão 003.AA — 20/06/2026 — CONHECIMENTO (reabertura DT-FDS-01: R-BIO-02 → R-BIO-04)
+
+**Foco.** Reabrir DT-FDS-01 (R-BIO-02 contradito pelo Anexo I vigente). CONHECIMENTO-só, sem código.
+
+**Gate.** main em `ca865aa`, limpo. Baseline 270/419 herdada (não reconfirmada por pytest — sessão não toca motor). PROTOCOLO v24 lido inteiro. NR-07 vigente (567/2022) lida no texto oficial gov.br/MTE — Anexo I Quadros 1 e 2 INTEIROS (Quadro 2 não fora lido na 003.F), itens 7.5.12–7.5.19.6, Anexo V.
+
+**Derivação.** Eixo = Quadro do Anexo I onde o indicador está listado (IBE/EE vs IBE/SC), não carcinogenicidade. Quadro 1 → só periódico (7.5.15 literal); Quadro 2 → cinco momentos (a contrario). Quadro 2 = cádmio/chumbo-inorg/anticolinesterásicos/flúor. Benzeno: regime duplo (TTMA Quadro 1 + hemograma via Anexo V/IN 02-1995). Manganês fora do eixo.
+
+**Passada de verificação (adversarial).** Corrigiu 4 pontos antes do fecho: (1) Quadro-2-cinco-momentos é a contrario, não literal — status diferenciado; (2) contra-exemplo cádmio é ambíguo → trocado por tolueno/solventes, direção do erro invertida (super, não subdimensionamento); (3) R-BIO-02 pode não ter consumidor no motor — implementação é incógnita factual, não dada; (4) "output estável" de R-CLI-02/03 era confiança demais — semestral é conduta Carolini (7.5.8 = anual), borda Anexo-V → INTERPRETADO.
+
+**Entrega (docs-only).** PROTOCOLO v24→v25: R-BIO-04 nova; R-BIO-02 DEPRECATED; R-CLI-02/03 relabel + changelog; DT-FDS-01 RESOLVIDA. DECISOES intocado. Sem código, sem alteração de teste.
+
+**Versionamento.** R-BIO-04 nova ID (muda saída: solventes Quadro 1 → só periódico). R-CLI-02/03 mesma ID + changelog (saída estável).
+
+**Pendências.** DT-FDS-01 RESOLVIDA. 003.AB: `git grep` de consumidor de R-BIO-02/`anexo_nr07` decide IMPLEMENTAÇÃO (consumidor emite errado → teste-tolueno falha-e-passa) vs. ARQUITETURA (sem roteador → roteador genérico vs. momentos por-pacote; criar sem consumidor = fiação fantasma). DT-FDS-02, DT-003M-01/02, DT-003T-01, DH-003M-01, DH-003P-01 seguem abertas, intocadas.
+
+**Honestidade de escopo.** Formaliza o eixo no PROTOCOLO; NÃO altera o motor. O que o motor emite para biomonitoramento não foi verificado por `git grep` nesta sessão — conformidade motor↔R-BIO-04 é a 003.AB.
+
+**Docs.** PROTOCOLO v25 (este). HISTORICO: este bloco. DECISOES intocado.
