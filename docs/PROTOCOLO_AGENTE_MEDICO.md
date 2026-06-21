@@ -827,6 +827,30 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 ---
 
+### DT-003AB-01 — Campo `anexo_nr07` é eixo morto/misturado; insumo herdado pela implementação de R-BIO-04 `[ABERTA — input para sessão de R-BIO-04]`
+
+**Origem:** Sessão 003.AB (21/06/2026), ARQUITETURA-leve de higiene de dado. Investigação derivada do apontamento de 003.AA ("`git grep` de consumidor de R-BIO-02/`anexo_nr07` decide IMPLEMENTAÇÃO vs. ARQUITETURA").
+
+**Achado (medido nesta sessão, não herdado de handoff).** O campo `anexo_nr07` (`agentes.yaml`, hidratado em `Risco`) está em estado terminal sob o eixo vigente (567/2022) e nenhum doc vivo registrava o estado real:
+
+1. **Consumo de produção = zero** `[VERIFICADO — git grep '*.py' nesta sessão]`. Nenhuma regra, predicado ou estágio lê `.anexo_nr07` do `Risco` para rotear momento/exame/periodicidade. As únicas leituras são duas asserções de teste (`test_riscos_stage.py`, asserções `risco.anexo_nr07 is None`) checando o caso de vocabulário `null` (benzeno). O campo é armazenado, nunca consumido.
+2. **Hidratação viva em 3 sítios** `[VERIFICADO — git grep]`: as três Fases (A/B/C) de `riscos.py` que fazem `meta.get("anexo_nr07")`. A 4ª ocorrência no mesmo arquivo é `anexo_nr07=None` literal (fallback de vocabulário-ausente), não hidratação. Não há re-hidratação em via separada — o comentário em `resolvedor.py` ("`is_ototoxico`/`anexo_nr07` re-hidratados por-slug no lado-médico") refere-se a esses 3 sítios.
+3. **Eixo misturado entre duas normas** `[VERIFICADO — agentes.yaml colado nesta sessão]`. O campo nomeado `anexo_nr07` carrega: `"I"` (silica, asbesto) = NR-07 Anexo I; `"11"` (etanol, metil_etil_cetona, cloreto_de_hidrogenio) = **NR-15 Anexo 11** (LT de insalubridade), redundante com `tem_lt`. Um campo, dois eixos normativos, nome que promete um só.
+4. **`"I"` em silica/asbesto é semanticamente vazio** `[INTERPRETADO]`. Poeira mineral não tem IBE no Anexo I — silica/asbesto roteiam por R-RX-01 (RX OIT por CLSC/LEO), não por biomonitoramento. O `"I"` ali não denota "Quadro 1".
+5. **Comentário-benzeno stale** `[VERIFICADO]`. O comentário em `agentes.yaml` que começa `# anexo_nr07 e tem_lt = null` cita "débito DT-FDS-01 (lado-médico, sessão própria)" como aberto; DT-FDS-01 foi RESOLVIDA em 003.AA. O `null` do benzeno permanece correto (dispara por identidade de agente, R-PKG-BZ); só o comentário envelheceu.
+
+**Por que é insumo herdado, não decisão a executar agora.** O eixo-alvo do biomonitoramento é `tipo_ibe ∈ {EE, SC}` (D-ARQ-33, contrato da mesa) — e R-BIO-04 (v25) roteia por "natureza do indicador IBE/EE vs IBE/SC", não por `anexo_nr07`. Logo a substituição `anexo_nr07 → tipo_ibe` é **consequência mecânica** de implementar R-BIO-04 (não há como rotear EE/SC sem campo EE/SC), não decisão própria da 003.AB. É **substituição, não rename**: `"11"` (NR-15) não traduz para EE/SC, obrigando re-derivar por agente (qual Quadro, ou nenhum) — trabalho clínico que pertence à sessão de R-BIO-04. Esta DT existe para que essa sessão herde a leitura semântica (estado do campo + os 5 achados acima) em vez de regrepá-la do zero; o gate de estado real de R-BIO-04 confirma *estado* (git/baseline), não *semântica*.
+
+**O que a implementação de R-BIO-04 deve fazer (pré-condições, a confirmar por git naquela sessão):**
+1. Reconfirmar consumo-zero e o número de sítios (`git grep anexo_nr07 '*.py'` no repo inteiro — tipo compartilhado, varredura total per 003.I).
+2. Substituir `anexo_nr07: Optional[str]` por `tipo_ibe` (forma `{EE,SC}` vs. enum a decidir na fatia), re-derivando o valor por agente via Quadro 1/2 de R-BIO-04 — `"11"`/NR-15 sai (redundante com `tem_lt`), `"I"`/silica-asbesto vira `None` (sem IBE).
+3. Blast radius medido nesta sessão: a definição em `tipos.py`, 3 hidratações em `riscos.py`, 1 comentário em `resolvedor.py`, e ~18 sítios de teste que constroem `Risco` passando `anexo_nr07=None` (contagem por grep; alguns em compreensão de lista — reconferir na migração). Todos tocados ao migrar o campo.
+4. Corrigir o comentário stale (`agentes.yaml`, bloco `# anexo_nr07 e tem_lt = null`) — R-BIO-04 reescreve esse trecho ao introduzir `tipo_ibe` de qualquer forma.
+
+**Status:** ABERTA. Não-bloqueante (consumo-zero verificado → campo morto não causa dano até R-BIO-04 escrever o consumidor, que lerá `tipo_ibe`). Lado-médico/vocabulário. Herdada pela sessão de implementação de R-BIO-04.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -872,3 +896,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v23 | 14/06/2026 | Sessão 003.P (IMPLEMENTAÇÃO): DH-003P-01 adicionada (imports de `Materialidade` apontam p/ módulo re-exportador, não `tipos` canônico — higiene de código). Nenhuma regra clínica criada/alterada (`regras.yaml` intocado; fatia 1 de D-ARQ-35 é contrato de risco, não conduta). |
 | v24 | 16/06/2026 | Sessão 003.T: DT-003T-01 adicionada (`is_sensibilizante` ausente do `agentes.yaml`; gate-CAS popula só `is_carcinogeno_iarc`; introduzi-la é sessão de dado própria, cruza DT-003M-01). Fatia 2 de D-ARQ-36 Parte 3 — sem regra clínica criada/alterada (gate materializa D-ARQ, não R-*). |
 | v25 | 20/06/2026 | Sessão 003.AA (CONHECIMENTO): DT-FDS-01 RESOLVIDA. R-BIO-04 nova (eixo Quadro 1/IBE-EE só-periódico [7.5.15 literal] vs Quadro 2/IBE-SC cinco-momentos [a contrario]; carcinógeno = Anexo V, não desloca momento; caso-âncora tolueno/solventes — superdimensionamento); R-BIO-02 DEPRECATED. R-CLI-02/03 relabel "Anexo I/II" → "Quadro 1/2 do Anexo I" (mesma ID; semestral = conduta Carolini, não 7.5.8; borda Anexo-V [INTERPRETADO]). Quadro 2 lido inteiro (MTE). Sem código. |
+| v26 | 21/06/2026 | Sessão 003.AB (ARQUITETURA-leve): DT-003AB-01 adicionada (seção 11) — campo `anexo_nr07` mapeado como eixo morto (consumo-zero verificado por git) e misturado (NR-07 "I" / NR-15 "11"), insumo herdado pela implementação de R-BIO-04 (substituição → `tipo_ibe`, D-ARQ-33). Sem regra clínica criada/alterada; sem código. |

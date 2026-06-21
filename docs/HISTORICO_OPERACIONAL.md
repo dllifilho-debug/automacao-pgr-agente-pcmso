@@ -2130,3 +2130,21 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Honestidade de escopo.** Formaliza o eixo no PROTOCOLO; NÃO altera o motor. O que o motor emite para biomonitoramento não foi verificado por `git grep` nesta sessão — conformidade motor↔R-BIO-04 é a 003.AB.
 
 **Docs.** PROTOCOLO v25 (este). HISTORICO: este bloco. DECISOES intocado.
+
+## Sessão 003.AB — 21/06/2026 — ARQUITETURA-leve (higiene de dado: campo `anexo_nr07`)
+
+**Foco.** Decidir o destino do campo `anexo_nr07` órfão e de eixo-misturado, apontado no fim da 003.AA. ARQUITETURA-leve, sem código.
+
+**Gate.** main em `a8dd343` (merge PR #92, 003.AA), confirmado por kickoff colado — git venceu, não recalculado. PROTOCOLO v25 e DECISOES v49 lidos inteiros nesta sessão (não só kickoff/handoff). pytest não reconfirmado: sessão não toca motor; baseline 270/419 herdada da 003.Z permanece. (Nota: briefing-sandbox reportou 0/0 por PyYAML ausente — não é regressão; se a sessão de R-BIO-04 rodar no mesmo sandbox, confirmar PyYAML antes de confiar em contagem.)
+
+**Investigação.** `git grep anexo_nr07 '*.py'` (repo inteiro) + os dois greps de `agentes.yaml` que a 003.AA deixou pendentes. Achado: campo com **consumo de produção zero** (só 2 asserções de teste), **3 hidratações vivas** (Fases A/B/C de `riscos.py`; a 4ª ocorrência no arquivo é fallback `=None`), **eixo misturado NR-07 `"I"` / NR-15 `"11"`** sob nome que promete uma norma, `"I"` semanticamente vazio em silica/asbesto, e comentário-benzeno stale citando DT-FDS-01 (resolvida em 003.AA).
+
+**Passadas de verificação (3 + 1 de erros nos textos).** (1) Derrubou os números cravados sem git no início ("5 hidratações" → 3 reais + 1 fallback; "sem consumidor" era premissa-de-handoff → virou fato por grep). (2) Refutou "D-ARQ-33 crava que `quadro_anexo_i` está errado" — D-ARQ-33 nomeia `tipo_ibe` no contexto da ficha-engenheiro; a conclusão (alvo = `tipo_ibe`) sobrevive por consistência de vocabulário, `[DERIVADO]`, não "crava". (3) A decisiva: trocou a natureza da entrega de "decisão a registrar (acoplar a R-BIO-04)" — que é não-decisão, pois R-BIO-04 força a substituição por construção — para "achado a preservar". A substituição `anexo_nr07 → tipo_ibe` é consequência mecânica de R-BIO-04; o valor da 003.AB é documentar a leitura semântica do campo (que o gate mecânico de R-BIO-04 não reproduz) para a sessão de R-BIO-04 herdar. (4) Passada de erros sobre os textos de fechamento corrigiu data inventada, lista de pendências fingindo exaustividade, versão DECISOES com formato sem precedente, e SHA futuro cravado.
+
+**Entrega (docs-only).** PROTOCOLO v25→v26: DT-003AB-01 adicionada (seção 11) — campo `anexo_nr07` mapeado como eixo morto/misturado, insumo herdado por R-BIO-04. DECISOES v49→v50: linha de changelog 003.AB (sem D-ARQ novo — não é decisão de arquitetura, é achado). Sem código, sem alteração de teste, sem branch de código.
+
+**Pendências.** DT-003AB-01 ABERTA (herdada por R-BIO-04). As DTs/DHs abertas herdadas da 003.AA seguem abertas e intocadas (DT-FDS-02, DT-003M-01/02, DT-003T-01, DH-003M-01, DH-003P-01), mais DT-003Y-01 (aberta em 003.Z) e DT-003L-01 — lista completa e canônica na seção 11 do PROTOCOLO; não reauditada exaustivamente nesta sessão. R-CLI-02/03 mantêm marca INTERPRETADO (borda Anexo-V) — sessão CONHECIMENTO própria.
+
+**Honestidade de escopo.** NÃO substitui o campo, NÃO toca motor, NÃO implementa R-BIO-04. Documenta o estado real de `anexo_nr07` (consumo-zero verificado por git nesta sessão) para que a implementação de R-BIO-04 não regrepe a semântica do zero. A substituição em si é da sessão de R-BIO-04.
+
+**Docs.** PROTOCOLO v26 (DT-003AB-01). HISTORICO: este bloco. DECISOES v50 (changelog 003.AB, sem alteração de conteúdo de D-ARQ).
