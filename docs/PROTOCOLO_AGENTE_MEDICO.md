@@ -179,11 +179,16 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 Exame clínico **anual** é o piso — vale inclusive para administrativo sem risco.
 **Justificativa clínica:** trabalhadores com doença crônica devem ter clínico anual; como não há triagem prévia, padroniza-se anual para todos.
 
-#### R-CLI-02 — Anexo I e Anexo II (NR-07) `[VALIDADO]`
-Cada anexo, isoladamente, demanda clínico **semestral**. Quando o trabalhador está exposto a agentes de **ambos os anexos**, registrar em **uma única linha** semestral (não duplicar).
+#### R-CLI-02 — Quadro 1 e Quadro 2 do Anexo I (NR-07) `[VALIDADO]`
+Exposição a agente biomonitorado do Anexo I (Quadro 1 ou Quadro 2) demanda clínico **semestral**. Quando exposto a agentes de **ambos os Quadros**, registrar em **uma única linha** semestral (não duplicar).
 
-#### R-CLI-03 — Manganês fora dos Anexos `[VALIDADO]`
-O **manganês** é o único agente fora dos Anexos I e II da NR-07 que dispara clínico semestral. Base: NR-15 — exposição a Mn exige avaliação biológica independente do limite de tolerância.
+> **Changelog 003.AA (mesma ID — relabel sem mudança de saída).** "Anexo I / Anexo II" → "Quadro 1 / Quadro 2 do Anexo I" (567/2022; "Anexo II" da NR-07 é ruído, não químico-com-LT). O conjunto de agentes que dispara o semestral não muda → saída estável → ID preservada.
+> **Ressalva `[INTERPRETADO — prioridade na revisão de saída]`:** o semestral é conduta da Dra. Carolini, não a NR-07 — item 7.5.8 fixa clínico **anual** para exposto (menor a critério médico). A borda "carcinógeno só de Anexo V, sem indicador no Anexo I, dispara semestral?" não está cravada (fonte primária congelada desde 002.M) — inspecionar na revisão de saída.
+
+#### R-CLI-03 — Manganês fora do Anexo I `[VALIDADO]`
+O **manganês** é o único agente fora do Anexo I (Quadros 1 e 2) da NR-07 que dispara clínico semestral. Base: NR-15 — exposição a Mn exige avaliação biológica independente do limite de tolerância.
+
+> **Changelog 003.AA (mesma ID).** "fora dos Anexos I e II" → "fora do Anexo I (Quadros 1 e 2)": Mn não consta em nenhum Quadro do Anexo I; o antigo "Anexo II" era o balde químico-com-LT (vocabulário pré-567), hoje inexistente nesse sentido. Conteúdo inalterado. A unicidade sob o eixo novo segue `[VALIDADO]`; reconfirmar de passagem se algum agente de Anexo V a altera (`[INTERPRETADO — revisão de saída]`).
 
 #### R-CLI-04 — Risco físico isolado `[VALIDADO]`
 **Nenhum** risco físico (ruído, calor, vibração) isoladamente justifica clínico semestral. O default anual prevalece.
@@ -332,12 +337,35 @@ Qualquer vibração (corpo inteiro ou mãos-braços) → **audiometria 12M**, me
 #### R-BIO-01 — Periodicidade fixa `[VALIDADO]`
 Todo exame de biomonitoramento de agente químico = **6 meses**. Sem exceção.
 
-#### R-BIO-02 — Matriz temporal por Anexo NR-07 `[VALIDADO]`
-- **Anexo I** (carcinógenos sem LT seguro) → biomonitoramento **apenas no periódico**
-- **Anexo II** (com LT) → biomonitoramento em **adm + per + RT + MR + dem**
+#### R-BIO-02 — Matriz temporal por Anexo NR-07 `[DEPRECATED — sucedida por R-BIO-04 em 003.AA; ver DT-FDS-01]`
+
+> **Redação original preservada para rastreabilidade (não remover — auditoria histórica do PCMSO):**
+> - Anexo I (carcinógenos sem LT seguro) → biomonitoramento apenas no periódico
+> - Anexo II (com LT) → biomonitoramento em adm + per + RT + MR + dem
+
+**Motivo da depreciação.** O critério "Anexo I/II = carcinógeno-sem-LT / com-LT" contradiz o Anexo I vigente (567/2022): o eixo é Quadro 1 (IBE/EE) vs Quadro 2 (IBE/SC) e "Anexo II" da NR-07 é ruído. A reclassificação muda a saída temporal de agentes de alta frequência (solventes) → exigiu nova ID. Sucessora: R-BIO-04.
 
 #### R-BIO-03 — Manganês `[VALIDADO]`
 Qualquer exposição confirmada a Mn → **manganês sanguíneo semestral em adm + per + MR**. Base: NR-15, independente do LT.
+
+#### R-BIO-04 — Matriz temporal por Quadro do Anexo I (NR-07) `[DERIVADO — NR-07 Anexo I + itens 7.5.13/7.5.15/7.5.19.4/7.5.19.5, Portaria MTP 567/2022, texto oficial MTE]`
+
+Sucede R-BIO-02. O eixo do biomonitoramento químico é o **Quadro do Anexo I onde o indicador da substância está listado** (natureza do indicador: IBE/EE vs IBE/SC) — NÃO carcinogenicidade nem presença de LT.
+
+- **Quadro 1 — IBE/EE** (exposição excessiva; sem caráter diagnóstico, afere absorção e sinaliza exposição acima do LEO): biomonitoramento **6M, obrigatório apenas no periódico**. `[DERIVADO — literal 7.5.15]` Alteração → médico informa o PGR para reavaliação dos riscos (7.5.19.4); não é conduta clínica individual.
+- **Quadro 2 — IBE/SC** (significado clínico; evidencia disfunção orgânica): biomonitoramento **6M em adm + per + RT + MR + dem**. `[DERIVADO — 7.5.15 a contrario: o item exime só o Quadro 1; o Quadro 2 segue a obrigação geral de 7.5.6/7.5.12. Inferência expressio-unius, não frase literal afirmativa — inspecionar na revisão de saída]` Alteração → CAT/afastamento/Previdência/reavaliação PGR (7.5.19.5).
+
+Ambos a 6M ±45d (7.5.13). "Obrigatório apenas no periódico" não impede o médico de solicitar exame extra em outro momento (7.5.18).
+
+**Roteamento substância→Quadro** (leitura direta da tabela do Anexo I, não da carcinogenicidade):
+- **Quadro 2 (IBE/SC), 4 entradas:** cádmio e compostos inorgânicos; chumbo e compostos inorgânicos (Pb-S + ALA-U); inseticidas inibidores da colinesterase; flúor, ácido fluorídrico e fluoretos inorgânicos.
+- **Quadro 1 (IBE/EE):** todo o restante da tabela — solventes (tolueno, xilenos, MEK, acetona, n-hexano, estireno…), Cr⁶⁺, CO, benzeno (via SPMA/TTMA), etc.
+
+**Carcinógenos têm regime próprio no Anexo V** (gatilho: exposição >10% do LEO ou sem avaliação ambiental; prontuário 40 anos; benzeno remetido a IN SSST 02/1995 + Portaria de Consolidação 5/MS). A carcinogenicidade **não** desloca a substância para "só periódico" — o momento é decidido pelo Quadro do indicador.
+
+**Caso-âncora da mudança de saída (motiva nova ID, não R-BIO-02 corrigido):** o **tolueno** e os solventes comuns (xileno, MEK, acetona — os agentes mais frequentes nas matrizes reais) têm LT, não são carcinógenos, e o indicador é IBE/EE (Quadro 1) → **só periódico**. O critério de R-BIO-02 ("com LT → cinco momentos") os emitia em adm+per+RT+MR+dem → **superdimensionamento**. Como muda a matriz temporal de agentes de alta frequência → nova ID. (Cádmio NÃO serve de contra-exemplo: carcinógeno E com LT ao mesmo tempo, ambíguo nos dois baldes do critério antigo.)
+
+R-BIO-01 (6M) e R-BIO-03 (manganês, fora do Anexo I, via NR-15) inalterados quanto a conteúdo.
 
 ---
 
@@ -676,7 +704,17 @@ A distinção não é cosmética: a própria seção **Consequência** do D-ARQ-
 3. Mapear os demais agentes modelados (R-BIO-03 manganês; solventes) em Quadro 1 vs Quadro 2, conferindo se algum muda de comportamento temporal sob o eixo correto.
 4. Redigir a sucessora (nova ID) por eixo Quadro 1/Quadro 2, momentos derivados de 7.5.13/7.5.15; R-BIO-02 → DEPRECATED com link.
 
-**Status:** ABERTA. Não bloqueia a frente FDS. Não-conformidade de regra `[VALIDADO]` contra norma vigente — sinalizada, não silenciosa. R-BIO-02 segue vivo e marcado até a reabertura.
+**Status:** RESOLVIDA na 003.AA (20/06/2026).
+
+**Resolução (003.AA).** Quadro 2 lido por inteiro no texto oficial (gov.br/MTE, 567/2022). Eixo formalizado em **R-BIO-04** (nova ID); R-BIO-02 → DEPRECATED.
+1. Quadro 1 (IBE/EE) → só periódico (7.5.15 literal); Quadro 2 (IBE/SC) → adm+per+RT+MR+dem (7.5.15 a contrario); 6M ±45d ambos (7.5.13).
+2. Quadro 2 = cádmio inorg., chumbo inorg. (Pb-S+ALA-U), inseticidas anticolinesterásicos, flúor/fluoretos. Quadro 1 = restante.
+3. Benzeno (item 2 resolvido): TTMA/SPMA são Quadro 1 → periódico; hemograma+reticulócitos do R-PKG-BZ vêm do regime benzeno (Anexo V → IN SSST 02/1995 + Portaria Consolidação 5/MS), não do Quadro 1. R-PKG-BZ válido; âncora esclarecida. Siderurgia mantém regra vigente (obs. da tabela do Quadro 1).
+4. Manganês (R-BIO-03): fora do Anexo I — eixo não o toca.
+5. Mudança de saída que motiva nova ID: tolueno/solventes (Quadro 1, com LT, não carcinógenos) — R-BIO-02 emitia 5 momentos, R-BIO-04 emite só periódico (superdimensionamento). Cádmio descartado como contra-exemplo (ambíguo: carcinógeno E com LT).
+6. Irmãs R-CLI-02/03: relabel "Anexo I/II" → "Quadro 1/2 do Anexo I" (mesma ID + changelog). Borda Anexo-V do semestral → [INTERPRETADO — revisão de saída].
+
+**Derivada para 003.AB (IMPLEMENTAÇÃO ou ARQUITETURA — `git grep` decide):** confirmar se R-BIO-02 tem consumidor no motor (roteador `anexo_nr07 → momentos`). Hipótese da passada de verificação 003.AA: os momentos moram nos pacotes/por-exame (solventes já saem periódico-só na matriz de referência; R-PKG-BZ já crava TTMA só no periódico), não em roteador genérico — nesse caso não há teste-que-falha e criar o roteador seria fiação fantasma.
 
 **Apontamento-irmão (não confundir com esta DT):** R-CLI-02 e R-CLI-03 usam o mesmo vocabulário "Anexo I / Anexo II" e podem sofrer do mesmo rótulo pré-567/2022 — mas governam **clínico semestral**, não biomonitoramento, e são regra distinta. Verificar na mesma sessão de reabertura, como item separado.
 
@@ -833,3 +871,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v22 | 13/06/2026 | Sessão 003.N: nota de andamento em DT-003M-02 (frente b-mínimo — 2 solventes de FDS populados em agentes.yaml: acetona, acetato_de_etila; DT segue ABERTA). Sem regra clínica alterada. |
 | v23 | 14/06/2026 | Sessão 003.P (IMPLEMENTAÇÃO): DH-003P-01 adicionada (imports de `Materialidade` apontam p/ módulo re-exportador, não `tipos` canônico — higiene de código). Nenhuma regra clínica criada/alterada (`regras.yaml` intocado; fatia 1 de D-ARQ-35 é contrato de risco, não conduta). |
 | v24 | 16/06/2026 | Sessão 003.T: DT-003T-01 adicionada (`is_sensibilizante` ausente do `agentes.yaml`; gate-CAS popula só `is_carcinogeno_iarc`; introduzi-la é sessão de dado própria, cruza DT-003M-01). Fatia 2 de D-ARQ-36 Parte 3 — sem regra clínica criada/alterada (gate materializa D-ARQ, não R-*). |
+| v25 | 20/06/2026 | Sessão 003.AA (CONHECIMENTO): DT-FDS-01 RESOLVIDA. R-BIO-04 nova (eixo Quadro 1/IBE-EE só-periódico [7.5.15 literal] vs Quadro 2/IBE-SC cinco-momentos [a contrario]; carcinógeno = Anexo V, não desloca momento; caso-âncora tolueno/solventes — superdimensionamento); R-BIO-02 DEPRECATED. R-CLI-02/03 relabel "Anexo I/II" → "Quadro 1/2 do Anexo I" (mesma ID; semestral = conduta Carolini, não 7.5.8; borda Anexo-V [INTERPRETADO]). Quadro 2 lido inteiro (MTE). Sem código. |
