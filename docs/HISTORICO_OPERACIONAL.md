@@ -2166,3 +2166,21 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Natureza do próximo passo.** CONHECIMENTO (derivar tipo_ibe três-vias + mapa agente→biomarcador contra texto MTE, uma sessão) antes de qualquer IMPL.
 
 **Docs.** DECISOES v51 (D-ARQ-38). HISTORICO: este bloco. PROTOCOLO v26 inalterado.
+
+## Sessão 003.AD — 21/06/2026 — CONHECIMENTO (derivação `tipo_ibe` três-vias + mapa agente→biomarcador: fatia (a) de D-ARQ-38)
+
+**Foco.** Cláusula 4(a) de D-ARQ-38: derivar, contra o texto oficial do Anexo I (Portaria 567/2022, gov.br/MTE), (1) `tipo_ibe` três-vias {EE/SC/None} por agente de `agentes.yaml` e (2) o mapa agente→biomarcador. Os dois saem do mesmo Anexo I. Sem código.
+
+**Gate.** main em `7bb59e6` (merge PR #94, 003.AC), confirmado por kickoff colado — git venceu, sem divergência. PROTOCOLO v26 e DECISOES v51 lidos inteiros nesta sessão. pytest não reconfirmado (CONHECIMENTO não toca motor; baseline 270/419 herdada da 003.Z, `[INTERPRETADO]`). `agentes.yaml` colado pelo Diovanni para a aplicação por-slug.
+
+**Texto oficial.** PDF da Portaria 567/2022 obtido em gov.br/trabalho-e-emprego; Quadro 1 (IBE/EE, 41 substâncias) e Quadro 2 (IBE/SC, 4 entradas) do Anexo I lidos inteiros, com abreviaturas de momento de coleta. Quadro 2 bate exatamente com o que R-BIO-04 (003.AA) já listava.
+
+**Entrega (docs-only).** Critério três-vias (SC⟺Quadro 2 / EE⟺Quadro 1 / None⟺ausente) — D-ARQ-38 aplicação 003.AD. Mapa agente→biomarcador (slug→indicador) — R-BIO-04 changelog 003.AD. Tabela `tipo_ibe` por slug (12 EE + 1 SC + resto None) — DT-003AB-01 nota de derivação. Nenhuma regra clínica criada/alterada (R-BIO-04 enriquecido, mesma ID).
+
+**Achados.** (1) Procedência herdada confirmada: benzeno=EE (fixture `test_resolvedor.py:50` SC errada); MEK=EE; etanol/HCl=None (`[INCERTO]`→`[DERIVADO]`). (2) 9 dos 12 EE têm `cas:null` → tipo_ibe é dado gravado, não casado por CAS; CAS faltantes são tarefa paralela. (3) chumbo ambíguo (Q2/SC inorgânico vs Q1/EE tetraetila) → SC recomendado, decisão a gravar explícita. (4) is_ototoxico ⊥ tipo_ibe (cianeto/manganês ototóxicos + None; 12 ototóxicos = 9 EE + 1 SC + 2 None). (5) Cardinalidade heterogênea do mapa (chumbo 2-simultâneos Pb-S+ALA-U; benzeno/CO/tolueno/estireno N-alternativos; resto 1:1) confirma o data-bloqueio do emissor (fatia d). (6) Cobertura SC parcial: dos 4 SC do Quadro 2, só chumbo tem slug.
+
+**Pendências.** DT-003AB-01 segue ABERTA (derivação anexada; migração de campo é fatia b). Comentário stale do benzeno no yaml a corrigir na fatia b (DT-FDS-01 já resolvida em 003.AA). Demais DTs/DHs intocadas.
+
+**Natureza do próximo passo.** IMPLEMENTAÇÃO fatia (b) de D-ARQ-38: campo `tipo_ibe` (forma a decidir na abertura) + migração `anexo_nr07 → tipo_ibe` transcrevendo a tabela 003.AD; gate de tipo compartilhado (repo inteiro, per 003.I) + passada adversária extra no prompt (per 003.W).
+
+**Docs.** DECISOES v52 (D-ARQ-38 aplicação 003.AD). PROTOCOLO v27 (R-BIO-04 changelog + DT-003AB-01 nota). HISTORICO: este bloco.

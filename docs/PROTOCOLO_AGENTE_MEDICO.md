@@ -367,6 +367,26 @@ Ambos a 6M ±45d (7.5.13). "Obrigatório apenas no periódico" não impede o mé
 
 R-BIO-01 (6M) e R-BIO-03 (manganês, fora do Anexo I, via NR-15) inalterados quanto a conteúdo.
 
+> **Changelog 003.AD (mesma ID — mapa biomarcador + confirmação da lista contra texto oficial).** Quadro 1 (41 substâncias) e Quadro 2 (4) conferidos inteiros no texto oficial (Portaria 567/2022, gov.br/MTE). Quadro 2 confirmado: cádmio e comp. inorg. (cádmio urina); chumbo e comp. inorg. (Pb-S **e** ALA-U — dois indicadores simultâneos); inseticidas inibidores da colinesterase (acetilcolinesterase eritrocitária *ou* butilcolinesterase plasma/soro); flúor/HF/fluoretos inorg. (fluoreto urinário). Cardinalidade não-uniforme (1:1 / N-alternativos / 2-simultâneos) é o que mantém a forma do emissor adiada (D-ARQ-38 cl.3). Dos 4 agentes SC do Quadro 2, o vocabulário modela só chumbo; dos 41 EE do Quadro 1, modela 12. `[DERIVADO — NR-07 Anexo I Quadros 1/2, Portaria 567/2022, texto oficial MTE]`
+
+Mapa agente→biomarcador dos agentes do vocabulário (insumo para o emissor de biomonitoramento, fatia d de D-ARQ-38 — mecanismo ainda data-bloqueado):
+
+| agente (slug) | Quadro | biomarcador (Anexo I) |
+|---|---|---|
+| acetona | 1/EE | acetona urina |
+| arsenio | 1/EE | As inorg. + metabólitos metilados urina (exceto arsina/arsenato de gálio) |
+| benzeno | 1/EE | S-PMA *ou* TTMA urina |
+| dissulfeto_de_carbono | 1/EE | TTCA urina ("Sulfeto de carbono" no Anexo) |
+| estireno | 1/EE | ác. mandélico+fenilglioxílico *ou* estireno urina |
+| mercurio | 1/EE | mercúrio urina ("Mercúrio metálico"; orgânico fora) |
+| metil_etil_cetona | 1/EE | MEK urina |
+| monoxido_de_carbono | 1/EE | COHb *ou* CO ar exalado |
+| n_hexano | 1/EE | 2,5-hexanodiona urina |
+| tolueno | 1/EE | tolueno sangue/urina *ou* o-cresol urina |
+| tricloroetileno | 1/EE | ác. tricloroacético *ou* tricloroetanol |
+| xileno | 1/EE | ác. metilhipúrico urina |
+| chumbo (inorgânico) | 2/SC | Pb-S **e** ALA-U |
+
 ---
 
 ## 6. PACOTES POR CARGO / ATIVIDADE
@@ -847,6 +867,18 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 3. Blast radius medido nesta sessão: a definição em `tipos.py`, 3 hidratações em `riscos.py`, 1 comentário em `resolvedor.py`, e ~18 sítios de teste que constroem `Risco` passando `anexo_nr07=None` (contagem por grep; alguns em compreensão de lista — reconferir na migração). Todos tocados ao migrar o campo.
 4. Corrigir o comentário stale (`agentes.yaml`, bloco `# anexo_nr07 e tem_lt = null`) — R-BIO-04 reescreve esse trecho ao introduzir `tipo_ibe` de qualquer forma.
 
+**Derivação 003.AD (21/06/2026) — `tipo_ibe` derivado por slug; a fatia b transcreve, não re-deriva.** A sessão CONHECIMENTO 003.AD derivou o conteúdo de `tipo_ibe` por agente contra o texto oficial do Anexo I (critério e mapa biomarcador em D-ARQ-38 aplicação 003.AD e R-BIO-04 changelog 003.AD). Tabela que a migração da fatia b transcreve:
+- **EE** (12): acetona, arsenio, benzeno, dissulfeto_de_carbono, estireno, mercurio, metil_etil_cetona, monoxido_de_carbono, n_hexano, tolueno, tricloroetileno, xileno.
+- **SC** (1): chumbo `[decisão: inorgânico — ver refinamento 3]`.
+- **None**: todos os demais (etanol, cloreto_de_hidrogenio, acetato_de_etila, dioxido_de_titanio, propanediamina_tridecyloxy, quimico_nao_especificado, cianeto_de_hidrogenio, manganes, silica, asbesto, poeira_nao_classificada, fumos_metalicos + físicos/ergonômicos/acidente/biológico).
+
+Refinamentos aos passos da migração desta DT:
+1. Passo 2 ("re-derivar tipo_ibe por agente") está **feito** — a fatia b transcreve a tabela acima. `"11"`/NR-15 → MEK=EE, etanol=HCl=None; `"I"`/silica-asbesto → None.
+2. **benzeno=EE** corrige (a) a fixture `test_resolvedor.py:50` (taggeava SC) e (b) o comentário stale do benzeno no `agentes.yaml` (bloco `# anexo_nr07 e tem_lt = null ... débito DT-FDS-01`): DT-FDS-01 RESOLVIDA (003.AA) e tipo_ibe=EE derivado — reescrever ao introduzir tipo_ibe.
+3. **chumbo=SC** é decisão a gravar explícita (Q2 inorgânico vs Q1 tetraetila); não cravar em silêncio.
+4. **9 dos 12 EE têm `cas: null`** → `tipo_ibe` é dado gravado, não casado por CAS; popular os 9 CAS (arsenio, dissulfeto_de_carbono, estireno, mercurio, monoxido_de_carbono, n_hexano, tolueno, tricloroetileno, xileno) é tarefa de dado paralela à fatia b, não pré-requisito dela.
+5. **Cobertura SC parcial**: dos 4 SC do Quadro 2, só chumbo tem slug. Cádmio, inseticidas anticolinesterásicos e flúor/fluoretos não existem em `agentes.yaml` — quando a extração os trouxer, viram `vocabulario_ausente` (D-ARQ-14), não erro silencioso. Expansão de vocabulário é sessão de dado própria.
+
 **Status:** ABERTA. Não-bloqueante (consumo-zero verificado → campo morto não causa dano até R-BIO-04 escrever o consumidor, que lerá `tipo_ibe`). Lado-médico/vocabulário. Herdada pela sessão de implementação de R-BIO-04.
 
 ---
@@ -897,3 +929,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v24 | 16/06/2026 | Sessão 003.T: DT-003T-01 adicionada (`is_sensibilizante` ausente do `agentes.yaml`; gate-CAS popula só `is_carcinogeno_iarc`; introduzi-la é sessão de dado própria, cruza DT-003M-01). Fatia 2 de D-ARQ-36 Parte 3 — sem regra clínica criada/alterada (gate materializa D-ARQ, não R-*). |
 | v25 | 20/06/2026 | Sessão 003.AA (CONHECIMENTO): DT-FDS-01 RESOLVIDA. R-BIO-04 nova (eixo Quadro 1/IBE-EE só-periódico [7.5.15 literal] vs Quadro 2/IBE-SC cinco-momentos [a contrario]; carcinógeno = Anexo V, não desloca momento; caso-âncora tolueno/solventes — superdimensionamento); R-BIO-02 DEPRECATED. R-CLI-02/03 relabel "Anexo I/II" → "Quadro 1/2 do Anexo I" (mesma ID; semestral = conduta Carolini, não 7.5.8; borda Anexo-V [INTERPRETADO]). Quadro 2 lido inteiro (MTE). Sem código. |
 | v26 | 21/06/2026 | Sessão 003.AB (ARQUITETURA-leve): DT-003AB-01 adicionada (seção 11) — campo `anexo_nr07` mapeado como eixo morto (consumo-zero verificado por git) e misturado (NR-07 "I" / NR-15 "11"), insumo herdado pela implementação de R-BIO-04 (substituição → `tipo_ibe`, D-ARQ-33). Sem regra clínica criada/alterada; sem código. |
+| v27 | 21/06/2026 | Sessão 003.AD (CONHECIMENTO): R-BIO-04 changelog 003.AD (mapa agente→biomarcador + confirmação Quadro 1/2 contra texto oficial; mesma ID); DT-003AB-01 nota de derivação (tabela tipo_ibe por slug que a fatia b transcreve; benzeno=EE corrige fixture+comentário stale; chumbo=SC; 9 CAS null; cobertura SC parcial). DT-003AB-01 segue ABERTA. Sem regra criada/alterada; sem código. |
