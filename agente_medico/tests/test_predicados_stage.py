@@ -34,7 +34,7 @@ def _ctx_altura() -> GHEContext:
                 fonte="explicito",
                 detalhe=None,
                 quantificacao=None,
-                anexo_nr07=None,
+                tipo_ibe=None,
             )
         ],
     )
@@ -84,7 +84,7 @@ def test_predicado_ausente_eh_cacheado_sem_pendencia() -> None:
         fonte="pgr",
         detalhe=None,
         quantificacao=None,  # sem quantificação → ruido_acima_acao retorna Ausente
-        anexo_nr07=None,
+        tipo_ibe=None,
     )
     ctx = GHEContext(pgr_ghe=_ghe(), riscos=[risco_ruido])
 

@@ -94,13 +94,18 @@ class PGR:
     ghes: tuple[GHEPGR, ...]
 
 
+class TipoIBE(Enum):
+    EE = "EE"
+    SC = "SC"
+
+
 @dataclass(frozen=True)
 class Risco:
     agente: str
     fonte: str
     detalhe: Optional[str]
     quantificacao: Optional[Quantificacao]
-    anexo_nr07: Optional[str]
+    tipo_ibe: Optional[TipoIBE]
     is_ototoxico: bool = False
     # D-ARQ-35 Parte 3: 4ª fonte de risco (químico de composição). materialidade = atributo
     # do risco, não filtro de existência. Flags de materialidade copiadas-pra-frente do

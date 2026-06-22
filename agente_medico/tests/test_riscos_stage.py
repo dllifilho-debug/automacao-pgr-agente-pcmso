@@ -11,6 +11,7 @@ from agente_medico.motor.tipos import (
     GHEPGR,
     Quantificacao,
     RiscoPGR,
+    TipoIBE,
 )
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
@@ -63,8 +64,26 @@ def test_hidrata_risco_explicito_com_anexo_nr07(proto):  # type: ignore[no-untyp
     assert risco.agente == "fumos_metalicos"
     assert risco.fonte == "explicito"
     assert risco.quantificacao == quant
-    assert risco.anexo_nr07 is None  # vocabulário define null
+    assert risco.tipo_ibe is None  # vocabulário define null
     assert ctx.pendencias == []
+
+
+def test_hidrata_risco_com_tipo_ibe_ee(proto):  # type: ignore[no-untyped-def]
+    ghe = _ghe(
+        riscos=(
+            RiscoPGR(
+                tipo="quimico",
+                agente="acetona",
+                quantificacao=None,
+                severidade=None,
+            ),
+        )
+    )
+    ctx = GHEContext(pgr_ghe=ghe)
+    stage_2_riscos(ctx, proto)
+
+    assert len(ctx.riscos) == 1
+    assert ctx.riscos[0].tipo_ibe == TipoIBE.EE
 
 
 def test_risco_explicito_agente_ausente_gera_pendencia_nao_bloqueante(proto):  # type: ignore[no-untyped-def]
@@ -82,7 +101,7 @@ def test_risco_explicito_agente_ausente_gera_pendencia_nao_bloqueante(proto):  #
     stage_2_riscos(ctx, proto)
 
     assert len(ctx.riscos) == 1
-    assert ctx.riscos[0].anexo_nr07 is None
+    assert ctx.riscos[0].tipo_ibe is None
     assert ctx.riscos[0].fonte == "explicito"
 
     assert len(ctx.pendencias) == 1

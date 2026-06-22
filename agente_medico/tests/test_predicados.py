@@ -30,13 +30,13 @@ def _ghe_vazio() -> GHEPGR:
 
 
 def _ctx(*agentes: str) -> GHEContext:
-    riscos = [Risco(agente=a, fonte="teste", detalhe=None, quantificacao=None, anexo_nr07=None) for a in agentes]
+    riscos = [Risco(agente=a, fonte="teste", detalhe=None, quantificacao=None, tipo_ibe=None) for a in agentes]
     return GHEContext(pgr_ghe=_ghe_vazio(), riscos=riscos)
 
 
 def _ctx_ruido_quantificado(relacao_LT: str | None, apenas_qualitativa: bool = False) -> GHEContext:
     q = Quantificacao(valor=85.0, unidade="dB(A)", relacao_LT=relacao_LT, pct_LT=None, apenas_qualitativa=apenas_qualitativa)
-    risco = Risco(agente="ruido", fonte="medicao", detalhe=None, quantificacao=q, anexo_nr07=None)
+    risco = Risco(agente="ruido", fonte="medicao", detalhe=None, quantificacao=q, tipo_ibe=None)
     return GHEContext(pgr_ghe=_ghe_vazio(), riscos=[risco])
 
 
@@ -96,7 +96,7 @@ def test_ruido_acima_acao_false_sem_risco_ruido() -> None:
 
 
 def test_ruido_acima_acao_ausente_sem_quantificacao() -> None:
-    risco = Risco(agente="ruido", fonte="teste", detalhe=None, quantificacao=None, anexo_nr07=None)
+    risco = Risco(agente="ruido", fonte="teste", detalhe=None, quantificacao=None, tipo_ibe=None)
     ctx = GHEContext(pgr_ghe=_ghe_vazio(), riscos=[risco])
     result = REGISTRO_PRIMITIVOS["ruido_acima_acao"](ctx)
     assert isinstance(result, Ausente)
@@ -145,7 +145,7 @@ def test_avaliar_e_curto_circuito_false() -> None:
 
 def test_avaliar_e_propaga_ausente_se_resto_true() -> None:
     ctx = _ctx_ruido_quantificado(relacao_LT=None)  # ruido_acima_acao → Ausente
-    ctx.riscos.append(Risco(agente="trabalho_altura", fonte="t", detalhe=None, quantificacao=None, anexo_nr07=None))
+    ctx.riscos.append(Risco(agente="trabalho_altura", fonte="t", detalhe=None, quantificacao=None, tipo_ibe=None))
     expr = {"e": ["altura", "ruido_acima_acao"]}
     result = avaliar(expr, ctx, _p)
     assert isinstance(result, Ausente)
@@ -178,7 +178,7 @@ def test_avaliar_ou_propaga_ausente_se_resto_false() -> None:
 
 def test_avaliar_ou_nao_propaga_ausente_se_tem_true() -> None:
     ctx = _ctx_ruido_quantificado(relacao_LT=None)
-    ctx.riscos.append(Risco(agente="trabalho_altura", fonte="t", detalhe=None, quantificacao=None, anexo_nr07=None))
+    ctx.riscos.append(Risco(agente="trabalho_altura", fonte="t", detalhe=None, quantificacao=None, tipo_ibe=None))
     expr = {"ou": ["altura", "ruido_acima_acao"]}
     assert avaliar(expr, ctx, _p) is True
 

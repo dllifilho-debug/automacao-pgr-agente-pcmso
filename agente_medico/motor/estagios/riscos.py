@@ -5,7 +5,7 @@ from typing import Any
 
 from agente_medico.motor.materialidade import materialidade
 from agente_medico.motor.protocolo import Protocolo
-from agente_medico.motor.tipos import GHEContext, Materialidade, Pendencia, Risco
+from agente_medico.motor.tipos import GHEContext, Materialidade, Pendencia, Risco, TipoIBE
 
 
 def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
@@ -22,7 +22,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     fonte="explicito",
                     detalhe=None,
                     quantificacao=risco_pgr.quantificacao,
-                    anexo_nr07=meta.get("anexo_nr07"),
+                    tipo_ibe=TipoIBE(meta["tipo_ibe"]) if meta.get("tipo_ibe") else None,
                     is_ototoxico=meta.get("is_ototoxico", False),
                 )
             )
@@ -33,7 +33,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     fonte="explicito",
                     detalhe=None,
                     quantificacao=risco_pgr.quantificacao,
-                    anexo_nr07=None,
+                    tipo_ibe=None,
                 )
             )
             ctx.pendencias.append(
@@ -95,7 +95,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                         fonte="implicito_cargo",
                         detalhe=f"derivado do cargo {cargo}",
                         quantificacao=None,
-                        anexo_nr07=meta.get("anexo_nr07") if meta is not None else None,
+                        tipo_ibe=TipoIBE(meta["tipo_ibe"]) if meta is not None and meta.get("tipo_ibe") else None,
                         is_ototoxico=meta.get("is_ototoxico", False) if meta is not None else False,
                     )
                 )
@@ -140,7 +140,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     fonte="quimico_composicao",
                     detalhe=f"componente {componente.nome} do produto {produto.nome}",
                     quantificacao=None,
-                    anexo_nr07=meta.get("anexo_nr07") if meta is not None else None,
+                    tipo_ibe=TipoIBE(meta["tipo_ibe"]) if meta is not None and meta.get("tipo_ibe") else None,
                     is_ototoxico=meta.get("is_ototoxico", False) if meta is not None else False,
                     materialidade=mat,
                     is_carcinogeno_iarc=componente.is_carcinogeno_iarc,
