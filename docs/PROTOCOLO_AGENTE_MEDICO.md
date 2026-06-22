@@ -879,7 +879,21 @@ Refinamentos aos passos da migração desta DT:
 4. **9 dos 12 EE têm `cas: null`** → `tipo_ibe` é dado gravado, não casado por CAS; popular os 9 CAS (arsenio, dissulfeto_de_carbono, estireno, mercurio, monoxido_de_carbono, n_hexano, tolueno, tricloroetileno, xileno) é tarefa de dado paralela à fatia b, não pré-requisito dela.
 5. **Cobertura SC parcial**: dos 4 SC do Quadro 2, só chumbo tem slug. Cádmio, inseticidas anticolinesterásicos e flúor/fluoretos não existem em `agentes.yaml` — quando a extração os trouxer, viram `vocabulario_ausente` (D-ARQ-14), não erro silencioso. Expansão de vocabulário é sessão de dado própria.
 
-**Status:** ABERTA. Não-bloqueante (consumo-zero verificado → campo morto não causa dano até R-BIO-04 escrever o consumidor, que lerá `tipo_ibe`). Lado-médico/vocabulário. Herdada pela sessão de implementação de R-BIO-04.
+**Status:** RESOLVIDA na 003.AE (22/06/2026). A migração de campo `anexo_nr07 → tipo_ibe` (passos 1-4 da DT + refinamentos 1-3 da nota 003.AD) foi materializada: enum `TipoIBE` {EE,SC} in-place, valor re-derivado por slug da tabela acima (12 EE + chumbo SC explícito + resto None), fixture e comentário stale corrigidos, consumo-zero reconfirmado por git, 419→420 verde (D-ARQ-38 aplicação 003.AE; commit `e778da8`, merge `78ba5ee`, PR #96). Resíduos NÃO-migração (refinamentos 4-5: 9 CAS null dos EE + cobertura SC parcial) destacados em **DT-003AE-01**, sessão de dado própria.
+
+---
+
+### DT-003AE-01 — Resíduos de dado pós-migração `tipo_ibe`: 9 CAS null + cobertura SC parcial `[ABERTA — sessão de dado própria]`
+
+**Origem:** Sessão 003.AE (22/06/2026), fechamento da migração `anexo_nr07 → tipo_ibe`. Recorte dos refinamentos 4-5 da nota 003.AD da DT-003AB-01, que NÃO são da migração de campo (tarefa de dado distinta, explicitamente marcada como "não pré-requisito" e "sessão própria").
+
+**Situação.** Dois resíduos de dado, ambos não-bloqueantes:
+1. **9 dos 12 EE têm `cas: null`** em `agentes.yaml` (só acetona, MEK, benzeno têm CAS). `tipo_ibe` é dado gravado por identidade de agente, não casado por CAS em runtime — a migração funcionou sem os CAS. Faltam: arsenio, dissulfeto_de_carbono, estireno, mercurio, monoxido_de_carbono, n_hexano, tolueno, tricloroetileno, xileno. Afeta o gate-CAS (D-ARQ-36) e a extração futura, NÃO `tipo_ibe`.
+2. **Cobertura SC parcial.** Dos 4 agentes SC do Quadro 2 (cádmio, chumbo, anticolinesterásicos, flúor/fluoretos), o vocabulário modela só `chumbo`. Quando a extração trouxer os demais (cádmio/galvanoplastia, fluoretos/alumínio-vidro), viram `vocabulario_ausente` (D-ARQ-14), não erro silencioso.
+
+**O que a resolução exige (sessão de dado, não esta fatia).** Popular os 9 CAS com fonte marcada por agente (CAS Registry, D-ARQ-27) e/ou expandir os slugs SC do Quadro 2. Tarefa de dado com proveniência, natureza distinta de migração de campo — não empilhar.
+
+**Status:** ABERTA. Não-bloqueante. Lado-vocabulário, não toca regra clínica.
 
 ---
 
@@ -930,3 +944,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v25 | 20/06/2026 | Sessão 003.AA (CONHECIMENTO): DT-FDS-01 RESOLVIDA. R-BIO-04 nova (eixo Quadro 1/IBE-EE só-periódico [7.5.15 literal] vs Quadro 2/IBE-SC cinco-momentos [a contrario]; carcinógeno = Anexo V, não desloca momento; caso-âncora tolueno/solventes — superdimensionamento); R-BIO-02 DEPRECATED. R-CLI-02/03 relabel "Anexo I/II" → "Quadro 1/2 do Anexo I" (mesma ID; semestral = conduta Carolini, não 7.5.8; borda Anexo-V [INTERPRETADO]). Quadro 2 lido inteiro (MTE). Sem código. |
 | v26 | 21/06/2026 | Sessão 003.AB (ARQUITETURA-leve): DT-003AB-01 adicionada (seção 11) — campo `anexo_nr07` mapeado como eixo morto (consumo-zero verificado por git) e misturado (NR-07 "I" / NR-15 "11"), insumo herdado pela implementação de R-BIO-04 (substituição → `tipo_ibe`, D-ARQ-33). Sem regra clínica criada/alterada; sem código. |
 | v27 | 21/06/2026 | Sessão 003.AD (CONHECIMENTO): R-BIO-04 changelog 003.AD (mapa agente→biomarcador + confirmação Quadro 1/2 contra texto oficial; mesma ID); DT-003AB-01 nota de derivação (tabela tipo_ibe por slug que a fatia b transcreve; benzeno=EE corrige fixture+comentário stale; chumbo=SC; 9 CAS null; cobertura SC parcial). DT-003AB-01 segue ABERTA. Sem regra criada/alterada; sem código. |
+| v28 | 22/06/2026 | Sessão 003.AE (IMPLEMENTAÇÃO): DT-003AB-01 RESOLVIDA (migração `anexo_nr07 → tipo_ibe` materializada — enum `TipoIBE`, valor por slug, fixture/comentário corrigidos, 419→420). DT-003AE-01 adicionada (resíduos de dado: 9 CAS null dos EE + cobertura SC parcial do Quadro 2 — sessão de dado própria). Sem regra clínica criada/alterada. |
