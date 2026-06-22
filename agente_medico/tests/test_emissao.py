@@ -79,12 +79,12 @@ def _protocolo_ausente(quando_ausente: Any = None) -> Protocolo:
 
 
 def _ctx_com_risco(agente: str, ghe_id: str = "GHE-01") -> GHEContext:
-    risco = Risco(agente=agente, fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None)
+    risco = Risco(agente=agente, fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None)
     return GHEContext(pgr_ghe=_ghe(ghe_id), riscos=[risco])
 
 
 def _ctx_ruido_sem_quantificacao(ghe_id: str = "GHE-01") -> GHEContext:
-    risco = Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None)
+    risco = Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None)
     return GHEContext(pgr_ghe=_ghe(ghe_id), riscos=[risco])
 
 

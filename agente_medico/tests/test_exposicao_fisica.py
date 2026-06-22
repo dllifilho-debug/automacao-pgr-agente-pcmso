@@ -38,7 +38,7 @@ def _ghe(ghe_id: str = "GHE-01") -> GHEPGR:
 
 def _ctx(*agentes: str) -> GHEContext:
     riscos = [
-        Risco(agente=a, fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None)
+        Risco(agente=a, fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None)
         for a in agentes
     ]
     return GHEContext(pgr_ghe=_ghe(), riscos=riscos)
@@ -49,7 +49,7 @@ def _ctx_ruido_quant(relacao_LT: str) -> GHEContext:
         valor=90.0, unidade="dB(A)", relacao_LT=relacao_LT,
         pct_LT=None, apenas_qualitativa=False,
     )
-    risco = Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, anexo_nr07=None)
+    risco = Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, tipo_ibe=None)
     return GHEContext(pgr_ghe=_ghe(), riscos=[risco])
 
 
@@ -59,8 +59,8 @@ def _ctx_ruido_quant_e_vci(relacao_LT: str) -> GHEContext:
         pct_LT=None, apenas_qualitativa=False,
     )
     return GHEContext(pgr_ghe=_ghe(), riscos=[
-        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, anexo_nr07=None),
-        Risco(agente="vibracao_corpo_inteiro", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None),
+        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, tipo_ibe=None),
+        Risco(agente="vibracao_corpo_inteiro", fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None),
     ])
 
 
@@ -284,7 +284,7 @@ def test_execucao_dedup_audiometria_tres_motivos_sem_conflito() -> None:
 def _risco_ototoxico(agente: str = "tolueno") -> Risco:
     return Risco(
         agente=agente, fonte="pgr", detalhe=None,
-        quantificacao=None, anexo_nr07=None, is_ototoxico=True,
+        quantificacao=None, tipo_ibe=None, is_ototoxico=True,
     )
 
 
@@ -315,9 +315,9 @@ def test_raud02_ruido_abaixo_ototoxico_vibracao_emite_demissional_via_branch_com
         pct_LT=None, apenas_qualitativa=False,
     )
     ctx = GHEContext(pgr_ghe=_ghe(), riscos=[
-        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, anexo_nr07=None),
+        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, tipo_ibe=None),
         _risco_ototoxico(),
-        Risco(agente="vibracao_mao_braco", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None),
+        Risco(agente="vibracao_mao_braco", fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None),
     ])
     proto = carregar(_PROTOCOLO_DIR)
     # Garante que o demissional NÃO veio do ramo ruido_acima_acao do `ou`,
@@ -339,9 +339,9 @@ def test_raud02_vibracao_generica_com_ruido_e_ototoxico_bloqueia() -> None:
         pct_LT=None, apenas_qualitativa=False,
     )
     ctx = GHEContext(pgr_ghe=_ghe(), riscos=[
-        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, anexo_nr07=None),
+        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=q, tipo_ibe=None),
         _risco_ototoxico(),
-        Risco(agente="vibracao", fonte="pgr", detalhe=None, quantificacao=None, anexo_nr07=None),
+        Risco(agente="vibracao", fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None),
     ])
     proto = carregar(_PROTOCOLO_DIR)
     stage_5_emissao(ctx, proto)

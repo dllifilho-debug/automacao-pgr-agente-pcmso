@@ -79,7 +79,7 @@ def gate_cas(
     até a Parte 3 plena (tri-estado + is_sensibilizante, sessão própria).
     is_sensibilizante NÃO é tocada — chave inexistente em agentes.yaml (DT-003T-01),
     introduzi-la é sessão de dado própria (cruza DT-003M-01).
-    is_ototoxico / anexo_nr07 permanecem re-hidratados por-slug no lado-médico
+    is_ototoxico / tipo_ibe permanecem re-hidratados por-slug no lado-médico
     (só existem em Risco, não em Componente).
     """
     cas_norm = _so_digitos(componente.cas)
