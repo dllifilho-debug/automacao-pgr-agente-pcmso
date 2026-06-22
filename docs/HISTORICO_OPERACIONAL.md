@@ -2208,3 +2208,89 @@ Nota para a fatia 2: `MatrizGHE` é construída em TRÊS sítios; o produtor de 
 **Pendências.** DT-003AB-01 RESOLVIDA (migração de campo feita; ver PROTOCOLO v28). **DT-003AE-01 nova** — resíduos não-migração: 9 CAS null dos EE + cobertura SC parcial (só chumbo dos 4 Quadro 2). Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01/02, DT-003T-01, DT-003Y-01, DH-003M-01, DH-003P-01, DH-003A-01, demais do balde. R-CLI-02 (fatia c) e o emissor de biomonitoramento (fatia d, data-bloqueado) seguem na fila de D-ARQ-38.
 
 **Docs.** DECISOES v53 (nota 003.AE em D-ARQ-38). PROTOCOLO v28 (DT-003AB-01 RESOLVIDA + DT-003AE-01). HISTORICO: este bloco.
+
+## Sessão 003.AF — 22/06/2026 — ARQUITETURA (seam de dedup convergente; D-ARQ-39; pré-condição de D-ARQ-38 fatia c)
+
+Foco. Resolver o seam de dedup convergente do Stage 8 (D-ARQ-31 fatia 3, recorte deixado
+aberto) — pré-condição arquitetural da fatia (c) de D-ARQ-38 (R-CLI-02 consome tipo_ibe).
+Sem código: decisão de arquitetura.
+
+Gate. main em 6f87089 (merge PR #97, docs 003.AE) sobre 78ba5ee (código fatia b, PR #96),
+confirmado por kickoff colado — git venceu. PROTOCOLO v28 e DECISOES v53 lidos inteiros.
+420/420 verde, mypy --strict delta-zero (26 pré-existentes, DH-003P-01). Número da sessão
+LIDO do HISTORICO (003.AE→003.AF), não calculado.
+
+Gate de número (disparou e resolveu). O prompt cravou "D-ARQ-39" de memória; o gate do Code
+achou que não havia bloco `## D-ARQ-38` (grep `^## D-ARQ-` = 37) e PAROU — exatamente o que
+D-ARQ-26 desenha. Verificação dirigida (greps sem `^##`) revelou caso (a): D-ARQ-38 existe
+CRU na linha ~1052, cabeçalho malformado, não bloco ausente. Número real CONFIRMADO 39 (38
+presente, só torto). O gate fez seu trabalho: pegou estado afirmado-de-memória ("último+1")
+contra disco — convergiram em 39 só após a higiene do cabeçalho.
+
+Gate de estado real (greps/sed em disco). Três leituras decidiram a forma:
+(1) consolidacao.py:20-70 — caminho de convergência tem chave norm=exame.exame (slug, nada
+mais); UM eixo de conflito (periodicidade_meses + periodicidade_apos_15a, igualdade estrita
+46-49 → raise ConflitoProtocolo); TRÊS mutações incondicionais (58-60: momentos |=, motivos
+extend, pendencias_anexadas extend) que rodam sempre que a igualdade não dispara raise.
+(2) tipos.py:157,160 — ExameEmitido tem os dois campos de periodicidade; suporta piso
+component-wise sem mudança de tipo. (3) regras.yaml HEAD — R-CLI-* NÃO EXISTE (busca exata
+e case-insensitive por "cli" → zero match). Nenhuma das duas regras clínicas foi materializada;
+não há branch perdido — é trabalho não feito.
+
+Decisão (D-ARQ-39). Periodicidade divergente no mesmo exame nunca foi contradição de
+protocolo — é composição resolvível célula a célula (mais-frequente-cobre-menos-frequente).
+Resolve por piso component-wise (min em periodicidade_meses e periodicidade_apos_15a,
+None=+∞ nos DOIS campos), substituindo o raise ConflitoProtocolo do caminho de periodicidade
+divergente do dedup. Geral, não clínico-específico — corrige semântica do estágio. As três
+mutações incondicionais ficam intactas; único código novo são as duas atribuições de mínimo
+(o caminho de convergência JÁ É único — não há branch a duplicar; só o gate de entrada muda
+de igualdade-ou-raise para sempre-calcula-mínimo).
+
+Passada adversária (gatilho "qual a melhor saída" + duas verificações). Resolveu contra
+literais: (V-unificação) recomendei unificar merge+piso sem ter lido o branch de merge
+contíguo — o sed 20-70 mostrou que o caminho já é único e as 3 mutações já são incondicionais,
+logo "unificar" era inferência, o disco confirmou que não há o que unificar. (V-proveniência)
+temi apagamento de regra_id na escolha de piso — fantasma: motivos.extend já é aditivo, piso
+escolhe número, não vencedor de proveniência; regra_id vive em Motivo, nunca em campo
+escolhido. (V-âncora) inverti vivo×iminente — corrigido: caso-âncora VIVO é sílica×fumos no
+RX (24M×60M→24M/12M, diagnóstico Viverde); clínico (R-CLI-01×R-CLI-02) é iminente, sem código.
+(V-None) confirmei None=+∞ nos dois campos com o caso sílica-sem-medição (apos_15a=12) × fumos
+(apos_15a=None) → 24M base / 12M após 15a, encurtamento herdado da regra que o tinha.
+
+Requisito de segurança preservado por construção. O piso-sem-teto de D-ARQ-31 (pendência
+bloqueante anexada à linha nunca perdida quando há piso) fica garantido pela linha 60
+(pendencias_anexadas.extend), que já roda incondicional no caminho de convergência — não é
+cláusula de vigilância, é estrutura. Auditor auditar_invariante_piso_teto (003.E) cobre a
+regressão.
+
+Honestidade de redação (pego na passada de fechamento). Não afirmo "ConflitoProtocolo perde
+o ÚNICO disparador" — só li o loop 20-70, não o arquivo inteiro. Afirmo o que o disco prova:
+perde o disparador de periodicidade divergente DESTE loop. O tipo permanece como veículo de
+captura por-GHE de D-ARQ-15 para outros call-sites, se houver.
+
+Nota de implementação obrigatória registrada no D-ARQ. A fatia IMPL recompõe a forma dos
+GHEs afetados: BLOQUEADA→PARCIAL onde o piso passa a emitir (sílica×fumos no RX) é mudança
+esperada, não regressão — a regressão Viverde tri-estado dos 32 GHEs (003.E) DEVE ser
+recomputada e reasserida.
+
+Escopo honesto. Sem código. A fatia (c) de D-ARQ-38 é maior que o handoff supunha: na ordem
+real é seam (esta sessão, 003.AF) → R-CLI-01 IMPL → R-CLI-02 IMPL (nenhuma das duas existe
+em regras.yaml). A derivação dos momentos de R-CLI-02 (protocolo dá "semestral", não os
+momentos) é micro-trabalho da fatia R-CLI-02. Nenhuma regra clínica criada ou alterada —
+R-CLI-01/02, R-RX-01/02 intactas; D-ARQ-39 é contrato de motor.
+
+Higiene de passagem (defeito de cabeçalho do D-ARQ-38). O gate de gravação pegou que o
+bloco D-ARQ-38 (criado na 003.AC) foi gravado em texto CRU — cabeçalho sem `## `, campos
+sem negrito, sem separador `---` (linha ~1052). O grep `^## D-ARQ-` contava 37, não 38.
+Terceira instância da mesma classe (negrito-em-vez-de-## na 002.X–Z; `\r\n` literal em
+DH-003M-01/003.K-L; agora `## ` ausente no D-ARQ-38). Conserto desta sessão: SÓ o prefixo
+`## ` do cabeçalho (defeito FUNCIONAL — quebra o grep do /kickoff e do briefing, D-ARQ-26/30).
+O negrito ausente dos campos internos do D-ARQ-38 é defeito COSMÉTICO, NÃO tocado nesta
+sessão — paliativo sinalizado (registro narrativo aqui, sem ID formal nem bump de PROTOCOLO:
+defeito de markdown do DECISOES não é pendência clínica). Resolve o sintoma funcional, não
+a classe; a recomendação estrutural de DH-003M-01 (arquivo-por-sessão ou tirar o kickoff da
+dependência de `^##`) sobe de prioridade com a 3ª recorrência — candidata a sessão META
+futura (rever o mecanismo de gravação de docs do Code, que corrompe markdown reincidente).
+
+Docs. DECISOES v54 (D-ARQ-39 novo; cabeçalho do D-ARQ-38 corrigido). PROTOCOLO inalterado
+(sem regra clínica — fica v28). HISTORICO: este bloco.
