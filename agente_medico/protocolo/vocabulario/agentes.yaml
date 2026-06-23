@@ -43,56 +43,56 @@ agentes:
     protocolos_especiais: []
   tolueno:
     tipo_ibe: EE
-    cas: null
+    cas: "108-88-3"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   xileno:
     tipo_ibe: EE
-    cas: null
+    cas: "1330-20-7"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   estireno:
     tipo_ibe: EE
-    cas: null
+    cas: "100-42-5"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   n_hexano:
     tipo_ibe: EE
-    cas: null
+    cas: "110-54-3"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   dissulfeto_de_carbono:
     tipo_ibe: EE
-    cas: null
+    cas: "75-15-0"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   tricloroetileno:
     tipo_ibe: EE
-    cas: null
+    cas: "79-01-6"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   monoxido_de_carbono:
     tipo_ibe: EE
-    cas: null
+    cas: "630-08-0"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   cianeto_de_hidrogenio:
     tipo_ibe: null
-    cas: null
+    cas: "74-90-8"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
@@ -100,28 +100,28 @@ agentes:
   chumbo:
     # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): chumbo inorgânico (Pb-S + ALA-U)
     tipo_ibe: SC
-    cas: null
+    cas: "7439-92-1"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   mercurio:
     tipo_ibe: EE
-    cas: null
+    cas: "7439-97-6"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   arsenio:
     tipo_ibe: EE
-    cas: null
+    cas: "7440-38-2"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
   manganes:
     tipo_ibe: null
-    cas: null
+    cas: "7439-96-5"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
