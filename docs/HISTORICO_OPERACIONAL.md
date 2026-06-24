@@ -2362,3 +2362,31 @@ Docs. DECISOES v54 (D-ARQ-39 novo; cabeçalho do D-ARQ-38 corrigido). PROTOCOLO 
 **Pendências abertas (inalteradas, salvo onde notado).** DT-003AE-01 candidata a RESOLVIDA (CAS dos EE gravados) — confirmar na próxima tiragem. propanediamina_tridecyloxy CAS segue [A VALIDAR] (bloqueado pelo gate). DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DH-003M-01 (4ª recorrência), DH-003P-01, DH-003A-01. Fatia 2 da extração (plugar executar_com_composicao no pipeline de produção, sobre índice agora populado) = 003.AJ, vira ARQUITETURA+IMPL.
 
 **Docs.** HISTORICO: este bloco. DECISOES inalterado (v56 — sem D-ARQ novo). PROTOCOLO inalterado (v28).
+
+## Sessão 003.AJ — 23/06/2026 — ARQUITETURA (ponto de entrada de produção do motor novo)
+
+**Foco.** Decidir o ponto de entrada de produção que chama `executar_com_composicao` — recorte da fatia A da extração (003.AH ratificada A→B), separado em ARQUITETURA isolada porque o ponto de entrada é a decisão de design, não encanamento. IMPL de plugar fica para 003.AK. Modo ARQUITETURA puro confirmado por Diovanni após o gate. Número lido do HISTORICO (003.AI → 003.AJ, não calculado).
+
+**Gate.** main em `13cb639` (merge PR #102, docs 003.AI), branch sincronizada com origin. Baseline herdada 420/420 verde, mypy --strict delta-zero (26 pré-existentes DH-003P-01). PROTOCOLO v28 + DECISOES v56 lidos inteiros, cruzados contra a coleta /kickoff — sem divergência git × docs. Untracked `fds_originais/` + `matrizes_originais/` (52 arq.) corretos como não rastreados.
+
+**Achado de disco que reescreveu o foco (três greps, gate de estado real).** O handoff pedia "plugar `executar_com_composicao` no pipeline de produção". Os greps mostraram que não há pipeline de produção onde plugar:
+- `executar()` sem chamador de produção; hits em `app.py` são `_executar_extracao` (flag session_state Streamlit), falso positivo.
+- `executar_com_composicao` com chamador único: `test_composicao_propaga_pendencias.py`.
+- Zero ponto de entrada do motor novo (`__main__`/argparse/main/click ausentes de produção em `agente_medico/`); único hit é `__main__` de teste manual em `test_integracao_viverde.py`. `app.py` é o legado Streamlit, aposentado por D-ARQ-25.
+Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo **ganha** ponto de entrada agora. `[DERIVADO — saída real dos três greps, 003.AJ]`.
+
+**Decisão (D-ARQ-40, DECISOES v57).** Ponto de entrada = fachada fina `processar_pgr` em módulo greenfield `agente_medico/motor/entrada.py`, sobre o wrapper existente. Quatro cláusulas: (1) duas portas — wrapper intocado (índice explícito, testável, ponto de injeção da transcrição-LLM) + `processar_pgr` que esconde a construção do índice do chamador; (2) a decisão é o princípio "fachada esconde a mecânica do índice", NÃO a assinatura concreta (esta é exemplo provisório, condicionada ao disco da AK); (3) contrato de entrada `tipos.PGR` cru (D-ARQ-25 Parte A); `processar_pgr` é a tomada onde a transcrição-LLM (Parte B) injeta, assinatura estável a essa injeção; (4) rótulo cravado — harness de produção, não travessia de PGR real (entrada por fixture até Parte B existir; salto de produção real declarado a jusante). CLI = extensão futura condicionada a parse de PGR real. Greenfield — legado `app.py` intocado.
+
+**Recorte da sessão (por que ARQUITETURA isolada, não ARQUITETURA+IMPL).** O handoff recomendava ARQUITETURA+IMPL. Empurrado para ARQUITETURA isolada porque o IMPL estava bloqueado por um dado de disco (qual o ponto de entrada hoje) que, medido, virou uma decisão de design própria (não há ponto de entrada — criar é arquitetura). Decidir a forma do ponto de entrada no meio de uma sessão com a mão no código arrisca escolher pela conveniência de plugar, não pela universalidade (D-ARQ-06). IMPL vira 003.AK com alvo estável.
+
+**Passadas adversariais (2, sobre a síntese — toca caminho compartilhado, per 003.W).** 1ª: rebaixou "greenfield de entrada.py" e "origem do índice" de afirmações a condicionais de disco da AK. 2ª: corrigiu três "parece decidido" vencendo "está decidido" — (i) "duas portas" é recomendação do Arquiteto não-objetada, NÃO decisão validada do Diovanni (marcado `[INTERPRETADO]`, não `[VALIDADO]`); (ii) a assinatura concreta `(pgr, protocolo, hoje=None)` saiu do corpo da decisão para exemplo provisório — cravá-la seria literal sem fonte de disco (D-ARQ-22); (iii) o encaixe do arquivo `entrada.py` é questão de design da AK (existe `motor/__init__` re-exportando API?), não só de colisão de nome. Resultado: direção intacta, três contornos de forma corretamente amolecidos.
+
+**Higiene confrontada (não fechada).** DT-003AE-01: o handoff sugeria candidata a RESOLVIDA quanto aos CAS dos EE (gravados na 003.AI). Não fechável contra o doc vivo em mãos (PROTOCOLO v28 = 003.AE, anterior à gravação dos CAS da 003.AI). A DT tem dois resíduos (9 CAS null + cobertura SC parcial do Quadro 2); o resíduo CAS está coberto pela 003.AI, o resíduo SC **não** foi tocado. DT segue ABERTA pelo resíduo SC. Confirmar texto exato contra PROTOCOLO pós-003.AI. Sem divergência com o handoff (que dizia "quanto aos CAS", não "RESOLVIDA").
+
+**Procedência de "duas portas".** Item "uma vs. duas portas" colocado a Diovanni e não contestado; Diovanni cravou o nome (`processar_pgr`/`entrada.py`) e não objetou a estrutura de duas portas. Registrado como recomendação do Arquiteto não-objetada, não decisão validada — para o handoff futuro não afirmar procedência que não houve.
+
+**Pendências abertas (inalteradas).** DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01 (resíduo SC), DH-003M-01 (4ª recorrência), DH-003P-01, DH-003A-01.
+
+**Próxima (003.AK) = IMPL de D-ARQ-40.** Gate de estado real obrigatório: grep de `processar_pgr`/`entrada.py` (greenfield: colisão E encaixe); origem do `indice_cas` (deriva do `Protocolo`? — pode revisar a assinatura); forma da construção do índice. Passada adversarial extra sobre o prompt cirúrgico (orquestrador + ponto de entrada). Reconfirmar 420/420 antes de tocar arquivo.
+
+**Docs.** HISTORICO: este bloco. DECISOES: D-ARQ-40 (v57). PROTOCOLO inalterado (v28 — nenhuma regra clínica tocada). PAINEL_ESTADO: re-tiragem adiada para a 003.AK (esta sessão não move código nem número de marco; o evento que move a extração é a AK plugando).
