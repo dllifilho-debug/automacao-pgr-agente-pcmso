@@ -2338,3 +2338,27 @@ Docs. DECISOES v54 (D-ARQ-39 novo; cabeçalho do D-ARQ-38 corrigido). PROTOCOLO 
 **Docs.** DECISOES v56 (linha de processo — ratificação A→B + slice map; sem novo D-ARQ). PROTOCOLO inalterado (fica v28). PAINEL_ESTADO re-tirado (tiragem 003.AH: sequenciamento + slice map medido). HISTORICO: este bloco.
 
 **Pendências abertas (inalteradas).** DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003AE-01, DT-003Y-01, DH-003M-01 (4ª recorrência — escalada, não aberta), DH-003P-01, DH-003A-01. Frente clínica (`R-CLI-01`→`R-CLI-02`) pausada até a extração destravar PGR real; pré-requisito da fatia (c) de D-ARQ-38 = o seam de D-ARQ-39 (dedup convergente) + R-CLI-01 IMPL.
+
+## Sessão 003.AI — 23/06/2026 — DADO (popular CAS faltantes em agentes.yaml; fatia 1 da extração, recorte B)
+
+**Foco.** Fatia 1 da extração (recorte B de 003.AH): popular os `cas: null` de substâncias em `agentes.yaml`. Modo DADO/vocabulário — não toca motor, regra clínica, predicado nem tipos.py. Materialização sob D-ARQ-22 (procedência) + D-ARQ-27 (gate CAS por agente); sem D-ARQ novo.
+
+**Gate.** main em `0deaa2f` (merge PR #101, impl 003.AI mergeado), 420/420 verde, mypy --strict delta-zero (26 pré-existentes DH-003P-01). Número da sessão LIDO do HISTORICO (003.AH→003.AI). agentes.yaml lido literal de disco (git show HEAD).
+
+**Correção de número herdado (disco venceu handoff).** O handoff/003.AH media 34 `cas: null` / 9 de 43. Disco mediu **36 `cas: null` / 9 de 45** (off-by-2: a tríade acetona/acetato/benzeno deslocou o denominador pós-snapshot 003.AH). Disco venceu. grep -c "cas: null" = 36 confirmado antes de editar.
+
+**Trabalho do gate (separação substância-vs-categoria, não pressuposto do handoff).** Dos 36 null: 13 substâncias (CAS atômico/definido) + 23 categorias (físico/ergonômico/acidente/biológico/agregado — null correto, não recebem CAS). Das 13 substâncias, 12 gravaram CAS; 1 bloqueada pelo gate.
+
+**Bloqueio consciente pelo gate (D-ARQ-22).** propanediamina_tridecyloxy é substância, mas o comentário [A VALIDAR] em disco marca CAS não confirmado → permanece null, comentário intacto. CAS sem fonte não entra. 12 gravam, 1 bloqueado.
+
+**12 CAS gravados [DERIVADO — CAS Registry], dígito verificador conferido antes de gravar:** tolueno 108-88-3; xileno 1330-20-7 (mistura de isômeros, âncora canônica); estireno 100-42-5; n_hexano 110-54-3; dissulfeto_de_carbono 75-15-0; tricloroetileno 79-01-6; monoxido_de_carbono 630-08-0; cianeto_de_hidrogenio 74-90-8; chumbo 7439-92-1 (Pb elementar, âncora canônica do slug — não há CAS de classe de composto inorgânico); mercurio 7439-97-6 (Hg elementar); arsenio 7440-38-2 (As elementar); manganes 7439-96-5 (Mn elementar). Os 4 metais usam CAS do elemento como âncora canônica do slug [DERIVADO — elemento como âncora canônica]; a Dra. Carolini pode fixar composto específico na revisão de saída.
+
+**Estende DT-003AE-01.** Os 9 EE que a DT listava (arsenio, dissulfeto_de_carbono, estireno, mercurio, monoxido_de_carbono, n_hexano, tolueno, tricloroetileno, xileno) foram gravados, mais 3 (cianeto_de_hidrogenio, chumbo SC, manganes). DT-003AE-01 candidata a RESOLVIDA quanto aos CAS dos EE — confirmar contra doc vivo na próxima tiragem do painel.
+
+**Verificação.** Diff 12 linhas - / 12 linhas + (12 `cas: null` → `cas: "..."`), blast radius 1 arquivo (git --no-pager diff). grep -c "cas: null" 36→24 (23 categorias + 1 bloqueado). 420/420 verde mantido; mypy --strict delta-zero. Commit 0d5f786, merge 0deaa2f (PR #101, "Create a merge commit"), staged só agentes.yaml (git add nominal, não git add .). [DERIVADO — saída real do git diff + pytest, 003.AI]
+
+**Índice CAS pós-fatia: 21/45** (9 prévios + 12). Restam 24 null: 23 categorias (corretas) + propanediamina (bloqueada). O gargalo "índice CAS raso" de 003.AH está substancialmente fechado para o universo de substâncias modeladas.
+
+**Pendências abertas (inalteradas, salvo onde notado).** DT-003AE-01 candidata a RESOLVIDA (CAS dos EE gravados) — confirmar na próxima tiragem. propanediamina_tridecyloxy CAS segue [A VALIDAR] (bloqueado pelo gate). DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DH-003M-01 (4ª recorrência), DH-003P-01, DH-003A-01. Fatia 2 da extração (plugar executar_com_composicao no pipeline de produção, sobre índice agora populado) = 003.AJ, vira ARQUITETURA+IMPL.
+
+**Docs.** HISTORICO: este bloco. DECISOES inalterado (v56 — sem D-ARQ novo). PROTOCOLO inalterado (v28).
