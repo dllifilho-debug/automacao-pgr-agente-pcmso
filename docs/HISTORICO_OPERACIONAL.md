@@ -2426,3 +2426,23 @@ Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo *
 **Próxima (003.AL).** Decisão do Diovanni no kickoff. Candidatas: (i) plugar `processar_pgr` em consumidor real/CLI — bloqueada por D-ARQ-25 Parte B (parse-PGR, zero código); (ii) sessão META de DH-003M-01 (gatilho disparado, 2 docs vivos); (iii) retomar a frente clínica pausada (R-CLI-01 → R-CLI-02, seam de dedup D-ARQ-39 selado). Gate de estado real obrigatório antes do prompt.
 
 **Docs.** HISTORICO: este bloco. DECISOES: nota de aplicação 003.AK em D-ARQ-40 (v58). PROTOCOLO inalterado (v28 — nenhuma regra clínica tocada). PAINEL_ESTADO: re-tiragem na 003.AL (a AK não move número de marco — fachada sobre fixture, não travessia real).
+
+## Sessão 003.AL — 25/06/2026 — ARQUITETURA (camada de extração: padrão bicamada e fronteira do parse-PGR — D-ARQ-41)
+
+**Foco.** Decidir a forma de D-ARQ-25 Parte B (transcrição-LLM / camada de extração) — o gargalo de produção ratificado pela diretoria (inversão A→B, v56). Número lido do HISTORICO (003.AK → 003.AL, não calculado). Modo ARQUITETURA — sem código, sem gate de estado real de código (conceitual; o gate vale antes do prompt cirúrgico de implementação, fatia futura).
+
+**Recorte.** D-ARQ-25 Parte B é guarda-chuva (nunca decidiu mecanismo de `name→slug`; parse-PGR greenfield). Uma sessão não fecha tudo. O que fecha honestamente: o **padrão da camada de extração** e a **fronteira do parse-PGR** — o nó que D-ARQ-36 empurrou ("resolvedor só resolve CAS→slug; `name→slug` em D-ARQ-25 Parte B"). Fora: prompt, forma do campo de sinônimos, as 6 formas de DT-003L-01, gates validade/assinatura.
+
+**Decisão (D-ARQ-41).** Padrão bicamada: transcritor-LLM (estrutura o documento heterogêneo, termos crus) + resolvedor determinístico (`termo→slug`, gate de pendência D-ARQ-14). Fronteira LLM↔determinístico = contrato transcrito tipado (a "PGR transcrita": `GHEPGR`-shaped, termos em linguagem natural, FDS apontadas — NÃO `tipos.PGR`, que sai do resolvedor). Generaliza D-ARQ-36 (instância-FDS) ao padrão de toda extração. Recusa monocamada (LLM cospe slug em silêncio → erro silencioso plausível, D-ARQ-22).
+
+**Adiado por medição (declarado, não chutado).** O mecanismo fino do `name→slug` e a granularidade da fronteira (quanto o LLM normaliza antes de entregar) ficam abertos — três saídas candidatas (a) verbatim+normalização-agressiva+sinônimos / (b) LLM normaliza p/ conceito / (c) híbrido com candidato-LLM de baixa confiança. CAS é token rígido (índice exato funciona); termo de risco é texto fluido (casamento exato → falso `vocabulario_ausente`). Escolha sai de medir sobre os PGRs de DT-003L-01. Molde de adiamento-por-dado de D-ARQ-38 (emissor de biomonitoramento esperou o mapa).
+
+**Três passadas adversariais.** (1ª) bicamada simétrica a D-ARQ-36. (2ª) achou a assimetria de peso: o resolvedor do PGR é quase-vazio (`dict.get`), a peça nova é o **contrato transcrito**, não a topologia — tratar topologia como a decisão enterraria a peça. (3ª) corrigiu honestidade de escopo: `name→slug` tem mecanismo adiado por medição (não "fechado", como uma redação anterior vendia); e a metade quase-pronta da extração é a **FDS** (resolvedor `gate_cas`/`resolver_composicao` já existe e costurado, 003.S/T/W/Z), não a PGR — relevante para a ordem da próxima implementação.
+
+**Honestidade de escopo.** D-ARQ-41 fecha topologia + fronteira + princípio do gate de slug. NÃO fecha: ordem de implementação parse-PGR vs. transcrição-FDS; mecanismo do `name→slug`; prompt; forma do campo de sinônimos; as 6 formas de DT-003L-01.
+
+**Pendências abertas:** DT-FDS-02, DT-003L-01 (insumo direto de D-ARQ-41), DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01 (resíduo SC), DT-003AK-01, DH-003M-01 (4ª recorrência, 2 docs vivos), DH-003P-01, DH-003A-01.
+
+**Próxima (003.AM).** Decisão do Diovanni no kickoff. Candidatas: (i) transcrição-FDS — IMPL do transcritor-LLM (resolvedor pronto, menor caminho até dado real no motor); (ii) parse-PGR fatia 1 (greenfield; exige CONHECIMENTO/medição da granularidade antes da forma da "PGR transcrita"); (iii) frente clínica R-CLI-01 → R-CLI-02 (desbloqueada, seam D-ARQ-39; conduta nova end-to-end; Marco 1). Gate de estado real obrigatório antes do prompt.
+
+**Docs.** HISTORICO: este bloco. DECISOES: D-ARQ-41 + changelog v59. PROTOCOLO inalterado (v28 — nenhuma regra clínica tocada). PAINEL_ESTADO: não re-tirado (AL não move número de marco nem fecha marco; cadência por-evento v55 não dispara) — opcional registrar "extração saiu de 0-forma para padrão+fronteira decididos" se o Diovanni quiser visibilidade.
