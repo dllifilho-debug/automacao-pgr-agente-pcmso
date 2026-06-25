@@ -2390,3 +2390,39 @@ Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo *
 **Próxima (003.AK) = IMPL de D-ARQ-40.** Gate de estado real obrigatório: grep de `processar_pgr`/`entrada.py` (greenfield: colisão E encaixe); origem do `indice_cas` (deriva do `Protocolo`? — pode revisar a assinatura); forma da construção do índice. Passada adversarial extra sobre o prompt cirúrgico (orquestrador + ponto de entrada). Reconfirmar 420/420 antes de tocar arquivo.
 
 **Docs.** HISTORICO: este bloco. DECISOES: D-ARQ-40 (v57). PROTOCOLO inalterado (v28 — nenhuma regra clínica tocada). PAINEL_ESTADO: re-tiragem adiada para a 003.AK (esta sessão não move código nem número de marco; o evento que move a extração é a AK plugando).
+
+
+## Sessão 003.AK — 24/06/2026 — IMPLEMENTAÇÃO (ponto de entrada de produção: processar_pgr)
+
+**Foco.** Materializar a fachada `processar_pgr` decidida em D-ARQ-40 (DECISOES v57) — IMPL da fatia A da extração. Número lido do HISTORICO (003.AJ → 003.AK, não calculado).
+
+**Gate de abertura.** main em `13cb639` (merge PR #102, docs 003.AI), branch sincronizada com origin. Baseline 420/420 verde RECONFIRMADA por pytest real antes de tocar arquivo; mypy --strict delta-zero (26 pré-existentes, DH-003P-01). PROTOCOLO v28 + DECISOES v57 lidos inteiros. Branch gate disparou — Code parou em `main`, `feature/003ak-entrada-processar-pgr` criada com autorização. Untracked `fds_originais/` + `matrizes_originais/` corretos como não rastreados.
+
+**Gate de estado real (5 verificações, todas confirmaram o que o prompt assumia).**
+1. G1 — `git grep processar_pgr`: zero em código (13 hits = prosa em docs). Greenfield confirmado.
+2. G2 (o gate que podia revisar a assinatura) — `construir_indice_cas(agentes_vocab: dict[str,Any])` em `resolvedor.py:36` recebe vocabulário; chamadores reais o alimentam de `Protocolo.vocabulario.agentes`. Índice DERIVÁVEL do `Protocolo` → assinatura `processar_pgr(pgr, protocolo, hoje=None) -> Resultado` se sustenta sem parâmetro extra. Cláusula 2 de D-ARQ-40 resolvida a favor da forma ilustrativa.
+3. G3 — `entrada.py` inexistente; `motor/__init__.py` vazio (sem fachada parcial a respeitar).
+4. G4 (CONTRADIÇÃO de invariante, registrada) — `git ls-files matrizes_originais/`: 14 arquivos JÁ RASTREADOS (commits antigos b59a714/18e6211/b48e0b6) + lote novo `??` não-rastreado; `fds_originais/` 100% não-rastreado. A invariante "matrizes/fds permanentemente não-rastreadas" é FALSA para `matrizes_originais/` (já catalogado em DT-003L-01). Trava cravada: `git add` NOMINAL por arquivo, nunca `git add .`.
+5. G5 — 420/420 verde reconfirmado.
+
+**Correção de rumo (G4).** Na abertura descartei (errado) o alarme do container sobre matrizes_originais/ como artefato de shallow clone; o `git ls-files` mostrou tracking real misto. Corrigido antes de qualquer staging.
+
+**Implementação.** Commit `a378999c4a80086821198a2345306f7a7e366ea6`:
+- `agente_medico/motor/entrada.py` (novo): `processar_pgr(pgr, protocolo, hoje=None) -> Resultado`, corpo = `executar_com_composicao(pgr, protocolo, construir_indice_cas(protocolo.vocabulario.agentes), hoje)`. Sem try/except (ValueError de colisão CAS propaga).
+- `agente_medico/motor/__init__.py`: item B (re-export canônico) — `from .entrada import processar_pgr` + `__all__`. `[INTERPRETADO]` não-objetado.
+- `agente_medico/tests/test_entrada_processar_pgr.py` (novo): 4 testes — fachada constrói o índice; equivalência ao wrapper por `status`+contagens (NÃO por `==` de `Resultado` mutável); repasse de `hoje`; import canônico.
+- Wrapper, `executar()`, `resolver_composicao`, `gate_cas`, legado `app.py` INTOCADOS.
+
+**Testes — desvio reportado (próprio do teste, não regressão).** 1ª versão de `test_processar_pgr_repassa_hoje` usou diferença de 1 dia esperando mudança de status; R-PGR-06 (`gates.py:33`) exige `(hoje - validade) >= 730 dias`. Corrigido para `date(2027,1,1)` → REJEITADO. Amarração ao limiar 730d registrada como DT-003AK-01 (dívida de teste, não-bloqueante).
+
+**Verificação.** 420→424 verde (suíte completa). mypy --strict: 26 pré-existentes (DH-003P-01), delta-zero confirmado por diff vs. baseline; `entrada.py`/`__init__.py` limpos. `git diff` revisado — 3 arquivos. Commit `a378999c4a80086821198a2345306f7a7e366ea6`, merge `ee233b4` (PR #104, "Create a merge commit"), sem push direto. Branch de impl deletada pós-merge (local + remoto).
+
+**Higiene confrontada (não fechada).** DH-003M-01: ao reler o PROTOCOLO inteiro, o `\r\n` literal tem ocorrência VIVA no changelog v20 da tabela de revisões do PROTOCOLO — não só no HISTORICO. Amplia a classe para o 2º doc vivo; a 4ª recorrência já era gatilho de META.
+
+**Honestidade de escopo.** `processar_pgr` é harness de produção, NÃO travessia de PGR real — entrada por fixture, salto de produção segue em D-ARQ-25 Parte B (transcrição-LLM, zero código), a jusante. A fachada esconde a mecânica do índice do chamador; o wrapper retém o índice explícito como ponto de injeção da transcrição.
+
+**Pendências abertas:** DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01 (resíduo SC), DT-003AK-01 (nova — dívida de teste, aprovada), DH-003M-01 (4ª recorrência, agora em 2 docs vivos), DH-003P-01, DH-003A-01.
+
+**Próxima (003.AL).** Decisão do Diovanni no kickoff. Candidatas: (i) plugar `processar_pgr` em consumidor real/CLI — bloqueada por D-ARQ-25 Parte B (parse-PGR, zero código); (ii) sessão META de DH-003M-01 (gatilho disparado, 2 docs vivos); (iii) retomar a frente clínica pausada (R-CLI-01 → R-CLI-02, seam de dedup D-ARQ-39 selado). Gate de estado real obrigatório antes do prompt.
+
+**Docs.** HISTORICO: este bloco. DECISOES: nota de aplicação 003.AK em D-ARQ-40 (v58). PROTOCOLO inalterado (v28 — nenhuma regra clínica tocada). PAINEL_ESTADO: re-tiragem na 003.AL (a AK não move número de marco — fachada sobre fixture, não travessia real).
