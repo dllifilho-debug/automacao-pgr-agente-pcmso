@@ -909,6 +909,18 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
+### DH-003AO-01 — Terminador CRLF de working tree em `.md`, autocrlf-dependente `[RESOLVIDA — D-ARQ-44]`
+
+**Origem:** Sessão 003.AO (26/06/2026), a partir da medição da 003.AN (os 3 docs vivos gravados 100% CRLF no working tree; LF salvo só porque `core.autocrlf=true` renormalizou no `git add`).
+
+**Situação.** Sem regra por arquivo, a integridade do terminador de fim de linha dos `.md` dependia de o `autocrlf` acertar a cada gravação. Distinta de DH-003M-01 (`\r\n` literal como conteúdo de string, defeito de caractere; esta é o byte `0x0D 0x0A` de fim de linha).
+
+**Resolução.** `.gitattributes` na raiz com `*.md text eol=lf` (D-ARQ-44). Escopo `*.md`, não `*` global, para não arrastar reescrita de `.py`/fixtures. Cobre `docs/`, `agente_medico/`, `.claude/skills/kickoff/`.
+
+**Status:** RESOLVIDA por D-ARQ-44. DH-003M-01 permanece ABERTA (defeito distinto).
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -958,3 +970,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v27 | 21/06/2026 | Sessão 003.AD (CONHECIMENTO): R-BIO-04 changelog 003.AD (mapa agente→biomarcador + confirmação Quadro 1/2 contra texto oficial; mesma ID); DT-003AB-01 nota de derivação (tabela tipo_ibe por slug que a fatia b transcreve; benzeno=EE corrige fixture+comentário stale; chumbo=SC; 9 CAS null; cobertura SC parcial). DT-003AB-01 segue ABERTA. Sem regra criada/alterada; sem código. |
 | v28 | 22/06/2026 | Sessão 003.AE (IMPLEMENTAÇÃO): DT-003AB-01 RESOLVIDA (migração `anexo_nr07 → tipo_ibe` materializada — enum `TipoIBE`, valor por slug, fixture/comentário corrigidos, 419→420). DT-003AE-01 adicionada (resíduos de dado: 9 CAS null dos EE + cobertura SC parcial do Quadro 2 — sessão de dado própria). Sem regra clínica criada/alterada. |
 | v29 | 26/06/2026 | Sessão 003.AN (CONHECIMENTO/medição): DT-003AN-01 adicionada (seção 11) — granularidade do "Derivados de:" multi-CAS na transcrição de FDS (explode em N `Componente` vs. agrega; cruza D-ARQ-35), input para a IMPL do transcritor-FDS, originada da medição dos 6 PDFs de `fds_originais/`. Sem regra clínica criada/alterada. Sem código. |
+| v30 | 26/06/2026 | Sessão 003.AO (META/higiene): DH-003AO-01 adicionada e RESOLVIDA (seção 11) — `.gitattributes` `*.md text eol=lf` blinda terminador de markdown na origem (independe de `core.autocrlf`); distinta de DH-003M-01 (`\r\n` literal-conteúdo, segue ABERTA). Doc-only, sem código, sem regra clínica. |

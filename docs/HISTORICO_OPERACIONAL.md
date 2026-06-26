@@ -2484,3 +2484,17 @@ Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo *
 **Entregas.** D-ARQ-43 (DECISOES v61); DT-003AN-01 (PROTOCOLO seção 11, v29); este bloco (HISTORICO). Nenhuma regra clínica criada/alterada. Sem código. `medir_fds.py` descartável, não commitado.
 
 **Próxima (003.AO).** DH-003M-01 estrutural (`.gitattributes *.md text eol=lf`) — META cravada. Gatilho de troca: se a gravação do bloco 003.AN reincidir CRLF, 003.AO já era. Caso contrário, AO segue por agenda. Alternativas vivas: IMPL do transcritor-FDS (fatia 1, com catálogo P1–P3); frente clínica R-CLI-01→R-CLI-02 (seam D-ARQ-39 selado).
+
+## Sessão 003.AO — 26/06/2026 — META/higiene (`.gitattributes` blinda terminador de markdown — D-ARQ-44, DH-003AO-01)
+
+**Foco.** Fechar a fragilidade de terminador CRLF dos `.md` medida na 003.AN (gravação 100% CRLF no working tree, salva como LF só porque `core.autocrlf` renormalizou). Doc-only.
+
+**Gate de estado real.** main em `5676cf9` (#108 = `8604a1f`, D-ARQ-43/v61). Tree sem modified (untracked: `fds_originais/`, `matrizes_originais/*`, `medir_fds.py` — corretos). 424/424 herdada, NÃO reconfirmada (META, não toca motor). mypy idem. `.gitattributes` AUSENTE (Test-Path). Último D-ARQ=43, último changelog PROTOCOLO=v29 — lidos do disco.
+
+**Entrega.** `.gitattributes` `*.md text eol=lf`, cobrindo `docs/`, `agente_medico/`, `.claude/skills/kickoff/` [DERIVADO — `git ls-files '*.md'`]. D-ARQ-44 (DECISOES v62). DH-003AO-01 adicionada e RESOLVIDA (PROTOCOLO seção 11, v30). Este bloco.
+
+**Correção de rótulo (gate-before-label).** O handoff tratava a fragilidade como "5ª reincidência de DH-003M-01"; refutado contra disco (PROTOCOLO, entrada DH-003M-01). DH-003M-01 é `\r\n` literal como conteúdo (quebra `grep "^## Sess"`); o medido na 003.AN é o terminador `0x0D 0x0A` autocrlf-dependente. Defeitos distintos. DH nova aberta+fechada; DH-003M-01 permanece ABERTA, intocada.
+
+**Escopo cirúrgico.** `*.md`, não `*` global — evita reescrita de `.py`/fixtures num repo de 424 testes. O `.py`/cp1252 fica para uma META futura. Renormalização retroativa (`--renormalize`) não executada.
+
+**Próxima (003.AP).** IMPL transcritor-FDS P2 (normalização min/max no resolvedor — fatia mais limpa, destravada, alinhada à prioridade A→B ratificada) ou frente clínica R-CLI-01→R-CLI-02 (move Marco 1). Decisão no kickoff.
