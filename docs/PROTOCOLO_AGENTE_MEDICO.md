@@ -897,6 +897,18 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
+### DT-003AN-01 — Granularidade do "Derivados de:" multi-CAS na transcrição de FDS `[ABERTA — decisão de arquitetura, cruza D-ARQ-35]`
+
+**Origem:** Sessão 003.AN (26/06/2026), medição dos 6 PDFs de `fds_originais/`.
+
+**Situação.** Leinertex e Massa-Corrida declaram, na seção 3, blocos "Derivados de:" agrupando 2–3 sub-componentes com CAS empilhados numa célula (`2634-33-5\n55965-84-9`, faixa única `0,2 – 0,05`). O transcritor-FDS (D-ARQ-42) produz `tuple[Componente,...]`; um `Componente` carrega um `cas: str`. Decisão aberta: o bloco multi-CAS explode em N `Componente` (um por CAS, faixa compartilhada) ou agrega num só (qual CAS-primário)? Cruza D-ARQ-35 (a granularidade da promoção a `Risco` herda a granularidade do `Componente`): explodir multiplica os riscos químicos promovidos; agregar perde sub-componentes.
+
+**Por que não decidir agora.** É decisão de arquitetura de granularidade, dependente de como o lado-médico consome o risco promovido — não medição. A medição revelou a forma; a decisão é da sessão que desenhar a IMPL do transcritor (ou ARQUITETURA própria), com o catálogo P1–P3 de D-ARQ-43 em mãos.
+
+**Status:** ABERTA. Não bloqueia. Input para a IMPL do transcritor-FDS.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -945,3 +957,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v26 | 21/06/2026 | Sessão 003.AB (ARQUITETURA-leve): DT-003AB-01 adicionada (seção 11) — campo `anexo_nr07` mapeado como eixo morto (consumo-zero verificado por git) e misturado (NR-07 "I" / NR-15 "11"), insumo herdado pela implementação de R-BIO-04 (substituição → `tipo_ibe`, D-ARQ-33). Sem regra clínica criada/alterada; sem código. |
 | v27 | 21/06/2026 | Sessão 003.AD (CONHECIMENTO): R-BIO-04 changelog 003.AD (mapa agente→biomarcador + confirmação Quadro 1/2 contra texto oficial; mesma ID); DT-003AB-01 nota de derivação (tabela tipo_ibe por slug que a fatia b transcreve; benzeno=EE corrige fixture+comentário stale; chumbo=SC; 9 CAS null; cobertura SC parcial). DT-003AB-01 segue ABERTA. Sem regra criada/alterada; sem código. |
 | v28 | 22/06/2026 | Sessão 003.AE (IMPLEMENTAÇÃO): DT-003AB-01 RESOLVIDA (migração `anexo_nr07 → tipo_ibe` materializada — enum `TipoIBE`, valor por slug, fixture/comentário corrigidos, 419→420). DT-003AE-01 adicionada (resíduos de dado: 9 CAS null dos EE + cobertura SC parcial do Quadro 2 — sessão de dado própria). Sem regra clínica criada/alterada. |
+| v29 | 26/06/2026 | Sessão 003.AN (CONHECIMENTO/medição): DT-003AN-01 adicionada (seção 11) — granularidade do "Derivados de:" multi-CAS na transcrição de FDS (explode em N `Componente` vs. agrega; cruza D-ARQ-35), input para a IMPL do transcritor-FDS, originada da medição dos 6 PDFs de `fds_originais/`. Sem regra clínica criada/alterada. Sem código. |
