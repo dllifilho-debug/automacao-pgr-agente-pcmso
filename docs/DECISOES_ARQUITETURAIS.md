@@ -1294,6 +1294,22 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 
 **Base.** Sessão 003.AN (26/06/2026). Medição determinística de 6 PDFs de `fds_originais/` (pdfplumber). Fecha fronteira-OCR (escaneado refutado) e critério-nome (CAS-primário, nome não-`==`); cataloga P1–P3 como input da IMPL. Passada adversária sobre o texto: corrigiu P2 de "faixa invertida" (um caso) para invertida-P2a + piso-textual-00-P2b (dois sub-casos, `min/max` cobre ambos sem "sempre inverter") — confronto contra os literais `00 – 10`/`0,2 – 0,05`. Decisão de arquitetura — sem código.
 
+## D-ARQ-44 — `.gitattributes` `*.md text eol=lf`: terminador de markdown blindado na origem
+
+**Sessão:** 003.AO (26/06/2026) — META/higiene, doc-only.
+
+**Medição (003.AN).** Gravação dos 3 docs vivos ficou 100% CRLF no working tree; o blob salvou LF-puro só porque `core.autocrlf=true` renormalizou no `git add` (0 CRLF nos blobs staged). A integridade do terminador dependia do autocrlf acertar a cada gravação — fragilidade medida, não teórica.
+
+**Decisão.** `.gitattributes` na raiz com `*.md text eol=lf`. Terminador LF passa a ser normativo no commit, independe de cliente ou de `core.autocrlf`. Cobre `docs/`, `agente_medico/`, `.claude/skills/kickoff/` [DERIVADO — `git ls-files '*.md'`].
+
+**Escopo — `*.md` e não `*` global.** `* text eol=lf` reescreveria o terminador de `.py`/fixtures no próximo toque — risco de reescrita não-pedida num repo de 424 testes, vetado numa sessão doc-only. `*.md` é cirúrgico: markdown é texto puro, sem asserção de byte-terminador em teste. O terreno `.py`/cp1252 fica para uma META futura, com o motor na mão.
+
+**Distinção de DH [VALIDADO — PROTOCOLO §DH-003M-01].** DH-003M-01 é `\r\n` literal como conteúdo de string (defeito de caractere, quebra `grep "^## Sess"`). Esta é o terminador `0x0D 0x0A` de fim de linha, autocrlf-dependente (defeito de byte). Fenômenos distintos, curas distintas. Abre DH-003AO-01; DH-003M-01 permanece ABERTA.
+
+**Efeito e limite.** O `.gitattributes` rege checkouts e adds futuros; não reescreve blobs já commitados até o próximo `modified`+`add`. Renormalização retroativa (`git add --renormalize`) NÃO executada nesta sessão — fora de escopo.
+
+**Status.** DH-003AO-01 RESOLVIDA por D-ARQ-44 no mesmo ato.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -1359,3 +1375,4 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 | v59 | 25/06/2026 | Sessão 003.AL (ARQUITETURA): D-ARQ-41 adicionada — camada de extração é bicamada (transcritor-LLM + resolvedor determinístico), fronteira = contrato transcrito tipado; generaliza D-ARQ-36 (instância-FDS) ao padrão de toda extração; nomeia a "PGR transcrita" (estrutura `GHEPGR`-shaped, termos crus, FDS apontadas, NÃO `tipos.PGR`); `termo→slug` determinístico/auditável (gate D-ARQ-14), com mecanismo fino + granularidade (a/b/c) ADIADOS por medição sobre os PGRs de DT-003L-01 (molde D-ARQ-38). Recusa monocamada (LLM cospe slug → erro silencioso D-ARQ-22). Sem regra clínica criada/alterada. Sem código. |
 | v60 | 25/06/2026 | Sessão 003.AM (ARQUITETURA): D-ARQ-42 adicionada — transcritor-FDS é a camada-LLM da instância-FDS de D-ARQ-41; contrato de saída `tuple[Componente,...]` cravado em disco (sem tipo intermediário); bicamada interna (parse-PDF determinístico → transcrição-LLM); recorte (A) identidade+concentração, flags de perigo no default-por-ausência com autor declarado (D-ARQ-22, não "perigo fora"); princípio de gabarito por-campo (`cas`/`concentracao` ancoram, `nome` texto-livre não-`==`); mecanismo fino + fronteira-OCR (Ciplan escaneado) + critério de `nome` ADIADOS por medição dos 3 PDFs reais → 003.AN (molde D-ARQ-41 P3). 3 pares PDF↔fixture em `fds_originais/`/`fds_t65`. Nenhuma regra clínica criada/alterada. Sem código. |
 | v61 | 26/06/2026 | Sessão 003.AN (CONHECIMENTO/medição): D-ARQ-43 adicionada — medição determinística de 6 PDFs de `fds_originais/` (pdfplumber) fecha fronteira-OCR (escaneado refutado: Ciplan é nativo; sem OCR no transcritor) e critério-nome (casa por CAS-primário, `nome` não-`==`); cataloga 3 patologias da seção 3 como input da IMPL (P1 CAS plural "Derivados de:" → DT-003AN-01; P2 faixa invertida-P2a + piso-textual-00-P2b → normalização min/max no resolvedor; P3 CAS oculto 3 sabores → ramo d do gate, DT-003M-01 viva). DT-003AN-01 adicionada (PROTOCOLO v29). Triagem-LLM da 003.AM (Ciplan OCR) refutada por medição. Nenhuma regra clínica criada/alterada. Sem código. |
+| v62 | 26/06/2026 | Sessão 003.AO (META/higiene): D-ARQ-44 adicionada — `.gitattributes` `*.md text eol=lf` blinda terminador de markdown na origem (independe de `core.autocrlf`); escopo `*.md` cirúrgico (não `*` global, que reescreveria `.py`/fixtures); abre+RESOLVE DH-003AO-01; distinta de DH-003M-01 (`\r\n` literal-conteúdo, segue ABERTA). Doc-only, sem código, sem regra clínica. |

@@ -1,0 +1,2 @@
+# DH-003AO-01 / D-ARQ-44: terminador LF normativo para markdown, independe de core.autocrlf.
+*.md text eol=lf
