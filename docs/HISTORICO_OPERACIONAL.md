@@ -2468,3 +2468,19 @@ Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo *
 **Pendências abertas:** DT-FDS-02, DT-003L-01, DT-003M-01 (referenciada por D-ARQ-42 Parte 3, sem mudança de status), DT-003M-02, DT-003T-01 (idem), DT-003Y-01, DT-003AE-01 (resíduo SC), DT-003AK-01, DH-003M-01 (4ª recorrência, 2 docs vivos), DH-003P-01, DH-003A-01.
 
 **Próxima (003.AN).** Decisão do Diovanni no kickoff. Candidata forte: CONHECIMENTO/medição dos 3 PDFs de `fds_originais/` (destrava o mecanismo do transcritor adiado por D-ARQ-42) — pré-requisito da IMPL do transcritor. Alternativas vivas: frente clínica R-CLI-01 → R-CLI-02 (Marco 1, desbloqueada seam D-ARQ-39); parse-PGR (greenfield, exige medição de DT-003L-01 antes). Gate de estado real obrigatório; reconfirmar 424 por pytest antes de tocar código.
+
+## Sessão 003.AN — 26/06/2026 — CONHECIMENTO/medição (6 PDFs de FDS — fecha fronteira-OCR e critério-nome do transcritor — D-ARQ-43)
+
+**Foco.** Medir os PDFs reais de `fds_originais/` por extração determinística (pdfplumber) para destravar os pontos que D-ARQ-42 adiou "por medição": fronteira-OCR, critério de `nome`, regularidade da seção 3.
+
+**Gate de estado real.** main em `8952f16` (= `409b093`, D-ARQ-42/v60), tree limpa (untracked: `fds_originais/`, `matrizes_originais/*`, `medir_fds.py`). Suíte 424/424 herdada da 003.AK — não reconfirmada (CONHECIMENTO/medição, sem toque em motor). mypy não rodado (idem).
+
+**O que a medição entregou.**
+- **6 PDFs em `fds_originais/`, não 3** — corrige a Base de D-ARQ-42 (inspeção da 003.AM escopou aos 3 do fixture). 3 do gabarito `fds_t65` (Ciplan, Adesivo Tigre, Tinta Acrílica) + 3 de acervo sem par (Amanco solução limpadora, Leinertex textura, Massa-Corrida).
+- **Nenhum é escaneado.** Triagem-LLM da 003.AM (Ciplan OCR) REFUTADA por medição: Ciplan é nativo (3340/3202 chars, tabela limpa, zero marcador OCR). Os 6 têm camada de texto (geradores: Ghostscript, Word, PDFCreator). → fronteira-OCR fechada (sem OCR; D-ARQ-43 Parte 1).
+- **Casamento dos 3 do fixture confirmado** abrindo cada tabela: Ciplan 8 componentes; Tigre acetona/MEK/copolímero/acetato + 2 Segredos; Tinta com TiO₂ de CAS errado `134363-67-7` **na fonte** (parte `134363-67-\n7`) — prova que o erro está no documento, não na transcrição à mão (ramo c do gate por construção).
+- **3 patologias da seção 3 catalogadas** (D-ARQ-43 Parte 3): P1 CAS plural "Derivados de:" (→ DT-003AN-01); P2 faixa invertida-P2a + piso-textual-00-P2b (→ normalização min/max no resolvedor); P3 CAS oculto 3 sabores (→ ramo d do gate; DT-003M-01 viva, H334+H317 no Segredo Industrial 2 do Tigre).
+
+**Entregas.** D-ARQ-43 (DECISOES v61); DT-003AN-01 (PROTOCOLO seção 11, v29); este bloco (HISTORICO). Nenhuma regra clínica criada/alterada. Sem código. `medir_fds.py` descartável, não commitado.
+
+**Próxima (003.AO).** DH-003M-01 estrutural (`.gitattributes *.md text eol=lf`) — META cravada. Gatilho de troca: se a gravação do bloco 003.AN reincidir CRLF, 003.AO já era. Caso contrário, AO segue por agenda. Alternativas vivas: IMPL do transcritor-FDS (fatia 1, com catálogo P1–P3); frente clínica R-CLI-01→R-CLI-02 (seam D-ARQ-39 selado).
