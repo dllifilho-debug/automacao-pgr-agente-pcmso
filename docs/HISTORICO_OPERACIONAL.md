@@ -2498,3 +2498,17 @@ Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo *
 **Escopo cirúrgico.** `*.md`, não `*` global — evita reescrita de `.py`/fixtures num repo de 424 testes. O `.py`/cp1252 fica para uma META futura. Renormalização retroativa (`--renormalize`) não executada.
 
 **Próxima (003.AP).** IMPL transcritor-FDS P2 (normalização min/max no resolvedor — fatia mais limpa, destravada, alinhada à prioridade A→B ratificada) ou frente clínica R-CLI-01→R-CLI-02 (move Marco 1). Decisão no kickoff.
+
+## Sessão 003.AP — 27/06/2026 — IMPLEMENTAÇÃO (P2: normalização min/max de faixa no resolvedor — D-ARQ-43)
+
+**Foco.** Materializar a patologia P2 do catálogo da 003.AN (D-ARQ-43 Parte 3): normalização de ordem da faixa de concentração no resolvedor de composição. Fatia mais limpa do transcritor-FDS (testável sem LLM), alinhada à inversão A→B ratificada (v56). IMPLEMENTAÇÃO.
+
+**Gate de estado real.** main em `dc2b7bd` (#109 = `25df935`, D-ARQ-44/v62, DH-003AO-01). Tree limpa (untracked: `fds_originais/`, `matrizes_originais/*`, `medir_fds.py` — corretos). **Suíte 424/424 reconfirmada por pytest real** antes de tocar arquivo (161s) — primeira reconfirmação desde a 003.AK (003.AN/003.AO foram doc-only). Leitura literal de `composicao.py` + `tipos.py` via `Get-Content -Encoding UTF8`; `git grep` de `FaixaConcentracao`/`piso_efetivo`/`teto_efetivo` no repo inteiro (tipo compartilhado, per 003.I). Passada adversária sobre a forma e o prompt contra os literais (per 003.W) antes de emitir.
+
+**Decisão de forma (gate de disco).** Normalização mora no resolvedor (`composicao.py`), não no tipo: botá-la no `__post_init__` de `FaixaConcentracao` reverteria a decisão da 003.I (tipo sem `__post_init__`) e tornaria `min>max` inalcançável, apagando o trilho de integridade do Stage 3 (D-ARQ-17) em silêncio. Helper aplicado **antes** do `gate_cas` (faixa canônica é pré-condição do que o downstream lê; ortogonal ao ramo do CAS; mantém `resolvedor.py` intocado, blast radius menor).
+
+**Entrega.** `_normalizar_faixa` em `composicao.py` (guarda dupla de `None`; `min/max` sem ramo condicional cobre P2a invertida e P2b piso-textual; idempotente; frozen via `replace`). `test_normalizacao_faixa.py` (8 testes). `tipos.py` INTOCADO. Blast radius: 2 arquivos. D-ARQ-43 nota de aplicação 003.AP (DECISOES v63). Este bloco. PROTOCOLO intocado (P2 não cria/altera R-\*; contrato de resolvedor). Commit `534f239`, merge `ec60c60` (PR #110, "Create a merge commit"). Suíte 424→432; mypy --strict limpo em `composicao.py`.
+
+**Pendências abertas:** DT-FDS-02, DT-003L-01, DT-003M-01 (viva — H334+H317 no Segredo Industrial 2 do Tigre, CAS oculto → ramo d), DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AN-01 (granularidade P1 "Derivados de:" multi-CAS, cruza D-ARQ-35), DH-003M-01 (segue ABERTA — `\r\n` literal-conteúdo; terreno `.py`/cp1252), DH-003P-01, DH-003A-01.
+
+**Próxima (003.AQ).** Decisão do Diovanni no kickoff. Candidatas vivas: IMPL transcritor-FDS — próxima fatia (P1 "Derivados de:" multi-CAS exige decidir DT-003AN-01 explode-vs-agrega antes, cruza D-ARQ-35; ou a camada de transcrição-LLM propriamente, D-ARQ-25 Parte B / D-ARQ-42, maior salto); frente clínica R-CLI-01→R-CLI-02 (move Marco 1, seam D-ARQ-39 selado, rema contra A→B ratificada); parse-PGR greenfield (D-ARQ-25, exige ARQUITETURA). Gate de estado real obrigatório; reconfirmar suíte por pytest antes de tocar código.
