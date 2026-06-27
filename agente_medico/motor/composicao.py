@@ -6,6 +6,25 @@ from agente_medico.motor.resolvedor import EntradaIndice, gate_cas
 from agente_medico.motor.tipos import Componente, FDS, GHEPGR, PGR, Pendencia, ProdutoQuimico
 
 
+def _normalizar_faixa(componente: Componente) -> Componente:
+    """Canonicaliza a ordem da faixa de concentração transcrita verbatim da FDS.
+    D-ARQ-43 P2: P2a (par invertido, ex. 0,2-0,05) -> (0.05, 0.2); P2b (piso-textual
+    00-10) -> (0.0, 10.0), sem inverter. min()/max() cobre ambos sem ramo condicional.
+    Só normaliza quando minimo E maximo são não-None: None é sentinela de faixa
+    semi-aberta (piso_efetivo/teto_efetivo), nunca valor comparável (D-ARQ-34 P1).
+    Sem faixa (concentracao None) -> intocado. Frozen: reescrita via replace (D-ARQ-09).
+    """
+    faixa = componente.concentracao
+    if faixa is None or faixa.minimo is None or faixa.maximo is None:
+        return componente
+    lo = min(faixa.minimo, faixa.maximo)
+    hi = max(faixa.minimo, faixa.maximo)
+    if lo == faixa.minimo and hi == faixa.maximo:
+        return componente
+    faixa_nova = dataclasses.replace(faixa, minimo=lo, maximo=hi)
+    return dataclasses.replace(componente, concentracao=faixa_nova)
+
+
 def resolver_composicao(
     pgr: PGR, indice_cas: dict[str, EntradaIndice]
 ) -> tuple[PGR, list[Pendencia]]:
@@ -32,6 +51,7 @@ def resolver_composicao(
                 continue
             componentes_novos: list[Componente] = []
             for c in produto.fds.composicao:
+                c = _normalizar_faixa(c)
                 comp_novo, pend = gate_cas(c, indice_cas)
                 componentes_novos.append(comp_novo)
                 if pend is not None:
