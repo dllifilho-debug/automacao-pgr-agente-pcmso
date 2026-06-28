@@ -25,6 +25,36 @@ def _normalizar_faixa(componente: Componente) -> Componente:
     return dataclasses.replace(componente, concentracao=faixa_nova)
 
 
+def _explodir_multi_cas(componente: Componente) -> list[Componente]:
+    """Explode um bloco "Derivados de:" multi-CAS em N Componente, um por CAS.
+
+    D-ARQ-45 (003.AQ): a FDS declara derivados num bloco único com os CAS empilhados
+    numa célula (medição 003.AN: '2634-33-5\\n55965-84-9', separados por \\n pelo
+    extract_tables do pdfplumber). Componente.cas é str singular; um CAS-plural é
+    mal-formado por construção e cairia espuriamente no ramo (c) cas_invalido do gate.
+    Logo a explosão é operação determinística do resolvedor, a MONTANTE do gate_cas
+    (D-ARQ-09/41: partir separador é lado-determinístico, nunca LLM).
+
+    Herança-α (D-ARQ-45 Parte 2): cada sub-Componente herda a faixa INTEIRA do bloco
+    (replace só troca cas; nome/concentracao/flags herdados) — fiel ao documento,
+    sobre-materializa na direção segura (anti-supressão D-ARQ-31/33 cl.5/35 P3).
+
+    Separador = '\\n' literal. [DERIVADO — 003.AN, único separador medido; vírgula/;//
+    são especulação sem medição, fora de escopo. Reconhecer "bloco empilhado" vs
+    "linhas de tabela separadas" é critério de transcrição, herdado pela IMPL do
+    transcritor-FDS (D-ARQ-45 item 2 aberto), não do resolvedor.]
+
+    Idempotente e anti-supressão por construção: single-CAS (sem \\n) -> [componente]
+    (objeto original, preserva identidade); cas vazio ou só-espaço -> [componente]
+    intacto (segue para o ramo (d) do gate). NUNCA remove componente: piso de 1.
+    """
+    pedacos = [p.strip() for p in componente.cas.split("\n")]
+    pedacos = [p for p in pedacos if p]
+    if len(pedacos) <= 1:
+        return [componente]
+    return [dataclasses.replace(componente, cas=p) for p in pedacos]
+
+
 def resolver_composicao(
     pgr: PGR, indice_cas: dict[str, EntradaIndice]
 ) -> tuple[PGR, list[Pendencia]]:
@@ -51,11 +81,12 @@ def resolver_composicao(
                 continue
             componentes_novos: list[Componente] = []
             for c in produto.fds.composicao:
-                c = _normalizar_faixa(c)
-                comp_novo, pend = gate_cas(c, indice_cas)
-                componentes_novos.append(comp_novo)
-                if pend is not None:
-                    pendencias_gate.append(pend)
+                for sub in _explodir_multi_cas(c):
+                    sub = _normalizar_faixa(sub)
+                    comp_novo, pend = gate_cas(sub, indice_cas)
+                    componentes_novos.append(comp_novo)
+                    if pend is not None:
+                        pendencias_gate.append(pend)
             fds_nova = dataclasses.replace(produto.fds, composicao=tuple(componentes_novos))
             produtos_novos.append(dataclasses.replace(produto, fds=fds_nova))
         ghes_novos.append(dataclasses.replace(ghe, produtos_quimicos=tuple(produtos_novos)))
