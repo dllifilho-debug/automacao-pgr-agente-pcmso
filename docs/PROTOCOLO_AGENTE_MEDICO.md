@@ -921,6 +921,29 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
+### DT-003AS-01 — Patologias de layout/transcrição da tabela de composição de FDS `[ABERTA — input para a fatia de transcrição]`
+
+**Origem:** Sessão 003.AS (29/06/2026), medição determinística (`pdfplumber.extract_tables()` puro) dos 6 PDFs de `fds_originais/`, ao construir a fatia parse-PDF (D-ARQ-42 Parte 1 / D-ARQ-43 Parte 1).
+
+**Situação.** O parse-PDF determinístico (`extrair_tabelas_fds`, 003.AS) entrega as tabelas cruas do pdfplumber. A montagem `grade crua → tuple[Componente,...]` (transcrição, fatia futura) enfrenta seis patologias medidas em dado real, distintas das de D-ARQ-43 (que cobriu conteúdo: multi-CAS, ordem-de-faixa, CAS-oculto). Estas são de **layout/coluna/token**:
+
+1. **Composição não-isolável (Ciplan, Tigre) — a mais grave.** `extract_tables` funde a composição com o resto da página num grid multi-seção: em Ciplan, a composição são as colunas 4-7 de linhas não-contíguas dentro de uma tabela única que carrega seções 1-7; em Tigre, é um grid de 9 colunas. Não há "tabela de composição" isolável por índice. A transcrição precisa **localizar a região por âncora de header textual** ('COMPOSIÇÃO E INFORMAÇÕES SOBRE INGREDIENTES' como início, header da seção seguinte como fim), não por "pegar a tabela N". Contrasta com tinta/Leinertex/Massa, onde a composição é tabela isolada limpa.
+2. **Coluna deslocada na mesma tabela (Tigre).** Nome/CAS/faixa vêm em col 1/4/7 para Acetona/Copolímero/tiofenodiil/Segredo, mas em col 0/3 sem faixa para MEK e Acetato — a faixa não está em `None` numa posição fixa, simplesmente não está naquela linha. Parser por índice fixo perde a faixa em silêncio (erro silencioso plausível, D-ARQ-22). Exige heurística por posição/bbox, não índice.
+3. **`\n` intra-token no CAS (tinta, TiO₂ `134363-67-\n7`).** O mesmo `\n` é separador-multi-CAS (P1, split legítimo) em Leinertex/Massa e quebra-de-render-no-meio-de-um-CAS em tinta. Desambiguar exige regex de CAS bem-formado (dígitos-dígitos-dígito) antes de decidir split — julgamento, lado-transcrição, NÃO no `.split("\n")` cego de `_explodir_multi_cas` (mexê-lo reabriria D-ARQ-45).
+4. **Múltiplas grafias de CAS-ausente.** `vários` (Ciplan), `ND`/`NA`/`*`/`**`/`****` (Tigre/tinta), `Segredo Industrial`/`Informação confidencial` (Leinertex/Massa) — todas mapeiam para `cas=""` (convenção da fixture), mas o mapa de grafias é interpretação.
+5. **Separador de faixa varia:** hífen comum `-` (Ciplan/tinta) vs en-dash `–` (Tigre/Leinertex/Massa). Normalizar antes de `_normalizar_faixa` ler o par.
+6. **Coluna de perigo europeia (tinta: 'Símbolo' Xn/Xi/C, 'Frases R' R21/22…).** Perigo declarado no documento — deliberadamente **descartado** pelo recorte (A) de D-ARQ-42 (frases-H/R fora de escopo, cruza DT-003M-01/DT-003T-01). Registrado para a fatia futura de perigo-transcrito saber onde o dado mora.
+
+**Seção da composição — número a confirmar.** Ciplan rotula a composição **"2 COMPOSIÇÃO E INFORMAÇÕES SOBRE INGREDIENTES"** (literal na medição) — seção **2**, não 3. Tinta não numera. D-ARQ-42/43 e R-FDS-02 dizem "seção 3 / 2-3". Variação por fabricante/versão da norma comprovada em dado. `[A CONFIRMAR — número da seção de composição na ABNT NBR 14725 vigente; conferir texto oficial antes de cravar âncora de header textual na transcrição]`.
+
+**Sobre "ler qualquer FDS" (moldura, não promessa).** A meta é ler qualquer FDS **digital** (com camada de texto). FDS escaneada sem OCR é imagem — `extract_tables` devolve vazio; OCR é contingência futura declarada (D-ARQ-43 Parte 1), não construída. Mesmo entre as digitais, não há parser de regra fixa que leia "qualquer layout" — a medição mostrou 4 layouts incompatíveis em 6 PDFs. Por isso a transcrição é **LLM** (D-ARQ-41/42): tolera layout nunca visto por ler o sentido, não a posição. E mesmo a transcrição-LLM é **não-determinística e sua saída é candidata** revisada pelo responsável técnico (D-ARQ-33 cl.4), não classificação automática confiável. Hoje o motor lê 0 FDS automaticamente (3 transcritas à mão); o caminho é parse-PDF (✓ 003.AS) → transcrição-LLM (fatia futura) → muitas FDS, não qualquer uma; cada layout novo que quebrar vira input append-by-medição.
+
+**O que a transcrição exige (fatia futura, não esta).** Localização-de-composição por header textual (patologia 1); leitura por posição/bbox (2); desambiguação `\n` por regex-CAS (3); dicionário de grafias-de-ausente (4); normalização de separador de faixa (5). O mecanismo (LLM vs heurística determinística vs híbrido) é decisão da fatia de transcrição, à luz de D-ARQ-41 Parte 3 (gate de slug) e D-ARQ-42 Parte 1.
+
+**Status:** ABERTA. Não-bloqueante. Input empírico para a fatia de transcrição-FDS; o parse-PDF (003.AS) entrega a grade crua sobre a qual estas patologias operam.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -972,3 +995,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v29 | 26/06/2026 | Sessão 003.AN (CONHECIMENTO/medição): DT-003AN-01 adicionada (seção 11) — granularidade do "Derivados de:" multi-CAS na transcrição de FDS (explode em N `Componente` vs. agrega; cruza D-ARQ-35), input para a IMPL do transcritor-FDS, originada da medição dos 6 PDFs de `fds_originais/`. Sem regra clínica criada/alterada. Sem código. |
 | v30 | 26/06/2026 | Sessão 003.AO (META/higiene): DH-003AO-01 adicionada e RESOLVIDA (seção 11) — `.gitattributes` `*.md text eol=lf` blinda terminador de markdown na origem (independe de `core.autocrlf`); distinta de DH-003M-01 (`\r\n` literal-conteúdo, segue ABERTA). Doc-only, sem código, sem regra clínica. |
 | v31 | 27/06/2026 | Sessão 003.AQ (ARQUITETURA): DT-003AN-01 RESOLVIDA por D-ARQ-45 (seção 11) — fork explode-vs-agrega resolvido a favor de explode (bloco multi-CAS explode em N `Componente` no resolvedor, herança-α da faixa inteira); nota da distinção empilhado-vs-linhas-soltas herdada pela IMPL do transcritor-FDS. Nenhuma R-* tocada (P1 não cria/altera conduta). Sem código. |
+| v32 | 29/06/2026 | Sessão 003.AS (IMPLEMENTAÇÃO): DT-003AS-01 adicionada (seção 11) — patologias de layout/transcrição da tabela de composição de FDS, expostas pela medição `extract_tables` dos 6 PDFs ao construir a camada parse-PDF (`extrair_tabelas_fds`, D-ARQ-42 Parte 1): composição-não-isolável (Ciplan/Tigre, grid fundido), coluna-deslocada (Tigre), `\n`-intra-token (TiO₂), grafias-de-ausente, separador de faixa `-`/`–`, coluna-de-perigo-europeia (descartada por recorte A). Seção da composição "2", não 3 — a confirmar contra NBR 14725 vigente. Input para a fatia de transcrição-FDS. Nenhuma R-* criada/alterada (fatia é parse-PDF, não conduta). |
