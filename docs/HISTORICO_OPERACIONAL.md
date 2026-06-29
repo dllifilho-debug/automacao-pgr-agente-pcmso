@@ -2548,3 +2548,23 @@ Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo *
 **Pendências abertas:** DT-FDS-02, DT-003L-01, DT-003M-01 (viva), DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AS-01 (nova — patologias de layout/transcrição de FDS), DH-003M-01 (segue ABERTA), DH-003P-01, DH-003A-01.
 
 **Próxima (003.AT).** Decisão do Diovanni no kickoff. Candidata natural: a fatia de transcrição-FDS que consome DT-003AS-01 (grade crua → `tuple[Componente,...]`, onde entra a decisão LLM-vs-heurística e as 6 patologias). Gate de estado real obrigatório; reconfirmar suíte por pytest antes de tocar código.
+
+## Sessão 003.AT — 29/06/2026 — ARQUITETURA (mecanismo do transcritor-LLM: localização, nome, gabarito — D-ARQ-42)
+
+**Foco.** Transcrição-FDS, camada-LLM do transcritor (D-ARQ-42 Parte 2 / D-ARQ-25 Parte B). Decisão de mecanismo. ARQUITETURA pura — sem código, sem gate de pytest.
+
+**Abertura.** main `c89ec6c`, sync `origin/main`, working tree limpo. HISTORICO fechava em 003.AS; cruzamento git × HISTORICO sem divergência. Suíte de referência 451 (não reconfirmada por pytest — ARQUITETURA não toca arquivo). Modo/foco confirmados pelo Diovanni.
+
+**Pré-requisito factual fechado.** "Seção de composição 2 vs 3" (`[A CONFIRMAR — NBR 14725]`, DT-003AS-01) resolvido por web_search: composição é seção 3 na NBR 14725:2023, **título normativo estável**, numeração de fabricante varia. Decorrência: âncora de localização por título, não por número. Texto oficial ABNT é pago (não conferido) — convergência de fontes secundárias + FDS reais sustenta; status frouxo da numeração não enfraquece a âncora-por-título.
+
+**Decisão (aplicação de D-ARQ-42, não ID nova).** Três cláusulas: (1) localização por título normativo, robusta à renumeração, com limite declarado em grid-fundido (localiza início, não isola grade — patologia 2 remanesce); opera na camada-LLM sobre texto, `extracao_fds.py` intocado; keyed na NBR-BR. (2) `nome` transcrito informativo, não-`==`. (3) gabarito por par PDF↔`fds_t65` em disco, LLM mockado, nunca testa API. Recorte (A) mantido (frase-H fora; Segredo Industrial 2 → ramo d → AUSENTE, DT-003M-01). Adiados para IMPL por medição (molde D-ARQ-41 P3): prompt; `\n`-regex (patologia 3); grafias-de-ausente (patologia 4); separador `-`/`–` (patologia 5).
+
+**Método.** Duas passadas adversariais a pedido do Diovanni pegaram 6 furos antes da selagem: cláusula 1 superestimava ("resolve" patologia 1 → corrigido para "localiza, não isola grade"); mistura camada-LLM vs parse-PDF (marcado: opera sobre texto, `extracao_fds.py` intocado); `[DERIVADO]` forte demais sobre fonte ABNT paga (rebaixado); cláusula esvaziada (decisão = âncora-por-título-não-número, resto é eco de DT); confronto faltante contra patologia 1 (grid não-isolável → limite declarado); marca de escopo D-ARQ-06 ausente (keyed na NBR-BR). Terceira passada dispensada — retorno marginal.
+
+**Sem código. Sem regra clínica tocada. Nenhuma DT nova** (DT-003AS-01 já cobre as patologias adiadas).
+
+**Pendências abertas:** DT-FDS-02, DT-003L-01, DT-003M-01 (viva), DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AS-01, DH-003M-01, DH-003P-01, DH-003A-01.
+
+**Entregas (D-ARQ-32):** DECISOES (aplicação 003.AT em D-ARQ-42 + changelog v67); PROTOCOLO intocado (R-* intactas, DT-003AS-01 já registra as patologias); este bloco; handoff 003.AT→003.AU.
+
+**Próxima (003.AU).** Decisão do Diovanni no kickoff. Candidata natural: IMPL do transcritor-LLM, fatia 1 — transcrição sobre o texto extraído (camada acima de `extracao_fds.py`), produzindo `tuple[Componente,...]` cru que `resolver_composicao` consome. Gate de estado real obrigatório (pytest 451, `git grep` de extracao_fds/transcritor, leitura dos 3 PDFs↔fixture); LLM mockado no teste, nunca a API. Prompt cirúrgico que commita abre com `git checkout -b` (003.AS) e, se tocar tipo/fixture, passada adversária extra com verificação de whitespace de fronteira (003.AR/003.AS).
