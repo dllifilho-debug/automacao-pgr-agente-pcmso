@@ -2584,3 +2584,19 @@ Possível DT futura. `cas_bem_formado` aceita `134363-67-` (sem último dígito)
 Verificação. 26 testes; suíte 451→477, 100% verde; mypy --strict limpo. Passada adversária de whitespace de fronteira no `\n` (tab+newline, espaços assimétricos, vazio) — OK.
 
 Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sincronizado.
+
+## Sessão 003.AV — 29/06/2026 — ARQUITETURA (contrato do verbatim transcrito da FDS — D-ARQ-46)
+
+**Foco.** Selar a forma do tipo intermediário do verbatim transcrito da FDS (saída do LLM-transcritor = entrada da normalização P3/P4/P5) e como a montagem `verbatim → tuple[Componente,...]` compõe P3/P4/P5. Gêmeo-FDS da "PGR transcrita" de D-ARQ-41 P2, aberto desde 003.AU.
+
+**Gate de abertura.** main `851040a` (PR #119), working tree limpo, untracked = clutter pré-existente (`fds_originais/`, `matrizes_originais/`, `medir_fds*.py`). Sem divergência git × HISTORICO. Docs vivos lidos inteiros (PROTOCOLO v33 + DECISOES v68). Gate de estado real por greps + `Get-Content` de `transcricao_fds.py` e `tipos.py`: verbatim-type inexistente; P3/P4/P5 puras sobre strings cruas; `Componente.concentracao` é `FaixaConcentracao` já parseada (sem casa para texto cru de faixa); `_explodir_multi_cas`/`_normalizar_faixa` no resolvedor.
+
+**Decisão (D-ARQ-46).** O LLM-transcritor emite o verbatim cru (cas/nome/faixa como texto, por componente); `tuple[Componente,...]` é saída da montagem determinística (P3/P4/P5), não do LLM. Fronteira LLM↔determinístico = o verbatim. Montagem 1→1 (explosão multi-CAS e ordenação min/max ficam no resolvedor). Crava semântica + fronteira; dataclass-form e local-de-módulo descem para a IMPL (003.AW).
+
+**Achado da passada crítica (o eixo da sessão).** A 1ª passada amaciou como "refino" o que é contradição: D-ARQ-42 P2 diz na letra que o transcritor produz `Componente(concentracao=<FaixaConcentracao transcrita>)` — mas P5 (`parsear_faixa`, 003.AU) recebe texto cru; se o LLM já entregasse `FaixaConcentracao`, P5 é morto. A 003.AU criou o split em silêncio; 003.AV o formaliza e corrige D-ARQ-42 P2 explicitamente. A passada também pegou overreach: "tipo frozen dedicado" e "montagem em `transcricao_fds.py`" rebaixados de crava-de-arquitetura para recomendação (precedente: ARQUITETURA crava semântica, IMPL crava forma — D-ARQ-34→003.I, D-ARQ-42→003.V→003.W).
+
+**Git.** Sessão de ARQUITETURA — sem código. Gravação doc-only (D-ARQ-46 + changelog v69 + este bloco). Suíte 477 intocada.
+
+**Pendências/dívidas.** Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AS-01 (patologias 1/2), DH-003M-01, DH-003P-01, DH-003A-01. Recorte (A) e patologia 1 (producibilidade do verbatim) seguem barrando FDS de grid não-isolável.
+
+**Próxima (003.AW — IMPLEMENTAÇÃO).** Montagem `verbatim → tuple[Componente,...]` + LLM-transcritor mockado, sobre o contrato D-ARQ-46. Decide com gate: forma do verbatim (dataclass frozen recomendada), local da montagem (`transcricao_fds.py` recomendado), ordem P3→P4, nomes de campo. Gabarito = par PDF↔`fds_t65` (D-ARQ-42 P4 / 003.AT), LLM mockado, nunca testa API. Reconfirmar 477 por pytest antes de tocar arquivo.
