@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from typing import Optional
 
 from agente_medico.motor.resolvedor import cas_bem_formado
-from agente_medico.motor.tipos import FaixaConcentracao
+from agente_medico.motor.tipos import Componente, ComponenteVerbatim, FaixaConcentracao
 
 # [DERIVADO — DT-003AS-01 / D-ARQ-43 P2, medição 003.AN/AS]
 # Camada de normalização determinística do verbatim de FDS, a montante de
@@ -127,3 +128,27 @@ def parsear_faixa(texto: str) -> Optional[FaixaConcentracao]:
     if minimo is None or maximo is None:
         return None
     return FaixaConcentracao(minimo=minimo, maximo=maximo)
+
+
+def montar_componente(verbatim: ComponenteVerbatim) -> Componente:
+    """Monta um Componente determinístico a partir de uma linha-verbatim (D-ARQ-46 Parte 4).
+
+    Montagem 1→1: P3 (desambiguar_cas) → P4 (normalizar_cas_ausente) no cas cru, P5
+    (parsear_faixa) na faixa crua, strip no nome. agente=None e flags de perigo no default
+    (recorte A, D-ARQ-42 Parte 3). NÃO explode multi-CAS (1→N, _explodir_multi_cas,
+    D-ARQ-45) nem ordena min/max (_normalizar_faixa, 003.AP): ambos ficam no resolvedor, a
+    jusante. desambiguar_cas preserva o `\n` multi-CAS legítimo, que sobrevive a
+    normalizar_cas_ausente e chega ao resolvedor; parsear_faixa devolve faixa sem ordenar.
+    """
+    cas = normalizar_cas_ausente(desambiguar_cas(verbatim.cas))
+    concentracao = parsear_faixa(verbatim.faixa)
+    return Componente(cas=cas, nome=verbatim.nome.strip(), concentracao=concentracao)
+
+
+def montar_composicao(verbatim: Sequence[ComponenteVerbatim]) -> tuple[Componente, ...]:
+    """FDS inteira: sequência de linhas-verbatim → tuple[Componente, ...] (D-ARQ-46 Parte 2/4).
+
+    Saída do LLM-transcritor (mockado nesta fatia) montada 1→1; explosão multi-CAS e
+    ordenação ficam no resolvedor (resolver_composicao), que consome esta tupla.
+    """
+    return tuple(montar_componente(v) for v in verbatim)
