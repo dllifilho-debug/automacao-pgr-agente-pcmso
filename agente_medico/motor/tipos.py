@@ -42,6 +42,19 @@ class FaixaConcentracao:
 
 
 @dataclass(frozen=True)
+class ComponenteVerbatim:
+    # D-ARQ-46 Parte 2: verbatim cru transcrito da seção de composição da FDS, por
+    # componente. Texto bruto, sem normalização: `cas` pode trazer `\n` de quebra-de-render,
+    # grafia-de-ausente ou estar oculto; `faixa` é texto cru ("0,2 – 0,05", "< 5%", "").
+    # NÃO carrega slug, FaixaConcentracao parseada, flags de perigo, explosão multi-CAS nem
+    # ordenação min/max — tudo isso é determinístico a jusante. Fronteira LLM↔determinístico
+    # (D-ARQ-46 Parte 3): saída do LLM-transcritor, entrada da montagem (transcricao_fds).
+    cas: str
+    nome: str
+    faixa: str
+
+
+@dataclass(frozen=True)
 class Componente:
     cas: str
     nome: str
