@@ -2620,3 +2620,25 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências/dívidas.** Inalteradas, + DT-003AW-01 (nova, ABERTA, não-bloqueante): DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AS-01 (patologias 1/2), DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01. Recorte (A) e patologia 1 seguem barrando FDS de grid não-isolável.
 
 **Próxima.** Candidatas: patologias 1/2 de DT-003AS-01 (localização por header/bbox, camada-LLM) — desbloqueiam a producibilidade do verbatim para Ciplan/Tigre; ou plugar `montar_composicao` no pipeline (hoje nasce sem chamador, espelha 003.J/003.S/003.AR). Modo+foco e numeração: do Diovanni.
+
+---
+
+## Sessão 003.AX — 30/06/2026 — ARQUITETURA (patologias 1/2 de DT-003AS-01: mecanismo e representação-de-entrada do transcritor-FDS)
+
+**Ambiente.** Cowork com o repo `automacao-pgr-pcmso` montado (não o PowerShell habitual). Abertura barrada por `.git/HEAD` corrompido (24 bytes `NUL` após `ref: refs/heads/main\n`, truncamento do mount) → git acusava "invalid HEAD", árvore inteira como `A`. Diagnóstico: `refs/heads/main` (`0fce362`), `packed-refs`, `config` e objetos íntegros (`fsck` só com erros derivados do HEAD); única corrupção no HEAD. Correção não-destrutiva (`printf 'ref: refs/heads/main\n' > /tmp/HEAD_fix && cp /tmp/HEAD_fix .git/HEAD`, autorizada). Pós-fix: `main @ 0fce362`, `fsck` limpo, working tree só com EOL cosmético (`git diff --ignore-all-space` vazio nos ~130 `M`). Locks órfãos do mount limpos por rename same-dir (cross-device pra `/tmp` é bloqueado). Achados de ambiente (HEAD-NUL, distinção rename same-dir vs cross-device) salvos em memória do agente.
+
+**Foco e pivô.** Modo declarado IMPLEMENTAÇÃO (Cand. 2: plugar `montar_composicao`). O gate de leitura derrubou a premissa: `montar_composicao` e `resolver_composicao` não se tocam — a cadeia é `extrair_tabelas → [GAP transcrição] → montar_composicao → FDS.composicao → resolver_composicao`; o GAP (tabelas→verbatim) é a Cand. 1, e nenhum código de produção constrói `FDS.composicao` (só fixtures; `entrada.py` é fachada fina). Logo Cand. 2 depende da Cand. 1 — o "independente" do handoff estava errado. Pivô para Cand. 1 (ARQUITETURA), autorizado.
+
+**Gate de estado real (ARQUITETURA).** Docs vivos lidos inteiros (PROTOCOLO v34 + DECISOES v70); D-ARQ-42/43/45/46 + DT-003AS-01 literais; `git grep` da cadeia composição (`montar_composicao`/`resolver_composicao`/`FDS(`); medição read-only `extract_text`/`extract_words` Ciplan+Tigre+Leinertex (espelha 003.AN/AS, não toca motor).
+
+**Decisão (nota 003.AX em D-ARQ-42).** (1) Patologias 1/2 = camada-LLM semântica, não bbox determinístico (D-ARQ-41/42 + universalidade + a patologia-2 como evidência pró-LLM). (2) Entrada do LLM = `extract_text` da região âncora-por-título, não `extract_tables`: medido que o título-âncora some no `extract_tables` do Tigre e sobrevive no texto, e que a patologia 2 (faixa perdida) é artefato do `extract_tables` (no texto MEK/Acetato voltam com faixa `10 – 42` / `05 – 30`). (3) DT-003AX-01 aberta: a virada tabelas→texto reabre o mecanismo de explosão multi-CAS (D-ARQ-45 `\n`-célula, não a decisão) e o papel do `extrair_tabelas_fds` (003.AS) — reconciliação texto-puro vs híbrido é passada dedicada.
+
+**Achado da passada crítica.** O ripple em D-ARQ-45 é de MECANISMO, não de decisão (explodir + herança-α permanece, cruza D-ARQ-35); a associação faixa↔componente no bloco "Derivados de:" é ambígua em texto linear (faixa em linha própria, não colada ao CAS), o que REFORÇA adiar a reconciliação em vez de cramá-la aqui. Segundo ripple (papel do `extrair_tabelas_fds`) entrelaçado com o primeiro — um só DT.
+
+**Verificação.** Sem código, sem pytest (ARQUITETURA). Decisão DERIVADA de medição read-only em disco, não de especulação (anti-D-ARQ-22). Duas passadas: a 2ª afinou "mata D-ARQ-45" → "mata o mecanismo `\n`-célula do D-ARQ-45" e expôs o 2º ripple (`extrair_tabelas_fds`).
+
+**Git.** Sem commit de código. Docs vivos atualizados: DECISOES v71 (nota 003.AX em D-ARQ-42), PROTOCOLO v35 (andamento DT-003AS-01 + DT-003AX-01), este bloco. EOL normalizado a LF nos 3 docs tocados (alinha `.gitattributes`/HEAD; diff limpo só com adições). Commit/PR/merge: do Diovanni.
+
+**Pendências/dívidas.** + DT-003AX-01 (nova, ABERTA, não-bloqueante). DT-003AS-01: patologias 1/2 saem de "abertas" para "decididas como camada-LLM + entrada `extract_text`" (IMPL futura); DT segue ABERTA (IMPL pendente). Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01.
+
+**Próxima.** Candidatas: (1) reconciliação DT-003AX-01 (texto-puro vs híbrido; explosão multi-CAS sem `\n`-célula; associação faixa↔componente — provável CONHECIMENTO/medição + ARQUITETURA); (2) IMPL do LLM-transcritor sobre a entrada-texto decidida (depende de (1) para o multi-CAS). Modo+foco e numeração: do Diovanni.
