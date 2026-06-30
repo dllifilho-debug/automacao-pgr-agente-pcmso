@@ -2600,3 +2600,23 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências/dívidas.** Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AS-01 (patologias 1/2), DH-003M-01, DH-003P-01, DH-003A-01. Recorte (A) e patologia 1 (producibilidade do verbatim) seguem barrando FDS de grid não-isolável.
 
 **Próxima (003.AW — IMPLEMENTAÇÃO).** Montagem `verbatim → tuple[Componente,...]` + LLM-transcritor mockado, sobre o contrato D-ARQ-46. Decide com gate: forma do verbatim (dataclass frozen recomendada), local da montagem (`transcricao_fds.py` recomendado), ordem P3→P4, nomes de campo. Gabarito = par PDF↔`fds_t65` (D-ARQ-42 P4 / 003.AT), LLM mockado, nunca testa API. Reconfirmar 477 por pytest antes de tocar arquivo.
+
+## Sessão 003.AW — 30/06/2026 — IMPLEMENTAÇÃO (montagem verbatim → `tuple[Componente,...]` + LLM-transcritor mockado — D-ARQ-46)
+
+**Foco.** Materializar a montagem determinística `verbatim → tuple[Componente,...]` sobre o contrato D-ARQ-46, com o LLM-transcritor mockado. Decidir as formas que D-ARQ-46 rebaixou a recomendação (forma do verbatim, local da montagem, nomes de campo) com gate de estado real e código na mão.
+
+**Gate de abertura.** main `60df3fd` (PR #120). Ambiente: Cowork com o repo montado (não o PowerShell habitual). Divergência aparente git × handoff — working tree inteiro como `M` — diagnosticada como **só EOL** (CRLF↔LF; `git diff --ignore-all-space` vazio; `.gitattributes` no topo): conteúdo limpo, bate com o handoff. Gate de estado real rodado no próprio ambiente: pytest **477** (motor novo 328 + legada 149), `git grep` confirmou `Componente` construído só em testes/fixtures, releitura literal de `transcricao_fds.py`/`tipos.py`/`composicao.py`/`fds_t65.py`. Docs vivos lidos inteiros (PROTOCOLO v33 + DECISOES v69), D-ARQ-46 literal.
+
+**Decisão de forma (003.AW).** (1) `ComponenteVerbatim(cas/nome/faixa: str)` frozen em `tipos.py` — dado no lar dos dataclasses; campo `faixa` ≠ `concentracao` marca texto cru. (2) `montar_componente` (1→1) + `montar_composicao(Sequence)` em `transcricao_fds.py`. (3) Ordem `normalizar_cas_ausente(desambiguar_cas(cas))` (cravada D-ARQ-46 Parte 4). Recomendações de D-ARQ-46 confirmadas, não revertidas.
+
+**Achado da passada crítica.** Material de medição untracked (`medir_fds_gabarito_output.txt`) traz o texto cru real extraído dos 6 PDFs — usado para tornar o verbatim mockado **fiel à medição**, não inventado (evita teste tautológico). Tinta (9 comp.) e Ciplan (8 comp.) reproduzem `cas`+`concentracao` do `fds_t65`; Adesivo Tigre fica fora do gabarito verde — patologia 1 (grid fundido, MEK/Acetato sem faixa na linha) barra a producibilidade do verbatim. A passada adversária (toca tipo compartilhado `tipos.py`) expôs DT-003AW-01 (grafia-ausente quebrada por `\n`).
+
+**Nota de ambiente (META).** O mount do Cowork proíbe `unlink`/`rm`: Edit/Write truncaram arquivos editados; contornado escrevendo via `/tmp`+`cp` (validado por `py_compile`), EOL por `sed`+`cp`, locks git órfãos por `mv`, commit com `core.autocrlf=false` e `git add` explícito (nunca `-A`, arrastaria o ruído EOL). Registrado em memória do agente para sessões futuras neste ambiente. Resíduos a limpar no `.git` (host): `*.lock.old*`, `index.lock.orphan`.
+
+**Verificação.** 11 testes (`test_montagem_verbatim.py`); suíte 477→488, 100% verde (motor novo 339; legada 149 intocada); mypy --strict limpo nos 4 arquivos. Diff sem ruído EOL (`git add` seletivo). Passada adversária extra por tocar `tipos.py` (molde 003.I/003.W).
+
+**Git.** Commit `ec3b225`, merge `8054f5b`, PR #121, "Create a merge commit". Branch feat deletada, main sincronizado em `8054f5b`. Identidade git setada local no sandbox (a confirmar/ajustar no host).
+
+**Pendências/dívidas.** Inalteradas, + DT-003AW-01 (nova, ABERTA, não-bloqueante): DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AS-01 (patologias 1/2), DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01. Recorte (A) e patologia 1 seguem barrando FDS de grid não-isolável.
+
+**Próxima.** Candidatas: patologias 1/2 de DT-003AS-01 (localização por header/bbox, camada-LLM) — desbloqueiam a producibilidade do verbatim para Ciplan/Tigre; ou plugar `montar_composicao` no pipeline (hoje nasce sem chamador, espelha 003.J/003.S/003.AR). Modo+foco e numeração: do Diovanni.
