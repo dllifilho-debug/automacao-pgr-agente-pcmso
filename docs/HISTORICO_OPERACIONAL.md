@@ -2568,3 +2568,19 @@ Logo a sessão não decide *onde* o wrapper encaixa — decide se o motor novo *
 **Entregas (D-ARQ-32):** DECISOES (aplicação 003.AT em D-ARQ-42 + changelog v67); PROTOCOLO intocado (R-* intactas, DT-003AS-01 já registra as patologias); este bloco; handoff 003.AT→003.AU.
 
 **Próxima (003.AU).** Decisão do Diovanni no kickoff. Candidata natural: IMPL do transcritor-LLM, fatia 1 — transcrição sobre o texto extraído (camada acima de `extracao_fds.py`), produzindo `tuple[Componente,...]` cru que `resolver_composicao` consome. Gate de estado real obrigatório (pytest 451, `git grep` de extracao_fds/transcritor, leitura dos 3 PDFs↔fixture); LLM mockado no teste, nunca a API. Prompt cirúrgico que commita abre com `git checkout -b` (003.AS) e, se tocar tipo/fixture, passada adversária extra com verificação de whitespace de fronteira (003.AR/003.AS).
+
+## Sessão 003.AU — 29/06/2026 — IMPLEMENTAÇÃO (fatia 1 da normalização do verbatim-FDS — D-ARQ-42)
+
+Foco. Camada determinística de normalização do verbatim transcrito da FDS: patologias 3/4/5 de DT-003AS-01 como funções puras. Fatia 1 do transcritor-FDS pós-parse-PDF (003.AS).
+
+Recorte (ARQUITETURA-leve no início). LLM-verbatim-mockado + montagem em `Componente` + contrato do verbatim (tipo intermediário, gêmeo "PGR transcrita" D-ARQ-41 P2) FORA — fatia futura. Fatia 1 = só normalização determinística, testável sem mock de API (molde isolado 003.AP/003.S/003.AS).
+
+Entregue. `agente_medico/motor/transcricao_fds.py` greenfield: `desambiguar_cas` (P3), `normalizar_cas_ausente` (P4), `parsear_faixa` (P5, sem ordenar). Isolado, sem consumidor. `tipos.py`/`composicao.py`(`_explodir_multi_cas`)/`extracao_fds.py`/`resolvedor.py` intocados (só importa `cas_bem_formado`).
+
+Achado — heurística P3 corrigida. Spec do prompt tinha buraco: validado em disco, `134363-67-` passa o dígito isoladamente (coincidência) mas a junção `134363-67-7` falha (CAS real e errado da tinta, ramo c do gate) → TiO₂ indefinido na regra dupla. Corrigido: preserva só se AMBOS fragmentos bem-formados; senão junta, sem exigir junção válida (validade é do gate, D-ARQ-36). Limite residual (D-ARQ-22): falso-preserva em coincidência dupla (sem caso medido). Causa-raiz: a passada adversária do prompt mirou whitespace, não a regra de decisão.
+
+Possível DT futura. `cas_bem_formado` aceita `134363-67-` (sem último dígito) — validador tolerante à estrutura de hífen. Fora de escopo; o gate funciona nas âncoras.
+
+Verificação. 26 testes; suíte 451→477, 100% verde; mypy --strict limpo. Passada adversária de whitespace de fronteira no `\n` (tab+newline, espaços assimétricos, vazio) — OK.
+
+Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sincronizado.
