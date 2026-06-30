@@ -946,6 +946,18 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
+### DT-003AW-01 — Grafia-de-ausente quebrada por `\n` de render escapa ao reconhecimento `[ABERTA — não-medida, não-bloqueante]`
+
+**Origem:** Sessão 003.AW (30/06/2026), passada adversária sobre a montagem `verbatim → Componente` (D-ARQ-46).
+
+**Situação.** A montagem aplica `normalizar_cas_ausente(desambiguar_cas(cas_bruto))` (D-ARQ-46 Parte 4). Se uma grafia-de-ausente textual chegar quebrada por `\n` de render no campo `cas` (ex.: `"Segredo\nIndustrial"`, plausível em coluna estreita), `desambiguar_cas` junta os fragmentos sem espaço (`"SegredoIndustrial"`) — nenhum fragmento é CAS bem-formado — e `normalizar_cas_ausente` não casa a grafia `"segredo industrial"` (com espaço) em `_GRAFIAS_CAS_AUSENTE`. Resultado: `cas="SegredoIndustrial"` em vez de `""` → ramo (c) `cas_invalido` em vez de ramo (d) `cas_ausente`. A **ordem inversa** falha igual: `"Segredo\nIndustrial".casefold()` também não casa `"segredo industrial"`. Logo não é eixo de ordem (D-ARQ-46 Parte 4 confirma "ambas as ordens passam os medidos"); é patologia de **grafia-ausente-multilinha**, não coberta por P3 nem P4.
+
+**Por que não resolver agora.** Não-medida: `"Segredo Industrial"` foi medida (003.AN/AS) sempre como string única, nunca partida por `\n`. Resolver sobre hipótese viola D-ARQ-22 (anti-falsa-completude). Correção candidata quando/se medida: normalizar `\n→espaço` nas grafias textuais antes do casefold, ou casar `_GRAFIAS_CAS_AUSENTE` com whitespace colapsado.
+
+**Status:** ABERTA. Não-bloqueante. Não é regressão (estado de hoje). Input para a fatia futura, se a patologia aparecer em FDS real.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -999,3 +1011,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v31 | 27/06/2026 | Sessão 003.AQ (ARQUITETURA): DT-003AN-01 RESOLVIDA por D-ARQ-45 (seção 11) — fork explode-vs-agrega resolvido a favor de explode (bloco multi-CAS explode em N `Componente` no resolvedor, herança-α da faixa inteira); nota da distinção empilhado-vs-linhas-soltas herdada pela IMPL do transcritor-FDS. Nenhuma R-* tocada (P1 não cria/altera conduta). Sem código. |
 | v32 | 29/06/2026 | Sessão 003.AS (IMPLEMENTAÇÃO): DT-003AS-01 adicionada (seção 11) — patologias de layout/transcrição da tabela de composição de FDS, expostas pela medição `extract_tables` dos 6 PDFs ao construir a camada parse-PDF (`extrair_tabelas_fds`, D-ARQ-42 Parte 1): composição-não-isolável (Ciplan/Tigre, grid fundido), coluna-deslocada (Tigre), `\n`-intra-token (TiO₂), grafias-de-ausente, separador de faixa `-`/`–`, coluna-de-perigo-europeia (descartada por recorte A). Seção da composição "2", não 3 — a confirmar contra NBR 14725 vigente. Input para a fatia de transcrição-FDS. Nenhuma R-* criada/alterada (fatia é parse-PDF, não conduta). |
 | v33 | 29/06/2026 | Sessão 003.AU (IMPLEMENTAÇÃO): nota de andamento em DT-003AS-01 — patologias 3/4/5 materializadas (`transcricao_fds.py`, funções puras); P3 refinada; patologias 1/2 seguem abertas. DT ABERTA. Sem regra clínica alterada. |
+| v34 | 30/06/2026 | Sessão 003.AW (IMPLEMENTAÇÃO): DT-003AW-01 adicionada (seção 11) — grafia-de-ausente quebrada por `\n` de render (`"Segredo\nIndustrial"`) escapa a `desambiguar_cas`+`normalizar_cas_ausente` (junta sem espaço → não casa `_GRAFIAS_CAS_AUSENTE`); ambas as ordens P3/P4 falham igual, logo não é eixo de ordem; não-medida (D-ARQ-22), não-bloqueante. Exposta pela passada adversária da montagem `verbatim → Componente` (D-ARQ-46, 003.AW). Nenhuma R-* criada/alterada. |
