@@ -19,7 +19,7 @@ from agente_medico.motor.tipos import (
 # Fronteira é BlocoVerbatim (D-ARQ-46, refinado 003.AZ): o mecanismo \n-célula
 # (003.AR) foi substituído por grupo verbatim explícito — o LLM-transcritor já
 # entrega os N CAS de um bloco "Derivados de:" como membros separados, faixa
-# escrita 1× por bloco. FRONTEIRA D-ARQ-45: _explodir_multi_cas (composicao.py)
+# escrita 1× por bloco. FRONTEIRA D-ARQ-45: _explodir_bloco (composicao.py)
 # é INTOCADA — a expansão-de-grupo e a herança-α da faixa do bloco continuam
 # sendo do resolvedor. Este módulo só conserta a quebra de render intra-token a
 # montante, nunca decide expansão nem herança.

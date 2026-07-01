@@ -210,6 +210,7 @@ def test_resolver_composicao_hidrata_mek() -> None:
 
     from agente_medico.motor.composicao import resolver_composicao
     from agente_medico.motor.tipos import FDS, GHEPGR, PGR, ProdutoQuimico
+    from agente_medico.tests.fixtures import bloco_de
 
     pgr_cru = PGR(
         validade=date(2025, 1, 1),
@@ -224,7 +225,10 @@ def test_resolver_composicao_hidrata_mek() -> None:
                 produtos_quimicos=(
                     ProdutoQuimico(
                         nome="Adesivo MEK",
-                        fds=FDS(composicao=(Componente(cas="78-93-3", nome="MEK"),)),
+                        fds=FDS(
+                            composicao=(),
+                            composicao_verbatim=(bloco_de(Componente(cas="78-93-3", nome="MEK")),),
+                        ),
                     ),
                 ),
                 psicossocial=False,
