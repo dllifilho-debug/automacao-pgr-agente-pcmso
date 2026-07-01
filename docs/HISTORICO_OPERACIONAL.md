@@ -2714,3 +2714,23 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Decisão (Arquiteto recomenda, Diovanni ratifica).** Continuar a rota atual (ingestão + lado-médico). Não replicar o Anexo I do engenheiro no motor novo agora. Previdenciário+eSocial+engenharia = frente de emissão separada perto do cutover (paridade p/ desligar Streamlit). Prova de vida = Marco 1 já cravado (não criar marco novo).
 
 **Entregas.** DECISOES v75 + DT-003BA-01. PAINEL não tocado (Marco 1 já cobre; DT-003BA-01 a triar na próxima re-tiragem). PROTOCOLO intocado (sem regra clínica). Sem git de código.
+
+## Sessão 003.BB — 01/07/2026 — IMPLEMENTAÇÃO (fatia iii do transcritor-FDS: wiring de `_explodir_bloco` no resolver + aposentadoria de `_explodir_multi_cas`)
+
+**Ambiente.** IMPL executada pelo Claude Code no host. Abertura: `main` em `f399961` (merge PR #127), sincronizada com `origin/main`; working tree limpa.
+
+**Foco.** IMPL declarada pelo Diovanni. Fatia (iii): fecha as três pendências abertas do bloco 003.BA. Fork de modelo de dados (forma do trânsito bloco→resolver) ratificado pelo Arquiteto+Diovanni ANTES do prompt cirúrgico: **opção B** (campo `composicao_verbatim` separado) + **manter** o verbatim na saída. Opções C e D descartadas com razão registrada em D-ARQ-45 (aplicação 003.BB).
+
+**Gate de estado real.** pytest **495 verde reconfirmado** ANTES de tocar arquivo. Leitura real de `composicao.py`, `tipos.py`, `transcricao_fds.py`, `test_explosao_multi_cas.py` e dos 5 arquivos de teste que fluem pelo resolver. Branch nova `feat/003bb-plugar-explodir-bloco` a partir de `main` atualizada. Passada adversária (toca tipo compartilhado `tipos.py` + função `resolver_composicao`).
+
+**IMPL (Code).** `tipos.py`: `FDS` ganha `composicao_verbatim: tuple[BlocoComponente, ...] = ()`. `composicao.py`: `_explodir_multi_cas` DELETADA; `resolver_composicao` reescrita para varrer `fds.composicao_verbatim`, expandir via `_explodir_bloco`, rodar `gate_cas`, escrever em `fds.composicao` (o `replace` preserva `composicao_verbatim`). `agente_medico/tests/fixtures/__init__.py`: helper `bloco_de(c) -> BlocoComponente` (embrulho 1→1). Migração da entrada de 5 arquivos que fluem pelo resolver. `test_explosao_multi_cas.py` removido; 3 asserções de integração migraram para `test_resolver_explode_bloco.py` (novo) + teste de preservação de `composicao_verbatim`. Higiene: 3 comentários stale citando `_explodir_multi_cas` atualizados em `transcricao_fds.py`, `test_transcricao_fds.py`, `test_extracao_fds.py`.
+
+**Nota de higiene / desvio de processo.** Primeiro commit saiu com ~952/981 linhas porque o editor gravou 12 `.py` em CRLF (repo é LF). O Code tratou sozinho: `git reset --soft` + normalização LF + recommit limpo (165+/194−). **O tratamento furou o protocolo "bloqueador reportado = decisão do Arquiteto"** — o correto era parar e reportar. Resultado correto, processo indevido. Causa-raiz: a lacuna do **D-ARQ-44** (`.gitattributes` cobre só `*.md`; `.py`/CRLF ficou "META futura") mordeu como previsto. **Candidato a próxima META:** `*.py text eol=lf`. Ajuste de método do Arquiteto: prompt cirúrgico deve separar "higiene autorizada" de "se aparecer X inesperado, PARE e reporte".
+
+**Verificação.** Suíte 495→**488** (−8, +1). mypy --strict **delta-zero** em `composicao.py` e `tipos.py`. `test_explodir_bloco.py` 6/6. `git grep _explodir_multi_cas` → zero fora de `docs/` e da nota histórica no próprio `test_resolver_explode_bloco.py`.
+
+**Git.** Commit `05b0e41` na branch `feat/003bb-plugar-explodir-bloco`; merge em `main` via PR #128 (merge commit `05731bd`, "Create a merge commit"), branch remota deletada, `main` local sincronizada. `riscos.py`, `pendencias_estruturais.py`, `fds_t65`, `test_stage_3_*`, `test_promocao_quimico`, `test_regra_benzeno` INTOCADOS. Docs: DECISOES v76 (notas 003.BB em D-ARQ-45 e D-ARQ-46), este bloco. `PROTOCOLO_AGENTE_MEDICO.md` NÃO tocado (sem regra clínica). `PAINEL_ESTADO.md` NÃO re-tirado: 488 é baseline de testes, não um dos três números; nenhum se moveu.
+
+**Pendências.** Fatia (iii) fecha as três pendências do bloco 003.BA. Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01/02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DT-003BA-01, DH-003M-01, DH-003P-01, DH-003A-01. DT-003AS-01 segue ABERTA. Nova candidata a META: lacuna `.gitattributes .py` (D-ARQ-44).
+
+**Próxima.** A declarar pelo Arquiteto. Candidatas: (a) META `.gitattributes *.py eol=lf`; (b) triar DT-003BA-01 na re-tiragem do PAINEL; (c) fechar a porta de entrada — wiring de `montar_composicao` no pipeline (preencher `FDS.composicao_verbatim` em produção) / patologia 1 (DT-003AS-01).
