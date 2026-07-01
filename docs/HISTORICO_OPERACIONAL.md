@@ -2664,3 +2664,23 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências/dívidas.** DT-003AX-01 → RESOLVIDA (reconciliação; IMPL pendente, não-bloqueante). DT-003AS-01 segue ABERTA (patologia 1 IMPL pendente; entrada texto-puro cravada). Novos itens ABERTOS p/ IMPL (forma/IMPL, precedente "Aberto para a IMPL" de D-ARQ-45): forma do verbatim-grupo (`BlocoVerbatim` vs `ComponenteVerbatim`+`grupo_id`); `_explodir_multi_cas` aposentar vs generalizar; destino de `extrair_tabelas_fds`. Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01, DT-003M-02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01.
 
 **Próxima.** Candidata natural: IMPL do transcritor-FDS sobre a entrada texto-puro decidida — fatia que materializa (i) o verbatim-grupo + parse-PDF `extract_text` âncora-por-título e (ii) a expansão-de-grupo no resolvedor substituindo o `\n`-split. Gate de estado real obrigatório (reconfirmar 488 por pytest ANTES de tocar arquivo; reler literais de `composicao.py`/`transcricao_fds.py`/`extracao_fds.py`/`tipos.py`; tocar tipo compartilhado → passada adversária + grep repo-inteiro). Modo+foco e numeração: do Diovanni.
+
+## Sessão 003.AZ — 01/07/2026 — IMPLEMENTAÇÃO (fatia i do transcritor-FDS: forma do verbatim-grupo `BlocoVerbatim` + montagem-de-grupo)
+
+**Ambiente.** Kickoff + gate + decisão de forma no Cowork (mount read/pytest); IMPL executada pelo Claude Code no host. Abertura: `main` em `0b548ef` (PR #124), sincronizada com `origin/main`; working tree só com EOL cosmético.
+
+**Foco.** IMPL declarada pelo Diovanni. Fatia (i) da IMPL do transcritor-FDS sob a entrada texto-puro selada na 003.AY.
+
+**Gate de estado real.** pytest **488 verde reconfirmado** (motor novo 339 + legada 149) ANTES de tocar arquivo — a suíte legada é lenta no sandbox por fixture class-scoped re-parseando PDF real, não por lógica; rodada por classe confirma 98/98 do `test_regressao_pcmso`. Literais relidos: `transcricao_fds.py`, `composicao.py`, `tipos.py`, `extracao_fds.py`. Grep de produtores/consumidores: `ComponenteVerbatim`/`montar_*` só em `transcricao_fds.py` + fixture + teste; `_explodir_multi_cas` consumido só por `resolver_composicao`; `extrair_tabelas_fds` sem consumidor no motor (só testes).
+
+**Decisão de forma (ratificada pelo Diovanni).** (1) verbatim-grupo = `BlocoVerbatim` aninhado (não flat+grupo_id); (2) `_explodir_multi_cas` = aposentar+reescrever `_explodir_bloco` (não generalizar); (3) `extrair_tabelas_fds` = DEPRECATED (não cross-check); (4) escopo desta sessão = só fatia (i) tipo+montagem. Detalhe em DECISOES (nota 003.AZ em D-ARQ-46 + D-ARQ-45).
+
+**IMPL (Code).** `tipos.py`: +`MembroVerbatim`/`BlocoVerbatim`/`BlocoComponente`, −`ComponenteVerbatim`. `transcricao_fds.py`: `_montar_membro`/`montar_bloco`/`montar_composicao` substituindo `montar_componente`/`montar_composicao`; P3/P4/P5 intocadas. Fixtures: `fds_verbatim_t65` → BlocoVerbatim-singleton; `fds_verbatim_leinertex` nova (bloco multi-CAS real N=2/N=3, medição 003.AN/AY). `test_montagem_verbatim.py` migrado + teste de preservação-de-grupo (membros single-CAS, `concentracao=None`, faixa do bloco não-ordenada).
+
+**Verificação.** Suíte 488→**489**; mypy --strict **delta-zero** (46 pré-existentes, arquivos não-tocados); `git grep ComponenteVerbatim` vazio em `*.py`. Cobertura da regra-de-grupo: teste novo falha sem `BlocoVerbatim`, passa com.
+
+**Git.** Commit `9a4eaf3` na branch `feat-003az-blocoverbatim-montagem`, 5 arquivos nominais. `composicao.py`/`_explodir_multi_cas`/`resolvedor.py`/`extracao_fds.py` intocados. Sem push/PR (do Diovanni). Docs: DECISOES v73, PROTOCOLO v37, este bloco.
+
+**Pendências.** Fatia (ii)/003.BA: `_explodir_bloco` no resolver (expansão 1→N + herança-α) + aposentar `_explodir_multi_cas` + `extrair_tabelas_fds` DEPRECATED. Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01/02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01. DT-003AS-01 avança (fatia i feita).
+
+**Próxima.** 003.BA — IMPL fatia (ii): expansão-de-grupo no resolver. Gate de estado real obrigatório (reconfirmar 489 por pytest; reler `composicao.py`/`tipos.py`; grep de quem consome `BlocoComponente`/`_explodir_multi_cas`).

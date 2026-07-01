@@ -5,14 +5,24 @@ from collections.abc import Sequence
 from typing import Optional
 
 from agente_medico.motor.resolvedor import cas_bem_formado
-from agente_medico.motor.tipos import Componente, ComponenteVerbatim, FaixaConcentracao
+from agente_medico.motor.tipos import (
+    BlocoComponente,
+    BlocoVerbatim,
+    Componente,
+    FaixaConcentracao,
+    MembroVerbatim,
+)
 
-# [DERIVADO — DT-003AS-01 / D-ARQ-43 P2, medição 003.AN/AS]
+# [DERIVADO — DT-003AS-01 / D-ARQ-43 P2, medição 003.AN/AS; refinado 003.AZ]
 # Camada de normalização determinística do verbatim de FDS, a montante de
 # resolver_composicao (D-ARQ-42 camada-LLM). Funções puras, sem I/O, sem LLM.
-# FRONTEIRA D-ARQ-45: _explodir_multi_cas (composicao.py) é INTOCADA — o split
-# multi-CAS legítimo continua sendo do resolvedor. Este módulo só conserta a
-# quebra de render intra-token a montante, nunca decide separação multi-CAS.
+# Fronteira é BlocoVerbatim (D-ARQ-46, refinado 003.AZ): o mecanismo \n-célula
+# (003.AR) foi substituído por grupo verbatim explícito — o LLM-transcritor já
+# entrega os N CAS de um bloco "Derivados de:" como membros separados, faixa
+# escrita 1× por bloco. FRONTEIRA D-ARQ-45: _explodir_multi_cas (composicao.py)
+# é INTOCADA — a expansão-de-grupo e a herança-α da faixa do bloco continuam
+# sendo do resolvedor. Este módulo só conserta a quebra de render intra-token a
+# montante, nunca decide expansão nem herança.
 
 _GRAFIAS_CAS_AUSENTE = frozenset(
     {
@@ -130,25 +140,35 @@ def parsear_faixa(texto: str) -> Optional[FaixaConcentracao]:
     return FaixaConcentracao(minimo=minimo, maximo=maximo)
 
 
-def montar_componente(verbatim: ComponenteVerbatim) -> Componente:
-    """Monta um Componente determinístico a partir de uma linha-verbatim (D-ARQ-46 Parte 4).
+def _montar_membro(m: MembroVerbatim) -> Componente:
+    """Monta um Componente determinístico a partir de um membro-verbatim (D-ARQ-46 Parte 4).
 
-    Montagem 1→1: P3 (desambiguar_cas) → P4 (normalizar_cas_ausente) no cas cru, P5
-    (parsear_faixa) na faixa crua, strip no nome. agente=None e flags de perigo no default
-    (recorte A, D-ARQ-42 Parte 3). NÃO explode multi-CAS (1→N, _explodir_multi_cas,
-    D-ARQ-45) nem ordena min/max (_normalizar_faixa, 003.AP): ambos ficam no resolvedor, a
-    jusante. desambiguar_cas preserva o `\n` multi-CAS legítimo, que sobrevive a
-    normalizar_cas_ausente e chega ao resolvedor; parsear_faixa devolve faixa sem ordenar.
+    Montagem 1→1: P3 (desambiguar_cas) → P4 (normalizar_cas_ausente) no cas cru, strip no
+    nome. concentracao=None: a faixa é do bloco (herança-α é resolver-side, D-ARQ-45 P1/P2).
+    agente=None e flags de perigo no default (recorte A, D-ARQ-42 Parte 3).
     """
-    cas = normalizar_cas_ausente(desambiguar_cas(verbatim.cas))
-    concentracao = parsear_faixa(verbatim.faixa)
-    return Componente(cas=cas, nome=verbatim.nome.strip(), concentracao=concentracao)
+    cas = normalizar_cas_ausente(desambiguar_cas(m.cas))
+    return Componente(cas=cas, nome=m.nome.strip())
 
 
-def montar_composicao(verbatim: Sequence[ComponenteVerbatim]) -> tuple[Componente, ...]:
-    """FDS inteira: sequência de linhas-verbatim → tuple[Componente, ...] (D-ARQ-46 Parte 2/4).
+def montar_bloco(bloco: BlocoVerbatim) -> BlocoComponente:
+    """Monta um BlocoComponente a partir de um BlocoVerbatim (D-ARQ-46, refinado 003.AZ).
 
-    Saída do LLM-transcritor (mockado nesta fatia) montada 1→1; explosão multi-CAS e
-    ordenação ficam no resolvedor (resolver_composicao), que consome esta tupla.
+    Faixa parseada 1× por bloco (P5); NÃO explode (D-ARQ-45 P1), NÃO ordena (003.AP),
+    NÃO aplica a faixa aos membros — expansão-de-grupo e herança-α ficam no resolver
+    (fatia ii). Cada membro é montado 1→1 por _montar_membro.
     """
-    return tuple(montar_componente(v) for v in verbatim)
+    return BlocoComponente(
+        concentracao=parsear_faixa(bloco.faixa),
+        membros=tuple(_montar_membro(m) for m in bloco.membros),
+    )
+
+
+def montar_composicao(blocos: Sequence[BlocoVerbatim]) -> tuple[BlocoComponente, ...]:
+    """FDS inteira: sequência de blocos-verbatim → tuple[BlocoComponente, ...]
+    (D-ARQ-46 Parte 2/4, refinado 003.AZ).
+
+    Saída do LLM-transcritor (mockado nesta fatia) montada 1→1 por bloco; expansão-de-grupo
+    e herança-α ficam no resolver (resolver_composicao), que consome esta tupla.
+    """
+    return tuple(montar_bloco(b) for b in blocos)
