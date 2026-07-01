@@ -21,7 +21,7 @@ def test_desambiguar_cas_junta_quebra_intra_token_tio2() -> None:
 
 def test_desambiguar_cas_preserva_multi_cas_legitimo() -> None:
     # Âncora: bloco "Derivados de:" com dois CAS válidos empilhados —
-    # preserva o '\n' para o resolvedor explodir (_explodir_multi_cas).
+    # preserva o '\n' para o resolvedor explodir (_explodir_bloco).
     assert desambiguar_cas("2634-33-5\n55965-84-9") == "2634-33-5\n55965-84-9"
 
 

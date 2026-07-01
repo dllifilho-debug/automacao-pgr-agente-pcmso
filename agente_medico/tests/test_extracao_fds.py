@@ -54,7 +54,7 @@ def test_tinta_header_composicao_literal() -> None:
 
 def test_leinertex_massa_cas_empilhado_literal() -> None:
     # Leinertex e Massa: composição ISOLADA, bloco "Derivados de:" com CAS multi-linha.
-    # Prova literal do \n-empilhado que _explodir_multi_cas (D-ARQ-45) consome.
+    # Prova literal do \n-empilhado que a montagem de bloco (D-ARQ-45/46) consome.
     for caminho in (LEINERTEX, MASSA):
         tabelas = extrair_tabelas_fds(caminho)
         primeira = tabelas[0]

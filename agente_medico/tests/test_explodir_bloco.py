@@ -1,7 +1,8 @@
 """Testes da expansão-de-grupo BlocoComponente -> tuple[Componente,...] (D-ARQ-45 P1/P2, 003.BA).
 
 Cada teste falha sem _explodir_bloco e passa com ela (cobertura por regra, metodologia).
-Fatia (ii) isolada: sem gate, sem chamador — _explodir_multi_cas/resolver_composicao intocados.
+Nasceu isolada (fatia ii, sem gate/sem chamador); plugada em resolver_composicao na
+fatia iii (003.BB) — cobertura aqui permanece válida e intacta.
 """
 from __future__ import annotations
 

@@ -11,6 +11,7 @@ from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import (
     Componente, FDS, GHEPGR, PGR, ProdutoQuimico,
 )
+from agente_medico.tests.fixtures import bloco_de
 from agente_medico.tests.fixtures.fds_t65 import (
     tinta_acrilica, cimento_ciplan, adesivo_pvc_tigre,
 )
@@ -24,7 +25,12 @@ _HOJE = date(2025, 1, 1)  # pina o gate de validade; PGR.validade da fixture = 2
 def _ghe_com_fds(ghe_id: str, componentes: tuple[Componente, ...]) -> GHEPGR:
     return GHEPGR(
         id=ghe_id, nome=ghe_id, cargos=(), riscos=(), epis=(),
-        produtos_quimicos=(ProdutoQuimico(nome=ghe_id, fds=FDS(composicao=componentes)),),
+        produtos_quimicos=(
+            ProdutoQuimico(
+                nome=ghe_id,
+                fds=FDS(composicao=(), composicao_verbatim=tuple(bloco_de(c) for c in componentes)),
+            ),
+        ),
         psicossocial=False,
     )
 

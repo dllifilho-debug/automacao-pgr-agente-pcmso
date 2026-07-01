@@ -83,6 +83,7 @@ class Componente:
 @dataclass(frozen=True)
 class FDS:
     composicao: tuple[Componente, ...]
+    composicao_verbatim: tuple[BlocoComponente, ...] = ()
 
 
 @dataclass(frozen=True)
