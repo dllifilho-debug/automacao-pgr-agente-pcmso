@@ -42,16 +42,28 @@ class FaixaConcentracao:
 
 
 @dataclass(frozen=True)
-class ComponenteVerbatim:
-    # D-ARQ-46 Parte 2: verbatim cru transcrito da seção de composição da FDS, por
-    # componente. Texto bruto, sem normalização: `cas` pode trazer `\n` de quebra-de-render,
-    # grafia-de-ausente ou estar oculto; `faixa` é texto cru ("0,2 – 0,05", "< 5%", "").
-    # NÃO carrega slug, FaixaConcentracao parseada, flags de perigo, explosão multi-CAS nem
-    # ordenação min/max — tudo isso é determinístico a jusante. Fronteira LLM↔determinístico
-    # (D-ARQ-46 Parte 3): saída do LLM-transcritor, entrada da montagem (transcricao_fds).
+class MembroVerbatim:
     cas: str
     nome: str
+
+
+@dataclass(frozen=True)
+class BlocoVerbatim:
+    """D-ARQ-46 (refinado 003.AZ): verbatim cru AGRUPADO. Faixa única por bloco
+    (medição 003.AY: no bloco 'Derivados de:' a faixa é escrita 1×). Singleton = bloco de 1 membro.
+    Fronteira LLM↔determinístico. NÃO carrega FaixaConcentracao parseada, flags, explosão nem
+    herança-α — tudo a jusante. Recorte A (D-ARQ-42 P3)."""
     faixa: str
+    membros: tuple[MembroVerbatim, ...]
+
+
+@dataclass(frozen=True)
+class BlocoComponente:
+    """Saída da montagem determinística, entrada da expansão-de-grupo (resolver,
+    fatia ii). membros são Componente com concentracao=None: a herança-α da faixa do bloco é
+    RESOLVER-SIDE (D-ARQ-45 P1/P2). concentracao do bloco = faixa parseada 1×."""
+    concentracao: Optional[FaixaConcentracao]
+    membros: tuple[Componente, ...]
 
 
 @dataclass(frozen=True)
