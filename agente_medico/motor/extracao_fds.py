@@ -7,7 +7,10 @@ import pdfplumber
 
 
 def extrair_tabelas_fds(caminho: Path) -> list[list[list[Optional[str]]]]:
-    """Parse-PDF determinístico da transcrição-FDS (D-ARQ-42 Parte 1).
+    """DEPRECATED (003.BA): entrada de composição migrou para texto-puro (D-ARQ-42);
+    mantida para rastreabilidade, sem consumidor no motor.
+
+    Parse-PDF determinístico da transcrição-FDS (D-ARQ-42 Parte 1).
 
     Devolve as tabelas CRUAS de extract_tables() de todas as páginas, achatadas numa
     única lista (fronteira de página DESCARTADA nesta fatia — a composição aparece em

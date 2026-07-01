@@ -3,7 +3,15 @@ from __future__ import annotations
 import dataclasses
 
 from agente_medico.motor.resolvedor import EntradaIndice, gate_cas
-from agente_medico.motor.tipos import Componente, FDS, GHEPGR, PGR, Pendencia, ProdutoQuimico
+from agente_medico.motor.tipos import (
+    BlocoComponente,
+    Componente,
+    FDS,
+    GHEPGR,
+    PGR,
+    Pendencia,
+    ProdutoQuimico,
+)
 
 
 def _normalizar_faixa(componente: Componente) -> Componente:
@@ -53,6 +61,24 @@ def _explodir_multi_cas(componente: Componente) -> list[Componente]:
     if len(pedacos) <= 1:
         return [componente]
     return [dataclasses.replace(componente, cas=p) for p in pedacos]
+
+
+def _explodir_bloco(bloco: BlocoComponente) -> tuple[Componente, ...]:
+    """Expande um BlocoComponente (grupo verbatim) em N Componente, herdando a faixa do bloco.
+
+    D-ARQ-45 P1/P2 (herança-α): cada membro nasce com concentracao=None (montar_bloco);
+    aqui herda a FaixaConcentracao do bloco (replace só troca concentracao) e canonicaliza
+    via _normalizar_faixa (D-ARQ-43 P2). Determinístico puro, a MONTANTE do gate_cas
+    (D-ARQ-09/41): expandir grupo e herdar faixa é lado-determinístico, nunca LLM.
+
+    Sem gate aqui — gate_cas exige indice_cas, é responsabilidade do resolver (fatia iii).
+    Anti-supressão (D-ARQ-31/33): bloco de 1 membro -> tuple de 1; preserva cardinalidade,
+    nunca remove membro. cas/nome/flags dos membros intocados (só concentracao muda).
+    """
+    return tuple(
+        _normalizar_faixa(dataclasses.replace(m, concentracao=bloco.concentracao))
+        for m in bloco.membros
+    )
 
 
 def resolver_composicao(
