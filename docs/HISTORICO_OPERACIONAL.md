@@ -2704,3 +2704,13 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** Fatia (iii)/003.BB: aposentar `_explodir_multi_cas`, plugar `_explodir_bloco` em `resolver_composicao` (wiring real no pipeline), migrar/atualizar `test_explosao_multi_cas.py`. Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01/02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01. DT-003AS-01 segue ABERTA (patologia 1 do transcritor, não desta fatia).
 
 **Próxima.** 003.BB — IMPL fatia (iii): aposentadoria de `_explodir_multi_cas` + wiring de `_explodir_bloco` no resolver + migração de testes. Gate de estado real obrigatório (reconfirmar 495 por pytest; reler `composicao.py`/`resolvedor.py`; tocar `resolver_composicao` exige passada adversária, per precedente de tipo/função compartilhada).
+
+### Adenda 003.BA — 01/07/2026 — discussão de escopo (pós-merge, sem código)
+
+**Gatilho.** Diovanni comparou a saída completa do legado (módulo Engenharia: Anexo I do PGR — NR-01 + NR-15/09 + NR-07 + Dec 3.048 + eSocial Tab 24) e perguntou se o motor novo deve reproduzi-la ("completo pro engenheiro ver") ou seguir a rota atual.
+
+**Achado (disco, 937209c).** Resultado do motor novo emite só o lado-médico (GHE×ExameEmitido). Zero previdenciário/eSocial em agente_medico/ (git grep vazio; vivem no legado). A tela é lado-ENGENHEIRO (Anexo I) = INPUT (tipos.PGR), não produto do agente médico.
+
+**Decisão (Arquiteto recomenda, Diovanni ratifica).** Continuar a rota atual (ingestão + lado-médico). Não replicar o Anexo I do engenheiro no motor novo agora. Previdenciário+eSocial+engenharia = frente de emissão separada perto do cutover (paridade p/ desligar Streamlit). Prova de vida = Marco 1 já cravado (não criar marco novo).
+
+**Entregas.** DECISOES v75 + DT-003BA-01. PAINEL não tocado (Marco 1 já cobre; DT-003BA-01 a triar na próxima re-tiragem). PROTOCOLO intocado (sem regra clínica). Sem git de código.
