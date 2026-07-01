@@ -2684,3 +2684,23 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** Fatia (ii)/003.BA: `_explodir_bloco` no resolver (expansão 1→N + herança-α) + aposentar `_explodir_multi_cas` + `extrair_tabelas_fds` DEPRECATED. Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01/02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01. DT-003AS-01 avança (fatia i feita).
 
 **Próxima.** 003.BA — IMPL fatia (ii): expansão-de-grupo no resolver. Gate de estado real obrigatório (reconfirmar 489 por pytest; reler `composicao.py`/`tipos.py`; grep de quem consome `BlocoComponente`/`_explodir_multi_cas`).
+
+## Sessão 003.BA — 01/07/2026 — IMPLEMENTAÇÃO (fatia ii do transcritor-FDS: expansão-de-grupo `_explodir_bloco`, recorte enxuto)
+
+**Ambiente.** IMPL executada pelo Claude Code no host. Abertura: `main` em `5ab6086` (merge PR #125), sincronizada com `origin/main`; working tree limpa (só untracked de sempre, fora do escopo).
+
+**Foco.** IMPL declarada pelo Diovanni. Fatia (ii) da IMPL do transcritor-FDS — expansão-de-grupo, recorte ratificado como adição ISOLADA: só `_explodir_bloco` (sem gate, sem chamador) + `extrair_tabelas_fds` DEPRECATED. Aposentadoria de `_explodir_multi_cas`, wiring em `resolver_composicao` e migração de `test_explosao_multi_cas.py` explicitamente FORA de escopo (fatia iii).
+
+**Gate de estado real.** pytest **489 verde reconfirmado** ANTES de tocar arquivo. Branch nova `feat-003ba-explodir-bloco` a partir de `main` atualizada.
+
+**IMPL (Code).** `composicao.py`: `_explodir_bloco(bloco: BlocoComponente) -> tuple[Componente, ...]` adicionado ao lado de `_explodir_multi_cas` (import de `BlocoComponente` somado a `tipos`) — expande os membros do bloco, cada um herdando a `FaixaConcentracao` do bloco via `dataclasses.replace` (só troca `concentracao`) e canonicalizado por `_normalizar_faixa` (D-ARQ-43 P2); sem `gate_cas` dentro (exige `indice_cas`, responsabilidade do resolver — fatia iii); sem chamador em `resolver_composicao`. `extracao_fds.py`: docstring de `extrair_tabelas_fds` prefixada com `DEPRECATED (003.BA): entrada de composição migrou para texto-puro (D-ARQ-42); mantida para rastreabilidade, sem consumidor no motor.` — corpo intocado. `test_explodir_bloco.py` novo: 6 testes (2/3/1 membros por cardinalidade; herança-α com faixa invertida normalizada; bloco sem faixa → membros sem faixa; cas/nome/flags do membro preservados), cada um falha sem `_explodir_bloco` e passa com.
+
+**Nota de higiene.** `composicao.py` e `extracao_fds.py` vieram do disco em CRLF (convenção mista no repo, por arquivo); a edição inicial produziu diff de arquivo inteiro por causa disso. Normalizados de volta a LF (o que já tinham no HEAD) antes de comitar — diff final mínimo (28 e 5 linhas), suíte e mypy reconfirmados depois da normalização.
+
+**Verificação.** Suíte 489→**495** (6 testes novos, delta exato); mypy --strict **delta-zero** em `composicao.py` (limpo) — 46 erros pré-existentes em arquivos não-tocados, inalterados. `git grep _explodir_multi_cas|resolver_composicao` só mostra ocorrências pré-existentes (definição + uso em `resolver_composicao`/`orquestrador.py`/comentários de `transcricao_fds.py`) — nada novo. `git diff --stat` vs `main`: só `composicao.py`, `extracao_fds.py`, `test_explodir_bloco.py`.
+
+**Git.** Commit `add384f` na branch `feat-003ba-explodir-bloco`, push para `origin` (autorizado pelo Diovanni). `_explodir_multi_cas`, `resolver_composicao`, `FDS.composicao`, `test_explosao_multi_cas.py` intocados. Sem PR/merge nesta etapa. Docs: DECISOES v74 (nota 003.BA em D-ARQ-45), este bloco. `PROTOCOLO_AGENTE_MEDICO.md`/`PAINEL_ESTADO.md` deliberadamente NÃO tocados (fora do escopo desta rodada de docs).
+
+**Pendências.** Fatia (iii)/003.BB: aposentar `_explodir_multi_cas`, plugar `_explodir_bloco` em `resolver_composicao` (wiring real no pipeline), migrar/atualizar `test_explosao_multi_cas.py`. Inalteradas: DT-FDS-02, DT-003L-01, DT-003M-01/02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DH-003M-01, DH-003P-01, DH-003A-01. DT-003AS-01 segue ABERTA (patologia 1 do transcritor, não desta fatia).
+
+**Próxima.** 003.BB — IMPL fatia (iii): aposentadoria de `_explodir_multi_cas` + wiring de `_explodir_bloco` no resolver + migração de testes. Gate de estado real obrigatório (reconfirmar 495 por pytest; reler `composicao.py`/`resolvedor.py`; tocar `resolver_composicao` exige passada adversária, per precedente de tipo/função compartilhada).
