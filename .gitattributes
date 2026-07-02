@@ -1,2 +1,4 @@
 # DH-003AO-01 / D-ARQ-44: terminador LF normativo para markdown, independe de core.autocrlf.
 *.md text eol=lf
+# 003.BC / D-ARQ-44: fecha a lacuna .py (incidente CRLF da 003.BB).
+*.py text eol=lf
