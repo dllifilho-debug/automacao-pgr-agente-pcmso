@@ -1408,6 +1408,54 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 
 **Nota (003.BC) — `montar_fds` fecha o trânsito que a nota 003.BB descreveu.** A invariante implícita registrada em 003.BB ("composicao vazio / composicao_verbatim cheio" na entrada do resolver) ganha função nomeada e testada: `montar_fds(blocos) -> FDS` é a ÚNICA porta de entrada de produção verbatim→FDS (fork A, ver nota 003.BC em D-ARQ-45) — nenhum chamador constrói `FDS` de verbatim na mão. Composição pura sobre `montar_composicao` já existente; `BlocoVerbatim`/`BlocoComponente` intactos. `[DERIVADO — IMPL 003.BC; D-ARQ-45]`.
 
+## D-ARQ-47 — Contrato de invocação e gate do transcritor-LLM-FDS: candidato verbatim revisado pelo RT é a fronteira LLM↔determinístico
+
+**Status:** DECISÃO DE ARQUITETURA (CONHECIMENTO/medição → ARQUITETURA). Sem código nesta sessão. Implementação (parse-texto greenfield + transcritor-LLM injetável + gate de forma + harness mockado) é fatia futura. Autorização para virar D-ARQ dada pelo Diovanni (003.BD).
+
+**Contexto.** D-ARQ-41/42 selaram o transcritor-FDS como camada-LLM (bicamada interna parse-PDF→LLM, fronteira "CAS transcrito"); D-ARQ-46 cravou que o LLM emite verbatim cru e a montagem determinística produz `Componente`. Toda a cadeia a jusante do verbatim está construída e testada com o LLM MOCKADO: montagem (003.AW/AZ), `_explodir_bloco`/wiring (003.BB), `montar_fds` (003.BC), pareado 1:1 contra `fds_t65.tinta_acrilica()`. Falta a peça que nenhuma fatia tocou: a invocação REAL do transcritor-LLM e a fronteira em que o candidato não-determinístico entra no pipeline determinístico. DT-003AS-01 patologia 1 (grid fundido Ciplan/Tigre) era o caso-âncora dado como "producibilidade barrada" (D-ARQ-46 limites); esta sessão mediu e o desbloqueou.
+
+**Medição (003.BD, CONHECIMENTO — a passada do Arquiteto como classe do transcritor-LLM).** `extract_text` (pdfplumber) da região âncora-por-título dos 2 grid-fundidos, transcrição por sentido contra o gabarito `fds_t65`:
+- Tigre 7/7, Ciplan 8/8 em `cas` + `concentracao`. O "grid fundido" é interleave de coluna em ordem linear do texto (composição intercalada com a seção vizinha), NÃO perda de informação — os triplos estão todos presentes.
+- Ordem de coluna INVERTE por fabricante: Tigre `[nome, CAS, faixa]`, Ciplan `[nome, faixa, CAS]`. Roteamento por FORMATO do token (CAS `dd…-dd-d`; faixa `n–n %`), não por posição — reforça a decisão anti-bbox de 003.AX.
+- Ruído descartável pela disciplina do triplo: a tabela de LT em ppm (Tigre p.1) repete nomes sem CAS e sem %-faixa → não é composição.
+- CAS oculto: `*`/`**` (Tigre), `vários` (Ciplan) → `cas=""` (ramo d de D-ARQ-36). Frases-H em rodapé (SI2: H334) — recorte A deixa fora; DT-003M-01 viva.
+- Nome multi-linha (Tigre comp. 5, `2,5-tiofenodiilbis (5-terc-\nbutil-1,3-benzoxazole)`) reassemblado por sentido.
+`[DERIVADO — medição extract_text dos 2 grid-fundidos vs. fds_t65, 003.BD]`. Reenquadra D-ARQ-46: o bloqueio era ausência de LLM real invocado, não impossibilidade intrínseca.
+
+**Decisão — cinco cláusulas.**
+
+*Cláusula 1 — fronteira e forma.* O transcritor-LLM recebe TEXTO (`extract_text` da região âncora-por-título, 003.AT/AY) e emite `tuple[BlocoVerbatim,...]` candidato — tipo já materializado (003.AZ). NÃO emite `Componente`, não resolve slug, não explode multi-CAS, não ordena faixa, não classifica perigo. Confirma D-ARQ-46 P1/P3; o verbatim é a fronteira LLM↔determinístico. `[DERIVADO — D-ARQ-46 P1/P3; tipos.py em disco]`.
+
+*Cláusula 2 — invocação injetável, nunca global.* O cliente-LLM é injetado como parâmetro (forma ex.: `transcrever_fds(texto: str, cliente: TranscritorLLM) -> tuple[BlocoVerbatim,...]`), nunca importado no módulo — para testar com mock/gravação sem bater na API (D-ARQ-42 P4). O LLM fica a montante do verbatim; motor determinístico intacto (D-ARQ-09). `[DERIVADO — D-ARQ-09; D-ARQ-42 P4]`.
+
+*Cláusula 3 — gate de FORMA, não de conteúdo.* Antes de o candidato entrar em `montar_fds`, gate determinístico de schema: cada `BlocoVerbatim` tem faixa-texto parseável (ou vazia → sentinela AUSENTE, D-ARQ-34 P1) e ≥1 membro nomeado. O gate NÃO valida CAS (é do `gate_cas` a jusante, D-ARQ-36), não decide materialidade, não corrige. Falha de forma → `Pendencia`, nunca chute (D-ARQ-08/22). `[DERIVADO — D-ARQ-36; D-ARQ-22]`.
+
+*Cláusula 4 — revisão do RT sobre o verbatim é a admissão do candidato.* A saída do LLM é candidata (D-ARQ-33 cl.4). O `BlocoVerbatim` é o artefato de revisão humana — texto legível, 1:1 com o documento — revisado/editado pelo responsável técnico ANTES de `montar_fds`. Ancora no gate existente R-PGR-01 (assinatura por engenheiro), espelha D-ARQ-33 cl.4, sem criar camada de revisão nova. É a peça topológica que faltava: onde o não-determinístico vira aceito. `[DERIVADO — D-ARQ-33 cl.4; R-PGR-01]`.
+
+*Cláusula 5 — roteamento por formato-de-token (princípio derivado da medição).* O triplo (`nome + token-CAS + token-faixa-%`) é a âncora semântica; a ordem de coluna é irrelevante; linhas sem CAS+%-faixa (tabela de LT em ppm) são descartadas. O texto exato do prompt é adiado à IMPL (molde D-ARQ-42 P4); o PRINCÍPIO entra no contrato como derivado da medição 003.BD. `[DERIVADO — medição 003.BD]`.
+
+**Consequência.**
+- Fecha a fronteira que faltava para o transcritor-FDS sair do mock: contrato de invocação + gate + ponto de revisão, sem implementar.
+- Dá `extrair_texto_fds` (parse-texto greenfield) como camada determinística a montante — sucede o papel que `extrair_tabelas_fds` (003.AS) perdeu ao virar DEPRECATED (003.BB, sob entrada texto-puro).
+- Determinismo intacto (D-ARQ-09): toda LLM a montante do verbatim; gate de forma, montagem e resolvedor puros.
+- Universal (D-ARQ-06): "documento → texto → triplos-candidatos → verbatim revisado → determinístico" serve qualquer FDS digital de qualquer setor; a conduta segue no lado-médico.
+- Não cria nem altera regra clínica (R-* intactas; PROTOCOLO inalterado quanto a conduta). Cria contrato de camada de extração-FDS.
+
+**Limites declarados (D-ARQ-22).**
+- Producibilidade validada em 2 grid-fundidos (Ciplan/Tigre, medição) + 3 isolados (tinta/Leinertex/Massa, mock). n pequeno; FDS de outra norma-fonte ou escaneada fora (OCR = contingência D-ARQ-43 P1).
+- Recorte A mantido: frase-H de rodapé não transcrita; SI2/H334 → `cas=""` → AUSENTE, mascarando o bypass-sensibilizante (estado de hoje, DT-003M-01, não regressão).
+- A revisão-RT-sobre-verbatim é o gate de qualidade; sem ela o candidato-LLM é não-confiável por construção. Não é paliativo — é a topologia correta (cl.4). Alternativa rejeitada na 2ª passada: gate automático de confiança (sem humano) para FDS "fáceis" introduziria classificador fácil-vs-difícil, superfície de erro silencioso (D-ARQ-22).
+
+**Fronteiras (não confundir):**
+- **D-ARQ-42** — instancia a invocação da camada-LLM que D-ARQ-42 P4 adiou "por medição"; a medição 003.BD fecha o ponto. Contrato de saída (`tuple[...]`), recorte A, bicamada interna intactos.
+- **D-ARQ-46** — reenquadra o limite "producibilidade barrada pela patologia 1": desbloqueado por medição. Contrato do verbatim intacto.
+- **D-ARQ-36** — o `gate_cas` a jusante é intocado; o gate desta decisão é de forma, a montante da montagem.
+- **D-ARQ-33 cl.4 / R-PGR-01** — a cl.4 é a admissão do candidato ancorada no gate existente, não camada nova.
+- **D-ARQ-09** — preservada: verbatim é a fronteira; LLM a montante.
+- **DT-003AS-01** — patologia 1 medida/producível; DT permanece ABERTA até a IMPL do transcritor-LLM + `extrair_texto_fds`. DT-003M-01 (frase-H/CAS-oculto) intocada, fora do recorte A.
+
+**Base.** Sessão 003.BD (02/07/2026). Medição (CONHECIMENTO) desbloqueia patologia 1; contrato (ARQUITETURA) crava a invocação+gate. Modo A+B na mesma sessão, ordenado B→A (medição alimenta o contrato). Duas passadas: a 1ª esboçou as 5 cláusulas; a 2ª quase derrubou a cl.4 (gate automático) e reafirmou revisão-RT como topologia, não paliativo. Decisão de arquitetura — sem código. Implementação por fatias futuras (gate de estado real obrigatório: `extrair_texto_fds` greenfield).
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -1489,3 +1537,4 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 | v75 | 01/07/2026 | Sessão 003.BA (adenda — discussão de escopo pós-merge, sem código): nota 003.BA em D-ARQ-25 — fronteira de PRODUTO. Motor novo emite só o lado-médico (matriz GHE×ExameEmitido rastreável); Dec 3.048 e eSocial Tab 24 confirmados ausentes do motor (git grep vazio em agente_medico/; vivem no legado modulo_esocial_xml/modulo_engenharia). Decisão: não replicar o Anexo I do engenheiro no motor novo agora (escopo do engenheiro, não diferencial; rodaria sobre fixture; commodity; re-acopla D-ARQ-09); previdenciário+eSocial = frente de emissão separada perto do cutover (paridade p/ desligar Streamlit). Prova de vida = Marco 1 (já no PAINEL), não réplica visual. Abre DT-003BA-01. Nenhuma R-* criada/alterada. Sem código. |
 | v76 | 01/07/2026 | Sessão 003.BB (IMPLEMENTAÇÃO fatia iii): notas de aplicação em D-ARQ-45 (`_explodir_bloco` plugado no resolver, `_explodir_multi_cas` aposentado, forma de trânsito = campo `composicao_verbatim`) e D-ARQ-46 (`FDS.composicao_verbatim` como entrada do resolver). Suíte 495→488, mypy delta-zero. Commit `05b0e41`, merge `05731bd`, PR #128. Nenhuma R-* alterada. |
 | v77 | 01-02/07/2026 | Sessão 003.BC (META + IMPLEMENTAÇÃO): nota de aplicação em D-ARQ-44 — `.gitattributes` `*.py text eol=lf` (PR #130), fecha a lacuna sinalizada em 003.BB; desvio do gate (21 não-`.py` CRLF-only tocados por `--renormalize`) confirmado EOL-only e revertido, escopo reduzido; abre DH-003BC-01. Notas de aplicação em D-ARQ-45/D-ARQ-46 — `montar_fds(blocos) -> FDS` (`transcricao_fds.py`), porta de entrada única de produção verbatim→FDS, fork A ratificado sobre fork B (construção manual descartada); teste de integração fim-a-fim pareado 1:1 contra gabarito `fds_t65.tinta_acrilica()`. Suíte 488→491, mypy --strict delta-zero. Commit `3eb0d21`, merge `1038d7a`, PR #131 (PR #130 para a parte META). Nenhuma R-* alterada. |
+| v78 | 02/07/2026 | Sessão 003.BD (CONHECIMENTO/medição → ARQUITETURA): D-ARQ-47 adicionada — contrato de invocação e gate do transcritor-LLM-FDS (5 cláusulas: LLM recebe texto/emite `tuple[BlocoVerbatim,...]` candidato; invocação injetável nunca-global testável sem API; gate de FORMA não-conteúdo; revisão-RT-sobre-verbatim ancorada em R-PGR-01/D-ARQ-33 cl.4 = admissão do candidato; roteamento por formato-de-token). Medição (B): patologia 1 de DT-003AS-01 DESBLOQUEADA — grid fundido Ciplan/Tigre transcritível por LLM sobre `extract_text` (Tigre 7/7, Ciplan 8/8 vs. `fds_t65`); fusão = interleave de coluna, não perda de dado; ordem de coluna inverte por fabricante → roteia por formato. Reenquadra D-ARQ-46 (bloqueio era ausência de LLM real, não impossibilidade). DT-003AS-01 segue ABERTA (IMPL do transcritor-LLM + `extrair_texto_fds` greenfield pendente); DT-003M-01 intocada (recorte A). Nenhuma regra clínica criada/alterada. Sem código. |
