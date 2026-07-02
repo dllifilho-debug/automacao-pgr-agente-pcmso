@@ -10,6 +10,7 @@ from agente_medico.motor.tipos import (
     BlocoVerbatim,
     Componente,
     FaixaConcentracao,
+    FDS,
     MembroVerbatim,
 )
 
@@ -172,3 +173,12 @@ def montar_composicao(blocos: Sequence[BlocoVerbatim]) -> tuple[BlocoComponente,
     e herança-α ficam no resolver (resolver_composicao), que consome esta tupla.
     """
     return tuple(montar_bloco(b) for b in blocos)
+
+
+def montar_fds(blocos: Sequence[BlocoVerbatim]) -> FDS:
+    """Porta de entrada única de produção (003.BC, fork A). Materializa a invariante
+    D-ARQ-45/46: composicao nasce VAZIA — quem preenche é resolver_composicao
+    (herança-α + gate_cas são resolver-side). Nenhum chamador constrói FDS de
+    verbatim na mão.
+    """
+    return FDS(composicao=(), composicao_verbatim=montar_composicao(blocos))
