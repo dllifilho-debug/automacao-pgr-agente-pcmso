@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_fds import extrair_texto_fds
 from agente_medico.motor.tipos import BlocoVerbatim, Pendencia
 from agente_medico.motor.transcritor_fds import TranscritorLLM, gate_forma, transcrever_fds
@@ -12,6 +13,13 @@ from agente_medico.motor.transcritor_fds import TranscritorLLM, gate_forma, tran
 # verbatim é a revisão-RT, que fica fora deste adaptador. Compor até
 # montar_fds/resolver_composicao só existe em harness de teste (mockado),
 # nunca em código de produção (motor/transcritor_fds.py, nota de topo).
+#
+# Duas Pendencias BLOQUEANTES distintas, nenhuma vira () silencioso
+# (anti-supressão D-ARQ-31/35): região ausente (extrair_texto_fds -> None) é
+# "composicao_ausente_fds"; falha de INVOCAÇÃO do transcritor-LLM
+# (TranscricaoIndisponivel — chave ausente, cascata sem 200, JSON
+# ininteligível) é "transcricao_indisponivel_fds". Confundi-las apagaria a
+# distinção entre "não achei a seção" e "achei, mas o LLM não respondeu".
 
 
 def preparar_composicao(
@@ -32,5 +40,16 @@ def preparar_composicao(
                 regra_origem="D-ARQ-47",
             ),
         )
-    candidato = transcrever_fds(texto, cliente)
+    try:
+        candidato = transcrever_fds(texto, cliente)
+    except TranscricaoIndisponivel as e:
+        return (), (
+            Pendencia(
+                tipo="transcricao_indisponivel_fds",
+                destinatario="extracao",
+                motivo=str(e),
+                bloqueante=True,
+                regra_origem="D-ARQ-47",
+            ),
+        )
     return gate_forma(candidato)

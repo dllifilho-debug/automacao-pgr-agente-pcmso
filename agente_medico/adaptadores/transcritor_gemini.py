@@ -63,6 +63,19 @@ Texto da FDS:
 """
 
 
+class TranscricaoIndisponivel(Exception):
+    """Falha de INVOCAÇÃO do transcritor-LLM (chave ausente, cascata de
+    modelos sem 200, JSON de resposta ininteligível) — distinta de "LLM
+    respondeu e afirmou composição vazia" (blocos=[] é resultado legítimo,
+    não erro). Levantada em vez de devolver () silenciosamente: anti-
+    supressão D-ARQ-31/35 — o chamador (orquestracao_fds) traduz para
+    Pendencia bloqueante, nunca deixa a falha virar composição vazia muda."""
+
+    def __init__(self, motivo: str) -> None:
+        super().__init__(motivo)
+        self.motivo = motivo
+
+
 def _obter_chave() -> str:
     """CHAVE_API_GOOGLE: st.secrets primeiro, os.environ depois. Nunca lança
     (try/except em volta de streamlit — pode não estar instalado/configurado
@@ -131,11 +144,11 @@ class TranscritorGemini:
     def transcrever(self, texto: str) -> tuple[BlocoVerbatim, ...]:
         chave = self._chave if self._chave is not None else _obter_chave()
         if not chave:
-            return ()
+            raise TranscricaoIndisponivel("CHAVE_API_GOOGLE ausente")
         resposta = _chamar_gemini(_PROMPT.format(texto=texto), chave)
         if not resposta:
-            return ()
+            raise TranscricaoIndisponivel("cascata Gemini sem 200")
         try:
             return _parsear_blocos(resposta)
-        except Exception:
-            return ()
+        except Exception as e:
+            raise TranscricaoIndisponivel(f"JSON inválido: {e}") from e

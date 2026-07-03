@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini
+from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel, TranscritorGemini
 from agente_medico.motor.composicao import resolver_composicao
 from agente_medico.motor.extracao_fds import extrair_texto_fds
 from agente_medico.motor.protocolo import carregar
@@ -93,11 +93,12 @@ def test_cascata_primeiro_modelo_falha_segundo_responde() -> None:
     assert resultado[0].membros[0].cas == "1-2-3"
 
 
-def test_todos_os_modelos_falham_devolve_tupla_vazia() -> None:
+def test_todos_os_modelos_falham_levanta_transcricao_indisponivel() -> None:
     with patch(_ALVO, return_value=Mock(status_code=500)):
         cliente = TranscritorGemini(chave="fake")
-        resultado = cliente.transcrever("texto qualquer")
-    assert resultado == ()
+        with pytest.raises(TranscricaoIndisponivel) as exc:
+            cliente.transcrever("texto qualquer")
+    assert exc.value.motivo == "cascata Gemini sem 200"
 
 
 def test_excecao_de_rede_passa_para_o_proximo_modelo() -> None:
@@ -136,11 +137,20 @@ def test_cas_ausente_da_chave_json_vira_string_vazia() -> None:
     assert resultado[0].membros[0].cas == ""
 
 
-def test_json_invalido_devolve_tupla_vazia() -> None:
+def test_json_invalido_levanta_transcricao_indisponivel() -> None:
     resp = Mock(status_code=200)
     resp.json.return_value = {
         "candidates": [{"content": {"parts": [{"text": "isso nao e json {{{"}]}}]}
     with patch(_ALVO, return_value=resp):
+        cliente = TranscritorGemini(chave="fake")
+        with pytest.raises(TranscricaoIndisponivel) as exc:
+            cliente.transcrever("texto qualquer")
+    assert exc.value.motivo.startswith("JSON inválido:")
+
+
+def test_blocos_vazio_e_resultado_legitimo_sem_excecao() -> None:
+    payload: dict[str, Any] = {"blocos": []}
+    with patch(_ALVO, return_value=_resposta_200(payload)):
         cliente = TranscritorGemini(chave="fake")
         resultado = cliente.transcrever("texto qualquer")
     assert resultado == ()
@@ -160,12 +170,13 @@ def test_json_com_markdown_fence_e_limpo() -> None:
     assert resultado[0].membros[0].cas == "1-2-3"
 
 
-def test_sem_chave_nao_chama_http() -> None:
+def test_sem_chave_nao_chama_http_e_levanta_transcricao_indisponivel() -> None:
     with patch(_ALVO) as mock_post:
         cliente = TranscritorGemini(chave="")
-        resultado = cliente.transcrever("texto qualquer")
+        with pytest.raises(TranscricaoIndisponivel) as exc:
+            cliente.transcrever("texto qualquer")
     mock_post.assert_not_called()
-    assert resultado == ()
+    assert exc.value.motivo == "CHAVE_API_GOOGLE ausente"
 
 
 def test_payload_usa_temperature_zero() -> None:
