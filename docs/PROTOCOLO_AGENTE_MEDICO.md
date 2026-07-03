@@ -952,6 +952,8 @@ Refinamentos aos passos da migração desta DT:
 
 **Andamento 003.BE (02/07/2026):** `extrair_texto_fds` materializada (D-ARQ-47 consequência) — recorte âncora-por-título com sobre-inclusão, núcleo puro + wrapper, 16 testes, suíte 491→507. Resta transcritor-LLM real + gate de forma (cláusulas 1-3/5). DT segue ABERTA.
 
+**Andamento 003.BF (02/07/2026):** invocação injetável (`TranscritorLLM` Protocol + `transcrever_fds`, cl.1/2) + `gate_forma` (cl.3, reprovado → Pendencia bloqueante `forma_verbatim_fds`) + harness mockado tinta/Ciplan sobre `extrair_texto_fds` real, materializados (`transcritor_fds.py`, 10 testes, suíte 507→517). Resta cliente-LLM real + prompt (cl.5) e ponto de revisão-RT (cl.4). DT segue ABERTA.
+
 **Status:** ABERTA. Não-bloqueante. Input empírico para a fatia de transcrição-FDS; o parse-PDF (003.AS) entrega a grade crua sobre a qual estas patologias operam. Patologia 1 producível por LLM (medido 003.BD, D-ARQ-47); resta a IMPL.
 
 ---
@@ -1041,3 +1043,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v37 | 01/07/2026 | Sessão 003.AZ (IMPLEMENTAÇÃO — fatia i): andamento em DT-003AS-01 — montagem-de-grupo materializada. Forma FECHADA: `BlocoVerbatim` aninhado (`ComponenteVerbatim` aposentado; singleton = bloco de 1). Destinos ratificados p/ fatia ii: `_explodir_multi_cas` aposentar, `extrair_tabelas_fds` DEPRECATED. Detalhe em DECISOES (nota 003.AZ em D-ARQ-46 + D-ARQ-45, v73). Suíte 488→489; mypy delta-zero. Commit `9a4eaf3`. Nenhuma R-* criada/alterada. |
 | v38 | 02/07/2026 | Sessão 003.BD (CONHECIMENTO/medição → ARQUITETURA): andamento em DT-003AS-01 — patologia 1 (grid fundido Ciplan/Tigre) MEDIDA e DESBLOQUEADA. Transcrição por sentido sobre `extract_text` âncora-por-título contra `fds_t65`: Tigre 7/7, Ciplan 8/8 (cas + concentração). Fusão = interleave de coluna (não perda de dado); ordem de coluna inverte por fabricante → roteia por formato-de-token, confirma anti-bbox (003.AX). Reenquadra o limite de D-ARQ-46. Contrato de invocação+gate do transcritor-LLM em D-ARQ-47 (DECISOES v78). DT segue ABERTA (IMPL do transcritor-LLM + `extrair_texto_fds` greenfield); DT-003M-01 intocada (recorte A). Sem código. |
 | v39 | 02/07/2026 | Sessão 003.BE (IMPLEMENTAÇÃO): andamento em DT-003AS-01 — `extrair_texto_fds` materializada (D-ARQ-47 consequência, recorte âncora-por-título com sobre-inclusão). DT segue ABERTA. Nenhuma R-* criada/alterada. |
+| v40 | 02/07/2026 | Sessão 003.BF (IMPLEMENTAÇÃO): andamento em DT-003AS-01 — invocação injetável (`TranscritorLLM` Protocol + `transcrever_fds`) + `gate_forma` (cl.3) + harness mockado tinta/Ciplan sobre `extrair_texto_fds` real. DT segue ABERTA. Nenhuma R-* criada/alterada. |
