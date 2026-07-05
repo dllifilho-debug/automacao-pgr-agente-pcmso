@@ -23,11 +23,16 @@ from agente_medico.tests.fixtures.fds_t65 import adesivo_pvc_tigre, cimento_cipl
 _ALVO = "agente_medico.adaptadores.transcritor_gemini.requests.post"
 
 
-def _resposta_200(payload: dict[str, Any]) -> Mock:
+def _resposta_200(payload: dict[str, Any], finish_reason: str = "STOP") -> Mock:
     resp = Mock()
     resp.status_code = 200
     resp.json.return_value = {
-        "candidates": [{"content": {"parts": [{"text": json.dumps(payload)}]}}]
+        "candidates": [
+            {
+                "content": {"parts": [{"text": json.dumps(payload)}]},
+                "finishReason": finish_reason,
+            }
+        ]
     }
     return resp
 
@@ -98,7 +103,35 @@ def test_todos_os_modelos_falham_levanta_transcricao_indisponivel() -> None:
         cliente = TranscritorGemini(chave="fake")
         with pytest.raises(TranscricaoIndisponivel) as exc:
             cliente.transcrever("texto qualquer")
-    assert exc.value.motivo == "cascata Gemini sem 200"
+    assert exc.value.motivo == "cascata Gemini sem resposta íntegra (200 + STOP)"
+
+
+def test_todos_os_modelos_max_tokens_levanta_transcricao_indisponivel() -> None:
+    payload = {"blocos": [{"faixa": "1 - 2", "membros": [{"cas": "1-2-3", "nome": "X"}]}]}
+    with patch(_ALVO, return_value=_resposta_200(payload, finish_reason="MAX_TOKENS")):
+        cliente = TranscritorGemini(chave="fake")
+        with pytest.raises(TranscricaoIndisponivel) as exc:
+            cliente.transcrever("texto qualquer")
+    assert "resposta íntegra" in exc.value.motivo
+
+
+def test_primeiro_modelo_max_tokens_segundo_stop_cascata_continua() -> None:
+    payload_truncado = {"blocos": [{"faixa": "0 - 0", "membros": [{"cas": "0-0-0", "nome": "Truncado"}]}]}
+    payload_ok = {"blocos": [{"faixa": "1 - 2", "membros": [{"cas": "1-2-3", "nome": "X"}]}]}
+    chamadas: list[str] = []
+
+    def _post(url: str, json: dict[str, Any], timeout: int) -> Mock:
+        chamadas.append(url)
+        if len(chamadas) == 1:
+            return _resposta_200(payload_truncado, finish_reason="MAX_TOKENS")
+        return _resposta_200(payload_ok)
+
+    with patch(_ALVO, side_effect=_post):
+        cliente = TranscritorGemini(chave="fake")
+        resultado = cliente.transcrever("texto qualquer")
+
+    assert len(chamadas) == 2
+    assert resultado[0].membros[0].cas == "1-2-3"
 
 
 def test_excecao_de_rede_passa_para_o_proximo_modelo() -> None:
@@ -140,7 +173,13 @@ def test_cas_ausente_da_chave_json_vira_string_vazia() -> None:
 def test_json_invalido_levanta_transcricao_indisponivel() -> None:
     resp = Mock(status_code=200)
     resp.json.return_value = {
-        "candidates": [{"content": {"parts": [{"text": "isso nao e json {{{"}]}}]}
+        "candidates": [
+            {
+                "content": {"parts": [{"text": "isso nao e json {{{"}]},
+                "finishReason": "STOP",
+            }
+        ]
+    }
     with patch(_ALVO, return_value=resp):
         cliente = TranscritorGemini(chave="fake")
         with pytest.raises(TranscricaoIndisponivel) as exc:
@@ -161,7 +200,10 @@ def test_json_com_markdown_fence_e_limpo() -> None:
     resp = Mock(status_code=200)
     resp.json.return_value = {
         "candidates": [
-            {"content": {"parts": [{"text": f"```json\n{json.dumps(payload)}\n```"}]}}
+            {
+                "content": {"parts": [{"text": f"```json\n{json.dumps(payload)}\n```"}]},
+                "finishReason": "STOP",
+            }
         ]
     }
     with patch(_ALVO, return_value=resp):

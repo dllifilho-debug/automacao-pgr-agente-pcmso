@@ -64,12 +64,13 @@ Texto da FDS:
 
 
 class TranscricaoIndisponivel(Exception):
-    """Falha de INVOCAÇÃO do transcritor-LLM (chave ausente, cascata de
-    modelos sem 200, JSON de resposta ininteligível) — distinta de "LLM
-    respondeu e afirmou composição vazia" (blocos=[] é resultado legítimo,
-    não erro). Levantada em vez de devolver () silenciosamente: anti-
-    supressão D-ARQ-31/35 — o chamador (orquestracao_fds) traduz para
-    Pendencia bloqueante, nunca deixa a falha virar composição vazia muda."""
+    """Falha de INVOCAÇÃO do transcritor-LLM (chave ausente, cascata sem
+    resposta íntegra: sem 200 ou finishReason != STOP, JSON de resposta
+    ininteligível) — distinta de "LLM respondeu e afirmou composição vazia"
+    (blocos=[] é resultado legítimo, não erro). Levantada em vez de devolver
+    () silenciosamente: anti-supressão D-ARQ-31/35 — o chamador
+    (orquestracao_fds) traduz para Pendencia bloqueante, nunca deixa a falha
+    virar composição vazia muda."""
 
     def __init__(self, motivo: str) -> None:
         super().__init__(motivo)
@@ -96,18 +97,29 @@ def _obter_chave() -> str:
 
 
 def _chamar_gemini(prompt: str, chave: str) -> str | None:
-    """Cascata de modelos: primeiro HTTP 200 vence, sem retry por modelo.
-    Qualquer exceção de rede/timeout num modelo passa para o próximo."""
+    """Cascata de modelos: primeiro HTTP 200 com finishReason STOP vence, sem
+    retry por modelo. Qualquer exceção de rede/timeout num modelo passa para
+    o próximo.
+
+    Sem teto de maxOutputTokens: com o teto (8192), o thinking do
+    gemini-2.5-flash disputa o mesmo budget (medido thoughtsTokenCount até
+    13231) e estoura antes do JSON de resposta — o corpo sai cortado
+    (finishReason=MAX_TOKENS) em vez de completo. Sonda ao vivo confirmou
+    5/5 finishReason=STOP sem o teto (medição 003.BH)."""
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0, "maxOutputTokens": 8192},
+        "generationConfig": {"temperature": 0},
     }
     for modelo in _MODELOS:
         try:
             r = requests.post(_URL.format(modelo=modelo, chave=chave), json=payload, timeout=120)
-            if r.status_code == 200:
-                resultado = r.json()["candidates"][0]["content"]["parts"][0]["text"]
-                return str(resultado)
+            if r.status_code != 200:
+                continue
+            corpo = r.json()
+            if corpo["candidates"][0].get("finishReason") != "STOP":
+                continue
+            resultado = corpo["candidates"][0]["content"]["parts"][0]["text"]
+            return str(resultado)
         except Exception:
             continue
     return None
@@ -147,7 +159,7 @@ class TranscritorGemini:
             raise TranscricaoIndisponivel("CHAVE_API_GOOGLE ausente")
         resposta = _chamar_gemini(_PROMPT.format(texto=texto), chave)
         if not resposta:
-            raise TranscricaoIndisponivel("cascata Gemini sem 200")
+            raise TranscricaoIndisponivel("cascata Gemini sem resposta íntegra (200 + STOP)")
         try:
             return _parsear_blocos(resposta)
         except Exception as e:
