@@ -2824,3 +2824,21 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** **DT-003BG-01 (nova, ABERTA, não-bloqueante):** gabarito de composição de Leinertex/Massa/Amanco ausente em `fds_t65` → teste ao vivo cobre 3/6 FDS (Ciplan+Tigre grid-fundido + tinta; lacuna nos isolados fáceis); dado verbatim de julgamento humano, não se inventa. DT-003AS-01 segue ABERTA — resta validação ao vivo de (e1) + cl.4 (revisão-RT) + serialização verbatim ida/volta = (e2). PAINEL: merge (e1) NÃO move os 3 números (porta sem fim-a-fim; falta e2); re-tiragem recomendada na próxima META (baseline 420 vs 538). Demais inalteradas: DH-003BC-01, DT-FDS-02, DT-003L-01, DT-003M-01/02, DT-003T-01, DT-003Y-01, DT-003AE-01, DT-003AK-01, DT-003AR-01, DT-003AW-01, DT-003BA-01, DH-003M-01, DH-003P-01, DH-003A-01.
 
 **Próxima.** Declarada pelo Arquiteto: CONHECIMENTO/medição — validação ao vivo de (e1). `CHAVE_API_GOOGLE` real → roda `@requer_api` contra os 3 FDS com gabarito → lê contra `fds_t65` (Ciplan+Tigre = veredito, inclui se modelo/URL sequer respondem 200). Só após chão verificado, (e2). NÃO abrir branch da medição antes do merge deste fechamento.
+
+## Sessão 003.BH — 05/07/2026 — CONHECIMENTO/medição (validação ao vivo de (e1), DT-003AS-01) + fix de truncamento
+
+**Medição.** Sonda por modelo (`medir_probe_modelos.py`): `gemini-2.5-flash` HTTP 200; demais 3 da cascata 429 (quota do plano — modelos/URLs existem; failover inútil neste plano: se flash estourar quota, cascata inteira falha ruidosa). `[INCERTO]` de 003.BG resolvido. Pytest ao vivo inicial: 3/3 FAILED, `TranscricaoIndisponivel("JSON inválido: Unterminated string")` cortando em ~640–750 chars — falha ruidosa correta (comportamento `879a085`), nada colapsou em `()`.
+
+**Diagnóstico.** Sondas `medir_truncamento.py` v1–v3 (5 rodadas cada): truncamento NÃO-determinístico — thinking do 2.5-flash compartilha o budget `maxOutputTokens=8192` (`thoughtsTokenCount` medido: 4320 a 13231); quando estoura, `finishReason=MAX_TOKENS` e JSON cortado. Hipóteses descartadas por medição: multi-parts (`n_parts=1` sempre); truncamento determinístico (v1 deu STOP com thinking de 4320). Sem teto: 5/5 STOP+parseável.
+
+**Correção (formulada pelo Arquiteto, aplicada pelo Code).** Branch `fix/003bh-truncamento-gemini`: (1) payload sem `maxOutputTokens`; (2) `_chamar_gemini` só aceita 200 + `finishReason=="STOP"`, não-STOP segue cascata (contrato `str|None` preservado); (3) mensagem "cascata Gemini sem resposta íntegra (200 + STOP)"; mock `_resposta_200` com `finish_reason` + 2 testes novos. Suite: 538→540 passed, 3 skipped; mypy --strict delta-zero. Commit `fe1b908`, merge `9689fc3`, PR #140.
+
+**Veredito.** Pytest ao vivo pós-fix: **3 passed** (ciplan, tigre, tinta) — (e1) VALIDADA AO VIVO fim-a-fim (PDF→extração→Gemini real→gate de forma→`montar_fds`→`resolver_composicao`→CAS+concentração = gabarito `fds_t65`). Ressalva ESCRITO-NÃO-VERIFICADO de 003.BG resolvida; pré-requisito bloqueante de (e2) cumprido.
+
+**Observação de qualidade (não-bloqueante).** Sem teto, a resposta oscila entre 2 versões estáveis (713/1115 chars; provável cache server-side — `temperature=0` não determina thinking). Ambas passaram no gabarito nesta medição.
+
+**Untracked (procedência registrada).** `fds_originais/` (6 PDFs, insumo do teste ao vivo — commitados neste fechamento), `medir_fds*.py` (medições da era do gabarito), `medir_probe_modelos.py`+`medir_truncamento.py` (sondas 003.BH), `matrizes_originais/` (~40 matrizes reais de clientes — dado sensível, NÃO commitar; agora no `.gitignore`).
+
+**Pendências.** DT-003AS-01: (e1) validada ao vivo; resta (e2) = cl.4 revisão-RT + serialização verbatim ida/volta. DT-003BG-01 inalterada (gabarito 3/6). Demais inalteradas. PAINEL: (e1) validada ainda não move os 3 números (falta e2); re-tiragem na próxima META (baseline 420 vs 540).
+
+**Próxima.** IMPLEMENTAÇÃO — (e2).

@@ -17,3 +17,10 @@ data/cargos_desconhecidos.json
 
 # Dumps de inspeção (uso único)
 **/*_diff.txt
+
+# Dados sensíveis de clientes (matrizes reais, não commitar)
+matrizes_originais/
+
+# Sondas/medições locais (uso único, 003.BH)
+medir_*.py
+._eoltest
