@@ -65,8 +65,9 @@ def test_json_completo_vira_gheverbatim() -> None:
 
 
 def test_multi_agente_mesmo_et_vira_riscos_separados_com_fonte_copiada() -> None:
-    # Literais medidos 003.BK/003.BM (GHE 13/14 - Pintura, pág. 71).
-    fonte = "Thinner/Zarcão"
+    # Literal conferido contra o documento em 003.BO (GHE 13/14 - Pintura,
+    # pág. 71) — 003.BK citava a forma curta "Thinner/Zarcão".
+    fonte = "Thinner/Zarcão e tinta esmalte sintético"
     payload = {
         "nome": "Pintura",
         "cargos": [],
@@ -204,17 +205,21 @@ def test_transcricao_ao_vivo_bloco_pintura_thinner_zarcao() -> None:
     agentes = {r.agente.strip() for r in ghe.riscos}
     assert agentes >= {"Etanol", "Acetato de Etila", "Tolueno"}
 
-    # Literais medidos 003.BK/003.BM, pág. 71 (GHE Pintura). Comparação
-    # tolerante só a whitespace (colapsado), nunca a conteúdo — a transcrição
-    # ao vivo pode variar espaçamento, nunca o valor em si.
+    # Literal conferido contra o documento em 003.BO, pág. 71 (GHE Pintura) —
+    # 003.BK citava a forma curta "Thinner/Zarcão". A fonte geradora vem
+    # quebrada em 2 linhas pelo PDF ("Thinner/Zarcão e tinta" / "esmalte
+    # sintético"); comparação tolerante só a whitespace (colapsado), nunca a
+    # conteúdo — a transcrição ao vivo pode variar espaçamento, nunca o valor.
     esperado = {
         "Etanol": "4,4 ppm",
         "Acetato de Etila": "1 ppm",
         "Tolueno": "6,3 ppm",
     }
+    fonte_esperada = "Thinner/Zarcão e tinta esmalte sintético"
     for risco in ghe.riscos:
         agente = risco.agente.strip()
         if agente in esperado:
             quantificacao = " ".join(risco.quantificacao.split())
             assert quantificacao == esperado[agente]
-            assert risco.fonte_geradora.strip() == "Thinner/Zarcão"
+            fonte = " ".join(risco.fonte_geradora.split())
+            assert fonte == fonte_esperada

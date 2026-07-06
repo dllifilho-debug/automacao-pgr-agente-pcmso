@@ -55,8 +55,8 @@ NUNCA emita um código/slug (ex.: nunca "ruido" ou "RUIDO_82DB"), NUNCA traduza 
 "0,163 mg/m³"). Deixe "" quando o risco é qualitativo ou não tem valor no documento. NÃO calcule, NÃO \
 converta unidade, NÃO arredonde.
 6. fonte_geradora = texto cru da coluna "Fonte geradora" daquele código de atividade (ex.: \
-"Thinner/Zarcão", "Manuseio serra circular, Furadeira"). Deixe "" quando a coluna estiver ausente ou \
-ilegível para aquele código.
+"Thinner/Zarcão e tinta esmalte sintético", "Manuseio serra circular, Furadeira"). Deixe "" quando a \
+coluna estiver ausente ou ilegível para aquele código.
 7. RUÍDO — NÃO transcreva: o grid de classificação de risco (colunas de letras/números \
 I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
 EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/rodapé repetido de página \
