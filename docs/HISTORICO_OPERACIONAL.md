@@ -2842,3 +2842,19 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003AS-01: (e1) validada ao vivo; resta (e2) = cl.4 revisão-RT + serialização verbatim ida/volta. DT-003BG-01 inalterada (gabarito 3/6). Demais inalteradas. PAINEL: (e1) validada ainda não move os 3 números (falta e2); re-tiragem na próxima META (baseline 420 vs 540).
 
 **Próxima.** IMPLEMENTAÇÃO — (e2).
+
+## Sessão 003.BI — 05/07/2026 — IMPLEMENTAÇÃO (e2)
+
+**Foco.** (e2) = cl.4 (revisão-RT sobre o verbatim) + serialização ida/volta, spec do Arquiteto com 2 passadas: a 1ª derrubou o formato tabular candidato (mata round-trip byte-exato com `\n` intra-token, que o texto verbatim carrega — TiO₂/nomes multi-linha); a 2ª derrubou emitir `Pendencia` de dentro do desserializador (exceção nomeada `VerbatimInvalido` é o contrato — schema estrito, sem meio-termo silencioso).
+
+**Entrega.** Módulo greenfield `agente_medico/motor/revisao_verbatim.py` (puro, sem I/O, D-ARQ-48 preservada): `VerbatimInvalido(ValueError)`; `serializar_verbatim` (JSON `ensure_ascii=False`/`indent=2`, envelope `{"versao":1,"blocos":[...]}`); `desserializar_verbatim` (schema ESTRITO — campo extra/faltante/tipo errado/versão desconhecida → `VerbatimInvalido` indexada por bloco/membro, nunca aceitação parcial); garantia round-trip `desserializar(serializar(x)) == x` inclusive `\n` intra-token. `montar_fds_revisado` = `gate_forma` → `montar_fds` sobre o verbatim PÓS-revisão-RT (cl.4 de D-ARQ-47, ancorada em R-PGR-01/D-ARQ-33 cl.4); não é o bypass vedado pela nota de `transcritor_fds.py` (aquele parte do candidato cru). Nota de topo de `transcritor_fds.py` atualizada apontando para `montar_fds_revisado` como única porta de produção pós-revisão. 17 testes novos (`test_revisao_verbatim.py`): round-trip ×5, rejeições ×8, `montar_fds_revisado` ×2, fim-a-fim tinta com revisão simulada vs. `fds_t65`, edição-RT efetiva (prova que a revisão muda o dado).
+
+**Revisão.** Aprovada pelo Arquiteto sobre objects, sem correção. Observação não-bloqueante: rejeição de campo extra no ENVELOPE (distinto de bloco/membro) implementada mas sem teste dedicado — os 8 casos de rejeição da spec estão cobertos.
+
+**Gates.** Host: 540→557 passed (+17), 3 skipped, 0 falha; mypy --strict delta-zero (46 pré-existentes). Commit `d5c60d4`, merge `0b89904`, PR #142, "Create a merge commit".
+
+**Insumo commitado neste fechamento.** `medir_fds_gabarito_output.txt` — procedência: medição da era do gabarito (`pdfplumber.extract_tables`/`extract_text` sobre `fds_originais/`), fonte do mock fiel citada em `fds_verbatim_t65.py` (003.AW/AN/AS); estava untracked, sem git-ignore, achado na higiene de abertura desta sessão.
+
+**Pendências.** DT-003AS-01 **FECHADA** (seção 11 do PROTOCOLO, v41) — cadeia extração→LLM→gate→revisão-RT→montagem→resolvedor completa. DT-003BG-01 (gabarito 3/6, Leinertex/Massa/Amanco), DT-003M-01/02, DT-003AW-01 e demais DTs inalteradas — nenhuma reaberta por este fechamento. PAINEL_ESTADO.md re-tirado nesta sessão (baseline main `0b89904`, 557 passed/3 skipped, PROTOCOLO v41, DECISOES v83).
+
+**Próxima.** A declarar no kickoff. Proposta do Arquiteto: parse de PGR (D-ARQ-25 — esqueleto GHE/cargo/risco, maior massa restante da porta de entrada, 0 código) ou costura da UI de revisão-RT (Streamlit) sobre `revisao_verbatim.py`.
