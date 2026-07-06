@@ -2892,3 +2892,19 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003L-01 complementada por D-ARQ-50 C1 (esqueleto-GHE agora medido); permanece ABERTA como input da IMPL. Fatia FDS-apontada precisa de gabarito forma-1 (não Viverde) — registrado em C2. Demais DTs inalteradas.
 
 **Próxima.** A declarar no kickoff. Proposta do Arquiteto: 1ª fatia de IMPL do parse-PGR — parse-doc determinístico (`extrair_texto_pgr` via `pdfplumber.extract_text`, isolado, sem consumidor, molde `extracao_fds.py` 003.AS). A porta de entrada agora tem contrato (D-ARQ-49) + fronteiras medidas (D-ARQ-50); falta código.
+
+## Sessão 003.BL — 06/07/2026 — IMPLEMENTAÇÃO (parse-doc do parse-PGR: `extrair_texto_pgr` — 1ª fatia)
+
+**Foco.** 1ª fatia de IMPL do parse-PGR: parse-doc determinístico (D-ARQ-49 P1, fechado por D-ARQ-50 P1), isolado, sem consumidor, molde `extracao_fds.py` (003.AS). Modo IMPLEMENTAÇÃO, ratificado pelo Diovanni sobre a proposta da 003.BK.
+
+**Gate de estado real (disco).** Kickoff: git×HISTORICO sem divergência, main `7d8dea3` limpa, 557/3 herdados, PROTOCOLO v41 / DECISOES v85. Arquivos a tocar lidos via git objects (molde `extracao_fds.py` + `test_extrair_texto_fds.py`; D-ARQ-49/50 verbatim; greenfield reconfirmado por grep zero; par Viverde TRACKED em `matrizes_originais/` — ≠ FDS untracked → teste de integração sem skipif).
+
+**Entrega.** `agente_medico/motor/extracao_pgr.py::extrair_texto_pgr(caminho) -> list[str]` — texto VERBATIM por página via `pdfplumber.extract_text`, página sem texto → `""`; fronteira de página PRESERVADA (difere de `extrair_tabelas_fds`, que a descartou: blocos GHE cruzam páginas e o recorte futuro consome lista-por-página, mesmo shape de `_recortar_composicao`). Sem LLM, sem recorte de bloco, sem termo→slug. Limites em docstring: PDF escaneado → páginas vazias (detecção/OCR = chamador, fatia futura, D-ARQ-43 P1); `.docx` = cross-check futuro (D-ARQ-50 P1). + `test_extracao_pgr.py` (5 testes, fixture module-scoped, 1 parse): 151 págs; toda página str; 42 blocos `SETOR/FUNÇÃO`; valores da GHE-Pintura (pág 71) com adjacência agente↔valor — teste de perda-silenciosa, classe D-ARQ-22; verbatim (Ç preservado). Literais cravados por script descartável sobre o PDF real, não inventados.
+
+**Correção a D-ARQ-50 (achado da sessão).** O Code reportou (sem parar — 151/42 eram os números-gate): o literal `78,2` do gate de D-ARQ-50 não existe no PDF. Verificação independente do Arquiteto sobre git objects: texto do `.docx` = `{78,3: 1, 78,8: 4}`, IDÊNTICO ao text layer do PDF; as 7 ocorrências de "78,2" no XML do `.docx` eram coordenadas de desenho vetorial. Fantasma de transcrição na medição 003.BK — sem perda silenciosa (o ataque a P1 não se materializa; docx↔pdf idênticos nesses valores REFORÇAM P1). Correção de literal: mesma ID, changelog (DECISOES v86), decisão intacta.
+
+**Gates.** Host: 557→562 passed (+5), 3 skipped, 0 falha (~161s, dominado pelo parse único de 151 págs); mypy --strict delta-zero (46 pré-existentes, zero nos arquivos novos). Commit `2d7916e`, merge `6413e59`, PR #146, "Create a merge commit". PROTOCOLO v41 inalterado (nenhuma R-*). DECISOES v85→v86 (correção de literal, sem D-ARQ nova). PAINEL re-tirado (merge moveu 557→562 e lado-PGR saiu de 0-código).
+
+**Pendências.** DT-003L-01 ABERTA (input das próximas fatias). `extrair_texto_pgr` sem consumidor (por design da fatia). Demais DTs inalteradas.
+
+**Próxima.** A declarar no kickoff. Proposta do Arquiteto: 2ª fatia do parse-PGR — recorte determinístico dos blocos GHE (âncora `SETOR/FUNÇÃO`, 42 blocos medidos), núcleo puro sem I/O, molde `_recortar_composicao` (003.AT-BE), ainda sem LLM.
