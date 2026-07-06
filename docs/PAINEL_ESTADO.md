@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.BL · 06/07/2026
-**Baseline:** main `6413e59` · 562 passed, 3 skipped · mypy `--strict` delta-zero (46 pré-existentes) · PROTOCOLO v41 · DECISOES v86
+**Tiragem corrente:** 003.BM · 06/07/2026
+**Baseline:** main `5bd5403` · 569 passed, 3 skipped · mypy `--strict` delta-zero (46 pré-existentes) · PROTOCOLO v41 · DECISOES v87
 
 ---
 
@@ -20,17 +20,17 @@
 | Pergunta | Estado medido | Leitura |
 |---|---|---|
 | Quanto da regra clínica está no código? | **17 de 41** ativas (~41%) — inalterado desde 003.AH (frente clínica pausada, caminho B) | Espinha do motor de decisão de pé; cauda clínica ainda em prosa |
-| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **1ª fatia no main** (parse-doc `extrair_texto_pgr`, 003.BL, isolada sem consumidor; recorte-GHE/transcrição-LLM/termo→slug 0 código) | Gargalo de produção migrou: não é mais o transcritor-FDS — é o parse-PGR + a rasura do vocabulário químico |
+| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **2ª fatia no main** (parse-doc `extrair_texto_pgr` + recorte-GHE `recortar_blocos_ghe`, 003.BL/BM, sem consumidor LLM; transcrição-LLM/termo→slug 0 código) | Gargalo de produção migrou: não é mais o transcritor-FDS — é o parse-PGR + a rasura do vocabulário químico |
 | Dívidas que travam produção? | **3** — mesmas facetas de sempre, recontadas pós-fechamento | DT-003L-01 (parse-PGR), DT-003M-02 (vocabulário-FDS raso), DT-FDS-02 (unidade do cutoff) |
 
-**Headline:** a produção **não está travada por falta de regra clínica nem mais pelo transcritor-FDS** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI) — está travada por **parse de PGR** (esqueleto GHE/cargo/risco: parse-doc no main — 003.BL; recorte-GHE e transcrição-LLM 0 código, D-ARQ-49/50) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
+**Headline:** a produção **não está travada por falta de regra clínica nem mais pelo transcritor-FDS** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI) — está travada por **parse de PGR** (esqueleto GHE/cargo/risco: recorte-GHE no main — 003.BM; transcrição-LLM e termo→slug 0 código, D-ARQ-49/50) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
 
 ---
 
 ## CAMADA 1 — Diretoria · início, meio, fim
 
 ### Onde estamos, em uma frase
-O **motor que decide os exames** (a partir de risco já estruturado) está ~41% construído e testado na espinha. Do lado da **porta de entrada**, o lado-FDS (química) está **construído e validado ao vivo, fim-a-fim** (PDF→extração de texto→transcritor-LLM→gate de forma→revisão-RT→montagem→resolvedor, 003.BD a 003.BI). Falta o lado-PGR: transcrição do esqueleto GHE/cargo/risco (D-ARQ-49/50; parse-doc `extrair_texto_pgr` no main desde 003.BL, camadas seguintes 0 código — maior massa restante) e o vocabulário químico ainda raso (a maioria dos componentes de FDS real cai em ramo 0/AUSENTE por falta de slug em `agentes.yaml`, DT-003M-02) — juntos, o que ainda separa o sistema de rodar um PGR real de ponta a ponta.
+O **motor que decide os exames** (a partir de risco já estruturado) está ~41% construído e testado na espinha. Do lado da **porta de entrada**, o lado-FDS (química) está **construído e validado ao vivo, fim-a-fim** (PDF→extração de texto→transcritor-LLM→gate de forma→revisão-RT→montagem→resolvedor, 003.BD a 003.BI). Falta o lado-PGR: transcrição do esqueleto GHE/cargo/risco (D-ARQ-49/50; parse-doc `extrair_texto_pgr` + recorte-GHE `recortar_blocos_ghe` no main desde 003.BL/BM; transcrição-LLM e termo→slug 0 código — maior massa restante) e o vocabulário químico ainda raso (a maioria dos componentes de FDS real cai em ramo 0/AUSENTE por falta de slug em `agentes.yaml`, DT-003M-02) — juntos, o que ainda separa o sistema de rodar um PGR real de ponta a ponta.
 
 ### A decisão que a diretoria precisa tomar
 Hoje a fila assume "continuar a frente clínica" por inércia. O painel torna a escolha informada:
@@ -54,7 +54,7 @@ Gargalos restantes, em massa crescente:
 | Índice CAS raso | Dado | **21 de 45 slugs com CAS** (47%; 003.AI populou 12, restam 24 null — várias por categoria física sem CAS aplicável) |
 | `name→slug` (string química sem CAS → slug) | Decisão de arquitetura | Indeciso (D-ARQ-36 Parte 1) |
 | UI da revisão-RT (Streamlit) | Greenfield | 0 código — `montar_fds_revisado` (003.BI) existe, sem tela onde o RT edita o verbatim |
-| Parse de PGR (esqueleto GHE/cargo/risco físico) | Em construção | parse-doc no main (`extrair_texto_pgr`, 003.BL); recorte-GHE + transcrição-LLM 0 código (D-ARQ-49/50) — maior massa |
+| Parse de PGR (esqueleto GHE/cargo/risco físico) | Em construção | parse-doc + recorte-GHE no main (`extrair_texto_pgr`/`recortar_blocos_ghe`, 003.BL/BM); transcrição-LLM e termo→slug 0 código (D-ARQ-49/50) — maior massa |
 
 **Fatia 1 da extração (popular CAS) parcialmente cumprida** (003.AI: 12 substâncias). Falta plugar a costura ao pipeline real (fatia A) e o parse-PGR (maior massa). Número corrigido nesta tiragem: o "9/43" citado nas sessões 003.BG-BI já estava defasado pela 003.AI (23/06/2026) — medido de disco (`agente_medico/protocolo/vocabulario/agentes.yaml`) como 21/45 nesta re-tiragem.
 
@@ -97,7 +97,7 @@ Instrumento: `git grep` de IDs de regra. Mede **rastreabilidade** (string presen
 | UI da revisão-RT (onde o RT edita o verbatim) | **0 código** — `serializar_verbatim`/`montar_fds_revisado` existem (motor puro); tela/costura ficam para fatia futura |
 | Índice CAS (`construir_indice_cas`) | **21/45 slugs com CAS** (47%) — 003.AI populou 12; restam 24 null (parte por categoria física sem CAS aplicável, parte gargalo de dado) |
 | Resolução canônica `name→slug` (string química → slug de agente) | **0 código** — decisão de arquitetura não tomada (D-ARQ-36 Parte 1); única `def` de normalização é `leo_resolver.py:37 _normaliza`, escopo LEO-texto, não vocabulário químico |
-| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **parse-doc construído** (`extrair_texto_pgr`, 003.BL, isolado); recorte-GHE, transcrição-LLM e termo→slug **0 código** (D-ARQ-49/50) — maior massa restante |
+| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **parse-doc + recorte-GHE construídos** (`extrair_texto_pgr`/`recortar_blocos_ghe`, 003.BL/BM, isolados sem consumidor); transcrição-LLM e termo→slug **0 código** (D-ARQ-49/50) — maior massa restante |
 
 Toda menção a "slug" em produção é **uso de campo** (lookup direto), não função dedicada.
 
@@ -148,10 +148,11 @@ Construir extração contra camada clínica incompleta → retrabalho se `R-CLI-
 ## Próximos passos
 1. ~~**003.AI (DADO):** popular `cas: null` de `agentes.yaml`~~ — **parcialmente cumprido** (12 substâncias, 003.AI); restam 24 null.
 2. ~~**Transcritor-FDS + revisão-RT**~~ — **CUMPRIDO** (003.BE-BI, D-ARQ-47); DT-003AS-01 fechada.
-3. **A declarar no kickoff (proposta do Arquiteto, 003.BL):** 2ª fatia do parse-PGR — recorte determinístico dos blocos GHE (âncora `SETOR/FUNÇÃO`, molde `_recortar_composicao`) **ou** costura da UI de revisão-RT (Streamlit) sobre `revisao_verbatim.py`.
-4. **Fatia A:** plugar `executar_com_composicao`/`montar_fds_revisado` no pipeline real (CLI/Streamlit), sobre índice CAS populado.
-5. **`name→slug`:** decisão de arquitetura a tomar (D-ARQ-36 Parte 1) — destrava agentes sem CAS atômico.
-6. **META higiene DH-003M-01:** 4ª recorrência de markdown cru, ainda pendente.
+3. ~~**2ª fatia do parse-PGR — recorte determinístico dos blocos GHE**~~ — **CUMPRIDO** (003.BM, `recortar_blocos_ghe`, D-ARQ-49 P2).
+4. **A declarar no kickoff (proposta do Arquiteto, 003.BM):** 3ª fatia do parse-PGR — transcrição-LLM do bloco GHE (esqueleto), molde `transcrever_fds` **ou** costura da UI de revisão-RT (Streamlit) sobre `revisao_verbatim.py`.
+5. **Fatia A:** plugar `executar_com_composicao`/`montar_fds_revisado` no pipeline real (CLI/Streamlit), sobre índice CAS populado.
+6. **`name→slug`:** decisão de arquitetura a tomar (D-ARQ-36 Parte 1) — destrava agentes sem CAS atômico.
+7. **META higiene DH-003M-01:** 4ª recorrência de markdown cru, ainda pendente.
 
 ---
 *Gestão à vista. Vive ao lado da produção, não a substitui. Próxima tiragem: ao próximo merge que mover um número, fechamento de marco, ou sessão META.*
