@@ -1,0 +1,139 @@
+########## GABARITO ##########
+
+====================================================================================================
+ARQUIVO: 01 - FISPQ_cimento - Ciplan.pdf
+====================================================================================================
+--- pagina 0 (1 tabela(s)) ---
+  tabela 0:
+    ['1 IDENTIFICAÇÃO DO PRODUTO E DA EMPRESA', None, None, None, '2 COMPOSIÇÃO E INFORMAÇÕES SOBRE INGREDIENTES', None, None, None]
+    ['CIMENTO PORTLAND', None, None, None, 'Produto químico preparado CAS 65997-15-1\nO cimento Portland é constituído basicamente de clínquer portland finamente moído e gesso. Podem, ainda, ser adicionados outros materiais\nnormalizados dependendo do tipo que se deseja. Pode ter a seguinte composição, conforme a mistura que for preparada:', None, None, None]
+    ['EMPRESA: CIPLAN Cimentos Planalto S/A', None, None, None, 'Componente', 'Faixa de concentração (%)', None, 'Número CAS']
+    ['', None, None, None, '', '', None, '']
+    ['MARCAS: CIPLAN', None, None, None, 'Silicato tricálcico', '20 - 70', None, '12168-85-3']
+    ['', None, None, None, 'Silicato dicálcico', '10 - 60', None, '10034-77-2']
+    ['Rodovia DF 205 Km 2,7 Fercal\nENDEREÇO:\nSobradinho DF', None, None, None, 'Ferro-aluminato de cálcio', '5 - 15', None, '12068-35-8']
+    [None, None, None, None, 'Sulfato de cálcio', '2 - 10', None, 'vários']
+    ['TELEFONE DA FÁBRICA/\nEMERGÊNCIA', None, '0800 61 3352\n61 3487 9000', None, 'Aluminato tricálcico', '1 - 15', None, '1242-78-3']
+    [None, None, None, None, 'Carbonato de cálcio', '0 - 5', None, '1317-65-3']
+    ['', None, None, None, 'Óxido de magnésio', '0 - 4', None, '1309-48-4']
+    [None, None, None, None, 'Óxido de cálcio', '0 - 0,2', None, '1305-78-8']
+    ['3 IDENTIFICAÇÃO DE PERIGOS', None, None, None, '4 MEDIDAS DE PRIMEIROS SOCORROS', None, None, None]
+    ['Efeitos / Sintomas da exposição', None, None, None, 'Prevenção', None, 'Ação', None]
+    ['Inalação', 'Exposição à poeira pode causar irritação\ndas vias respiratórias. O efeito depende do grau\nde exposição. Exposição repetida e prolongada\npode causar tenção no tórax, tosse, danos ao\npulmão.', None, None, 'O Trabalhar em ambiente ventilado, de\npreferência com uso de máscaras ou sob outro tipo de\nexaustão.Caso haja possibilidade de concentrações\ninaceitáveis de poeira no ar, e não seja possível\na utilização de proteção coletiva eficiente, deve\nser elaborado um programa de proteção respiratória, de\nacordo com a Instrução Normativa no 1 de 11/04/1994 do\nMT.', None, 'Remover a pessoa para local fresco e arejado. Procure\nassistência médica', None]
+    ['Pele', 'A pasta de cimento apresenta um pH elvado pode\nirritar a pele em caso de contato prolongado. O\ncontato efetivo com o pó pode causar eczema', None, None, 'Evitar contato com a pele. Usar roupas e luvas resistentes\na abrasão e materiais alcalino. Não usar cremes nas mãos\nno lugar de luvas.', None, 'La var imediatamente com água corrente e sabão por pelo\nmenos quize minutos. Remover toda a roupa contaminada,\nprincipalmente com cimento úmido, para evitar contato com a\npele, procurar assistência médica.', None]
+    ['Olhos', 'Pode ocorrer irritação, queimadurar e danos na\ncórnea. Exposição a longo prazo podem causar\nqueima química ou ulceração no olhos.', None, None, 'Usar óculos de proteção. Não devem ser utilizados lentes\nde contato.', None, 'Lavar imediatamente com água por quinze minutos. Assegurar\nque as pálpebras estejam abertas e que os olhos estejam em\ntodas as direções. Procurar assistência médica.', None]
+    ['Ingestão', 'Pode causar queimadura na mucosa da boca,\nesôfago e estômago. A ingestão de grande\nquantidade podem causar problemas intestinais e\npossíveis formação de agregado sólido no\nestômago e intestino.', None, None, 'Não fumar, beber ou comer no ambiente de trabalho.\nLavar as mãos antes das refeições. Evitar todas as\npráticas de trabalho que possam permitir o contato com a\nboca.', None, 'Não provocar vômito. Fornecer bastante água ou leite. Procurar\nassistência médica.', None]
+    [None, None, None, None, None, None, 'Dispor a material para reciclagem ou alocar em aterros\nsanitários', None]
+    ['5 MEDIDAS DE COMBATE A INCÊNDIO', None, None, '6 MEDIDAS DE CONTROLE DERRAMAMENTO OU VAZAMENTO', None, None, '7 MANUSEIO E ARMAZENAMENTO', None]
+--- pagina 1 (1 tabela(s)) ---
+  tabela 0:
+    ['O cimento não é inflamável. Todas as\nmedidas de extinção são utilisáveis nos casos\nde incêndio nas proximidades.', None, 'Limpar todo o derramamento deste material para evitar levantamento de\npoeira e coletar em recipiente adequado. O cimento endurecido pode ser\nelimidado como resíduo inerte.', None, None, None, 'Manuseio', None, 'Armazenamento', '']
+    [None, None, None, None, None, None, 'Manusear com\ncuidado. Evitar\ncontato com a pele.\nEvitar geração de\npoeira.', None, 'Estocar em local seco, protegido de\numidade e água, e produtos químicos que\npossam provocar reações perigosas.\nManter os recipientes bem fechados e\nprotegidos de danos.', None]
+    ['8 CONTROLE DE EXPOSIÇÃO E PROTEÇÃO INDIVIDUAL', None, None, None, None, None, None, None, None, None]
+    ['Valores limites de exposição 10 mg/m3, concentração média de 8 horas. Utilizar exaustores para manter o nível de poeiras abaixo dos limites de exposição em locais de trabalho com\nventilação fraca e empoeirados', None, None, None, None, None, None, None, None, None]
+    ['Proteção respiratória: Em condições normais nenhuma\nproteção rspiratória é requerida. Usar proteção respiratória\nem condições com alta concentração de poeira.', None, None, 'Proteção para os olhos: Usar óculos normais ou óculos de proteção\npara evitar contato com os olhos. Não é recomendado usar lente de\ncontato ao manusear este produto em condições alta concentração\nde poeira.', None, None, None, 'Proteção para a pele: Usar luvas impermeáveis,\nbotas e roupas protetora para evitar contato com a\npele.', None, None]
+    ['9 PROPRIEDADES FÍSICO QUÍMICA - Estado físico: sólido (na forma de pó fino), sem cheiro, cor: cinza', None, None, None, None, None, None, None, None, None]
+    ['pH em Solução Aquosa', '12 ≤ pH ≤ 14', None, 'Pressão de vapor (mm Hg)', None, 'Não Aplicável', None, None, None, None]
+    ['Ponto de Ebulição', 'Não Aplicável', None, 'Solubilidade em água', None, 'até 1,5 g/l a 20ºC', None, None, None, None]
+    ['Ponto de Fusão', 'Não Aplicável', None, 'Ponto de Fulgor', None, 'Não Aplicável', None, None, None, None]
+    ['Massa Específica Absoluta', '2,8 ≤ yr ≤ 3,2 g/cm3 a 20ºC', None, 'Densidade relativa do vapor 20ºC', None, 'Não Aplicável', None, None, None, None]
+    ['', None, None, 'Massa Específica Aparente', None, '0,9 a 1,2 g/cm3 a 20ºC', None, None, None, None]
+    ['10 ESTABILIDADE e REATIVIDADE - Produto Estável', None, None, None, None, None, None, None, None, None]
+    ['Condições a evitar: Umidade durante a estocagem', None, None, None, 'Substâncias incompatíveis: nenhuma', None, None, None, None, None]
+    ['Necessidade de aditivos para evitar reações perigosas: nenhuma', None, None, None, 'Produtos perigosos da decomposição: nenhum', None, None, None, None, None]
+    ['11 INFORMAÇÕES TOXILÓGICAS', None, None, None, None, None, None, None, None, None]
+    ['Ver itens 3 e 4', None, None, None, None, None, None, None, None, None]
+    ['12 INFORMAÇÕES ECOLÓGICAS - Não reconhecida toxicidade às plantas ou animais', None, None, None, None, None, None, None, None, None]
+    ['Moobilidade: Nenhuma', None, None, None, 'Presistência/ Degradabilidade: Os componentes do cimento endurecidos são insolúveis', None, None, None, None, None]
+    ['Bioacumulação: Nenhuma', None, None, None, 'Comportamento esperado: Em caso de derramamento em meio úmido ocorre aumento do pH da água (mais\nbásico', None, None, None, None, None]
+    ['13 CONSIDERAÇÕES SOBRE TRATAMENTO E DISPOSIÇÃO', None, None, None, None, None, None, None, None, None]
+    ['Pequenas quantidades de material podem ser dispostas como resíduo comum ou devolvidada ao recipiente para uso posterior se não estiver contaminada. Após o endurecimento o\ncimento pode ser eliminado como resíduo inerte. Dispor as embalagens utilizadas em aterros sanitário ou incinerador. Caso haja regulamentação específica na região deve-se utilizá-la.', None, None, None, None, None, None, None, None, None]
+    ['14 INFORMAÇÕES SOBRE TRANSPORTE', None, None, None, None, None, None, None, None, None]
+    ['O Cimento Portland não é considerado produto químico perioso, portanto não se aplicam códigos e classificações para transporte terrestre, fluvial, marítimo ou aéreo.', None, None, None, None, None, None, None, None, None]
+    ['15 REGULAMENTAÇÕES', None, None, None, None, None, None, None, None, None]
+    ['Por não ser produto químio perigoso ou tóxico não existem regulamentações específicas.', None, None, None, None, None, None, None, None, None]
+    ['16 OUTRAS INFORMAÇÕES', None, None, None, None, None, None, None, None, None]
+    ['É importante diferenciar cimento de concreto, que é uma mistura de cimento, areia e outros materiais.', None, None, None, None, None, None, None, None, None]
+    ['ENDEREÇO: Rodovia DF 205 Km 2,7 Fercal Sobradinho DF', None, None, None, None, None, None, None, None, None]
+
+====================================================================================================
+ARQUIVO: 270 -FISPQ -  Adesivo PVC Incolor Tigre.pdf
+====================================================================================================
+--- pagina 0 (1 tabela(s)) ---
+  tabela 0:
+    ['Ingrediente', None, None, 'Nº CAS', None, None, None, None, None]
+    ['', 'Acetona', '', '', '67-64-1', '', '', '30 – 70', '']
+    ['Metiletilcetona (MEK)', None, None, '78-93-3', None, None, None, None, None]
+    ['', 'Copolímero de PVC', '', '', '9003-22-9', '', '', '15 – 35', '']
+    ['Acetato de Etila', None, None, '141-78-6', None, None, None, None, None]
+    ['', '2,5-tiofenodiilbis (5-terc-', '', '7128-64-5', None, None, '00 – 10', None, None]
+    [None, 'butil-1,3-benzoxazole)', None, None, None, None, None, None, None]
+    ['', 'Segredo Industrial 1', '', '', '*', '', '', '00 – 01', '']
+    ['', 'Segredo Industrial 2', '', '', '**', '', '', '00 – 0,5', '']
+--- pagina 1 (1 tabela(s)) ---
+  tabela 0:
+    [None, 'LT', 'TLV TWA\nACGIH', 'TLV STEL\nACGIH', 'REL STEL\nNIOSH', None]
+    ['Acetona', '780 ppm 1', '200 ppm 2', '500 ppm 2', 'N/D', 'N/D']
+    ['', '', '', '', '', '']
+    [None, '155 ppm 1', '200 ppm 3', '300 ppm 3', '300 ppm 4', None]
+    ['Acetato de Etila', '310 ppm 1', '400 ppm 3', 'N/D', 'N/D', '400 ppm 5']
+    ['', '', '', '', '', '']
+    ['2,5-tiofenodiilbis', '', '', '', '', '']
+    [None, '78 ppm 1', None, None, None, None]
+    ['(5-terc-butil-1,3-', None, 'N/D', 'N/D', 'N/D', 'N/D']
+    [None, '****', None, None, None, None]
+    ['benzoxazole)', None, '', '', '', '']
+    [None, '', None, None, None, None]
+
+====================================================================================================
+ARQUIVO: tinta_acrilica.pdf
+====================================================================================================
+--- pagina 0 (1 tabela(s)) ---
+  tabela 0:
+    ['', 'Nome Químico', 'CAS\nNumber', 'Faixa de\nConcentração (%)', 'Símbolo', 'Frases R']
+    ['01', 'Derivados Isotiazolonas e\nSemi-Acetais', 'ND', '0,1 – 0,4', 'Xn/Xi', 'R21/22 /\nR36/37/38']
+    ['02', 'Dióxido de Titânio', '134363-67-\n7', '1 - 15', 'Xi', 'R36/37/38']
+    ['03', 'Óxido de Ferro Amarelo', '51274-00-1', '0,1 - 3', 'Xi', 'R36/37/38']
+    ['04', 'Carbonato de Cálcio ppt', 'ND', '5 - 15', 'Xi', 'R36/37/38']
+    ['05', 'Silicato de Alumínio\nhidratado', '1332-58-7', '5 - 15', 'Xi', 'R36/37/38']
+    ['06', 'Carbonato de cálcio natural', 'ND', '5 - 15', 'Xi', 'R36/37/38']
+    ['07', 'Hidróxido de amônia\n(24°Be)', '1336-21-6', '0,1 - 1', 'C/Xn', 'R34 / R50']
+    ['08', 'Polímeros acrílicos aquosos\n(a 50%)', 'NA', '3 - 30', 'NA', 'R21/22 /\nR36/38']
+    ['09', 'Alquil Lauril Érter', 'ND', '0,1 – 1,2', 'Xi', 'R36/37']
+--- pagina 3 (1 tabela(s)) ---
+  tabela 0:
+    ['Nome Químico', 'Limites de Exposição 48horas/semana – TWA / OSHA']
+    ['Dióxido de Titânio', '10 mg/m3']
+    ['Amônia', '14 mg/m3']
+    ['Óxido de Ferro Amarelo', '15 mg/m3']
+    ['Etileno Glicol', '5 mg/m3']
+
+########## PASSAGEM (\n-empilhado) ##########
+
+====================================================================================================
+ARQUIVO: 70 - FISPQ_textura textucril - Leinertex.pdf
+====================================================================================================
+--- pagina 2 (1 tabela(s)) ---
+  tabela 0:
+    ['Nome Químico', 'Nº CAS', 'Faixa de Concentração (%)']
+    ['Derivados de:\n\uf0b7 1,2-benzotiazolin-3-ona\n\uf0b7 5-cloro-2-metil-2H-\nisotiazole-3-ona e 2-metil-\n2H-isotiazole-3-ona', '2634-33-5\n55965-84-9', '0,2 – 0,05']
+    ['Derivados de:\n\uf0b7 3-(3,4-dichlorophenyl)-1,1-\ndimethylurea\n\uf0b7 methyl benzimidazol-2-\nylcarbamate\n\uf0b7 N-octil isotiazolinona', '330-54-1\n10605-21-7\n26530-20-2', '0,1 – 0,05']
+    ['Segredo Industrial', 'Segredo Industrial', '0,01 – 0,008']
+    ['Hidrocarboneto Alifático', '64742-47-8', '0,2 – 0,1']
+    ['Aguarrás Mineral', '64742-47-8', '0,2 – 0,1']
+--- pagina 5 (1 tabela(s)) ---
+  tabela 0:
+    ['Nome comum', 'Limite de exposição', 'Tipo', 'Referências']
+    ['Diurom\n(3-(3,4-\ndichlorophenyl)-1,1-\ndimethylurea)', '10 mg/m3', 'TLV-TWA', 'ACGIH 2013']
+    [None, None, 'REL-TWA', 'NIOSH']
+    ['Querosene', '200 mg/m3 (P)', 'TLV – TWA', 'ACGIH, 2012']
+
+====================================================================================================
+ARQUIVO: Massa-Corrida.pdf
+====================================================================================================
+--- pagina 2 (1 tabela(s)) ---
+  tabela 0:
+    ['Nome Químico', 'Nº CAS', 'Faixa de Concentração (%)']
+    ['Derivados de:\n\uf0b7 1,2-benzotiazolin-3-ona\n\uf0b7 5-cloro-2-metil-2H-\nisotiazole-3-ona e 2-metil-\n2H-isotiazole-3-ona', '2634-33-5\n55965-84-9', '0,1 – 0,05']
+    ['Solução de etanolamina', 'Informação\nconfidencial', '0,1 – 0,05']
+

@@ -921,7 +921,7 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
-### DT-003AS-01 — Patologias de layout/transcrição da tabela de composição de FDS `[ABERTA — input para a fatia de transcrição]`
+### DT-003AS-01 — Patologias de layout/transcrição da tabela de composição de FDS `[FECHADA — 003.BI]`
 
 **Origem:** Sessão 003.AS (29/06/2026), medição determinística (`pdfplumber.extract_tables()` puro) dos 6 PDFs de `fds_originais/`, ao construir a fatia parse-PDF (D-ARQ-42 Parte 1 / D-ARQ-43 Parte 1).
 
@@ -954,7 +954,9 @@ Refinamentos aos passos da migração desta DT:
 
 **Andamento 003.BF (02/07/2026):** invocação injetável (`TranscritorLLM` Protocol + `transcrever_fds`, cl.1/2) + `gate_forma` (cl.3, reprovado → Pendencia bloqueante `forma_verbatim_fds`) + harness mockado tinta/Ciplan sobre `extrair_texto_fds` real, materializados (`transcritor_fds.py`, 10 testes, suíte 507→517). Resta cliente-LLM real + prompt (cl.5) e ponto de revisão-RT (cl.4). DT segue ABERTA.
 
-**Status:** ABERTA. Não-bloqueante. Input empírico para a fatia de transcrição-FDS; o parse-PDF (003.AS) entrega a grade crua sobre a qual estas patologias operam. Patologia 1 producível por LLM (medido 003.BD, D-ARQ-47); resta a IMPL.
+**Fechamento (003.BI, 05/07/2026).** Patologias 1/2 resolvidas na camada-LLM sobre `extract_text` (003.AX/BD/BE); patologias 3/4/5 em `transcricao_fds.py` (003.AU); invocação+gate (003.BF); cliente real (003.BG); validação ao vivo 3/3 (003.BH); revisão-RT + serialização (003.BI, `motor/revisao_verbatim.py`) — cadeia extração→LLM→gate→revisão-RT→montagem→resolvedor completa. Residual que NÃO reabre esta DT: DT-003M-01 (frase-H/CAS-oculto, recorte A), DT-003BG-01 (gabarito 3/6), DT-003AW-01 (grafia-de-ausente com `\n`, não-medida), UI da revisão-RT.
+
+**Status:** FECHADA (003.BI). Cadeia extração→LLM→gate→revisão-RT→montagem→resolvedor completa e testada fim-a-fim (mock, sem API) contra `fds_t65`. Patologia 1 producível por LLM validado ao vivo (003.BD/BH, D-ARQ-47). Residuais listados acima não reabrem esta DT.
 
 ---
 
@@ -1044,3 +1046,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v38 | 02/07/2026 | Sessão 003.BD (CONHECIMENTO/medição → ARQUITETURA): andamento em DT-003AS-01 — patologia 1 (grid fundido Ciplan/Tigre) MEDIDA e DESBLOQUEADA. Transcrição por sentido sobre `extract_text` âncora-por-título contra `fds_t65`: Tigre 7/7, Ciplan 8/8 (cas + concentração). Fusão = interleave de coluna (não perda de dado); ordem de coluna inverte por fabricante → roteia por formato-de-token, confirma anti-bbox (003.AX). Reenquadra o limite de D-ARQ-46. Contrato de invocação+gate do transcritor-LLM em D-ARQ-47 (DECISOES v78). DT segue ABERTA (IMPL do transcritor-LLM + `extrair_texto_fds` greenfield); DT-003M-01 intocada (recorte A). Sem código. |
 | v39 | 02/07/2026 | Sessão 003.BE (IMPLEMENTAÇÃO): andamento em DT-003AS-01 — `extrair_texto_fds` materializada (D-ARQ-47 consequência, recorte âncora-por-título com sobre-inclusão). DT segue ABERTA. Nenhuma R-* criada/alterada. |
 | v40 | 02/07/2026 | Sessão 003.BF (IMPLEMENTAÇÃO): andamento em DT-003AS-01 — invocação injetável (`TranscritorLLM` Protocol + `transcrever_fds`) + `gate_forma` (cl.3) + harness mockado tinta/Ciplan sobre `extrair_texto_fds` real. DT segue ABERTA. Nenhuma R-* criada/alterada. |
+| v41 | 05/07/2026 | Sessão 003.BI (IMPLEMENTAÇÃO fatia (e2)): DT-003AS-01 FECHADA (seção 11) — revisão-RT (cl.4) + serialização verbatim ida/volta materializadas (`motor/revisao_verbatim.py`, D-ARQ-47); cadeia extração→LLM→gate→revisão-RT→montagem→resolvedor completa (003.AX/AU/BD/BE/BF/BG/BH/BI). Residuais que NÃO reabrem a DT: DT-003M-01, DT-003BG-01 (gabarito 3/6), DT-003AW-01, UI da revisão-RT. Nenhuma R-* criada/alterada. |
