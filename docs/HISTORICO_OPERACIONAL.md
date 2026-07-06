@@ -2858,3 +2858,19 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003AS-01 **FECHADA** (seção 11 do PROTOCOLO, v41) — cadeia extração→LLM→gate→revisão-RT→montagem→resolvedor completa. DT-003BG-01 (gabarito 3/6, Leinertex/Massa/Amanco), DT-003M-01/02, DT-003AW-01 e demais DTs inalteradas — nenhuma reaberta por este fechamento. PAINEL_ESTADO.md re-tirado nesta sessão (baseline main `0b89904`, 557 passed/3 skipped, PROTOCOLO v41, DECISOES v83).
 
 **Próxima.** A declarar no kickoff. Proposta do Arquiteto: parse de PGR (D-ARQ-25 — esqueleto GHE/cargo/risco, maior massa restante da porta de entrada, 0 código) ou costura da UI de revisão-RT (Streamlit) sobre `revisao_verbatim.py`.
+
+## Sessão 003.BJ — 05/07/2026 — ARQUITETURA (contrato do parse-PGR — D-ARQ-49)
+
+**Foco.** Abertura da 2ª metade da porta de entrada — parse-PGR (D-ARQ-25 Parte B), lado-PGR. Modo ARQUITETURA, ratificado pelo Diovanni sobre a proposta da 003.BI. Sem código.
+
+**Gate de estado real (disco).** Kickoff: git×HISTORICO sem divergência, main `1ec743c` limpa, 557 verdes/3 skipped herdados, PROTOCOLO v41 / DECISOES v83. Três fatos que ancoram a decisão: (1) parse-PGR greenfield — `git grep -E "termo.*slug|normaliz.*vocab|pgr_transcrit" -- agente_medico/**/*.py` → zero; (2) gabarito-par existe — `agente_medico/tests/fixtures/pgr_viverde.py` ↔ `matrizes_originais/PGR VIVERDE V02 - 03.02.25.{pdf,docx}` (mesmo arranjo que destravou a FDS); (3) contrato `tipos.PGR` já materializado (D-ARQ-25 Parte C, 002.Q).
+
+**Entrega.** **D-ARQ-49** (DECISOES v84) — contrato do parse-PGR, irmão de D-ARQ-42 do lado-PGR, mesmo corte que a instância-FDS: contrato+recorte+gabarito+fronteira-parse↔LLM agora, mecanismo por medição depois. 4 partes: (1) bicamada interna parse-doc determinístico ↔ transcrição-LLM (PGR Viverde é `.docx` nativo — provável parse mais limpo que o OCR-sujo do Ciplan, a confirmar); (2) recorte da 1ª fatia = esqueleto GHE `{id,nome}` + cargos/riscos/quantificação **crus** + FDS **apontadas** (alimenta a cadeia química já pronta a jusante); EPIs/psicossocial/gates diferidos e nomeados; universalidade conferida (espinha GHE/cargo/risco vale construção/química/saúde, formas químicas de DT-003L-01 vivem abaixo); (3) semântica da "PGR transcrita" cravada (termos crus, FDS apontadas, sem slug), forma concreta do tipo = IMPL (D-ARQ-22, literal sem fonte de disco barrado); (4) gabarito `pgr_viverde.py` ↔ PGR Viverde real, LLM mockado nunca testa API; **adiado por medição** (molde D-ARQ-42→003.AN): mecanismo `termo→slug` (as 3 saídas a/b/c de D-ARQ-41 P3), granularidade, prompt, parse `.docx` vs `.pdf`, critério de `nome`.
+
+**Revisão.** Duas passadas adversariais: a 1ª propôs congelar a forma concreta do tipo "PGR transcrita" nesta sessão; a 2ª derrubou — forma concreta é IMPL (D-ARQ-41 P2), só a semântica se crava; e o mecanismo `termo→slug` é adiado por medição, não decidido (DT-003L-01 cobre só o químico, não o esqueleto GHE/cargo/risco).
+
+**Gates.** Sem código. PROTOCOLO v41 inalterado (nenhuma R-* criada/alterada). DECISOES v83→v84. Suíte/contagem inalteradas (557/3). PAINEL não re-tirado (sem merge que mova número, sem marco fechado — CLAUDE.md).
+
+**Pendências.** DT-003L-01 permanece input empírico da IMPL (formas químicas); a medição de esqueleto-GHE (formas de cargo/risco/quantificação) que D-ARQ-49 Parte 4 adia é a próxima sessão CONHECIMENTO. Demais DTs inalteradas.
+
+**Próxima.** A declarar no kickoff. Proposta do Arquiteto: sessão CONHECIMENTO de medição do PGR Viverde (`.docx`/`.pdf`) — confirmar casamento com `pgr_viverde.py`, medir estrutura GHE/cargo/risco/quantificação, decidir parse-doc e a saída (a/b/c) de `termo→slug` — que destrava a 1ª fatia de IMPL do parse-PGR.
