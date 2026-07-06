@@ -11,7 +11,8 @@ from agente_medico.motor.transcricao_fds import parsear_faixa
 # (cl.1). A revisão-RT sobre o verbatim (cl.4) é a admissão do candidato —
 # por isso este módulo NÃO compõe transcrever_fds -> gate_forma -> montar_fds
 # fim-a-fim; isso criaria bypass do ponto de revisão. Composição fim-a-fim
-# só existe em teste (harness mockado).
+# só existe em teste (harness mockado). A composição de PRODUÇÃO pós-revisão-RT
+# existe em revisao_verbatim.montar_fds_revisado (cl.4) — única porta.
 
 
 class TranscritorLLM(Protocol):
