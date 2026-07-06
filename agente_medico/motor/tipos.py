@@ -81,6 +81,40 @@ class Componente:
 
 
 @dataclass(frozen=True)
+class RiscoVerbatim:
+    """Risco cru transcrito do bloco GHE (D-ARQ-49 P3: semântica cravada — termos
+    crus, sem slug, quantificação NÃO normalizada). agente = termo com normalização
+    linguística bounded do LLM (D-ARQ-50 P2: tira qualificador, quebra composto,
+    corrige typo óbvio — NUNCA emite slug); quantificacao = texto como transcrito
+    ("82,2 dB(A)", "6,3 ppm"; "" se qualitativo/ausente) — parse é resolver-side,
+    fatia futura; fonte_geradora = texto cru da coluna homônima ("" se ausente) —
+    carrega a FDS-apontada de D-ARQ-49 P2 (produto: "Thinner/Zarcão"), que alimenta
+    a cadeia química existente a jusante, não a reconstrói. Multi-agente sob o mesmo
+    ET (D-ARQ-50 C3) vira riscos separados com fonte_geradora copiada — cópia, não
+    perda; nenhum campo é herdado entre riscos (difere de BlocoVerbatim/FDS, onde a
+    faixa 1× por bloco exigia grupo)."""
+    agente: str
+    quantificacao: str
+    fonte_geradora: str
+
+
+@dataclass(frozen=True)
+class GHEVerbatim:
+    """Bloco GHE transcrito — a "PGR transcrita" da 1ª fatia (esqueleto, D-ARQ-49 P2).
+    Fronteira LLM↔determinístico do lado-PGR (D-ARQ-41). nome = setor/função cru da
+    linha-âncora ("Estrutura de concreto armado"); cargos = crus, separados da âncora
+    pelo LLM (leitura bounded, D-ARQ-50 C3). SEM campo id: o documento não traz id de
+    GHE (ids canônicos da fixture vêm do MAPA, re-agrupamento humano — D-ARQ-50 C1);
+    LLM atribuir id seria escolha de identidade silenciosa (classe D-ARQ-22) — id é
+    atribuição a jusante. FICAM FORA (diferidos, D-ARQ-49 P2): EPIs, psicossocial,
+    campos-de-topo de gate. NÃO é tipos.PGR nem GHEPGR — conversão termo→slug é do
+    resolvedor, fatia futura (D-ARQ-50 P2)."""
+    nome: str
+    cargos: tuple[str, ...]
+    riscos: tuple[RiscoVerbatim, ...]
+
+
+@dataclass(frozen=True)
 class FDS:
     composicao: tuple[Componente, ...]
     composicao_verbatim: tuple[BlocoComponente, ...] = ()
