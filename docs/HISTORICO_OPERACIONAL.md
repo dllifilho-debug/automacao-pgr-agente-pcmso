@@ -2908,3 +2908,17 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003L-01 ABERTA (input das próximas fatias). `extrair_texto_pgr` sem consumidor (por design da fatia). Demais DTs inalteradas.
 
 **Próxima.** A declarar no kickoff. Proposta do Arquiteto: 2ª fatia do parse-PGR — recorte determinístico dos blocos GHE (âncora `SETOR/FUNÇÃO`, 42 blocos medidos), núcleo puro sem I/O, molde `_recortar_composicao` (003.AT-BE), ainda sem LLM.
+
+## Sessão 003.BM — 06/07/2026 — IMPLEMENTAÇÃO (recorte determinístico dos blocos GHE: `recortar_blocos_ghe` — 2ª fatia do parse-PGR)
+
+**Foco.** 2ª fatia de IMPL do parse-PGR: recorte determinístico dos blocos GHE (D-ARQ-49 P2, sob parse-doc D-ARQ-50 P1), núcleo puro sem I/O, consumidor de `extrair_texto_pgr` (003.BL), molde `_recortar_composicao` (003.AT-BE) adaptado. Modo IMPLEMENTAÇÃO; foco, prioridade e numeração delegados pelo Diovanni ao Arquiteto no kickoff.
+
+**Gate de estado real (disco).** Kickoff: git×HISTORICO sem divergência, main `e572e05` limpa, 562/3 herdados, PROTOCOLO v41 / DECISOES v86. Arquivos a tocar lidos via git objects (`extracao_pgr.py`, molde `extracao_fds.py`, D-ARQ-49/50 verbatim, `test_extracao_pgr.py`); greenfield do recorte reconfirmado por grep zero. Medição prévia por script descartável sobre o PDF real: (a) 42 âncoras `startswith("SETOR/FUNÇÃO")`; (b) 0 ocorrências contains-sem-startswith; (c) 1ª âncora pág. 33, última pág. 146/151 → cauda de 4 págs. sobre-incluída no último bloco; (d) bloco da Pintura cruza págs. 71→73, literal real `Estireno 0,1 ppm` (pág. 72).
+
+**Entrega.** `agente_medico/motor/extracao_pgr.py::recortar_blocos_ghe(paginas) -> list[str]` — âncora VERBATIM, SEM normalização (difere do molde FDS de propósito: n=1 medido com gate de 42; limite D-ARQ-22 em docstring); blocos CONTÍGUOS [âncora_i, âncora_i+1), último até o fim do documento — sobre-inclusão como direção segura (D-ARQ-31/35), grid de classificação e cauda = ruído descartado a jusante pela transcrição-LLM (D-ARQ-50 C3); zero âncoras → `[]` (falha explícita; nunca o documento inteiro como fallback); saída verbatim, sem I/O, sem LLM. + 7 testes (fixture module-scoped reusada, 1 parse): contagem 42; todo bloco começa na âncora; invariante de partição (anti perda-silenciosa, classe D-ARQ-22); adjacência agente↔valor na Pintura; fronteira de página (`Estireno 0,1 ppm`); 2 sintéticos (`[]` e 2 âncoras na mesma página). Revisão do Arquiteto sobre git objects, 2 passadas: conforme a espec; achado não-bloqueador — página vazia desaparece no flatten (`"".splitlines()` → zero linhas; sem perda de conteúdo, invariante consistente).
+
+**Gates.** Host: 562→569 passed (+7), 3 skipped, 0 falha; mypy --strict delta-zero (46 pré-existentes, zero nos arquivos tocados). Commit `60e80ac`, merge `5bd5403`, PR #148, "Create a merge commit". PROTOCOLO v41 inalterado (nenhuma R-*). DECISOES v86→v87 (nota em D-ARQ-50, mesma ID). PAINEL re-tirado (merge moveu 562→569; lado-PGR ganhou 2ª fatia).
+
+**Pendências.** DT-003L-01 ABERTA. `recortar_blocos_ghe` sem consumidor (por design da fatia). Demais DTs inalteradas.
+
+**Próxima.** A declarar no kickoff. Proposta do Arquiteto: 3ª fatia do parse-PGR — transcrição-LLM do bloco GHE (esqueleto): forma concreta do tipo "PGR transcrita" (D-ARQ-49 P3, decisão de IMPL) + transcritor bounded (D-ARQ-50 C3), molde `transcrever_fds`, gabarito de forma (C1), LLM fixado/mockado nos testes — nunca testa API.
