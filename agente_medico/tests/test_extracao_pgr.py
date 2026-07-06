@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from agente_medico.motor.extracao_pgr import extrair_texto_pgr
+from agente_medico.motor.extracao_pgr import extrair_texto_pgr, recortar_blocos_ghe
 
 # PDF é tracked no git (matrizes_originais/) — ausência é falha explícita,
 # não skip (espelha a decisão de test_extracao_fds.py para o acervo untracked,
@@ -54,3 +54,60 @@ def test_saida_verbatim_preserva_acento_e_caixa(paginas: list[str]) -> None:
     pagina_pintura = paginas[71]
     assert "SETOR/FUNÇÃO" in pagina_pintura
     assert "SETOR/FUNCAO" not in pagina_pintura
+
+
+def test_recorte_blocos_ghe_contagem(paginas: list[str]) -> None:
+    assert len(recortar_blocos_ghe(paginas)) == 42
+
+
+def test_recorte_blocos_ghe_todo_bloco_comeca_com_ancora(paginas: list[str]) -> None:
+    blocos = recortar_blocos_ghe(paginas)
+    assert all(bloco.startswith("SETOR/FUNÇÃO") for bloco in blocos)
+
+
+def test_recorte_blocos_ghe_invariante_de_particao(paginas: list[str]) -> None:
+    # Anti perda-silenciosa (classe D-ARQ-22): juntar os blocos de volta
+    # reproduz exatamente o texto do documento da 1ª âncora até o fim —
+    # nenhuma linha é duplicada ou descartada no recorte.
+    blocos = recortar_blocos_ghe(paginas)
+    linhas = [linha for pagina in paginas for linha in pagina.splitlines()]
+    i_primeira_ancora = next(
+        i for i, linha in enumerate(linhas) if linha.startswith("SETOR/FUNÇÃO")
+    )
+    texto_esperado = "\n".join(linhas[i_primeira_ancora:])
+    assert "\n".join(blocos) == texto_esperado
+
+
+def test_recorte_blocos_ghe_pintura_preserva_agente_valor(paginas: list[str]) -> None:
+    blocos = recortar_blocos_ghe(paginas)
+    (bloco_pintura,) = [
+        bloco
+        for bloco in blocos
+        if bloco.startswith("SETOR/FUNÇÃO Pintura/ pintor/ meio oficial de pintor/ servente")
+    ]
+    assert "78,8 dB(A) em funcionamento" in bloco_pintura
+    assert "Etanol 4,4 ppm" in bloco_pintura
+    assert "Tolueno 6,3 ppm" in bloco_pintura
+
+
+def test_recorte_blocos_ghe_pintura_cruza_fronteira_de_pagina(paginas: list[str]) -> None:
+    # Literal REAL cravado na medição 003.BM (pág. 72, linha 3): pertence ao
+    # bloco da Pintura (âncora na pág. 71) mas está na página SEGUINTE —
+    # prova que o recorte não trava na fronteira de página.
+    blocos = recortar_blocos_ghe(paginas)
+    (bloco_pintura,) = [
+        bloco
+        for bloco in blocos
+        if bloco.startswith("SETOR/FUNÇÃO Pintura/ pintor/ meio oficial de pintor/ servente")
+    ]
+    assert "Estireno 0,1 ppm" in bloco_pintura
+
+
+def test_recorte_blocos_ghe_sem_ancora_devolve_lista_vazia() -> None:
+    assert recortar_blocos_ghe(["sem ancora aqui", ""]) == []
+
+
+def test_recorte_blocos_ghe_duas_ancoras_mesma_pagina() -> None:
+    pagina = "SETOR/FUNÇÃO Um\nlinha A\nSETOR/FUNÇÃO Dois\nlinha B"
+    blocos = recortar_blocos_ghe([pagina])
+    assert blocos == ["SETOR/FUNÇÃO Um\nlinha A", "SETOR/FUNÇÃO Dois\nlinha B"]
