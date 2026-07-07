@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.BP · 07/07/2026
-**Baseline:** main `4abeaf9` · 597 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero (46 pré-existentes) · PROTOCOLO v41 · DECISOES v90
+**Tiragem corrente:** 003.BQ fatia 1a · 07/07/2026
+**Baseline:** main `e87759f` · 598 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero (tipos.py/riscos.py) · PROTOCOLO v41 · DECISOES v91
 
 ---
 
@@ -20,7 +20,7 @@
 | Pergunta | Estado medido | Leitura |
 |---|---|---|
 | Quanto da regra clínica está no código? | **17 de 41** ativas (~41%) — inalterado desde 003.AH (frente clínica pausada, caminho B) | Espinha do motor de decisão de pé; cauda clínica ainda em prosa |
-| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **5ª fatia no main** (parse-doc + recorte-GHE + tipo transcrito/invocação/gate de forma + cliente-LLM real + resolvedor termo→slug determinístico — 003.BL/BM/BN/BO/BP; resta hidratação GHEVerbatim→tipos.PGR, 0 código) | Gargalo de produção migrou: não é mais o termo→slug do parse-PGR — é a hidratação GHEVerbatim→tipos.PGR + a rasura do vocabulário químico |
+| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **6ª fatia iniciada no main** (parse-doc + recorte-GHE + tipo transcrito/invocação/gate de forma + cliente-LLM real + resolvedor termo→slug determinístico — 003.BL/BM/BN/BO/BP; 003.BQ fatia 1a materializa só o contrato de tipo da hidratação, `RiscoPGR.agente` Optional[str] + guard D-ARQ-51; `hidratar_ghe` em si — 1b — ainda 0 código) | Gargalo de produção migrou: não é mais o termo→slug do parse-PGR — é a hidratação GHEVerbatim→tipos.PGR + a rasura do vocabulário químico |
 | Dívidas que travam produção? | **3** — mesmas facetas de sempre, recontadas pós-fechamento | DT-003L-01 (parse-PGR), DT-003M-02 (vocabulário-FDS raso), DT-FDS-02 (unidade do cutoff) |
 
 **Headline:** a produção **não está travada por falta de regra clínica nem mais pelo transcritor-FDS** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI) — está travada por **parse de PGR** (esqueleto GHE/cargo/risco: transcrição-LLM tem cliente-LLM real e resolvedor termo→slug determinístico no main — 003.BO/BP, tipo + invocação + gate + cliente real validado ao vivo + resolvedor; resta a hidratação GHEVerbatim→tipos.PGR (costura resolvedor→motor)) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
@@ -54,7 +54,7 @@ Gargalos restantes, em massa crescente:
 | Índice CAS raso | Dado | **21 de 45 slugs com CAS** (47%; 003.AI populou 12, restam 24 null — várias por categoria física sem CAS aplicável) |
 | `name→slug` (string química sem CAS → slug) | Decisão de arquitetura | Indeciso (D-ARQ-36 Parte 1) |
 | UI da revisão-RT (Streamlit) | Greenfield | 0 código — `montar_fds_revisado` (003.BI) existe, sem tela onde o RT edita o verbatim |
-| Parse de PGR (esqueleto GHE/cargo/risco físico) | Em construção | parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor_termos (003.BP) no main (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP, validado ao vivo contra o Viverde); resta a hidratação GHEVerbatim→tipos.PGR (maior massa restante) + população de aliases `termos:` (dado) |
+| Parse de PGR (esqueleto GHE/cargo/risco físico) | Em construção | parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor_termos (003.BP) no main (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP, validado ao vivo contra o Viverde); 003.BQ fatia 1a materializa o contrato de tipo (`RiscoPGR.agente` Optional[str] + guard, D-ARQ-51); resta `hidratar_ghe` (1b, maior massa restante) + população de aliases `termos:` (dado) |
 
 **Fatia 1 da extração (popular CAS) parcialmente cumprida** (003.AI: 12 substâncias). Falta plugar a costura ao pipeline real (fatia A) e o parse-PGR (maior massa). Número corrigido nesta tiragem: o "9/43" citado nas sessões 003.BG-BI já estava defasado pela 003.AI (23/06/2026) — medido de disco (`agente_medico/protocolo/vocabulario/agentes.yaml`) como 21/45 nesta re-tiragem.
 
@@ -97,7 +97,7 @@ Instrumento: `git grep` de IDs de regra. Mede **rastreabilidade** (string presen
 | UI da revisão-RT (onde o RT edita o verbatim) | **0 código** — `serializar_verbatim`/`montar_fds_revisado` existem (motor puro); tela/costura ficam para fatia futura |
 | Índice CAS (`construir_indice_cas`) | **21/45 slugs com CAS** (47%) — 003.AI populou 12; restam 24 null (parte por categoria física sem CAS aplicável, parte gargalo de dado) |
 | Resolução canônica `name→slug` (string química → slug de agente) | **0 código** — decisão de arquitetura não tomada (D-ARQ-36 Parte 1); única `def` de normalização é `leo_resolver.py:37 _normaliza`, escopo LEO-texto, não vocabulário químico |
-| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor termo→slug construídos** (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`gate_forma_ghe`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP; LLM real validado ao vivo contra o Viverde, PR #152; resolvedor isolado sem consumidor, PR #154); hidratação GHEVerbatim→tipos.PGR **0 código** — maior massa restante |
+| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor termo→slug construídos** (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`gate_forma_ghe`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP; LLM real validado ao vivo contra o Viverde, PR #152; resolvedor isolado sem consumidor, PR #154); hidratação GHEVerbatim→tipos.PGR **contrato de tipo materializado** (003.BQ fatia 1a, `RiscoPGR.agente` Optional[str] + guard D-ARQ-51, PR #156) — `hidratar_ghe` em si (1b) **0 código**, maior massa restante |
 
 Toda menção a "slug" em produção é **uso de campo** (lookup direto), não função dedicada.
 
@@ -152,7 +152,7 @@ Construir extração contra camada clínica incompleta → retrabalho se `R-CLI-
 4. ~~**3ª fatia do parse-PGR — transcritor-LLM do bloco GHE (esqueleto)**~~ — **CUMPRIDO** (003.BN, `GHEVerbatim`/`RiscoVerbatim` + `transcrever_ghes` + `gate_forma_ghe`, D-ARQ-49 P3/D-ARQ-50 C3; LLM sempre mockado).
 5. ~~**4ª fatia do parse-PGR — cliente-LLM real do transcritor-GHE**~~ — **CUMPRIDO** (003.BO, `TranscritorGeminiGHE`, molde `TranscritorGemini`/D-ARQ-48; validado ao vivo contra o Viverde, PR #152).
 6. ~~**5ª fatia do parse-PGR — resolvedor determinístico termo→slug**~~ — **CUMPRIDO** (003.BP, `resolvedor_termos.py`, D-ARQ-50 P2; PR #154).
-7. **A declarar no kickoff (proposta do Arquiteto, 003.BP):** hidratação GHEVerbatim→tipos.PGR **ou** DT-003BO-01 (observabilidade da cascata Gemini).
+7. ~~**6ª fatia do parse-PGR — contrato de tipo da hidratação (1a)**~~ — **CUMPRIDO** (003.BQ, `RiscoPGR.agente` Optional[str] + guard, D-ARQ-51 seams 2/3; PR #156). **Resta 1b:** `hidratar_ghe(GHEVerbatim, indice_termos)→(GHEPGR, list[Pendencia])` (seams 1 id-posicional + 4 recorte-identidade).
 8. **Fatia A:** plugar `executar_com_composicao`/`montar_fds_revisado` no pipeline real (CLI/Streamlit), sobre índice CAS populado.
 9. **`name→slug`:** decisão de arquitetura a tomar (D-ARQ-36 Parte 1) — destrava agentes sem CAS atômico.
 10. **META higiene DH-003M-01:** 4ª recorrência de markdown cru, ainda pendente.

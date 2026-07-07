@@ -2970,3 +2970,21 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA (observabilidade da cascata Gemini). Ao-vivo FDS ciplan/tinta: re-validar quando a quota renovar. População do campo termos:/aliases = sessão de dado futura.
 
 **Próxima.** A declarar no kickoff. Proposta do Arquiteto: hidratação GHEVerbatim→tipos.PGR (6ª fatia — dá consumidor de produção ao resolvedor e fecha a travessia do parse-PGR); alternativa: DT-003BO-01.
+
+## Sessão 003.BQ fatia 1a — 07/07/2026 — IMPLEMENTAÇÃO (contrato de tipo da hidratação GHEVerbatim→PGR; D-ARQ-51 seams 2/3)
+
+**Foco.** Iniciar a 6ª fatia do parse-PGR — hidratação GHEVerbatim→tipos.PGR, consumidor de produção do resolver termo→slug (órfão desde 003.BP). ARQUITETURA fechou D-ARQ-51 (4 seams: id posicional, agente tri-estado→Optional, None-agente não-bloqueante, recorte identidade-primeiro). Escolhida no kickoff sobre DT-003BO-01.
+
+**Gate de estado real.** main e87759f... (na abertura 0928cae limpa), 597/4 herdados, DECISOES v90 / PROTOCOLO v41. git objects: RiscoPGR.agente só lido por stage_2_riscos Fase A; tipo/severidade zero consumidores no motor; RiscoPGR construído só em fixtures. O gate revelou o acoplamento virada-de-tipo→Fase A (mypy Optional→str) → split da fatia em 1a (contrato) / 1b (hidratar_ghe).
+
+**Decisões (ARQUITETURA, ratificadas).** Split 1a/1b; None-agente na Fase A NÃO-bloqueante (D-ARQ-14 + D-ARQ-50 P2: cauda não-resolvida baixa-criticidade → revisão), assimetria intencional com o materialidade_ausente bloqueante do lado-FDS (molde D-ARQ-29); continue-sem-duplo confiando no invariante "None vem pareado com a pendência do resolver".
+
+**Entrega (1a).** tipos.py: RiscoPGR.agente str→Optional[str]. riscos.py: guard `if risco_pgr.agente is None: continue` como 1ª instrução da Fase A. test_riscos_stage.py: 1 teste sintético (agente=None ignorado + agente real promovido; ctx.pendencias==[]) — falha sem o guard, provado por stash-removal (assert 2==1). Isolado: nada plugado em executar; hidratação (1b) não tocada.
+
+**Gates.** Host: 597→598 passed, 4 skipped, 0 falha; mypy --strict delta-zero (tipos.py + riscos.py). Commit b38a76a, merge e87759f, PR #156, "Create a merge commit". Verificação cruzada: mensagem colada dizia "squash", git objects mostraram Merge de 2 pais — git venceu, sem desvio. Revisão do Arquiteto sobre objects (git show do commit + do vocab fumos_metalicos + do helper _ghe): aprovada sem correção.
+
+**Docs.** DECISOES v90→v91 (D-ARQ-51 criada). PROTOCOLO v41 inalterado (nenhuma R-*). HISTORICO este bloco. PAINEL re-tirado (597→598).
+
+**Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA (duplo de pendência do lado-FDS — o continue-sem-duplo de 1a é o espelho-PGR que a evita).
+
+**Próxima.** 003.BQ fatia 1b — hidratar_ghe(GHEVerbatim, indice_termos)→(GHEPGR, list[Pendencia]): seams 1 (id posicional) e 4 (recorte identidade, quantificacao=None). Consome resolver_termo. Gabarito pgr_viverde.py ↔ esqueleto (D-ARQ-50 C1: compara forma, não contagem 42vs32).
