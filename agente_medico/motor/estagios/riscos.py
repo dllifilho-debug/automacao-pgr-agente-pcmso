@@ -14,6 +14,15 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
 
     # Fase A — hidratar riscos explícitos do PGR
     for risco_pgr in ctx.pgr_ghe.riscos:
+        if risco_pgr.agente is None:
+            # D-ARQ-51: termo não resolvido a slug (hidratação 1b) chega com agente=None.
+            # Não promove a Risco (Risco.agente: str; inventar slug = D-ARQ-22) e NÃO bloqueia
+            # (D-ARQ-14 + D-ARQ-50 P2: cauda não-resolvida é baixa-criticidade → revisão, não
+            # erro silencioso). Assimetria intencional com o materialidade_ausente bloqueante do
+            # lado-FDS (molde D-ARQ-29). Sem pendência nova: o None vem pareado com a
+            # vocabulario_ausente que o resolver já emitiu na hidratação (invariante de 1b) —
+            # evita o duplo de DT-003Y-01.
+            continue
         meta = agentes_vocab.get(risco_pgr.agente)
         if meta is not None:
             ctx.riscos.append(
