@@ -2954,3 +2954,19 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003L-01 ABERTA. NOVA DT-003BO-01: observabilidade da cascata Gemini — _chamar_gemini engole status codes; acumular status/motivo por modelo e TranscricaoIndisponivel carregá-los (diagnóstico quota-vs-drift em uma olhada). Ao-vivo FDS ciplan/tinta vermelhos ambientais (quota): re-validar quando a quota renovar; se persistir, DT própria. Proposta de cascata de provedores free REJEITADA pelo Arquiteto (prompt é calibrado por modelo — cada provedor exigiria validação ao vivo própria; free tier não sustenta produção; solução estrutural = billing pago; a arquitetura já suporta multi-provedor via Protocol injetável, se um dia precisar).
 
 **Próxima.** A declarar no kickoff. Proposta do Arquiteto: resolvedor termo→slug (D-ARQ-50 P2) — agora com termos reais validados ao vivo como entrada; alternativa: DT-003BO-01 (fatia pequena de observabilidade).
+
+## Sessão 003.BP — 07/07/2026 — IMPLEMENTAÇÃO (resolvedor determinístico termo→slug — 5ª fatia do parse-PGR, D-ARQ-50 P2)
+
+**Foco.** Materializar a Parte 2 de D-ARQ-50 (fechada em 003.BK): resolver determinístico termo-normalizado→slug, autoridade de slug fora do LLM (D-ARQ-41 P1). Escolhida no kickoff sobre DT-003BO-01, conforme proposta de 003.BO — termos reais validados ao vivo como entrada.
+
+**Gate de estado real.** Kickoff: git×HISTORICO sem divergência, main 4174e69 limpa, 585/4 herdados, PROTOCOLO v41 / DECISOES v89. Fontes lidas via git objects (D-ARQ-50 verbatim, tipos.py, resolvedor.py, transcritor_pgr.py, agentes.yaml — 45 slugs, literais ao-vivo de test_transcritor_gemini_pgr.py). Gate pytest do sandbox indisponível (sem deps; classe do achado 003.BO) — baseline pelo PAINEL/merge 5a7941a; suite rodada no host.
+
+**Decisões de IMPL (as 3 granularidades que D-ARQ-50 P2 deixou à IMPL).** (i) Normalização determinística — "Acetato de Etila"→acetato_de_etila sem tabela alguma; typo de acento da cauda 003.BK morre na normalização. (ii) Fuzzy Levenshtein ≤2, slug único na dist mínima, SEMPRE FUZZY (nunca certeza); empate não escolhe (classe D-ARQ-22). (iii) Sinônimos via campo opcional termos: no agentes.yaml, não populado nesta fatia — alias real é escolha química, sessão de dado futura (molde 003.AI). "Thinner" NAO_RESOLVIDO por design (produto ≠ agente). Módulo isolado sem consumidor (molde 003.J/003.S).
+
+**Entrega.** motor/resolvedor_termos.py (normalizar_termo, construir_indice_termos, _levenshtein DP próprio, Confianca {EXATA, FUZZY, NAO_RESOLVIDO}, ResolucaoTermo frozen, resolver_termo) + test_resolvedor_termos.py (12: vocab real 45 entradas; exatos 003.BO Ruído/Etanol/Acetato de Etila/Tolueno; "esforço fisico" exato; "Microrganismo"→microrganismos FUZZY dist 1; "Thinner" e "Eaquipamento desprotegido" NAO_RESOLVIDO; empate sintético; alias; colisão→ValueError). Revisão do Arquiteto sobre git objects, 2 passadas: nenhum par dos 45 slugs reais dista ≤2 entre si (sem falso-positivo possível no vocab atual, teste de empate protege o futuro); nit não-bloqueante do termos:-string registrado na nota D-ARQ-50.
+
+**Gates.** Host sem chave: 585→597 passed (+12), 4 skipped, 0 falha; mypy --strict delta-zero (46 pré-existentes, zero nos arquivos novos). Commit 6bbbce6, merge 4abeaf9, PR #154, "Create a merge commit". PROTOCOLO v41 inalterado (nenhuma R-*). DECISOES v89→v90 (nota em D-ARQ-50, mesma ID). PAINEL re-tirado (585→597; lado-PGR 5ª fatia).
+
+**Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA (observabilidade da cascata Gemini). Ao-vivo FDS ciplan/tinta: re-validar quando a quota renovar. População do campo termos:/aliases = sessão de dado futura.
+
+**Próxima.** A declarar no kickoff. Proposta do Arquiteto: hidratação GHEVerbatim→tipos.PGR (6ª fatia — dá consumidor de produção ao resolvedor e fecha a travessia do parse-PGR); alternativa: DT-003BO-01.

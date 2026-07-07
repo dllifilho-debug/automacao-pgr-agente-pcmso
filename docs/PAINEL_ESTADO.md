@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.BO · 06/07/2026
-**Baseline:** main `09ab817` · 585 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero (46 pré-existentes) · PROTOCOLO v41 · DECISOES v89
+**Tiragem corrente:** 003.BP · 07/07/2026
+**Baseline:** main `4abeaf9` · 597 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero (46 pré-existentes) · PROTOCOLO v41 · DECISOES v90
 
 ---
 
@@ -20,17 +20,17 @@
 | Pergunta | Estado medido | Leitura |
 |---|---|---|
 | Quanto da regra clínica está no código? | **17 de 41** ativas (~41%) — inalterado desde 003.AH (frente clínica pausada, caminho B) | Espinha do motor de decisão de pé; cauda clínica ainda em prosa |
-| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **4ª fatia no main** (parse-doc + recorte-GHE + tipo transcrito/invocação/gate de forma + cliente-LLM real validado ao vivo — 003.BL/BM/BN/BO; resta termo→slug 0 código) | Gargalo de produção migrou: não é mais o transcritor-FDS — é o termo→slug do parse-PGR + a rasura do vocabulário químico |
+| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **5ª fatia no main** (parse-doc + recorte-GHE + tipo transcrito/invocação/gate de forma + cliente-LLM real + resolvedor termo→slug determinístico — 003.BL/BM/BN/BO/BP; resta hidratação GHEVerbatim→tipos.PGR, 0 código) | Gargalo de produção migrou: não é mais o termo→slug do parse-PGR — é a hidratação GHEVerbatim→tipos.PGR + a rasura do vocabulário químico |
 | Dívidas que travam produção? | **3** — mesmas facetas de sempre, recontadas pós-fechamento | DT-003L-01 (parse-PGR), DT-003M-02 (vocabulário-FDS raso), DT-FDS-02 (unidade do cutoff) |
 
-**Headline:** a produção **não está travada por falta de regra clínica nem mais pelo transcritor-FDS** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI) — está travada por **parse de PGR** (esqueleto GHE/cargo/risco: transcrição-LLM tem cliente-LLM real no main — 003.BO, tipo + invocação + gate + cliente real validado ao vivo; resta termo→slug, D-ARQ-50 P2) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
+**Headline:** a produção **não está travada por falta de regra clínica nem mais pelo transcritor-FDS** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI) — está travada por **parse de PGR** (esqueleto GHE/cargo/risco: transcrição-LLM tem cliente-LLM real e resolvedor termo→slug determinístico no main — 003.BO/BP, tipo + invocação + gate + cliente real validado ao vivo + resolvedor; resta a hidratação GHEVerbatim→tipos.PGR (costura resolvedor→motor)) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
 
 ---
 
 ## CAMADA 1 — Diretoria · início, meio, fim
 
 ### Onde estamos, em uma frase
-O **motor que decide os exames** (a partir de risco já estruturado) está ~41% construído e testado na espinha. Do lado da **porta de entrada**, o lado-FDS (química) está **construído e validado ao vivo, fim-a-fim** (PDF→extração de texto→transcritor-LLM→gate de forma→revisão-RT→montagem→resolvedor, 003.BD a 003.BI). Falta o lado-PGR: transcrição do esqueleto GHE/cargo/risco (D-ARQ-49/50; parse-doc `extrair_texto_pgr` + recorte-GHE `recortar_blocos_ghe` + tipo transcrito/invocação/gate de forma `transcrever_ghes`/`gate_forma_ghe` + cliente-LLM real `TranscritorGeminiGHE` no main desde 003.BL/BM/BN/BO, validado ao vivo contra o Viverde; resta termo→slug — maior massa restante) e o vocabulário químico ainda raso (a maioria dos componentes de FDS real cai em ramo 0/AUSENTE por falta de slug em `agentes.yaml`, DT-003M-02) — juntos, o que ainda separa o sistema de rodar um PGR real de ponta a ponta.
+O **motor que decide os exames** (a partir de risco já estruturado) está ~41% construído e testado na espinha. Do lado da **porta de entrada**, o lado-FDS (química) está **construído e validado ao vivo, fim-a-fim** (PDF→extração de texto→transcritor-LLM→gate de forma→revisão-RT→montagem→resolvedor, 003.BD a 003.BI). Falta o lado-PGR: transcrição do esqueleto GHE/cargo/risco (D-ARQ-49/50; parse-doc `extrair_texto_pgr` + recorte-GHE `recortar_blocos_ghe` + tipo transcrito/invocação/gate de forma `transcrever_ghes`/`gate_forma_ghe` + cliente-LLM real `TranscritorGeminiGHE` + resolvedor termo→slug `resolvedor_termos` no main desde 003.BL/BM/BN/BO/BP, validado ao vivo contra o Viverde; resta a hidratação GHEVerbatim→tipos.PGR (costura resolvedor→motor) — maior massa restante) e o vocabulário químico ainda raso (a maioria dos componentes de FDS real cai em ramo 0/AUSENTE por falta de slug em `agentes.yaml`, DT-003M-02) — juntos, o que ainda separa o sistema de rodar um PGR real de ponta a ponta.
 
 ### A decisão que a diretoria precisa tomar
 Hoje a fila assume "continuar a frente clínica" por inércia. O painel torna a escolha informada:
@@ -54,7 +54,7 @@ Gargalos restantes, em massa crescente:
 | Índice CAS raso | Dado | **21 de 45 slugs com CAS** (47%; 003.AI populou 12, restam 24 null — várias por categoria física sem CAS aplicável) |
 | `name→slug` (string química sem CAS → slug) | Decisão de arquitetura | Indeciso (D-ARQ-36 Parte 1) |
 | UI da revisão-RT (Streamlit) | Greenfield | 0 código — `montar_fds_revisado` (003.BI) existe, sem tela onde o RT edita o verbatim |
-| Parse de PGR (esqueleto GHE/cargo/risco físico) | Em construção | parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real no main (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`TranscritorGeminiGHE`, 003.BL/BM/BN/BO, validado ao vivo contra o Viverde); resta termo→slug (D-ARQ-50 P2) — maior massa |
+| Parse de PGR (esqueleto GHE/cargo/risco físico) | Em construção | parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor_termos (003.BP) no main (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP, validado ao vivo contra o Viverde); resta a hidratação GHEVerbatim→tipos.PGR (maior massa restante) + população de aliases `termos:` (dado) |
 
 **Fatia 1 da extração (popular CAS) parcialmente cumprida** (003.AI: 12 substâncias). Falta plugar a costura ao pipeline real (fatia A) e o parse-PGR (maior massa). Número corrigido nesta tiragem: o "9/43" citado nas sessões 003.BG-BI já estava defasado pela 003.AI (23/06/2026) — medido de disco (`agente_medico/protocolo/vocabulario/agentes.yaml`) como 21/45 nesta re-tiragem.
 
@@ -97,7 +97,7 @@ Instrumento: `git grep` de IDs de regra. Mede **rastreabilidade** (string presen
 | UI da revisão-RT (onde o RT edita o verbatim) | **0 código** — `serializar_verbatim`/`montar_fds_revisado` existem (motor puro); tela/costura ficam para fatia futura |
 | Índice CAS (`construir_indice_cas`) | **21/45 slugs com CAS** (47%) — 003.AI populou 12; restam 24 null (parte por categoria física sem CAS aplicável, parte gargalo de dado) |
 | Resolução canônica `name→slug` (string química → slug de agente) | **0 código** — decisão de arquitetura não tomada (D-ARQ-36 Parte 1); única `def` de normalização é `leo_resolver.py:37 _normaliza`, escopo LEO-texto, não vocabulário químico |
-| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real construídos** (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`gate_forma_ghe`/`TranscritorGeminiGHE`, 003.BL/BM/BN/BO; LLM real validado ao vivo contra o Viverde, PR #152); termo→slug **0 código** (D-ARQ-50 P2) — maior massa restante |
+| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor termo→slug construídos** (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`gate_forma_ghe`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP; LLM real validado ao vivo contra o Viverde, PR #152; resolvedor isolado sem consumidor, PR #154); hidratação GHEVerbatim→tipos.PGR **0 código** — maior massa restante |
 
 Toda menção a "slug" em produção é **uso de campo** (lookup direto), não função dedicada.
 
@@ -151,10 +151,11 @@ Construir extração contra camada clínica incompleta → retrabalho se `R-CLI-
 3. ~~**2ª fatia do parse-PGR — recorte determinístico dos blocos GHE**~~ — **CUMPRIDO** (003.BM, `recortar_blocos_ghe`, D-ARQ-49 P2).
 4. ~~**3ª fatia do parse-PGR — transcritor-LLM do bloco GHE (esqueleto)**~~ — **CUMPRIDO** (003.BN, `GHEVerbatim`/`RiscoVerbatim` + `transcrever_ghes` + `gate_forma_ghe`, D-ARQ-49 P3/D-ARQ-50 C3; LLM sempre mockado).
 5. ~~**4ª fatia do parse-PGR — cliente-LLM real do transcritor-GHE**~~ — **CUMPRIDO** (003.BO, `TranscritorGeminiGHE`, molde `TranscritorGemini`/D-ARQ-48; validado ao vivo contra o Viverde, PR #152).
-6. **A declarar no kickoff (proposta do Arquiteto, 003.BO):** resolvedor termo→slug (D-ARQ-50 P2) **ou** DT-003BO-01 (observabilidade da cascata Gemini).
-7. **Fatia A:** plugar `executar_com_composicao`/`montar_fds_revisado` no pipeline real (CLI/Streamlit), sobre índice CAS populado.
-8. **`name→slug`:** decisão de arquitetura a tomar (D-ARQ-36 Parte 1) — destrava agentes sem CAS atômico.
-9. **META higiene DH-003M-01:** 4ª recorrência de markdown cru, ainda pendente.
+6. ~~**5ª fatia do parse-PGR — resolvedor determinístico termo→slug**~~ — **CUMPRIDO** (003.BP, `resolvedor_termos.py`, D-ARQ-50 P2; PR #154).
+7. **A declarar no kickoff (proposta do Arquiteto, 003.BP):** hidratação GHEVerbatim→tipos.PGR **ou** DT-003BO-01 (observabilidade da cascata Gemini).
+8. **Fatia A:** plugar `executar_com_composicao`/`montar_fds_revisado` no pipeline real (CLI/Streamlit), sobre índice CAS populado.
+9. **`name→slug`:** decisão de arquitetura a tomar (D-ARQ-36 Parte 1) — destrava agentes sem CAS atômico.
+10. **META higiene DH-003M-01:** 4ª recorrência de markdown cru, ainda pendente.
 
 ---
 *Gestão à vista. Vive ao lado da produção, não a substitui. Próxima tiragem: ao próximo merge que mover um número, fechamento de marco, ou sessão META.*
