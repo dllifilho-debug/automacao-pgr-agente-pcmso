@@ -1569,6 +1569,40 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 
 **Base.** Sessão 003.BK (06/07/2026). Medição determinística do par PGR Viverde `.docx`/`.pdf` ↔ `pgr_viverde.py`. Fecha parse-doc (PDF text-puro) e termo→slug ((c)-shaped). Passada de verificação crítica (pedida pelo Diovanni antes de ratificar): (1) teste de perda-silenciosa do `extract_text` PASSOU (valores + adjacência preservados) — a recomendação de parse-doc sobrevive ao ataque empírico; correção honesta — `.docx` é mais colunar no grid, PDF vence por universalidade+reuso, não por "mais limpo em tudo"; (2) recomendação de termo→slug reenquadrada — (b) lida com typo melhor mas viola o gate; (c) vence por auditabilidade onde importa clinicamente, o typo-tail é revisão de baixa-criticidade. Ratificada pelo Diovanni em 003.BK. Decisão de arquitetura — sem código.
 
+## D-ARQ-51 — Hidratação GHEVerbatim → tipos.PGR: consumidor de produção do resolver termo→slug; id posicional, agente tri-estado→Optional, None-agente não-bloqueante
+
+**Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO por fatias. 1a (contrato de tipo) materializada em 003.BQ; 1b (`hidratar_ghe`) e o parse de quantificação são fatias futuras. Autorização para virar D-ARQ do Diovanni (003.BQ).
+
+**Contexto.** D-ARQ-49/50 fecharam a camada de extração-PGR até a "PGR transcrita" (`GHEVerbatim`, 003.BN) e o resolver `termo→slug` (`resolvedor_termos.py`, 003.BP) — este ISOLADO, sem consumidor de produção. Falta a peça que converte `GHEVerbatim` → `tipos.PGR`/`GHEPGR`/`RiscoPGR` consumindo o resolver: a hidratação. Dá vida ao resolver (D-ARQ-50 P2); é a 6ª fatia do parse-PGR.
+
+**Decisão — quatro seams.**
+
+1. **id do GHE = posicional determinístico.** `GHEVerbatim` não tem id (D-ARQ-50 C1: o doc não traz; LLM atribuir = identidade silenciosa, D-ARQ-22); `GHEPGR.id` exige `str`. A hidratação atribui id posicional sobre a ordem transcrita (`GHE-01`…), NÃO derivado de `nome` (texto-livre-de-LLM, colide — 42 blocos, vários "Pintura"). Honesto: handle do bloco transcrito, não id canônico. Paliativo sinalizado: id posicional ≠ id canônico; o re-agrupamento MAPA 42→32 é fatia downstream. `[DERIVADO — D-ARQ-50 C1; D-ARQ-22]`. (Fatia 1b — não materializado em 1a.)
+
+2. **agente: `RiscoVerbatim.agente` (termo) → `RiscoPGR.agente` (slug), com o tri-estado do resolver.** EXATA→slug; FUZZY→slug + `Pendencia` não-bloqueante (candidato baixa-confiança revisado na saída, D-ARQ-47 cl.4); NAO_RESOLVIDO→`agente=None` + a `vocabulario_ausente` não-bloqueante que o resolver já emite. Risco NUNCA descartado (anti-supressão, D-ARQ-31/35 P3); slug NUNCA inventado (D-ARQ-22). Forçou `RiscoPGR.agente: str → Optional[str]`, espelho de `Componente.agente` do lado-FDS (D-ARQ-14). `[DERIVADO — D-ARQ-14; D-ARQ-31; espelho Componente.agente]`. **Materializado em 1a: a virada de tipo.**
+
+3. **Política None-agente na Fase A do Stage 2 (classe D-ARQ-08).** Risco com `agente=None`: a Fase A não promove a `Risco` (`Risco.agente: str`; inventar = D-ARQ-22) e NÃO bloqueia — apenas `continue`. Não-bloqueante contra o espelho-FDS (`materialidade_ausente` é bloqueante): D-ARQ-14 é não-bloqueante por design e D-ARQ-50 P2 mediu que a cauda não-resolvida é baixa-criticidade (acidente/ergonômico) → revisão, não erro silencioso. Assimetria com o lado-FDS (lá bloqueia: químico sem materialidade é inaferível, alta-criticidade) intencional e documentada, molde D-ARQ-29. Sem pendência nova na Fase A: o `None` vem pareado com a pendência que o resolver emitiu na hidratação (invariante de 1b) — evita o duplo de DT-003Y-01. **Materializado em 1a: o guard.**
+
+4. **Recorte identidade-primeiro; parse de quantificação diferido.** A 1ª leva de hidratação (1b) preenche id + nome + cargos + agente-slug; `RiscoPGR.quantificacao=None`. O parse do texto cru (`"6,3 ppm"→Quantificacao`) é resolver-side determinístico (molde `parsear_faixa`/`_normalizar_faixa` do lado-FDS), natureza distinta de identidade → fatia 2. Anti-perda: o texto cru sobrevive no `GHEVerbatim` de entrada (preservado a montante). Diferidos já nomeados (D-ARQ-49 P2): EPIs, psicossocial, gates de topo (`validade`/`assinatura`) → `GHEPGR` com defaults; envelope PGR-topo é fatia irmã. `[INTERPRETADO — recorte, ratificado 003.BQ]`.
+
+**Consequência.**
+- Dá consumidor de produção ao resolver `termo→slug` (órfão desde 003.BP).
+- Motor puro (D-ARQ-09): a hidratação é determinística; LLM parou no verbatim.
+- Universal (D-ARQ-06): id posicional + termo→slug + defaults servem qualquer setor; as formas químicas de DT-003L-01 vivem abaixo, no ramo quantificação/FDS.
+- Não cria nem altera regra clínica (R-* intactas; PROTOCOLO v41 inalterado). Cria contrato de camada.
+
+**Fronteiras (não confundir):**
+- **D-ARQ-49/50** — consome (a "PGR transcrita" e o resolver); não revoga.
+- **D-ARQ-14** — reusado (`vocabulario_ausente` não-bloqueante).
+- **D-ARQ-31 / D-ARQ-35 P3** — anti-supressão: risco não-resolvido preservado, não descartado.
+- **D-ARQ-29** — molde da assimetria bloqueante-vs-não-bloqueante entre lados.
+- **D-ARQ-08** — a política None-agente é a escolha bloqueante-vs-operacional.
+- **Componente.agente (lado-FDS)** — espelho estrutural do `RiscoPGR.agente` Optional.
+
+**Base.** Sessão 003.BQ (07/07/2026). Gate de estado real (git objects): `RiscoPGR.agente` só lido por `stage_2_riscos` Fase A; `RiscoPGR.tipo`/`severidade` zero consumidores no motor (só fixture); `RiscoPGR` construído só em fixtures. Duas passadas: (1ª) recorte identidade-primeiro + virada Optional; (2ª, pós-gate) o gate revelou o acoplamento tipo→Fase A (mypy) → split 1a/1b, e a política None-agente (D-ARQ-08) resolvida não-bloqueante por D-ARQ-14 + D-ARQ-50 P2.
+
+**Aplicação 003.BQ fatia 1a (07/07/2026) — contrato de tipo, isolado.** `RiscoPGR.agente: str→Optional[str]` (`tipos.py`) + guard `if risco_pgr.agente is None: continue` na Fase A de `stage_2_riscos` (`riscos.py`) — materializa os seams 2 (virada de tipo) e 3 (guard não-bloqueante, `continue`-sem-duplo). Seams 1 (id) e 4 (recorte) são 1b. Blast radius confirmado repo-inteiro: só `tipos.py` + `riscos.py` (`RiscoPGR` construído só em fixtures; `predicados.py`/`transcritor_pgr.py` leem `Risco`/`RiscoVerbatim`, não `RiscoPGR`). Guard defensivo (a hidratação que produz `None` é 1b) exercitado por teste sintético (falha sem o guard, provado por stash-removal: `Risco(agente=None)` construído → `assert 2==1`). Suíte 597→598, 4 skipped; mypy --strict delta-zero (`tipos.py` + `riscos.py`). Commit `b38a76a`, merge `e87759f` (PR #156, "Create a merge commit"). `[DERIVADO — IMPL 003.BQ 1a host; gate de estado real em disco]`.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -1663,3 +1697,4 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 | v88 | 06/07/2026 | Sessão 003.BN (IMPLEMENTAÇÃO): nota de aplicação em D-ARQ-49 — P3 fechado; GHEVerbatim/RiscoVerbatim (sem id, D-ARQ-50 C1/D-ARQ-22) + transcrever_ghes + gate_forma_ghe (molde D-ARQ-47) em transcritor_pgr.py. LLM mockado, 8 testes. Suíte 569→577. Commit d4fa02a, merge 94bd5c4, PR #150. |
 | v89 | 06/07/2026 | Sessão 003.BO (IMPLEMENTAÇÃO): notas em D-ARQ-49 (regra 3c — perigo de acidente como agente, quantificacao="") e D-ARQ-50 (correção de literal — fonte geradora forma-longa "Thinner/Zarcão e tinta esmalte sintético"; 003.BK citava forma curta). Entrega: TranscritorGeminiGHE (cliente-LLM real do transcritor-GHE, 4ª fatia do parse-PGR) + validação ao vivo Viverde verde no main via PR #152, 577→585 verdes. DT-003BO-01 aberta (observabilidade da cascata). Nenhuma R-* criada/alterada. |
 | v90 | 07/07/2026 | Sessão 003.BP (IMPLEMENTAÇÃO): nota de aplicação 003.BP em D-ARQ-50 — Parte 2 materializada em motor/resolvedor_termos.py (normalização determinística + índice com aliases termos:/colisão→ValueError + fuzzy Levenshtein ≤2 único-candidato sempre FUZZY + Pendencia vocabulario_ausente não-bloqueante); campo termos: não populado (sessão de dado futura); isolado sem consumidor (molde 003.J/003.S). Suíte 585→597. Commit 6bbbce6, merge 4abeaf9, PR #154. |
+| v91 | 07/07/2026 | Sessão 003.BQ fatia 1a (IMPLEMENTAÇÃO): D-ARQ-51 criada — hidratação GHEVerbatim→tipos.PGR (consumidor de produção do resolver termo→slug). Fatia 1a materializa o contrato de tipo: RiscoPGR.agente str→Optional[str] + guard None não-bloqueante na Fase A do Stage 2 (seams 2/3). Suíte 597→598. Commit b38a76a, merge e87759f, PR #156. Nenhuma R-* tocada. |
