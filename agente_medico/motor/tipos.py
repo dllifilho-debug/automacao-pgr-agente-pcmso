@@ -21,7 +21,9 @@ class Quantificacao:
 @dataclass(frozen=True)
 class RiscoPGR:
     tipo: str
-    agente: str
+    # D-ARQ-51: None = termo não resolvido a slug pela hidratação (D-ARQ-50 P2 / D-ARQ-14).
+    # Espelha Componente.agente: Optional[str]. Risco NUNCA descartado; None vira revisão, não slug inventado (D-ARQ-22).
+    agente: Optional[str]
     quantificacao: Optional[Quantificacao]
     severidade: Optional[str]
 

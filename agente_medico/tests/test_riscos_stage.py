@@ -111,6 +111,33 @@ def test_risco_explicito_agente_ausente_gera_pendencia_nao_bloqueante(proto):  #
     assert "agente_desconhecido_xyz" in pend.motivo
 
 
+def test_risco_agente_none_e_ignorado_sem_pendencia_extra(proto):  # type: ignore[no-untyped-def]
+    # D-ARQ-51: agente=None (termo não resolvido a slug pela hidratação 1b) não vira Risco
+    # e não gera Pendencia própria — o guard da Fase A apenas pula o risco.
+    ghe = _ghe(
+        riscos=(
+            RiscoPGR(
+                tipo="quimico",
+                agente=None,
+                quantificacao=None,
+                severidade=None,
+            ),
+            RiscoPGR(
+                tipo="quimico",
+                agente="fumos_metalicos",
+                quantificacao=None,
+                severidade=None,
+            ),
+        )
+    )
+    ctx = GHEContext(pgr_ghe=ghe)
+    stage_2_riscos(ctx, proto)
+
+    assert len(ctx.riscos) == 1
+    assert ctx.riscos[0].agente == "fumos_metalicos"
+    assert ctx.pendencias == []
+
+
 def test_expande_riscos_implicitos_de_cargo_soldador(proto):  # type: ignore[no-untyped-def]
     ghe = _ghe(cargos=("soldador",))
     ctx = GHEContext(pgr_ghe=ghe)
