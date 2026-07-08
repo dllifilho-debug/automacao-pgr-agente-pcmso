@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import pytest
 
-from agente_medico.motor.hidratacao import hidratar_ghe
+from agente_medico.motor.entrada import processar_pgr
+from agente_medico.motor.hidratacao import hidratar_ghe, hidratar_pgr
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.resolvedor_termos import construir_indice_termos
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
@@ -134,3 +136,80 @@ def test_gabarito_de_forma_ghepgr(indice_real: dict[str, str]) -> None:
     assert ghe_pgr.produtos_quimicos == ()
     assert ghe_pgr.psicossocial is False
     assert ghe_pgr.cenario is None
+
+
+# ---------------------------------------------------------------------------
+# costura plural: hidratar_pgr (D-ARQ-51 seam 1, consumidor de hidratar_ghe)
+# ---------------------------------------------------------------------------
+
+def test_hidratar_pgr_ids_posicionais_ordem_preservada(indice_real: dict[str, str]) -> None:
+    ghe_a = _ghe_verbatim(riscos=())
+    ghe_b = _ghe_verbatim(riscos=())
+
+    pgr, _ = hidratar_pgr(
+        (ghe_a, ghe_b), indice_real, validade=date(2025, 1, 1), assinatura_engenheiro=True
+    )
+
+    assert [g.id for g in pgr.ghes] == ["GHE-01", "GHE-02"]
+    assert pgr.ghes[0].nome == ghe_a.nome
+    assert pgr.ghes[1].nome == ghe_b.nome
+
+
+def test_hidratar_pgr_agrega_pendencias_com_ghe_id_correto(indice_real: dict[str, str]) -> None:
+    ghe_fuzzy = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Microrganismo", quantificacao="", fonte_geradora=""),)
+    )
+    ghe_nao_resolvido = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Thinner", quantificacao="", fonte_geradora=""),)
+    )
+
+    pgr, pendencias = hidratar_pgr(
+        (ghe_fuzzy, ghe_nao_resolvido),
+        indice_real,
+        validade=date(2025, 1, 1),
+        assinatura_engenheiro=True,
+    )
+
+    assert len(pendencias) == 2
+    assert pendencias[0].tipo == "resolucao_fuzzy"
+    assert pendencias[0].ghe_id == "GHE-01"
+    assert pendencias[1].tipo == "vocabulario_ausente"
+    assert pendencias[1].ghe_id == "GHE-02"
+
+
+def test_hidratar_pgr_repassa_envelope_verbatim(indice_real: dict[str, str]) -> None:
+    validade = date(2026, 3, 15)
+
+    pgr, _ = hidratar_pgr((), indice_real, validade=validade, assinatura_engenheiro=False)
+
+    assert pgr.validade == validade
+    assert pgr.assinatura_engenheiro is False
+
+
+def test_hidratar_pgr_sequencia_vazia_legitima(indice_real: dict[str, str]) -> None:
+    pgr, pendencias = hidratar_pgr(
+        (), indice_real, validade=date(2025, 1, 1), assinatura_engenheiro=True
+    )
+
+    assert pgr.ghes == ()
+    assert pendencias == []
+
+
+def test_hidratar_pgr_e2e_sintetico_processar_pgr(indice_real: dict[str, str]) -> None:
+    # D-ARQ-50 C1: GHEVerbatim moldado no Est-01 do Viverde (forma emprestada da
+    # fixture); asserção de forma (matriz produzida), não de contagem.
+    ghe_real = build_pgr_viverde().ghes[0]
+    ghe = GHEVerbatim(
+        nome=ghe_real.nome,
+        cargos=ghe_real.cargos,
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="82,2 dB(A)", fonte_geradora=""),),
+    )
+
+    pgr, _ = hidratar_pgr(
+        (ghe,), indice_real, validade=date(2025, 1, 1), assinatura_engenheiro=True
+    )
+    protocolo = carregar(PROTOCOLO_DIR)
+    resultado = processar_pgr(pgr, protocolo, date(2025, 1, 1))
+
+    assert resultado.matrizes[0].ghe_id == "GHE-01"
+    assert len(resultado.matrizes) == 1

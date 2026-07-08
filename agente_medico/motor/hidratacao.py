@@ -1,4 +1,4 @@
-"""Hidratação GHEVerbatim -> GHEPGR (D-ARQ-51 fatia 1b, seams 1 e 4).
+"""Hidratação GHEVerbatim -> GHEPGR / PGR (D-ARQ-51 fatia 1b e costura plural).
 
 Consome resolver_termo (resolvedor_termos.py) por risco. Seam 1: GHEPGR.id é
 posicional sobre a ordem transcrita ("GHE-01", "GHE-02", ...) — NÃO deriva de
@@ -14,9 +14,11 @@ resolver (EXATA/FUZZY/NAO_RESOLVIDO) sempre vira exatamente 1 RiscoPGR.
 from __future__ import annotations
 
 import dataclasses
+from collections.abc import Sequence
+from datetime import date
 
 from agente_medico.motor.resolvedor_termos import Confianca, resolver_termo
-from agente_medico.motor.tipos import GHEPGR, GHEVerbatim, Pendencia, RiscoPGR
+from agente_medico.motor.tipos import GHEPGR, PGR, GHEVerbatim, Pendencia, RiscoPGR
 
 
 def hidratar_ghe(
@@ -85,3 +87,34 @@ def hidratar_ghe(
         cenario=None,
     )
     return ghe_pgr, pendencias
+
+
+def hidratar_pgr(
+    ghes: Sequence[GHEVerbatim],
+    indice: dict[str, str],
+    validade: date,
+    assinatura_engenheiro: bool,
+) -> tuple[PGR, list[Pendencia]]:
+    """Hidrata a sequência de blocos GHE transcritos em PGR (D-ARQ-51 costura plural).
+
+    Consumidor de produção de hidratar_ghe: itera os blocos na ordem transcrita
+    e delega cada um (a posição 1-based, seam 1, vem daqui), agregando as
+    pendências de todos os blocos numa lista única na mesma ordem. validade e
+    assinatura_engenheiro são envelope por parâmetro obrigatório, sem default —
+    a FONTE desses campos é a transcrição de topo do documento, fatia futura;
+    o parâmetro não inventa dado (D-ARQ-22), apenas repassa verbatim ao PGR.
+    """
+    ghes_pgr: list[GHEPGR] = []
+    pendencias: list[Pendencia] = []
+
+    for posicao, ghe in enumerate(ghes, start=1):
+        ghe_pgr, pendencias_ghe = hidratar_ghe(ghe, indice, posicao)
+        ghes_pgr.append(ghe_pgr)
+        pendencias.extend(pendencias_ghe)
+
+    pgr = PGR(
+        validade=validade,
+        assinatura_engenheiro=assinatura_engenheiro,
+        ghes=tuple(ghes_pgr),
+    )
+    return pgr, pendencias
