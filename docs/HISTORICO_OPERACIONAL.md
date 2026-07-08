@@ -3011,3 +3011,23 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move nesta fatia (isolada, não toca pipeline de produção nem a cascata Gemini).
 
 **Próxima.** A declarar no kickoff. Duas propostas: fatia 2 de D-ARQ-51 (parse de quantificação resolver-side — texto cru "6,3 ppm"→Quantificacao, molde `parsear_faixa`/`_normalizar_faixa` do lado-FDS) OU a costura plural (sequência GHEVerbatim→PGR completa + envelope PGR-topo — `validade`/`assinatura_engenheiro` —, fatia irmã que precede o e2e real).
+
+## Sessão 003.BR — 07/07/2026 — IMPLEMENTAÇÃO (costura plural hidratar_pgr; D-ARQ-51 fatia irmã)
+
+**Foco.** Kickoff delegou ao Arquiteto; ratificada a costura plural sobre a fatia 2 (parse de quantificação) por 4 razões: código órfão é o risco recorrente (hidratar_ghe sem chamador, mesmo padrão do resolver 003.BP→BQ); a costura é quem valida a assinatura desenhada para chamador então-inexistente (posicao); a dependência real é costura→parse (sem costura o parse não tem travessia); o gargalo do PAINEL é travessia, não riqueza de campo.
+
+**Gate de estado real.** git objects sobre c6be69a (working tree do mount não-confiável, prática permanente). Achados: PGR frozen exige validade+assinatura_engenheiro que nenhuma camada verbatim produz (diferidos D-ARQ-49 P2); construir_indice_termos existe no resolver; transcrever_ghes/gate_forma_ghe (003.BN) entregam os aprovados — consumidor natural da costura; ninguém itera a sequência.
+
+**Decisões de IMPL (4 micro-decisões ratificadas).** 1. Envelope por parâmetro obrigatório sem default — fecha o tipo PGR sem decidir a fonte; rejeitado retornar tuple[GHEPGR, ...] (não fecha a travessia). 2. enumerate(ghes, start=1) — ids GHE-01… consistentes com 1b. 3. Local hidratacao.py; entrada.py/executar() intocados — plug de produção exige cliente LLM real + fonte do envelope, fatia seguinte. 4. Índice recebido, não construído dentro (mecânica de índice é de fachada, D-ARQ-40).
+
+**Entrega.** hidratar_pgr em hidratacao.py; 5 testes em test_hidratacao.py (plural/ordem, agregação com ghe_id por bloco, envelope verbatim, sequência vazia legítima, e2e-sintético Est-01 Viverde → processar_pgr — primeiro e2e verbatim→Resultado do projeto).
+
+**Revisão do Arquiteto (git objects, sobre 110b2c8).** 2 desvios: (i) MATERIAL — asserção tautológica de status no e2e (Resultado.status é Literal exatamente dos 3 valores testados; teste que não pode falhar não é gate) → substituída por travessia de identidade (matrizes[0].ghe_id == "GHE-01"); (ii) MENOR — typing.Sequence deprecated → collections.abc (padrão do repo). Emenda 3039af4 conferida sobre objects.
+
+**Gates.** Host: 604→609 passed (+5), 4 skipped, 0 falha; mypy --strict delta-zero (agente_medico/motor/). Commits 110b2c8+3039af4, merge e064778, PR #160, "Create a merge commit".
+
+**Docs.** DECISOES v92→v93 (nota de aplicação 003.BR em D-ARQ-51, mesma ID). PROTOCOLO v41 inalterado (nenhuma R-*). HISTORICO este bloco. PAINEL re-tirado (604→609).
+
+**Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move nesta fatia.
+
+**Próxima.** A declarar no kickoff. Duas propostas: fatia 2 de D-ARQ-51 (parse de quantificação resolver-side — agora com travessia viva para consumir) OU plug de produção do lado-PGR (cliente LLM real + fonte do envelope de topo + revisão-RT sobre verbatim), que fecha o e2e real arquivo→Resultado.
