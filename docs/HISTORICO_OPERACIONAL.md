@@ -3051,3 +3051,25 @@ Docs. DECISOES v93→v94 (D-ARQ-52 criada). PROTOCOLO v41 inalterado (nenhuma R-
 Pendências. DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move nesta fatia. Novo não-bloqueante nomeado: universalidade multi-PGR exige (a) transcrição-de-topo do envelope, (b) generalização da âncora de recorte.
 
 Próxima. A declarar no kickoff. Candidatas: fatia 2 de D-ARQ-51 (parse de quantificação, agora com travessia viva pra consumir); transcrição-de-topo do envelope (fecha o envelope document-derived); camada de edição-RT do verbatim-PGR (análogo 003.BI); generalização multi-PGR da âncora.
+
+## Sessão 003.BT — 08/07/2026 — ARQUITETURA (transcrição-de-topo do envelope; D-ARQ-53)
+
+Foco. Kickoff delegou ao Arquiteto; recomendada e ratificada a transcrição-de-topo (requisito (a) da 003.BS) sobre fatia 2 de parse, edição-RT e generalização da âncora, por 3 razões: o paliativo "envelope RT-supplied" (D-ARQ-52 seam 3) agora está no caminho de produção vivo — todo uso real força o RT a digitar dado que já está no documento; é o requisito (a) da universalidade multi-PGR, destrava o marco seguinte; sequenciamento — a fatia 2 (parse de quantificação) consome texto transcrito do documento, com a transcrição-de-topo em main a fatia 2 ganha fonte real em vez de nascer sobre envelope artificial.
+
+Gate de estado real (disco). Envelope = `PGR.validade: date` + `PGR.assinatura_engenheiro: bool` (`tipos.py` 154-155), consumido só por `estagios/gates.py` (R-PGR-01 `not assinatura` bloqueante; R-PGR-06 `(hoje-validade)>=730d` bloqueante). Topo do documento DESCARTADO hoje: `recortar_blocos_ghe` começa na 1ª âncora `SETOR/FUNÇÃO` (pág. 33 Viverde); emissão e responsável técnico vivem no topo descartado. Seam RT-supplied sem default pronto em `orquestracao_pgr.py::processar_arquivo_pgr` + `hidratacao.py::hidratar_pgr`.
+
+Decisão (D-ARQ-53, 4 partes). Instância-envelope de D-ARQ-41, irmã de D-ARQ-49; caminho de saída do paliativo D-ARQ-52 seam 3. 1. Bicamada interna: recorte-de-topo determinístico (inverso de `recortar_blocos_ghe` — pega a região início→1ª âncora que ele descarta, reusa `extrair_texto_pgr`) → transcrição-LLM. 2. Insight central (2ª passada corrigiu a 1ª): gate ELIMINATÓRIO (R-PGR-01/06 rejeitam o PGR inteiro) exige pré-preenchimento + confirmação-RT (molde revisão-RT D-ARQ-47 cl.4), NÃO document-derived autônomo — `date`/`bool` confiante-e-errado da LLM passaria em silêncio (classe D-ARQ-22), o mesmo risco que levou D-ARQ-52 seam 3 a escolher RT-supplied. O paliativo removido é o CUSTO recorrente de garimpar o documento, não a confirmação no gate. 3. `EnvelopeVerbatim` texto-cru (`validade_texto`/`responsavel_tecnico`/`registro_profissional`) semântica cravada, forma concreta = IMPL (D-ARQ-22); resolvedor `validade_texto→date` + evidência-de-credencial; `gate_forma_topo` (molde `gate_forma_ghe`). 4. Gabarito topo-Viverde; mecanismo (localização, formatos de data BR, evidência engenheiro-vs-técnico, prompt) ADIADO POR MEDIÇÃO — o topo nunca foi medido (o recorte o descarta).
+
+Universalidade (gate CLAUDE.md). Validade + assinatura de engenheiro responsável são exigência NR-01 de QUALQUER PGR (construção civil, química, saúde) — não é Viverde. O que varia (posição/formato no topo) é o adiado por medição, não o cravado.
+
+Duas passadas críticas. (1ª) nova bicamada document-derived autônoma substituindo os parâmetros RT; (2ª) document-derived autônomo num gate eliminatório reintroduz o risco de D-ARQ-52 seam 3 → corrigido para pré-preenchimento + confirmação-RT. Paliativo remanescente sinalizado: o recorte-de-topo herda a âncora `SETOR/FUNÇÃO` (n=1 Viverde) como fronteira-fim — generalização multi-PGR é o requisito (b) da 003.BS, sessão à parte.
+
+Fatiamento previsto (IMPL futura). (1) recorte-de-topo isolado; (2) `EnvelopeVerbatim` + `TranscritorTopo` (Protocol) + `gate_forma_topo`, LLM mockado; (3) resolvedor + seam de confirmação-RT (molde `revisao_verbatim.py`); (4) plug em `processar_arquivo_pgr` (troca a origem do envelope). A medição precede a fatia 2. `entrada.py`/`processar_pgr` intocados.
+
+Gates. Sem código — ARQUITETURA. Suíte inalterada (614 verdes herdados). Nenhuma R-* criada/alterada; PROTOCOLO v41 inalterado.
+
+Docs. DECISOES v94→v95 (D-ARQ-53 criada). HISTORICO este bloco. PAINEL não re-tirado (sessão ARQUITETURA sem merge que mova número, sem marco fechado).
+
+Pendências. DT-003L-01 ABERTA (input de medição do topo multi-setor). DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move. Requisito (b) da 003.BS (generalização multi-PGR da âncora) segue aberto.
+
+Próxima. A declarar no kickoff. Candidatas: sessão CONHECIMENTO de medição do topo Viverde (destrava a fatia 2 de IMPL de D-ARQ-53); fatia 1 de IMPL de D-ARQ-53 (recorte-de-topo, não depende da medição); fatia 2 de D-ARQ-51 (parse de quantificação).
