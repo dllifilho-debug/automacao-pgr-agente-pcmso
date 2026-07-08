@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.BR · 07/07/2026
-**Baseline:** main `e064778` · 609 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero (tipos.py/riscos.py/hidratacao.py) · PROTOCOLO v41 · DECISOES v93
+**Tiragem corrente:** 003.BS · 07/07/2026
+**Baseline:** main `980fb9d` · 614 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero · PROTOCOLO v41 · DECISOES v94
 
 ---
 
@@ -20,17 +20,17 @@
 | Pergunta | Estado medido | Leitura |
 |---|---|---|
 | Quanto da regra clínica está no código? | **17 de 41** ativas (~41%) — inalterado desde 003.AH (frente clínica pausada, caminho B) | Espinha do motor de decisão de pé; cauda clínica ainda em prosa |
-| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **6ª fatia iniciada no main** (parse-doc + recorte-GHE + tipo transcrito/invocação/gate de forma + cliente-LLM real + resolvedor termo→slug determinístico — 003.BL/BM/BN/BO/BP; 003.BQ fatia 1a materializa só o contrato de tipo da hidratação, `RiscoPGR.agente` Optional[str] + guard D-ARQ-51; `hidratar_ghe` em si — 1b — ainda 0 código) | Gargalo de produção migrou: não é mais o termo→slug do parse-PGR — é a hidratação GHEVerbatim→tipos.PGR + a rasura do vocabulário químico |
+| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **CONSTRUÍDO e PLUGADO em produção** — `processar_arquivo_pgr` (D-ARQ-52, 003.BS) costura arquivo→Resultado fim-a-fim (extração→recorte→transcrição-LLM→gate→hidratação→motor), validado contra o PDF Viverde real (LLM mockado em teste) | Gargalo de produção migrou de novo: não é mais travessia — é **universalidade** (envelope document-derived + generalização multi-PGR da âncora de recorte) + a rasura do vocabulário químico |
 | Dívidas que travam produção? | **3** — mesmas facetas de sempre, recontadas pós-fechamento | DT-003L-01 (parse-PGR), DT-003M-02 (vocabulário-FDS raso), DT-FDS-02 (unidade do cutoff) |
 
-**Headline:** a produção **não está travada por falta de regra clínica nem mais pelo transcritor-FDS** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI) — está travada por **parse de PGR** (esqueleto GHE/cargo/risco: transcrição-LLM tem cliente-LLM real e resolvedor termo→slug determinístico no main — 003.BO/BP, tipo + invocação + gate + cliente real validado ao vivo + resolvedor; resta a hidratação GHEVerbatim→tipos.PGR (costura resolvedor→motor)) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
+**Headline:** a produção **não está travada por falta de regra clínica, nem mais pelo transcritor-FDS, nem mais pela travessia do parse-PGR** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI; lado-PGR plugado em produção arquivo→Resultado, D-ARQ-52/003.BS) — está travada por **universalidade do parse-PGR** (envelope ainda RT-supplied, falta transcrição-de-topo document-derived; âncora de recorte segue Viverde-pontual, falta generalização multi-PGR) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
 
 ---
 
 ## CAMADA 1 — Diretoria · início, meio, fim
 
 ### Onde estamos, em uma frase
-O **motor que decide os exames** (a partir de risco já estruturado) está ~41% construído e testado na espinha. Do lado da **porta de entrada**, o lado-FDS (química) está **construído e validado ao vivo, fim-a-fim** (PDF→extração de texto→transcritor-LLM→gate de forma→revisão-RT→montagem→resolvedor, 003.BD a 003.BI). Falta o lado-PGR: transcrição do esqueleto GHE/cargo/risco (D-ARQ-49/50; parse-doc `extrair_texto_pgr` + recorte-GHE `recortar_blocos_ghe` + tipo transcrito/invocação/gate de forma `transcrever_ghes`/`gate_forma_ghe` + cliente-LLM real `TranscritorGeminiGHE` + resolvedor termo→slug `resolvedor_termos` no main desde 003.BL/BM/BN/BO/BP, validado ao vivo contra o Viverde; resta a hidratação GHEVerbatim→tipos.PGR (costura resolvedor→motor) — maior massa restante) e o vocabulário químico ainda raso (a maioria dos componentes de FDS real cai em ramo 0/AUSENTE por falta de slug em `agentes.yaml`, DT-003M-02) — juntos, o que ainda separa o sistema de rodar um PGR real de ponta a ponta.
+O **motor que decide os exames** (a partir de risco já estruturado) está ~41% construído e testado na espinha. Do lado da **porta de entrada**, o lado-FDS (química) está **construído e validado ao vivo, fim-a-fim** (PDF→extração de texto→transcritor-LLM→gate de forma→revisão-RT→montagem→resolvedor, 003.BD a 003.BI). O lado-PGR está **construído e PLUGADO em produção**: `adaptadores/orquestracao_pgr.py::processar_arquivo_pgr` (D-ARQ-52, 003.BS) costura arquivo→Resultado fim-a-fim (extração `extrair_texto_pgr` → recorte `recortar_blocos_ghe` → transcrição-LLM `transcrever_ghes`/`gate_forma_ghe` + `TranscritorGeminiGHE` → resolvedor `resolvedor_termos` → hidratação `hidratar_pgr` → motor `processar_pgr`), validado contra o PDF Viverde real (LLM mockado em teste). Falta para **universalidade**: transcrição-de-topo do envelope (`validade`/`assinatura_engenheiro` ainda RT-supplied, não document-derived) e generalização multi-PGR da âncora de recorte (hoje Viverde-pontual) — e o vocabulário químico ainda raso (a maioria dos componentes de FDS real cai em ramo 0/AUSENTE por falta de slug em `agentes.yaml`, DT-003M-02) — juntos, o que ainda separa o sistema de rodar qualquer PGR real de ponta a ponta.
 
 ### A decisão que a diretoria precisa tomar
 Hoje a fila assume "continuar a frente clínica" por inércia. O painel torna a escolha informada:
@@ -54,7 +54,7 @@ Gargalos restantes, em massa crescente:
 | Índice CAS raso | Dado | **21 de 45 slugs com CAS** (47%; 003.AI populou 12, restam 24 null — várias por categoria física sem CAS aplicável) |
 | `name→slug` (string química sem CAS → slug) | Decisão de arquitetura | Indeciso (D-ARQ-36 Parte 1) |
 | UI da revisão-RT (Streamlit) | Greenfield | 0 código — `montar_fds_revisado` (003.BI) existe, sem tela onde o RT edita o verbatim |
-| Parse de PGR (esqueleto GHE/cargo/risco físico) | Em construção | parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor_termos (003.BP) no main (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP, validado ao vivo contra o Viverde); 003.BQ fatia 1a materializa o contrato de tipo (`RiscoPGR.agente` Optional[str] + guard, D-ARQ-51); resta `hidratar_ghe` (1b, maior massa restante) + população de aliases `termos:` (dado) |
+| Parse de PGR (esqueleto GHE/cargo/risco físico) | Plugado em produção; universalidade em aberto | arquivo→Resultado CONSTRUÍDO e PLUGADO (`processar_arquivo_pgr`, D-ARQ-52, 003.BS; travessia Viverde real fechada, LLM mockado em teste). Resta para universalidade: transcrição-de-topo do envelope + generalização multi-PGR da âncora de recorte + população de aliases `termos:` (dado) |
 
 **Fatia 1 da extração (popular CAS) parcialmente cumprida** (003.AI: 12 substâncias). Falta plugar a costura ao pipeline real (fatia A) e o parse-PGR (maior massa). Número corrigido nesta tiragem: o "9/43" citado nas sessões 003.BG-BI já estava defasado pela 003.AI (23/06/2026) — medido de disco (`agente_medico/protocolo/vocabulario/agentes.yaml`) como 21/45 nesta re-tiragem.
 
@@ -97,7 +97,7 @@ Instrumento: `git grep` de IDs de regra. Mede **rastreabilidade** (string presen
 | UI da revisão-RT (onde o RT edita o verbatim) | **0 código** — `serializar_verbatim`/`montar_fds_revisado` existem (motor puro); tela/costura ficam para fatia futura |
 | Índice CAS (`construir_indice_cas`) | **21/45 slugs com CAS** (47%) — 003.AI populou 12; restam 24 null (parte por categoria física sem CAS aplicável, parte gargalo de dado) |
 | Resolução canônica `name→slug` (string química → slug de agente) | **0 código** — decisão de arquitetura não tomada (D-ARQ-36 Parte 1); única `def` de normalização é `leo_resolver.py:37 _normaliza`, escopo LEO-texto, não vocabulário químico |
-| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **parse-doc + recorte-GHE + tipo transcrito/invocação/gate + cliente-LLM real + resolvedor termo→slug construídos** (`extrair_texto_pgr`/`recortar_blocos_ghe`/`transcrever_ghes`/`gate_forma_ghe`/`TranscritorGeminiGHE`/`resolvedor_termos`, 003.BL/BM/BN/BO/BP; LLM real validado ao vivo contra o Viverde, PR #152; resolvedor isolado sem consumidor, PR #154); hidratação GHEVerbatim→tipos.PGR **contrato de tipo materializado** (003.BQ fatia 1a, `RiscoPGR.agente` Optional[str] + guard D-ARQ-51, PR #156) — `hidratar_ghe` em si (1b) **0 código**, maior massa restante |
+| Parse de PGR bruto → `tipos.PGR` (esqueleto GHE/cargo/risco físico) | **arquivo→Resultado CONSTRUÍDO e PLUGADO em produção** — `adaptadores/orquestracao_pgr.py::processar_arquivo_pgr` (D-ARQ-52, 003.BS, PR #162) costura extração→recorte→transcrição-LLM→gate→hidratação→motor num só chamador; primeiro e2e real do projeto (PDF Viverde, LLM mockado em teste). Falta para **universalidade**: transcrição-de-topo do envelope (RT-supplied ainda, não document-derived) + generalização multi-PGR da âncora de recorte (Viverde-pontual) |
 
 Toda menção a "slug" em produção é **uso de campo** (lookup direto), não função dedicada.
 
@@ -114,7 +114,7 @@ Toda menção a "slug" em produção é **uso de campo** (lookup direto), não f
 | | DH-003P-01 / DT-003Y-01 — resíduo sem-slug (edge) |
 | | DH-003M-01 / DH-003A-01 — corrupção/cosmético de markdown |
 
-**Convergência crítica (recontada pós-fechamento DT-003AS-01):** ainda **3** dívidas travam produção — DT-003L-01, DT-003M-02, DT-FDS-02 — mas a natureza da restrição migrou: não é mais "falta transcritor-FDS" (fechado nesta sessão), é "falta parse-PGR + vocabulário químico populado". Não são débitos independentes — são facetas do mesmo subsistema de ingestão (D-ARQ-25 + `name→slug` + vocabulário de composição-FDS).
+**Convergência crítica (recontada pós-fechamento DT-003AS-01):** ainda **3** dívidas travam produção — DT-003L-01, DT-003M-02, DT-FDS-02 — mas a natureza da restrição migrou de novo: não é mais "falta transcritor-FDS" (fechado 003.BI) nem "falta a travessia do parse-PGR" (fechada 003.BS, D-ARQ-52) — é "falta universalidade do parse-PGR (envelope document-derived + âncora multi-PGR) + vocabulário químico populado". Não são débitos independentes — são facetas do mesmo subsistema de ingestão (D-ARQ-25 + `name→slug` + vocabulário de composição-FDS).
 
 ### Risco de retrabalho de B — considerado e descartado
 Construir extração contra camada clínica incompleta → retrabalho se `R-CLI-*` mudar a forma do que a extração produz. **Descartado:** a saída da extração (input estruturado de agente/risco) é a montante e **ortogonal** à convergência `R-CLI-*` (dedup/periodicidade, a jusante). Contrato de saída não depende de `R-CLI-*` estar pronto. Bônus: clínica retomada depois valida `R-CLI-*` contra **PGR real, não fixture**.
@@ -128,7 +128,7 @@ Construir extração contra camada clínica incompleta → retrabalho se `R-CLI-
 
 - **Gate de aceite clínico:** a validação clínica entra **aqui** — sobre a matriz que sai, não sobre cobertura de regra interna. Olho clínico opera sobre output real, a jusante.
 - **Insumos materiais:** D-ARQ-25 parse-PGR (transcrição-FDS já entregue, D-ARQ-47/003.BI), `name→slug` canônico, **modelos de matriz de risco** (contrato de saída da extração), **normas vigentes gov.br/MTE** (ancoram a derivação), DT-003M-02 fechada, DT-FDS-02 confirmada, UI da revisão-RT plugada.
-- **Estado:** **bloqueado pelo parse-PGR + vocabulário químico** (lado-FDS já construído e validado ao vivo) — é o que o caminho B ainda constrói.
+- **Estado:** **bloqueado pela universalidade do parse-PGR + vocabulário químico** — a travessia arquivo→Resultado já fecha (Viverde real, D-ARQ-52/003.BS), mas falta document-derived envelope + generalização multi-PGR da âncora (lado-FDS já construído e validado ao vivo) — é o que o caminho B ainda constrói.
 
 ### Marco 2 — motor-sombra no Streamlit
 **Pronto =** para N inputs reais, saída do motor novo capturada ao lado do legado (`agente_medico_ia.py`), diff visível, sem regressão no legado.
@@ -152,7 +152,7 @@ Construir extração contra camada clínica incompleta → retrabalho se `R-CLI-
 4. ~~**3ª fatia do parse-PGR — transcritor-LLM do bloco GHE (esqueleto)**~~ — **CUMPRIDO** (003.BN, `GHEVerbatim`/`RiscoVerbatim` + `transcrever_ghes` + `gate_forma_ghe`, D-ARQ-49 P3/D-ARQ-50 C3; LLM sempre mockado).
 5. ~~**4ª fatia do parse-PGR — cliente-LLM real do transcritor-GHE**~~ — **CUMPRIDO** (003.BO, `TranscritorGeminiGHE`, molde `TranscritorGemini`/D-ARQ-48; validado ao vivo contra o Viverde, PR #152).
 6. ~~**5ª fatia do parse-PGR — resolvedor determinístico termo→slug**~~ — **CUMPRIDO** (003.BP, `resolvedor_termos.py`, D-ARQ-50 P2; PR #154).
-7. ~~**6ª fatia do parse-PGR — contrato de tipo da hidratação (1a)**~~ — **CUMPRIDO** (003.BQ, `RiscoPGR.agente` Optional[str] + guard, D-ARQ-51 seams 2/3; PR #156). **Resta 1b:** `hidratar_ghe(GHEVerbatim, indice_termos)→(GHEPGR, list[Pendencia])` (seams 1 id-posicional + 4 recorte-identidade).
+7. ~~**6ª/7ª/8ª fatia do parse-PGR — hidratação (1a contrato de tipo + 1b `hidratar_ghe`) + costura plural `hidratar_pgr` + plug de produção arquivo→Resultado**~~ — **CUMPRIDO** (003.BQ 1a: `RiscoPGR.agente` Optional[str] + guard, D-ARQ-51 seams 2/3, PR #156; 003.BQ 1b: `hidratar_ghe`, seams 1/4, PR #158; 003.BR: costura plural `hidratar_pgr`, PR #160; 003.BS: plug de produção `processar_arquivo_pgr`, D-ARQ-52, PR #162). Travessia Viverde arquivo→Resultado fecha fim-a-fim (LLM mockado em teste). **Resta para universalidade:** transcrição-de-topo do envelope + generalização multi-PGR da âncora de recorte.
 8. **Fatia A:** plugar `executar_com_composicao`/`montar_fds_revisado` no pipeline real (CLI/Streamlit), sobre índice CAS populado.
 9. **`name→slug`:** decisão de arquitetura a tomar (D-ARQ-36 Parte 1) — destrava agentes sem CAS atômico.
 10. **META higiene DH-003M-01:** 4ª recorrência de markdown cru, ainda pendente.

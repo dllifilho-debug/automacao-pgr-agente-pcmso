@@ -3031,3 +3031,23 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move nesta fatia.
 
 **Próxima.** A declarar no kickoff. Duas propostas: fatia 2 de D-ARQ-51 (parse de quantificação resolver-side — agora com travessia viva para consumir) OU plug de produção do lado-PGR (cliente LLM real + fonte do envelope de topo + revisão-RT sobre verbatim), que fecha o e2e real arquivo→Resultado.
+
+## Sessão 003.BS — 07/07/2026 — IMPLEMENTAÇÃO (plug de produção lado-PGR; D-ARQ-52)
+
+Foco. Kickoff delegou ao Arquiteto; recomendado e ratificado o plug de produção (opção 2 da 003.BR) sobre a fatia 2 de parse por 3 razões: código-órfão é o risco recorrente (`hidratar_pgr` em main sem chamador, mesmo padrão do resolver/`hidratar_ghe`); o gargalo do PAINEL é travessia, não riqueza de campo; o e2e real arquivo→Resultado ainda não fechava.
+
+Gate de estado real. git objects sobre 73a66c7. Cadeia extração-PGR inteira isolada (`extrair_texto_pgr`→`recortar_blocos_ghe`→`transcrever_ghes`/`gate_forma_ghe`+`TranscritorGeminiGHE`→`construir_indice_termos`→`hidratar_pgr`→`processar_pgr`); `entrada.py` recebendo PGR pronto (fixture). Correção do próprio kickoff: cliente-LLM real NÃO era decisão aberta (`TranscritorGeminiGHE` validado ao vivo, 003.BO) — 3 decisões, não 4.
+
+Decisões (3 seams, D-ARQ-52). 1. `preparar_ghes` espelha `preparar_composicao`, para no verbatim, duas Pendencia bloqueantes distintas (`blocos_ausentes`, `transcricao_indisponivel_pgr`). 2. `processar_arquivo_pgr` ATRAVESSA verbatim→hidratação→motor sem gate-RT no meio — assimetria medida vs. FDS (resolver PGR não-bloqueante, revisão pós-hoc), D-ARQ-29/D-ARQ-50 P2. 3. Envelope por-parâmetro RT-supplied; paliativo sinalizado (fonte real = transcrição-de-topo, D-ARQ-49 P2). `entrada.py` intocado.
+
+Entrega. `adaptadores/orquestracao_pgr.py` (fora do motor, D-ARQ-48); 5 testes em `test_orquestracao_pgr.py` — e2e PDF Viverde real (só LLM mockado, primeiro arquivo→Resultado real) com travessia de identidade `matrizes[0].ghe_id=="GHE-01"`, `blocos_ausentes`, `transcricao_indisponivel_pgr`, aprovação parcial, envelope atravessando R-PGR-06→REJEITADO.
+
+Revisão do Arquiteto (git objects, commit f4405a3). APROVADO sem correção — zero desvio. Verificado: e2e é travessia de identidade (não asserção de status tautológica, lição 003.BR); envelope provado atravessando gate real; nit cosmético (`tuple(pend_hidr)` redundante) não-bloqueante.
+
+Gates. Host: 609→614 passed (+5), 4 skipped, 0 falha; mypy --strict delta-zero (motor+adaptadores). Commit f4405a3, merge 980fb9d, PR #162, "Create a merge commit".
+
+Docs. DECISOES v93→v94 (D-ARQ-52 criada). PROTOCOLO v41 inalterado (nenhuma R-*). HISTORICO este bloco. PAINEL re-tirado (609→614; lado-PGR agora atravessa arquivo→Resultado, Viverde-ancorado).
+
+Pendências. DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move nesta fatia. Novo não-bloqueante nomeado: universalidade multi-PGR exige (a) transcrição-de-topo do envelope, (b) generalização da âncora de recorte.
+
+Próxima. A declarar no kickoff. Candidatas: fatia 2 de D-ARQ-51 (parse de quantificação, agora com travessia viva pra consumir); transcrição-de-topo do envelope (fecha o envelope document-derived); camada de edição-RT do verbatim-PGR (análogo 003.BI); generalização multi-PGR da âncora.
