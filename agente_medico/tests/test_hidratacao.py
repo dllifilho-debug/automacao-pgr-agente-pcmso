@@ -8,6 +8,7 @@ from agente_medico.motor.hidratacao import hidratar_ghe
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.resolvedor_termos import construir_indice_termos
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
+from agente_medico.tests.fixtures.pgr_viverde import build_pgr_viverde
 
 PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
@@ -108,8 +109,14 @@ def test_todo_agente_none_tem_pendencia_correspondente(indice_real: dict[str, st
 # ---------------------------------------------------------------------------
 
 def test_gabarito_de_forma_ghepgr(indice_real: dict[str, str]) -> None:
-    ghe = _ghe_verbatim(
-        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="82,2 dB(A)", fonte_geradora=""),)
+    # D-ARQ-50 C1: molda o GHEVerbatim sintético num GHE real da fixture Viverde
+    # (nome/cargos copiados de Est-01) — compara FORMA do GHEPGR produzido, não
+    # contagem 42vs32 (o re-agrupamento MAPA é fatia downstream).
+    ghe_real = build_pgr_viverde().ghes[0]
+    ghe = GHEVerbatim(
+        nome=ghe_real.nome,
+        cargos=ghe_real.cargos,
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="82,2 dB(A)", fonte_geradora=""),),
     )
     ghe_pgr, _ = hidratar_ghe(ghe, indice_real, posicao=1)
 

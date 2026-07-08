@@ -69,8 +69,10 @@ def hidratar_ghe(
             # Invariante: agente=None sempre pareado com exatamente 1 pendência —
             # o guard da Fase A (estagios/riscos.py, 1a) confia nisso (D-ARQ-51 seam 3).
             riscos.append(RiscoPGR(tipo="", agente=None, quantificacao=None, severidade=None))
-            if resolucao.pendencia is not None:
-                pendencias.append(dataclasses.replace(resolucao.pendencia, ghe_id=ghe_id))
+            # Erro-zero (D-ARQ-22): NAO_RESOLVIDO sem pendência é violação de contrato
+            # do resolver — estourar aqui, nunca produzir agente=None órfão (seam 3).
+            assert resolucao.pendencia is not None
+            pendencias.append(dataclasses.replace(resolucao.pendencia, ghe_id=ghe_id))
 
     ghe_pgr = GHEPGR(
         id=ghe_id,
