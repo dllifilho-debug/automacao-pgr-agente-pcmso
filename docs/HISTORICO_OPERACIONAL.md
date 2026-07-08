@@ -3073,3 +3073,21 @@ Docs. DECISOES v94→v95 (D-ARQ-53 criada). HISTORICO este bloco. PAINEL não re
 Pendências. DT-003L-01 ABERTA (input de medição do topo multi-setor). DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move. Requisito (b) da 003.BS (generalização multi-PGR da âncora) segue aberto.
 
 Próxima. A declarar no kickoff. Candidatas: sessão CONHECIMENTO de medição do topo Viverde (destrava a fatia 2 de IMPL de D-ARQ-53); fatia 1 de IMPL de D-ARQ-53 (recorte-de-topo, não depende da medição); fatia 2 de D-ARQ-51 (parse de quantificação).
+
+## Sessão 003.BU — 08/07/2026 — IMPLEMENTAÇÃO (recorte-de-topo; D-ARQ-53 fatia 1)
+
+Foco. Kickoff delegou ao Arquiteto; recomendada e ratificada a fatia 1 de IMPL de D-ARQ-53 (recorte-de-topo isolado) sobre a medição do topo e a fatia 2 de D-ARQ-51, por 3 razões: não depende de medição; o recorte É o instrumento que torna a medição do topo mecânica (alimenta DT-003L-01); D-ARQ-53 é a saída de paliativo vivo em produção (envelope RT-supplied, D-ARQ-52 seam 3).
+
+Implementação. `recortar_topo(paginas) -> str | None` em `motor/extracao_pgr.py`: inverso determinístico de `recortar_blocos_ghe`, reusa `_ANCORA_GHE` verbatim. Decisão de assinatura (Arquiteto): `None` = zero âncoras (falha explícita, molde do `[]` do irmão), `""` = âncora na 1ª linha (topo genuinamente vazio) — `""` para ambos seria ambíguo. Nenhum chamador tocado: `entrada.py`, `orquestracao_pgr.py`, `hidratacao.py`, `tipos.py`, `gates.py` intactos (plug é a fatia 4).
+
+Testes. 5 novos em `test_extracao_pgr.py` reusando a fixture `paginas`: termina-antes-da-âncora, não-vazio-no-Viverde, invariante de partição topo+blocos == documento (anti perda-silenciosa, classe D-ARQ-22), sem-âncora→None, âncora-na-1ª-linha→"". Sem literais de conteúdo do topo — gabarito é da sessão de medição.
+
+Gates. `python -m pytest agente_medico/tests/ tests/` → 619 verdes (614 herdados + 5), 4 skipped. `python -m mypy --strict agente_medico` → 46 erros pré-existentes idênticos ao baseline de main (verificado via stash antes/depois), zero nos arquivos tocados.
+
+Git. `fe0155b` em `feat/003bu-recorte-topo`, PR #165, merge commit `beb6622`.
+
+Docs. DECISOES v95 inalterada (D-ARQ-53 já registrada em 003.BT). PROTOCOLO v41 inalterado. PAINEL re-tirado: 619 verdes.
+
+Pendências. DT-003L-01 ABERTA (a medição do topo agora tem instrumento — próximo passo natural). DT-003BO-01, DT-003Y-01 ABERTAS. Requisito (b) da 003.BS (generalização da âncora) ABERTO.
+
+Próxima. A declarar no kickoff. Candidatas: CONHECIMENTO de medição do topo Viverde via `recortar_topo` (destrava fatias 2-3 de D-ARQ-53); fatia 2 de D-ARQ-51 (parse de quantificação).
