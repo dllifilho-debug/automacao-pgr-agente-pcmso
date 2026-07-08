@@ -211,5 +211,5 @@ def test_hidratar_pgr_e2e_sintetico_processar_pgr(indice_real: dict[str, str]) -
     protocolo = carregar(PROTOCOLO_DIR)
     resultado = processar_pgr(pgr, protocolo, date(2025, 1, 1))
 
-    assert resultado.status in ("OK", "PRELIMINAR", "REJEITADO")
+    assert resultado.matrizes[0].ghe_id == "GHE-01"
     assert len(resultado.matrizes) == 1

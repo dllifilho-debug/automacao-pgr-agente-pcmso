@@ -14,8 +14,8 @@ resolver (EXATA/FUZZY/NAO_RESOLVIDO) sempre vira exatamente 1 RiscoPGR.
 from __future__ import annotations
 
 import dataclasses
+from collections.abc import Sequence
 from datetime import date
-from typing import Sequence
 
 from agente_medico.motor.resolvedor_termos import Confianca, resolver_termo
 from agente_medico.motor.tipos import GHEPGR, PGR, GHEVerbatim, Pendencia, RiscoPGR
