@@ -2993,7 +2993,7 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 
 **Foco.** Kickoff delegou o foco ao Arquiteto: materializar `hidratar_ghe`, os dois seams de D-ARQ-51 que ficaram de fora de 1a (1 — id posicional; 4 — recorte identidade-primeiro). Proposta ratificada sem alternativa concorrente — 1b é a continuação natural de 1a; o resolver termo→slug (003.BP) segue órfão até esta fatia fechar a travessia.
 
-**Gate de estado real.** git objects: mount local estava stale em relação ao que já havia sido produzido na sessão — `motor/hidratacao.py` + `tests/test_hidratacao.py` greenfield ainda não versionados no disco lido no kickoff. Releitura via git objects confirmou o estado de main pós-1a sem divergência: `tipos.py` (`RiscoPGR.agente: Optional[str]`), `resolvedor_termos.py` (`resolver_termo` tri-estado, `pendencia=None` no ramo FUZZY por design), `riscos.py` (guard `if risco_pgr.agente is None: continue` da Fase A, 1a).
+**Gate de estado real.** git objects (working tree do mount do Arquiteto não é confiável — leitura e revisão sempre sobre objects, prática permanente, não evento desta sessão). A leitura via git objects confirmou o estado de main pós-1a sem divergência: `tipos.py` (`RiscoPGR.agente: Optional[str]`), `resolvedor_termos.py` (`resolver_termo` tri-estado, `pendencia=None` no ramo FUZZY por design), `riscos.py` (guard `if risco_pgr.agente is None: continue` da Fase A, 1a).
 
 **Decisões de IMPL (3 micro-decisões ratificadas).**
 1. `posicao` entra na assinatura de `hidratar_ghe` — o seam 1 exige ordem determinística e o `GHEVerbatim` isolado não a conhece (sem campo `id`, D-ARQ-50 C1); quem itera a sequência e sabe a posição é o chamador (a costura, fatia futura).
