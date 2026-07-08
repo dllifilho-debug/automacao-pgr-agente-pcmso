@@ -986,6 +986,22 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
+### DT-003BV-01 — Formato de validade no topo do PGR: mês-ano, multi-candidata, sem `dd/mm/aaaa` `[DERIVADO — medição do topo Viverde, 003.BV]`
+
+**Origem:** Sessão 003.BV (08/07/2026), medição do topo Viverde via `recortar_topo` (D-ARQ-53 P4).
+
+**Situação.** O topo do PGR Viverde NÃO carrega data em `dd/mm/aaaa`. A validade (insumo de R-PGR-06) aparece em granularidade MÊS-ANO e em três candidatas empilhadas: "GOIÂNIA, FEVEREIRO 2023" (emissão original), "ATUALIZADO FEVEREIRO 2024", "ATUALIZADO FEVEREIRO 2025" (última atualização). A precisão de dia (03/02/25) existe só no nome do arquivo, fora do corpo transcrito. Consequência: o resolver `validade_texto→date` de D-ARQ-53 P3 não pode assumir `dd/mm/aaaa` nem candidata única — precisa (a) parsear mês-ano PT-BR ("FEVEREIRO 2025" → 2025-02), (b) escolher entre múltiplas candidatas por política "mais recente", (c) tolerar que a última atualização, não a emissão, conta para R-PGR-06. Erro de escolha flipa o gate eliminatório em silêncio (classe D-ARQ-22): hoje 08/07/2026, FEV/2025 (~17m) VÁLIDO vs. FEV/2023 (~41m) rejeita PGR válido — caso concreto que valida o insight pré-preenchimento+confirmação-RT de D-ARQ-53 P2.
+
+**Pergunta de método (Dra. Carolini / norma, futura):** quando o topo traz emissão + N atualizações em mês-ano, qual data conta para os 2 anos de R-PGR-06 — a última atualização (hipótese atual) ou a emissão original? E granularidade mês-ano conta o 1º dia do mês, o último, ou exige confirmação-RT do dia exato? Buscar o método, não o caso Viverde.
+
+**Resolução parcial `[INTERPRETADO — prioridade na revisão de saída]`.** Até validar: última atualização = data de R-PGR-06; mês-ano resolve para o 1º dia do mês como default conservador, dia exato na confirmação-RT (molde D-ARQ-53 P2). Cravar sem a médica seria [INTERPRETADO] disfarçado de derivado — por isso o pré-preenchimento+confirmação-RT já é a topologia.
+
+**Impacto:** insumo direto da fatia 3 de D-ARQ-53 (resolver + evidência-de-credencial). NÃO bloqueia a fatia 2 (`EnvelopeVerbatim` é texto-cru, não interpreta data). Achado irmão da mesma medição: assinatura-imagem → bool R-PGR-01 não text-derivable → 100% confirmação-RT (registrado no gabarito 003.BV; não vira DT própria por já estar coberto pela confirmação-RT de D-ARQ-53 P2).
+
+**Status:** ABERTA. Não-bloqueante. Cruza D-ARQ-53 P3/P4.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -1047,3 +1063,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v39 | 02/07/2026 | Sessão 003.BE (IMPLEMENTAÇÃO): andamento em DT-003AS-01 — `extrair_texto_fds` materializada (D-ARQ-47 consequência, recorte âncora-por-título com sobre-inclusão). DT segue ABERTA. Nenhuma R-* criada/alterada. |
 | v40 | 02/07/2026 | Sessão 003.BF (IMPLEMENTAÇÃO): andamento em DT-003AS-01 — invocação injetável (`TranscritorLLM` Protocol + `transcrever_fds`) + `gate_forma` (cl.3) + harness mockado tinta/Ciplan sobre `extrair_texto_fds` real. DT segue ABERTA. Nenhuma R-* criada/alterada. |
 | v41 | 05/07/2026 | Sessão 003.BI (IMPLEMENTAÇÃO fatia (e2)): DT-003AS-01 FECHADA (seção 11) — revisão-RT (cl.4) + serialização verbatim ida/volta materializadas (`motor/revisao_verbatim.py`, D-ARQ-47); cadeia extração→LLM→gate→revisão-RT→montagem→resolvedor completa (003.AX/AU/BD/BE/BF/BG/BH/BI). Residuais que NÃO reabrem a DT: DT-003M-01, DT-003BG-01 (gabarito 3/6), DT-003AW-01, UI da revisão-RT. Nenhuma R-* criada/alterada. |
+| v42 | 08/07/2026 | Sessão 003.BV (CONHECIMENTO/medição): DT-003BV-01 adicionada (seção 11) — formato de validade no topo do PGR (mês-ano, multi-candidata, sem `dd/mm/aaaa`; insight confirmação-RT de D-ARQ-53 P2 validado com caso concreto Viverde FEV/2025 vs FEV/2023). Medição do topo Viverde via `recortar_topo` (D-ARQ-53 P4): 33 págs texto nativo, OCR não recorre; responsável por âncora-título (R-PGR-01 satisfeito, evidência Título+CREA; assinatura-imagem não text-derivable); gabarito `EnvelopeVerbatim` semeado p/ a fatia 2. Correção de rótulo: medição do topo NÃO é DT-003L-01 (mapa químico); topo nunca medido, sessão própria. Nenhuma R-* criada/alterada. Sem código. |

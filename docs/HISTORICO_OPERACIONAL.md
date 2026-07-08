@@ -3091,3 +3091,23 @@ Docs. DECISOES v95 inalterada (D-ARQ-53 já registrada em 003.BT). PROTOCOLO v41
 Pendências. DT-003L-01 ABERTA (a medição do topo agora tem instrumento — próximo passo natural). DT-003BO-01, DT-003Y-01 ABERTAS. Requisito (b) da 003.BS (generalização da âncora) ABERTO.
 
 Próxima. A declarar no kickoff. Candidatas: CONHECIMENTO de medição do topo Viverde via `recortar_topo` (destrava fatias 2-3 de D-ARQ-53); fatia 2 de D-ARQ-51 (parse de quantificação).
+## Sessão 003.BV — 08/07/2026 — CONHECIMENTO (medição do topo Viverde; D-ARQ-53 fatia 2 desbloqueada)
+
+Foco. Kickoff delegou ao Arquiteto; recomendada e ratificada a medição do topo Viverde via `recortar_topo` (003.BU) sobre a fatia 2 de D-ARQ-51, por 3 razões: saída de paliativo (envelope RT-supplied, D-ARQ-52 seam 3) vence feature nova; o instrumento (`recortar_topo`) acabou de ficar pronto e pede consumidor; a medição destrava as fatias 2-3 de D-ARQ-53. Divergência sinalizada: o HISTORICO 003.BU e o kickoff rotularam a medição como "DT-003L-01" — incorreto; DT-003L-01 é o mapa das 6 formas químicas. O topo nunca foi medido (D-ARQ-53 P4); esta é medição própria, NÃO fecha DT-003L-01.
+
+Medição. `extrair_texto_pgr` sobre `matrizes_originais/PGR VIVERDE V02 - 03.02.25.pdf` → 151 págs; `recortar_topo` → topo de 1649 linhas / 64 KB / 33 págs (1ª âncora `SETOR/FUNÇÃO` idx-linha 1649, pág. idx0 33; 42 âncoras — bate com 003.BM). Camada de texto nativa: fronteira-OCR de D-ARQ-42 NÃO recorre.
+
+Achados (D-ARQ-53 P4).
+1. Validade (R-PGR-06): zero `dd/mm/aaaa` no corpo; validade em granularidade MÊS-ANO e TRÊS candidatas ("GOIÂNIA, FEVEREIRO 2023" emissão; "ATUALIZADO FEVEREIRO 2024"; "ATUALIZADO FEVEREIRO 2025" última). Precisão de dia (03/02/25) só no nome do arquivo. Caso que valida o insight de D-ARQ-53 P2: hoje 08/07/2026 → FEV/2025 (~17m) VÁLIDO vs. FEV/2023 (~41m) rejeita PGR válido; `date` confiante-e-errado flipa o gate em silêncio.
+2. Assinatura/engenheiro (R-PGR-01) SATISFEITO mas não text-trivial: dois blocos por âncora-título ("10. RESPONSABILIDADE TÉCNICA" — Elisângela Alves Faria, "Eng. Ambiental e de Segurança do Trabalho", CREA 1016192983D-GO; "11. RESPONSABILIDADE PELA IMPLEMENTAÇÃO" — Vinícius Andrade Narciso, "Eng. civil", CREA 16.958D/GO). Evidência = Título "Eng." + CREA. Ruído anti-keyword: "Técnico de Segurança do Trabalho 01" (headcount, não assinante); `Nº ART` em branco. Assinatura é IMAGEM → `extract_text` pega só fragmento → bool de R-PGR-01 não é text-derivable → 100% confirmação-RT.
+3. Localização: responsável por âncora-título (resolvível); data de emissão em linha solta `CIDADE, MÊS ANO` no topo absoluto, sem âncora.
+
+Gabarito (`EnvelopeVerbatim` texto-cru, D-ARQ-53 P3, p/ semear teste da fatia 2, LLM mockado): `validade_texto` candidatas [FEVEREIRO 2023, FEVEREIRO 2024, FEVEREIRO 2025], mais recente FEVEREIRO 2025; `responsavel_tecnico` "Elisângela Alves Faria"; `titulo_rt` "Eng. Ambiental e de Segurança do Trabalho"; `registro_profissional` "CREA – 1016192983D-GO". Implementação: Vinícius Andrade Narciso / Eng. civil / CREA – 16.958D/GO. Assinatura: imagem, sem token confiável.
+
+Consequência p/ fatiamento D-ARQ-53. Fatia 3 (resolver `validade_texto→date`) precisa de parser mês-ano PT-BR + política multi-candidata "mais recente", não só `dd/mm/aaaa`. bool R-PGR-01 não-resolvível por texto → confirmação-RT obrigatória, não default. Não muda D-ARQ-53 (adiamento previsto); refina o alvo da fatia 2/3.
+
+Docs. PROTOCOLO → v42: DT-003BV-01 aberta. DECISOES inalterada (D-ARQ-53 intacta). PAINEL não re-tirado (nenhum dos 3 números mudou; sem merge de código).
+
+Pendências. DT-003BV-01 ABERTA (nova). DT-003L-01, DT-003BO-01, DT-003Y-01 ABERTAS. Requisito (b) da 003.BS (generalização da âncora) ABERTO.
+
+Próxima. A declarar no kickoff. Candidatas: IMPLEMENTAÇÃO fatia 2 de D-ARQ-53 (`EnvelopeVerbatim` + `TranscritorTopo` Protocol + `gate_forma_topo`, LLM mockado, gabarito desta sessão); fatia 2 de D-ARQ-51 (parse de quantificação).
