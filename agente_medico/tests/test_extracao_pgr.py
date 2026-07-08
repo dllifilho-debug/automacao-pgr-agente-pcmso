@@ -4,7 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from agente_medico.motor.extracao_pgr import extrair_texto_pgr, recortar_blocos_ghe
+from agente_medico.motor.extracao_pgr import (
+    extrair_texto_pgr,
+    recortar_blocos_ghe,
+    recortar_topo,
+)
 
 # PDF é tracked no git (matrizes_originais/) — ausência é falha explícita,
 # não skip (espelha a decisão de test_extracao_fds.py para o acervo untracked,
@@ -111,3 +115,35 @@ def test_recorte_blocos_ghe_duas_ancoras_mesma_pagina() -> None:
     pagina = "SETOR/FUNÇÃO Um\nlinha A\nSETOR/FUNÇÃO Dois\nlinha B"
     blocos = recortar_blocos_ghe([pagina])
     assert blocos == ["SETOR/FUNÇÃO Um\nlinha A", "SETOR/FUNÇÃO Dois\nlinha B"]
+
+
+def test_recorte_topo_termina_antes_da_primeira_ancora(paginas: list[str]) -> None:
+    topo = recortar_topo(paginas)
+    assert topo is not None
+    assert not any(linha.startswith("SETOR/FUNÇÃO") for linha in topo.splitlines())
+
+
+def test_recorte_topo_nao_vazio_no_viverde(paginas: list[str]) -> None:
+    topo = recortar_topo(paginas)
+    assert isinstance(topo, str)
+    assert topo != ""
+
+
+def test_recorte_topo_invariante_de_particao(paginas: list[str]) -> None:
+    # Anti perda-silenciosa (classe D-ARQ-22): topo + blocos reconstrói
+    # exatamente o texto do documento inteiro — nenhuma linha duplicada
+    # ou descartada entre topo e blocos.
+    topo = recortar_topo(paginas)
+    assert topo is not None
+    blocos = recortar_blocos_ghe(paginas)
+    linhas = [linha for pagina in paginas for linha in pagina.splitlines()]
+    texto_esperado = "\n".join(linhas)
+    assert topo + "\n" + "\n".join(blocos) == texto_esperado
+
+
+def test_recorte_topo_sem_ancora_devolve_none() -> None:
+    assert recortar_topo(["sem ancora aqui", ""]) is None
+
+
+def test_recorte_topo_ancora_na_primeira_linha_devolve_vazio() -> None:
+    assert recortar_topo(["SETOR/FUNÇÃO Um\nlinha A"]) == ""
