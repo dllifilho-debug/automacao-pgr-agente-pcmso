@@ -81,3 +81,35 @@ def recortar_blocos_ghe(paginas: Sequence[str]) -> list[str]:
         "\n".join(linhas[inicio:fim])
         for inicio, fim in zip(limites, limites[1:])
     ]
+
+
+def recortar_topo(paginas: Sequence[str]) -> str | None:
+    """Núcleo puro (sem I/O) do recorte-de-topo (D-ARQ-53 parte 1): inverso
+    determinístico de recortar_blocos_ghe — devolve a região que aquele
+    descarta, da 1ª linha do documento até a linha ANTERIOR à 1ª âncora
+    _ANCORA_GHE. A transcrição-LLM do conteúdo do topo é fatia futura.
+
+    paginas = saída de extrair_texto_pgr, lista-por-página, na ordem do
+    documento. As linhas de todas as páginas são achatadas numa sequência
+    única, na ordem do documento (fronteira de página vira "\\n" na
+    reconstrução do texto), e juntadas com "\\n" — exatamente como em
+    recortar_blocos_ghe. Reusa _ANCORA_GHE e o mesmo critério
+    linha.startswith(_ANCORA_GHE), VERBATIM, sem normalização.
+
+    Zero âncoras -> None (falha explícita; quem transforma isso em Pendência
+    é o chamador, fatia futura — nunca devolver o documento inteiro como
+    fallback). 1ª âncora na 1ª linha do documento -> "" (topo genuinamente
+    vazio). Caso contrário -> topo VERBATIM (acentos, caixa preservados).
+
+    Limite herdado (classe D-ARQ-22): âncora derivada de n=1 (PGR Viverde)
+    como fronteira-fim do topo; generalização para múltiplos PGRs é
+    requisito (b) da 003.BS, sessão à parte.
+
+    Sem I/O, sem LLM (D-ARQ-09), sem parse de conteúdo do topo (emissão, RT,
+    validade = fatias 2-3, ADIADAS POR MEDIÇÃO — DT-003L-01).
+    """
+    linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
+    indices_ancora = [i for i, linha in enumerate(linhas) if linha.startswith(_ANCORA_GHE)]
+    if not indices_ancora:
+        return None
+    return "\n".join(linhas[: indices_ancora[0]])
