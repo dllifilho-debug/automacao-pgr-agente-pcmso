@@ -2988,3 +2988,26 @@ Git. Commit `0135754`, merge `f3452bb`, PR #118. Branch feat deletada, main sinc
 **Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA (duplo de pendência do lado-FDS — o continue-sem-duplo de 1a é o espelho-PGR que a evita).
 
 **Próxima.** 003.BQ fatia 1b — hidratar_ghe(GHEVerbatim, indice_termos)→(GHEPGR, list[Pendencia]): seams 1 (id posicional) e 4 (recorte identidade, quantificacao=None). Consome resolver_termo. Gabarito pgr_viverde.py ↔ esqueleto (D-ARQ-50 C1: compara forma, não contagem 42vs32).
+
+## Sessão 003.BQ fatia 1b — 07/07/2026 — IMPLEMENTAÇÃO (hidratar_ghe GHEVerbatim→GHEPGR; D-ARQ-51 seams 1 e 4)
+
+**Foco.** Kickoff delegou o foco ao Arquiteto: materializar `hidratar_ghe`, os dois seams de D-ARQ-51 que ficaram de fora de 1a (1 — id posicional; 4 — recorte identidade-primeiro). Proposta ratificada sem alternativa concorrente — 1b é a continuação natural de 1a; o resolver termo→slug (003.BP) segue órfão até esta fatia fechar a travessia.
+
+**Gate de estado real.** git objects (working tree do mount do Arquiteto não é confiável — leitura e revisão sempre sobre objects, prática permanente, não evento desta sessão). A leitura via git objects confirmou o estado de main pós-1a sem divergência: `tipos.py` (`RiscoPGR.agente: Optional[str]`), `resolvedor_termos.py` (`resolver_termo` tri-estado, `pendencia=None` no ramo FUZZY por design), `riscos.py` (guard `if risco_pgr.agente is None: continue` da Fase A, 1a).
+
+**Decisões de IMPL (3 micro-decisões ratificadas).**
+1. `posicao` entra na assinatura de `hidratar_ghe` — o seam 1 exige ordem determinística e o `GHEVerbatim` isolado não a conhece (sem campo `id`, D-ARQ-50 C1); quem itera a sequência e sabe a posição é o chamador (a costura, fatia futura).
+2. `RiscoPGR.tipo=""` sem virar Optional — convenção-verbatim de ausência (mesmo padrão de `quantificacao=None`), zero consumidores no motor além do gate de forma já materializado em 1a; sem a pressão de tipo que forçou `agente` a Optional (não há guard de Fase A lendo `tipo`).
+3. `Pendencia(tipo="resolucao_fuzzy")` fabricada NA HIDRATAÇÃO, não no resolver — `resolver_termo` retorna `pendencia=None` no ramo FUZZY por design (a própria docstring delega: "roteamento p/ revisão é do consumidor futuro"); `destinatario="extracao"` (não "protocolo", destinatario do `vocabulario_ausente`) — o alvo da revisão de baixa-confiança é quem operou a transcrição, não o vocabulário.
+
+**Entrega.** Conforme nota de aplicação em D-ARQ-51 (mesma ID). `motor/hidratacao.py` greenfield flat: `hidratar_ghe(ghe, indice, posicao) -> tuple[GHEPGR, list[Pendencia]]`. `tests/test_hidratacao.py`: 6 testes (tri-estado do resolver, id posicional determinístico, pareamento `agente=None`↔pendência, gabarito de forma moldado em Est-01 do Viverde). Isolado — nada plugado em `executar()`/`entrada.py`.
+
+**Revisão do Arquiteto (git objects, sobre o commit b039f0d).** 2 desvios: (i) MATERIAL — `if resolucao.pendencia is not None` no ramo NAO_RESOLVIDO deveria ser `assert` (erro-zero D-ARQ-22: pendência ausente ali é violação de contrato do resolver, não caminho degradável — um `None` órfão furaria o invariante do seam 3 sem barulho); (ii) MENOR — o gabarito de forma usava um `GHEVerbatim` inteiramente sintético em vez de moldado num GHE real da fixture Viverde (D-ARQ-50 C1 pede forma emprestada do canônico, não inventada). Emenda `682d106` corrigiu ambos, conferida sobre git objects (diff do commit lido, não relato).
+
+**Gates.** Host: 598→604 passed (+6), 4 skipped, 0 falha; mypy --strict delta-zero (`agente_medico/motor/`, inclui `hidratacao.py` novo). Commits `b039f0d`+`682d106`, merge `663f9f1`, PR #158, "Create a merge commit" (2 pais verificados via git objects).
+
+**Docs.** DECISOES v91→v92 (nota de aplicação 1b em D-ARQ-51, mesma ID). PROTOCOLO v41 inalterado (nenhuma R-*). HISTORICO este bloco. PAINEL re-tirado (598→604).
+
+**Pendências.** DT-003L-01 ABERTA. DT-003BO-01 ABERTA. DT-003Y-01 ABERTA — nenhuma se move nesta fatia (isolada, não toca pipeline de produção nem a cascata Gemini).
+
+**Próxima.** A declarar no kickoff. Duas propostas: fatia 2 de D-ARQ-51 (parse de quantificação resolver-side — texto cru "6,3 ppm"→Quantificacao, molde `parsear_faixa`/`_normalizar_faixa` do lado-FDS) OU a costura plural (sequência GHEVerbatim→PGR completa + envelope PGR-topo — `validade`/`assinatura_engenheiro` —, fatia irmã que precede o e2e real).
