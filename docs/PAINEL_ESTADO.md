@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.BQ fatia 1a · 07/07/2026
-**Baseline:** main `e87759f` · 598 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero (tipos.py/riscos.py) · PROTOCOLO v41 · DECISOES v91
+**Tiragem corrente:** 003.BQ fatia 1b · 07/07/2026
+**Baseline:** main `663f9f1` · 604 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero (tipos.py/riscos.py/hidratacao.py) · PROTOCOLO v41 · DECISOES v92
 
 ---
 
