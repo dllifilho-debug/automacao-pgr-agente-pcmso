@@ -140,6 +140,27 @@ class EnvelopeVerbatim:
 
 
 @dataclass(frozen=True)
+class CandidataValidade:
+    """Candidata crua de validade + resolução determinística (D-ARQ-53 P3).
+    texto = elemento cru de EnvelopeVerbatim.validade_textos; data = resolução
+    mês-ano PT-BR (resolvedor_topo.py), ou None quando não-parseável nesta
+    fatia. data=None NÃO bloqueia — a decisão final é da confirmação-RT
+    (DT-003BV-01), não deste tipo."""
+    texto: str
+    data: Optional[date]
+
+
+@dataclass(frozen=True)
+class EnvelopeConfirmado:
+    """Saída da confirmação-RT do envelope (molde revisão-RT D-ARQ-47 cl.4,
+    D-ARQ-53 P2/P3): exatamente os dois parâmetros hoje RT-supplied de
+    processar_arquivo_pgr (troca de origem é fatia 4). Consumidores:
+    R-PGR-01/R-PGR-06 (estagios/gates.py)."""
+    validade: date
+    assinatura_engenheiro: bool
+
+
+@dataclass(frozen=True)
 class FDS:
     composicao: tuple[Componente, ...]
     composicao_verbatim: tuple[BlocoComponente, ...] = ()
