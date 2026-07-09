@@ -5,9 +5,14 @@ posicional sobre a ordem transcrita ("GHE-01", "GHE-02", ...) — NÃO deriva de
 GHEVerbatim.nome (texto livre do LLM colide entre blocos) nem é id canônico
 (re-agrupamento MAPA 42->32 é fatia downstream, D-ARQ-50 C1). Seam 4: recorte
 de identidade — id, nome, cargos e agente-slug são hidratados; quantificacao
-fica None (parse de "6,3 ppm" é fatia resolver-side futura; o texto cru
-sobrevive em RiscoVerbatim, GHEVerbatim é preservado a montante). EPIs,
-produtos_quimicos, psicossocial e cenario ficam em default (diferidos,
+é parseada por parsear_quantificacao (D-ARQ-51 fatia 2), independente da
+resolução do agente — o parse roda 1x por risco antes do tri-estado. Texto
+parseável vira Quantificacao; vazio vira None sem pendência; texto não-vazio
+ininteligível vira None + Pendencia quantificacao_nao_parseada não-bloqueante
+(anti-supressão D-ARQ-31/35: medição transcrita nunca some em silêncio, o
+risco entra mesmo assim). Recorte remanescente: relacao_LT sempre None —
+classificação dB->relação é regra clínica não formalizada (fatia futura).
+EPIs, produtos_quimicos, psicossocial e cenario ficam em default (diferidos,
 D-ARQ-49 P2). Risco NUNCA descartado (D-ARQ-31/35 P3): tri-estado do
 resolver (EXATA/FUZZY/NAO_RESOLVIDO) sempre vira exatamente 1 RiscoPGR.
 """
@@ -17,6 +22,7 @@ import dataclasses
 from collections.abc import Sequence
 from datetime import date
 
+from agente_medico.motor.quantificacao import parsear_quantificacao
 from agente_medico.motor.resolvedor_termos import Confianca, resolver_termo
 from agente_medico.motor.tipos import GHEPGR, PGR, GHEVerbatim, Pendencia, RiscoPGR
 
@@ -34,7 +40,10 @@ def hidratar_ghe(
     FUZZY por design — fabricá-la aqui é o "consumidor futuro" a que seu
     docstring delega). NAO_RESOLVIDO -> agente=None + a Pendencia
     vocabulario_ausente que o próprio resolver já emitiu, apenas com ghe_id
-    preenchido.
+    preenchido. quantificacao é parseada 1x por risco (parsear_quantificacao,
+    D-ARQ-51 fatia 2), independente do tri-estado acima; texto cru não-vazio
+    que falha o parse rende Pendencia quantificacao_nao_parseada
+    não-bloqueante (anti-supressão D-ARQ-31/35), sem impedir o risco de entrar.
     """
     # Handle do bloco transcrito, NÃO id canônico (D-ARQ-51 seam 1;
     # re-agrupamento 42->32 é fatia downstream).
@@ -45,14 +54,33 @@ def hidratar_ghe(
 
     for risco_verbatim in ghe.riscos:
         resolucao = resolver_termo(risco_verbatim.agente, indice)
+        quantificacao = parsear_quantificacao(risco_verbatim.quantificacao)
+        if risco_verbatim.quantificacao.strip() != "" and quantificacao is None:
+            pendencias.append(
+                Pendencia(
+                    tipo="quantificacao_nao_parseada",
+                    destinatario="extracao",
+                    motivo=(
+                        f"quantificação '{risco_verbatim.quantificacao}' não pôde ser "
+                        "interpretada — revisão recomendada"
+                    ),
+                    bloqueante=False,
+                    regra_origem="D-ARQ-51",
+                    ghe_id=ghe_id,
+                )
+            )
 
         if resolucao.confianca == Confianca.EXATA:
             riscos.append(
-                RiscoPGR(tipo="", agente=resolucao.slug, quantificacao=None, severidade=None)
+                RiscoPGR(
+                    tipo="", agente=resolucao.slug, quantificacao=quantificacao, severidade=None
+                )
             )
         elif resolucao.confianca == Confianca.FUZZY:
             riscos.append(
-                RiscoPGR(tipo="", agente=resolucao.slug, quantificacao=None, severidade=None)
+                RiscoPGR(
+                    tipo="", agente=resolucao.slug, quantificacao=quantificacao, severidade=None
+                )
             )
             pendencias.append(
                 Pendencia(
@@ -70,7 +98,9 @@ def hidratar_ghe(
         else:
             # Invariante: agente=None sempre pareado com exatamente 1 pendência —
             # o guard da Fase A (estagios/riscos.py, 1a) confia nisso (D-ARQ-51 seam 3).
-            riscos.append(RiscoPGR(tipo="", agente=None, quantificacao=None, severidade=None))
+            riscos.append(
+                RiscoPGR(tipo="", agente=None, quantificacao=quantificacao, severidade=None)
+            )
             # Erro-zero (D-ARQ-22): NAO_RESOLVIDO sem pendência é violação de contrato
             # do resolver — estourar aqui, nunca produzir agente=None órfão (seam 3).
             assert resolucao.pendencia is not None

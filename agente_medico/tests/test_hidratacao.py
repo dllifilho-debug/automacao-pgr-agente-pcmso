@@ -73,6 +73,50 @@ def test_nao_resolvido_agente_none_com_pendencia_e_risco_preservado(indice_real:
 
 
 # ---------------------------------------------------------------------------
+# parse de quantificacao (D-ARQ-51 fatia 2)
+# ---------------------------------------------------------------------------
+
+def test_quantificacao_parseavel_preenchida_sem_pendencia(indice_real: dict[str, str]) -> None:
+    ghe = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="82,2 dB(A)", fonte_geradora=""),)
+    )
+    ghe_pgr, pendencias = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    quantificacao = ghe_pgr.riscos[0].quantificacao
+    assert quantificacao is not None
+    assert quantificacao.valor == 82.2
+    assert quantificacao.unidade == "dB(A)"
+    assert [p for p in pendencias if p.tipo == "quantificacao_nao_parseada"] == []
+
+
+def test_quantificacao_ininteligivel_vira_none_com_pendencia_nao_bloqueante(
+    indice_real: dict[str, str],
+) -> None:
+    ghe = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="lixo qualquer", fonte_geradora=""),)
+    )
+    ghe_pgr, pendencias = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    assert ghe_pgr.riscos[0].quantificacao is None
+
+    pendencias_quantificacao = [p for p in pendencias if p.tipo == "quantificacao_nao_parseada"]
+    assert len(pendencias_quantificacao) == 1
+    pend = pendencias_quantificacao[0]
+    assert pend.bloqueante is False
+    assert pend.ghe_id == "GHE-01"
+
+
+def test_quantificacao_vazia_vira_none_sem_pendencia(indice_real: dict[str, str]) -> None:
+    ghe = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="", fonte_geradora=""),)
+    )
+    ghe_pgr, pendencias = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    assert ghe_pgr.riscos[0].quantificacao is None
+    assert [p for p in pendencias if p.tipo == "quantificacao_nao_parseada"] == []
+
+
+# ---------------------------------------------------------------------------
 # id posicional (D-ARQ-51 seam 1)
 # ---------------------------------------------------------------------------
 
@@ -128,7 +172,9 @@ def test_gabarito_de_forma_ghepgr(indice_real: dict[str, str]) -> None:
     assert ghe_pgr.cargos == ghe.cargos
     assert len(ghe_pgr.riscos) == len(ghe.riscos)
     assert all(r.tipo == "" for r in ghe_pgr.riscos)
-    assert all(r.quantificacao is None for r in ghe_pgr.riscos)
+    assert ghe_pgr.riscos[0].quantificacao is not None
+    assert ghe_pgr.riscos[0].quantificacao.valor == 82.2
+    assert ghe_pgr.riscos[0].quantificacao.unidade == "dB(A)"
     assert all(r.severidade is None for r in ghe_pgr.riscos)
 
     # diferidos em default (D-ARQ-49 P2)
