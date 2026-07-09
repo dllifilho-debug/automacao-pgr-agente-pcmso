@@ -108,6 +108,21 @@ def test_gate_forma_topo_reprova_envelope_integralmente_vazio() -> None:
     assert pendencias[0].tipo == "forma_verbatim_topo"
 
 
+def test_gate_forma_topo_reprova_envelope_whitespace_only() -> None:
+    # Whitespace-only é a mesma transcrição-vazia do ramo (a) — strip() em
+    # todos os campos, não só comparação literal com "".
+    envelope = EnvelopeVerbatim(
+        validade_textos=(),
+        responsavel_tecnico="  ",
+        titulo_rt=" ",
+        registro_profissional="   ",
+    )
+    aprovado, pendencias = gate_forma_topo(envelope)
+    assert aprovado is None
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "forma_verbatim_topo"
+
+
 def test_gate_forma_topo_aprova_envelope_parcial_sem_registro_profissional() -> None:
     envelope = _envelope(registro_profissional="")
     aprovado, pendencias = gate_forma_topo(envelope)

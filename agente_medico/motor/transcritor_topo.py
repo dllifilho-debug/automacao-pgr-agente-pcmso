@@ -43,8 +43,9 @@ def gate_forma_topo(
 
     REPROVADO (devolve None + Pendencia bloqueante) se: (a) qualquer
     elemento de validade_textos tem strip() == ""; ou (b) o envelope está
-    INTEIRAMENTE vazio (validade_textos == () e os 3 campos de texto == "")
-    — transcrição vazia em silêncio é classe D-ARQ-22.
+    INTEIRAMENTE vazio (validade_textos == () e os 3 campos de texto têm
+    strip() == "" — whitespace-only é a mesma transcrição-vazia, mesmo
+    critério do ramo (a)) — transcrição vazia em silêncio é classe D-ARQ-22.
 
     Campos individuais vazios (ex.: registro_profissional ausente no
     documento) NÃO reprovam sozinhos: ausência pontual é forma legítima
@@ -53,9 +54,9 @@ def gate_forma_topo(
     """
     candidata_vazia = any(texto.strip() == "" for texto in envelope.validade_textos)
     integralmente_vazio = envelope.validade_textos == () and (
-        envelope.responsavel_tecnico == ""
-        and envelope.titulo_rt == ""
-        and envelope.registro_profissional == ""
+        envelope.responsavel_tecnico.strip() == ""
+        and envelope.titulo_rt.strip() == ""
+        and envelope.registro_profissional.strip() == ""
     )
     if candidata_vazia or integralmente_vazio:
         pendencia = Pendencia(
