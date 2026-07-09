@@ -195,6 +195,37 @@ O **manganês** é o único agente fora do Anexo I (Quadros 1 e 2) da NR-07 que 
 
 ### 5.2 Audiometria
 
+#### R-RUIDO-01 — Classificação de exposição a ruído contínuo/intermitente vs. nível de ação e LT `[DERIVADO — NR-15 Anexo 1 + NR-09 nível de ação c/c NHO-01]`
+
+Converte a medição de ruído (`Quantificacao` com `unidade="dB(A)"`, `valor` = NEN) na classificação `relacao_LT` que os predicados de audiometria consomem. Destrava a fatia 3 de D-ARQ-51 (`dB(A)→relacao_LT`, até 003.BZ sempre `None`).
+
+Partição disjunta e exaustiva sobre o NEN:
+
+| Faixa (NEN) | `relacao_LT` |
+|---|---|
+| valor < 80 dB(A) | `abaixo_acao` |
+| 80 ≤ valor < 85 dB(A) | `entre_acao_LT` |
+| valor ≥ 85 dB(A) | `acima_LT` |
+
+**Limiares (fonte normativa):**
+- **85 dB(A)** = limite de tolerância para exposição de 8h — NR-15 Anexo 1 (contínuo/intermitente). Teto absoluto 115 dB(A) sem proteção. `[DERIVADO — NR-15 Anexo 1, texto vigente conferido gov.br/MTE 2025]`
+- **80 dB(A)** = nível de ação = dose de 0,5 = NLI (nível limiar de integração) da NHO-01/Fundacentro. `[DERIVADO — NR-09 nível de ação c/c NHO-01]`; nº do item literal da NR-09 vigente `[INCERTO — confirmar na Portaria 6.735/2020 antes de citar no comentário do código]`.
+
+**Ressalvas `[INTERPRETADO — prioridade na revisão de saída]`:**
+1. `valor` DEVE ser o NEN (normalizado p/ 8h), não SPL instantâneo nem pico. Comparar leitura pontual ao LT de 85 é erro clínico silencioso (classe D-ARQ-22). Análogo direto a DT-002V-01 (`Quantificacao.valor` não discrimina a estatística — lá CLSC, aqui NEN). Laudo com pico/média simples → pendência, não classificação. Ver **DT-003CB-01**.
+2. A taxa de troca q=5 (NR-15) vs q=3 (NHO-01) afeta o **cálculo** do NEN/dose, não a classificação por limiar. O motor **consome o NEN pronto, não calcula dose** — mesma separação NR-07-consome/NR-09-produz de DT-002V-01. O `q` vive no laudo, fora do motor.
+3. Ruído de impacto (NR-15 Anexo 2, teto ~130 dB(C)) é agente distinto — fora do escopo desta regra. Só contínuo/intermitente.
+
+**Borda:** limites inferiores inclusivos (≥80, ≥85) — a insalubridade começa *em* 85. Direção inversa das bordas `≤` de R-RX-01; confirmar na revisão de saída.
+
+**Vocabulário `relacao_LT`:** o classificador emite apenas os 3 valores disjuntos acima. `acima_acao` permanece sinônimo-legado aceito pelo predicado `_ruido_acima_acao`, nunca **produzido** pelo classificador (evita ambiguidade com `entre_acao_LT`).
+
+**Consumidor existente (inalterado):** `_ruido_acima_acao` já dispara `True` para `{entre_acao_LT, acima_LT}` → R-AUD-01 (12M adm/per/MR) e R-AUD-02 (demissional "acima do nível de ação"). R-RUIDO-01 alimenta esses predicados sem tocar as R-AUD-*.
+
+**Cobertura de teste (exigida antes de "implementada"):** um teste por faixa que falhe sem a regra — 79→`abaixo_acao`, 80→`entre_acao_LT`, 84→`entre_acao_LT`, 85→`acima_LT`, 90→`acima_LT`; mais NEN-ausente/pico → pendência (não classifica). Âncora Viverde (`MAPA_GHE_VIVERDE.md`): 78,8 dB(A)→`abaixo_acao`; 89,6 dB(A)→`acima_LT`.
+
+**Universalidade:** o LT de ruído da NR-15 vale construção civil, indústria química e saúde igualmente — regra universal, não caso Viverde.
+
 #### R-AUD-01 — Indicações para 12M (adm/per/MR) `[VALIDADO]`
 Audiometria **12 meses** em **adm/per/MR** quando houver pelo menos uma das condições:
 - Ruído (qualquer nível, mesmo abaixo do nível de ação, **se combinado** com outras condições abaixo)
@@ -1002,6 +1033,22 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
+### DT-003CB-01 — `Quantificacao.valor` de ruído não discrimina NEN vs. SPL pontual/pico `[ABERTA — irmã de DT-002V-01]`
+
+**Origem:** Sessão 003.CB (09/07/2026), CONHECIMENTO — derivação de R-RUIDO-01.
+
+**Situação.** R-RUIDO-01 roteia a faixa (`abaixo_acao`/`entre_acao_LT`/`acima_LT`) comparando `Quantificacao.valor` (dB(A)) aos limiares 80/85. A classificação só é válida se o número for o **NEN** (nível de exposição normalizado p/ 8h). Mas `valor: Optional[float]` é anônimo — não garante que carrega o NEN e não uma leitura instantânea, pico, ou média simples. Enquanto `valor` vinha de fixture, a garantia era humana; com a extração de PGRs reais (D-ARQ-25) preenchendo `valor` via `parsear_quantificacao` (003.BZ), some a garantia: um laudo que reporte pico ou SPL pontual no campo faz R-RUIDO-01 rotear a faixa sobre o número errado e emitir/omitir audiometria demissional **sem sinal** — erro clínico silencioso (a classe que D-ARQ-22 combate).
+
+**Espelho de DT-002V-01.** Idêntica em forma à do RX/CLSC: lá o campo não discrimina CLSC vs. média/pico; aqui não discrimina NEN vs. SPL. A premissa de fundo é a mesma: o motor **consome** a estatística pronta do laudo (NEN pela NHO-01), não a calcula — a médica lê o NEN da avaliação ambiental (NR-09), não refaz a dose. Confiança alta pela separação NR-07-consome/NR-09-produz, mas é premissa, não fato verificado.
+
+**Pergunta de método (Dra. Carolini / norma, futura):** quando o laudo traz uma métrica de ruído que não é o NEN — SPL pontual, pico, média simples — qual a conduta? Recusar e pedir NEN? Tratar como sem-avaliação-quantitativa (pendência)? Buscar o método, não o caso.
+
+**Impacto até resolver:** a fatia 3 de D-ARQ-51 roteia sob a premissa "`valor` é NEN quando há avaliação quantitativa de ruído"; a borda 80/85 fica `[INTERPRETADO]` quanto à estatística de entrada, não quanto ao limiar (o limiar é `[DERIVADO]`). Candidato de fechamento: campo discriminador de estatística (comum a CLSC e NEN) com regra consumidora, ou sinalização na extração (D-ARQ-25 → Pendencia).
+
+**Status:** ABERTA. Não-bloqueante. Cruza R-RUIDO-01, D-ARQ-51 fatia 3, DT-002V-01.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -1064,3 +1111,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v40 | 02/07/2026 | Sessão 003.BF (IMPLEMENTAÇÃO): andamento em DT-003AS-01 — invocação injetável (`TranscritorLLM` Protocol + `transcrever_fds`) + `gate_forma` (cl.3) + harness mockado tinta/Ciplan sobre `extrair_texto_fds` real. DT segue ABERTA. Nenhuma R-* criada/alterada. |
 | v41 | 05/07/2026 | Sessão 003.BI (IMPLEMENTAÇÃO fatia (e2)): DT-003AS-01 FECHADA (seção 11) — revisão-RT (cl.4) + serialização verbatim ida/volta materializadas (`motor/revisao_verbatim.py`, D-ARQ-47); cadeia extração→LLM→gate→revisão-RT→montagem→resolvedor completa (003.AX/AU/BD/BE/BF/BG/BH/BI). Residuais que NÃO reabrem a DT: DT-003M-01, DT-003BG-01 (gabarito 3/6), DT-003AW-01, UI da revisão-RT. Nenhuma R-* criada/alterada. |
 | v42 | 08/07/2026 | Sessão 003.BV (CONHECIMENTO/medição): DT-003BV-01 adicionada (seção 11) — formato de validade no topo do PGR (mês-ano, multi-candidata, sem `dd/mm/aaaa`; insight confirmação-RT de D-ARQ-53 P2 validado com caso concreto Viverde FEV/2025 vs FEV/2023). Medição do topo Viverde via `recortar_topo` (D-ARQ-53 P4): 33 págs texto nativo, OCR não recorre; responsável por âncora-título (R-PGR-01 satisfeito, evidência Título+CREA; assinatura-imagem não text-derivable); gabarito `EnvelopeVerbatim` semeado p/ a fatia 2. Correção de rótulo: medição do topo NÃO é DT-003L-01 (mapa químico); topo nunca medido, sessão própria. Nenhuma R-* criada/alterada. Sem código. |
+| v43 | 09/07/2026 | Sessão 003.CB (CONHECIMENTO): **R-RUIDO-01 nova** (seção 5.2) — classificação de exposição a ruído contínuo/intermitente `dB(A)→relacao_LT` sobre o NEN: <80 `abaixo_acao`, 80–85 `entre_acao_LT`, ≥85 `acima_LT`. Limiares `[DERIVADO]`: 85 dB(A) = LT NR-15 Anexo 1 (teto 115), 80 dB(A) = nível de ação NR-09 c/c NLI da NHO-01 (item literal NR-09 `[INCERTO]`). Ressalvas `[INTERPRETADO]`: valor=NEN não SPL/pico (DT-003CB-01); q=5 vs q=3 é cálculo, não limiar (motor consome NEN); ruído de impacto fora de escopo. Destrava a fatia 3 de D-ARQ-51 (`relacao_LT` sempre `None` até 003.BZ); consumidor `_ruido_acima_acao` inalterado. DT-003CB-01 adicionada (NEN vs SPL, irmã de DT-002V-01). Normas conferidas via web (D-ARQ-27). Sem código. |
