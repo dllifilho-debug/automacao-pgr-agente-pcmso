@@ -96,3 +96,7 @@ def test_envelope_so_com_nao_parseaveis_proposta_none() -> None:
 def test_ambiguidade_dois_mes_ano_na_mesma_string_resolve_para_none() -> None:
     candidata = resolver_candidata("FEVEREIRO 2023 ATUALIZADO MARÇO 2024")
     assert candidata.data is None
+
+
+def test_ano_fora_do_range_de_date_resolve_para_none() -> None:
+    assert resolver_candidata("FEVEREIRO 0000").data is None

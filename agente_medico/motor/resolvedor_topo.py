@@ -59,7 +59,12 @@ def resolver_candidata(texto: str) -> CandidataValidade:
     mes_str, ano_str = matches[0].group(1), matches[0].group(2)
     mes = _MESES[mes_str.lower()]
     ano = int(ano_str)
-    return CandidataValidade(texto=texto, data=date(ano, mes, 1))
+    try:
+        # \d{4} admite ano fora do range de datetime.date (ex. "0000"); crash
+        # em função pura viola a postura não-parseável->None (classe D-ARQ-22).
+        return CandidataValidade(texto=texto, data=date(ano, mes, 1))
+    except ValueError:
+        return CandidataValidade(texto=texto, data=None)
 
 
 def resolver_validade(
