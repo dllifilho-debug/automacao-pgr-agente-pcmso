@@ -117,6 +117,29 @@ class GHEVerbatim:
 
 
 @dataclass(frozen=True)
+class EnvelopeVerbatim:
+    """Envelope do topo transcrito — instância-envelope de D-ARQ-41 (D-ARQ-53
+    P3: semântica cravada — texto CRU, sem `date`, sem `bool`, sem juízo de
+    "engenheiro vs. técnico"). validade_textos = candidatas CRUAS na ordem do
+    documento — plural porque a medição 003.BV achou 3 candidatas mês-ano no
+    topo Viverde (emissão + 2 atualizações); a política "mais recente" é
+    RESOLVER-SIDE (fatia 3), não transcrição. responsavel_tecnico/titulo_rt/
+    registro_profissional = texto cru da linha-âncora "RESPONSABILIDADE
+    TÉCNICA" ("" se ausente; achado 003.BW: no Viverde a camada de texto
+    traz o typo de origem "TÉNICA", sem o C — âncora de fatia 3 não pode
+    exigir match exato do título); registro_profissional é texto cru — não
+    assume CREA (universalidade NR-01, outros conselhos possíveis). SEM
+    campo de assinatura: a assinatura no topo Viverde é IMAGEM (003.BV) —
+    o `bool` de R-PGR-01 é 100% CONFIRMAÇÃO-RT (D-ARQ-53 P2), não
+    text-derivable. Consumidores finais R-PGR-01/R-PGR-06 só via
+    confirmação-RT (molde revisão-RT D-ARQ-47 cl.4), fatia 3."""
+    validade_textos: tuple[str, ...]
+    responsavel_tecnico: str
+    titulo_rt: str
+    registro_profissional: str
+
+
+@dataclass(frozen=True)
 class FDS:
     composicao: tuple[Componente, ...]
     composicao_verbatim: tuple[BlocoComponente, ...] = ()
