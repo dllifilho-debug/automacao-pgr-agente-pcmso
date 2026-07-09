@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.BY · 08/07/2026
-**Baseline:** main `a081a3f` · 658 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero · PROTOCOLO v42 · DECISOES v98
+**Tiragem corrente:** 003.BZ · 09/07/2026
+**Baseline:** main `79e9499` · 671 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero · PROTOCOLO v42 · DECISOES v99
 
 ---
 
