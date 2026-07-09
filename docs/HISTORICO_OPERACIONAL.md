@@ -3111,3 +3111,19 @@ Docs. PROTOCOLO → v42: DT-003BV-01 aberta. DECISOES inalterada (D-ARQ-53 intac
 Pendências. DT-003BV-01 ABERTA (nova). DT-003L-01, DT-003BO-01, DT-003Y-01 ABERTAS. Requisito (b) da 003.BS (generalização da âncora) ABERTO.
 
 Próxima. A declarar no kickoff. Candidatas: IMPLEMENTAÇÃO fatia 2 de D-ARQ-53 (`EnvelopeVerbatim` + `TranscritorTopo` Protocol + `gate_forma_topo`, LLM mockado, gabarito desta sessão); fatia 2 de D-ARQ-51 (parse de quantificação).
+
+## Sessão 003.BW — 08/07/2026 — IMPLEMENTAÇÃO (D-ARQ-53 fatia 2: EnvelopeVerbatim + TranscritorTopo + gate_forma_topo)
+
+Foco. Kickoff delegou ao Arquiteto; recomendada e ratificada a fatia 2 de D-ARQ-53: o gabarito 003.BV recém-semeado é o insumo direto do teste; cadeia instrumento (003.BU) → medição (003.BV) → consumidor (003.BW) fecha sem contexto perdido; D-ARQ-51 fatia 2 não perde nada esperando. LLM mockado (D-ARQ-53 P4).
+
+Entrega. `EnvelopeVerbatim` frozen em `tipos.py` (após `GHEVerbatim`); módulo novo `transcritor_topo.py` (padrão um-módulo-por-fronteira, molde `transcritor_pgr.py`): `TranscritorTopo` (Protocol), `transcrever_topo` (ponto único de invocação, cliente injetado, nunca importado), `gate_forma_topo` (molde `gate_forma_ghe`: reprova candidata de validade vazia OU envelope integralmente vazio, `strip()` em todos os campos; ausência pontual de campo NÃO reprova — conteúdo é da confirmação-RT, fatia 3); `test_transcritor_topo.py` (núcleo sem PDF + harness `@requer_pdfs` com topo real de 33 págs chegando inteiro ao mock). Commits `3cdef6f` (feat) + `16f2c6b` (fix strip, formulado pelo Arquiteto na revisão via git objects), PR #168, merge `321c6da`. Suíte 619→626 total, mypy `--strict` delta-zero.
+
+Decisões IMPL (D-ARQ-53 P3 deixou a forma aberta; 5, ratificadas pelo Diovanni). (1) dataclass própria em `tipos.py`, não campos enxertados em verbatim existente — terceira fronteira transcrita, tipo próprio como as irmãs. (2) `validade_textos: tuple[str, ...]` PLURAL — a medição 003.BV achou 3 candidatas; campo singular obrigaria a LLM a escolher "mais recente", juízo que viola a semântica crua (D-ARQ-09); a escolha é resolvedor-side, fatia 3. (3) SEM campo de assinatura — 003.BV cravou assinatura-imagem sem token confiável; o `bool` de R-PGR-01 é 100% confirmação-RT (D-ARQ-53 P2). (4) bloco "responsabilidade pela implementação" (medido em 003.BV) EXCLUÍDO do contrato — consumo-zero nos gates R-PGR-01/06; incluir seria fiação sem consumidor (classe da reversão 003.T); reversível em fatia futura se a confirmação-RT quiser os dois blocos como contexto humano. (5) módulo próprio espelhando `transcritor_fds.py`/`transcritor_pgr.py`; `gate_forma_topo` mora junto do Protocol.
+
+Correção factual a 003.BV (achado 003.BW). A camada de texto do PDF Viverde traz o título com typo de origem: "10. RESPONSABILIDADE TÉNICA" (sem o C), não "TÉCNICA" como o bloco 003.BV registrou. Descoberto pelo Code no harness de integração e verificado independentemente pelo Arquiteto (pdfplumber sobre o PDF real, pág. idx 5). [INCERTO — se o typo é visual ou só da camada de texto; para o motor é indiferente: a camada de texto é o que `recortar_topo` e a LLM consomem]. Consequência p/ fatia 3: localização por âncora-título NÃO pode exigir match exato do título. Registrado na docstring de `EnvelopeVerbatim`.
+
+Docs. DECISOES → v96 (nota de aplicação fatia 2 em D-ARQ-53). PROTOCOLO v42 inalterado (nenhuma R-*/DT criada/alterada; DT-003BV-01 segue ABERTA — insumo da fatia 3). PAINEL re-tirado (626; baseline `321c6da`).
+
+Pendências. DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01 ABERTAS. Requisito (b) da 003.BS (generalização da âncora) ABERTO.
+
+Próxima. A declarar no kickoff. Candidatas: fatia 3 de D-ARQ-53 (resolvedor `validade_texto→date` mês-ano PT-BR multi-candidata + evidência-de-credencial + seam de confirmação-RT — insumo DT-003BV-01); fatia 2 de D-ARQ-51 (parse de quantificação).
