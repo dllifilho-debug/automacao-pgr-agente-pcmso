@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.CA · 09/07/2026
-**Baseline:** main `49a30ec` · 678 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero · PROTOCOLO v42 · DECISOES v100
+**Tiragem corrente:** 003.CC · 09/07/2026
+**Baseline:** main `975ae85` · 693 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero · PROTOCOLO v44 · DECISOES v102
 
 ---
 
@@ -19,7 +19,7 @@
 
 | Pergunta | Estado medido | Leitura |
 |---|---|---|
-| Quanto da regra clínica está no código? | **17 de 41** ativas (~41%) — inalterado desde 003.AH (frente clínica pausada, caminho B) | Espinha do motor de decisão de pé; cauda clínica ainda em prosa |
+| Quanto da regra clínica está no código? | **18 de 42** ativas (~43%) | R-RUIDO-01 (formalizada 003.CB, implementada 003.CC) entra no numerador e no denominador — primeira regra clínica nova em código desde a pausa da frente clínica (caminho B); pausa segue vigente, esta foi puxada pela porta de entrada (fatia 3 D-ARQ-51), não retomada da frente |
 | A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **CONSTRUÍDO e PLUGADO em produção** — `processar_arquivo_pgr` (D-ARQ-52, 003.BS) costura arquivo→Resultado fim-a-fim (extração→recorte→transcrição-LLM→gate→hidratação→motor), validado contra o PDF Viverde real (LLM mockado em teste) | Gargalo de produção migrou de novo: não é mais travessia — é **universalidade** (envelope document-derived + generalização multi-PGR da âncora de recorte) + a rasura do vocabulário químico |
 | Dívidas que travam produção? | **3** — mesmas facetas de sempre, recontadas pós-fechamento | DT-003L-01 (parse-PGR), DT-003M-02 (vocabulário-FDS raso), DT-FDS-02 (unidade do cutoff) |
 

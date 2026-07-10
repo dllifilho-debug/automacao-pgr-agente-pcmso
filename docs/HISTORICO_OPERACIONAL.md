@@ -3199,3 +3199,17 @@ Docs. PROTOCOLO → v43 (R-RUIDO-01 + DT-003CB-01). DECISOES → v101 (nota de a
 Pendências. Nova: DT-003CB-01 (`Quantificacao.valor` de ruído não discrimina NEN vs SPL/pico — irmã de DT-002V-01), herdada à IMPL da fatia 3. Seguem ABERTAS: DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, requisito (b) da 003.BS. Remanescente de D-ARQ-53: superfície RT (UI/CLI).
 
 Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 de D-ARQ-51 — R-RUIDO-01 agora desbloqueada para código (classificador `valor` dB(A)→`relacao_LT` em `hidratar_ghe`/módulo próprio, cobertura de teste por faixa exigida, DT-003CB-01 herdada). Alternativa: superfície RT (UI/CLI) do envelope.
+
+## Sessão 003.CC — 09/07/2026 — IMPLEMENTAÇÃO (fatia 3 D-ARQ-51: classificador R-RUIDO-01)
+
+**Foco.** Ratificado no kickoff: IMPLEMENTAÇÃO da fatia 3 de D-ARQ-51 — classificador dB(A)→`relacao_LT` que R-RUIDO-01 (003.CB) desbloqueou. Escolhida sobre superfície RT (UI/CLI): converte a R-* recém-formalizada em código com teste (sem isso, "regra escrita, não implementada"); consumidor pronto dos dois lados.
+
+**Método.** Leitura pré-prompt via git objects (working tree do mount não usada — hazard conhecido): R-RUIDO-01 (PROTOCOLO v43 §5.2), `predicados.py`, `tipos.py`, `quantificacao.py`, `hidratar_ghe`. Decisão de desenho do Arquiteto: classificador em módulo próprio, NÃO em `parsear_quantificacao` (parse sintático é agnóstico de agente; regra clínica exige slug pós-resolução) — chamado de `hidratar_ghe`. FUZZY→"ruido" classifica (coerente com o desenho: FUZZY entra com slug + pendência não-bloqueante). Prompt cirúrgico com escopo de 5 arquivos; execução sem bloqueadores; revisão do Arquiteto sobre o diff real (objects) aprovou sem desvios.
+
+**Entrega.** `motor/classificacao_ruido.py` (função pura, pré-condições explícitas, idempotente, `acima_acao` nunca emitido); plug em `hidratar_ghe`; docstrings defasadas de `hidratacao.py`/`quantificacao.py` atualizadas no mesmo commit; 15 testes (11 unitários + 4 integração, âncoras Viverde 78,8/89,6). `_ruido_acima_acao` e R-AUD-* intocados. Recorte remanescente da fatia 2 (relacao_LT sempre None desde 003.BZ) FECHADO. Suíte 678→693 passed, 4 skipped; mypy --strict delta-zero (31 arquivos). Commit `9500c2a`, PR #179, merge `975ae85` ("Create a merge commit").
+
+**Docs.** DECISOES → v102 (nota de aplicação fatia 3 em D-ARQ-51). PROTOCOLO → v44 (nota de implementação em R-RUIDO-01; nenhuma regra criada/alterada). PAINEL re-tirado (merge moveu a suíte 678→693 e a contagem de regra clínica em código).
+
+**Pendências.** DT-003CB-01 segue ABERTA (documentada no docstring; resolução exige discriminar NEN vs SPL/pico no tipo — irmã de DT-002V-01, mesma sessão futura). Seguem ABERTAS: DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, requisito (b) da 003.BS. Remanescente de D-ARQ-53: superfície RT (UI/CLI).
+
+**Próxima.** A declarar no kickoff. Candidata natural: superfície RT (UI/CLI) — último remanescente nomeado de D-ARQ-53. Alternativa: CONHECIMENTO (vocabulário químico raso, DT-003M-02).
