@@ -9,22 +9,21 @@ ZERO — a superfície consome o artefato, não o reconstrói.
 
 from __future__ import annotations
 
-import argparse
-import json
-import sys
 from collections.abc import Sequence
 from datetime import date
-from pathlib import Path
 from typing import Any, TextIO
 
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao
+from agente_medico.superficie.apresentacao import (
+    ArtefatoIdaIlegivel,
+    conduzir_revisao,
+    executar_main,
+    ler_resposta,
+)
 
-_CAMPOS_RENDERIZACAO = {"candidatas", "proposta", "credencial", "confirmacao"}
+_CAMPOS_RENDERIZACAO = frozenset({"candidatas", "proposta", "credencial", "confirmacao"})
 
-
-class ArtefatoIdaIlegivel(ValueError):
-    """Artefato de ida não é JSON válido ou não tem os campos que a
-    renderização usa (candidatas/proposta/credencial/confirmacao)."""
+__all__ = ["ArtefatoIdaIlegivel", "revisar_envelope", "main"]
 
 
 def revisar_envelope(artefato_ida: str, entrada: TextIO, saida: TextIO) -> str:
@@ -33,22 +32,17 @@ def revisar_envelope(artefato_ida: str, entrada: TextIO, saida: TextIO) -> str:
     retorna o artefato-volta. Sem re-validação de domínio — confia no
     produtor (serializar_envelope); o self-check final reutiliza
     desserializar_confirmacao (anti-erro-silencioso D-ARQ-22)."""
-    try:
-        dados = json.loads(artefato_ida)
-    except json.JSONDecodeError as erro:
-        raise ArtefatoIdaIlegivel(f"JSON inválido: {erro}") from erro
+    return conduzir_revisao(
+        artefato_ida,
+        _CAMPOS_RENDERIZACAO,
+        _revisar,
+        desserializar_confirmacao,
+        entrada,
+        saida,
+    )
 
-    if not isinstance(dados, dict):
-        raise ArtefatoIdaIlegivel(
-            f"Artefato de ida deve ser um objeto JSON, recebido {type(dados).__name__}"
-        )
 
-    campos_ausentes = _CAMPOS_RENDERIZACAO - set(dados)
-    if campos_ausentes:
-        raise ArtefatoIdaIlegivel(
-            f"Artefato de ida sem campo(s) necessário(s) à renderização: {sorted(campos_ausentes)}"
-        )
-
+def _revisar(dados: dict[str, Any], entrada: TextIO, saida: TextIO) -> dict[str, Any]:
     _renderizar(dados, saida)
 
     validade = _prompt_validade(dados["proposta"], entrada, saida)
@@ -57,9 +51,7 @@ def revisar_envelope(artefato_ida: str, entrada: TextIO, saida: TextIO) -> str:
     dados["confirmacao"]["validade"] = validade
     dados["confirmacao"]["assinatura_engenheiro"] = assinatura
 
-    volta = json.dumps(dados, ensure_ascii=False, indent=2)
-    desserializar_confirmacao(volta)
-    return volta
+    return dados
 
 
 def _renderizar(dados: dict[str, Any], saida: TextIO) -> None:
@@ -83,10 +75,7 @@ def _prompt_validade(proposta: str | None, entrada: TextIO, saida: TextIO) -> st
     proposta_texto = proposta if proposta is not None else "(nenhuma)"
     while True:
         saida.write(f"Validade [Enter mantém: {proposta_texto}]: ")
-        linha = entrada.readline()
-        if linha == "":
-            raise EOFError("entrada encerrada antes da confirmação-RT")
-        resposta = linha.strip()
+        resposta = ler_resposta(entrada, "confirmação-RT")
         if resposta == "":
             if proposta is not None:
                 return proposta
@@ -103,10 +92,7 @@ def _prompt_validade(proposta: str | None, entrada: TextIO, saida: TextIO) -> st
 def _prompt_assinatura(entrada: TextIO, saida: TextIO) -> bool:
     while True:
         saida.write("Assinatura do engenheiro confirmada? (s/n): ")
-        linha = entrada.readline()
-        if linha == "":
-            raise EOFError("entrada encerrada antes da confirmação-RT")
-        resposta = linha.strip().lower()
+        resposta = ler_resposta(entrada, "confirmação-RT").lower()
         if resposta == "s":
             return True
         if resposta == "n":
@@ -115,18 +101,14 @@ def _prompt_assinatura(entrada: TextIO, saida: TextIO) -> bool:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Confirmação-RT do envelope do topo (D-ARQ-54 fatia 1)."
+    return executar_main(
+        "Confirmação-RT do envelope do topo (D-ARQ-54 fatia 1).",
+        revisar_envelope,
+        argv,
     )
-    parser.add_argument("caminho_ida", type=Path)
-    parser.add_argument("caminho_volta", type=Path)
-    args = parser.parse_args(argv)
-
-    artefato_ida = args.caminho_ida.read_text(encoding="utf-8")
-    volta = revisar_envelope(artefato_ida, sys.stdin, sys.stdout)
-    args.caminho_volta.write_text(volta, encoding="utf-8")
-    return 0
 
 
 if __name__ == "__main__":
+    import sys
+
     sys.exit(main())
