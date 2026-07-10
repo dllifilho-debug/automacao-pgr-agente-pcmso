@@ -3257,3 +3257,17 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** Remanescente NOMEADO novo: adaptador FDS sem emissor do artefato-ida em produção (`preparar_composicao` para em blocos; `serializar_verbatim` sem chamador de produção) — fechar na costura de produção ou junto das fatias 3/4. Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54 fatias 3 (unificação — as duas fatias confirmaram a forma) e 4 (web) abertas.
 
 **Próxima.** A declarar no kickoff. Candidata natural: fatia 3 de D-ARQ-54 (unificação, gatilho anti-D-ARQ-22 satisfeito pelas duas instâncias) ou CONHECIMENTO DT-003M-02.
+
+---
+
+## Sessão 003.CG — 10/07/2026 — IMPLEMENTAÇÃO (fatia 3 D-ARQ-54: unificação do contrato de apresentação)
+
+**Foco.** Declarado no kickoff (recomendação do Arquiteto, ratificada): IMPLEMENTAÇÃO da fatia 3 de D-ARQ-54 — gatilho anti-D-ARQ-22 satisfeito pelas duas instâncias concretas (cli_envelope 003.CE, cli_fds 003.CF).
+
+**Método.** Leitura pré-prompt via git objects (as duas CLIs, imports dos 23 testes, D-ARQ-54 completa). Duplicação confirmada em disco: exceção, loader do artefato-ida, EOF-antes-do-strip ×5, prompt Enter-mantém, cauda dumps+self-check, esqueleto main(). Spec fechada com 4 forks ratificados: (F1) módulo `superficie/apresentacao.py`; (F2) contrato = função `conduzir_revisao` com `revisar` callable — NÃO fases render/coleta separadas, porque na FDS a renderização é intercalada com a coleta; (F3) `ArtefatoIdaIlegivel` movida e re-exportada nas CLIs → testes existentes intocados como gate de regressão; (F4) refactor puro, emissor do artefato-ida em produção FORA (não misturar feature com refactor no mesmo diff). Revisão pré-merge via git show: byte-identidade de mensagens/prompts/ordem de writes verificada, nenhum defeito.
+
+**Entrega.** `superficie/apresentacao.py` + `test_apresentacao.py` (7 testes) + CLIs refatoradas como instâncias do contrato. Commits dfdd4fa/fec0739, merge bb426a5, PR #186. Suíte 720→727 (723 passed + 4 skipped), mypy delta-zero (46 preexistentes). DECISOES v105→v106 (nota de aplicação). PROTOCOLO v44 intocado (nenhuma R-*). PAINEL NÃO re-tirado: refactor interno não move nenhum dos 3 números (menção "restam unificação 3" no texto fica defasada; corrigir na próxima tiragem por evento).
+
+**Pendências.** Remanescente 003.CF segue: adaptador FDS sem emissor do artefato-ida em produção. Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54: resta fatia 4 (web), sobre o contrato unificado.
+
+**Próxima.** A declarar no kickoff. Candidatas: CONHECIMENTO DT-003M-02 (vocabulário-FDS, gargalo nomeado no PAINEL) ou fatia 4 D-ARQ-54 (web, sessão própria por decisão da D-ARQ).
