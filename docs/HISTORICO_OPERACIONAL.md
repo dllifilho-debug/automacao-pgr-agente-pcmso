@@ -3241,3 +3241,19 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54 fatias 2 (CLI FDS, gabarito fds_t65), 3 (unificação), 4 (web) abertas.
 
 **Próxima.** A declarar no kickoff. Candidata natural: fatia 2 de D-ARQ-54 (CLI da FDS — mesma forma, gabarito fds_t65).
+
+---
+
+## Sessão 003.CF — 10/07/2026 — IMPLEMENTAÇÃO (fatia 2 D-ARQ-54: CLI da FDS)
+
+**Foco.** Declarado no kickoff (recomendação do Arquiteto, ratificada): IMPLEMENTAÇÃO da fatia 2 de D-ARQ-54 (CLI da FDS sobre `revisao_verbatim.py`), escolhida sobre CONHECIMENTO DT-003M-02 — mesma forma da fatia 1 recém-mergeada (custo de spec baixo) e pré-requisito da fatia 3 (unificação); DT-003M-02 independe de sequência.
+
+**Método.** Leitura pré-prompt via git objects (`cli_envelope.py` molde, `revisao_verbatim.py` contrato, `test_cli_envelope.py`, fixtures). Spec fechada com 3 forks ratificados após 2ª passada: (1) coleta por membro com gate único `[Enter mantém / e edita / r remove]` e drill-down cas/nome só no "e" (caminho feliz = M Enters, não 3M prompts); sem "adicionar" — membro digitado à mão não tem procedência de transcrição, correção é re-transcrever a FDS; (2) self-check só `desserializar_verbatim` — `gate_forma` segue exclusivo de `montar_fds_revisado` (decisão selada 003.BI); (3) gabarito serializa direto no teste; emissor do artefato-ida no adaptador FORA da fatia. Revisão de diff via git show pegou defeito real ANTES do merge: gabarito com literais inventados (faixa `f"{min} - {max}"` sobre `fds_t65`) em vez da fixture verbatim REAL `fds_verbatim_t65` (en-dash, ND, `\n` intra-token do TiO₂) — teste passava sobre dados higienizados, classe D-ARQ-22. Correção formulada pelo Arquiteto, aplicada pelo Code.
+
+**Entrega.** `superficie/cli_fds.py` (`ArtefatoIdaIlegivel` local — unificação é fatia 3; `revisar_verbatim` com `EOFError` antes do strip em TODO prompt, lição 003.CE aplicada; bloco com membros vazio aceito — juízo é do `gate_forma` a jusante) + `test_cli_fds.py` (12 testes: roundtrip byte-exato sobre verbatim sujo, edição cas/nome/faixa, remoção, EOF×2, gabarito `tinta_acrilica_verbatim` fim-a-fim até `montar_fds_revisado`). Commits 45ca92b/3b7f5ee, merge 7c272a8, PR #184. Suíte 708→720 (716 passed + 4 skipped), mypy delta-zero (46 preexistentes). DECISOES v104→v105 (nota de aplicação). PROTOCOLO v44 intocado (nenhuma R-*). PAINEL re-tirado (número 2 moveu: os dois seams têm CLI).
+
+**Lição de spec.** A spec citou `fds_t65` como fonte do gabarito quando a fixture verbatim própria (`fds_verbatim_t65`, medição 003.AN/AS) já existia — antes de citar fixture em prompt cirúrgico, listar `tests/fixtures/` inteiro.
+
+**Pendências.** Remanescente NOMEADO novo: adaptador FDS sem emissor do artefato-ida em produção (`preparar_composicao` para em blocos; `serializar_verbatim` sem chamador de produção) — fechar na costura de produção ou junto das fatias 3/4. Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54 fatias 3 (unificação — as duas fatias confirmaram a forma) e 4 (web) abertas.
+
+**Próxima.** A declarar no kickoff. Candidata natural: fatia 3 de D-ARQ-54 (unificação, gatilho anti-D-ARQ-22 satisfeito pelas duas instâncias) ou CONHECIMENTO DT-003M-02.
