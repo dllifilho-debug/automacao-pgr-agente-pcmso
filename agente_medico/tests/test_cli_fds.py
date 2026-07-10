@@ -11,7 +11,7 @@ from agente_medico.motor.revisao_verbatim import (
 )
 from agente_medico.motor.tipos import BlocoVerbatim, MembroVerbatim
 from agente_medico.superficie.cli_fds import ArtefatoIdaIlegivel, revisar_verbatim
-from agente_medico.tests.fixtures.fds_t65 import tinta_acrilica
+from agente_medico.tests.fixtures.fds_verbatim_t65 import tinta_acrilica_verbatim
 
 _BLOCOS_PADRAO = (
     BlocoVerbatim(
@@ -157,24 +157,16 @@ def test_eof_no_prompt_de_membro_levanta_eof() -> None:
         revisar_verbatim(ida, entrada, saida)
 
 
-def test_gabarito_tinta_acrilica_enter_em_tudo_fim_a_fim() -> None:
-    componentes = tinta_acrilica()
-    blocos_lista: list[BlocoVerbatim] = []
-    for c in componentes:
-        assert c.concentracao is not None
-        blocos_lista.append(
-            BlocoVerbatim(
-                faixa=f"{c.concentracao.minimo} - {c.concentracao.maximo}",
-                membros=(MembroVerbatim(cas=c.cas, nome=c.nome),),
-            )
-        )
-    blocos = tuple(blocos_lista)
+def test_gabarito_tinta_acrilica_verbatim_fim_a_fim() -> None:
+    blocos = tinta_acrilica_verbatim()
     ida = serializar_verbatim(blocos)
     entrada = io.StringIO("\n\n" * len(blocos))
     saida = io.StringIO()
 
     volta = revisar_verbatim(ida, entrada, saida)
     revisado = desserializar_verbatim(volta)
+    assert revisado == blocos
+
     fds, _pendencias = montar_fds_revisado(revisado)
 
     assert fds.composicao_verbatim != ()
