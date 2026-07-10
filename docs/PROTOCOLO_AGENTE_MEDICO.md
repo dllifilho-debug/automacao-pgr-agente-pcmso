@@ -169,6 +169,8 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 
 **Implicação para o agente:** confiar nos dados de FDS é o default; investigação adicional só é disparada por genericidade da descrição.
 
+**Nota de aplicação (003.CI, D-ARQ-55).** R-FDS-06 ganha consumidor executável no recorte (B) da transcrição-FDS: a frase-H declarada na FDS é confiada por default (sem desconfiança por classe), transcrita verbatim em `Componente.frases_h` e admitida pelo RT (D-ARQ-47 cl.4) → mapa determinístico resolver-side {H334, H317} → `is_sensibilizante`. O gate é de FORMA (`H\d{3}`), não de conteúdo — coerente com "confiar na FDS é o default; investigação só por genericidade (R-FDS-04)". Semântica de R-FDS-06 intacta; ID preservada.
+
 ---
 
 ## 5. REGRAS POR TIPO DE EXAME
@@ -824,6 +826,8 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 **Status:** ABERTA. Não bloqueia. Caso-âncora vivo capturado na fixture (`fds_t65.py`, Adesivo PVC componente "Segredo Industrial 2", comentado).
 
+**Nota (003.CI).** Pré-condição escrita: D-ARQ-55 (recorte B) dá contrato ao perigo-transcrito — `frases_h` por-membro + mapa {H334,H317}→`is_sensibilizante`. Com a flag populada e carregada mesmo no CAS-oculto (SI2), "ausência de flag" passa a significar "FDS sem perigo". A reordenação ramo-0-vs-bypass que esta DT pede é o **passo 2** (honrar flag antes do slug-check, em `materialidade()` + Fase C), agora seguro. DT segue ABERTA até o passo 2 (fecha junto com DT-003M-02(B)).
+
 ---
 
 ### DT-003M-02 — Vocabulário (agentes.yaml) não cobre composição-de-FDS `[ABERTA — input para expansão]`
@@ -856,6 +860,8 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 **Sequência ratificada pelo Diovanni (003.CH):** (1) perigo-transcrição (recorte B de D-ARQ-42) → popula as flags e fecha DT-003T-01; (2) só então a reordenação do ramo-0 → fecha DT-003M-01 + DT-003M-02(B) juntas. A digitação de vocabulário (A) e a lista-de-inertes ficam sinalizadas como **paliativo** (enumeração paralela ao sinal que a FDS já carrega). `[INTERPRETADO — prioridade na revisão de saída]` na articulação "ausência de frase-H ⇒ inerte" (ancorada em R-FDS-06, sem norma literal).
 
 **Status:** ABERTA — **(B) bloqueada por perigo-transcrição (recorte B de D-ARQ-42); (A) segue sessão de dado**. Não bloqueia (o bloqueio conservador da Fase C é seguro). Cluster unificado: DT-003M-01 + DT-003M-02(B) + DT-003T-01.
+
+**Nota (003.CI).** O pré-requisito duro (perigo-transcrição) ganhou contrato em D-ARQ-55: o recorte B popula `is_sensibilizante` a partir da frase-H. (B) NÃO fecha nesta sessão — depende do **passo 2** (reordenação do ramo-0 de `materialidade()`/Fase C para honrar a flag antes do `agente is None`), que fecha (B) junto com DT-003M-01. (A) (digitar vocabulário de FDS) segue sessão de dado, sinalizada como paliativo. DT segue ABERTA.
 
 ---
 
@@ -895,7 +901,7 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 **Nota de cluster (003.CH).** DT-003T-01 é a **fatia 1** do cluster unificado (DT-003M-01 + DT-003M-02(B) + DT-003T-01): a perigo-transcrição (recorte B de D-ARQ-42) que popula `is_sensibilizante` (e confirma `is_carcinogeno_iarc`) no `Componente` a partir da frase-H da FDS é o pré-requisito duro das outras duas. Sequência ratificada (003.CH): esta fatia primeiro → depois a reordenação do ramo-0. Ver reframe em DT-003M-02.
 
-**Status:** ABERTA. Não-bloqueante. Lado-engenheiro/vocabulário, não toca regra clínica.
+**Status:** RESOLVIDA (003.CI) por D-ARQ-55, por caminho DISTINTO do que a DT propunha. A DT pedia `is_sensibilizante` no `EntradaIndice`/`agentes.yaml` (fonte-vocabulário, casada por CAS); D-ARQ-55 popula `is_sensibilizante` a partir da **frase-H transcrita da FDS** ({H334,H317} → flag, mapa determinístico resolver-side), proveniência = FDS admitida pelo RT, não vocabulário. O vetor vocabulário-side fica DESNECESSÁRIO para o cluster — a fonte da flag é a FDS. Se um sensibilizante conhecido SEM H-phrase na FDS específica exigir fonte-vocabulário no futuro, é sessão de dado própria e não bloqueia. Implementação (código) é fatia futura; a arquitetura da entrada da flag está decidida. DT-003M-01/DT-003M-02(B) fecham no passo 2 (reordenação).
 
 ---
 
@@ -1070,6 +1076,18 @@ Refinamentos aos passos da migração desta DT:
 
 ---
 
+### DT-003CI-01 — Carcinógeno-via-frase-H: H350/H351 é GHS, não IARC — bypass próprio deferido `[ABERTA — deferida por D-ARQ-55]`
+
+**Origem:** Sessão 003.CI (10/07/2026), 2ª passada crítica sobre o mapa frase-H→flag de D-ARQ-55.
+
+**Situação.** O recorte (B) mapeia as frases-H de sensibilização ({H334, H317} → `is_sensibilizante`). O análogo carcinógeno seria {H350 (pode causar câncer), H351 (suspeito de causar câncer)} → carcinógeno. Mas a flag existente é `is_carcinogeno_iarc` — proveniência **IARC**. H350/H351 é carcinogenicidade **GHS/CLP** (autoclassificação do fabricante / CLP), sistema distinto do IARC: sobrepõem-se muito, mas um H351 pode existir para substância que a IARC não avaliou. Popular `is_carcinogeno_iarc` a partir do H-code lavaria proveniência GHS como IARC — erro-silencioso da classe D-ARQ-22.
+
+**Decisão de deferimento (D-ARQ-55, ratificada pelo Diovanni).** Recorte B NÃO mapeia carcinógeno-via-frase-H. O H350/H351 bem-formado é transcrito e carregado cru em `Componente.frases_h` (não perdido — anti-supressão), sem virar flag nesta fatia. O carcinógeno já tem caminho vivo por outra via: `is_carcinogeno_iarc` vocab/slug-sourced (agentes.yaml/gate-CAS) + R-PKG-BZ por identidade de agente (benzeno). Não há furo urgente — os casos-âncora do cluster são sensibilização.
+
+**O que a resolução exige (sessão própria).** Flag NOVA `is_carcinogeno_ghs` (proveniência GHS, distinta de `is_carcinogeno_iarc`), apendada à lista de bypass de `materialidade()` (cl.5 D-ARQ-33, append-only) + mapa {H350, H351} → `is_carcinogeno_ghs` no resolver-side + cobertura de teste. Decidir se a revisão de saída reconcilia GHS↔IARC por agente (D-ARQ-27). `[INTERPRETADO — prioridade na revisão de saída]` na articulação "H350 GHS dispara bypass sem confirmação IARC".
+
+**Status:** ABERTA. Não-bloqueante. Deferida por design de D-ARQ-55; append-only sobre o bypass. Irmã da sensibilização do recorte B.
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -1135,3 +1153,5 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v43 | 09/07/2026 | Sessão 003.CB (CONHECIMENTO): **R-RUIDO-01 nova** (seção 5.2) — classificação de exposição a ruído contínuo/intermitente `dB(A)→relacao_LT` sobre o NEN: <80 `abaixo_acao`, 80–85 `entre_acao_LT`, ≥85 `acima_LT`. Limiares `[DERIVADO]`: 85 dB(A) = LT NR-15 Anexo 1 (teto 115), 80 dB(A) = nível de ação NR-09 c/c NLI da NHO-01 (item literal NR-09 `[INCERTO]`). Ressalvas `[INTERPRETADO]`: valor=NEN não SPL/pico (DT-003CB-01); q=5 vs q=3 é cálculo, não limiar (motor consome NEN); ruído de impacto fora de escopo. Destrava a fatia 3 de D-ARQ-51 (`relacao_LT` sempre `None` até 003.BZ); consumidor `_ruido_acima_acao` inalterado. DT-003CB-01 adicionada (NEN vs SPL, irmã de DT-002V-01). Normas conferidas via web (D-ARQ-27). Sem código. |
 | v44 | 09/07/2026 | Sessão 003.CC (IMPLEMENTAÇÃO): nota de implementação em R-RUIDO-01 (classificador em código, PR #179). Nenhuma regra criada/alterada. |
 | v45 | 10/07/2026 | Sessão 003.CH (CONHECIMENTO/ARQUITETURA): reframe de DT-003M-02 — andamento 003.N corrigido (hidratação CAS→slug→flags FOI construída em 003.S/V/W/BI; não "inexistente"). Achado `[VERIFICADO — git grep]`: flags de perigo do `Componente` NÃO populadas em produção (transcritor não classifica perigo, recorte B excluído de D-ARQ-42) → "sem flag" = "não extraímos", não "FDS sem perigo". Logo "sem slug → bloqueia" é o estado conservador-CORRETO; (B) NÃO é resolvível isolada — pré-requisito duro = perigo-transcrição (recorte B). Cluster DT-003M-01 + DT-003M-02(B) + DT-003T-01 unificado sob "extrair perigo → reordenar ramo-0". Sequência ratificada pelo Diovanni: perigo-transcrição primeiro; digitação de vocabulário/lista-de-inertes = paliativo. Nota 003.CH em D-ARQ-42. Nenhuma R-* criada/alterada. Sem código. |
+
+| v46 | 10/07/2026 | Sessão 003.CI (ARQUITETURA): **nota de aplicação em R-FDS-06** (seção 4) — recorte (B) da transcrição-FDS dá a R-FDS-06 consumidor executável (frase-H confiada por default, transcrita verbatim `Componente.frases_h`, admitida pelo RT, mapa {H334,H317}→`is_sensibilizante`; gate de FORMA). Semântica de R-FDS-06 intacta, ID preservada. **DT-003T-01 FECHA** (sensibilização vem da FDS, não do vocabulário); notas 003.CI em DT-003M-01 e DT-003M-02 (pré-condição escrita, fecham no passo 2). **DT-003CI-01 adicionada** (seção 11) — carcinógeno-via-frase-H (H350/H351 GHS≠IARC) deferido, futura `is_carcinogeno_ghs`. Decisão de arquitetura em D-ARQ-55 (DECISOES). Nenhuma R-* criada/alterada. Sem código. |
