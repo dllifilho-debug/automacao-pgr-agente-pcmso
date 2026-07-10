@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.CC · 09/07/2026
-**Baseline:** main `975ae85` · 693 passed, 4 skipped (host sem chave) · mypy `--strict` delta-zero · PROTOCOLO v44 · DECISOES v102
+**Tiragem corrente:** 003.CE · 10/07/2026
+**Baseline:** main `a0153a8` · 704 passed, 4 skipped · mypy `--strict` delta-zero · PROTOCOLO v44 · DECISOES v104
 
 ---
 
@@ -20,10 +20,10 @@
 | Pergunta | Estado medido | Leitura |
 |---|---|---|
 | Quanto da regra clínica está no código? | **18 de 42** ativas (~43%) | R-RUIDO-01 (formalizada 003.CB, implementada 003.CC) entra no numerador e no denominador — primeira regra clínica nova em código desde a pausa da frente clínica (caminho B); pausa segue vigente, esta foi puxada pela porta de entrada (fatia 3 D-ARQ-51), não retomada da frente |
-| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **CONSTRUÍDO e PLUGADO em produção** — `processar_arquivo_pgr` (D-ARQ-52, 003.BS) costura arquivo→Resultado fim-a-fim (extração→recorte→transcrição-LLM→gate→hidratação→motor), validado contra o PDF Viverde real (LLM mockado em teste) | Gargalo de produção migrou de novo: não é mais travessia — é **universalidade** (envelope document-derived + generalização multi-PGR da âncora de recorte) + a rasura do vocabulário químico |
+| A porta de entrada existe? | **Lado-FDS (química) CONSTRUÍDO e validado ao vivo** end-to-end (extração→LLM→gate→revisão-RT→montagem→resolvedor, 003.BD-BI); lado-PGR **CONSTRUÍDO e PLUGADO em produção** — `processar_arquivo_pgr` (D-ARQ-52, 003.BS) costura arquivo→Resultado fim-a-fim (extração→recorte→transcrição-LLM→gate→hidratação→motor), validado contra o PDF Viverde real (LLM mockado em teste) | Gargalo de produção migrou de novo: não é mais travessia — é **universalidade** (**superfície RT INICIADA** — CLI do envelope pronta e em main, D-ARQ-54 fatia 1, pacote `superficie/`; restam CLI-FDS fatia 2, unificação 3, web 4, e generalização multi-PGR da âncora de recorte) + a rasura do vocabulário químico |
 | Dívidas que travam produção? | **3** — mesmas facetas de sempre, recontadas pós-fechamento | DT-003L-01 (parse-PGR), DT-003M-02 (vocabulário-FDS raso), DT-FDS-02 (unidade do cutoff) |
 
-**Headline:** a produção **não está travada por falta de regra clínica, nem mais pelo transcritor-FDS, nem mais pela travessia do parse-PGR** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI; lado-PGR plugado em produção arquivo→Resultado, D-ARQ-52/003.BS) — está travada por **universalidade do parse-PGR** (transcrição-de-topo do envelope COMPLETA — D-ARQ-53, 4/4 fatias prontas (recorte `recortar_topo` 003.BU + contrato `EnvelopeVerbatim`/`TranscritorTopo`/`gate_forma_topo` 003.BW + resolvedor `resolvedor_topo.py`/seam `revisao_envelope.py` 003.BX + plug `preparar_envelope` em `processar_arquivo_pgr` 003.BY) + **cliente-LLM real do topo pronto** (`TranscritorGeminiTopo`, 003.CA, validado ao vivo 4/4 contra o gabarito 003.BV); origem de `validade`/`assinatura_engenheiro` agora document-derived + confirmação-RT, paliativo D-ARQ-52 seam 3 fechado no nível do adaptador; resta **superfície RT (UI/CLI)** e generalização multi-PGR da âncora de recorte) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
+**Headline:** a produção **não está travada por falta de regra clínica, nem mais pelo transcritor-FDS, nem mais pela travessia do parse-PGR** (lado-químico fim-a-fim construído e validado ao vivo, 003.BH/BI; lado-PGR plugado em produção arquivo→Resultado, D-ARQ-52/003.BS) — está travada por **universalidade do parse-PGR** (transcrição-de-topo do envelope COMPLETA — D-ARQ-53, 4/4 fatias prontas (recorte `recortar_topo` 003.BU + contrato `EnvelopeVerbatim`/`TranscritorTopo`/`gate_forma_topo` 003.BW + resolvedor `resolvedor_topo.py`/seam `revisao_envelope.py` 003.BX + plug `preparar_envelope` em `processar_arquivo_pgr` 003.BY) + **cliente-LLM real do topo pronto** (`TranscritorGeminiTopo`, 003.CA, validado ao vivo 4/4 contra o gabarito 003.BV); origem de `validade`/`assinatura_engenheiro` agora document-derived + confirmação-RT, paliativo D-ARQ-52 seam 3 fechado no nível do adaptador; **superfície RT INICIADA** — CLI do envelope pronta e em main (D-ARQ-54 fatia 1, pacote `superficie/`); restam CLI-FDS (fatia 2), unificação (3), web (4) e generalização multi-PGR da âncora de recorte) e por **índice CAS/vocabulário químico raso** (a maioria dos componentes de FDS real ainda cai em ramo 0/AUSENTE por falta de slug, DT-003M-02). Nenhuma regra clínica nova move essa restrição.
 
 ---
 
