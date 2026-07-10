@@ -3291,3 +3291,23 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** Seguem ABERTAS: DT-003M-02 (B bloqueada por recorte B; A é sessão de dado), DT-003M-01, DT-003T-01 (cluster), DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54: resta fatia 4 (web).
 
 **Próxima.** A declarar no kickoff. Candidatas: ARQUITETURA do recorte (B) perigo-transcrição (contrato do verbatim-de-perigo + mapa frase-H→flag + gate de confiança R-FDS-06 — a fatia 1 do cluster-FDS) ou fatia 4 D-ARQ-54 (web).
+
+---
+
+## Sessão 003.CI — 10/07/2026 — ARQUITETURA (recorte B da transcrição-FDS: perigo-transcrição, passo 1 do cluster-FDS)
+
+**Foco.** Declarado no kickoff: ARQUITETURA do recorte (B) — perigo-transcrição (contrato do verbatim-de-perigo + mapa frase-H→flag + gate de confiança R-FDS-06), a fatia 1 do cluster-FDS. Recomendação do Arquiteto ratificada pelo Diovanni.
+
+**Método.** Docs vivos lidos inteiros por git objects (`git show HEAD:` — HEAD `ac0b2ee`, working tree do mount defasado/truncado, ignorado): PROTOCOLO v45, DECISOES até D-ARQ-54. Código da cadeia de transcrição-FDS lido em disco (`tipos.py`, `transcritor_fds.py`, `revisao_verbatim.py`, `transcricao_fds.py`, `composicao.py`, `resolvedor.py`, `materialidade.py`, `estagios/riscos.py`). Estado de abertura: 723+4 skip herdado (doc-only 003.CH, sem reexecução). Duas passadas críticas.
+
+**Decisão — D-ARQ-55 (quatro partes).** (1) Verbatim-de-perigo é **por-membro**, H-code GHS cru: `MembroVerbatim` e `Componente` ganham `frases_h: tuple[str,...] = ()`; o LLM transcreve fielmente, sem classificar (espelha `cas`). Mecanismo de localização (caso-rodapé SI2) adiado por medição (molde D-ARQ-42/43). (2) Mapa frase-H→flag determinístico resolver-side, **só sensibilização** no recorte B: {H334,H317}→`is_sensibilizante`; H-code bem-formado fora do mapa carregado cru sem flag (anti-supressão); malformado → pendência de forma; `is_carcinogeno_iarc` permanece vocab/IARC-sourced. (3) Confiança = R-FDS-06 (confia no conteúdo declarado) + revisão-RT (D-ARQ-47 cl.4, `_CAMPOS_MEMBRO`+`frases_h`); gate de FORMA (`H\d{3}`). (4) Fronteira de escopo: recorte B popula o sinal; a reordenação do ramo-0 é o **passo 2**. In-vocab sensibilizante <5% já corrige agora (→ MATERIAL); CAS-oculto (SI2) tem a flag populada/carregada mas saída inalterada até o passo 2.
+
+**Achados das passadas críticas.** (1ª) Granularidade por-membro é derivada da estrutura GHS/seção 3, não medida — cravei o CONTRATO por-membro mas ADIEI o mecanismo de localização por medição, não cravar leitura de layout sem medir (disciplina D-ARQ-42/43). (2ª) A recomendação inicial de mapear H350/H351→`is_carcinogeno_iarc` foi **REFUTADA**: H350/H351 é carcinogenicidade GHS/CLP, não IARC — lavaria proveniência, erro-silencioso D-ARQ-22. Recorte B mapeia só sensibilização; carcinógeno-via-frase-H virou DT-003CI-01 (deferida, futura `is_carcinogeno_ghs`, append cl.5 D-ARQ-33). Fork ratificado pelo Diovanni: deferir.
+
+**Entrega (doc-only, sem código).** DECISOES: **D-ARQ-55** adicionada + changelog v107. PROTOCOLO v45→v46: nota de aplicação em R-FDS-06 (seção 4), **DT-003T-01 marcada RESOLVIDA** (sensibilização vem da FDS transcrita, não do vocabulário — vetor `EntradaIndice`/`agentes.yaml` da DT superado), notas 003.CI em DT-003M-01 e DT-003M-02 (pré-condição escrita; fecham no passo 2), **DT-003CI-01 adicionada** (§11). HISTORICO: este bloco. Nenhuma R-* criada/alterada. PAINEL NÃO re-tirado (nenhum dos 3 números movido; ARQUITETURA doc-only).
+
+**Verificação.** Cadeia de transcrição conferida em disco (contrato `Componente` com flags no default, `materialidade()` ramo 1 lê o bypass, Fase C copia flags pra frente, gate-CAS ramo (d) preserva o componente). Ausência de populador de flag fora de fixture reconfirmada (`git grep`, herdado 003.CH). Commit no repo via git-objects (mount proíbe unlink) — verificado por `git show` dos blobs, não pelo working tree (memória: worktree do mount mente).
+
+**Pendências.** FECHADA: DT-003T-01 (por D-ARQ-55). Seguem ABERTAS: DT-003M-01, DT-003M-02(B) (fecham no passo 2 = reordenação do ramo-0), DT-003CI-01 (deferida), DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54: resta fatia 4 (web).
+
+**Próxima.** A declarar no kickoff. Candidatas: **passo 2 do cluster** (reordenação do ramo-0 de `materialidade()`+Fase C para honrar a flag antes do slug-check — fecha DT-003M-01 + DT-003M-02(B); ARQUITETURA ou IMPL), ou **IMPL do recorte B** (D-ARQ-55: `frases_h` nos tipos + mapa + gate + gabarito `fds_t65` com `frases_h`), ou fatia 4 D-ARQ-54 (web).
