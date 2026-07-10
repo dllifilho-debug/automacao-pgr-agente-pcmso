@@ -3271,3 +3271,23 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** Remanescente 003.CF segue: adaptador FDS sem emissor do artefato-ida em produção. Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54: resta fatia 4 (web), sobre o contrato unificado.
 
 **Próxima.** A declarar no kickoff. Candidatas: CONHECIMENTO DT-003M-02 (vocabulário-FDS, gargalo nomeado no PAINEL) ou fatia 4 D-ARQ-54 (web, sessão própria por decisão da D-ARQ).
+
+## Sessão 003.CH — 10/07/2026 — CONHECIMENTO/ARQUITETURA (reframe de DT-003M-02: o gargalo é perigo-transcrição, não vocabulário)
+
+**Foco.** Declarado no kickoff: CONHECIMENTO DT-003M-02 (recomendação do Arquiteto ratificada). Recorte fechado com o Diovanni ANTES de formalizar: (B) ARQUITETURA — o default "componente sem slug → bloqueia" — e não (A) DADO (digitação de vocabulário).
+
+**Método.** Docs vivos lidos inteiros via git objects (PROTOCOLO v44, DECISOES até D-ARQ-54). Estado de abertura verificado (HEAD 65a06fc, working tree limpo, 723+4 skip). Duas passadas críticas sobre a própria recomendação inicial.
+
+**Achado (2ª passada, `[VERIFICADO — git grep]`).** A recomendação inicial do Arquiteto (lista-de-inertes-benignos) foi RETIRADA na 2ª passada. Verificado em disco: (1) a hidratação CAS→slug→flags que o andamento 003.N de DT-003M-02 dava por "inexistente" FOI construída em 003.S (`gate_cas`) / 003.V-W (`resolver_composicao`) / 003.BI (cadeia de transcrição FECHADA) — andamento defasado. (2) As flags de perigo do `Componente` (`is_carcinogeno_iarc`/`is_sensibilizante`) NÃO são populadas em produção: nenhum código fora de fixture as levanta; o transcritor "não classifica perigo" (frases-H = recorte B excluído de D-ARQ-42); `MembroVerbatim`/`BlocoVerbatim` sem campo de perigo. Logo "sem flag" = "não extraímos", não "FDS declarou sem perigo".
+
+**Conclusão.** "Sem slug → bloqueia" (Fase C, `riscos.py`, ramo `agente is None` → `materialidade_ausente` bloqueante) NÃO é bug — é o estado conservador-CORRETO enquanto o perigo não é extraído; não-bloquear o inerte por ausência-de-flag passaria carcinógeno real em silêncio (D-ARQ-22). (Mascarado hoje porque carcinógenos in-vocab disparam por identidade de slug, ex.: R-PKG-BZ.) Portanto **DT-003M-02(B) não é resolvível isolada — pré-requisito duro = perigo-transcrição (recorte B de D-ARQ-42)**, o mesmo cluster de DT-003M-01 e DT-003T-01. A reordenação do ramo-0 (honrar flag antes do slug-check) é a solução estrutural, dormente até o perigo popular as flags.
+
+**Decisão ratificada.** Sequência: (1) perigo-transcrição (recorte B) → popula flags, fecha DT-003T-01; (2) reordenação do ramo-0 → fecha DT-003M-01 + DT-003M-02(B) juntas. Digitação de vocabulário / lista-de-inertes = **paliativo** sinalizado. Cluster DT-003M-01 + DT-003M-02(B) + DT-003T-01 unificado.
+
+**Entrega (doc-only, sem código).** PROTOCOLO v44→v45: reframe em DT-003M-02, notas de cluster em DT-003M-01 e DT-003T-01, linha v45. DECISOES: nota 003.CH em D-ARQ-42 (recorte B ratificado como próxima frente). HISTORICO: este bloco. Nenhuma R-* criada/alterada. PAINEL NÃO re-tirado (nenhum dos 3 números movido; sessão CONHECIMENTO doc-only).
+
+**Verificação.** Ordem dos ramos de `materialidade()` conferida em disco (`agente is None → AUSENTE` antes do bypass — DT-003M-01 confirmada). Ausência de populador das flags confirmada por `git grep` sem hits fora de fixture. Nenhum valor afirmado de memória.
+
+**Pendências.** Seguem ABERTAS: DT-003M-02 (B bloqueada por recorte B; A é sessão de dado), DT-003M-01, DT-003T-01 (cluster), DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54: resta fatia 4 (web).
+
+**Próxima.** A declarar no kickoff. Candidatas: ARQUITETURA do recorte (B) perigo-transcrição (contrato do verbatim-de-perigo + mapa frase-H→flag + gate de confiança R-FDS-06 — a fatia 1 do cluster-FDS) ou fatia 4 D-ARQ-54 (web).
