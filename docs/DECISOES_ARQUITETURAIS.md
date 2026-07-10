@@ -1691,6 +1691,48 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 
 **Base.** Sessão 003.BT (08/07/2026). Instância-envelope de D-ARQ-41; irmã de D-ARQ-49; caminho de saída do paliativo D-ARQ-52 seam 3. Gate de estado real (disco): envelope `date`/`bool` em `tipos.py`, gates em `estagios/gates.py`, topo descartado por `recortar_blocos_ghe`, seam RT-supplied pronto em `orquestracao_pgr.py`/`hidratacao.py`. Duas passadas: (1ª) nova bicamada document-derived autônoma substituindo os parâmetros RT; (2ª, crítica) document-derived autônomo num gate ELIMINATÓRIO reintroduz o risco que D-ARQ-52 seam 3 evitou — confiante-e-errado passa em silêncio → corrigido para pré-preenchimento + confirmação-RT (molde D-ARQ-47 cl.4), removendo o custo recorrente sem abrir mão da postura conservadora no gate. Decisão de arquitetura — sem código.
 
+## D-ARQ-54 — Superfície RT como apresentação-pura sobre o contrato ida/volta; CLI primeiro, web herda o mesmo artefato; escopo = os dois seams de confirmação (envelope + FDS)
+
+**Status:** DECISÃO DE ARQUITETURA (ARQUITETURA). Sem código nesta sessão. Fecha o último remanescente nomeado de D-ARQ-53 ("superfície RT (UI/CLI)") e o ponto humano de D-ARQ-47 cl.4 lado-FDS. Implementação por fatias futuras. Autorização para virar D-ARQ do Diovanni (003.CD).
+
+**Contexto.** Os dois pontos humanos da porta de entrada existem hoje **só como par serializar/desserializar JSON**, sem nenhuma superfície que um responsável técnico use:
+- Envelope (D-ARQ-53 P3): `serializar_envelope` (ida) → RT → `desserializar_confirmacao → EnvelopeConfirmado` (volta). `motor/revisao_envelope.py`.
+- FDS (D-ARQ-47 cl.4): `serializar_verbatim` (ida) → RT → `desserializar_verbatim` + `montar_fds_revisado` (volta). `motor/revisao_verbatim.py`.
+
+`preparar_envelope`/`orquestracao_fds` montam a ida e **param antes da confirmação** ("seam humano fora do adaptador"). Falta a superfície que renderize ida → humano → volta. Sem ela, todo uso real do pipeline trava no seam.
+
+**Gate de estado real (disco, 003.CD).**
+- `revisao_envelope.py`: `serializar_envelope(candidatas,...) -> str` + `desserializar_confirmacao(texto) -> EnvelopeConfirmado`, schema estrito, `EnvelopeRevisadoInvalido` para adulteração. `[DERIVADO — git show HEAD]`
+- `revisao_verbatim.py`: `serializar_verbatim(blocos) -> str` + `desserializar_verbatim(texto) -> tuple[BlocoVerbatim,...]` com garantia `desserializar(serializar(x)) == x` + `montar_fds_revisado`, `VerbatimInvalido`. `[DERIVADO — git show HEAD]`
+- Nenhum consumidor humano dos dois artefatos existe. `[DERIVADO — git grep]`
+
+**Decisão — quatro partes.**
+
+*Parte 1 — apresentação-pura, lógica-de-domínio ZERO.* A superfície RT é **camada de apresentação sobre o contrato ida/volta já existente**: lê o artefato-ida (JSON), renderiza ao humano, coleta edição/confirmação, emite o artefato-volta (JSON) que `desserializar_*` consome. Não interpreta data, não julga credencial, não classifica composição — tudo isso já vive no resolvedor determinístico a montante. A superfície não pode introduzir juízo novo; se precisar, é sinal de que falta regra no resolvedor, não na UI. Preserva D-ARQ-09 (motor puro) e a invariante "seam humano fora do adaptador" de D-ARQ-52/53. `[INTERPRETADO — espelha D-ARQ-09 e a postura seam-humano-fora-do-adaptador]`
+
+*Parte 2 — uma abstração para os dois seams.* Envelope e FDS são a mesma forma: "artefato-ida → edição → artefato-volta". A superfície expõe **um contrato de apresentação único** (renderizar artefato + coletar volta válido), instanciado duas vezes (envelope, FDS), não duas superfícies independentes. A diferença entre eles é só o schema do artefato — dado, não código de superfície. `[INTERPRETADO — generalização sobre os dois pares serializar/desserializar em disco]`
+
+*Parte 3 — CLI primeiro; web herda o mesmo artefato.* A primeira fatia é **CLI**: menor superfície que fecha o loop fim-a-fim, testável deterministicamente (fixture stdin/stdout, sem mock de framework), zero dependência de lib; e o Streamlit é o motor legado "não tocar". Web (Streamlit ou outro) é fatia posterior sobre o **mesmo contrato de artefato** de P2 — CLI-first não fecha a porta do web, porque ambos são adaptadores da mesma apresentação. 2ª passada considerada e rejeitada: Streamlit-first acoplaria a superfície a um framework antes de o contrato de apresentação estar exercido por teste. `[INTERPRETADO — decisão de Diovanni, 003.CD]`
+
+*Parte 4 — universalidade e o gabarito.* O contrato de apresentação vale para qualquer PGR/FDS de qualquer setor, porque opera sobre o artefato JSON (universal por construção), não sobre conteúdo Viverde. Gabarito da fatia CLI: artefato-ida do envelope Viverde (par em disco) → sessão CLI simulada (stdin de confirmação) → artefato-volta que `desserializar_confirmacao` aceita, `EnvelopeConfirmado` verificável. Idem FDS com `fds_t65`. LLM nunca entra (a superfície é a jusante do transcritor). `[DERIVADO — molde de gabarito D-ARQ-53 P4]`
+
+**Consequência.**
+- Fecha o remanescente "superfície RT (UI/CLI)" de D-ARQ-53 e o ponto de revisão-RT de D-ARQ-47 cl.4 com um contrato de apresentação único, sem implementar.
+- Determinismo intacto (D-ARQ-09): a superfície é I/O humano nas bordas, resolvedor/motor seguem puros.
+- **Universalidade (gate CLAUDE.md):** confirmação de validade/assinatura e revisão de composição de FDS são exigência para qualquer PGR/FDS — construção civil, química, saúde. A superfície opera sobre artefato, agnóstica de setor.
+- Não cria nem altera regra clínica (R-* intactas; PROTOCOLO v44 inalterado). Cria o contrato da superfície RT.
+
+**Fatiamento previsto (IMPL futura, ordem):** (1) CLI do envelope — renderiza candidatas + credencial-crua, coleta escolha de validade + `assinatura_engenheiro` (bool), emite artefato-volta; gabarito envelope-Viverde. (2) CLI da FDS — renderiza `BlocoVerbatim`, coleta edição, emite volta; gabarito `fds_t65`. (3) unificação num contrato de apresentação comum se as duas fatias confirmarem a forma compartilhada (não antes — anti-falsa-completude D-ARQ-22). (4) web (Streamlit ou outro) como adaptador irmão sobre o mesmo contrato — sessão própria.
+
+**Fronteiras (não confundir):**
+- **D-ARQ-53** — esta decisão é o remanescente "superfície RT (UI/CLI)" que aquela deixou aberto; consome o artefato-ida do envelope, não o reconstrói.
+- **D-ARQ-47 cl.4** — o ponto de revisão-RT da FDS; esta superfície é a instância humana dele.
+- **D-ARQ-52 seam 3** — a costura arquivo→Resultado é intocada; a superfície fica no seam humano, fora do adaptador.
+- **D-ARQ-09** — preservada: a superfície é borda de I/O, não lógica.
+- **Escopo:** render de saída (matriz tri-estado D-ARQ-31 + pendências) fica FORA — é apresentação-de-saída, D-ARQ próprio. Esta decisão é só confirmação-de-entrada.
+
+**Base.** Sessão 003.CD (09/07/2026). Remanescente de D-ARQ-53. Gate de estado real (disco): pares serializar/desserializar em `revisao_envelope.py`/`revisao_verbatim.py`, sem consumidor humano. Duas passadas: (1ª) superfície por seam, cada uma sua; (2ª, crítica) os dois seams são a mesma forma "ida→edição→volta" → contrato de apresentação único, instanciado duas vezes; CLI-first porque exerce o contrato limpo antes de qualquer framework. Decisão de arquitetura — sem código.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -1797,3 +1839,4 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 | v100 | 09/07/2026 | Sessão 003.CA (IMPLEMENTAÇÃO): nota de aplicação cliente-LLM real do topo em D-ARQ-53 — `TranscritorGeminiTopo` (molde adaptador GHE, cascata reusada), sonda ao vivo 4/4 no gabarito 003.BV, 1 desvio MENOR aceito. Commits 3fe3b3d+30fdd8b, PR #176, merge 49a30ec. Suíte 671→678, mypy delta-zero. Remanescente: superfície RT (UI/CLI). |
 | v101 | 09/07/2026 | Sessão 003.CB (CONHECIMENTO): nota de aplicação 003.CB em D-ARQ-51 — **R-RUIDO-01** (PROTOCOLO v43) destrava a fatia 3 (`relacao_LT` sempre `None` até 003.BZ era bloqueio clínico, não de engenharia): limiares NEN <80/80–85/≥85 → `abaixo_acao`/`entre_acao_LT`/`acima_LT`, `[DERIVADO]` NR-15 Anexo 1 (85=LT) + NR-09/NHO-01 (80=nível de ação), conferidos via web (D-ARQ-27). Fatia 3 desbloqueada p/ IMPL (cobertura por faixa exigida). DT-003CB-01 herdada à IMPL (`valor` não discrimina NEN vs SPL/pico — irmã de DT-002V-01). Sem código. Nenhum número de suíte movido (PAINEL não re-tira — sem merge). |
 | v102 | 09/07/2026 | Sessão 003.CC (IMPLEMENTAÇÃO): nota de aplicação fatia 3 em D-ARQ-51 — classificador R-RUIDO-01 (`motor/classificacao_ruido.py` novo, aplicado em `hidratar_ghe` pós-resolução quando slug=="ruido"; `acima_acao` nunca emitido; predicado e R-AUD-* intocados). Recorte remanescente da 003.BZ fechado. DT-003CB-01 documentada em docstring, segue ABERTA. Commit `9500c2a`, PR #179, merge `975ae85`. Suíte 678→693, mypy delta-zero. Nenhuma R-* criada/alterada (R-RUIDO-01 já era v43; ganha status implementada-com-teste). |
+| v103 | 09/07/2026 | Sessão 003.CD (ARQUITETURA): **D-ARQ-54** adicionada — superfície RT como apresentação-pura sobre o contrato ida/volta já existente (lógica-de-domínio ZERO; preserva D-ARQ-09 e "seam humano fora do adaptador"); um contrato de apresentação instanciado nos dois seams (envelope `revisao_envelope.py` + FDS `revisao_verbatim.py`); **CLI primeiro** (exerce o contrato antes de framework; web herda o mesmo artefato), decisão de Diovanni; escopo = só os dois seams de confirmação (render de saída matriz/pendências fica FORA, D-ARQ próprio). Fecha o remanescente "superfície RT (UI/CLI)" de D-ARQ-53. Gate de estado real: pares serializar/desserializar em disco, sem consumidor humano. Nenhuma R-* criada/alterada (PROTOCOLO v44 intocado). Sem código. |

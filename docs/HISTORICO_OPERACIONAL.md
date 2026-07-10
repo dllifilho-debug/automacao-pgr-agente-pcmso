@@ -3213,3 +3213,17 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** DT-003CB-01 segue ABERTA (documentada no docstring; resolução exige discriminar NEN vs SPL/pico no tipo — irmã de DT-002V-01, mesma sessão futura). Seguem ABERTAS: DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, requisito (b) da 003.BS. Remanescente de D-ARQ-53: superfície RT (UI/CLI).
 
 **Próxima.** A declarar no kickoff. Candidata natural: superfície RT (UI/CLI) — último remanescente nomeado de D-ARQ-53. Alternativa: CONHECIMENTO (vocabulário químico raso, DT-003M-02).
+
+---
+
+## Sessão 003.CD — 09/07/2026 — ARQUITETURA (superfície RT: D-ARQ-54)
+
+**Foco.** Declarado no kickoff: ARQUITETURA da superfície RT (UI/CLI) — último remanescente nomeado de D-ARQ-53. Escolhida sobre CONHECIMENTO/vocabulário químico (DT-003M-02): o motor classifica ruído fim-a-fim (R-RUIDO-01 em código, 003.CC), mas sem superfície nada chega ao responsável técnico e o ciclo de validação de tudo que já existe fica travado; vocabulário amplia universalidade mas mantém o resultado invisível. Sequência RT→vocabulário entrega ambos utilizáveis; a inversa não.
+
+**Método.** Leitura pré-decisão via git objects (`git show HEAD`, working tree do mount não usada — hazard conhecido): PROTOCOLO v44 e DECISOES v102 inteiros; `revisao_envelope.py`/`revisao_verbatim.py` (contratos serializar/desserializar), `orquestracao_pgr.py`/`orquestracao_fds` (seam humano fora do adaptador). Gate de estado real: os dois pontos humanos existem só como par ida/volta JSON, sem consumidor humano (`git grep`). Duas passadas: (1ª) superfície por seam; (2ª, crítica) os dois seams são a mesma forma "ida→edição→volta" → contrato de apresentação único. Forks binários resolvidos com Diovanni: tecnologia = **CLI primeiro** (exerce o contrato antes de framework; web herda o mesmo artefato); escopo = **só os dois seams de confirmação** (render de saída fica fora, D-ARQ próprio).
+
+**Entrega.** D-ARQ-54: superfície RT como apresentação-pura sobre o contrato ida/volta (lógica-de-domínio ZERO; preserva D-ARQ-09 e "seam humano fora do adaptador"); um contrato instanciado nos dois seams; CLI-first; universalidade por operar sobre artefato JSON, não conteúdo Viverde. Fatiamento previsto: (1) CLI envelope, (2) CLI FDS, (3) unificação se a forma se confirmar, (4) web como adaptador irmão. Sem código. DECISOES → v103. PROTOCOLO v44 intocado (nenhuma R-* criada/alterada). PAINEL intocado (decisão não move nenhum dos 3 números, nenhum marco fechou, não é META).
+
+**Pendências.** Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, requisito (b) da 003.BS. Remanescente de D-ARQ-53 FECHADO por D-ARQ-54 (a superfície RT deixa de ser remanescente aberto e vira decisão com fatiamento). Cliente-LLM real do topo já entregue (003.CA).
+
+**Próxima.** A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 1 de D-ARQ-54 (CLI do envelope, gabarito envelope-Viverde). Alternativa: CONHECIMENTO (vocabulário químico raso, DT-003M-02).
