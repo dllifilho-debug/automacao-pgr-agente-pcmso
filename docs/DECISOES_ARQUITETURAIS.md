@@ -1733,6 +1733,22 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 
 **Base.** Sessão 003.CD (09/07/2026). Remanescente de D-ARQ-53. Gate de estado real (disco): pares serializar/desserializar em `revisao_envelope.py`/`revisao_verbatim.py`, sem consumidor humano. Duas passadas: (1ª) superfície por seam, cada uma sua; (2ª, crítica) os dois seams são a mesma forma "ida→edição→volta" → contrato de apresentação único, instanciado duas vezes; CLI-first porque exerce o contrato limpo antes de qualquer framework. Decisão de arquitetura — sem código.
 
+**Aplicação (003.CE — fatia 1).** CLI do envelope materializada em
+`superficie/cli_envelope.py` (pacote NOVO `agente_medico/superficie/` —
+casa da camada de apresentação, distinto de `adaptadores/` que costura
+LLM/arquivo). `revisar_envelope(artefato_ida, entrada, saida) -> str`:
+renderiza credencial crua + candidatas + proposta, coleta validade (Enter
+mantém proposta; validação SÓ de forma ISO) e assinatura_engenheiro (s/n
+explícito, sem default — 003.BV), emite artefato-volta com self-check via
+`desserializar_confirmacao` (reutiliza o validador, anti-erro-silencioso
+D-ARQ-22). Lógica-de-domínio zero confirmada. Contrato de apresentação
+abstrato NÃO criado (fatia 3, anti-falsa-completude D-ARQ-22). Achado de
+revisão pré-merge: EOF em stdin virava loop infinito (readline() == ""
+confundido com Enter); corrigido com EOFError, 2 testes. Gabarito
+envelope-Viverde fim-a-fim (preparar_envelope → CLI → EnvelopeConfirmado).
+Commits 62ca3e5 + 0a4f4fc, merge a0153a8, PR #182. Suíte 697→708
+(704 passed + 4 skipped), mypy --strict delta-zero. Fatias 2–4 abertas.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -1840,3 +1856,4 @@ Passada de verificação que corrigiu o escopo: a simetria com D-ARQ-36 é real 
 | v101 | 09/07/2026 | Sessão 003.CB (CONHECIMENTO): nota de aplicação 003.CB em D-ARQ-51 — **R-RUIDO-01** (PROTOCOLO v43) destrava a fatia 3 (`relacao_LT` sempre `None` até 003.BZ era bloqueio clínico, não de engenharia): limiares NEN <80/80–85/≥85 → `abaixo_acao`/`entre_acao_LT`/`acima_LT`, `[DERIVADO]` NR-15 Anexo 1 (85=LT) + NR-09/NHO-01 (80=nível de ação), conferidos via web (D-ARQ-27). Fatia 3 desbloqueada p/ IMPL (cobertura por faixa exigida). DT-003CB-01 herdada à IMPL (`valor` não discrimina NEN vs SPL/pico — irmã de DT-002V-01). Sem código. Nenhum número de suíte movido (PAINEL não re-tira — sem merge). |
 | v102 | 09/07/2026 | Sessão 003.CC (IMPLEMENTAÇÃO): nota de aplicação fatia 3 em D-ARQ-51 — classificador R-RUIDO-01 (`motor/classificacao_ruido.py` novo, aplicado em `hidratar_ghe` pós-resolução quando slug=="ruido"; `acima_acao` nunca emitido; predicado e R-AUD-* intocados). Recorte remanescente da 003.BZ fechado. DT-003CB-01 documentada em docstring, segue ABERTA. Commit `9500c2a`, PR #179, merge `975ae85`. Suíte 678→693, mypy delta-zero. Nenhuma R-* criada/alterada (R-RUIDO-01 já era v43; ganha status implementada-com-teste). |
 | v103 | 09/07/2026 | Sessão 003.CD (ARQUITETURA): **D-ARQ-54** adicionada — superfície RT como apresentação-pura sobre o contrato ida/volta já existente (lógica-de-domínio ZERO; preserva D-ARQ-09 e "seam humano fora do adaptador"); um contrato de apresentação instanciado nos dois seams (envelope `revisao_envelope.py` + FDS `revisao_verbatim.py`); **CLI primeiro** (exerce o contrato antes de framework; web herda o mesmo artefato), decisão de Diovanni; escopo = só os dois seams de confirmação (render de saída matriz/pendências fica FORA, D-ARQ próprio). Fecha o remanescente "superfície RT (UI/CLI)" de D-ARQ-53. Gate de estado real: pares serializar/desserializar em disco, sem consumidor humano. Nenhuma R-* criada/alterada (PROTOCOLO v44 intocado). Sem código. |
+| v104 | 10/07/2026 | Sessão 003.CE (IMPLEMENTAÇÃO): nota de aplicação fatia 1 em D-ARQ-54 — CLI do envelope em pacote novo `agente_medico/superficie/` (`cli_envelope.py`, apresentação-pura, lógica-de-domínio zero); `revisar_envelope` renderiza credencial+candidatas+proposta, coleta validade (Enter mantém proposta, validação só de forma) e assinatura_engenheiro (s/n sem default), self-check via `desserializar_confirmacao`. Achado pré-merge: EOF em stdin causava loop infinito, corrigido com `EOFError` + 2 testes. Gabarito envelope-Viverde fim-a-fim. Commits 62ca3e5+0a4f4fc, merge a0153a8, PR #182. Suíte 697→708 (704 passed + 4 skipped), mypy --strict delta-zero. Fatias 2–4 (CLI FDS, unificação, web) abertas. |

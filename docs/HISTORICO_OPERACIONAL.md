@@ -3227,3 +3227,17 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, requisito (b) da 003.BS. Remanescente de D-ARQ-53 FECHADO por D-ARQ-54 (a superfície RT deixa de ser remanescente aberto e vira decisão com fatiamento). Cliente-LLM real do topo já entregue (003.CA).
 
 **Próxima.** A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 1 de D-ARQ-54 (CLI do envelope, gabarito envelope-Viverde). Alternativa: CONHECIMENTO (vocabulário químico raso, DT-003M-02).
+
+---
+
+## Sessão 003.CE — 10/07/2026 — IMPLEMENTAÇÃO (fatia 1 D-ARQ-54: CLI do envelope)
+
+**Foco.** Declarado no kickoff: IMPLEMENTAÇÃO da fatia 1 de D-ARQ-54, escolhida sobre CONHECIMENTO DT-003M-02 (destrava o ciclo de validação-RT; vocabulário não depende de sequência).
+
+**Método.** Leitura pré-prompt via git objects (D-ARQ-54 integral, revisao_envelope.py inteiro, preparar_envelope). Especificação fechada pelo Arquiteto antes do Code: pacote superficie/ novo, sem contrato abstrato (fatia 3), I/O injetável (TextIO), self-check na volta. Revisão de diff via git show pegou defeito real (EOF → loop infinito) ANTES do merge; correção formulada pelo Arquiteto, aplicada pelo Code — fluxo bloqueador/decisão respeitado.
+
+**Entrega.** superficie/cli_envelope.py + __init__.py + test_cli_envelope.py (10 testes: 8 da spec + 2 EOF). Gabarito Viverde fim-a-fim. Commits 62ca3e5/0a4f4fc, merge a0153a8, PR #182. Suíte 697→708 (704 passed + 4 skipped), mypy delta-zero (46 preexistentes). DECISOES v103→v104 (nota de aplicação). PROTOCOLO v44 intocado (nenhuma R-*). PAINEL re-tirado (número 2 moveu: seam envelope tem superfície).
+
+**Pendências.** Seguem ABERTAS: DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-003M-02, DT-FDS-02, requisito (b) da 003.BS. D-ARQ-54 fatias 2 (CLI FDS, gabarito fds_t65), 3 (unificação), 4 (web) abertas.
+
+**Próxima.** A declarar no kickoff. Candidata natural: fatia 2 de D-ARQ-54 (CLI da FDS — mesma forma, gabarito fds_t65).
