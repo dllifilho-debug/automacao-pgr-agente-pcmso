@@ -1749,6 +1749,24 @@ envelope-Viverde fim-a-fim (preparar_envelope → CLI → EnvelopeConfirmado).
 Commits 62ca3e5 + 0a4f4fc, merge a0153a8, PR #182. Suíte 697→708
 (704 passed + 4 skipped), mypy --strict delta-zero. Fatias 2–4 abertas.
 
+**Aplicação (003.CF — fatia 2).** CLI da FDS materializada em
+`superficie/cli_fds.py`. `revisar_verbatim(artefato_ida, entrada, saida) -> str`:
+renderiza blocos/membros crus (byte-exato), coleta faixa com Enter-mantém e
+revisão por membro com gate único `[Enter mantém / e edita / r remove]`
+(drill-down cas/nome só no "e"; SEM "adicionar" — membro sem procedência de
+transcrição, correção é re-transcrever a FDS); bloco com membros vazio aceito
+(juízo do `gate_forma` a jusante); self-check via `desserializar_verbatim`
+(`gate_forma` segue exclusivo de `montar_fds_revisado`, decisão selada);
+`EOFError` antes do strip em todo prompt (lição 003.CE). `ArtefatoIdaIlegivel`
+local — contrato abstrato segue NÃO criado (fatia 3, anti-falsa-completude
+D-ARQ-22). Defeito pego em revisão pré-merge: gabarito com literais inventados
+em vez de `fds_verbatim_t65` cru — corrigido (roundtrip byte-exato com `\n`
+intra-token do TiO₂). Remanescente nomeado: adaptador FDS sem emissor do
+artefato-ida em produção. Commits 45ca92b + 3b7f5ee, merge 7c272a8, PR #184.
+Suíte 708→720 (716 passed + 4 skipped), mypy --strict delta-zero. Fatias 3–4
+(unificação, web) abertas — a fatia 3 tem gatilho satisfeito (duas instâncias
+confirmaram a forma).
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -1857,3 +1875,4 @@ Commits 62ca3e5 + 0a4f4fc, merge a0153a8, PR #182. Suíte 697→708
 | v102 | 09/07/2026 | Sessão 003.CC (IMPLEMENTAÇÃO): nota de aplicação fatia 3 em D-ARQ-51 — classificador R-RUIDO-01 (`motor/classificacao_ruido.py` novo, aplicado em `hidratar_ghe` pós-resolução quando slug=="ruido"; `acima_acao` nunca emitido; predicado e R-AUD-* intocados). Recorte remanescente da 003.BZ fechado. DT-003CB-01 documentada em docstring, segue ABERTA. Commit `9500c2a`, PR #179, merge `975ae85`. Suíte 678→693, mypy delta-zero. Nenhuma R-* criada/alterada (R-RUIDO-01 já era v43; ganha status implementada-com-teste). |
 | v103 | 09/07/2026 | Sessão 003.CD (ARQUITETURA): **D-ARQ-54** adicionada — superfície RT como apresentação-pura sobre o contrato ida/volta já existente (lógica-de-domínio ZERO; preserva D-ARQ-09 e "seam humano fora do adaptador"); um contrato de apresentação instanciado nos dois seams (envelope `revisao_envelope.py` + FDS `revisao_verbatim.py`); **CLI primeiro** (exerce o contrato antes de framework; web herda o mesmo artefato), decisão de Diovanni; escopo = só os dois seams de confirmação (render de saída matriz/pendências fica FORA, D-ARQ próprio). Fecha o remanescente "superfície RT (UI/CLI)" de D-ARQ-53. Gate de estado real: pares serializar/desserializar em disco, sem consumidor humano. Nenhuma R-* criada/alterada (PROTOCOLO v44 intocado). Sem código. |
 | v104 | 10/07/2026 | Sessão 003.CE (IMPLEMENTAÇÃO): nota de aplicação fatia 1 em D-ARQ-54 — CLI do envelope em pacote novo `agente_medico/superficie/` (`cli_envelope.py`, apresentação-pura, lógica-de-domínio zero); `revisar_envelope` renderiza credencial+candidatas+proposta, coleta validade (Enter mantém proposta, validação só de forma) e assinatura_engenheiro (s/n sem default), self-check via `desserializar_confirmacao`. Achado pré-merge: EOF em stdin causava loop infinito, corrigido com `EOFError` + 2 testes. Gabarito envelope-Viverde fim-a-fim. Commits 62ca3e5+0a4f4fc, merge a0153a8, PR #182. Suíte 697→708 (704 passed + 4 skipped), mypy --strict delta-zero. Fatias 2–4 (CLI FDS, unificação, web) abertas. |
+| v105 | 10/07/2026 | Sessão 003.CF (IMPLEMENTAÇÃO): nota de aplicação fatia 2 em D-ARQ-54 — CLI da FDS em `superficie/cli_fds.py` (apresentação-pura, lógica-de-domínio zero); `revisar_verbatim` renderiza blocos/membros crus, coleta faixa (Enter mantém) e revisão por membro (`[Enter mantém / e edita / r remove]`, drill-down só no "e"; sem "adicionar" — procedência de transcrição), self-check via `desserializar_verbatim` (`gate_forma` segue só em `montar_fds_revisado`); `EOFError` antes do strip em todo prompt (lição 003.CE). Defeito pego em revisão pré-merge: gabarito com literais inventados em vez de `fds_verbatim_t65` cru — corrigido (roundtrip byte-exato, `\n` intra-token). Remanescente nomeado: adaptador FDS sem emissor do artefato-ida em produção. Commits 45ca92b+3b7f5ee, merge 7c272a8, PR #184. Suíte 708→720 (716 passed + 4 skipped), mypy --strict delta-zero. Fatias 3–4 abertas (gatilho da 3 satisfeito). |
