@@ -144,6 +144,24 @@ def test_ida_ilegivel_levanta_erro() -> None:
         revisar_envelope('{"candidatas": []}', io.StringIO(), io.StringIO())
 
 
+def test_stdin_exaurido_levanta_eof_sem_travar() -> None:
+    ida = _ida_padrao()
+    entrada = io.StringIO("")
+    saida = io.StringIO()
+
+    with pytest.raises(EOFError):
+        revisar_envelope(ida, entrada, saida)
+
+
+def test_stdin_acaba_apos_validade_levanta_eof_na_assinatura() -> None:
+    ida = _ida_padrao()
+    entrada = io.StringIO("2027-01-01\n")
+    saida = io.StringIO()
+
+    with pytest.raises(EOFError):
+        revisar_envelope(ida, entrada, saida)
+
+
 def test_gabarito_viverde_fim_a_fim() -> None:
     mock = MockTranscritorTopoConstante(_ENVELOPE_VIVERDE_GABARITO)
     artefato, pendencias = preparar_envelope(_PDF_VIVERDE, mock)

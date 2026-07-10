@@ -83,7 +83,10 @@ def _prompt_validade(proposta: str | None, entrada: TextIO, saida: TextIO) -> st
     proposta_texto = proposta if proposta is not None else "(nenhuma)"
     while True:
         saida.write(f"Validade [Enter mantém: {proposta_texto}]: ")
-        resposta = entrada.readline().strip()
+        linha = entrada.readline()
+        if linha == "":
+            raise EOFError("entrada encerrada antes da confirmação-RT")
+        resposta = linha.strip()
         if resposta == "":
             if proposta is not None:
                 return proposta
@@ -100,7 +103,10 @@ def _prompt_validade(proposta: str | None, entrada: TextIO, saida: TextIO) -> st
 def _prompt_assinatura(entrada: TextIO, saida: TextIO) -> bool:
     while True:
         saida.write("Assinatura do engenheiro confirmada? (s/n): ")
-        resposta = entrada.readline().strip().lower()
+        linha = entrada.readline()
+        if linha == "":
+            raise EOFError("entrada encerrada antes da confirmação-RT")
+        resposta = linha.strip().lower()
         if resposta == "s":
             return True
         if resposta == "n":
