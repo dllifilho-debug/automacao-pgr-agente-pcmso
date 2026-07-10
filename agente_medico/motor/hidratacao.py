@@ -10,8 +10,10 @@ resolução do agente — o parse roda 1x por risco antes do tri-estado. Texto
 parseável vira Quantificacao; vazio vira None sem pendência; texto não-vazio
 ininteligível vira None + Pendencia quantificacao_nao_parseada não-bloqueante
 (anti-supressão D-ARQ-31/35: medição transcrita nunca some em silêncio, o
-risco entra mesmo assim). Recorte remanescente: relacao_LT sempre None —
-classificação dB->relação é regra clínica não formalizada (fatia futura).
+risco entra mesmo assim). Recorte remanescente: quantificacao de ruído
+(slug "ruido", EXATA ou FUZZY) é classificada em relacao_LT por
+classificar_ruido (D-ARQ-51 fatia 3, R-RUIDO-01), aplicada pós-resolução do
+termo — agente=None não classifica.
 EPIs, produtos_quimicos, psicossocial e cenario ficam em default (diferidos,
 D-ARQ-49 P2). Risco NUNCA descartado (D-ARQ-31/35 P3): tri-estado do
 resolver (EXATA/FUZZY/NAO_RESOLVIDO) sempre vira exatamente 1 RiscoPGR.
@@ -22,6 +24,7 @@ import dataclasses
 from collections.abc import Sequence
 from datetime import date
 
+from agente_medico.motor.classificacao_ruido import classificar_ruido
 from agente_medico.motor.quantificacao import parsear_quantificacao
 from agente_medico.motor.resolvedor_termos import Confianca, resolver_termo
 from agente_medico.motor.tipos import GHEPGR, PGR, GHEVerbatim, Pendencia, RiscoPGR
@@ -44,6 +47,9 @@ def hidratar_ghe(
     D-ARQ-51 fatia 2), independente do tri-estado acima; texto cru não-vazio
     que falha o parse rende Pendencia quantificacao_nao_parseada
     não-bloqueante (anti-supressão D-ARQ-31/35), sem impedir o risco de entrar.
+    Quando o slug resolvido é "ruido" (EXATA ou FUZZY) e a quantificação foi
+    parseada, classificar_ruido (D-ARQ-51 fatia 3, R-RUIDO-01) preenche
+    relacao_LT antes de montar o RiscoPGR; agente=None não classifica.
     """
     # Handle do bloco transcrito, NÃO id canônico (D-ARQ-51 seam 1;
     # re-agrupamento 42->32 é fatia downstream).
@@ -69,6 +75,9 @@ def hidratar_ghe(
                     ghe_id=ghe_id,
                 )
             )
+
+        if resolucao.slug == "ruido" and quantificacao is not None:
+            quantificacao = classificar_ruido(quantificacao)
 
         if resolucao.confianca == Confianca.EXATA:
             riscos.append(

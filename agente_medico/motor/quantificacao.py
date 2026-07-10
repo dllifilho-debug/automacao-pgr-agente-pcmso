@@ -44,7 +44,9 @@ def parsear_quantificacao(texto: str) -> Optional[Quantificacao]:
     é o chamador (hidratar_ghe compara contra o texto cru original).
 
     Saída sempre com relacao_LT=None, pct_LT=None, apenas_qualitativa=False:
-    classificação dB->relação é regra clínica não formalizada (fatia futura).
+    classificação dB(A)->relacao_LT é responsabilidade de
+    classificacao_ruido.classificar_ruido (R-RUIDO-01), aplicada
+    pós-resolução em hidratar_ghe.
     """
     bruto = texto.strip()
     if not bruto:

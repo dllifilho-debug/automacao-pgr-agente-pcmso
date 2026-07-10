@@ -117,6 +117,54 @@ def test_quantificacao_vazia_vira_none_sem_pendencia(indice_real: dict[str, str]
 
 
 # ---------------------------------------------------------------------------
+# classificação dB(A) -> relacao_LT (D-ARQ-51 fatia 3, R-RUIDO-01)
+# ---------------------------------------------------------------------------
+
+def test_ruido_abaixo_acao_classifica_relacao_lt(indice_real: dict[str, str]) -> None:
+    # âncora Viverde: 78,8 dB(A) < 80 -> abaixo_acao.
+    ghe = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="78,8 dB(A)", fonte_geradora=""),)
+    )
+    ghe_pgr, _ = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    quantificacao = ghe_pgr.riscos[0].quantificacao
+    assert quantificacao is not None
+    assert quantificacao.relacao_LT == "abaixo_acao"
+
+
+def test_ruido_acima_lt_classifica_relacao_lt(indice_real: dict[str, str]) -> None:
+    # âncora Viverde: 89,6 dB(A) >= 85 -> acima_LT.
+    ghe = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="89,6 dB(A)", fonte_geradora=""),)
+    )
+    ghe_pgr, _ = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    quantificacao = ghe_pgr.riscos[0].quantificacao
+    assert quantificacao is not None
+    assert quantificacao.relacao_LT == "acima_LT"
+
+
+def test_risco_nao_ruido_com_dba_nao_classifica(indice_real: dict[str, str]) -> None:
+    ghe = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Thinner", quantificacao="89,6 dB(A)", fonte_geradora=""),)
+    )
+    ghe_pgr, _ = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    quantificacao = ghe_pgr.riscos[0].quantificacao
+    assert quantificacao is not None
+    assert quantificacao.relacao_LT is None
+
+
+def test_ruido_sem_quantificacao_nao_classifica(indice_real: dict[str, str]) -> None:
+    ghe = _ghe_verbatim(
+        riscos=(RiscoVerbatim(agente="Ruído", quantificacao="", fonte_geradora=""),)
+    )
+    ghe_pgr, _ = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    assert ghe_pgr.riscos[0].quantificacao is None
+
+
+# ---------------------------------------------------------------------------
 # id posicional (D-ARQ-51 seam 1)
 # ---------------------------------------------------------------------------
 
