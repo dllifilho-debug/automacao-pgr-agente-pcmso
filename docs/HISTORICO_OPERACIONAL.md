@@ -3183,3 +3183,19 @@ Docs. DECISOES → v100 (nota de aplicação cliente-real em D-ARQ-53). PROTOCOL
 Pendências. DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01 seguem ABERTAS. Requisito (b) da 003.BS (generalização multi-PGR da âncora) ABERTO — prompt do topo calibrado em n=1 Viverde. Fatia 3 de D-ARQ-51 (dB→`relacao_LT`) segue bloqueada por regra clínica não formalizada. Remanescente de D-ARQ-53: superfície RT (UI/CLI).
 
 Próxima. A declarar no kickoff. Candidatas: sessão CONHECIMENTO — derivar R-* de classificação de ruído das normas vigentes (NR-15 Anexo 1, NR-01/09, NHO-01; destrava fatia 3 de D-ARQ-51) vs. superfície RT (UI/CLI) do envelope.
+
+## Sessão 003.CB — 09/07/2026 — CONHECIMENTO (R-RUIDO-01: classificação de ruído dB→relacao_LT)
+
+Foco. Ratificado no kickoff: derivar a R-* de classificação de ruído que destrava a fatia 3 de D-ARQ-51 (`relacao_LT` sempre `None` desde 003.BZ — bloqueio clínico, não de engenharia). Escolhida sobre superfície RT (UI/CLI) por ser o único bloqueador clínico ativo; as duas sessões anteriores (003.BZ/CA) foram engenharia pura e a fila de IMPL esvazia sem R-* nova.
+
+Método. Leitura integral de PROTOCOLO (v42) e DECISOES via git objects. Achado central: R-AUD-01/02 já referenciam "nível de ação" e "ruído acima do nível de ação", e o predicado `_ruido_acima_acao` (`predicados.py`) já consome `relacao_LT ∈ {abaixo_acao, entre_acao_LT, acima_acao, acima_LT}` — faltava só a regra que converte `valor` dB(A) em `relacao_LT`. Consumidor pronto; a fatia 3 é a única peça ausente. Conferência normativa via web (D-ARQ-27): NR-15 Anexo 1 (gov.br/MTE 2025) LT=85 dB(A)/8h, teto 115; nível de ação=dose 0,5=80 dB(A)=NLI da NHO-01.
+
+Entrega. R-RUIDO-01 formalizada (PROTOCOLO v43, seção 5.2): partição do NEN — <80 `abaixo_acao`, 80–85 `entre_acao_LT`, ≥85 `acima_LT`. Limiares `[DERIVADO]` (85=LT NR-15 Anexo 1; 80=nível de ação NR-09 c/c NHO-01, item literal NR-09 `[INCERTO]`). Três ressalvas `[INTERPRETADO — revisão de saída]`: (1) `valor` tem que ser o NEN, não SPL/pico — comparar leitura pontual ao LT é erro clínico silencioso (D-ARQ-22); (2) q=5 (NR-15) vs q=3 (NHO-01) afeta o cálculo do NEN, não a classificação por limiar — motor consome NEN pronto, não calcula dose (separação NR-07-consome/NR-09-produz de DT-002V-01); (3) ruído de impacto (NR-15 Anexo 2) fora de escopo. Recomendação de vocabulário: classificador emite os 3 disjuntos; `acima_acao` fica sinônimo-legado aceito pelo predicado, nunca produzido. Universalidade verificada (construção/química/saúde — LT de ruído é universal).
+
+Falso alarme de higiene doc registrado. No fechamento, o mount do sandbox (working tree defasado — hazard conhecido) mostrou o changelog do DECISOES terminando em v98, sugerindo v99/v100 esquecidos. Verificação pelo arquivo real (host): v99 e v100 presentes (linhas 1794-1795). Não havia divergência — o git venceu, como sempre. Nenhuma reconciliação feita; só append de v101.
+
+Docs. PROTOCOLO → v43 (R-RUIDO-01 + DT-003CB-01). DECISOES → v101 (nota de aplicação 003.CB em D-ARQ-51 + linha de changelog). PAINEL não re-tirado (sessão CONHECIMENTO sem merge; nenhum dos 3 números movido — re-tira quando a fatia 3 mergear).
+
+Pendências. Nova: DT-003CB-01 (`Quantificacao.valor` de ruído não discrimina NEN vs SPL/pico — irmã de DT-002V-01), herdada à IMPL da fatia 3. Seguem ABERTAS: DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, requisito (b) da 003.BS. Remanescente de D-ARQ-53: superfície RT (UI/CLI).
+
+Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 de D-ARQ-51 — R-RUIDO-01 agora desbloqueada para código (classificador `valor` dB(A)→`relacao_LT` em `hidratar_ghe`/módulo próprio, cobertura de teste por faixa exigida, DT-003CB-01 herdada). Alternativa: superfície RT (UI/CLI) do envelope.
