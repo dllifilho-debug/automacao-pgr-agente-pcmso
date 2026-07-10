@@ -1767,6 +1767,23 @@ Suíte 708→720 (716 passed + 4 skipped), mypy --strict delta-zero. Fatias 3–
 (unificação, web) abertas — a fatia 3 tem gatilho satisfeito (duas instâncias
 confirmaram a forma).
 
+**Aplicação (003.CG — fatia 3).** Contrato de apresentação materializado
+em `superficie/apresentacao.py` (D-ARQ-54 P2): `ArtefatoIdaIlegivel`
+única, `carregar_artefato_ida` (validação estrutural do artefato-ida),
+`ler_resposta` (EOF→`EOFError` antes do strip), `prompt_enter_mantem`,
+`conduzir_revisao` (carregar → revisar → serializar → self-check; o
+`revisar` é callable por-seam porque na FDS a renderização é intercalada
+com a coleta — fases separadas quebrariam o fluxo real) e `executar_main`
+(esqueleto argparse). `cli_envelope.py`/`cli_fds.py` viram instâncias do
+contrato; ficam por-seam os renders e os prompts de juízo próprio
+(validade-ISO, s/n, gate [Enter/e/r]). Refactor comportamento-preservante:
+os 23 testes das CLIs INTOCADOS como gate de regressão (byte-identidade de
+mensagens, prompts e ordem de writes). Emissor do artefato-ida em produção
+segue FORA (remanescente 003.CF — costura de produção ou fatia 4).
+Commits dfdd4fa + fec0739, merge bb426a5, PR #186. Suíte 720→727
+(723 passed + 4 skipped), mypy --strict delta-zero. Resta fatia 4 (web),
+agora sobre o contrato unificado.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -1876,3 +1893,4 @@ confirmaram a forma).
 | v103 | 09/07/2026 | Sessão 003.CD (ARQUITETURA): **D-ARQ-54** adicionada — superfície RT como apresentação-pura sobre o contrato ida/volta já existente (lógica-de-domínio ZERO; preserva D-ARQ-09 e "seam humano fora do adaptador"); um contrato de apresentação instanciado nos dois seams (envelope `revisao_envelope.py` + FDS `revisao_verbatim.py`); **CLI primeiro** (exerce o contrato antes de framework; web herda o mesmo artefato), decisão de Diovanni; escopo = só os dois seams de confirmação (render de saída matriz/pendências fica FORA, D-ARQ próprio). Fecha o remanescente "superfície RT (UI/CLI)" de D-ARQ-53. Gate de estado real: pares serializar/desserializar em disco, sem consumidor humano. Nenhuma R-* criada/alterada (PROTOCOLO v44 intocado). Sem código. |
 | v104 | 10/07/2026 | Sessão 003.CE (IMPLEMENTAÇÃO): nota de aplicação fatia 1 em D-ARQ-54 — CLI do envelope em pacote novo `agente_medico/superficie/` (`cli_envelope.py`, apresentação-pura, lógica-de-domínio zero); `revisar_envelope` renderiza credencial+candidatas+proposta, coleta validade (Enter mantém proposta, validação só de forma) e assinatura_engenheiro (s/n sem default), self-check via `desserializar_confirmacao`. Achado pré-merge: EOF em stdin causava loop infinito, corrigido com `EOFError` + 2 testes. Gabarito envelope-Viverde fim-a-fim. Commits 62ca3e5+0a4f4fc, merge a0153a8, PR #182. Suíte 697→708 (704 passed + 4 skipped), mypy --strict delta-zero. Fatias 2–4 (CLI FDS, unificação, web) abertas. |
 | v105 | 10/07/2026 | Sessão 003.CF (IMPLEMENTAÇÃO): nota de aplicação fatia 2 em D-ARQ-54 — CLI da FDS em `superficie/cli_fds.py` (apresentação-pura, lógica-de-domínio zero); `revisar_verbatim` renderiza blocos/membros crus, coleta faixa (Enter mantém) e revisão por membro (`[Enter mantém / e edita / r remove]`, drill-down só no "e"; sem "adicionar" — procedência de transcrição), self-check via `desserializar_verbatim` (`gate_forma` segue só em `montar_fds_revisado`); `EOFError` antes do strip em todo prompt (lição 003.CE). Defeito pego em revisão pré-merge: gabarito com literais inventados em vez de `fds_verbatim_t65` cru — corrigido (roundtrip byte-exato, `\n` intra-token). Remanescente nomeado: adaptador FDS sem emissor do artefato-ida em produção. Commits 45ca92b+3b7f5ee, merge 7c272a8, PR #184. Suíte 708→720 (716 passed + 4 skipped), mypy --strict delta-zero. Fatias 3–4 abertas (gatilho da 3 satisfeito). |
+| v106 | 10/07/2026 | Sessão 003.CG (IMPLEMENTAÇÃO): nota de aplicação fatia 3 em D-ARQ-54 — contrato de apresentação unificado em `superficie/apresentacao.py` (exceção única, loader, ler_resposta, prompt_enter_mantem, conduzir_revisao com revisar-callable, executar_main); CLIs viram instâncias, testes existentes intocados (gate de regressão byte-idêntico). Commits dfdd4fa+fec0739, merge bb426a5, PR #186. Suíte 720→727, mypy delta-zero. Resta fatia 4 (web). |
