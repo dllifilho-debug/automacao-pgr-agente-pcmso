@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from agente_medico.motor.extracao_pgr import (
+    avaliar_segmentacao,
     eh_cabecalho_ghe,
     extrair_texto_pgr,
     recortar_blocos_ghe,
@@ -190,3 +191,72 @@ def test_recorte_blocos_ghe_conflacao_viverde_nao_gera_bloco_por_processo_subpro
     # gerar bloco para essa seção.
     blocos = recortar_blocos_ghe(paginas)
     assert not any("PROCESSO/SUBPROCESSO" in bloco.splitlines()[0] for bloco in blocos)
+
+
+# ---------------------------------------------------------------------------
+# avaliar_segmentacao — gate anti-Vistamérica, densidade + contagem
+# (D-ARQ-57 peça 2, limiares calibrados em 003.CP sobre DT-003CM-01).
+# ---------------------------------------------------------------------------
+
+
+def _construir_paginas(total_paginas: int, ancoras: dict[int, str]) -> list[str]:
+    # 1 linha por página: "GHE n" nas páginas-âncora (1-based), filler nas
+    # demais — controla exatamente a extensão em páginas de cada bloco.
+    return [
+        ancoras.get(pagina, f"linha comum pág. {pagina}")
+        for pagina in range(1, total_paginas + 1)
+    ]
+
+
+def test_avaliar_segmentacao_uma_ancora_doc_grande_e_pendencia_por_contagem() -> None:
+    paginas = _construir_paginas(20, {5: "GHE 1"})
+    pendencia = avaliar_segmentacao(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
+
+
+def test_avaliar_segmentacao_zero_ancoras_doc_grande_e_pendencia_por_contagem() -> None:
+    paginas = _construir_paginas(20, {})
+    pendencia = avaliar_segmentacao(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
+
+
+def test_avaliar_segmentacao_doc_pequeno_uma_ancora_e_none() -> None:
+    # 8 páginas está abaixo de _LIMIAR_PAGINAS_DOC_MINIMO=10 — 1 bloco
+    # cobrindo o documento inteiro é plausível num doc pequeno.
+    paginas = _construir_paginas(8, {8: "GHE 1"})
+    assert avaliar_segmentacao(paginas) is None
+
+
+def test_avaliar_segmentacao_bloco_denso_e_pendencia_por_densidade() -> None:
+    # Âncoras nas págs. 1,2,3,4,12 -> blocos de 1,1,1,8,9 páginas (últ. bloco
+    # vai até a pág. 20) — o bloco de 9 págs. excede 40% de 20 (=8 págs.).
+    paginas = _construir_paginas(
+        20, {1: "GHE 1", 2: "GHE 2", 3: "GHE 3", 4: "GHE 4", 12: "GHE 5"}
+    )
+    pendencia = avaliar_segmentacao(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
+
+
+def test_avaliar_segmentacao_blocos_distribuidos_e_none() -> None:
+    # Âncoras nas págs. 1,5,9,13,17 -> todo bloco tem 4 páginas (<= 40% de 20).
+    paginas = _construir_paginas(
+        20, {1: "GHE 1", 5: "GHE 2", 9: "GHE 3", 13: "GHE 4", 17: "GHE 5"}
+    )
+    assert avaliar_segmentacao(paginas) is None
+
+
+def test_avaliar_segmentacao_pendencia_e_bloqueante_com_regra_origem_darq57() -> None:
+    paginas = _construir_paginas(20, {})
+    pendencia = avaliar_segmentacao(paginas)
+    assert pendencia is not None
+    assert pendencia.bloqueante is True
+    assert pendencia.regra_origem == "D-ARQ-57"
+
+
+def test_avaliar_segmentacao_viverde_e_none(paginas: list[str]) -> None:
+    # Medição 003.CP: Viverde 151 págs., 31 blocos, maior bloco 29 págs.
+    # (= 19,2%) — bem abaixo dos dois limiares.
+    assert avaliar_segmentacao(paginas) is None
