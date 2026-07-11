@@ -1102,6 +1102,32 @@ Refinamentos aos passos da migração desta DT:
 
 **Status:** ABERTA. Não-bloqueante (a pendência bloqueante `bypass_sem_slug` já impede saída silenciosa).
 
+### DT-003CM-01 — Mapa de cabeçalhos de bloco GHE multi-PGR: âncora `SETOR/FUNÇÃO` cobre 1 de 15 `[DERIVADO — medição de 15 PGRs, 003.CM]`
+
+**Origem:** Sessão 003.CM (11/07/2026), medição da generalização da âncora de recorte (requisito (b) da 003.BS; medição prevista na NOTA 003.BM sobre a amostra de DT-003L-01). Varredura read-only dos 15 PGRs do acervo via pdfplumber (mesmo extrator de `extrair_texto_pgr`); Ricco Hetrin, Ricco Serra Dourada e Seconci REV3 por censo pypdf `[MEDIDO com pypdf — forma de linha a confirmar com pdfplumber se virarem caso-âncora]`.
+
+**Situação.** A âncora atual do recorte (`linha.startswith("SETOR/FUNÇÃO")`, verbatim, `extracao_pgr.py`) casa em **1 de 15 PGRs** (Viverde, 42×). Não existe âncora única multi-PGR — o acervo (só construção civil) usa pelo menos 5 formas de cabeçalho de bloco:
+
+1. **`GHE NN` seco + sub-linha `SETOR/FUNÇÃO ...`** (Viverde) — 31 cabeçalhos `GHE NN` no inventário.
+2. **`GHE NN - TÍTULO`** (Vistamérica 50×, CMO Ver.02 14×, Seconci REV3/REV4 18×, TPB Andrade 1×, AURO 19×) — a forma mais frequente, 6 PGRs.
+3. **`INVENTÁRIO DE RISCO GHE NN`** (ALT T65 16×, EURO Setor C 19×) — "GHE" NÃO inicia a linha; âncora por startswith de "GHE" falharia.
+4. **`GHE: NN - TÍTULO`** (R78 Naturia) — variante com dois-pontos; doc é "PARTE 2", começa no meio do GHE 07 (sem topo — caso de doc parcial).
+5. **Sem GHE — bloco por cargo** (`CARGO/FUNÇÃO: ...` Ricco-Adm; `CARGO X - CBO: NNNN` Cjr; Hetrin e Serra Dourada idem por censo) — 4 PGRs; forma 6 de DT-003L-01. Recorte por GHE inaplicável; unidade de bloco = cargo.
+
+Floramazônia (forma 2 de DT-003L-01 — carta pedindo FDS) não tem inventário; traz índice `GHE NN - Título` em prosa de resposta — armadilha de falso positivo em nível de documento.
+
+**Achados críticos.**
+
+- **Caso-Vistamérica (classe D-ARQ-22):** a âncora atual ocorre exatamente 1× no Vistamérica (pág. 36 de 173, 1-based) → `recortar_blocos_ghe` produziria 1 "bloco" de ~137 páginas, lixo silencioso — 1 âncora não dispara a falha explícita de zero âncoras. Mesma consultoria (CMO) ≠ mesmo template.
+- **Viverde conflaciona 2 seções:** inventário por-GHE (31 cabeçalhos `GHE NN`, págs. 34–123) + quadro por-atividade `PROCESSO/SUBPROCESSO/ATIVIDADES` (págs. 131–147, com `SETOR/FUNÇÃO`, SEM linha GHE). Das 42 âncoras atuais, 17 estão no quadro por-atividade; os 32 GHEs canônicos do MAPA vêm desse re-agrupamento. (Páginas 1-based; a NOTA 003.BM reportou 1ª pág. 33 / última 146 em contagem 0-based — mesmo achado, 42 blocos.)
+- **Discriminador candidato (medido, não decidido):** `^(INVENTÁRIO DE RISCO )?GHE:? \d+( - TÍTULO)?$` em linha curta separa cabeçalho de prosa em 10/12 docs pdfplumber — exclui corretamente campos internos ("Quantidade de Funcionários expostos neste GHE: 08") e prosa ("Fisioterapia do GHE 17 para GHE 11"). Armadilhas restantes: índice do Floramazônia e a 2ª seção do Viverde.
+
+**Impacto na arquitetura (input para o D-ARQ do req. (b), sessão própria).** Âncora única verbatim não generaliza nem intra-setor. A generalização é um **localizador de blocos** com repertório de formas medidas + **gate estrutural** ("0 ou 1 bloco achado em doc >N págs → pendência bloqueante") para matar o caso-Vistamérica silencioso. Família cargo-based é fronteira de escopo (unidade cargo, não GHE), não variação de âncora. Multi-setor (química, saúde) segue não-medido — extensão futura via fontes públicas/sintéticos rotulados (lembrete 06/07/2026).
+
+**Status:** ABERTA. Não bloqueia. Insumo obrigatório da sessão ARQUITETURA do requisito (b) da 003.BS.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -1171,3 +1197,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v46 | 10/07/2026 | Sessão 003.CI (ARQUITETURA): **nota de aplicação em R-FDS-06** (seção 4) — recorte (B) da transcrição-FDS dá a R-FDS-06 consumidor executável (frase-H confiada por default, transcrita verbatim `Componente.frases_h`, admitida pelo RT, mapa {H334,H317}→`is_sensibilizante`; gate de FORMA). Semântica de R-FDS-06 intacta, ID preservada. **DT-003T-01 FECHA** (sensibilização vem da FDS, não do vocabulário); notas 003.CI em DT-003M-01 e DT-003M-02 (pré-condição escrita, fecham no passo 2). **DT-003CI-01 adicionada** (seção 11) — carcinógeno-via-frase-H (H350/H351 GHS≠IARC) deferido, futura `is_carcinogeno_ghs`. Decisão de arquitetura em D-ARQ-55 (DECISOES). Nenhuma R-* criada/alterada. Sem código. |
 | v47 | 10/07/2026 | Sessão 003.CJ (IMPLEMENTAÇÃO): nota de aplicação de R-FDS-06 **implementada** — `mapear_frases_h` em `resolvedor.py` (PR #190): mapa {H334,H317}→`is_sensibilizante`, gate de FORMA `H\d{3}`, pendência não-bloqueante em token malformado; teste-por-regra `test_mapa_frases_h.py`. Nenhuma R-* criada/alterada; semântica e ID de R-FDS-06 intactas. Detalhe em DECISOES v108 e HISTORICO 003.CJ. |
 | v48 | 10/07/2026 | Sessão 003.CK (ARQUITETURA→IMPLEMENTAÇÃO): **DT-003M-01 FECHADA** e **DT-003M-02(B) FECHADA** por D-ARQ-56 (passo 2 do cluster: bypass antes do slug-check em `materialidade()`; Fase C tripartida no sem-slug — `bypass_sem_slug` bloqueante / inerte-declarado não-bloqueante via R-FDS-06 / não-mapeado bloqueante D-ARQ-35). **2ª nota de aplicação em R-FDS-06** (inerte-declarado materializado, `regra_origem="R-FDS-06"` em `riscos.py`). **DT-003CK-01 adicionada** (promoção-sem-slug, condicionada a regra clínica de sensibilizante genérico). Nenhuma R-* criada/alterada. PR #192, suite 740→744. Detalhe em DECISOES v109 e HISTORICO 003.CK. |
+| v49 | 11/07/2026 | Sessão 003.CM (CONHECIMENTO/medição): **DT-003CM-01 adicionada** (seção 11) — mapa de cabeçalhos de bloco GHE multi-PGR (medição dos 15 PGRs do acervo, prevista na NOTA 003.BM): âncora `SETOR/FUNÇÃO` cobre 1/15; 5 formas de cabeçalho; caso-Vistamérica (1 âncora → bloco único de ~137 págs., lixo silencioso, classe D-ARQ-22); Viverde conflaciona inventário por-GHE com quadro por-atividade; família cargo-based 4/15 fora do alcance de âncora-GHE. Input obrigatório da sessão ARQ do req. (b) da 003.BS. Nenhuma R-* criada/alterada. Sem código. |

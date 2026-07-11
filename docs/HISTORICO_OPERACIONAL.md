@@ -3361,3 +3361,19 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** Sem mudança de lista: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, requisito (b) da 003.BS, higiene mypy (46). Remanescentes nomeados fora de D-ARQ-54 (seguem): emissor do artefato-ida FDS em produção (003.CF), render de saída (D-ARQ próprio), generalização multi-PGR da âncora de recorte.
 
 **Próxima.** A declarar no kickoff. Candidatas: requisito (b) 003.BS, DT-003M-02(A) (sessão de dado — vocabulário de FDS com proveniência), generalização multi-PGR da âncora de recorte, higiene mypy (46, sessão mecânica).
+
+## Sessão 003.CM — 11/07/2026 — CONHECIMENTO (medição da âncora de recorte — req. (b) 003.BS, prevista na NOTA 003.BM)
+
+**Foco.** Kickoff pediu passada crítica de verificação + recomendação; Arquiteto recomendou âncora multi-PGR (gargalo nº 1 do PAINEL; único item com lead time de dado), ratificado. Achado de leitura que moveu o plano: a NOTA 003.BM manda medir sobre a amostra de DT-003L-01 — os 15 PGRs do acervo, já em disco; a medição intra-setor começa sem esperar amostra multi-setor. Preteridas: DT-003M-02(A) (dado), emissor artefato-ida FDS (003.CF), higiene mypy.
+
+**Verificação de abertura.** Divergência da coleta colada apontada e resolvida: PR #195 JÁ estava mergeado (`d2eaf84`) — o log colado era anterior ao merge e havia typo de hash (d2caf84→d2eaf84). Fechamento 003.CL confirmado íntegro contra git objects (HISTORICO 003.CL presente, PAINEL 754+4 · 19/42 · v48/v110). Achados laterais: candidata duplicada no bloco 003.CL ("req. (b) 003.BS" ≡ "âncora multi-PGR"); staleness menor no PAINEL Camada 1 ("17→19/41" vs "19 de 42" — corrigir na próxima re-tiragem por evento).
+
+**Método.** Varredura read-only dos 15 PGRs de `matrizes_originais/` via pdfplumber (mesmo extrator de `extrair_texto_pgr`), página a página, em 12 docs; Hetrin, Serra Dourada e Seconci REV3 por censo pypdf com validação cruzada no Viverde (pypdf diverge na quebra de linha — 41+1 vs 42 startswith — serve a censo de presença, não a forma-de-linha). Scripts descartáveis em /tmp, não commitados. Sem código no repo.
+
+**Resultados.** DT-003CM-01 (PROTOCOLO v49): âncora atual `startswith("SETOR/FUNÇÃO")` casa em 1/15 PGRs; 5 formas de cabeçalho de bloco no acervo; caso-Vistamérica (1 âncora em 173 págs. → 1 "bloco" de ~137 págs., lixo silencioso, classe D-ARQ-22 — mesma consultoria do Viverde); Viverde conflaciona inventário por-GHE (31 cabeçalhos) com quadro por-atividade (17 das 42 âncoras atuais, sem linha GHE); discriminador candidato medido (separa cabeçalho de prosa em 10/12); família cargo-based (Ricco ×3 + Cjr = 4/15) fora do alcance de âncora-GHE (fronteira de escopo, unidade = cargo). Consequência para a sessão ARQ do req. (b): localizador de blocos com repertório de formas + gate estrutural anti-bloco-único, não âncora única generalizada.
+
+**Entrega (fechamento, esta branch).** PROTOCOLO v49 (DT-003CM-01, seção 11). HISTORICO: este bloco. DECISOES intocado (medição, sem D-ARQ — a decisão de generalização é da sessão ARQ que consome a DT). PAINEL não re-tirado (nenhum dos 3 números move; sem marco; não-META).
+
+**Pendências.** NOVA: DT-003CM-01. Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída. Requisito (b) da 003.BS: medição intra-setor FEITA; segue aberto (D-ARQ da generalização + IMPL + medição multi-setor futura).
+
+**Próxima.** A declarar no kickoff. Candidata natural: ARQUITETURA do localizador de blocos (req. (b), consome DT-003CM-01). Demais: DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
