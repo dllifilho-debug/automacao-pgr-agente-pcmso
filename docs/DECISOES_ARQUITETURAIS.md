@@ -1786,6 +1786,33 @@ Commits dfdd4fa + fec0739, merge bb426a5, PR #186. Suíte 720→727
 (723 passed + 4 skipped), mypy --strict delta-zero. Resta fatia 4 (web),
 agora sobre o contrato unificado.
 
+**Aplicação (003.CL — fatia 4, ÚLTIMA).** Web materializada como adaptador
+irmão das CLIs em `superficie/web_envelope.py` + `superficie/web_fds.py`
+(Streamlit — dependência já pinada; teste determinístico via
+`streamlit.testing.v1.AppTest`, sem browser/servidor; motor legado intocado).
+A metade TextIO do contrato (`conduzir_revisao`/`ler_resposta`/
+`prompt_enter_mantem`) NÃO migra — é sequencial de terminal, Streamlit é
+rerun-reativo; o web herda a metade ARTEFATO (`carregar_artefato_ida`,
+`ArtefatoIdaIlegivel`, self-check via `desserializar_*`) + `emitir_volta`
+extraído em `apresentacao.py` (o rabo dumps+self-check de `conduzir_revisao`
+— anti-erro-silencioso D-ARQ-22 num ponto só). Núcleo puro por seam
+(`montar_volta_envelope`/`montar_volta_verbatim`, sem import de streamlit,
+pytest puro) + casca fina (`pagina_envelope`/`pagina_fds`, auto-contidas por
+exigência de `AppTest.from_function` — re-executa só o texto da função).
+Semânticas das CLIs preservadas: assinatura sem default (radio `index=None`,
+003.BV), Enter-mantém vira default de input, radio de membro default
+"mantém", SEM adicionar membro (procedência de transcrição), `gate_forma`
+segue exclusivo de `montar_fds_revisado`. Achado de revisão pré-merge
+(D-ARQ-22): `except ValueError` em `pagina_envelope` capturava
+`EnvelopeRevisadoInvalido` (subclasse) do self-check rotulando falha interna
+como "Data inválida" — corrigido (validação de forma em try próprio; núcleo
+sem except, self-check propaga — postura de `pagina_fds`). Commits 0a257de +
+9885879 + 367ea96 + f8819df (fixup), merge 7652b36, PR #194. Suíte 744→754
+(754 passed + 4 skipped), mypy --strict delta-zero (46). **D-ARQ-54
+COMPLETA — 4/4 fatias em main.** Remanescentes FORA do escopo desta D-ARQ:
+emissor do artefato-ida FDS em produção (003.CF) e render de saída
+(matriz/pendências — D-ARQ próprio).
+
 ## D-ARQ-55 — Recorte (B) da transcrição-FDS: verbatim-de-perigo é por-membro (H-code cru); mapa frase-H→flag é determinístico resolver-side (só sensibilização); confiança ancora em R-FDS-06 + revisão-RT
 
 **Status:** DECISÃO DE ARQUITETURA (ARQUITETURA). Sem código nesta sessão. Implementação por fatias futuras. Ratificada pelo Diovanni (003.CI).
@@ -1964,3 +1991,4 @@ agora sobre o contrato unificado.
 | v107 | 10/07/2026 | Sessão 003.CI (ARQUITETURA): **D-ARQ-55** adicionada — recorte (B) da transcrição-FDS (perigo-transcrição, passo 1 do cluster ratificado em 003.CH). `MembroVerbatim`/`Componente` ganham `frases_h: tuple[str,...]` cru (por-membro, H-code GHS verbatim); mapa determinístico resolver-side {H334,H317}→`is_sensibilizante` (só sensibilização); H350/H351 REFUTADO em `is_carcinogeno_iarc` (GHS≠IARC, D-ARQ-22) → DT-003CI-01 deferida (futura `is_carcinogeno_ghs`, append cl.5); confiança ancora R-FDS-06 (confia conteúdo) + revisão-RT (D-ARQ-47 cl.4, `_CAMPOS_MEMBRO`+`frases_h`), gate de FORMA. DT-003T-01 FECHA; DT-003M-01/DT-003M-02(B) ganham pré-condição, fecham no passo 2 (reordenação ramo-0). Mecanismo de localização por-membro adiado por medição. Nenhuma R-* criada/alterada (R-FDS-06 ganha nota de aplicação, PROTOCOLO v46). Sem código. PAINEL não re-tirado (nenhum número movido). |
 | v108 | 10/07/2026 | Sessão 003.CJ (IMPLEMENTAÇÃO): **D-ARQ-55 implementada** — PR #190 (`bc78788`/`4565eb0`/`d4adb36`): `frases_h` em `MembroVerbatim`/`Componente` (cru, propagado intocado pela montagem); `mapear_frases_h` resolver-side ({H334,H317}→`is_sensibilizante`, forma `H\d{3}` estrita, pendência `frase_h_malformada` não-bloqueante, flag só liga, todos os ramos do gate_cas inclusive CAS-oculto); `frases_h` OBRIGATÓRIO no artefato-RT (`versao` mantida 1) + `cli_fds` renderiza/edita/preserva; fixtures: SI2 `("H334","H317")` (medido), `fds_verbatim_t65` `()` com nota de medição pendente. Suite 723→740 (+17). Nota de implementação em D-ARQ-55; 7 decisões de IMPL no HISTORICO 003.CJ. PROTOCOLO v47 (R-FDS-06 implementada). PAINEL re-tirado (R-FDS-06 footprint executável: 18→19/42). |
 | v109 | 10/07/2026 | Sessão 003.CK (ARQUITETURA→IMPLEMENTAÇÃO): **D-ARQ-56** adicionada e implementada na mesma sessão (PR #192, merge `f7aa825`) — passo 2 do cluster-FDS: bypass antes do slug-check em `materialidade()` (SI2/CAS-oculto → MATERIAL); Fase C tripartida no sem-slug ((a) `bypass_sem_slug` bloqueante sem promover Risco; (b) inerte-declarado não-bloqueante via R-FDS-06; (c) não-mapeado bloqueante D-ARQ-35); promoção-sem-slug deferida (DT-003CK-01, condicionada a regra clínica de sensibilizante genérico). **DT-003M-01 e DT-003M-02(B) FECHADAS.** Suite 740→744; mypy zero novo. PROTOCOLO v48. PAINEL re-tirado. |
+| v110 | 11/07/2026 | Sessão 003.CL (IMPLEMENTAÇÃO): nota de aplicação fatia 4 em D-ARQ-54 — **D-ARQ-54 COMPLETA (4/4 fatias)**: web como adaptador irmão das CLIs (`superficie/web_envelope.py`/`web_fds.py`, Streamlit + AppTest determinístico); `emitir_volta` extraído em `apresentacao.py`; núcleo puro + casca fina; semânticas das CLIs preservadas (assinatura sem default 003.BV; sem adicionar membro). Achado pré-merge D-ARQ-22 corrigido (self-check mascarado como "Data inválida" no web do envelope, fixup `f8819df`). PR #194, merge `7652b36`. Suíte 744→754+4; mypy delta-zero (46). PROTOCOLO v48 intocado (nenhuma R-*). PAINEL re-tirado (marco superfície RT fecha). |
