@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import re
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -127,3 +128,61 @@ def gate_cas(
 
     # Ramo (a): CAS válido com slug resolvido. [DERIVADO — D-ARQ-36 nota 003.V (a); D-ARQ-34 Parte 4]
     return dataclasses.replace(componente, agente=entrada.slug), None
+
+
+_FRASES_H_SENSIBILIZANTE = frozenset({"H334", "H317"})  # D-ARQ-55 P2: sensibilização respiratória/dérmica GHS
+_FORMA_FRASE_H = re.compile(r"^H\d{3}$")
+
+
+def mapear_frases_h(componente: Componente) -> tuple[Componente, Optional[Pendencia]]:
+    """Mapa determinístico resolver-side, irmão de gate_cas (D-ARQ-55 P2/P3).
+
+    Para cada token de componente.frases_h (verbatim, D-ARQ-55 P1), avalia
+    token.strip() contra _FORMA_FRASE_H (H\\d{3}, estrito, case-sensitive —
+    "h334" é malformado, tolerância não medida não é chutada):
+      - casa a forma E está em _FRASES_H_SENSIBILIZANTE (H334/H317)
+        -> liga is_sensibilizante=True.
+      - casa a forma mas fora do mapa (H350, H302…) -> nada: cru preservado,
+        sem flag, sem pendência (D-ARQ-22 satisfeito pela PRESERVAÇÃO —
+        H-code não-mapeado não some).
+      - não casa a forma -> 1 Pendencia não-bloqueante tipo=
+        "frase_h_malformada", destinatario="empresa", regra_origem=
+        "D-ARQ-55", agregando todos os tokens malformados do componente no
+        motivo (revisão-RT, D-ARQ-33 cl.4).
+
+    frases_h NUNCA é reescrito (cru intocado); a flag só LIGA, nunca desliga
+    (se já True, permanece True). frases_h == () -> (componente, None) sem
+    trabalho. is_carcinogeno_iarc é INTOCADO (GHS != IARC, DT-003CI-01 deferida).
+    """
+    if not componente.frases_h:
+        return componente, None
+
+    liga_sensibilizante = False
+    malformados: list[str] = []
+    for token in componente.frases_h:
+        candidato = token.strip()
+        if not _FORMA_FRASE_H.match(candidato):
+            malformados.append(token)
+            continue
+        if candidato in _FRASES_H_SENSIBILIZANTE:
+            liga_sensibilizante = True
+
+    componente_novo = componente
+    if liga_sensibilizante and not componente.is_sensibilizante:
+        componente_novo = dataclasses.replace(componente_novo, is_sensibilizante=True)
+
+    if not malformados:
+        return componente_novo, None
+
+    pendencia = Pendencia(
+        tipo="frase_h_malformada",
+        destinatario="empresa",
+        motivo=(
+            f"Frase(s)-H malformada(s) {malformados!r} no componente "
+            f"'{componente.nome}' (CAS {componente.cas!r})"
+            " — revisão pelo RT (D-ARQ-33 cl.4)"
+        ),
+        bloqueante=False,
+        regra_origem="D-ARQ-55",
+    )
+    return componente_novo, pendencia

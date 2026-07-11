@@ -21,7 +21,11 @@ class TranscritorLLM(Protocol):
     Recebe o TEXTO da região de composição (saída de extrair_texto_fds,
     003.BE) e emite o verbatim CANDIDATO — tuple[BlocoVerbatim, ...]. NÃO
     emite Componente, não resolve slug, não explode multi-CAS, não ordena
-    faixa, não classifica perigo (isso é montagem/resolver, a jusante).
+    faixa, não classifica perigo (isso é montagem/resolver, a jusante). O
+    candidato agora carrega frases_h por membro — o LLM TRANSCREVE os
+    H-codes GHS declarados na FDS, verbatim, sem classificar (D-ARQ-55 P1);
+    gate_forma permanece só sobre nome/faixa — a forma de frase-H (H\\d{3})
+    é validada resolver-side (mapear_frases_h, D-ARQ-55 P2).
 
     Princípio de implementação real (cl.5, roteamento por formato-de-token):
     o triplo nome+CAS+faixa é a âncora semântica; a ordem de coluna no
