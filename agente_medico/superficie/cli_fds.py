@@ -57,11 +57,12 @@ def _revisar_bloco(
     membros = bloco["membros"]
     saida.write(f"Bloco {indice} — faixa: {bloco['faixa']}\n")
     for j, membro in enumerate(membros, start=1):
-        saida.write(f"  {j}. {membro['cas']} | {membro['nome']}\n")
+        frases_h = " ".join(membro["frases_h"]) or "—"
+        saida.write(f"  {j}. {membro['cas']} | {membro['nome']} | H: {frases_h}\n")
 
     faixa = prompt_enter_mantem("Faixa", bloco["faixa"], "revisão-RT", entrada, saida)
 
-    membros_revisados: list[dict[str, str]] = []
+    membros_revisados: list[dict[str, Any]] = []
     for j, membro in enumerate(membros, start=1):
         resultado = _revisar_membro(membro, j, entrada, saida)
         if resultado is not None:
@@ -71,19 +72,26 @@ def _revisar_bloco(
 
 
 def _revisar_membro(
-    membro: dict[str, str], indice: int, entrada: TextIO, saida: TextIO
-) -> dict[str, str] | None:
+    membro: dict[str, Any], indice: int, entrada: TextIO, saida: TextIO
+) -> dict[str, Any] | None:
     while True:
         saida.write(f"  Membro {indice} [Enter mantém / e edita / r remove]: ")
         resposta = ler_resposta(entrada, "revisão-RT")
         if resposta == "":
-            return {"cas": membro["cas"], "nome": membro["nome"]}
+            return {"cas": membro["cas"], "nome": membro["nome"], "frases_h": membro["frases_h"]}
         if resposta == "r":
             return None
         if resposta == "e":
             cas = prompt_enter_mantem("  CAS", membro["cas"], "revisão-RT", entrada, saida)
             nome = prompt_enter_mantem("  Nome", membro["nome"], "revisão-RT", entrada, saida)
-            return {"cas": cas, "nome": nome}
+            frases_h_texto = prompt_enter_mantem(
+                "  Frases-H (separadas por espaço)",
+                " ".join(membro["frases_h"]),
+                "revisão-RT",
+                entrada,
+                saida,
+            )
+            return {"cas": cas, "nome": nome, "frases_h": frases_h_texto.split()}
         saida.write(f"Opção inválida: {resposta!r}. Digite Enter, 'e' ou 'r'.\n")
 
 

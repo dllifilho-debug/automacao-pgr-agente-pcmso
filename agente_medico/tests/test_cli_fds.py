@@ -49,9 +49,9 @@ def test_enter_em_tudo_roundtrip_byte_exato() -> None:
 
 def test_editar_cas_de_um_membro_so_ele_muda() -> None:
     ida = _ida_padrao()
-    # bloco 1: faixa Enter; membro 1 "e" -> cas novo, Enter no nome; membro 2 Enter
-    # bloco 2: faixa Enter; membros 1..3 Enter
-    entrada = io.StringIO("\ne\n13463-67-7\n\n\n\n\n\n\n")
+    # bloco 1: faixa Enter; membro 1 "e" -> cas novo, Enter no nome, Enter nas frases-H;
+    # membro 2 Enter. bloco 2: faixa Enter; membros 1..3 Enter
+    entrada = io.StringIO("\ne\n13463-67-7\n\n\n\n\n\n\n\n")
     saida = io.StringIO()
 
     volta = revisar_verbatim(ida, entrada, saida)
@@ -65,7 +65,7 @@ def test_editar_cas_de_um_membro_so_ele_muda() -> None:
 
 def test_editar_nome_enter_no_cas_mantem_cas() -> None:
     ida = _ida_padrao()
-    entrada = io.StringIO("\ne\n\nDióxido de Titânio Corrigido\n\n\n\n\n\n")
+    entrada = io.StringIO("\ne\n\nDióxido de Titânio Corrigido\n\n\n\n\n\n\n")
     saida = io.StringIO()
 
     volta = revisar_verbatim(ida, entrada, saida)
@@ -155,6 +155,44 @@ def test_eof_no_prompt_de_membro_levanta_eof() -> None:
 
     with pytest.raises(EOFError):
         revisar_verbatim(ida, entrada, saida)
+
+
+# ---------------------------------------------------------------------------
+# frases_h (D-ARQ-55 P3): Enter-mantém preserva; edição via "e" substitui.
+# ---------------------------------------------------------------------------
+
+_BLOCOS_FRASES_H = (
+    BlocoVerbatim(
+        faixa="0 - 1",
+        membros=(MembroVerbatim(cas="", nome="Segredo Industrial 2", frases_h=("H334", "H317")),),
+    ),
+)
+
+
+def test_enter_mantem_preserva_frases_h() -> None:
+    ida = serializar_verbatim(_BLOCOS_FRASES_H)
+    entrada = io.StringIO("\n\n")
+    saida = io.StringIO()
+
+    volta = revisar_verbatim(ida, entrada, saida)
+    blocos = desserializar_verbatim(volta)
+
+    assert blocos == _BLOCOS_FRASES_H
+    assert blocos[0].membros[0].frases_h == ("H334", "H317")
+
+
+def test_editar_frases_h_via_e_substitui() -> None:
+    ida = serializar_verbatim(_BLOCOS_FRASES_H)
+    # faixa Enter; membro "e" -> CAS Enter, Nome Enter, Frases-H nova
+    entrada = io.StringIO("\ne\n\n\nH350\n")
+    saida = io.StringIO()
+
+    volta = revisar_verbatim(ida, entrada, saida)
+    blocos = desserializar_verbatim(volta)
+
+    assert blocos[0].membros[0].frases_h == ("H350",)
+    assert blocos[0].membros[0].cas == ""
+    assert blocos[0].membros[0].nome == "Segredo Industrial 2"
 
 
 def test_gabarito_tinta_acrilica_verbatim_fim_a_fim() -> None:

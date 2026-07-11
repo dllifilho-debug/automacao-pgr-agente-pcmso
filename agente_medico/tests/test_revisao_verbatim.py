@@ -98,6 +98,25 @@ def test_round_trip_tupla_vazia() -> None:
     assert desserializar_verbatim(serializar_verbatim(blocos)) == blocos
 
 
+def test_round_trip_frases_h_povoado() -> None:
+    blocos = (
+        BlocoVerbatim(
+            faixa="0 - 1",
+            membros=(MembroVerbatim(cas="", nome="Segredo Industrial 2", frases_h=("H334", "H317")),),
+        ),
+    )
+    assert desserializar_verbatim(serializar_verbatim(blocos)) == blocos
+
+
+def test_round_trip_frases_h_vazio_explicito() -> None:
+    blocos = (
+        BlocoVerbatim(
+            faixa="1 - 2", membros=(MembroVerbatim(cas="71-43-2", nome="benzeno", frases_h=()),)
+        ),
+    )
+    assert desserializar_verbatim(serializar_verbatim(blocos)) == blocos
+
+
 # ---------------------------------------------------------------------------
 # Rejeições — cada uma diz O QUE falhou (anti-erro-silencioso, D-ARQ-22)
 # ---------------------------------------------------------------------------
@@ -126,6 +145,46 @@ def test_rejeita_bloco_sem_faixa() -> None:
 def test_rejeita_membro_sem_nome() -> None:
     texto = json.dumps(
         {"versao": 1, "blocos": [{"faixa": "1 - 2", "membros": [{"cas": "1-2-3"}]}]}
+    )
+    with pytest.raises(VerbatimInvalido):
+        desserializar_verbatim(texto)
+
+
+def test_rejeita_membro_sem_frases_h() -> None:
+    texto = json.dumps(
+        {
+            "versao": 1,
+            "blocos": [{"faixa": "1 - 2", "membros": [{"cas": "1-2-3", "nome": "X"}]}],
+        }
+    )
+    with pytest.raises(VerbatimInvalido):
+        desserializar_verbatim(texto)
+
+
+def test_rejeita_frases_h_nao_lista() -> None:
+    texto = json.dumps(
+        {
+            "versao": 1,
+            "blocos": [
+                {"faixa": "1 - 2", "membros": [{"cas": "1-2-3", "nome": "X", "frases_h": "H334"}]}
+            ],
+        }
+    )
+    with pytest.raises(VerbatimInvalido):
+        desserializar_verbatim(texto)
+
+
+def test_rejeita_frases_h_com_elemento_nao_string() -> None:
+    texto = json.dumps(
+        {
+            "versao": 1,
+            "blocos": [
+                {
+                    "faixa": "1 - 2",
+                    "membros": [{"cas": "1-2-3", "nome": "X", "frases_h": ["H334", 1]}],
+                }
+            ],
+        }
     )
     with pytest.raises(VerbatimInvalido):
         desserializar_verbatim(texto)

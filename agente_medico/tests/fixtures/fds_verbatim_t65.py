@@ -16,6 +16,11 @@ não-isolável (patologia 1 de DT-003AS-01) barra a producibilidade do verbatim 
 sem faixa na própria linha), limite aberto na camada-LLM, não na montagem.
 
 [DERIVADO — medir_fds_gabarito_output.txt, medição 003.AN/AS; fds_t65.py em disco.]
+
+NOTA D-ARQ-55: nenhum MembroVerbatim aqui carrega frases_h — tinta (notação europeia,
+frases-R) e cimento (frases-H não medidas nos PDFs de origem) estão fora do escopo desta
+fatia. frases_h=() aqui reflete medição PENDENTE do mecanismo de localização (D-ARQ-55 P1),
+não afirmação de ausência de perigo no documento real.
 """
 from __future__ import annotations
 
