@@ -3,11 +3,12 @@ from __future__ import annotations
 from datetime import date
 
 from agente_medico.motor.composicao import resolver_composicao
-from agente_medico.motor.materialidade import Materialidade, materialidade
+from agente_medico.motor.materialidade import materialidade
 from agente_medico.motor.resolvedor import EntradaIndice, mapear_frases_h
 from agente_medico.motor.tipos import (
     FDS,
     GHEPGR,
+    Materialidade,
     PGR,
     Componente,
     FaixaConcentracao,
