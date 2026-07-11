@@ -84,3 +84,18 @@ def test_pagina_envelope_sem_assinatura_nao_emite() -> None:
     assert not at.exception
     assert at.error
     assert not at.code
+
+
+def test_pagina_envelope_validade_invalida_mostra_erro() -> None:
+    at = AppTest.from_function(pagina_envelope)
+    at.run()
+
+    ida = _ida_viverde()
+    at.text_area[0].set_value(ida).run()
+    at.text_input[0].set_value("31/12/2023").run()
+    at.radio[0].set_value("s").run()
+    at.button[0].click().run()
+
+    assert not at.exception
+    assert at.error
+    assert not at.code

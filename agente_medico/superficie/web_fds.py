@@ -14,11 +14,7 @@ from __future__ import annotations
 from typing import Any
 
 from agente_medico.motor.revisao_verbatim import desserializar_verbatim
-from agente_medico.superficie.apresentacao import (
-    ArtefatoIdaIlegivel,
-    carregar_artefato_ida,
-    emitir_volta,
-)
+from agente_medico.superficie.apresentacao import ArtefatoIdaIlegivel, emitir_volta
 
 _CAMPOS_ENVELOPE = frozenset({"versao", "blocos"})
 

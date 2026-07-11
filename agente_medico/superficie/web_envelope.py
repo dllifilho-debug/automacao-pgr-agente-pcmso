@@ -14,11 +14,7 @@ from datetime import date
 from typing import Any
 
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao
-from agente_medico.superficie.apresentacao import (
-    ArtefatoIdaIlegivel,
-    carregar_artefato_ida,
-    emitir_volta,
-)
+from agente_medico.superficie.apresentacao import ArtefatoIdaIlegivel, emitir_volta
 
 _CAMPOS_RENDERIZACAO = frozenset({"candidatas", "proposta", "credencial", "confirmacao"})
 
@@ -41,6 +37,7 @@ def montar_volta_envelope(dados: dict[str, Any], validade: str, assinatura: bool
 
 def pagina_envelope() -> None:
     import streamlit as st
+    from datetime import date
 
     from agente_medico.superficie.apresentacao import ArtefatoIdaIlegivel, carregar_artefato_ida
     from agente_medico.superficie.web_envelope import _CAMPOS_RENDERIZACAO, montar_volta_envelope
@@ -82,10 +79,12 @@ def pagina_envelope() -> None:
             st.error("Escolha 's' ou 'n' para a assinatura do engenheiro.")
             return
         try:
-            volta = montar_volta_envelope(dados, validade, assinatura_escolha == "s")
+            date.fromisoformat(validade)
         except ValueError:
             st.error(f"Data inválida: {validade!r}. Use o formato ISO (AAAA-MM-DD).")
             return
+
+        volta = montar_volta_envelope(dados, validade, assinatura_escolha == "s")
 
         st.code(volta, language="json")
         st.download_button("Baixar artefato-volta", volta, file_name="envelope_volta.json")
