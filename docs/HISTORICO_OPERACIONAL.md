@@ -3345,3 +3345,19 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** FECHADAS nesta sessão: DT-003M-01, DT-003M-02(B). NOVA: DT-003CK-01 (promoção-sem-slug, condicionada a regra clínica de sensibilizante genérico — não-bloqueante). Sem mudança: DT-003M-02(A) (dado), DT-003CI-01 (deferida), DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, requisito (b) da 003.BS, fatia 4 D-ARQ-54 (web), higiene mypy (46).
 
 **Próxima.** A declarar no kickoff. Candidatas: fatia 4 D-ARQ-54 (web — última fatia da superfície RT), requisito (b) 003.BS, DT-003M-02(A) (sessão de dado — vocabulário de FDS com proveniência), higiene mypy (46, sessão mecânica).
+
+## Sessão 003.CL — 11/07/2026 — IMPLEMENTAÇÃO (fatia 4 D-ARQ-54: superfície RT web — FECHA D-ARQ-54)
+
+**Foco.** Kickoff delegou; Arquiteto recomendou fatia 4 — única candidata que FECHA marco (última fatia da superfície RT; move o PAINEL). Preteridos: req. (b) 003.BS (escopo novo), DT-003M-02(A) (dado), higiene mypy (mecânica). Ratificado.
+
+**Método.** Docs e código relidos por git objects (HEAD `cb1ee71`). Decisões de espec: Streamlit (dependência já pinada `>=1.35`; `AppTest` determinístico sem browser/servidor; FastAPI/Flask rejeitados — categoria nova de dependência + servidor HTTP em teste); a metade TextIO do contrato NÃO migra (terminal-sequencial vs rerun-reativo) — o web herda a metade artefato + `emitir_volta` extraído; núcleo puro form-data→volta + casca fina; os dois seams num PR só (2 instâncias do mesmo padrão novo). [INCERTO] da espec (tipagem streamlit sob `--strict`) resolvido na sessão: delta-zero, sem bloqueador. Prompt cirúrgico único (3 commits) + fixup de revisão pré-merge. Revisão dos commits via git objects.
+
+**Entrega (código).** PR #194 (merge `7652b36`), 4 commits: `0a257de` (refactor: `emitir_volta` em `apresentacao.py`, comportamento-preservante), `9885879` (`web_envelope.py` + 5 testes), `367ea96` (`web_fds.py` + 4 testes), `f8819df` (fixup pré-merge + 1 teste). Suite 744→754 passed + 4 skip; mypy `--strict` zero erro novo (46 baseline).
+
+**Achados.** (1) Revisão pré-merge pegou `except ValueError` em `pagina_envelope` capturando `EnvelopeRevisadoInvalido` (subclasse de ValueError) vinda do self-check e rotulando falha interna como "Data inválida" (mascaramento de rótulo, D-ARQ-22); correção formulada pelo Arquiteto (validação de forma em try próprio; núcleo sem except — postura de `pagina_fds`), aplicada em `f8819df` com teste novo. (2) `AppTest.from_function` re-executa só o texto da função — páginas auto-contidas (re-imports locais), registrado na nota de aplicação. (3) Import top-level morto de `carregar_artefato_ida` nos dois adaptadores — limpo no fixup.
+
+**Entrega (fechamento, esta branch).** DECISOES v110 (nota de aplicação fatia 4; **D-ARQ-54 COMPLETA 4/4**). PROTOCOLO v48 intocado (nenhuma R-* criada/alterada). PAINEL re-tirado (tiragem 003.CL: baseline `7652b36`, 754+4; marco superfície RT fecha — número 2 movido). HISTORICO: este bloco.
+
+**Pendências.** Sem mudança de lista: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, requisito (b) da 003.BS, higiene mypy (46). Remanescentes nomeados fora de D-ARQ-54 (seguem): emissor do artefato-ida FDS em produção (003.CF), render de saída (D-ARQ próprio), generalização multi-PGR da âncora de recorte.
+
+**Próxima.** A declarar no kickoff. Candidatas: requisito (b) 003.BS, DT-003M-02(A) (sessão de dado — vocabulário de FDS com proveniência), generalização multi-PGR da âncora de recorte, higiene mypy (46, sessão mecânica).
