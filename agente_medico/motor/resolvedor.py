@@ -137,6 +137,10 @@ _FORMA_FRASE_H = re.compile(r"^H\d{3}$")
 def mapear_frases_h(componente: Componente) -> tuple[Componente, Optional[Pendencia]]:
     """Mapa determinístico resolver-side, irmão de gate_cas (D-ARQ-55 P2/P3).
 
+    Materializa a nota de aplicação de R-FDS-06 (PROTOCOLO seção 4, v46/v47):
+    a frase-H declarada na FDS é confiada por default — sem confirmação contra
+    base externa de sensibilizante; o gate abaixo é de FORMA, não de conteúdo.
+
     Para cada token de componente.frases_h (verbatim, D-ARQ-55 P1), avalia
     token.strip() contra _FORMA_FRASE_H (H\\d{3}, estrito, case-sensitive —
     "h334" é malformado, tolerância não medida não é chutada):
