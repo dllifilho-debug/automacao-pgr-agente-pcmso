@@ -169,7 +169,7 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 
 **Implicação para o agente:** confiar nos dados de FDS é o default; investigação adicional só é disparada por genericidade da descrição.
 
-**Nota de aplicação (003.CI, D-ARQ-55).** R-FDS-06 ganha consumidor executável no recorte (B) da transcrição-FDS: a frase-H declarada na FDS é confiada por default (sem desconfiança por classe), transcrita verbatim em `Componente.frases_h` e admitida pelo RT (D-ARQ-47 cl.4) → mapa determinístico resolver-side {H334, H317} → `is_sensibilizante`. O gate é de FORMA (`H\d{3}`), não de conteúdo — coerente com "confiar na FDS é o default; investigação só por genericidade (R-FDS-04)". Semântica de R-FDS-06 intacta; ID preservada. **Implementada (003.CJ, PR #190):** `mapear_frases_h` (`agente_medico/motor/resolvedor.py`, docstring carrega o ID), teste-por-regra em `test_mapa_frases_h.py` (cada caso falha sem a fatia).
+**Nota de aplicação (003.CI, D-ARQ-55).** R-FDS-06 ganha consumidor executável no recorte (B) da transcrição-FDS: a frase-H declarada na FDS é confiada por default (sem desconfiança por classe), transcrita verbatim em `Componente.frases_h` e admitida pelo RT (D-ARQ-47 cl.4) → mapa determinístico resolver-side {H334, H317} → `is_sensibilizante`. O gate é de FORMA (`H\d{3}`), não de conteúdo — coerente com "confiar na FDS é o default; investigação só por genericidade (R-FDS-04)". Semântica de R-FDS-06 intacta; ID preservada. **Implementada (003.CJ, PR #190):** `mapear_frases_h` (`agente_medico/motor/resolvedor.py`, docstring carrega o ID), teste-por-regra em `test_mapa_frases_h.py` (cada caso falha sem a fatia). **Segunda aplicação (003.CK, D-ARQ-56, PR #192):** a articulação "ausência de frase-H ⇒ inerte-declarado" (`[INTERPRETADO — prioridade na revisão de saída]`, sem norma literal) materializada na Fase C — componente sem slug e `frases_h == ()` gera pendência NÃO-bloqueante com `regra_origem="R-FDS-06"` (`estagios/riscos.py`); teste-por-regra em `test_promocao_quimico.py`. Semântica e ID intactas.
 
 ---
 
@@ -812,7 +812,7 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 ---
 
-### DT-003M-01 — Ordem ramo-0-vs-bypass quando o CAS é oculto `[ABERTA — decisão de arquitetura]`
+### DT-003M-01 — Ordem ramo-0-vs-bypass quando o CAS é oculto `[FECHADA — D-ARQ-56, 003.CK]`
 
 **Origem:** Sessão 003.M (13/06/2026), leitura da FDS do Adesivo PVC Tigre (PGR ALT T65).
 
@@ -824,13 +824,15 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 **Nota de cluster (003.CH).** Unificada com DT-003M-02(B) e DT-003T-01 sob "extrair perigo (frases-H) para as flags do `Componente`". A reordenação do ramo-0 aqui pedida (honrar bypass antes do slug-check) só é segura DEPOIS que a perigo-transcrição (recorte B de D-ARQ-42) popular `is_carcinogeno_iarc`/`is_sensibilizante` — hoje `False` por não-extração, não por classificação (`[VERIFICADO — git grep, 003.CH]`). Sequência ratificada: perigo-transcrição → reordenação (fecha DT-003M-01 + DT-003M-02(B) juntas). Ver reframe em DT-003M-02.
 
-**Status:** ABERTA. Não bloqueia. Caso-âncora vivo capturado na fixture (`fds_t65.py`, Adesivo PVC componente "Segredo Industrial 2", comentado).
+**Status:** FECHADA (003.CK, D-ARQ-56, PR #192). Resolução: alternativa (b) — honrar a flag mesmo sem slug. Caso-âncora coberto por teste de travessia e de fixture real.
 
 **Nota (003.CI).** Pré-condição escrita: D-ARQ-55 (recorte B) dá contrato ao perigo-transcrito — `frases_h` por-membro + mapa {H334,H317}→`is_sensibilizante`. Com a flag populada e carregada mesmo no CAS-oculto (SI2), "ausência de flag" passa a significar "FDS sem perigo". A reordenação ramo-0-vs-bypass que esta DT pede é o **passo 2** (honrar flag antes do slug-check, em `materialidade()` + Fase C), agora seguro. DT segue ABERTA até o passo 2 (fecha junto com DT-003M-02(B)).
 
+**Nota de fechamento (003.CK, D-ARQ-56).** Passo 2 implementado (PR #192): bypass avaliado ANTES do ramo-0 em `materialidade()` — SI2 (H334+H317, CAS oculto) → MATERIAL; Fase C emite `bypass_sem_slug` bloqueante nomeando as frases-H literais, SEM promover Risco (promoção-sem-slug é DT-003CK-01, condicionada a regra clínica de sensibilizante genérico). Testes: `test_cas_oculto_com_h334_h317_e_material_via_bypass_sem_slug` (inversão do teste-fronteira de 003.CJ) e `test_adesivo_segredo_industrial_2_bypass_sem_slug_bloqueante` (fixture real). Custo declarado: visibilidade, não conduta — exame ainda não dispara no CAS-oculto.
+
 ---
 
-### DT-003M-02 — Vocabulário (agentes.yaml) não cobre composição-de-FDS `[ABERTA — input para expansão]`
+### DT-003M-02 — Vocabulário (agentes.yaml) não cobre composição-de-FDS `[ABERTA — só (A) dado; (B) FECHADA por D-ARQ-56, 003.CK]`
 
 **Origem:** Sessão 003.M (13/06/2026), medição da fixture-FDS sobre `agentes.yaml`.
 
@@ -859,9 +861,11 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 **Sequência ratificada pelo Diovanni (003.CH):** (1) perigo-transcrição (recorte B de D-ARQ-42) → popula as flags e fecha DT-003T-01; (2) só então a reordenação do ramo-0 → fecha DT-003M-01 + DT-003M-02(B) juntas. A digitação de vocabulário (A) e a lista-de-inertes ficam sinalizadas como **paliativo** (enumeração paralela ao sinal que a FDS já carrega). `[INTERPRETADO — prioridade na revisão de saída]` na articulação "ausência de frase-H ⇒ inerte" (ancorada em R-FDS-06, sem norma literal).
 
-**Status:** ABERTA — **(B) bloqueada por perigo-transcrição (recorte B de D-ARQ-42); (A) segue sessão de dado**. Não bloqueia (o bloqueio conservador da Fase C é seguro). Cluster unificado: DT-003M-01 + DT-003M-02(B) + DT-003T-01.
+**Status:** ABERTA só em **(A)** (sessão de dado — vocabulário de FDS com proveniência). **(B) FECHADA (003.CK, D-ARQ-56, PR #192):** componente sem slug e sem frase-H declarada deixa de travar o GHE — pendência `materialidade_ausente` NÃO-bloqueante (inerte-declarado, R-FDS-06); frase-H não-mapeada mantém bloqueante (conservador-correto, D-ARQ-35). Cluster resolvido: DT-003T-01 fechada (003.CI/CJ), DT-003M-01 fechada (003.CK).
 
 **Nota (003.CI).** O pré-requisito duro (perigo-transcrição) ganhou contrato em D-ARQ-55: o recorte B popula `is_sensibilizante` a partir da frase-H. (B) NÃO fecha nesta sessão — depende do **passo 2** (reordenação do ramo-0 de `materialidade()`/Fase C para honrar a flag antes do `agente is None`), que fecha (B) junto com DT-003M-01. (A) (digitar vocabulário de FDS) segue sessão de dado, sinalizada como paliativo. DT segue ABERTA.
+
+**Nota de fechamento de (B) (003.CK, D-ARQ-56).** Passo 2 implementado (PR #192): Fase C tripartida no `agente is None` — (a) bypass declarado → `bypass_sem_slug` bloqueante; (b) `frases_h == ()` → inerte-declarado NÃO-bloqueante (fecha (B)); (c) frase-H não-mapeada → bloqueante mantido. Ressalva de fixture: `()` de `fds_verbatim_t65` é medição PENDENTE (003.CJ decisão 6) — os testes de fixture real exercitam o contrato dado o input, sem afirmar ausência na FDS real (comentários corrigidos em `1ad7ca3`).
 
 ---
 
@@ -1088,6 +1092,16 @@ Refinamentos aos passos da migração desta DT:
 
 **Status:** ABERTA. Não-bloqueante. Deferida por design de D-ARQ-55; append-only sobre o bypass. Irmã da sensibilização do recorte B.
 
+### DT-003CK-01 — Promoção de Risco sem slug (bypass com CAS oculto) `[ABERTA — condicionada a regra clínica]`
+
+**Origem:** Sessão 003.CK (10/07/2026), decisão P3(a) de D-ARQ-56.
+
+**Situação.** Com D-ARQ-56, o bypass declarado na FDS com CAS oculto é honrado (`materialidade()` → MATERIAL) e visível (`bypass_sem_slug` bloqueante nomeando as frases-H), mas o componente NÃO é promovido a `Risco`: `Risco.agente: str` rejeita `None`, e promover exigiria (i) `Optional[str]` propagado por consolidação/emissão/regras sem consumidor clínico, ou (ii) slug inventado (D-ARQ-22). Custo declarado: exame NÃO dispara para sensibilizante de CAS oculto — o sistema entrega visibilidade (MATERIAL + pendência bloqueante), não conduta.
+
+**O que a resolução exige.** Regra clínica formalizada de conduta para sensibilizante-sem-agente (qual exame/periodicidade um "sensibilizante genérico" dispara — método pela literatura oficial vigente, D-ARQ-27), ANTES de qualquer mudança no contrato de `Risco`. Sem a regra, promover é forma sem função.
+
+**Status:** ABERTA. Não-bloqueante (a pendência bloqueante `bypass_sem_slug` já impede saída silenciosa).
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -1156,3 +1170,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 
 | v46 | 10/07/2026 | Sessão 003.CI (ARQUITETURA): **nota de aplicação em R-FDS-06** (seção 4) — recorte (B) da transcrição-FDS dá a R-FDS-06 consumidor executável (frase-H confiada por default, transcrita verbatim `Componente.frases_h`, admitida pelo RT, mapa {H334,H317}→`is_sensibilizante`; gate de FORMA). Semântica de R-FDS-06 intacta, ID preservada. **DT-003T-01 FECHA** (sensibilização vem da FDS, não do vocabulário); notas 003.CI em DT-003M-01 e DT-003M-02 (pré-condição escrita, fecham no passo 2). **DT-003CI-01 adicionada** (seção 11) — carcinógeno-via-frase-H (H350/H351 GHS≠IARC) deferido, futura `is_carcinogeno_ghs`. Decisão de arquitetura em D-ARQ-55 (DECISOES). Nenhuma R-* criada/alterada. Sem código. |
 | v47 | 10/07/2026 | Sessão 003.CJ (IMPLEMENTAÇÃO): nota de aplicação de R-FDS-06 **implementada** — `mapear_frases_h` em `resolvedor.py` (PR #190): mapa {H334,H317}→`is_sensibilizante`, gate de FORMA `H\d{3}`, pendência não-bloqueante em token malformado; teste-por-regra `test_mapa_frases_h.py`. Nenhuma R-* criada/alterada; semântica e ID de R-FDS-06 intactas. Detalhe em DECISOES v108 e HISTORICO 003.CJ. |
+| v48 | 10/07/2026 | Sessão 003.CK (ARQUITETURA→IMPLEMENTAÇÃO): **DT-003M-01 FECHADA** e **DT-003M-02(B) FECHADA** por D-ARQ-56 (passo 2 do cluster: bypass antes do slug-check em `materialidade()`; Fase C tripartida no sem-slug — `bypass_sem_slug` bloqueante / inerte-declarado não-bloqueante via R-FDS-06 / não-mapeado bloqueante D-ARQ-35). **2ª nota de aplicação em R-FDS-06** (inerte-declarado materializado, `regra_origem="R-FDS-06"` em `riscos.py`). **DT-003CK-01 adicionada** (promoção-sem-slug, condicionada a regra clínica de sensibilizante genérico). Nenhuma R-* criada/alterada. PR #192, suite 740→744. Detalhe em DECISOES v109 e HISTORICO 003.CK. |
