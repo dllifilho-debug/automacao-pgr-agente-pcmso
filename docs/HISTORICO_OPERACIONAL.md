@@ -3393,3 +3393,17 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** DT-003CM-01 segue ABERTA (D-ARQ-57 a consome, não a fecha — fecha na IMPL do localizador). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída. Requisito (b) da 003.BS: âncora DECIDIDA (D-ARQ-57); segue aberto na IMPL (fatias 1–3) + medição multi-setor futura.
 
 **Próxima.** A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO fatia 1 de D-ARQ-57 (repertório de reconhecedores GHE + troca de âncora em `recortar_blocos_ghe`/`recortar_topo`, gabarito Viverde 31/32). Demais: fatia 2 (gate de segmentação), fatia 3 (cargo-based), DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
+
+## Sessão 003.CO — 11/07/2026 — IMPLEMENTAÇÃO (fatia 1 de D-ARQ-57: repertório de reconhecedores GHE + troca de âncora)
+
+**Verificação de abertura.** main `c32c50a`, working tree clean, suíte 754+4 herdada de 003.CL.
+
+**Entrega.** `eh_cabecalho_ghe` + `_RECONHECEDORES_GHE` em `motor/extracao_pgr.py` substituem `_ANCORA_GHE` verbatim; `recortar_blocos_ghe`/`recortar_topo` migrados. Gabarito Viverde 42→31 (custo previsto em D-ARQ-57 realizado). Fixtures consumidoras migradas (`test_orquestracao_pgr.py`, `test_transcritor_pgr.py`). Suíte 754+4 → 762+4 (+8 testes novos). mypy `--strict`: mesmos 46 pré-existentes. PR #198, merge `4571ec6`.
+
+**Achado de medição.** Variante `"GHE NN-"` (sem espaço antes do traço) presente no Viverde real (`"GHE 01- Engenharia planejamento de obra"`, seção administrativa) — não coberta pelo discriminador `( - título)?` medido em DT-003CM-01/003.CN. Regex ajustado para `\s*-\s*` (espaçamento variável ao redor do traço); gabarito real confirmado em 31, ratificado pelo Arquiteto pós-hoc.
+
+**Desvio de processo.** O ajuste do regex foi decidido pelo Code sem parada — o prompt cirúrgico não cobria divergência entre o gabarito esperado (31) e o valor medido no primeiro run (30). Correção adotada: cláusula padrão em prompts cirúrgicos — "divergência entre medição real e valor esperado no prompt = bloqueador: parar e reportar, não ajustar".
+
+**Pendências.** DT-003CM-01 segue ABERTA (faltam fatias 2 — gate de segmentação — e 3 — cargo-based). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída.
+
+**Próxima.** A declarar no kickoff. Candidata natural: fatia 2 de D-ARQ-57 (gate de segmentação densidade+contagem, limiares X/N a calibrar contra os 15 medidos). Demais: fatia 3 (cargo-based), DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
