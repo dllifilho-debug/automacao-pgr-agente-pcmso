@@ -3377,3 +3377,19 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** NOVA: DT-003CM-01. Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída. Requisito (b) da 003.BS: medição intra-setor FEITA; segue aberto (D-ARQ da generalização + IMPL + medição multi-setor futura).
 
 **Próxima.** A declarar no kickoff. Candidata natural: ARQUITETURA do localizador de blocos (req. (b), consome DT-003CM-01). Demais: DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
+
+## Sessão 003.CN — 11/07/2026 — ARQUITETURA (localizador de blocos GHE — req. (b) 003.BS, consome DT-003CM-01: D-ARQ-57)
+
+**Foco.** ARQUITETURA declarada no kickoff (candidata natural de 003.CM). Objetivo: fechar a generalização multi-PGR da âncora de recorte que DT-003CM-01 mediu — o requisito (b) da 003.BS, paliativo nomeado em D-ARQ-52/53.
+
+**Verificação de abertura.** Kickoff colado consistente com git: main `ddae587` (merge PR #196), working tree clean, suíte 754+4 herdada de 003.CL. PROTOCOLO v49 e DECISOES v110 relidos INTEIROS (metodologia — arquitetura só após ler o protocolo); estado real de `motor/extracao_pgr.py` conferido em disco (`recortar_blocos_ghe`/`recortar_topo` ambos sobre `_ANCORA_GHE = "SETOR/FUNÇÃO"` verbatim, núcleo puro).
+
+**Decisão.** **D-ARQ-57** (DECISOES v111): localizador de blocos GHE em três peças. (1) Localização permanece DETERMINÍSTICA — repertório de reconhecedores de cabeçalho GHE (discriminador medido `^(INVENTÁRIO DE RISCO )?GHE:? \d+( - título)?$`, formas 1–4) substitui a âncora verbatim única; NÃO migra p/ LLM (violaria D-ARQ-09 e poria cardinalidade no LLM, anti-D-ARQ-45 P1). (2) Gate de segmentação anti-Vistamérica, critério densidade+contagem (bloco > X% das págs OU ≤1 bloco em doc >N págs → `segmentacao_implausivel` bloqueante) — só-troca-de-âncora deixaria o caso-Vistamérica (1 âncora → bloco de ~137 págs) passar. (3) Família cargo-based (forma 5, 4/15) = reconhecer+sinalizar `pgr_cargo_based` bloqueante; recorte-por-cargo é fatia futura própria (não empilhar 2 unidades de bloco). `recortar_topo` solidário à troca de âncora. Ganho medido: resolve a conflação Viverde (2ª seção sem linha GHE deixa de casar). Custo sinalizado: recorte Viverde 42→31 blocos (regressão de gabarito na IMPL).
+
+**Passadas críticas.** (1ª) repertório + gate + cargo-based. (2ª) confirmou que só-contagem (`≤1 bloco`) deixa brecha p/ bloco-gigante em doc com 2+ blocos → gate densidade+contagem; e que recorte-cargo junto violaria "uma coisa por vez". Duas escolhas ratificadas pelo Diovanni: cargo-based reconhecer-não-construir; gate densidade+contagem.
+
+**Entrega (fechamento, esta branch).** DECISOES v111 (D-ARQ-57). PROTOCOLO v50 (nota em DT-003CM-01: consumida por D-ARQ-57, segue ABERTA). HISTORICO: este bloco. PAINEL não re-tirado (nenhum dos 3 números move; sem marco fechado; não-META).
+
+**Pendências.** DT-003CM-01 segue ABERTA (D-ARQ-57 a consome, não a fecha — fecha na IMPL do localizador). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída. Requisito (b) da 003.BS: âncora DECIDIDA (D-ARQ-57); segue aberto na IMPL (fatias 1–3) + medição multi-setor futura.
+
+**Próxima.** A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO fatia 1 de D-ARQ-57 (repertório de reconhecedores GHE + troca de âncora em `recortar_blocos_ghe`/`recortar_topo`, gabarito Viverde 31/32). Demais: fatia 2 (gate de segmentação), fatia 3 (cargo-based), DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
