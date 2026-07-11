@@ -116,7 +116,10 @@ def test_degradacao_procedencia_cas_invalido_vira_materialidade_ausente() -> Non
     # de "cas_invalido" em ctx.pendencias — essa pendência NUNCA aparece no stage por
     # construção (nasce e morre dentro de resolver_composicao), seria tautologia cega.
     # A prova real é a FUSÃO de procedências: ramo-c (TiO2 CAS inválido) e ramo-b
-    # (copolimero CAS válido sem slug) chegam à Fase C indistinguíveis.
+    # (copolimero CAS válido sem slug) chegam à Fase C indistinguíveis. Pós D-ARQ-56/
+    # R-FDS-06 (passo 2): nenhum dos dois tem frase-H declarada -> caem no mesmo
+    # ramo (b) inerte-declarado, não-bloqueante — a fusão passou a ocorrer sob
+    # R-FDS-06 em vez de D-ARQ-35.
     ctx_tinta = _ctx_resolvido("tinta")
     ctx_adesivo = _ctx_resolvido("adesivo")
 
@@ -124,28 +127,44 @@ def test_degradacao_procedencia_cas_invalido_vira_materialidade_ausente() -> Non
     assert not any(r.agente == "dioxido_de_titanio" for r in _quimicos(ctx_tinta))
 
     # A pendência que o TiO2 (ramo c, ORIGEM cas_invalido/D-ARQ-36) gera na Fase C é
-    # materialidade_ausente/D-ARQ-35 — a procedência cas_invalido foi PERDIDA no descarte.
+    # materialidade_ausente/R-FDS-06 — a procedência cas_invalido foi PERDIDA no descarte.
     pend_tio2 = [p for p in ctx_tinta.pendencias
-                 if p.tipo == "materialidade_ausente" and p.regra_origem == "D-ARQ-35"]
+                 if p.tipo == "materialidade_ausente" and p.regra_origem == "R-FDS-06"]
     assert pend_tio2
+    assert all(not p.bloqueante for p in pend_tio2)
 
     # O copolimero PVC (ramo b, ORIGEM vocabulario_ausente/D-ARQ-36) gera na Fase C uma
     # pendência do MESMO tipo e MESMA regra_origem — procedências distintas (b vs c)
     # ACHATADAS no mesmo tipo após o descarte. Esta é a degradação observável.
     pend_copol = [p for p in ctx_adesivo.pendencias
-                  if p.tipo == "materialidade_ausente" and p.regra_origem == "D-ARQ-35"]
+                  if p.tipo == "materialidade_ausente" and p.regra_origem == "R-FDS-06"]
     assert pend_copol
+    assert all(not p.bloqueante for p in pend_copol)
 
     # DH-003P-01 — quando resolver_composicao propagar a Pendencia do gate ao Resultado,
     # ramo-c e ramo-b deixarão de ser indistinguíveis.
     # (i') é a fatia seguinte; este teste muda de asserção lá.
 
 
+def test_adesivo_segredo_industrial_2_bypass_sem_slug_bloqueante() -> None:
+    # Segredo Industrial 2 (CAS oculto, ramo d) declara H334+H317 na FDS —
+    # mapear_frases_h liga is_sensibilizante=True mesmo sem slug. D-ARQ-56: o
+    # bypass é honrado e gera pendência bloqueante distinta (bypass_sem_slug),
+    # em vez de ser mascarado pelo ramo-0 (fronteira fechada no passo 2).
+    ctx = _ctx_resolvido("adesivo")
+    pend = [p for p in ctx.pendencias
+            if p.tipo == "bypass_sem_slug" and "Segredo Industrial 2" in p.motivo]
+    assert len(pend) == 1
+    assert pend[0].bloqueante is True
+    assert pend[0].regra_origem == "D-ARQ-56"
+
+
 def test_cimento_nenhum_componente_promove() -> None:
     ctx = _ctx_resolvido("cimento")
     assert _quimicos(ctx) == []   # nenhum dos 8 tem slug; aluminato ramo c, demais b/d
 
-    # toda pendência de materialidade aqui é o mesmo achatamento do teste 5, em massa:
+    # nenhum componente do cimento declara frase-H -> todos caem no ramo (b)
+    # inerte-declarado (R-FDS-06), não-bloqueante.
     pend = [p for p in ctx.pendencias if p.tipo == "materialidade_ausente"]
     assert pend
-    assert all(p.regra_origem == "D-ARQ-35" and p.bloqueante for p in pend)
+    assert all(p.regra_origem == "R-FDS-06" and not p.bloqueante for p in pend)
