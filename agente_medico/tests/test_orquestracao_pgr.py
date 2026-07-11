@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from agente_medico.adaptadores.orquestracao_pgr import preparar_envelope, processar_arquivo_pgr
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
+from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao
 from agente_medico.motor.tipos import EnvelopeConfirmado, EnvelopeVerbatim, GHEVerbatim, RiscoVerbatim
@@ -29,7 +30,7 @@ _ENVELOPE_PADRAO = EnvelopeConfirmado(validade=date.today(), assinatura_engenhei
 
 
 def _paginas_com_bloco(nome_setor: str = "Setor Teste") -> list[str]:
-    return [f"SETOR/FUNÇÃO {nome_setor}\nCargo A\nOutraLinha"]
+    return [f"GHE 1 - {nome_setor}\nCargo A\nOutraLinha"]
 
 
 class MockTranscritorConstante:
@@ -129,8 +130,8 @@ def test_transcricao_indisponivel_vira_none_e_pendencia_bloqueante() -> None:
 
 def test_aprovacao_parcial_processa_aprovados_e_carrega_pendencia_de_forma() -> None:
     paginas = [
-        "SETOR/FUNÇÃO Setor Bom\nCargo A\n"
-        "SETOR/FUNÇÃO Setor Ruim\nCargo B"
+        "GHE 1 - Setor Bom\nCargo A\n"
+        "GHE 2 - Setor Ruim\nCargo B"
     ]
     mock = MockTranscritorSequencial((_GHE_VALIDO, _GHE_INVALIDO))
     with patch(_ALVO_EXTRACAO, return_value=paginas):
@@ -187,7 +188,7 @@ def test_preparar_envelope_pdf_real_viverde_gera_artefato_com_proposta_pre_preen
     topo_recebido = mock.topos_recebidos[0]
     # Inverso determinístico de recortar_blocos_ghe: nenhuma linha do topo
     # recebido é (ou vem depois d)a âncora de bloco GHE.
-    assert not any(linha.startswith("SETOR/FUNÇÃO") for linha in topo_recebido.splitlines())
+    assert not any(eh_cabecalho_ghe(linha) for linha in topo_recebido.splitlines())
 
     dados = json.loads(artefato)
     assert dados["confirmacao"]["validade"] == "2023-02-01"
