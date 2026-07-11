@@ -6,6 +6,13 @@ from pathlib import Path
 
 import pdfplumber
 
+from agente_medico.motor.tipos import Pendencia
+
+# D-ARQ-57 peça 2 (gate anti-Vistamérica): limiares calibrados em 003.CP sobre
+# os 15 PGRs de DT-003CM-01.
+_LIMIAR_DENSIDADE_PCT = 40.0  # maior legítimo medido: 34,8% (ALT T65); implausíveis ≥ 44,4%
+_LIMIAR_PAGINAS_DOC_MINIMO = 10  # ≤1 bloco em doc > 10 págs → implausível
+
 
 def extrair_texto_pgr(caminho: Path) -> list[str]:
     """Parse-doc determinístico do parse-PGR (D-ARQ-49 P1; D-ARQ-50 P1):
@@ -151,3 +158,75 @@ def recortar_topo(paginas: Sequence[str]) -> str | None:
     if not indices_ancora:
         return None
     return "\n".join(linhas[: indices_ancora[0]])
+
+
+def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
+    """Gate anti-Vistamérica (D-ARQ-57 peça 2): detecta segmentação GHE
+    implausível por densidade + contagem, sem depender de conteúdo — só da
+    forma do recorte de recortar_blocos_ghe. Limiares calibrados em 003.CP
+    sobre os 15 PGRs de DT-003CM-01, ratificado em 003.CN.
+
+    Reproduz o mesmo achatamento e a mesma fronteira de bloco de
+    recortar_blocos_ghe (âncora via eh_cabecalho_ghe, bloco i = âncora i até
+    a linha anterior à âncora i+1, último bloco até o fim), mas rastreia a
+    página 1-based de cada linha achatada para medir a extensão em páginas de
+    cada bloco: pag(última linha do bloco) - pag(linha da âncora) + 1.
+
+    Dois testes independentes, qualquer um decide implausibilidade:
+    - Contagem: <= 1 bloco (inclui zero âncoras) num documento com mais de
+      _LIMIAR_PAGINAS_DOC_MINIMO páginas — massa insuficiente para um único
+      bloco cobrir o documento inteiro ser plausível.
+    - Densidade: maior bloco ocupa mais de _LIMIAR_DENSIDADE_PCT% do total de
+      páginas do documento.
+
+    Sem I/O, sem LLM (D-ARQ-09); não altera recortar_blocos_ghe/recortar_topo.
+    """
+    linhas_com_pagina: list[tuple[int, str]] = [
+        (indice_pagina + 1, linha)
+        for indice_pagina, pagina in enumerate(paginas)
+        for linha in pagina.splitlines()
+    ]
+    indices_ancora = [
+        i for i, (_, linha) in enumerate(linhas_com_pagina) if eh_cabecalho_ghe(linha)
+    ]
+    n_blocos = len(indices_ancora)
+    total_paginas = len(paginas)
+
+    if n_blocos <= 1 and total_paginas > _LIMIAR_PAGINAS_DOC_MINIMO:
+        return Pendencia(
+            tipo="segmentacao_implausivel",
+            destinatario="extracao",
+            motivo=(
+                f"Segmentação implausível: {n_blocos} bloco(s) GHE detectado(s) "
+                f"em documento de {total_paginas} páginas"
+            ),
+            bloqueante=True,
+            regra_origem="D-ARQ-57",
+            ghe_id=None,
+        )
+
+    if n_blocos == 0:
+        return None
+
+    limites = [*indices_ancora, len(linhas_com_pagina)]
+    maior_extensao_paginas = max(
+        linhas_com_pagina[fim - 1][0] - linhas_com_pagina[inicio][0] + 1
+        for inicio, fim in zip(limites, limites[1:])
+    )
+    percentual_maior_bloco = (maior_extensao_paginas / total_paginas) * 100
+
+    if percentual_maior_bloco > _LIMIAR_DENSIDADE_PCT:
+        return Pendencia(
+            tipo="segmentacao_implausivel",
+            destinatario="extracao",
+            motivo=(
+                f"Segmentação implausível: maior bloco GHE ocupa "
+                f"{maior_extensao_paginas} de {total_paginas} páginas "
+                f"({percentual_maior_bloco:.1f}%)"
+            ),
+            bloqueante=True,
+            regra_origem="D-ARQ-57",
+            ghe_id=None,
+        )
+
+    return None
