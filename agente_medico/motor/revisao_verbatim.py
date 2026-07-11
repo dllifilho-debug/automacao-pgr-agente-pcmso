@@ -14,7 +14,7 @@ class VerbatimInvalido(ValueError):
 
 _CAMPOS_ENVELOPE = {"versao", "blocos"}
 _CAMPOS_BLOCO = {"faixa", "membros"}
-_CAMPOS_MEMBRO = {"cas", "nome"}
+_CAMPOS_MEMBRO = {"cas", "nome", "frases_h"}
 
 
 def serializar_verbatim(blocos: Sequence[BlocoVerbatim]) -> str:
@@ -26,7 +26,10 @@ def serializar_verbatim(blocos: Sequence[BlocoVerbatim]) -> str:
         "blocos": [
             {
                 "faixa": bloco.faixa,
-                "membros": [{"cas": m.cas, "nome": m.nome} for m in bloco.membros],
+                "membros": [
+                    {"cas": m.cas, "nome": m.nome, "frases_h": list(m.frases_h)}
+                    for m in bloco.membros
+                ],
             }
             for bloco in blocos
         ],
@@ -113,15 +116,22 @@ def _desserializar_membro(dado: object, indice_bloco: int, indice_membro: int) -
         raise VerbatimInvalido(f"{prefixo}: campo obrigatório 'cas' ausente")
     if "nome" not in dado:
         raise VerbatimInvalido(f"{prefixo}: campo obrigatório 'nome' ausente")
+    if "frases_h" not in dado:
+        raise VerbatimInvalido(f"{prefixo}: campo obrigatório 'frases_h' ausente")
 
     cas = dado["cas"]
     nome = dado["nome"]
+    frases_h = dado["frases_h"]
     if not isinstance(cas, str):
         raise VerbatimInvalido(f"{prefixo}: 'cas' deve ser string, recebido {type(cas).__name__}")
     if not isinstance(nome, str):
         raise VerbatimInvalido(f"{prefixo}: 'nome' deve ser string, recebido {type(nome).__name__}")
+    if not isinstance(frases_h, list) or not all(isinstance(f, str) for f in frases_h):
+        raise VerbatimInvalido(
+            f"{prefixo}: 'frases_h' deve ser uma lista de strings, recebido {frases_h!r}"
+        )
 
-    return MembroVerbatim(cas=cas, nome=nome)
+    return MembroVerbatim(cas=cas, nome=nome, frases_h=tuple(frases_h))
 
 
 def montar_fds_revisado(

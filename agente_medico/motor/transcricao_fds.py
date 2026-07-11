@@ -146,10 +146,12 @@ def _montar_membro(m: MembroVerbatim) -> Componente:
 
     Montagem 1→1: P3 (desambiguar_cas) → P4 (normalizar_cas_ausente) no cas cru, strip no
     nome. concentracao=None: a faixa é do bloco (herança-α é resolver-side, D-ARQ-45 P1/P2).
-    agente=None e flags de perigo no default (recorte A, D-ARQ-42 Parte 3).
+    agente=None e is_carcinogeno_iarc/is_sensibilizante no default (recorte A, D-ARQ-42
+    Parte 3). frases_h=m.frases_h propagado INTOCADO — cru, forma e mapa são resolver-side
+    (recorte B, D-ARQ-55 P1).
     """
     cas = normalizar_cas_ausente(desambiguar_cas(m.cas))
-    return Componente(cas=cas, nome=m.nome.strip())
+    return Componente(cas=cas, nome=m.nome.strip(), frases_h=m.frases_h)
 
 
 def montar_bloco(bloco: BlocoVerbatim) -> BlocoComponente:

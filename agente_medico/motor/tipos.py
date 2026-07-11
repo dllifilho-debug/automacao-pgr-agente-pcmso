@@ -47,6 +47,9 @@ class FaixaConcentracao:
 class MembroVerbatim:
     cas: str
     nome: str
+    # H-codes GHS transcritos VERBATIM por membro, sem classificar — D-ARQ-55 P1;
+    # () = FDS declarou sem H-phrase para o membro.
+    frases_h: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -80,6 +83,9 @@ class Componente:
     agente: Optional[str] = None
     is_carcinogeno_iarc: bool = False
     is_sensibilizante: bool = False
+    # H-code cru sobrevive à montagem espelhando cas — D-ARQ-55 P1; anti-supressão
+    # D-ARQ-22 (H-code não-mapeado não some).
+    frases_h: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

@@ -89,9 +89,11 @@ def adesivo_pvc_tigre() -> tuple[Componente, ...]:
         # CAS oculto. H334 (sensib. respiratória) + H317 (sensib. dérmica) DECLARADOS na FDS.
         # CASO-ÂNCORA da DT da 003.M (ramo-0-vs-bypass com CAS oculto): flag-de-perigo-no-
         # documento + CAS-oculto → sem slug → agente=None → ramo 0 → AUSENTE, mascarando o
-        # bypass-sensibilizante. is_sensibilizante NÃO é cravado True: sem slug o pipeline
-        # real não popula a flag (extração resolve CAS→slug→flag; CAS oculto quebra a cadeia).
-        # Fica False; cai em ramo 0 honestamente. (Número da DT a cravar no fechamento.)
+        # bypass-sensibilizante. D-ARQ-55: o dado cru agora É CARREGADO (frases_h abaixo);
+        # is_sensibilizante permanece False NESTA fixture CRUA — quem liga a flag é
+        # mapear_frases_h no resolver, não a montagem. O ramo-0 ainda mascara a saída
+        # (AUSENTE) até o passo 2 (reordenação, fora de escopo desta fatia).
         Componente(cas="", nome="Segredo Industrial 2",
-                   concentracao=FaixaConcentracao(0.0, 0.5), agente=None),
+                   concentracao=FaixaConcentracao(0.0, 0.5), agente=None,
+                   frases_h=("H334", "H317")),
     )

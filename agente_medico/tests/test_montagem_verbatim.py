@@ -83,6 +83,13 @@ def test_montar_membro_flags_e_agente_no_default() -> None:
     assert c.is_sensibilizante is False
 
 
+def test_montar_membro_propaga_frases_h_intocado() -> None:
+    # D-ARQ-55 P1 (recorte B): frases_h é cru, propagado sem classificar — mapa é resolver-side.
+    c = _montar_membro(MembroVerbatim(cas="67-64-1", nome="Acetona", frases_h=("H334", "H317")))
+    assert c.frases_h == ("H334", "H317")
+    assert c.is_sensibilizante is False
+
+
 def test_montar_bloco_faixa_en_dash() -> None:
     bc = montar_bloco(BlocoVerbatim(faixa="30 – 70", membros=(MembroVerbatim(cas="67-64-1", nome="Acetona"),)))
     assert bc.concentracao == FaixaConcentracao(minimo=30.0, maximo=70.0)

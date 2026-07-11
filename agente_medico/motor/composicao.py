@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 
-from agente_medico.motor.resolvedor import EntradaIndice, gate_cas
+from agente_medico.motor.resolvedor import EntradaIndice, gate_cas, mapear_frases_h
 from agente_medico.motor.tipos import (
     BlocoComponente,
     Componente,
@@ -55,7 +55,13 @@ def resolver_composicao(
     pgr: PGR, indice_cas: dict[str, EntradaIndice]
 ) -> tuple[PGR, list[Pendencia]]:
     """Motor irmão mínimo: consome fds.composicao_verbatim (tuple[BlocoComponente, ...])
-    e escreve fds.composicao resolvida, via _explodir_bloco + gate_cas.
+    e escreve fds.composicao resolvida, via _explodir_bloco + gate_cas + mapear_frases_h.
+
+    mapear_frases_h roda em TODOS os ramos do gate_cas, inclusive (c) inválido e
+    (d) CAS-oculto (D-ARQ-55 P4): no oculto a flag is_sensibilizante é populada e
+    CARREGADA no componente, mas a saída permanece AUSENTE via ramo-0 de
+    materialidade() — fronteira deliberada, reordenar o ramo-0 é o passo 2, fora
+    de escopo desta fatia.
 
     D-ARQ-36 nota 003.V (a); D-ARQ-33 cl.1/2 (engenheiro resolve, não emite Risco).
     D-ARQ-45 P1/P2 (aplicação 003.BB): _explodir_bloco já normaliza a faixa (herança-α +
@@ -83,9 +89,12 @@ def resolver_composicao(
             for bloco in produto.fds.composicao_verbatim:
                 for sub in _explodir_bloco(bloco):
                     comp_novo, pend = gate_cas(sub, indice_cas)
-                    componentes_novos.append(comp_novo)
                     if pend is not None:
                         pendencias_gate.append(pend)
+                    comp_novo, pend_h = mapear_frases_h(comp_novo)
+                    if pend_h is not None:
+                        pendencias_gate.append(pend_h)
+                    componentes_novos.append(comp_novo)
             fds_nova = dataclasses.replace(produto.fds, composicao=tuple(componentes_novos))
             produtos_novos.append(dataclasses.replace(produto, fds=fds_nova))
         ghes_novos.append(dataclasses.replace(ghe, produtos_quimicos=tuple(produtos_novos)))
