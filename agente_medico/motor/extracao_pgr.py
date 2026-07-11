@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+import re
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 import pdfplumber
@@ -29,19 +30,54 @@ def extrair_texto_pgr(caminho: Path) -> list[str]:
         return [page.extract_text() or "" for page in pdf.pages]
 
 
-_ANCORA_GHE = "SETOR/FUNÇÃO"
+def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:
+    linha_normalizada = linha.strip()
+    if len(linha_normalizada) > 80:
+        return False
+    return re.fullmatch(
+        r"(INVENTÁRIO DE RISCO )?GHE:? \d+(\s*-\s*.+)?", linha_normalizada
+    ) is not None
+
+
+_RECONHECEDORES_GHE: tuple[Callable[[str], bool], ...] = (
+    _reconhece_cabecalho_ghe_padrao,
+)
+
+
+def eh_cabecalho_ghe(linha: str) -> bool:
+    """Reconhecedor de linha-âncora de bloco GHE (D-ARQ-57 peça 1, consome
+    DT-003CM-01): função pura, verdadeiro sse ALGUM reconhecedor do
+    repertório _RECONHECEDORES_GHE casar a linha.
+
+    Substitui a âncora fixa _ANCORA_GHE = "SETOR/FUNÇÃO" (n=1, medição
+    003.BM/003.BL). O único reconhecedor hoje cobre as 4 formas de
+    cabeçalho medidas em DT-003CM-01 sobre o acervo de 15 PGRs:
+    1. "GHE 12" (Viverde)
+    2. "GHE 12 - TÍTULO" (Vistamérica/CMO/Seconci/TPB/AURO)
+    3. "INVENTÁRIO DE RISCO GHE 12" (ALT T65/EURO)
+    4. "GHE: 07 - TÍTULO" (R78 Naturia)
+
+    Estruturado como tupla de funções linha->bool em disjunção para
+    extensão futura (novas formas de cabeçalho) sem tocar o consumidor
+    (recortar_blocos_ghe/recortar_topo).
+    """
+    return any(reconhecedor(linha) for reconhecedor in _RECONHECEDORES_GHE)
 
 
 def recortar_blocos_ghe(paginas: Sequence[str]) -> list[str]:
     """Núcleo puro (sem I/O) do recorte determinístico dos blocos GHE
-    (esqueleto D-ARQ-49 P2; D-ARQ-50). paginas = saída de extrair_texto_pgr,
-    lista-por-página, na ordem do documento.
+    (esqueleto D-ARQ-49 P2; D-ARQ-50; âncora trocada por D-ARQ-57 peça 1).
+    paginas = saída de extrair_texto_pgr, lista-por-página, na ordem do
+    documento.
 
-    Âncora: linha.startswith(_ANCORA_GHE), match VERBATIM — sem normalização
-    (difere do molde _recortar_composicao da FDS de propósito: medição 003.BM
-    achou n=1 forma de âncora no acervo Viverde, com o gate de 42 ocorrências
-    provando estabilidade; o limite dessa escolha é documentado abaixo,
-    classe D-ARQ-22).
+    Âncora: eh_cabecalho_ghe(linha) — repertório de reconhecedores de
+    cabeçalho GHE (D-ARQ-57 peça 1, consome DT-003CM-01), VERBATIM — sem
+    normalização de acento/caixa (difere do molde _recortar_composicao da
+    FDS de propósito). A âncora "SETOR/FUNÇÃO" (n=1, medição 003.BM) sofria
+    de conflação (D-ARQ-22): no Viverde ela também abre a 2ª seção
+    PROCESSO/SUBPROCESSO, sem linha de cabeçalho GHE — essa 2ª seção deixa
+    de casar com a nova âncora, por design (resolve a conflação em vez de
+    contorná-la).
 
     As linhas de todas as páginas são achatadas numa sequência única, na
     ordem do documento (fronteira de página vira "\\n" na reconstrução do
@@ -62,18 +98,20 @@ def recortar_blocos_ghe(paginas: Sequence[str]) -> list[str]:
     Saída VERBATIM (acentos, caixa preservados) — sem I/O, sem LLM
     (D-ARQ-09), sem termo->slug.
 
-    Limites (D-ARQ-22): âncora derivada de n=1 (PGR Viverde), gate de 42
-    blocos medido em 003.BM; conteúdo do documento ANTES da 1ª âncora
-    (pág. 33) é descartado (fora de qualquer bloco); a cauda do ÚLTIMO bloco
-    (última âncora na pág. 146 de 151) sobre-inclui as 4 páginas finais do
-    documento até o fim — medido no script descartável de 003.BM, nunca
-    cortado fino aqui.
+    Limites (D-ARQ-22): repertório derivado de 15 PGRs (DT-003CM-01), gate
+    de 31 blocos sobre o Viverde após a troca de âncora (regressão explícita
+    de 42 para 31 em relação à âncora "SETOR/FUNÇÃO", pela resolução da
+    conflação com a 2ª seção PROCESSO/SUBPROCESSO); conteúdo do documento
+    ANTES da 1ª âncora (pág. 33) é descartado (fora de qualquer bloco); a
+    cauda do ÚLTIMO bloco (última âncora na pág. 146 de 151) sobre-inclui as
+    4 páginas finais do documento até o fim — medido no script descartável
+    de 003.BM, nunca cortado fino aqui.
 
     NÃO separa cargo/risco/quantificação dentro do bloco, NÃO transcreve,
     NÃO classifica GHE — tudo isso é fatia futura (transcrição-LLM).
     """
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
-    indices_ancora = [i for i, linha in enumerate(linhas) if linha.startswith(_ANCORA_GHE)]
+    indices_ancora = [i for i, linha in enumerate(linhas) if eh_cabecalho_ghe(linha)]
     if not indices_ancora:
         return []
     limites = [*indices_ancora, len(linhas)]
@@ -86,30 +124,30 @@ def recortar_blocos_ghe(paginas: Sequence[str]) -> list[str]:
 def recortar_topo(paginas: Sequence[str]) -> str | None:
     """Núcleo puro (sem I/O) do recorte-de-topo (D-ARQ-53 parte 1): inverso
     determinístico de recortar_blocos_ghe — devolve a região que aquele
-    descarta, da 1ª linha do documento até a linha ANTERIOR à 1ª âncora
-    _ANCORA_GHE. A transcrição-LLM do conteúdo do topo é fatia futura.
+    descarta, da 1ª linha do documento até a linha ANTERIOR à 1ª âncora de
+    cabeçalho GHE. A transcrição-LLM do conteúdo do topo é fatia futura.
 
     paginas = saída de extrair_texto_pgr, lista-por-página, na ordem do
     documento. As linhas de todas as páginas são achatadas numa sequência
     única, na ordem do documento (fronteira de página vira "\\n" na
     reconstrução do texto), e juntadas com "\\n" — exatamente como em
-    recortar_blocos_ghe. Reusa _ANCORA_GHE e o mesmo critério
-    linha.startswith(_ANCORA_GHE), VERBATIM, sem normalização.
+    recortar_blocos_ghe. Reusa eh_cabecalho_ghe (D-ARQ-57 peça 1), VERBATIM,
+    sem normalização.
 
     Zero âncoras -> None (falha explícita; quem transforma isso em Pendência
     é o chamador, fatia futura — nunca devolver o documento inteiro como
     fallback). 1ª âncora na 1ª linha do documento -> "" (topo genuinamente
     vazio). Caso contrário -> topo VERBATIM (acentos, caixa preservados).
 
-    Limite herdado (classe D-ARQ-22): âncora derivada de n=1 (PGR Viverde)
-    como fronteira-fim do topo; generalização para múltiplos PGRs é
-    requisito (b) da 003.BS, sessão à parte.
+    Limite herdado (classe D-ARQ-22): repertório de reconhecedores derivado
+    de 15 PGRs (DT-003CM-01) como fronteira-fim do topo; generalização para
+    novas formas de cabeçalho fora do acervo medido é requisito futuro.
 
     Sem I/O, sem LLM (D-ARQ-09), sem parse de conteúdo do topo (emissão, RT,
     validade = fatias 2-3, ADIADAS POR MEDIÇÃO — DT-003L-01).
     """
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
-    indices_ancora = [i for i, linha in enumerate(linhas) if linha.startswith(_ANCORA_GHE)]
+    indices_ancora = [i for i, linha in enumerate(linhas) if eh_cabecalho_ghe(linha)]
     if not indices_ancora:
         return None
     return "\n".join(linhas[: indices_ancora[0]])
