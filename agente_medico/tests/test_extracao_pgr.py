@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from agente_medico.motor.extracao_pgr import (
+    eh_cabecalho_ghe,
     extrair_texto_pgr,
     recortar_blocos_ghe,
     recortar_topo,
@@ -30,7 +31,7 @@ def test_toda_pagina_e_str(paginas: list[str]) -> None:
     assert all(isinstance(pagina, str) for pagina in paginas)
 
 
-def test_contagem_de_blocos_setor_funcao(paginas: list[str]) -> None:
+def test_contagem_de_linhas_setor_funcao_no_texto(paginas: list[str]) -> None:
     n_blocos = sum(
         1
         for pagina in paginas
@@ -61,12 +62,12 @@ def test_saida_verbatim_preserva_acento_e_caixa(paginas: list[str]) -> None:
 
 
 def test_recorte_blocos_ghe_contagem(paginas: list[str]) -> None:
-    assert len(recortar_blocos_ghe(paginas)) == 42
+    assert len(recortar_blocos_ghe(paginas)) == 31
 
 
 def test_recorte_blocos_ghe_todo_bloco_comeca_com_ancora(paginas: list[str]) -> None:
     blocos = recortar_blocos_ghe(paginas)
-    assert all(bloco.startswith("SETOR/FUNÇÃO") for bloco in blocos)
+    assert all(eh_cabecalho_ghe(bloco.splitlines()[0]) for bloco in blocos)
 
 
 def test_recorte_blocos_ghe_invariante_de_particao(paginas: list[str]) -> None:
@@ -76,7 +77,7 @@ def test_recorte_blocos_ghe_invariante_de_particao(paginas: list[str]) -> None:
     blocos = recortar_blocos_ghe(paginas)
     linhas = [linha for pagina in paginas for linha in pagina.splitlines()]
     i_primeira_ancora = next(
-        i for i, linha in enumerate(linhas) if linha.startswith("SETOR/FUNÇÃO")
+        i for i, linha in enumerate(linhas) if eh_cabecalho_ghe(linha)
     )
     texto_esperado = "\n".join(linhas[i_primeira_ancora:])
     assert "\n".join(blocos) == texto_esperado
@@ -87,7 +88,7 @@ def test_recorte_blocos_ghe_pintura_preserva_agente_valor(paginas: list[str]) ->
     (bloco_pintura,) = [
         bloco
         for bloco in blocos
-        if bloco.startswith("SETOR/FUNÇÃO Pintura/ pintor/ meio oficial de pintor/ servente")
+        if "SETOR/FUNÇÃO Pintura/ pintor/ meio oficial de pintor/ servente" in bloco
     ]
     assert "78,8 dB(A) em funcionamento" in bloco_pintura
     assert "Etanol 4,4 ppm" in bloco_pintura
@@ -102,7 +103,7 @@ def test_recorte_blocos_ghe_pintura_cruza_fronteira_de_pagina(paginas: list[str]
     (bloco_pintura,) = [
         bloco
         for bloco in blocos
-        if bloco.startswith("SETOR/FUNÇÃO Pintura/ pintor/ meio oficial de pintor/ servente")
+        if "SETOR/FUNÇÃO Pintura/ pintor/ meio oficial de pintor/ servente" in bloco
     ]
     assert "Estireno 0,1 ppm" in bloco_pintura
 
@@ -112,15 +113,15 @@ def test_recorte_blocos_ghe_sem_ancora_devolve_lista_vazia() -> None:
 
 
 def test_recorte_blocos_ghe_duas_ancoras_mesma_pagina() -> None:
-    pagina = "SETOR/FUNÇÃO Um\nlinha A\nSETOR/FUNÇÃO Dois\nlinha B"
+    pagina = "GHE 1\nlinha A\nGHE 2\nlinha B"
     blocos = recortar_blocos_ghe([pagina])
-    assert blocos == ["SETOR/FUNÇÃO Um\nlinha A", "SETOR/FUNÇÃO Dois\nlinha B"]
+    assert blocos == ["GHE 1\nlinha A", "GHE 2\nlinha B"]
 
 
 def test_recorte_topo_termina_antes_da_primeira_ancora(paginas: list[str]) -> None:
     topo = recortar_topo(paginas)
     assert topo is not None
-    assert not any(linha.startswith("SETOR/FUNÇÃO") for linha in topo.splitlines())
+    assert not any(eh_cabecalho_ghe(linha) for linha in topo.splitlines())
 
 
 def test_recorte_topo_nao_vazio_no_viverde(paginas: list[str]) -> None:
@@ -146,4 +147,46 @@ def test_recorte_topo_sem_ancora_devolve_none() -> None:
 
 
 def test_recorte_topo_ancora_na_primeira_linha_devolve_vazio() -> None:
-    assert recortar_topo(["SETOR/FUNÇÃO Um\nlinha A"]) == ""
+    assert recortar_topo(["GHE 1\nlinha A"]) == ""
+
+
+# ---------------------------------------------------------------------------
+# eh_cabecalho_ghe — repertório de reconhecedores (D-ARQ-57 peça 1,
+# DT-003CM-01): formas 1-4 medidas sobre o acervo de 15 PGRs.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "linha",
+    [
+        "GHE 12",
+        "GHE 12 - OBRAS",
+        "INVENTÁRIO DE RISCO GHE 3",
+        "GHE: 07 - ADMINISTRATIVO",
+    ],
+)
+def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
+    assert eh_cabecalho_ghe(linha)
+
+
+@pytest.mark.parametrize(
+    "linha",
+    [
+        "SETOR/FUNÇÃO Pintura/ pintor",
+        "Quantidade de Funcionários expostos neste GHE: 08",
+        "Fisioterapia do GHE 17 para GHE 11",
+    ],
+)
+def test_eh_cabecalho_ghe_rejeita_armadilhas_medidas(linha: str) -> None:
+    assert not eh_cabecalho_ghe(linha)
+
+
+def test_recorte_blocos_ghe_conflacao_viverde_nao_gera_bloco_por_processo_subprocesso(
+    paginas: list[str],
+) -> None:
+    # Conflação D-ARQ-22: a 2ª seção do Viverde (PROCESSO/SUBPROCESSO) também
+    # começava com "SETOR/FUNÇÃO" mas não tem linha de cabeçalho GHE — a
+    # troca de âncora (D-ARQ-57 peça 1) resolve isso por design, deixando de
+    # gerar bloco para essa seção.
+    blocos = recortar_blocos_ghe(paginas)
+    assert not any("PROCESSO/SUBPROCESSO" in bloco.splitlines()[0] for bloco in blocos)

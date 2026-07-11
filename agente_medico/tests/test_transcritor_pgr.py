@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from agente_medico.motor.extracao_pgr import extrair_texto_pgr, recortar_blocos_ghe
+from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe, extrair_texto_pgr, recortar_blocos_ghe
 from agente_medico.motor.tipos import GHEVerbatim, Pendencia, RiscoVerbatim
 from agente_medico.motor.transcritor_pgr import gate_forma_ghe, transcrever_ghes
 
@@ -30,7 +30,7 @@ class MockTranscritorGHE:
     """Mock injetável (D-ARQ-49 P4: LLM SEMPRE mockado em teste, nunca API real).
 
     resultado fixo por bloco via overrides (bloco -> GHEVerbatim); padrao cobre
-    blocos sem override explícito (usado no harness de integração, onde os 42
+    blocos sem override explícito (usado no harness de integração, onde os 31
     blocos reais não têm gabarito de conteúdo nesta fatia-esqueleto). Captura
     a ordem e o conteúdo verbatim dos blocos recebidos em blocos_recebidos.
     """
@@ -143,10 +143,10 @@ def test_multi_agente_mesmo_et_vira_riscos_separados_com_fonte_copiada() -> None
 
 
 @requer_pdfs
-def test_transcrever_ghes_recebe_os_42_blocos_com_ancora(paginas: list[str]) -> None:
+def test_transcrever_ghes_recebe_os_31_blocos_com_ancora(paginas: list[str]) -> None:
     blocos = recortar_blocos_ghe(paginas)
     resultado = _ghe(riscos=(_risco(),))
     mock = MockTranscritorGHE(padrao=resultado)
     transcrever_ghes(blocos, mock)
-    assert len(mock.blocos_recebidos) == 42
-    assert all(bloco.startswith("SETOR/FUNÇÃO") for bloco in mock.blocos_recebidos)
+    assert len(mock.blocos_recebidos) == 31
+    assert all(eh_cabecalho_ghe(bloco.splitlines()[0]) for bloco in mock.blocos_recebidos)
