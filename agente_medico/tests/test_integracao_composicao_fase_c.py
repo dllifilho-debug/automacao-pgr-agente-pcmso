@@ -117,9 +117,10 @@ def test_degradacao_procedencia_cas_invalido_vira_materialidade_ausente() -> Non
     # construção (nasce e morre dentro de resolver_composicao), seria tautologia cega.
     # A prova real é a FUSÃO de procedências: ramo-c (TiO2 CAS inválido) e ramo-b
     # (copolimero CAS válido sem slug) chegam à Fase C indistinguíveis. Pós D-ARQ-56/
-    # R-FDS-06 (passo 2): nenhum dos dois tem frase-H declarada -> caem no mesmo
-    # ramo (b) inerte-declarado, não-bloqueante — a fusão passou a ocorrer sob
-    # R-FDS-06 em vez de D-ARQ-35.
+    # R-FDS-06 (passo 2): nenhum dos dois tem frase-H TRANSCRITA na fixture (tinta:
+    # frases-R europeias fora de escopo, medição PENDENTE — 003.CJ decisão 6) -> caem
+    # no mesmo ramo (b) inerte-declarado, não-bloqueante — a fusão passou a ocorrer
+    # sob R-FDS-06 em vez de D-ARQ-35.
     ctx_tinta = _ctx_resolvido("tinta")
     ctx_adesivo = _ctx_resolvido("adesivo")
 
@@ -163,8 +164,9 @@ def test_cimento_nenhum_componente_promove() -> None:
     ctx = _ctx_resolvido("cimento")
     assert _quimicos(ctx) == []   # nenhum dos 8 tem slug; aluminato ramo c, demais b/d
 
-    # nenhum componente do cimento declara frase-H -> todos caem no ramo (b)
-    # inerte-declarado (R-FDS-06), não-bloqueante.
+    # frases_h=() na fixture é MEDIÇÃO PENDENTE (003.CJ decisão 6: cimento não
+    # medido; não é afirmação de ausência na FDS real) — dado (), o contrato
+    # D-ARQ-56/R-FDS-06 exige ramo (b) não-bloqueante.
     pend = [p for p in ctx.pendencias if p.tipo == "materialidade_ausente"]
     assert pend
     assert all(p.regra_origem == "R-FDS-06" and not p.bloqueante for p in pend)
