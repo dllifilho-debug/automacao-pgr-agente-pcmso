@@ -63,6 +63,15 @@ def prompt_enter_mantem(
     return resposta
 
 
+def emitir_volta(dados: dict[str, Any], self_check: Callable[[str], object]) -> str:
+    """Serializa `dados` como artefato-volta e roda `self_check` sobre ele
+    antes de devolver (self-check único, anti-erro-silencioso D-ARQ-22,
+    D-ARQ-54 fatia 4) — compartilhado entre as CLIs e a superfície web."""
+    volta = json.dumps(dados, ensure_ascii=False, indent=2)
+    self_check(volta)
+    return volta
+
+
 def conduzir_revisao(
     artefato_ida: str,
     campos_necessarios: frozenset[str],
@@ -73,9 +82,7 @@ def conduzir_revisao(
 ) -> str:
     dados = carregar_artefato_ida(artefato_ida, campos_necessarios)
     dados = revisar(dados, entrada, saida)
-    volta = json.dumps(dados, ensure_ascii=False, indent=2)
-    self_check(volta)
-    return volta
+    return emitir_volta(dados, self_check)
 
 
 def executar_main(
