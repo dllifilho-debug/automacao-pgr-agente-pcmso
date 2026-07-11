@@ -123,7 +123,7 @@ def test_cas_in_vocab_com_h317_e_faixa_abaixo_de_5pct_e_material_via_bypass() ->
     assert materialidade(comp_out) is Materialidade.MATERIAL
 
 
-def test_cas_oculto_com_h334_h317_carrega_flag_mas_materialidade_ainda_ausente() -> None:
+def test_cas_oculto_com_h334_h317_e_material_via_bypass_sem_slug() -> None:
     comp = Componente(
         cas="", nome="segredo industrial", frases_h=("H334", "H317"),
     )
@@ -135,5 +135,13 @@ def test_cas_oculto_com_h334_h317_carrega_flag_mas_materialidade_ainda_ausente()
     assert comp_out.is_sensibilizante is True
     # pendência do gate_cas (ramo d, cas_ausente) preservada
     assert any(p.tipo == "cas_ausente" for p in pend)
-    # saída ainda AUSENTE via ramo-0 (sem slug) — fronteira do passo 2, fora de escopo
-    assert materialidade(comp_out) is Materialidade.AUSENTE
+    # bypass honrado mesmo sem slug (D-ARQ-56) — fronteira do passo 2 fechada
+    assert materialidade(comp_out) is Materialidade.MATERIAL
+
+
+def test_agente_none_sem_flags_sem_frases_h_preserva_ramo_0_ausente() -> None:
+    comp = Componente(cas="", nome="sem slug e sem flag", agente=None)
+    assert comp.frases_h == ()
+    assert comp.is_carcinogeno_iarc is False
+    assert comp.is_sensibilizante is False
+    assert materialidade(comp) is Materialidade.AUSENTE

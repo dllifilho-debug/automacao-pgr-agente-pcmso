@@ -105,7 +105,9 @@ def test_componente_carcinogeno_abaixo_cutoff_bypass_material(proto):  # type: i
     assert risco.is_carcinogeno_iarc is True
 
 
-def test_componente_sem_slug_nao_promove_gera_pendencia_bloqueante(proto):  # type: ignore[no-untyped-def]
+def test_componente_sem_slug_sem_frase_h_gera_pendencia_nao_bloqueante(proto):  # type: ignore[no-untyped-def]
+    # (b) D-ARQ-56 / R-FDS-06: sem slug e sem frase-H declarada -> inerte-declarado,
+    # pendência NÃO-bloqueante (fecha DT-003M-02(B)).
     componente = Componente(
         cas="0000-00-0",
         nome="Componente Sem Slug",
@@ -122,9 +124,60 @@ def test_componente_sem_slug_nao_promove_gera_pendencia_bloqueante(proto):  # ty
     pendencias_materialidade = [p for p in ctx.pendencias if p.tipo == "materialidade_ausente"]
     assert len(pendencias_materialidade) == 1
     pend = pendencias_materialidade[0]
+    assert pend.bloqueante is False
+    assert pend.regra_origem == "R-FDS-06"
+    assert "Componente Sem Slug" in pend.motivo
+
+
+def test_componente_sem_slug_com_bypass_gera_pendencia_bloqueante(proto):  # type: ignore[no-untyped-def]
+    # (a) D-ARQ-56: bypass do cutoff (frases_h) declarado na FDS com CAS oculto —
+    # não promove Risco, pendência bloqueante distinta (bypass_sem_slug).
+    componente = Componente(
+        cas="",
+        nome="Segredo Industrial",
+        agente=None,
+        frases_h=("H334", "H317"),
+        is_sensibilizante=True,
+    )
+    ghe = _ghe(produtos_quimicos=(_produto("Produto E", componente),))
+    ctx = GHEContext(pgr_ghe=ghe)
+    stage_2_riscos(ctx, proto)
+
+    riscos_quimicos = [r for r in ctx.riscos if r.fonte == "quimico_composicao"]
+    assert riscos_quimicos == []
+
+    pendencias_bypass = [p for p in ctx.pendencias if p.tipo == "bypass_sem_slug"]
+    assert len(pendencias_bypass) == 1
+    pend = pendencias_bypass[0]
+    assert pend.bloqueante is True
+    assert pend.regra_origem == "D-ARQ-56"
+    assert "H334" in pend.motivo and "H317" in pend.motivo
+
+    assert not any(p.tipo == "materialidade_ausente" for p in ctx.pendencias)
+
+
+def test_componente_sem_slug_com_frase_h_nao_mapeada_mantem_pendencia_bloqueante(proto):  # type: ignore[no-untyped-def]
+    # (c) frase-H presente mas não-mapeada (ex. H350): materialidade segue
+    # indeterminável, pendência bloqueante D-ARQ-35 mantida.
+    componente = Componente(
+        cas="",
+        nome="Componente H350",
+        agente=None,
+        frases_h=("H350",),
+    )
+    ghe = _ghe(produtos_quimicos=(_produto("Produto F", componente),))
+    ctx = GHEContext(pgr_ghe=ghe)
+    stage_2_riscos(ctx, proto)
+
+    riscos_quimicos = [r for r in ctx.riscos if r.fonte == "quimico_composicao"]
+    assert riscos_quimicos == []
+
+    pendencias_materialidade = [p for p in ctx.pendencias if p.tipo == "materialidade_ausente"]
+    assert len(pendencias_materialidade) == 1
+    pend = pendencias_materialidade[0]
     assert pend.bloqueante is True
     assert pend.regra_origem == "D-ARQ-35"
-    assert "Componente Sem Slug" in pend.motivo
+    assert "H350" in pend.motivo
 
 
 def test_componente_straddle_promovido_com_pendencia_bloqueante(proto):  # type: ignore[no-untyped-def]

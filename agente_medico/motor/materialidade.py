@@ -10,16 +10,21 @@ def materialidade(componente: Componente) -> Materialidade:
     Pré-condição (não é ramo): CAS válido pelo dígito verificador é gate do motor
     irmão (D-ARQ-33 cl.3), a montante — o componente que chega aqui já passou.
     """
-    # Ramo 0: slug não resolvido (D-ARQ-14). Sem slug não há flags confiáveis;
-    # não decidir NÃO-MATERIAL por concentração (carcinógeno desconhecido <5% viraria
-    # supressão silenciosa — D-ARQ-22).
-    if componente.agente is None:
-        return Materialidade.AUSENTE
-
-    # Ramo 1: qualquer bypass do cutoff True -> MATERIAL, independe de concentração
-    # (inclusive concentracao=None). Bypasses = lista append-only (D-ARQ-33 cl.5).
+    # Ramo 1 (bypass): qualquer bypass do cutoff True -> MATERIAL, independe de
+    # concentração (inclusive concentracao=None) e independe de slug (D-ARQ-56 +
+    # DT-003M-01): a flag agora vem da FDS via frases_h (D-ARQ-55), não do slug;
+    # honrada mesmo com agente=None (CAS oculto). Bypasses = lista append-only
+    # (D-ARQ-33 cl.5).
     if componente.is_carcinogeno_iarc or componente.is_sensibilizante:
         return Materialidade.MATERIAL
+
+    # Ramo 0: sem slug E sem flag de bypass (D-ARQ-14). Sem slug não há flags
+    # confiáveis por si só; não decidir NÃO-MATERIAL por concentração (carcinógeno
+    # desconhecido <5% viraria supressão silenciosa — D-ARQ-22). is_carcinogeno_iarc
+    # continua slug-dependente (DT-003CI-01) — decidir por concentração aqui seria
+    # supressão D-ARQ-22.
+    if componente.agente is None:
+        return Materialidade.AUSENTE
 
     faixa = componente.concentracao
     # Ramo 2: sem bypass e concentração não extraída -> AUSENTE.

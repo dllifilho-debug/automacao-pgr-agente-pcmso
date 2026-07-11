@@ -118,16 +118,60 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
             continue
         for componente in produto.fds.composicao:
             if componente.agente is None:
-                ctx.pendencias.append(
-                    Pendencia(
-                        tipo="materialidade_ausente",
-                        destinatario="empresa",
-                        motivo=f"componente '{componente.nome}' (produto {produto.nome}) sem slug resolvido — materialidade indeterminável",
-                        bloqueante=True,
-                        regra_origem="D-ARQ-35",
-                        ghe_id=ctx.pgr_ghe.id,
+                if componente.is_carcinogeno_iarc or componente.is_sensibilizante:
+                    # (a) bypass declarado na FDS (frases_h, D-ARQ-55) mas sem slug
+                    # resolvido: não promovível a Risco (Risco.agente: str; promoção
+                    # sem slug exigiria regra clínica inexistente — decisão P3(a)).
+                    # Bloqueante: bypass do cutoff com CAS oculto não pode ficar
+                    # silencioso (D-ARQ-56).
+                    ctx.pendencias.append(
+                        Pendencia(
+                            tipo="bypass_sem_slug",
+                            destinatario="empresa",
+                            motivo=(
+                                f"componente '{componente.nome}' (produto {produto.nome}) "
+                                f"com frases_h {componente.frases_h} — bypass do cutoff "
+                                "declarado na FDS com CAS oculto — sem slug resolvido, "
+                                "não promovível a Risco"
+                            ),
+                            bloqueante=True,
+                            regra_origem="D-ARQ-56",
+                            ghe_id=ctx.pgr_ghe.id,
+                        )
                     )
-                )
+                elif componente.frases_h == ():
+                    # (b) sem slug e sem frase-H declarada: inerte-declarado (R-FDS-06),
+                    # não-bloqueante.
+                    ctx.pendencias.append(
+                        Pendencia(
+                            tipo="materialidade_ausente",
+                            destinatario="empresa",
+                            motivo=(
+                                f"componente '{componente.nome}' (produto {produto.nome}) "
+                                "sem slug e sem frase-H declarada — inerte-declarado (R-FDS-06)"
+                            ),
+                            bloqueante=False,
+                            regra_origem="R-FDS-06",
+                            ghe_id=ctx.pgr_ghe.id,
+                        )
+                    )
+                else:
+                    # (c) frases_h presentes não-mapeadas (ex. H350): materialidade
+                    # segue indeterminável, pendência bloqueante mantida.
+                    ctx.pendencias.append(
+                        Pendencia(
+                            tipo="materialidade_ausente",
+                            destinatario="empresa",
+                            motivo=(
+                                f"componente '{componente.nome}' (produto {produto.nome}) "
+                                f"sem slug resolvido, com frases_h não-mapeadas {componente.frases_h} "
+                                "— materialidade indeterminável"
+                            ),
+                            bloqueante=True,
+                            regra_origem="D-ARQ-35",
+                            ghe_id=ctx.pgr_ghe.id,
+                        )
+                    )
                 continue
 
             mat = materialidade(componente)
