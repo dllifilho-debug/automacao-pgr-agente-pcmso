@@ -160,6 +160,113 @@ def recortar_topo(paginas: Sequence[str]) -> str | None:
     return "\n".join(linhas[: indices_ancora[0]])
 
 
+def _reconhece_cargo_funcao_dois_pontos(linha: str) -> bool:
+    linha_normalizada = linha.strip()
+    return re.match(r"CARGO/FUNÇÃO:", linha_normalizada) is not None
+
+
+def _reconhece_cargo_cbo(linha: str) -> bool:
+    linha_normalizada = linha.strip()
+    return re.match(r"CARGO\b.*\bCBO:? ?\d+", linha_normalizada) is not None
+
+
+def _reconhece_funcao_grid_perigo_risco(linha: str) -> bool:
+    linha_normalizada = linha.strip()
+    return re.match(r"Função .*Perigo / Risco", linha_normalizada) is not None
+
+
+_RECONHECEDORES_CARGO: tuple[Callable[[str], bool], ...] = (
+    _reconhece_cargo_funcao_dois_pontos,
+    _reconhece_cargo_cbo,
+    _reconhece_funcao_grid_perigo_risco,
+)
+
+
+def eh_sinal_cargo(linha: str) -> bool:
+    """Reconhecedor de SINAL DE FAMÍLIA cargo-based (D-ARQ-57 peça 3, consome
+    DT-003CM-01): função pura, verdadeiro sse ALGUM reconhecedor do
+    repertório _RECONHECEDORES_CARGO casar a linha.
+
+    É sinal de família para DIAGNÓSTICO — distingue um PGR cuja unidade de
+    bloco é cargo/função (sem cabeçalho GHE) de um PGR GHE-based — e NÃO é
+    âncora de recorte: recorte-por-cargo é fatia futura própria (D-ARQ-57
+    peça 3 / "fora da 1ª leva").
+
+    Três formas medidas em 003.CQ (pdfplumber sobre o acervo de
+    DT-003CM-01/DT-003L-01 forma 6):
+    1. "CARGO/FUNÇÃO:" (Ricco-Adm, 2x)
+    2. "CARGO ... CBO: 123456" (Cjr, 1x)
+    3. "Função ... Perigo / Risco" — cabeçalho de grid AIHA (Hetrin 37x /
+       Serra Dourada 32x); linha longa, sem teto de 80 chars (difere de
+       eh_cabecalho_ghe por design — o grid-header é naturalmente extenso).
+
+    linha_normalizada = linha.strip(). Casamento via re.match (início da
+    linha), VERBATIM — sem normalização de acento/caixa (mesma convenção de
+    eh_cabecalho_ghe).
+    """
+    return any(reconhecedor(linha) for reconhecedor in _RECONHECEDORES_CARGO)
+
+
+def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
+    """Diagnóstico de família cargo-based (D-ARQ-57 peça 3): um PGR cuja
+    unidade de bloco é cargo/função, não GHE — recorte-GHE (recortar_blocos_ghe
+    / avaliar_segmentacao) é inaplicável a esse formato, e tentar aplicá-lo
+    produziria "0 ou 1 bloco" indistinguível, a olho, de um doc genuinamente
+    implausível.
+
+    Mesmo achatamento por linhas dos irmãos (avaliar_segmentacao):
+    documento é família cargo-based sse ZERO linhas casarem eh_cabecalho_ghe
+    E pelo menos 1 linha casar eh_sinal_cargo. Presença de QUALQUER âncora
+    GHE veta o diagnóstico (GHE-presente sempre vence) — mesmo se o
+    documento também tiver sinais de cargo (ex.: boilerplate de assinatura).
+
+    Pendência tipo "pgr_cargo_based", sempre bloqueante (anti-supressão:
+    D-ARQ-31/35 — nunca silêncio), regra_origem "D-ARQ-57", ghe_id=None.
+    """
+    linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
+    tem_ancora_ghe = any(eh_cabecalho_ghe(linha) for linha in linhas)
+    if tem_ancora_ghe:
+        return None
+
+    n_sinais_cargo = sum(1 for linha in linhas if eh_sinal_cargo(linha))
+    if n_sinais_cargo == 0:
+        return None
+
+    return Pendencia(
+        tipo="pgr_cargo_based",
+        destinatario="extracao",
+        motivo=(
+            f"PGR cargo-based: nenhum cabeçalho GHE e {n_sinais_cargo} "
+            f"sinal(is) de bloco por cargo — unidade de bloco é cargo, "
+            f"recorte-GHE inaplicável"
+        ),
+        bloqueante=True,
+        regra_origem="D-ARQ-57",
+        ghe_id=None,
+    )
+
+
+def avaliar_estrutura(paginas: Sequence[str]) -> Pendencia | None:
+    """Composto de diagnóstico de estrutura (D-ARQ-57 peça 3): sela a ordem
+    diagnóstico específico vence genérico. Tenta avaliar_familia primeiro
+    (cargo-based); se None, delega a avaliar_segmentacao (gate anti-
+    Vistamérica).
+
+    Exclusão mútua: um documento cargo-based emite SEMPRE pgr_cargo_based e
+    NUNCA segmentacao_implausivel — sem a peça 3, um PGR cargo-based (0/1
+    âncora GHE por definição) cairia no gate genérico de contagem e emitiria
+    o diagnóstico errado. Anti-supressão preservada nos dois ramos: um
+    documento cargo-based sempre gera pendência bloqueante (nunca silêncio),
+    e um documento não-cargo-based continua sujeito ao gate de segmentação.
+
+    Não altera avaliar_segmentacao nem recortar_blocos_ghe/recortar_topo.
+    """
+    pendencia_familia = avaliar_familia(paginas)
+    if pendencia_familia is not None:
+        return pendencia_familia
+    return avaliar_segmentacao(paginas)
+
+
 def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
     """Gate anti-Vistamérica (D-ARQ-57 peça 2): detecta segmentação GHE
     implausível por densidade + contagem, sem depender de conteúdo — só da
