@@ -3421,3 +3421,17 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** DT-003CM-01 segue ABERTA (falta fatia 3 — cargo-based). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída.
 
 **Próxima.** A declarar no kickoff. Candidata natural: fatia 3 de D-ARQ-57 (família cargo-based reconhecer+sinalizar `pgr_cargo_based`). Demais: DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
+
+## Sessão 003.CQ — 12/07/2026 — IMPLEMENTAÇÃO (fatia 3 de D-ARQ-57: família cargo-based)
+
+**Verificação de abertura.** main `a03bb91`, working tree clean, suíte 769+4 herdada de 003.CP.
+
+**Método.** Medição direta pelo Arquiteto no sandbox (precedente 003.CP): censo dos sinais-cargo nos 4 PGRs cargo-based via pdfplumber (Hetrin/SD por pdfium para localizar + amostra pdfplumber para forma de linha — resolve o caveat pypdf de DT-003CM-01). Achados: Ricco-Adm `CARGO/FUNÇÃO:` 2×; Cjr `CARGO...CBO:` 1×; Hetrin/SD sinal = grid-header AIHA (37×/32× em amostra), NÃO `CARGO/FUNÇÃO:` (boilerplate de assinatura) — corrige o "idem" do censo 003.CM. Zero âncoras GHE nos 4. Decisão fina selada: exclusão mútua família→gate (diagnóstico específico vence genérico), materializada no composto `avaliar_estrutura`.
+
+**Entrega.** `eh_sinal_cargo`/`_RECONHECEDORES_CARGO` (3 formas), `avaliar_familia` (`pgr_cargo_based` bloqueante, regra_origem D-ARQ-57), `avaliar_estrutura` (família antes do gate) em `motor/extracao_pgr.py` + 15 testes (sintéticos + Ricco-Adm e Cjr reais; Hetrin/SD cobertos por linhas medidas — 396/272 págs, custo de suíte). Suíte 769+4 → 784+4. mypy --strict: mesmos 46. PR #202, merge `a769dbc`. Cláusula-bloqueador presente; sem desvio.
+
+**Incidente operacional.** Push inicial bloqueado por checagem de segurança (repo público + nomes reais de clientes). Correção estrutural antes do push: repositório tornado PRIVADO no GitHub (decisão Diovanni, recomendação do Arquiteto — exposição real era o acervo de PGRs em matrizes_originais/, não a mensagem de commit). Push autorizado após a mudança.
+
+**Pendências.** DT-003CM-01 FECHADA (1ª leva de D-ARQ-57 completa). DT-003L-01 forma 6 segue aberta (recorte-por-cargo = fatia futura própria). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída.
+
+**Próxima.** A declarar no kickoff. Candidatas: DT-003M-02(A) (vocabulário), emissor artefato-ida FDS, render de saída, recorte-por-cargo, medição multi-setor, higiene mypy.
