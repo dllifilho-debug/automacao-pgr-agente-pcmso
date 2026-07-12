@@ -3407,3 +3407,17 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** DT-003CM-01 segue ABERTA (faltam fatias 2 — gate de segmentação — e 3 — cargo-based). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída.
 
 **Próxima.** A declarar no kickoff. Candidata natural: fatia 2 de D-ARQ-57 (gate de segmentação densidade+contagem, limiares X/N a calibrar contra os 15 medidos). Demais: fatia 3 (cargo-based), DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
+
+## Sessão 003.CP — 11/07/2026 — IMPLEMENTAÇÃO (fatia 2 de D-ARQ-57: gate de segmentação densidade+contagem)
+
+**Verificação de abertura.** main `0a3d965`, working tree clean, suíte 762+4 herdada de 003.CO.
+
+**Método (novidade de processo).** Calibração dos limiares X/N feita pelo próprio Arquiteto, medição direta dos 15 PGRs do acervo no sandbox do Cowork (pdfplumber com a lógica exata de `eh_cabecalho_ghe` @ HEAD; Hetrin/Serra Dourada/Seconci REV3-REV4 por pypdf, precedente 003.CM). Resultado: legítimos ≤34,8% de densidade (ALT T65), implausíveis ≥44,4% (TPB); Floramazônia (armadilha do índice-em-prosa prevista em DT-003CM-01) mede 6 falsos blocos / 50% — pega só pela densidade. X=40 / N=10 ratificados pelo Diovanni antes do prompt cirúrgico.
+
+**Entrega.** `avaliar_segmentacao` em `motor/extracao_pgr.py` (gate puro, Pendencia `segmentacao_implausivel` bloqueante, regra_origem D-ARQ-57) + 7 testes (6 sintéticos + Viverde real → None). Suíte 762+4 → 769+4. mypy --strict: mesmos 46. PR #200, merge `81e9a9b`. Cláusula-bloqueador presente no prompt; nenhum desvio de processo.
+
+**Falsos-positivos aceitos por design.** TPB Andrade (1 âncora, 45 págs) e R78 Naturia (parcial, 19 págs) serão bloqueados pelo gate — pendência p/ revisão humana, direção anti-supressão (D-ARQ-22/31/35).
+
+**Pendências.** DT-003CM-01 segue ABERTA (falta fatia 3 — cargo-based). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003L-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída.
+
+**Próxima.** A declarar no kickoff. Candidata natural: fatia 3 de D-ARQ-57 (família cargo-based reconhecer+sinalizar `pgr_cargo_based`). Demais: DT-003M-02(A), emissor artefato-ida FDS, render de saída, higiene mypy.
