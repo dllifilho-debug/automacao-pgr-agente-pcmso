@@ -232,6 +232,13 @@ def test_avaliar_segmentacao_doc_pequeno_uma_ancora_e_none() -> None:
     assert avaliar_segmentacao(paginas) is None
 
 
+def test_avaliar_segmentacao_doc_pequeno_ancora_no_topo_e_none() -> None:
+    # Âncora na pág. 1 -> bloco único satura 100% num doc pequeno; sem o
+    # piso de páginas na densidade seria falso-implausível (regressão 003.CR).
+    paginas = _construir_paginas(3, {1: "GHE 1"})
+    assert avaliar_segmentacao(paginas) is None
+
+
 def test_avaliar_segmentacao_bloco_denso_e_pendencia_por_densidade() -> None:
     # Âncoras nas págs. 1,2,3,4,12 -> blocos de 1,1,1,8,9 páginas (últ. bloco
     # vai até a pág. 20) — o bloco de 9 págs. excede 40% de 20 (=8 págs.).
