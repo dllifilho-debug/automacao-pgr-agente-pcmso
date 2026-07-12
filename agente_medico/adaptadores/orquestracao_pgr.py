@@ -4,7 +4,12 @@ from datetime import date
 from pathlib import Path
 
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
-from agente_medico.motor.extracao_pgr import extrair_texto_pgr, recortar_blocos_ghe, recortar_topo
+from agente_medico.motor.extracao_pgr import (
+    avaliar_estrutura,
+    extrair_texto_pgr,
+    recortar_blocos_ghe,
+    recortar_topo,
+)
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_pgr
 from agente_medico.motor.protocolo import Protocolo
@@ -85,13 +90,28 @@ def preparar_envelope(
 def preparar_ghes(
     caminho: Path, cliente: TranscritorGHE
 ) -> tuple[tuple[GHEVerbatim, ...], tuple[Pendencia, ...]]:
-    """extrair_texto_pgr -> recortar_blocos_ghe -> transcrever_ghes -> gate_forma_ghe.
+    """extrair_texto_pgr -> avaliar_estrutura -> recortar_blocos_ghe ->
+    transcrever_ghes -> gate_forma_ghe.
+
+    avaliar_estrutura roda ANTES do recorte/transcrição (D-ARQ-57): um
+    documento cargo-based ou com segmentação implausível bloqueia aqui, sem
+    gastar chamada LLM sobre recorte inválido. Doc pequeno sem âncora
+    (avaliar_estrutura devolve None, gate inaplicável) continua caindo em
+    "blocos_ausentes" via recortar_blocos_ghe abaixo; doc grande com 0/1
+    âncora agora emite "segmentacao_implausivel" — diagnóstico específico
+    vence "blocos_ausentes" genérico.
 
     Zero blocos (recortar_blocos_ghe devolve []) vira Pendencia bloqueante
     aqui — quem transforma ausência de âncora em Pendencia é o chamador,
     como documentado em recortar_blocos_ghe (anti-supressão D-ARQ-31/35).
     """
     paginas = extrair_texto_pgr(caminho)
+    pendencia_estrutura = avaliar_estrutura(paginas)
+    if pendencia_estrutura is not None:
+        # Gate de estrutura ANTES do recorte/transcrição (D-ARQ-57):
+        # documento cargo-based ou com segmentação implausível bloqueia
+        # aqui, sem gastar chamada LLM sobre recorte inválido.
+        return (), (pendencia_estrutura,)
     blocos = recortar_blocos_ghe(paginas)
     if not blocos:
         return (), (
