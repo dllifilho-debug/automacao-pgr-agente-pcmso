@@ -3435,3 +3435,21 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** DT-003CM-01 FECHADA (1ª leva de D-ARQ-57 completa). DT-003L-01 forma 6 segue aberta (recorte-por-cargo = fatia futura própria). Sem mudança: DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída.
 
 **Próxima.** A declarar no kickoff. Candidatas: DT-003M-02(A) (vocabulário), emissor artefato-ida FDS, render de saída, recorte-por-cargo, medição multi-setor, higiene mypy.
+
+## Sessão 003.CR — 12/07/2026 — IMPLEMENTAÇÃO (plug de `avaliar_estrutura` em produção + refino peça 2 de D-ARQ-57)
+
+**Verificação de abertura.** main `c9684db`, working tree clean, suíte 784+4 herdada de 003.CQ.
+
+**Foco (recomendação do Arquiteto, ratificada).** Plugar `avaliar_estrutura` em `preparar_ghes`: a 1ª leva de D-ARQ-57 estava completa mas INERTE (sem chamador de produção) — gate e família não afetavam saída real. Fatia pequena, fecha o ciclo da porta de entrada antes de abrir frente nova.
+
+**Bloqueador e resolução (decisão do Arquiteto).** O Code reportou que plugar quebrava 5 testes pré-existentes de doc pequeno (fixture 1 pág, 1 âncora GHE legítima → `segmentacao_implausivel`). Diagnóstico do Arquiteto (git objects, worktree do mount não confiável): defeito latente na peça 2, não no fixture. O ramo de densidade de `avaliar_segmentacao` não tinha o piso de páginas que a contagem já tinha; num doc pequeno o bloco único satura o percentual (1/1 = 100% > 40%) por definição matemática, e a densidade nunca foi calibrada abaixo do piso. Correção formulada (não paliativa — o piso sempre foi a intenção da peça 2): guardar o ramo de densidade com `total_paginas > _LIMIAR_PAGINAS_DOC_MINIMO`, espelhando a contagem. "Não ajustar teste/fixture" respeitado — o defeito era do motor.
+
+**Entrega.** Dois commits na mesma branch (rastreabilidade): (1) `e73b281` piso de páginas no ramo de densidade de `avaliar_segmentacao` (`motor/extracao_pgr.py`) + regressão `test_avaliar_segmentacao_doc_pequeno_ancora_no_topo_e_none` (falha sem o piso, passa com); (2) `82a4a81` plug de `avaliar_estrutura` em `preparar_ghes` (`adaptadores/orquestracao_pgr.py`, gate ANTES do recorte/transcrição, retorna `(), (pendencia,)`) + 3 testes de orquestração (cargo-based bloqueia antes da transcrição; segmentação implausível idem com `blocos_recebidos == []` como discriminador; doc grande sem âncora emite `segmentacao_implausivel`, não `blocos_ausentes`). Os 5 testes de doc pequeno voltaram verdes sem alteração. Suíte 784+4 → 788+4. mypy --strict: mesmos 46. PR #204, merge `0e95574`. Cláusula-bloqueador presente; disparou uma vez (o defeito da peça 2) e foi honrada — parou e reportou, correção veio do Arquiteto.
+
+**Saída do motor mudou (sinalizado).** Docs ≤ `_LIMIAR_PAGINAS_DOC_MINIMO` páginas deixam de ser marcados `segmentacao_implausivel` por densidade (a contagem já os ignorava). Bloco único cobrindo doc pequeno é plausível; a patologia Vistamérica é sempre grande e segue pega.
+
+**PAINEL.** Não re-tirado: o merge não moveu nenhum dos 3 números de headline (cobertura clínica 19/42, porta já "plugada em produção" via D-ARQ-52, dívidas 3). Baseline metadata fica defasada por design — git vence; re-tira no próximo merge que mover número ou marco. `[CLAUDE.md — "merge que não move número não dispara re-tiragem"]`.
+
+**Pendências.** Sem mudança de contagem: DT-003L-01 forma 6 (recorte-por-cargo), DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída, medição multi-setor.
+
+**Próxima.** A declarar no kickoff. Candidatas: DT-003M-02(A) (vocabulário químico raso), recorte-por-cargo (DT-003L-01 forma 6), medição multi-setor (universalidade do localizador), emissor artefato-ida FDS, render de saída, higiene mypy.
