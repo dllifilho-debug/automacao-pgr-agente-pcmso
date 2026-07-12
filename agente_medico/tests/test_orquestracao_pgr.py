@@ -112,6 +112,61 @@ def test_blocos_ausentes_vira_none_e_pendencia_bloqueante() -> None:
     assert pendencias[0].bloqueante is True
 
 
+def test_cargo_based_bloqueia_antes_da_transcricao() -> None:
+    paginas = ["CARGO/FUNÇÃO: Pintor\nlinha\n"] * 3
+    mock = MockTranscritorConstante(_GHE_VALIDO)
+    with patch(_ALVO_EXTRACAO, return_value=paginas):
+        resultado, pendencias = processar_arquivo_pgr(
+            Path("qualquer.pdf"),
+            _PROTO,
+            mock,
+            envelope=_ENVELOPE_PADRAO,
+        )
+
+    assert resultado is None
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "pgr_cargo_based"
+    assert pendencias[0].bloqueante is True
+    assert pendencias[0].regra_origem == "D-ARQ-57"
+    assert mock.blocos_recebidos == []
+
+
+def test_segmentacao_implausivel_bloqueia_antes_da_transcricao() -> None:
+    paginas = (
+        ["GHE 1 - Setor A\nCargo A", "GHE 2 - Setor B\nCargo B"]
+        + ["conteudo\n"] * 10
+    )
+    mock = MockTranscritorConstante(_GHE_VALIDO)
+    with patch(_ALVO_EXTRACAO, return_value=paginas):
+        resultado, pendencias = processar_arquivo_pgr(
+            Path("qualquer.pdf"),
+            _PROTO,
+            mock,
+            envelope=_ENVELOPE_PADRAO,
+        )
+
+    assert resultado is None
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "segmentacao_implausivel"
+    assert pendencias[0].bloqueante is True
+    assert mock.blocos_recebidos == []
+
+
+def test_doc_grande_sem_ancora_emite_segmentacao_nao_blocos_ausentes() -> None:
+    paginas = ["linha qualquer\n"] * 12
+    with patch(_ALVO_EXTRACAO, return_value=paginas):
+        resultado, pendencias = processar_arquivo_pgr(
+            Path("qualquer.pdf"),
+            _PROTO,
+            MockTranscritorConstante(_GHE_VALIDO),
+            envelope=_ENVELOPE_PADRAO,
+        )
+
+    assert resultado is None
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "segmentacao_implausivel"
+
+
 def test_transcricao_indisponivel_vira_none_e_pendencia_bloqueante() -> None:
     with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()):
         resultado, pendencias = processar_arquivo_pgr(

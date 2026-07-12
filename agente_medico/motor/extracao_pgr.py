@@ -11,7 +11,9 @@ from agente_medico.motor.tipos import Pendencia
 # D-ARQ-57 peça 2 (gate anti-Vistamérica): limiares calibrados em 003.CP sobre
 # os 15 PGRs de DT-003CM-01.
 _LIMIAR_DENSIDADE_PCT = 40.0  # maior legítimo medido: 34,8% (ALT T65); implausíveis ≥ 44,4%
-_LIMIAR_PAGINAS_DOC_MINIMO = 10  # ≤1 bloco em doc > 10 págs → implausível
+_LIMIAR_PAGINAS_DOC_MINIMO = 10  # piso de massa dos DOIS testes (contagem e
+# densidade) — abaixo dele a segmentação não é julgada: ≤1 bloco ou bloco
+# denso num doc pequeno não é implausível, só reflete o tamanho do doc.
 
 
 def extrair_texto_pgr(caminho: Path) -> list[str]:
@@ -284,7 +286,10 @@ def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
       _LIMIAR_PAGINAS_DOC_MINIMO páginas — massa insuficiente para um único
       bloco cobrir o documento inteiro ser plausível.
     - Densidade: maior bloco ocupa mais de _LIMIAR_DENSIDADE_PCT% do total de
-      páginas do documento.
+      páginas do documento — só avaliada em doc com mais de
+      _LIMIAR_PAGINAS_DOC_MINIMO páginas; abaixo disso um bloco único
+      legítimo satura o percentual por definição e seria falso-implausível
+      (mesmo piso já presente no teste de contagem).
 
     Sem I/O, sem LLM (D-ARQ-09); não altera recortar_blocos_ghe/recortar_topo.
     """
@@ -322,7 +327,10 @@ def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
     )
     percentual_maior_bloco = (maior_extensao_paginas / total_paginas) * 100
 
-    if percentual_maior_bloco > _LIMIAR_DENSIDADE_PCT:
+    if (
+        total_paginas > _LIMIAR_PAGINAS_DOC_MINIMO
+        and percentual_maior_bloco > _LIMIAR_DENSIDADE_PCT
+    ):
         return Pendencia(
             tipo="segmentacao_implausivel",
             destinatario="extracao",
