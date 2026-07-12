@@ -5,8 +5,11 @@ from pathlib import Path
 import pytest
 
 from agente_medico.motor.extracao_pgr import (
+    avaliar_estrutura,
+    avaliar_familia,
     avaliar_segmentacao,
     eh_cabecalho_ghe,
+    eh_sinal_cargo,
     extrair_texto_pgr,
     recortar_blocos_ghe,
     recortar_topo,
@@ -260,3 +263,95 @@ def test_avaliar_segmentacao_viverde_e_none(paginas: list[str]) -> None:
     # Medição 003.CP: Viverde 151 págs., 31 blocos, maior bloco 29 págs.
     # (= 19,2%) — bem abaixo dos dois limiares.
     assert avaliar_segmentacao(paginas) is None
+
+
+# ---------------------------------------------------------------------------
+# eh_sinal_cargo / avaliar_familia / avaliar_estrutura — família cargo-based
+# (D-ARQ-57 peça 3, DT-003CM-01): 3 formas medidas em 003.CQ sobre o acervo.
+# ---------------------------------------------------------------------------
+
+CAMINHO_PGR_RICCO_ADM = Path("matrizes_originais/PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf")
+CAMINHO_PGR_CJR = Path("matrizes_originais/pgr_Cjr Engenharia Ltda (M Construtora).pdf")
+
+
+@pytest.mark.parametrize(
+    "linha",
+    [
+        "CARGO/FUNÇÃO: JORNADA TRABALHO: 08 horas",
+        "CARGO TECNÓLOGO EM EDIFICAÇÕES - CBO: 214280",
+        "Função Identificação de Perigo / Risco Tempo de Meio de Nível de "
+        "Eliminação ou Controle Existente",
+    ],
+)
+def test_eh_sinal_cargo_reconhece_cada_forma_medida(linha: str) -> None:
+    assert eh_sinal_cargo(linha)
+
+
+@pytest.mark.parametrize(
+    "linha",
+    [
+        "Função/Cargo:",
+        "cargo estão expostos.",
+        "XXVIII - Seguro contra acidentes de trabalho, á cargo do empregador, "
+        "sem excluir, a indenização",
+        "SETOR/FUNÇÃO: PRODUÇÃO",
+    ],
+)
+def test_eh_sinal_cargo_rejeita_armadilhas_medidas(linha: str) -> None:
+    assert not eh_sinal_cargo(linha)
+
+
+def test_avaliar_familia_sem_ghe_com_sinal_cargo_e_pendencia() -> None:
+    paginas = ["linha comum", "CARGO/FUNÇÃO: JORNADA TRABALHO: 08 horas"]
+    pendencia = avaliar_familia(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+    assert pendencia.bloqueante is True
+    assert pendencia.regra_origem == "D-ARQ-57"
+    assert pendencia.ghe_id is None
+
+
+def test_avaliar_familia_com_ancora_ghe_e_sinal_cargo_e_none() -> None:
+    paginas = ["GHE 1", "CARGO/FUNÇÃO: JORNADA TRABALHO: 08 horas"]
+    assert avaliar_familia(paginas) is None
+
+
+def test_avaliar_familia_sem_ghe_e_sem_sinal_e_none() -> None:
+    paginas = ["linha comum", "outra linha comum"]
+    assert avaliar_familia(paginas) is None
+
+
+def test_avaliar_estrutura_cargo_based_grande_e_pgr_cargo_based_nao_segmentacao() -> None:
+    # Doc grande (>10 págs.), 0 âncoras GHE, com sinal-cargo: sem a peça 3
+    # este caso cairia no gate genérico e emitiria segmentacao_implausivel
+    # (contagem: 0 blocos em doc >10 págs.) — a peça 3 sela a exclusão mútua.
+    paginas = _construir_paginas(20, {}) + ["CARGO/FUNÇÃO: JORNADA TRABALHO: 08 horas"]
+    pendencia = avaliar_estrutura(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+    assert pendencia.tipo != "segmentacao_implausivel"
+
+
+def test_avaliar_estrutura_ghe_implausivel_delega_segmentacao() -> None:
+    paginas = _construir_paginas(20, {5: "GHE 1"})
+    pendencia = avaliar_estrutura(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
+
+
+def test_avaliar_estrutura_viverde_e_none(paginas: list[str]) -> None:
+    assert avaliar_estrutura(paginas) is None
+
+
+def test_avaliar_estrutura_ricco_adm_real_e_pgr_cargo_based() -> None:
+    paginas_ricco = extrair_texto_pgr(CAMINHO_PGR_RICCO_ADM)
+    pendencia = avaliar_estrutura(paginas_ricco)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+
+
+def test_avaliar_estrutura_cjr_real_e_pgr_cargo_based() -> None:
+    paginas_cjr = extrair_texto_pgr(CAMINHO_PGR_CJR)
+    pendencia = avaliar_estrutura(paginas_cjr)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
