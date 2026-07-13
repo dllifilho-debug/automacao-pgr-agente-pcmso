@@ -14,6 +14,7 @@ from agente_medico.motor.predicados import (
     avaliar_predicado,
     primitivo,
 )
+from agente_medico.motor.protocolo import Vocabulario
 from agente_medico.motor.tipos import Ausente, GHEContext, GHEPGR, Quantificacao, Risco
 
 
@@ -287,3 +288,29 @@ def test_vibracao_qualquer_ausente_por_generico() -> None:
 def test_vibracao_qualquer_false_por_nenhum() -> None:
     proto = _protocolo_stub(_compostos_vibracao)
     assert avaliar_predicado("vibracao_qualquer", _ctx(), proto) is False
+
+
+# ---------------------------------------------------------------------------
+# Fallback por identidade de agente (R-BIO-04)
+# ---------------------------------------------------------------------------
+
+def _protocolo_stub_agentes(agentes: dict[str, Any]) -> Any:
+    proto = _protocolo_stub()
+    proto.vocabulario = Vocabulario(agentes=agentes, cargos={}, exames={}, epis={})
+    return proto
+
+
+def test_fallback_agente_true_quando_presente_no_ctx() -> None:
+    proto = _protocolo_stub_agentes({"chumbo": {}})
+    assert avaliar_predicado("chumbo", _ctx("chumbo"), proto) is True
+
+
+def test_fallback_agente_false_quando_ausente_no_ctx() -> None:
+    proto = _protocolo_stub_agentes({"chumbo": {}})
+    assert avaliar_predicado("chumbo", _ctx(), proto) is False
+
+
+def test_fallback_agente_nao_aplica_a_nome_fora_do_vocabulario() -> None:
+    proto = _protocolo_stub_agentes({"chumbo": {}})
+    with pytest.raises(PredicadoDesconhecido):
+        avaliar_predicado("agente_com_typo", _ctx(), proto)
