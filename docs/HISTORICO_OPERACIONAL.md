@@ -3453,3 +3453,23 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Pendências.** Sem mudança de contagem: DT-003L-01 forma 6 (recorte-por-cargo), DT-003CK-01, DT-003M-02(A), DT-003CI-01, DT-003CB-01, DT-003BV-01, DT-003BO-01, DT-003Y-01, DT-002V-01, DT-FDS-02, higiene mypy (46), emissor artefato-ida FDS (003.CF), render de saída, medição multi-setor.
 
 **Próxima.** A declarar no kickoff. Candidatas: DT-003M-02(A) (vocabulário químico raso), recorte-por-cargo (DT-003L-01 forma 6), medição multi-setor (universalidade do localizador), emissor artefato-ida FDS, render de saída, higiene mypy.
+
+## Sessão 003.CS — 12/07/2026 — ARQUITETURA (validação out-of-sample multi-setor de D-ARQ-57)
+
+**Verificação de abertura.** main `6481870`, working tree clean, suíte 788+4 herdada de 003.CR. Working tree do mount (Cowork) defasado — leitura confiável via git objects/host; git venceu.
+
+**Foco (recomendação do Arquiteto, ratificada).** ARQUITETURA — validar se o localizador de D-ARQ-57 (calibrado em n=15 só construção civil) é universal, medindo-o contra PGRs reais de outros setores. Insumo: Diovanni só tem PGR de construção civil → busca web de PGRs preenchidos (não template) de saúde e química.
+
+**PGRs selecionados (públicos, preenchidos).** Saúde: HU-UFGD (Hospital Universitário da Grande Dourados, template EBSERH/NR-9, 197 págs). Indústria: Bertoncini (Indústria e Comércio de Ferro, metalúrgica/serralheria, Sistema ESO, 55 págs, grau de risco 3). Descartado: Acelen "PGR-Terceiras-Modelo" (template em branco).
+
+**Medição (`avaliar_estrutura`, pdfplumber, host).** Bertoncini → `pgr_cargo_based` (6 sinais de cargo, 0 âncoras GHE): tratado corretamente. HU-UFGD → `segmentacao_implausivel` (0 âncoras GHE em 197 págs). Sonda de estrutura do HU (contadores por token): ~23 `GRUPO HOMOGÊNEO DE EXPOSIÇÃO SIMILAR (GHES)`, 378 `Cargo/Função`, ~40 seções `Unidade / Setor`, tabelas de risco por bloco — GHE-conceitual, cabeçalho EBSERH sem numeração.
+
+**Achado (3 passadas).** (1ª) hipótese: âncora presa a formato → furo de universalidade. (2ª, após ler DECISOES) correção: D-ARQ-57 já previu forma-não-medida → bloqueio é a rede de segurança projetada, não bug. (3ª, após sonda real) refino: o HU **não** é forma-não-medível — é um PGR EBSERH bem-formado e recortável; a rede funcionou (não gerou lixo), mas o furo de cobertura do **repertório de âncora GHE** para o formato EBSERH é real e acionável. Família e gate corretos; furo só na âncora GHE.
+
+**Placar.** Bertoncini: OK, sem ação. HU-UFGD: bloqueio correto + candidato a extensão de repertório → **DT-003CS-01** aberta (forma EBSERH, saúde; critério de resolução: censo n≥3 + unidade de recorte + reconhecedor em disjunção). Design de D-ARQ-57 validado out-of-sample nos dois eixos testados (família universal; gate como rede).
+
+**Docs.** DECISOES v116 (andamento 003.CS em D-ARQ-57 + DT-003CS-01). PROTOCOLO inalterado (sem R-*). PAINEL não re-tirado (cobertura clínica 19/42 inalterada; medição, não implementação).
+
+**Higiene.** Removidos os temporários de medição: `_medicao_multisetor.py` e `_pgr_multisetor/` (não commitados).
+
+**Próxima.** A declarar no kickoff. Candidatas: DT-003CS-01 (censo EBSERH n≥3 + IMPL forma EBSERH), DT-003M-02(A) (vocabulário químico), recorte-por-cargo (DT-003L-01 forma 6), emissor artefato-ida FDS, render de saída, higiene mypy.
