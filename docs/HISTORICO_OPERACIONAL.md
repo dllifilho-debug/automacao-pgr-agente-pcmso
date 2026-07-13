@@ -3473,3 +3473,23 @@ Próxima. A declarar no kickoff. Candidata natural: IMPLEMENTAÇÃO da fatia 3 d
 **Higiene.** Removidos os temporários de medição: `_medicao_multisetor.py` e `_pgr_multisetor/` (não commitados).
 
 **Próxima.** A declarar no kickoff. Candidatas: DT-003CS-01 (censo EBSERH n≥3 + IMPL forma EBSERH), DT-003M-02(A) (vocabulário químico), recorte-por-cargo (DT-003L-01 forma 6), emissor artefato-ida FDS, render de saída, higiene mypy.
+
+## Sessão 003.CT — 12/07/2026 — ARQUITETURA (D-ARQ-38 fatia d: forma do emissor de biomonitoramento químico)
+
+**Verificação de abertura.** main `827683e`, working tree clean, suíte 788+4, DECISOES v116, PROTOCOLO v53, cobertura clínica 19/42.
+
+**Kickoff e pivô.** Recomendei CONHECIMENTO (conduta química); Diovanni ratificou "trabalhar". A leitura obrigatória (regra de ouro) do PROTOCOLO + DECISOES **pivotou a recomendação**: a conduta química já está formalizada — R-BIO-04 (matriz temporal Quadro 1/2), R-CLI-02 (semestral), mapa agente→biomarcador de 13 agentes conferido em 003.AD. O vazio real não é CONHECIMENTO — é o **emissor**. Foco ratificado: ARQUITETURA, D-ARQ-38 fatia d.
+
+**Gate de estado real (disco).** `stage_5_emissao` emite slug fixo por regra (`emissao.py`); `regras.yaml` só emite R-PKG-BZ do lado químico; `exames.yaml` sem biomarcadores (só benzeno); `Risco.tipo_ibe` carregado mas sem consumidor; `Momento` tem RT (Quadro 2 expressável). Os 12 agentes com `tipo_ibe` carregam o Quadro e produzem ZERO exame — máquina inerte, mesmo padrão do localizador pré-003.CR. Data-bloqueio da cl.3 de D-ARQ-38 caiu (mapa existe desde 003.AD) → forma decidível.
+
+**Decisão (ratificada, 2 forks).** (1) Forma = **família regra-por-agente** (molde R-PKG-BZ), não estágio genérico nem schema estendido — precedente D-ARQ-20, zero motor, zero schema, rastreabilidade por regra. (2) Borda "ou" = **1º canônico + nota** `[INTERPRETADO]`, não pendência-de-escolha nem emitir-todos.
+
+**Spec fechada (12 regras, 6M).** Quadro 1/EE → `[per]` (11): acetona→acetona_urina; arsenio→arsenio_urina; dissulfeto_de_carbono→ttca_urina; estireno→acido_mandelico_fenilglioxilico (ou); mercurio→mercurio_urina; metil_etil_cetona→mek_urina; monoxido_de_carbono→carboxihemoglobina (ou); n_hexano→hexanodiona_urina; tolueno→tolueno_urina (ou); tricloroetileno→acido_tricloroacetico (ou); xileno→acido_metilhipurico. Quadro 2/SC → `[adm,per,RT,MR,dem]` (1): chumbo→chumbo_sangue + ala_urinario (e). Exclusões: benzeno (R-PKG-BZ), Mn (R-PKG-SOLD). Cr⁶⁺ fora (não-vocab). ~13 slugs novos em `exames.yaml`.
+
+**Fronteiras.** Escopo = fatia (d) só; R-CLI-02 (fatia c) segue travada em D-ARQ-39 (dedup convergente anual×semestral) — não empilhada. R-BIO-04 mantém ID (família materializa, molde R-RX-01-\<faixa\>); sem PROTOCOLO novo, sem R- nova. Trade-off sinalizado: família agora (n≈12); estágio genérico é refatoração futura se cruzar ~25 agentes (critério D-ARQ-54 "unificar só quando a forma confirmar").
+
+**Muda saída (sinalizado).** ~11 agentes que hoje emitem zero passam a emitir biomonitoramento; cada regra da família exige teste-que-falha-sem-ela na IMPL.
+
+**Docs.** DECISOES v117 (andamento 003.CT em D-ARQ-38 fatia d). PROTOCOLO v53 e PAINEL intocados (ARQUITETURA, nenhum número movido; sem R- nova). HISTORICO: este bloco.
+
+**Próxima.** IMPL da fatia (d): 12 regras `R-BIO-04-<agente>` + slugs em `exames.yaml` + teste por regra. Prompt cirúrgico pro Code (exige git log/status + leitura real de `regras.yaml`/`exames.yaml`). Alternativas: DT-003M-02(A) vocabulário químico (mais agentes → mais regras da família), R-CLI-02 via D-ARQ-39, DT-003CS-01 censo EBSERH.
