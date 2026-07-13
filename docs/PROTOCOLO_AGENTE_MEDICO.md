@@ -422,6 +422,8 @@ Mapa agente→biomarcador dos agentes do vocabulário (insumo para o emissor de 
 | xileno | 1/EE | ác. metilhipúrico urina |
 | chumbo (inorgânico) | 2/SC | Pb-S **e** ALA-U |
 
+> **Changelog 003.CU (mesma ID — materialização + correção de biomarcador do tolueno).** A família `R-BIO-04-<agente>` foi materializada em `regras.yaml`/`exames.yaml` (D-ARQ-38 fatia d, 12 regras). Entre os agentes multi-opção do mapa acima, o emissor adotou o canônico da Matriz Dra. Patrícia 06/2025, confirmado contra NR-7 vigente: **tolueno → o-cresol na urina** (`ortocresol_urina`), CO → COHb, TCE → ác. tricloroacético, estireno → soma mandélico+fenilglioxílico (exame único). Correção rastreável: a spec de 003.CT havia escolhido "tolueno urina" (`tolueno_urina`) — **erro**: não é IBE; o indicador vigente é o-cresol (Portaria SEPRT 2020, alinhada ACGIH; ácido hipúrico é o antigo). Corrigido antes da implementação; `tolueno_urina` nunca esteve em produção. Saída afetada (novo slug emitido) mas mesma ID — a família materializa R-BIO-04, não cria regra nova. `[DERIVADO — NR-07 Anexo I Quadro 1 rev.2020; Matriz Patrícia 06/2025]`
+
 ---
 
 ## 6. PACOTES POR CARGO / ATIVIDADE
@@ -1210,3 +1212,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v51 | 11/07/2026 | Sessão 003.CO (IMPLEMENTAÇÃO): **nota em DT-003CM-01** — forma 1 refinada (Viverde também traz `"GHE NN-"`, traço colado, medido no PDF real na IMPL da fatia 1; reconhecedor tolera espaçamento variável no traço). Fatia 1 de D-ARQ-57 implementada (PR #198). DT segue ABERTA (fatias 2–3). Nenhuma R-* criada/alterada. |
 | v52 | 11/07/2026 | Sessão 003.CP (IMPLEMENTAÇÃO): **nota em DT-003CM-01** — calibração X=40/N=10 medida diretamente sobre os 15 PGRs do acervo (legítimos ≤34,8%, ALT T65; implausíveis ≥44,4%, TPB); divergência registrada Seconci REV3/REV4 (pypdf 15/16 vs censo "18×" 003.CM). Fatia 2 de D-ARQ-57 implementada (PR #200). DT segue ABERTA (fatia 3). Nenhuma R-* criada/alterada. |
 | v53 | 12/07/2026 | Sessão 003.CQ (IMPLEMENTAÇÃO): **DT-003CM-01 FECHADA** — 1ª leva de D-ARQ-57 completa (3/3); caveat pypdf Hetrin/SD resolvido; refino do censo (sinal cargo-based = grid-header AIHA). Nenhuma R-* criada/alterada. |
+| v54 | 13/07/2026 | Sessão 003.CU (IMPLEMENTAÇÃO): **R-BIO-04 materializada** (família `R-BIO-04-<agente>`, 12 regras, D-ARQ-38 fatia d) + changelog de correção do biomarcador do tolueno (`tolueno_urina`→`ortocresol_urina`; NR-7 rev.2020 o-cresol, Matriz Patrícia). Mesma ID (família materializa; sem R- nova). |
