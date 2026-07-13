@@ -159,3 +159,111 @@ regras:
       Dispara por identidade de agente, agnóstico à fonte (4ª fonte D-ARQ-35) e à materialidade."
     status: VALIDADO
 
+  - id: R-BIO-04-acetona
+    quando: acetona
+    emite:
+      - {exame: acetona_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): acetona → acetona na urina. Momento [per],
+      periodicidade 6M [R-CLI-02 semestral]."
+    status: VALIDADO
+
+  - id: R-BIO-04-arsenio
+    quando: arsenio
+    emite:
+      - {exame: arsenio_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): arsênio → arsênio inorgânico + metabólitos
+      metilados na urina. Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-dissulfeto_de_carbono
+    quando: dissulfeto_de_carbono
+    emite:
+      - {exame: ttca_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): dissulfeto de carbono → TTCA na urina.
+      Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-estireno
+    quando: estireno
+    emite:
+      - {exame: acido_mandelico_fenilglioxilico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): estireno → soma dos ácidos mandélico e
+      fenilglioxílico na urina (exame único). Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-mercurio
+    quando: mercurio
+    emite:
+      - {exame: mercurio_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): mercúrio → mercúrio na urina.
+      Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-metil_etil_cetona
+    quando: metil_etil_cetona
+    emite:
+      - {exame: mek_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): MEK → metil-etil-cetona na urina.
+      Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-monoxido_de_carbono
+    quando: monoxido_de_carbono
+    emite:
+      - {exame: carboxihemoglobina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): monóxido de carbono → carboxihemoglobina
+      no sangue. Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-n_hexano
+    quando: n_hexano
+    emite:
+      - {exame: hexanodiona_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): n-hexano → 2,5-hexanodiona na urina.
+      Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-tolueno
+    quando: tolueno
+    emite:
+      - {exame: ortocresol_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE), revisão 2020: tolueno → ortocresol na urina
+      (não mais tolueno na urina). Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-tricloroetileno
+    quando: tricloroetileno
+    emite:
+      - {exame: acido_tricloroacetico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): tricloroetileno → ácido tricloroacético
+      na urina. Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-xileno
+    quando: xileno
+    emite:
+      - {exame: acido_metilhipurico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
+      NR-07 Anexo I Quadro 1 (IBE/EE): xileno → ácido metil-hipúrico na urina.
+      Momento [per], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-chumbo
+    quando: chumbo
+    emite:
+      - {exame: chumbo_sangue, periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
+      - {exame: ala_urinario,  periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 2 (IBE/SC): chumbo inorgânico →
+      chumbo no sangue (Pb-S) e ALA-U. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
+    status: VALIDADO
+

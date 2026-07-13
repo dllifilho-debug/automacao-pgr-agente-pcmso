@@ -51,3 +51,68 @@ exames:
     nome_exibicao: "Ácido trans-trans-mucônico"
     categoria: laboratorial
     fonte_matriz: "BENZENO (R-PKG-BZ)"
+
+  acetona_urina:
+    nome_exibicao: "Acetona na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  arsenio_urina:
+    nome_exibicao: "Arsênio inorgânico mais metabólitos metilados na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  ttca_urina:
+    nome_exibicao: "Ácido 2-tioxotiazolidina-4-carboxílico (TTCA) na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  acido_mandelico_fenilglioxilico:
+    nome_exibicao: "Soma dos ácidos mandélico e fenilglioxílico na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  mercurio_urina:
+    nome_exibicao: "Mercúrio na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  mek_urina:
+    nome_exibicao: "Metil-etil-cetona (MEK) na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  carboxihemoglobina:
+    nome_exibicao: "Carboxihemoglobina no sangue"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  hexanodiona_urina:
+    nome_exibicao: "2,5-hexanodiona na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  ortocresol_urina:
+    nome_exibicao: "Ortocresol na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE) — o-cresol, rev.2020"
+
+  acido_tricloroacetico:
+    nome_exibicao: "Ácido tricloroacético na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  acido_metilhipurico:
+    nome_exibicao: "Ácido metil-hipúrico na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  chumbo_sangue:
+    nome_exibicao: "Chumbo no sangue (Pb-S)"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro II (IBE/SC)"
+
+  ala_urinario:
+    nome_exibicao: "Ácido delta-aminolevulínico na urina (ALA-U)"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro II (IBE/SC)"

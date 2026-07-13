@@ -319,4 +319,11 @@ def avaliar_predicado(nome: str, ctx: GHEContext, protocolo: Any, _visitados: fr
         resultado = avaliar(compostos[nome], ctx, protocolo, _visitados | {nome})
         ctx.predicados[nome] = resultado
         return resultado
+    # Fallback por identidade de agente: habilita a família R-BIO-04-<agente>
+    # (roteamento de biomonitoramento) sem exigir um primitivo dedicado por agente.
+    agentes = getattr(protocolo.vocabulario, "agentes", {})
+    if nome in agentes:
+        resultado = any(r.agente == nome for r in ctx.riscos)
+        ctx.predicados[nome] = resultado
+        return resultado
     raise PredicadoDesconhecido(nome)
