@@ -295,3 +295,66 @@ regras:
       [adm/per/RT/MR/dem], periodicidade 6M."
     status: VALIDADO
 
+  - id: R-BIO-04-cromo_hexavalente
+    quando: cromo_hexavalente
+    emite:
+      - {exame: cromo_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): cromo hexavalente (comp. solúveis) → cromo na urina (FJFS 25 µg/L; critério alt. aumento-na-jornada 10 µg/L, mesmo analito). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-cobalto
+    quando: cobalto
+    emite:
+      - {exame: cobalto_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): cobalto → cobalto na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-fenol
+    quando: fenol
+    emite:
+      - {exame: fenol_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): fenol → fenol na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-metanol
+    quando: metanol
+    emite:
+      - {exame: metanol_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): metanol → metanol na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-diclorometano
+    quando: diclorometano
+    emite:
+      - {exame: diclorometano_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): diclorometano → diclorometano na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-etilbenzeno
+    quando: etilbenzeno
+    emite:
+      - {exame: acido_mandelico_fenilglioxilico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etilbenzeno → soma dos ácidos mandélico e fenilglioxílico na urina (exame único, mesmo analito do estireno). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-anilina
+    quando: anilina
+    emite:
+      - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): anilina → metahemoglobina no sangue (canônico entre 'OU'; p-aminofenol na urina é a alternativa) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-nitrobenzeno
+    quando: nitrobenzeno
+    emite:
+      - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): nitrobenzeno → metahemoglobina no sangue. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-indutores_metahemoglobina
+    quando: indutores_metahemoglobina
+    emite:
+      - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): classe indutores de metahemoglobina → metahemoglobina no sangue. Slug-classe (molde inseticidas). Momento [per], 6M."
+    status: VALIDADO
+
