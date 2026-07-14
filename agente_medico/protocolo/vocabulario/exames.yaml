@@ -116,3 +116,13 @@ exames:
     nome_exibicao: "Ácido delta-aminolevulínico na urina (ALA-U)"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro II (IBE/SC)"
+
+  cadmio_urina:
+    nome_exibicao: "Cádmio na urina"
+    categoria: laboratorial
+  fluoreto_urinario:
+    nome_exibicao: "Fluoreto urinário"
+    categoria: laboratorial
+  acetilcolinesterase_eritrocitaria:
+    nome_exibicao: "Atividade de acetilcolinesterase eritrocitária"
+    categoria: laboratorial

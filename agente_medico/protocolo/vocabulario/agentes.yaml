@@ -304,3 +304,28 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: null
     protocolos_especiais: [R-PKG-BZ]
+  cadmio:
+    # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): cádmio e comp. inorgânicos → cádmio na urina
+    # is_carcinogeno_iarc=true (IARC grupo 1); inerte no motor atual (só Componente-FDS consome);
+    # carcinogenicidade não desloca momento (R-BIO-04) — o Quadro decide.
+    tipo_ibe: SC
+    cas: "7440-43-9"
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: []
+  fluoretos:
+    # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): flúor, HF e fluoretos inorgânicos → fluoreto urinário
+    tipo_ibe: SC
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  inseticidas_inibidores_colinesterase:
+    # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): inseticidas inibidores da colinesterase
+    # → acetilcolinesterase eritrocitária (canônico entre "OU"; butirilcolinesterase plasma/soro
+    # é a alternativa) [INTERPRETADO — escolha do canônico, revisão de saída].
+    tipo_ibe: SC
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []

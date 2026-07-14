@@ -10,7 +10,7 @@ from agente_medico.motor.protocolo import carregar
 PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
-def test_vocabulario_exames_carrega_com_22_slugs() -> None:
+def test_vocabulario_exames_carrega_com_25_slugs() -> None:
     p = carregar(PROTOCOLO_DIR)
     assert set(p.vocabulario.exames.keys()) == {
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg",
@@ -21,6 +21,7 @@ def test_vocabulario_exames_carrega_com_22_slugs() -> None:
         "carboxihemoglobina", "hexanodiona_urina", "ortocresol_urina",
         "acido_tricloroacetico", "acido_metilhipurico",
         "chumbo_sangue", "ala_urinario",
+        "cadmio_urina", "fluoreto_urinario", "acetilcolinesterase_eritrocitaria",
     }
 
 
