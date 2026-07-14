@@ -267,3 +267,31 @@ regras:
       chumbo no sangue (Pb-S) e ALA-U. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
     status: VALIDADO
 
+  - id: R-BIO-04-cadmio
+    quando: cadmio
+    emite:
+      - {exame: cadmio_urina, periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 2 (IBE/SC): cádmio e comp.
+      inorgânicos → cádmio na urina. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-fluoretos
+    quando: fluoretos
+    emite:
+      - {exame: fluoreto_urinario, periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 2 (IBE/SC): flúor, ácido
+      fluorídrico e fluoretos inorgânicos → fluoreto urinário. Momentos
+      [adm/per/RT/MR/dem], periodicidade 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-inseticidas_inibidores_colinesterase
+    quando: inseticidas_inibidores_colinesterase
+    emite:
+      - {exame: acetilcolinesterase_eritrocitaria, periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 2 (IBE/SC): inseticidas
+      inibidores da colinesterase → atividade de acetilcolinesterase eritrocitária
+      (canônico entre OU; butirilcolinesterase plasma/soro é a alternativa)
+      [INTERPRETADO — escolha do canônico, revisão de saída]. Momentos
+      [adm/per/RT/MR/dem], periodicidade 6M."
+    status: VALIDADO
+

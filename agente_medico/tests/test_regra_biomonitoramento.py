@@ -81,6 +81,31 @@ def test_regra_bio_04_chumbo_grupo_sc(proto) -> None:  # type: ignore[no-untyped
         assert linha.momentos == _MOMENTOS_QUADRO_2
 
 
+@pytest.mark.parametrize(
+    "agente, regra_id, exame",
+    [
+        ("cadmio", "R-BIO-04-cadmio", "cadmio_urina"),
+        ("fluoretos", "R-BIO-04-fluoretos", "fluoreto_urinario"),
+        (
+            "inseticidas_inibidores_colinesterase",
+            "R-BIO-04-inseticidas_inibidores_colinesterase",
+            "acetilcolinesterase_eritrocitaria",
+        ),
+    ],
+)
+def test_regra_bio_04_grupo_sc_agente_unico(proto, agente: str, regra_id: str, exame: str) -> None:  # type: ignore[no-untyped-def]
+    ctx = _ctx_com_agente(agente)
+    emitidos = stage_5_emissao(ctx, proto)
+    por_exame = {e.exame: e for e in emitidos}
+
+    assert exame in por_exame, f"{agente}: esperado '{exame}', emitidos={list(por_exame)}"
+    linha = por_exame[exame]
+    assert linha.motivos[0].regra_id == regra_id
+    assert linha.periodicidade_meses == 6
+    assert linha.momentos == _MOMENTOS_QUADRO_2
+    assert len(emitidos) == 1, f"{agente}: esperado 1 exame, got {list(por_exame)}"
+
+
 def test_sem_agente_nao_emite_biomonitoramento(proto) -> None:  # type: ignore[no-untyped-def]
     ctx = _ctx_com_agente("ruido")
     emitidos = stage_5_emissao(ctx, proto)
