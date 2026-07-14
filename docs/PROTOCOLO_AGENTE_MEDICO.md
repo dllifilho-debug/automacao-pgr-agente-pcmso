@@ -420,6 +420,15 @@ Mapa agente→biomarcador dos agentes do vocabulário (insumo para o emissor de 
 | tolueno | 1/EE | tolueno sangue/urina *ou* o-cresol urina |
 | tricloroetileno | 1/EE | ác. tricloroacético *ou* tricloroetanol |
 | xileno | 1/EE | ác. metilhipúrico urina |
+| cromo hexavalente (comp. solúveis) | 1/EE | cromo urina (FJFS 25 µg/L; alt. aumento-na-jornada 10 µg/L, mesmo analito) |
+| cobalto | 1/EE | cobalto urina |
+| fenol | 1/EE | fenol urina |
+| metanol | 1/EE | metanol urina |
+| diclorometano | 1/EE | diclorometano urina |
+| etilbenzeno | 1/EE | soma mandélico+fenilglioxílico urina (mesmo analito do estireno) |
+| anilina | 1/EE | metahemoglobina sangue *ou* p-aminofenol urina |
+| nitrobenzeno | 1/EE | metahemoglobina sangue |
+| indutores de metahemoglobina (classe) | 1/EE | metahemoglobina sangue |
 | chumbo (inorgânico) | 2/SC | Pb-S **e** ALA-U |
 | cádmio (inorgânico) | 2/SC | cádmio urina |
 | flúor / HF / fluoretos inorgânicos | 2/SC | fluoreto urinário |
@@ -428,6 +437,8 @@ Mapa agente→biomarcador dos agentes do vocabulário (insumo para o emissor de 
 > **Changelog 003.CU (mesma ID — materialização + correção de biomarcador do tolueno).** A família `R-BIO-04-<agente>` foi materializada em `regras.yaml`/`exames.yaml` (D-ARQ-38 fatia d, 12 regras). Entre os agentes multi-opção do mapa acima, o emissor adotou o canônico da Matriz Dra. Patrícia 06/2025, confirmado contra NR-7 vigente: **tolueno → o-cresol na urina** (`ortocresol_urina`), CO → COHb, TCE → ác. tricloroacético, estireno → soma mandélico+fenilglioxílico (exame único). Correção rastreável: a spec de 003.CT havia escolhido "tolueno urina" (`tolueno_urina`) — **erro**: não é IBE; o indicador vigente é o-cresol (Portaria SEPRT 2020, alinhada ACGIH; ácido hipúrico é o antigo). Corrigido antes da implementação; `tolueno_urina` nunca esteve em produção. Saída afetada (novo slug emitido) mas mesma ID — a família materializa R-BIO-04, não cria regra nova. `[DERIVADO — NR-07 Anexo I Quadro 1 rev.2020; Matriz Patrícia 06/2025]`
 
 > **Changelog 003.CV (mesma ID — Quadro 2/SC completo).** A família `R-BIO-04-<agente>` ganhou os 3 agentes restantes do Quadro 2 (IBE/SC): **cádmio** (cádmio urina), **flúor/HF/fluoretos inorgânicos** (fluoreto urinário) e **inseticidas inibidores da colinesterase** (acetilcolinesterase eritrocitária) — todos `[adm,per,RT,MR,dem]` 6M. Quadro 2 passa de 1/4 (só chumbo) a **4/4**. Biomarcadores confirmados contra a Matriz Dra. Patrícia 06/2025 (aba "Periodicidade Exames"), que também confirmou empiricamente o eixo de R-BIO-04: os agentes EE aparecem só com periódico, os 4 SC com os 5 momentos. O inseticida tem indicador **"OU"** (acetilcolinesterase eritrocitária *ou* butirilcolinesterase plasma/soro) → adotado o 1º canônico (listado primeiro no Quadro 2, enzima-alvo específica); `[INTERPRETADO — escolha do canônico, prioridade na revisão de saída]`. Modelado como slug-classe único (não por praga), alinhado a Anexo I + Matriz. Mesma ID — a família materializa R-BIO-04, sem regra nova. `[DERIVADO — NR-07 Anexo I Quadro 2, Portaria 567/2022; Matriz Patrícia 06/2025]`
+
+> **Changelog 003.CW (mesma ID — Quadro 1/EE lote 1).** A família `R-BIO-04-<agente>` ganhou 9 agentes IBE/EE do Quadro 1, todos `[per]` 6M / um exame: **cromo hexavalente** (cromo urina), **cobalto**, **fenol**, **metanol**, **diclorometano**, **etilbenzeno** (soma mandélico+fenilglioxílico — reusa o slug do estireno), e o cluster metahemoglobina: **anilina**, **nitrobenzeno** e a classe **indutores de metahemoglobina** (metahemoglobina no sangue, exame compartilhado pelas 3 regras). Biomarcadores conferidos linha a linha no texto oficial do Anexo I Quadro 1 (Portaria 567/2022, gov.br/MTE). Anilina tem indicador "OU" (metahemoglobina *ou* p-aminofenol urina) → canônico = metahemoglobina, alinhando o cluster num exame só e coerente com a Matriz Patrícia; `[INTERPRETADO — escolha do canônico, revisão de saída]`. Cromo: um exame (mesmo analito, dois critérios de amostragem — FJFS 25 vs aumento-na-jornada 10, não dois exames). EE do Quadro 1 passa de 12/41 a **21/41**; total de regras R-BIO-04 = **24**. Mesma ID — família materializa R-BIO-04, sem regra nova. `[DERIVADO — NR-07 Anexo I Quadro 1, Portaria 567/2022, texto oficial MTE; Matriz Patrícia 06/2025]`
 
 ---
 
