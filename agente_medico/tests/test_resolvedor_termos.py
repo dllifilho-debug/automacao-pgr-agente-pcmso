@@ -24,8 +24,8 @@ def indice_real() -> dict[str, str]:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_48_entradas(indice_real: dict[str, str]) -> None:
-    assert len(indice_real) == 48
+def test_indice_real_tem_57_entradas(indice_real: dict[str, str]) -> None:
+    assert len(indice_real) == 57
 
 
 # ---------------------------------------------------------------------------

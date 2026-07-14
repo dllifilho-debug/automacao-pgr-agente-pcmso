@@ -50,6 +50,15 @@ def _ctx_com_agente(agente: str) -> GHEContext:
         ("tolueno", "R-BIO-04-tolueno", "ortocresol_urina"),
         ("tricloroetileno", "R-BIO-04-tricloroetileno", "acido_tricloroacetico"),
         ("xileno", "R-BIO-04-xileno", "acido_metilhipurico"),
+        ("cromo_hexavalente", "R-BIO-04-cromo_hexavalente", "cromo_urina"),
+        ("cobalto", "R-BIO-04-cobalto", "cobalto_urina"),
+        ("fenol", "R-BIO-04-fenol", "fenol_urina"),
+        ("metanol", "R-BIO-04-metanol", "metanol_urina"),
+        ("diclorometano", "R-BIO-04-diclorometano", "diclorometano_urina"),
+        ("etilbenzeno", "R-BIO-04-etilbenzeno", "acido_mandelico_fenilglioxilico"),
+        ("anilina", "R-BIO-04-anilina", "metahemoglobina_sangue"),
+        ("nitrobenzeno", "R-BIO-04-nitrobenzeno", "metahemoglobina_sangue"),
+        ("indutores_metahemoglobina", "R-BIO-04-indutores_metahemoglobina", "metahemoglobina_sangue"),
     ],
 )
 def test_regra_bio_04_grupo_ee(proto, agente: str, regra_id: str, exame: str) -> None:  # type: ignore[no-untyped-def]

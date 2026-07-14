@@ -329,3 +329,57 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+  cromo_hexavalente:   # R-BIO-04, NR-07 Anexo I Quadro 1 (IBE/EE): cromo hexavalente (comp. solúveis) → cromo na urina
+    tipo_ibe: EE
+    cas: "7440-47-3"
+    is_carcinogeno_iarc: true   # IARC grupo 1; inerte no motor atual
+    tem_lt: false
+    protocolos_especiais: []
+  cobalto:             # R-BIO-04, Quadro 1 (IBE/EE): cobalto e comp. inorg. → cobalto na urina
+    tipo_ibe: EE
+    cas: "7440-48-4"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  fenol:               # R-BIO-04, Quadro 1 (IBE/EE): fenol → fenol na urina
+    tipo_ibe: EE
+    cas: "108-95-2"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  metanol:             # R-BIO-04, Quadro 1 (IBE/EE): metanol → metanol na urina
+    tipo_ibe: EE
+    cas: "67-56-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  diclorometano:       # R-BIO-04, Quadro 1 (IBE/EE): diclorometano → diclorometano na urina
+    tipo_ibe: EE
+    cas: "75-09-2"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  etilbenzeno:         # R-BIO-04, Quadro 1 (IBE/EE): etilbenzeno → soma mandélico+fenilglioxílico (mesmo analito do estireno)
+    tipo_ibe: EE
+    cas: "100-41-4"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  anilina:             # R-BIO-04, Quadro 1 (IBE/EE): anilina → metahemoglobina (canônico; p-aminofenol é a alt. "OU") [INTERPRETADO]
+    tipo_ibe: EE
+    cas: "62-53-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  nitrobenzeno:        # R-BIO-04, Quadro 1 (IBE/EE): nitrobenzeno → metahemoglobina no sangue
+    tipo_ibe: EE
+    cas: "98-95-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  indutores_metahemoglobina:   # R-BIO-04, Quadro 1 (IBE/EE): classe "Indutores de Metahemoglobina" → metahemoglobina no sangue
+    tipo_ibe: EE
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []

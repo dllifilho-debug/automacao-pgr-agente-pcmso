@@ -126,3 +126,21 @@ exames:
   acetilcolinesterase_eritrocitaria:
     nome_exibicao: "Atividade de acetilcolinesterase eritrocitária"
     categoria: laboratorial
+  cromo_urina:
+    nome_exibicao: "Cromo na urina"
+    categoria: laboratorial
+  cobalto_urina:
+    nome_exibicao: "Cobalto na urina"
+    categoria: laboratorial
+  fenol_urina:
+    nome_exibicao: "Fenol na urina"
+    categoria: laboratorial
+  metanol_urina:
+    nome_exibicao: "Metanol na urina"
+    categoria: laboratorial
+  diclorometano_urina:
+    nome_exibicao: "Diclorometano na urina"
+    categoria: laboratorial
+  metahemoglobina_sangue:
+    nome_exibicao: "Metahemoglobina no sangue"
+    categoria: laboratorial
