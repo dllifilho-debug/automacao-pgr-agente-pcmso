@@ -406,7 +406,7 @@ R-BIO-01 (6M) e R-BIO-03 (manganês, fora do Anexo I, via NR-15) inalterados qua
 
 Mapa agente→biomarcador dos agentes do vocabulário (insumo para o emissor de biomonitoramento, fatia d de D-ARQ-38 — mecanismo ainda data-bloqueado):
 
-| agente (slug) | Quadro | biomarcador (Anexo I) |
+| agente | Quadro | biomarcador (Anexo I) |
 |---|---|---|
 | acetona | 1/EE | acetona urina |
 | arsenio | 1/EE | As inorg. + metabólitos metilados urina (exceto arsina/arsenato de gálio) |
