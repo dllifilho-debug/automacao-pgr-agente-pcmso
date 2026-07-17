@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from agente_medico.motor.extracao_pgr import (
+    _reconhece_lotacao_escala_qtd,
     avaliar_estrutura,
     avaliar_familia,
     avaliar_segmentacao,
@@ -288,6 +289,8 @@ CAMINHO_PGR_CJR = Path("matrizes_originais/pgr_Cjr Engenharia Ltda (M Construtor
         "CARGO TECNÓLOGO EM EDIFICAÇÕES - CBO: 214280",
         "Função Identificação de Perigo / Risco Tempo de Meio de Nível de "
         "Eliminação ou Controle Existente",
+        "Lotação: Escala de Trabalho: Qtde:",
+        "Lotação: EscaladeTrabalho: Qtd:",
     ],
 )
 def test_eh_sinal_cargo_reconhece_cada_forma_medida(linha: str) -> None:
@@ -302,6 +305,8 @@ def test_eh_sinal_cargo_reconhece_cada_forma_medida(linha: str) -> None:
         "XXVIII - Seguro contra acidentes de trabalho, á cargo do empregador, "
         "sem excluir, a indenização",
         "SETOR/FUNÇÃO: PRODUÇÃO",
+        "Lotação: UTI ADULTO",
+        "Escala de Trabalho: 12x36",
     ],
 )
 def test_eh_sinal_cargo_rejeita_armadilhas_medidas(linha: str) -> None:
@@ -362,3 +367,59 @@ def test_avaliar_estrutura_cjr_real_e_pgr_cargo_based() -> None:
     pendencia = avaliar_estrutura(paginas_cjr)
     assert pendencia is not None
     assert pendencia.tipo == "pgr_cargo_based"
+
+
+# ---------------------------------------------------------------------------
+# Lotação/Escala de Trabalho/Qtd — card cargo-based do template corporativo
+# EBSERH PGR.SOST.001 (D-ARQ-57 peça 3, censo 003.CZ, medição 003.DA).
+# ---------------------------------------------------------------------------
+
+CAMINHO_PGR_EBSERH_UFGD_V7 = Path("matrizes_originais/PGR_EBSERH_UFGD_v7.pdf")
+CAMINHO_PGR_EBSERH_LEGADO_GHES = Path(
+    "matrizes_originais/PGR_EBSERH_UFGD_legado_GHES.pdf"
+)
+CAMINHO_PGR_EBSERH_HUMAP = Path("matrizes_originais/PGR_EBSERH_HUMAP.pdf")
+
+
+@pytest.fixture(scope="module")
+def paginas_ebserh_ufgd_v7() -> list[str]:
+    # 184 páginas — uma extração para a suíte inteira (molde da fixture paginas).
+    return extrair_texto_pgr(CAMINHO_PGR_EBSERH_UFGD_V7)
+
+
+@pytest.fixture(scope="module")
+def paginas_ebserh_legado_ghes() -> list[str]:
+    # 197 páginas — uma extração para a suíte inteira (molde da fixture paginas).
+    return extrair_texto_pgr(CAMINHO_PGR_EBSERH_LEGADO_GHES)
+
+
+@pytest.fixture(scope="module")
+def paginas_ebserh_humap() -> list[str]:
+    # 368 páginas — uma extração para a suíte inteira (molde da fixture paginas).
+    return extrair_texto_pgr(CAMINHO_PGR_EBSERH_HUMAP)
+
+
+def test_avaliar_estrutura_ebserh_ufgd_v7_e_pgr_cargo_based(
+    paginas_ebserh_ufgd_v7: list[str],
+) -> None:
+    pendencia = avaliar_estrutura(paginas_ebserh_ufgd_v7)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+
+
+def test_avaliar_estrutura_ebserh_humap_e_pgr_cargo_based(
+    paginas_ebserh_humap: list[str],
+) -> None:
+    pendencia = avaliar_estrutura(paginas_ebserh_humap)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+
+
+def test_reconhecedor_lotacao_zero_matches_no_ghes_legado(
+    paginas_ebserh_legado_ghes: list[str],
+) -> None:
+    # Não-colisão medida em 003.CZ: o formato legado GHES não usa o card
+    # Lotação/Escala/Qtd — o reconhecedor não mislabela esse acervo.
+    linhas = [linha for pagina in paginas_ebserh_legado_ghes for linha in pagina.splitlines()]
+    n_casos = sum(1 for linha in linhas if _reconhece_lotacao_escala_qtd(linha))
+    assert n_casos == 0
