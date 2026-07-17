@@ -177,10 +177,22 @@ def _reconhece_funcao_grid_perigo_risco(linha: str) -> bool:
     return re.match(r"Função .*Perigo / Risco", linha_normalizada) is not None
 
 
+def _reconhece_lotacao_escala_qtd(linha: str) -> bool:
+    linha_normalizada = linha.strip()
+    return (
+        re.match(
+            r"Lota[cç][aã]o:\s*.*Escala\s*de\s*Trabalho:\s*.*Qtde?:",
+            linha_normalizada,
+        )
+        is not None
+    )
+
+
 _RECONHECEDORES_CARGO: tuple[Callable[[str], bool], ...] = (
     _reconhece_cargo_funcao_dois_pontos,
     _reconhece_cargo_cbo,
     _reconhece_funcao_grid_perigo_risco,
+    _reconhece_lotacao_escala_qtd,
 )
 
 
@@ -194,13 +206,20 @@ def eh_sinal_cargo(linha: str) -> bool:
     âncora de recorte: recorte-por-cargo é fatia futura própria (D-ARQ-57
     peça 3 / "fora da 1ª leva").
 
-    Três formas medidas em 003.CQ (pdfplumber sobre o acervo de
-    DT-003CM-01/DT-003L-01 forma 6):
+    Quatro formas medidas (003.CQ + 003.DA, pdfplumber sobre o acervo de
+    DT-003CM-01/DT-003L-01 forma 6 e DT-003CS-01):
     1. "CARGO/FUNÇÃO:" (Ricco-Adm, 2x)
     2. "CARGO ... CBO: 123456" (Cjr, 1x)
     3. "Função ... Perigo / Risco" — cabeçalho de grid AIHA (Hetrin 37x /
        Serra Dourada 32x); linha longa, sem teto de 80 chars (difere de
        eh_cabecalho_ghe por design — o grid-header é naturalmente extenso).
+    4. "Lotação: ... Escala de Trabalho: ... Qtd" — card cargo/lotação do
+       template corporativo EBSERH PGR.SOST.001 (censo 003.CZ, n=2
+       realizações: espaçada UFGD-v7.0 e colada HUMAP; reenquadramento de
+       DT-003CS-01 — D-ARQ-57 peça 3), medido em 003.DA sobre
+       matrizes_originais/PGR_EBSERH_UFGD_v7.pdf (184 pág., 105 casos) e
+       PGR_EBSERH_HUMAP.pdf (368 pág., 140 casos); zero colisão sobre o
+       legado GHES (PGR_EBSERH_UFGD_legado_GHES.pdf, 197 pág., 0 casos).
 
     linha_normalizada = linha.strip(). Casamento via re.match (início da
     linha), VERBATIM — sem normalização de acento/caixa (mesma convenção de
