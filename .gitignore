@@ -22,5 +22,5 @@ data/cargos_desconhecidos.json
 matrizes_originais/
 
 # Sondas/medições locais (uso único, 003.BH)
-medir_*.py
+/medir_*.py
 ._eoltest
