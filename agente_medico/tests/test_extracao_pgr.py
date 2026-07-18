@@ -168,6 +168,12 @@ def test_recorte_topo_ancora_na_primeira_linha_devolve_vazio() -> None:
         "GHE 12 - OBRAS",
         "INVENTÁRIO DE RISCO GHE 3",
         "GHE: 07 - ADMINISTRATIVO",
+        # Forma 5 (Ricco-Adm, D-ARQ-57 peça 4 fatia 4a): verbatim REAL medido
+        # em 003.DD (perda de diacrítico específica de fonte/glifo — "Õ" ->
+        # "O" na 1ª palavra, confirmado por codepoint) e a forma sã com "Õ" —
+        # ambas devem casar (classe [OÕ], sem normalização NFC/NFD).
+        "INFORMAÇOES SOBRE CARGOS/FUNÇÕES 01",
+        "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES 01",
     ],
 )
 def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
@@ -180,6 +186,10 @@ def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
         "SETOR/FUNÇÃO Pintura/ pintor",
         "Quantidade de Funcionários expostos neste GHE: 08",
         "Fisioterapia do GHE 17 para GHE 11",
+        # Forma 5 (003.DD): sem número (fullmatch exige \d+) e com sufixo
+        # após o número (fullmatch rejeita qualquer coisa além do número).
+        "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES",
+        "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES 01 - QUALQUER SUFIXO",
     ],
 )
 def test_eh_cabecalho_ghe_rejeita_armadilhas_medidas(linha: str) -> None:
@@ -355,11 +365,30 @@ def test_avaliar_estrutura_viverde_e_none(paginas: list[str]) -> None:
     assert avaliar_estrutura(paginas) is None
 
 
-def test_avaliar_estrutura_ricco_adm_real_e_pgr_cargo_based() -> None:
+def test_avaliar_estrutura_ricco_adm_real_e_segmentacao_implausivel() -> None:
+    # Flip deliberado (decisão 003.DD, não regressão): a forma 5 do
+    # repertório GHE (D-ARQ-57 peça 4 fatia 4a) reclassifica o Ricco-Adm de
+    # cargo-based para GHE-based (2 blocos reconhecidos), mas o bloco 2 mede
+    # 10/24 págs. = 41,7% > _LIMIAR_DENSIDADE_PCT (40,0%) — gated por
+    # densidade a jusante, revisão humana BY DESIGN (mesma classe do Cjr,
+    # falso-positivo aceito, decisão 003.DD sobre medição real; NÃO
+    # recalibrar _LIMIAR_DENSIDADE_PCT).
     paginas_ricco = extrair_texto_pgr(CAMINHO_PGR_RICCO_ADM)
     pendencia = avaliar_estrutura(paginas_ricco)
     assert pendencia is not None
-    assert pendencia.tipo == "pgr_cargo_based"
+    assert pendencia.tipo == "segmentacao_implausivel"
+    assert pendencia.bloqueante is True
+    assert pendencia.tipo != "pgr_cargo_based"
+
+
+def test_recorte_blocos_ghe_ricco_adm_real() -> None:
+    # Witness de que reconhecedor+recorte funcionam apesar do gate a
+    # jusante (avaliar_estrutura): 2 blocos, cada um começando na âncora
+    # forma 5 (D-ARQ-57 peça 4 fatia 4a, medição 003.DD).
+    paginas_ricco = extrair_texto_pgr(CAMINHO_PGR_RICCO_ADM)
+    blocos = recortar_blocos_ghe(paginas_ricco)
+    assert len(blocos) == 2
+    assert all(eh_cabecalho_ghe(bloco.splitlines()[0]) for bloco in blocos)
 
 
 def test_avaliar_estrutura_cjr_real_e_pgr_cargo_based() -> None:
