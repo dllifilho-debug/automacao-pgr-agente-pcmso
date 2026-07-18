@@ -11,6 +11,10 @@ from agente_medico.motor.tipos import Pendencia
 # D-ARQ-57 peça 2 (gate anti-Vistamérica): limiares calibrados em 003.CP sobre
 # os 15 PGRs de DT-003CM-01.
 _LIMIAR_DENSIDADE_PCT = 40.0  # maior legítimo medido: 34,8% (ALT T65); implausíveis ≥ 44,4%
+# Ricco-Adm legítimo (rota (i)/forma 5, medição 003.DD) mede 41,7% — fica
+# GATED por decisão explícita, NÃO recalibrado: a margem contra os
+# implausíveis (≥44,4%) seria de só 2,7pp, e o falso-positivo é aceito por
+# design (revisão humana, mesma classe do Cjr — anti-supressão vence).
 _LIMIAR_PAGINAS_DOC_MINIMO = 10  # piso de massa dos DOIS testes (contagem e
 # densidade) — abaixo dele a segmentação não é julgada: ≤1 bloco ou bloco
 # denso num doc pequeno não é implausível, só reflete o tamanho do doc.
@@ -48,8 +52,26 @@ def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:
     ) is not None
 
 
+def _reconhece_cabecalho_informacoes_cargos_funcoes(linha: str) -> bool:
+    # Classe [OÕ] cobre perda de diacrítico específica de fonte/glifo medida
+    # em 003.DD sobre PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf: o "Õ" da 1ª
+    # palavra extrai como "O" puro (codepoint 0x4f, confirmado por
+    # hex(ord(c)) — não é artefato de terminal/console), enquanto o mesmo
+    # caractere em "FUNÇÕES" extrai correto (0xd5). Verbatim real medido:
+    # "INFORMAÇOES SOBRE CARGOS/FUNÇÕES 01"/"...02" (págs. 14/15); forma sã
+    # "INFORMAÇÕES..." também aceita, sem normalização NFC/NFD (convenção
+    # VERBATIM da peça 1 preservada).
+    linha_normalizada = linha.strip()
+    if len(linha_normalizada) > 80:
+        return False
+    return re.fullmatch(
+        r"INFORMAÇ[OÕ]ES SOBRE CARGOS/FUNÇÕES \d+", linha_normalizada
+    ) is not None
+
+
 _RECONHECEDORES_GHE: tuple[Callable[[str], bool], ...] = (
     _reconhece_cabecalho_ghe_padrao,
+    _reconhece_cabecalho_informacoes_cargos_funcoes,
 )
 
 
@@ -59,12 +81,23 @@ def eh_cabecalho_ghe(linha: str) -> bool:
     repertório _RECONHECEDORES_GHE casar a linha.
 
     Substitui a âncora fixa _ANCORA_GHE = "SETOR/FUNÇÃO" (n=1, medição
-    003.BM/003.BL). O único reconhecedor hoje cobre as 4 formas de
-    cabeçalho medidas em DT-003CM-01 sobre o acervo de 15 PGRs:
+    003.BM/003.BL). O repertório hoje cobre 5 formas de cabeçalho:
     1. "GHE 12" (Viverde)
     2. "GHE 12 - TÍTULO" (Vistamérica/CMO/Seconci/TPB/AURO)
     3. "INVENTÁRIO DE RISCO GHE 12" (ALT T65/EURO)
     4. "GHE: 07 - TÍTULO" (R78 Naturia)
+    (formas 1-4 medidas em DT-003CM-01 sobre o acervo de 15 PGRs.)
+    5. "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES NN" (Ricco-Adm) — fonte:
+       DT-003DB-01/decisão 003.DC rota (i), medição 003.DD sobre
+       PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf. Header é ÂNCORA-DE-RECORTE
+       GHE (N cargos slash-separados na linha CARGO/FUNÇÃO: compartilham 1
+       inventário → casa R-GHE-01), revertendo a exclusão de 003.CQ (lá o
+       header era tratado como sinal-de-família redundante, não âncora).
+       O Ricco-Adm passa a ser reconhecido e recortado (2 blocos, D-ARQ-57
+       peça 4 fatia 4a) mas fica GATED por densidade a jusante
+       (avaliar_segmentacao: bloco 2 mede 41,7% > _LIMIAR_DENSIDADE_PCT) —
+       revisão humana BY DESIGN, mesma classe do Cjr (decisão 003.DD,
+       V2 de 003.DC), não um bug a corrigir.
 
     Estruturado como tupla de funções linha->bool em disjunção para
     extensão futura (novas formas de cabeçalho) sem tocar o consumidor
@@ -208,7 +241,12 @@ def eh_sinal_cargo(linha: str) -> bool:
 
     Quatro formas medidas (003.CQ + 003.DA, pdfplumber sobre o acervo de
     DT-003CM-01/DT-003L-01 forma 6 e DT-003CS-01):
-    1. "CARGO/FUNÇÃO:" (Ricco-Adm, 2x)
+    1. "CARGO/FUNÇÃO:" (Ricco-Adm, 2x) — Ricco-Adm foi reclassificado
+       GHE-based pela forma 5 do repertório GHE (_RECONHECEDORES_GHE,
+       decisão 003.DC rota (i)/medição 003.DD); a forma 1 PERMANECE aqui
+       no repertório cargo por anti-supressão — outros PGRs podem exibir
+       "CARGO/FUNÇÃO:" sem o header N:1 que a forma 5 exige, e esses
+       devem seguir diagnosticados como família cargo-based.
     2. "CARGO ... CBO: 123456" (Cjr, 1x)
     3. "Função ... Perigo / Risco" — cabeçalho de grid AIHA (Hetrin 37x /
        Serra Dourada 32x); linha longa, sem teto de 80 chars (difere de
