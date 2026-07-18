@@ -9,10 +9,12 @@ from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
     avaliar_familia,
     avaliar_segmentacao,
+    eh_ancora_card_cargo,
     eh_cabecalho_ghe,
     eh_sinal_cargo,
     extrair_texto_pgr,
     recortar_blocos_ghe,
+    recortar_cards_cargo,
     recortar_topo,
 )
 
@@ -452,3 +454,77 @@ def test_reconhecedor_lotacao_zero_matches_no_ghes_legado(
     linhas = [linha for pagina in paginas_ebserh_legado_ghes for linha in pagina.splitlines()]
     n_casos = sum(1 for linha in linhas if _reconhece_lotacao_escala_qtd(linha))
     assert n_casos == 0
+
+
+# ---------------------------------------------------------------------------
+# recortar_cards_cargo — recorte 1:1 ISOLADO, unidade = card cargo-based
+# (D-ARQ-57 peça 4 fatia 4b, decisão 003.DC; consome DT-003DB-01).
+# ---------------------------------------------------------------------------
+
+
+def test_recortar_cards_cargo_duas_ancoras_lotacao_fronteiras_corretas() -> None:
+    pagina = (
+        "Lotação: Escala de Trabalho: Qtde: linha A\n"
+        "conteudo 1\n"
+        "Lotação: Escala de Trabalho: Qtde: linha B\n"
+        "conteudo 2"
+    )
+    cards = recortar_cards_cargo([pagina])
+    assert cards == [
+        "Lotação: Escala de Trabalho: Qtde: linha A\nconteudo 1",
+        "Lotação: Escala de Trabalho: Qtde: linha B\nconteudo 2",
+    ]
+
+
+def test_recortar_cards_cargo_duas_ancoras_cargo_cbo_fronteiras_corretas() -> None:
+    pagina = (
+        "CARGO PEDREIRO - CBO: 711205\n"
+        "conteudo A\n"
+        "CARGO SERVENTE - CBO: 841205\n"
+        "conteudo B"
+    )
+    cards = recortar_cards_cargo([pagina])
+    assert cards == [
+        "CARGO PEDREIRO - CBO: 711205\nconteudo A",
+        "CARGO SERVENTE - CBO: 841205\nconteudo B",
+    ]
+
+
+def test_recortar_cards_cargo_sem_ancora_devolve_lista_vazia() -> None:
+    assert recortar_cards_cargo(["sem ancora aqui", ""]) == []
+
+
+def test_recortar_cards_cargo_grid_aiha_nao_ancora_card() -> None:
+    # Teste negativo do RECORTE (003.DC): o grid-header AIHA é sinal-de-
+    # família (eh_sinal_cargo/_RECONHECEDORES_CARGO), mas NÃO é âncora de
+    # recorte 1:1 — não delimita um card individual.
+    linha_grid = (
+        "Função Identificação de Perigo / Risco Tempo de Meio de Nível de "
+        "Eliminação ou Controle Existente"
+    )
+    assert not eh_ancora_card_cargo(linha_grid)
+    assert recortar_cards_cargo([linha_grid, "conteudo"]) == []
+
+
+def test_recortar_cards_cargo_ufgd_v7_real_105_cards(
+    paginas_ebserh_ufgd_v7: list[str],
+) -> None:
+    cards = recortar_cards_cargo(paginas_ebserh_ufgd_v7)
+    assert len(cards) == 105
+
+
+def test_recortar_cards_cargo_humap_real_140_cards(
+    paginas_ebserh_humap: list[str],
+) -> None:
+    cards = recortar_cards_cargo(paginas_ebserh_humap)
+    assert len(cards) == 140
+
+
+def test_recortar_cards_cargo_cjr_real_1_card() -> None:
+    # Cjr é witness do RECORTE (1 card, CARGO-CBO) — no roteamento (fatia
+    # 4d) ele fica GATED por design no gate de contagem de
+    # avaliar_segmentacao (classe V2/003.DC), sem recalibrar o gate por
+    # este witness.
+    paginas_cjr = extrair_texto_pgr(CAMINHO_PGR_CJR)
+    cards = recortar_cards_cargo(paginas_cjr)
+    assert len(cards) == 1
