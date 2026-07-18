@@ -266,6 +266,79 @@ def eh_sinal_cargo(linha: str) -> bool:
     return any(reconhecedor(linha) for reconhecedor in _RECONHECEDORES_CARGO)
 
 
+_RECORTADORES_CARGO: tuple[Callable[[str], bool], ...] = (
+    _reconhece_lotacao_escala_qtd,
+    _reconhece_cargo_cbo,
+)
+
+
+def eh_ancora_card_cargo(linha: str) -> bool:
+    """Reconhecedor de linha-âncora de card cargo-based, unidade 1:1
+    (D-ARQ-57 peça 4 fatia 4b, decisão 003.DC): função pura, verdadeiro sse
+    ALGUM reconhecedor do repertório _RECORTADORES_CARGO casar a linha.
+    Espelho de eh_cabecalho_ghe, mas sobre o repertório de RECORTE 1:1, não
+    o de sinal-de-família (_RECONHECEDORES_CARGO, peça 3).
+
+    _RECORTADORES_CARGO tem EXATAMENTE 2 membros, reusando os predicados já
+    definidos (nenhuma regex duplicada): `_reconhece_lotacao_escala_qtd`
+    (card EBSERH, `Lotação: ... Escala de Trabalho: ... Qtd`) e
+    `_reconhece_cargo_cbo` (Cjr, `CARGO ... CBO: NNNN`). FORA por decisão
+    003.DC: `_reconhece_funcao_grid_perigo_risco` (grid-header AIHA,
+    Hetrin/Serra Dourada) e `_reconhece_cargo_funcao_dois_pontos`
+    (`CARGO/FUNÇÃO:`, Ricco-Adm — já migrou para âncora GHE na fatia 4a) —
+    ambos são sinal-de-família, NÃO âncora-de-recorte: o grid AIHA não
+    delimita um card individual (é cabeçalho de tabela compartilhada), e o
+    `CARGO/FUNÇÃO:` do Ricco-Adm já recorta como GHE (forma 5,
+    `_RECONHECEDORES_GHE`).
+    """
+    return any(reconhecedor(linha) for reconhecedor in _RECORTADORES_CARGO)
+
+
+def recortar_cards_cargo(paginas: Sequence[str]) -> list[str]:
+    """Núcleo puro (sem I/O) do recorte determinístico dos cards cargo-based
+    1:1 (D-ARQ-57 peça 4 fatia 4b, decisão 003.DC — consome DT-003DB-01).
+    Motor contract, espelho estrutural EXATO de recortar_blocos_ghe: mesmo
+    achatamento de páginas em sequência única (fronteira de página vira
+    "\\n"), mesma fronteira de card (card i = âncora i até a linha anterior
+    à âncora i+1; último card até a última linha do documento), mesma
+    saída VERBATIM (sem I/O, sem LLM, sem termo->slug), zero âncoras -> []
+    (falha explícita; Pendência é do chamador — nunca devolver o documento
+    inteiro como fallback).
+
+    Âncora: eh_ancora_card_cargo(linha) — repertório _RECORTADORES_CARGO
+    (Lotação-tripla + CARGO-CBO). Cards são CONTÍGUOS e a sobre-inclusão é
+    direção segura (D-ARQ-31/35): a tabela `RISCOS AMBIENTAIS` embutida
+    (EBSERH) e a cauda até a próxima âncora ficam DENTRO do card como
+    conteúdo — o binding da tabela ao card é por POSIÇÃO dentro do span,
+    NUNCA por contagem global de `RISCOS AMBIENTAIS` no documento (caveat 1
+    de DT-003DB-01, morto por construção: a tabela sobreconta no texto
+    plano — UFGD 122>105, HUMAP 159>140 — a tabela do card é a que segue a
+    âncora DENTRO do span, não a N-ésima do documento).
+
+    Gabarito real medido (003.DA/DF, reconhecedor-Lotação validado em
+    003.CZ): UFGD-v7 105 cards, HUMAP 140 cards, Cjr 1 card (CARGO-CBO,
+    único no documento — witness do RECORTE; no roteamento futuro, fatia
+    4d, o Cjr fica GATED por design no gate de contagem de
+    avaliar_segmentacao, classe V2/003.DC, não recalibrado por este
+    witness).
+
+    NÃO transcreve, NÃO separa cargo/risco, NÃO classifica — tudo isso é
+    fatia futura (4c, transcrição do card). NÃO roteia nem pluga em
+    preparar_ghes — isso é fatia futura (4d, só ali DT-003CS-01 fecha).
+    avaliar_estrutura/avaliar_familia/avaliar_segmentacao inalterados por
+    esta fatia.
+    """
+    linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
+    indices_ancora = [i for i, linha in enumerate(linhas) if eh_ancora_card_cargo(linha)]
+    if not indices_ancora:
+        return []
+    limites = [*indices_ancora, len(linhas)]
+    return [
+        "\n".join(linhas[inicio:fim])
+        for inicio, fim in zip(limites, limites[1:])
+    ]
+
+
 def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
     """Diagnóstico de família cargo-based (D-ARQ-57 peça 3): um PGR cuja
     unidade de bloco é cargo/função, não GHE — recorte-GHE (recortar_blocos_ghe
