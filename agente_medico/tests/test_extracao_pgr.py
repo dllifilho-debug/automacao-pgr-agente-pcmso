@@ -16,6 +16,7 @@ from agente_medico.motor.extracao_pgr import (
     recortar_blocos_ghe,
     recortar_cards_cargo,
     recortar_topo,
+    recuperar_titulos_cargo,
 )
 
 # PDF é tracked no git (matrizes_originais/) — ausência é falha explícita,
@@ -528,3 +529,135 @@ def test_recortar_cards_cargo_cjr_real_1_card() -> None:
     paginas_cjr = extrair_texto_pgr(CAMINHO_PGR_CJR)
     cards = recortar_cards_cargo(paginas_cjr)
     assert len(cards) == 1
+
+
+# ---------------------------------------------------------------------------
+# recuperar_titulos_cargo — recuperação determinística do título-de-cargo
+# (D-ARQ-57 peça 4 fatia 4c, decisão 003.DG-4). Título fora do span do card
+# (003.DG-4): recuperado da cauda do card ANTERIOR, no texto de página cheia.
+# ---------------------------------------------------------------------------
+
+
+def test_recuperar_titulos_cargo_par_presente_recupera_titulo_duas_ancoras() -> None:
+    pagina = (
+        "13.1 Advogado\n"
+        "DADOS GERAIS\n"
+        "Lotação: Escala de Trabalho: Qtde: linha A\n"
+        "conteudo 1\n"
+        "13.2 Analista\n"
+        "DADOS GERAIS\n"
+        "Lotação: Escala de Trabalho: Qtde: linha B\n"
+        "conteudo 2"
+    )
+    titulos = recuperar_titulos_cargo([pagina])
+    assert titulos == ["13.1 Advogado", "13.2 Analista"]
+
+
+def test_recuperar_titulos_cargo_sem_dados_gerais_adjacente_e_vazio() -> None:
+    # Discriminador — regressão do falso-positivo medido no HUMAP (003.DH):
+    # "4.3 RESUMO FINAL DA IDENTIFICAÇÃO DOS RISCOS BIOLÓGICOS MAIS" casa
+    # `NN.N Nome` mas é título de SEÇÃO, não de cargo — sem `DADOS GERAIS`
+    # adjacente, exigir o PAR rejeita.
+    pagina = (
+        "4.3 RESUMO FINAL DA IDENTIFICAÇÃO DOS RISCOS BIOLÓGICOS MAIS\n"
+        "outra linha qualquer, sem o marcador esperado por perto\n"
+        "Lotação: Escala de Trabalho: Qtde: linha A\n"
+        "conteudo 1"
+    )
+    titulos = recuperar_titulos_cargo([pagina])
+    assert titulos == [""]
+
+
+def test_recuperar_titulos_cargo_dados_gerais_colado_recupera() -> None:
+    # Regressão do space-collapse — o HUMAP extrai colado (DADOSGERAIS).
+    pagina = (
+        "13.1 Advogado\n"
+        "DADOSGERAIS\n"
+        "Lotação: Escala de Trabalho: Qtde: linha A\n"
+        "conteudo 1"
+    )
+    titulos = recuperar_titulos_cargo([pagina])
+    assert titulos == ["13.1 Advogado"]
+
+
+def test_recuperar_titulos_cargo_sem_ancora_devolve_lista_vazia() -> None:
+    assert recuperar_titulos_cargo(["sem ancora aqui", ""]) == []
+
+
+def test_recuperar_titulos_cargo_card_0_recupera_do_texto_pre_ancora() -> None:
+    pagina = (
+        "13.1 Advogado\n"
+        "DADOS GERAIS\n"
+        "Lotação: Escala de Trabalho: Qtde: linha A\n"
+        "conteudo 1"
+    )
+    titulos = recuperar_titulos_cargo([pagina])
+    assert titulos == ["13.1 Advogado"]
+
+
+def test_recuperar_titulos_cargo_titulo_alem_da_janela_e_vazio() -> None:
+    # `DADOS GERAIS` existe no vão, mas a mais de 3 linhas do candidato-título.
+    pagina = (
+        "13.1 Advogado\n"
+        "linha de enchimento 1\n"
+        "linha de enchimento 2\n"
+        "linha de enchimento 3\n"
+        "DADOS GERAIS\n"
+        "Lotação: Escala de Trabalho: Qtde: linha A\n"
+        "conteudo 1"
+    )
+    titulos = recuperar_titulos_cargo([pagina])
+    assert titulos == [""]
+
+
+def test_recuperar_titulos_cargo_ufgd_v7_real_105_titulos(
+    paginas_ebserh_ufgd_v7: list[str],
+) -> None:
+    # Gabarito medido em 003.DH (host, pdfplumber).
+    titulos = recuperar_titulos_cargo(paginas_ebserh_ufgd_v7)
+    assert len(titulos) == 105
+    nao_vazios = [t for t in titulos if t]
+    assert len(nao_vazios) == 105
+    assert len(set(nao_vazios)) == 105
+    assert titulos[0] == "13.1 Advogado"
+    assert titulos[-1] == "13.106 Terapeuta Ocupacional"
+
+
+def test_recuperar_titulos_cargo_humap_real_140_entradas_0_nao_vazias(
+    paginas_ebserh_humap: list[str],
+) -> None:
+    # 0 é resultado LEGÍTIMO neste documento (003.DH): o cargo vive na linha
+    # de valores do próprio card, não em título numerado.
+    titulos = recuperar_titulos_cargo(paginas_ebserh_humap)
+    assert len(titulos) == 140
+    assert len([t for t in titulos if t]) == 0
+
+
+def test_recuperar_titulos_cargo_cjr_real_1_entrada_0_nao_vazias() -> None:
+    paginas_cjr = extrair_texto_pgr(CAMINHO_PGR_CJR)
+    titulos = recuperar_titulos_cargo(paginas_cjr)
+    assert len(titulos) == 1
+    assert len([t for t in titulos if t]) == 0
+
+
+def test_recuperar_titulos_cargo_invariante_paralelismo_ufgd_v7(
+    paginas_ebserh_ufgd_v7: list[str],
+) -> None:
+    assert len(recuperar_titulos_cargo(paginas_ebserh_ufgd_v7)) == len(
+        recortar_cards_cargo(paginas_ebserh_ufgd_v7)
+    )
+
+
+def test_recuperar_titulos_cargo_invariante_paralelismo_humap(
+    paginas_ebserh_humap: list[str],
+) -> None:
+    assert len(recuperar_titulos_cargo(paginas_ebserh_humap)) == len(
+        recortar_cards_cargo(paginas_ebserh_humap)
+    )
+
+
+def test_recuperar_titulos_cargo_invariante_paralelismo_cjr() -> None:
+    paginas_cjr = extrair_texto_pgr(CAMINHO_PGR_CJR)
+    assert len(recuperar_titulos_cargo(paginas_cjr)) == len(
+        recortar_cards_cargo(paginas_cjr)
+    )
