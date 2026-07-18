@@ -339,6 +339,92 @@ def recortar_cards_cargo(paginas: Sequence[str]) -> list[str]:
     ]
 
 
+_PADRAO_TITULO_CARGO = re.compile(r"\d{1,3}\.\d{1,3}\s+\S")
+_PADRAO_DADOS_GERAIS = re.compile(r"DADOS\s*GERAIS")
+_JANELA_DADOS_GERAIS = 3  # linhas seguintes ao candidato-título, limitadas pelo fim do vão
+
+
+def _recuperar_titulo_do_vao(linhas: Sequence[str], inicio: int, fim: int) -> str:
+    for indice in range(fim - 1, inicio - 1, -1):
+        candidato = linhas[indice].strip()
+        if not _PADRAO_TITULO_CARGO.match(candidato):
+            continue
+        fim_janela = min(indice + 1 + _JANELA_DADOS_GERAIS, fim)
+        if any(
+            _PADRAO_DADOS_GERAIS.search(linhas[j])
+            for j in range(indice + 1, fim_janela)
+        ):
+            return candidato
+    return ""
+
+
+def recuperar_titulos_cargo(paginas: Sequence[str]) -> list[str]:
+    """Recuperação determinística do título-de-cargo (D-ARQ-57 peça 4 fatia
+    4c, decisão 003.DG-4): função pura, espelho estrutural EXATO de
+    recortar_cards_cargo (mesmo achatamento de páginas em sequência única de
+    linhas, mesmos índices de âncora via eh_ancora_card_cargo, mesma saída
+    VERBATIM), sem I/O, sem LLM.
+
+    Motivação (003.DG-4, ratificada): no template EBSERH-UFGD o nome do
+    cargo fica FORA do span do card — a âncora da fatia 4b é a
+    `Lotação:`-tripla, e o título de cada card cai na CAUDA do card
+    anterior. Reabrir recortar_cards_cargo para incluir o título foi
+    REJEITADO em 003.DG-4; esta função recupera o título do texto de página
+    cheio, por trás da âncora, sem tocar o recorte.
+
+    Para o card `i`, o VÃO é linhas[ancoras[i-1]:ancoras[i]]; para o card
+    `0`, o vão é linhas[0:ancoras[0]] — o texto pré-âncora que
+    recortar_cards_cargo descarta é exatamente onde vive o título do
+    primeiro card. Zero âncoras -> [] (falha explícita, espelha o recorte).
+
+    Dentro do vão, a varredura é PARA TRÁS (da última linha do vão até a
+    primeira) e devolve a PRIMEIRA linha (== a mais próxima da âncora) que
+    satisfizer o PAR: casa `^\\d{1,3}\\.\\d{1,3}\\s+\\S` (após strip()) E,
+    dentro das 3 linhas seguintes (limitadas pelo fim do vão), existe linha
+    que casa `DADOS\\s*GERAIS` (tolerante a espaço — o HUMAP extrai colado,
+    `DADOSGERAIS`). Sem par no vão -> "" para aquele card — ausência
+    EXPLÍCITA, nunca descartada da lista (filtrar desalinharia títulos e
+    cards em silêncio, classe D-ARQ-22).
+
+    Por que o PAR, e não só `NN.N` (medido em 003.DH, host, pdfplumber): a
+    versão sem a adjacência a `DADOS GERAIS` produz FALSO-POSITIVO no HUMAP
+    — casa "4.3 RESUMO FINAL DA IDENTIFICAÇÃO DOS RISCOS BIOLÓGICOS MAIS",
+    título de SEÇÃO, não cargo. Exigir o par custa ZERO no
+    verdadeiro-positivo (UFGD segue 105/105) e zera o falso-positivo (HUMAP
+    1 -> 0).
+
+    Saída VERBATIM (strip() de bordas apenas — não parseia número vs. nome,
+    não normaliza; essa separação é concern da transcrição, fatia
+    seguinte). O número do título NÃO é índice do card e nenhuma aritmética
+    é feita sobre ele: o UFGD tem 105 cards com títulos indo até `13.106`
+    (numeração do documento com lacuna).
+
+    Gabarito real medido em 003.DH (host, pdfplumber): UFGD-v7 105 cards,
+    105 títulos não-vazios, 105 distintos (primeiro `13.1 Advogado`, último
+    `13.106 Terapeuta Ocupacional`); HUMAP 140 cards, 0 títulos não-vazios;
+    Cjr 1 card, 0 títulos não-vazios — 0 é resultado LEGÍTIMO nesses dois
+    documentos (o cargo vive na linha de valores do próprio card, não em
+    título numerado).
+
+    Invariante contratual: len(recuperar_titulos_cargo(p)) ==
+    len(recortar_cards_cargo(p)) para todo p — a saída é paralela por
+    ÍNDICE aos cards.
+
+    Fora de escopo (declarado): não emite Pendencia (decisão do chamador),
+    não separa cargo/risco, não transcreve, não classifica, não roteia; não
+    pluga em preparar_ghes (fatia 4d).
+    """
+    linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
+    indices_ancora = [i for i, linha in enumerate(linhas) if eh_ancora_card_cargo(linha)]
+    if not indices_ancora:
+        return []
+    limites_vao = [0, *indices_ancora[:-1]]
+    return [
+        _recuperar_titulo_do_vao(linhas, inicio, fim)
+        for inicio, fim in zip(limites_vao, indices_ancora)
+    ]
+
+
 def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
     """Diagnóstico de família cargo-based (D-ARQ-57 peça 3): um PGR cuja
     unidade de bloco é cargo/função, não GHE — recorte-GHE (recortar_blocos_ghe
