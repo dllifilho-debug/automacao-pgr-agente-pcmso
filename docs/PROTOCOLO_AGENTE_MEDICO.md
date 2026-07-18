@@ -1152,6 +1152,37 @@ Floramazônia (forma 2 de DT-003L-01 — carta pedindo FDS) não tem inventário
 
 **Status:** FECHADA (003.CQ). Insumo obrigatório da sessão ARQUITETURA do requisito (b) da 003.BS — consumida por D-ARQ-57 (003.CN); IMPLEMENTAÇÃO completa em 003.CQ (1ª leva 3/3, PR #202).
 
+### DT-003DB-01 — Anatomia do bloco-cargo: a família cargo-based parte em N:1 (grupo-GHE) vs 1:1 (card-por-cargo); ambas reduzem a `GHEPGR` `[DERIVADO — medição de 4 witnesses, 003.DB]`
+
+**Origem:** Sessão 003.DB (16-17/07/2026), CONHECIMENTO/medição. Pré-requisito duro nomeado por D-ARQ-57 peça 4 e DT-003CS-01 critério (2)/(3): medir a anatomia do bloco-cargo antes de arquitetar o recorte-por-cargo. Medição read-only (pdfplumber host) dos 4 witnesses trackeados em `matrizes_originais/`: Ricco-Adm (`PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf`), Cjr (`pgr_Cjr Engenharia Ltda (M Construtora).pdf`), UFGD-v7 (`PGR_EBSERH_UFGD_v7.pdf`) e HUMAP (`PGR_EBSERH_HUMAP.pdf`).
+
+**Situação — a "família cargo-based" (D-ARQ-57 peça 3) NÃO é homogênea.** Parte em duas anatomias de cardinalidade cargo↔tabela-de-risco:
+
+- **N:1 — grupo-de-cargos (GHE com header diferente).** Ricco-Adm: bloco = `INFORMAÇÕES SOBRE CARGOS/FUNÇÕES NN` (2 blocos medidos), a linha `CARGO/FUNÇÃO:` lista N cargos slash-separated, e 1 `INVENTÁRIO DOS RISCOS OCUPACIONAIS DO SETOR EM FUNÇÃO DO GHE` é compartilhado por todos. Estruturalmente é um GHE — o header é o único ponto que difere do repertório peça 1.
+- **1:1 — card-por-cargo.** Cjr (Sistema ESO, `CARGO <nome> - CBO: NNNN`, 1 cargo no doc, inventário por-categoria sufixado com o cargo — `INVENTÁRIO DE RISCOS <categoria> - <CARGO>`); UFGD-v7 (`Lotação: Escala de Trabalho: Qtde:`, 105 cards, tabela `RISCOS AMBIENTAIS` de 5 categorias embutida — FÍSICO/QUÍMICO/BIOLÓGICO/ERGONOMICO/ACIDENTES em linhas); HUMAP (`Lotação: EscaladeTrabalho: Qtd:`, 140 cards, idem, whitespace colado). Cada cargo carrega o próprio inventário.
+
+**Achado estrutural (input direto da ARQUITETURA da peça 4).** Ambas as anatomias reduzem ao `GHEPGR` existente: o 1:1 é um GHE degenerado (`cargos=[1 cargo]`, riscos próprios); o N:1 é um GHE normal (`cargos=[N]`, riscos compartilhados). A hidratação `GHEVerbatim→GHEPGR` (D-ARQ-51) já suporta os dois. **Consequência: o "recorte-por-cargo" NÃO é uma 2ª unidade de bloco (tipo novo) — é (a) um novo conjunto de reconhecedores de RECORTE por-cargo (1:1) + binding da tabela de risco POR POSIÇÃO dentro do bloco, e (b) possível extensão do repertório GHE (peça 1) com `INFORMAÇÕES SOBRE CARGOS/FUNÇÕES NN` para o N:1.** O tipo de dado a jusante é reusado; o maquinário de recorte+binding é novo — não é "de graça".
+
+**Gabarito isolado medido:**
+
+| witness | setor | âncora de bloco | cardinalidade | nº blocos | tabela de risco |
+|---|---|---|---|---|---|
+| Ricco-Adm | construção (MGE) | `INFORMAÇÕES SOBRE CARGOS/FUNÇÕES NN` | N:1 | 2 | `INVENTÁRIO DOS RISCOS ... EM FUNÇÃO DO GHE` (compartilhada) |
+| Cjr | construção (Sistema ESO) | `CARGO <nome> - CBO: NNNN` | 1:1 | 1 | `INVENTÁRIO DE RISCOS <cat> - <CARGO>` (por-categoria) |
+| UFGD-v7 | saúde EBSERH | `Lotação: Escala de Trabalho: Qtde:` | 1:1 | 105 | `RISCOS AMBIENTAIS` (5-cat embutida) |
+| HUMAP | saúde EBSERH | `Lotação: EscaladeTrabalho: Qtd:` | 1:1 | 140 | `RISCOS AMBIENTAIS` (idem, colado) |
+
+Contagens cruzadas com 003.CZ/DA: UFGD 105 / HUMAP 140 batem exato o reconhecedor-Lotação.
+
+**Caveats de medição (para a IMPL não tropeçar):**
+1. **Recorte prende a tabela por posição, não por contagem global.** `RISCOS AMBIENTAIS` sobreconta no texto plano (UFGD 122>105; HUMAP 159>140) — a tabela do card é a que segue a âncora DENTRO do bloco, não a N-ésima do documento. Naive-count = subsegmentação silenciosa (classe D-ARQ-22).
+2. **Título numerado EBSERH `NN.N <Cargo>` NÃO serve de âncora de recorte** (UFGD 134 títulos > 105 cards — pega subsseções de recomendação tipo `13.5.1 Mobiliário`). A âncora confiável é a `Lotação:`-tripla (já no repertório peça 3, 003.DA).
+3. **Cargo-nome em local variável** entre os 1:1: título numerado (UFGD `13.1 Advogado`) vs valor da Lotação (`SetorJurídico: ADVOGADO`, HUMAP) vs linha CBO (Cjr) vs slash-list (Ricco-Adm N:1). Concern da transcrição-LLM do bloco-cargo, não do recorte.
+
+**Fork para a ARQUITETURA (003.DC — não decidido em medição).** Ricco-Adm (N:1) roteia por (i) extensão de âncora GHE (peça 1) — `INFORMAÇÕES SOBRE CARGOS/FUNÇÕES NN` vira reconhecedor GHE, doc processa como GHE normal, NÃO `pgr_cargo_based`; ou (ii) caminho cargo. A medição aponta (i) — GHE-shaped. 003.CQ excluiu esse header do repertório GHE "por redundância como sinal de família"; reabri-lo como âncora de RECORTE é decisão de arquitetura, com risco não-medido (header como ruído em doc GHE-based). Se (i), o recorte-por-cargo genuíno restringe-se aos 1:1 (Cjr + EBSERH).
+
+**Status:** ABERTA (medição entregue; consumida pela ARQUITETURA da peça 4 de D-ARQ-57, na 003.DC). Não bloqueia. Cruza DT-003CS-01 (EBSERH/saúde), DT-003L-01 forma 6, D-ARQ-57 peça 4. Nenhuma R-* tocada.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1230,3 +1261,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v53 | 12/07/2026 | Sessão 003.CQ (IMPLEMENTAÇÃO): **DT-003CM-01 FECHADA** — 1ª leva de D-ARQ-57 completa (3/3); caveat pypdf Hetrin/SD resolvido; refino do censo (sinal cargo-based = grid-header AIHA). Nenhuma R-* criada/alterada. |
 | v54 | 13/07/2026 | Sessão 003.CU (IMPLEMENTAÇÃO): **R-BIO-04 materializada** (família `R-BIO-04-<agente>`, 12 regras, D-ARQ-38 fatia d) + changelog de correção do biomarcador do tolueno (`tolueno_urina`→`ortocresol_urina`; NR-7 rev.2020 o-cresol, Matriz Patrícia). Mesma ID (família materializa; sem R- nova). |
 | v55 | 13/07/2026 | Sessão 003.CV (IMPLEMENTAÇÃO): **R-BIO-04 Quadro 2/SC completo** — +3 agentes (cádmio, flúor/HF/fluoretos, inseticidas inibidores da colinesterase), `[adm,per,RT,MR,dem]` 6M; Quadro 2 fecha 4/4. Biomarcadores da Matriz Patrícia 06/2025; inseticida→acetilcolinesterase eritrocitária `[INTERPRETADO]` (butirilcolinesterase é a alternativa OU); slug-classe único. Mesma ID (família materializa; sem R- nova). |
+| v56 | 17/07/2026 | Sessão 003.DB (CONHECIMENTO/medição): DT-003DB-01 adicionada (§11) — anatomia do bloco-cargo medida em 4 witnesses trackeados; a família cargo-based (D-ARQ-57 peça 3) parte em N:1 grupo-GHE (Ricco-Adm) vs 1:1 card-por-cargo (Cjr; UFGD 105 / HUMAP 140). Achado: ambas reduzem a `GHEPGR` → recorte-por-cargo não é 2ª unidade de bloco, é reconhecedores de recorte + binding-por-posição. Gabarito + caveats + fork (Ricco-Adm N:1 → GHE-recorte estendido vs cargo) para a ARQUITETURA da peça 4. Nenhuma R-* criada/alterada. Sem código. |
