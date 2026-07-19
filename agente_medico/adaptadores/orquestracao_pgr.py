@@ -8,7 +8,9 @@ from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
     extrair_texto_pgr,
     recortar_blocos_ghe,
+    recortar_cards_cargo,
     recortar_topo,
+    recuperar_titulos_cargo,
 )
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_pgr
@@ -17,6 +19,7 @@ from agente_medico.motor.resolvedor_termos import construir_indice_termos
 from agente_medico.motor.resolvedor_topo import resolver_validade
 from agente_medico.motor.revisao_envelope import serializar_envelope
 from agente_medico.motor.tipos import EnvelopeConfirmado, GHEVerbatim, Pendencia, Resultado
+from agente_medico.motor.transcritor_card import TranscritorCard, transcrever_cards
 from agente_medico.motor.transcritor_pgr import TranscritorGHE, gate_forma_ghe, transcrever_ghes
 from agente_medico.motor.transcritor_topo import TranscritorTopo, gate_forma_topo, transcrever_topo
 
@@ -30,6 +33,14 @@ from agente_medico.motor.transcritor_topo import TranscritorTopo, gate_forma_top
 # (estagios/gates.py) só recebem validade/assinatura via EnvelopeConfirmado,
 # nunca direto do artefato — a volta (desserializar_confirmacao) é chamada
 # pelo caller, fora deste adaptador (seam humano, molde D-ARQ-47 cl.4).
+#
+# D-ARQ-57 peça 4 fatia 4d (plug — FECHA DT-003CS-01): preparar_ghes agora
+# ROTEIA pela saída de avaliar_estrutura (rota "ghe" vs "card") em vez de só
+# consumir a Pendencia — o EBSERH-vigente (card cargo-based, UFGD/HUMAP) e o
+# Cjr entram em produção pela rota card, plugando recortar_cards_cargo +
+# recuperar_titulos_cargo + transcrever_cards (motor/transcritor_card.py) +
+# gate_forma_ghe reusado (003.DG-3). cliente_card é injetável como cliente
+# (TranscritorGHE), nunca importado no módulo.
 
 
 def preparar_envelope(
@@ -88,30 +99,61 @@ def preparar_envelope(
 
 
 def preparar_ghes(
-    caminho: Path, cliente: TranscritorGHE
+    caminho: Path, cliente: TranscritorGHE, cliente_card: TranscritorCard
 ) -> tuple[tuple[GHEVerbatim, ...], tuple[Pendencia, ...]]:
-    """extrair_texto_pgr -> avaliar_estrutura -> recortar_blocos_ghe ->
-    transcrever_ghes -> gate_forma_ghe.
+    """extrair_texto_pgr -> avaliar_estrutura -> ROTEIA (D-ARQ-57 peça 4
+    fatia 4d, plug que FECHA DT-003CS-01):
 
-    avaliar_estrutura roda ANTES do recorte/transcrição (D-ARQ-57): um
-    documento cargo-based ou com segmentação implausível bloqueia aqui, sem
-    gastar chamada LLM sobre recorte inválido. Doc pequeno sem âncora
-    (avaliar_estrutura devolve None, gate inaplicável) continua caindo em
-    "blocos_ausentes" via recortar_blocos_ghe abaixo; doc grande com 0/1
-    âncora agora emite "segmentacao_implausivel" — diagnóstico específico
-    vence "blocos_ausentes" genérico.
+    - Pendência de estrutura não-None (qualquer rota): bloqueia aqui, sem
+      gastar chamada LLM sobre recorte inválido/implausível — como sempre.
+    - Rota "ghe": recortar_blocos_ghe -> transcrever_ghes(cliente) ->
+      gate_forma_ghe. Fluxo INALTERADO (inclui "blocos_ausentes" se
+      avaliar_estrutura devolveu ("ghe", None) num doc pequeno sem âncora —
+      gate inaplicável, mesmo comportamento pré-4d).
+    - Rota "card": recortar_cards_cargo + recuperar_titulos_cargo ->
+      transcrever_cards(cliente_card) -> gate_forma_ghe. SEM ramo
+      equivalente a "blocos_ausentes": a rota card só é devolvida por
+      avaliar_estrutura quando pelo menos 1 linha já casou
+      eh_ancora_card_cargo (ramo 2 do composto), logo recortar_cards_cargo
+      SEMPRE devolve >= 1 card por construção — zero-âncoras nesta rota é
+      inatingível, não uma omissão.
 
-    Zero blocos (recortar_blocos_ghe devolve []) vira Pendencia bloqueante
-    aqui — quem transforma ausência de âncora em Pendencia é o chamador,
-    como documentado em recortar_blocos_ghe (anti-supressão D-ARQ-31/35).
+    TranscricaoIndisponivel em QUALQUER rota vira Pendencia tipo
+    "transcricao_indisponivel_pgr" (tipo EXISTENTE — mesma falha de
+    INVOCAÇÃO do LLM, não de conteúdo); regra_origem distingue a origem:
+    "D-ARQ-52" na rota ghe (como sempre), "D-ARQ-57" na rota card (peça 4);
+    o motivo da rota card é prefixado "[rota card]" para diferenciar na
+    leitura humana sem introduzir um tipo novo.
+
+    cliente e cliente_card são injetáveis (nunca importados no módulo) —
+    quem monta o adaptador decide os dois clientes; uma rota nunca invoca o
+    cliente da outra.
     """
     paginas = extrair_texto_pgr(caminho)
-    pendencia_estrutura = avaliar_estrutura(paginas)
+    rota, pendencia_estrutura = avaliar_estrutura(paginas)
     if pendencia_estrutura is not None:
         # Gate de estrutura ANTES do recorte/transcrição (D-ARQ-57):
-        # documento cargo-based ou com segmentação implausível bloqueia
-        # aqui, sem gastar chamada LLM sobre recorte inválido.
+        # documento cargo-based ou com segmentação implausível (qualquer
+        # rota) bloqueia aqui, sem gastar chamada LLM sobre recorte inválido.
         return (), (pendencia_estrutura,)
+
+    if rota == "card":
+        cards = recortar_cards_cargo(paginas)
+        titulos = recuperar_titulos_cargo(paginas)
+        try:
+            candidatos = transcrever_cards(cards, titulos, cliente_card)
+        except TranscricaoIndisponivel as e:
+            return (), (
+                Pendencia(
+                    tipo="transcricao_indisponivel_pgr",
+                    destinatario="extracao",
+                    motivo=f"[rota card] {e}",
+                    bloqueante=True,
+                    regra_origem="D-ARQ-57",
+                ),
+            )
+        return gate_forma_ghe(candidatos)
+
     blocos = recortar_blocos_ghe(paginas)
     if not blocos:
         return (), (
@@ -142,10 +184,12 @@ def processar_arquivo_pgr(
     caminho: Path,
     protocolo: Protocolo,
     cliente: TranscritorGHE,
+    cliente_card: TranscritorCard,
     envelope: EnvelopeConfirmado,
     hoje: date | None = None,
 ) -> tuple[Resultado | None, tuple[Pendencia, ...]]:
-    """Costura completa arquivo -> Resultado (D-ARQ-52/D-ARQ-53).
+    """Costura completa arquivo -> Resultado (D-ARQ-52/D-ARQ-53; roteamento
+    ghe/card de preparar_ghes via D-ARQ-57 peça 4 fatia 4d).
 
     envelope.validade e envelope.assinatura_engenheiro alimentam
     hidratar_pgr, consumidos por R-PGR-06/R-PGR-01 (estagios/gates.py). A
@@ -159,12 +203,16 @@ def processar_arquivo_pgr(
     o seam de confirmação-RT entre as duas invocações é humano, não
     componível numa única passada de I/O.
 
+    cliente e cliente_card são repassados intactos a preparar_ghes, que
+    decide a rota (ghe/card) a partir de avaliar_estrutura — este nível não
+    julga rota, só costura.
+
     Aprovação PARCIAL no gate de forma (alguns GHE reprovados) processa os
     aprovados normalmente e CARREGA as pendências bloqueantes dos reprovados
     na lista final devolvida — zeramento de linha por bloqueio de GHE é
     D-ARQ-31 fatia 2, fora de escopo aqui.
     """
-    aprovados, pend_forma = preparar_ghes(caminho, cliente)
+    aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card)
     if not aprovados:
         # Parse total falho (blocos ausentes, transcrição indisponível, ou
         # todos os GHE reprovados no gate): sem verbatim para hidratar, não

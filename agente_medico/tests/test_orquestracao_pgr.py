@@ -5,7 +5,11 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
-from agente_medico.adaptadores.orquestracao_pgr import preparar_envelope, processar_arquivo_pgr
+from agente_medico.adaptadores.orquestracao_pgr import (
+    preparar_envelope,
+    preparar_ghes,
+    processar_arquivo_pgr,
+)
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe
 from agente_medico.motor.protocolo import carregar
@@ -15,7 +19,11 @@ from agente_medico.motor.tipos import EnvelopeConfirmado, EnvelopeVerbatim, GHEV
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 _PROTO = carregar(_PROTOCOLO_DIR)
 
-_PDF_VIVERDE = Path(__file__).parent.parent.parent / "matrizes_originais" / "PGR VIVERDE V02 - 03.02.25.pdf"
+_MATRIZES_DIR = Path(__file__).parent.parent.parent / "matrizes_originais"
+_PDF_VIVERDE = _MATRIZES_DIR / "PGR VIVERDE V02 - 03.02.25.pdf"
+_PDF_EBSERH_UFGD_V7 = _MATRIZES_DIR / "PGR_EBSERH_UFGD_v7.pdf"
+_PDF_EBSERH_HUMAP = _MATRIZES_DIR / "PGR_EBSERH_HUMAP.pdf"
+_PDF_CJR = _MATRIZES_DIR / "pgr_Cjr Engenharia Ltda (M Construtora).pdf"
 
 _ALVO_EXTRACAO = "agente_medico.adaptadores.orquestracao_pgr.extrair_texto_pgr"
 
@@ -31,6 +39,10 @@ _ENVELOPE_PADRAO = EnvelopeConfirmado(validade=date.today(), assinatura_engenhei
 
 def _paginas_com_bloco(nome_setor: str = "Setor Teste") -> list[str]:
     return [f"GHE 1 - {nome_setor}\nCargo A\nOutraLinha"]
+
+
+def _paginas_com_card() -> list[str]:
+    return ["Lotação: Escala de Trabalho: Qtde:\nSetor Teste 40hs/semana 1 - Efetivo\nCargo A"]
 
 
 class MockTranscritorConstante:
@@ -66,6 +78,39 @@ class MockTranscritorIndisponivel:
         raise TranscricaoIndisponivel(self._motivo)
 
 
+class MockTranscritorCardConstante:
+    """Devolve o MESMO GHEVerbatim canned para todo par (card, titulo)
+    recebido — molde MockTranscritorConstante, D-ARQ-57 peça 4 fatia 4d."""
+
+    def __init__(self, resposta: GHEVerbatim) -> None:
+        self._resposta = resposta
+        self.pares_recebidos: list[tuple[str, str]] = []
+
+    def transcrever(self, card: str, titulo: str) -> GHEVerbatim:
+        self.pares_recebidos.append((card, titulo))
+        return self._resposta
+
+
+class MockTranscritorCardIndisponivel:
+    def __init__(self, motivo: str) -> None:
+        self._motivo = motivo
+
+    def transcrever(self, card: str, titulo: str) -> GHEVerbatim:
+        raise TranscricaoIndisponivel(self._motivo)
+
+
+class MockTranscritorCardNuncaChamado:
+    """Dummy para a rota ghe: se preparar_ghes chamar cliente_card fora da
+    rota card, isso é bug de roteamento — falha alto e explícito em vez de
+    devolver silenciosamente um GHEVerbatim válido."""
+
+    def transcrever(self, card: str, titulo: str) -> GHEVerbatim:
+        raise AssertionError("cliente_card não deveria ser invocado na rota ghe")
+
+
+_CLIENTE_CARD_NUNCA_CHAMADO = MockTranscritorCardNuncaChamado()
+
+
 class MockTranscritorTopoConstante:
     """Devolve o MESMO EnvelopeVerbatim canned para todo topo recebido."""
 
@@ -89,7 +134,7 @@ class MockTranscritorTopoIndisponivel:
 def test_e2e_arquivo_real_ate_resultado_com_transcritor_mockado() -> None:
     mock = MockTranscritorConstante(_GHE_VALIDO)
     resultado, pendencias = processar_arquivo_pgr(
-        _PDF_VIVERDE, _PROTO, mock, envelope=_ENVELOPE_PADRAO
+        _PDF_VIVERDE, _PROTO, mock, _CLIENTE_CARD_NUNCA_CHAMADO, envelope=_ENVELOPE_PADRAO
     )
 
     assert resultado is not None
@@ -103,6 +148,7 @@ def test_blocos_ausentes_vira_none_e_pendencia_bloqueante() -> None:
             Path("qualquer.pdf"),
             _PROTO,
             MockTranscritorConstante(_GHE_VALIDO),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=_ENVELOPE_PADRAO,
         )
 
@@ -120,6 +166,7 @@ def test_cargo_based_bloqueia_antes_da_transcricao() -> None:
             Path("qualquer.pdf"),
             _PROTO,
             mock,
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=_ENVELOPE_PADRAO,
         )
 
@@ -142,6 +189,7 @@ def test_segmentacao_implausivel_bloqueia_antes_da_transcricao() -> None:
             Path("qualquer.pdf"),
             _PROTO,
             mock,
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=_ENVELOPE_PADRAO,
         )
 
@@ -159,6 +207,7 @@ def test_doc_grande_sem_ancora_emite_segmentacao_nao_blocos_ausentes() -> None:
             Path("qualquer.pdf"),
             _PROTO,
             MockTranscritorConstante(_GHE_VALIDO),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=_ENVELOPE_PADRAO,
         )
 
@@ -173,6 +222,7 @@ def test_transcricao_indisponivel_vira_none_e_pendencia_bloqueante() -> None:
             Path("qualquer.pdf"),
             _PROTO,
             MockTranscritorIndisponivel("CHAVE_API_GOOGLE ausente"),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=_ENVELOPE_PADRAO,
         )
 
@@ -194,6 +244,7 @@ def test_aprovacao_parcial_processa_aprovados_e_carrega_pendencia_de_forma() -> 
             Path("qualquer.pdf"),
             _PROTO,
             mock,
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=_ENVELOPE_PADRAO,
         )
 
@@ -211,6 +262,7 @@ def test_envelope_validade_atravessa_ate_o_gate_r_pgr_06() -> None:
             Path("qualquer.pdf"),
             _PROTO,
             MockTranscritorConstante(_GHE_VALIDO),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=EnvelopeConfirmado(validade=date(2025, 1, 1), assinatura_engenheiro=True),
             hoje=date(2027, 1, 1),
         )
@@ -318,6 +370,7 @@ def test_ida_e_volta_validade_antiga_gera_pendencia_r_pgr_06_bloqueante() -> Non
             Path("qualquer.pdf"),
             _PROTO,
             MockTranscritorConstante(_GHE_VALIDO),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=envelope_confirmado,
             hoje=date(2026, 7, 8),
         )
@@ -350,9 +403,84 @@ def test_ida_e_volta_validade_recente_nao_gera_pendencia_r_pgr_06() -> None:
             Path("qualquer.pdf"),
             _PROTO,
             MockTranscritorConstante(_GHE_VALIDO),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
             envelope=envelope_confirmado,
             hoje=date(2026, 7, 8),
         )
 
     assert resultado is not None
     assert not any(p.regra_origem == "R-PGR-06" for p in resultado.pendencias_globais)
+
+
+# ---------------------------------------------------------------------------
+# preparar_ghes — rota card plugada (D-ARQ-57 peça 4 fatia 4d, FECHA
+# DT-003CS-01). e2e com PDFs reais trackeados, falha explícita, sem skip
+# (precedente 003.DA/DI: PDF ausente é falha, não skip).
+# ---------------------------------------------------------------------------
+
+
+def test_preparar_ghes_ufgd_real_105_invocacoes_card_titulo_e_gate_aprova() -> None:
+    cliente_ghe = MockTranscritorConstante(_GHE_VALIDO)
+    cliente_card = MockTranscritorCardConstante(_GHE_VALIDO)
+    aprovados, pendencias = preparar_ghes(_PDF_EBSERH_UFGD_V7, cliente_ghe, cliente_card)
+
+    assert cliente_ghe.blocos_recebidos == []
+    assert len(cliente_card.pares_recebidos) == 105
+    assert cliente_card.pares_recebidos[0][1] == "13.1 Advogado"
+    assert pendencias == ()
+    assert len(aprovados) == 105
+
+
+def test_preparar_ghes_humap_real_gated_por_densidade_nenhum_cliente_invocado() -> None:
+    # Witness de gate (correção do Arquiteto/Diovanni pós-medição): a última
+    # das 140 âncoras card do HUMAP fica na pág. 186/368 — a cauda depois
+    # dela é bloco de assinatura do documento, não outro card, e infla o
+    # span do "último card" a 183/368 págs. (49,7% > 40,0%) — mesma classe
+    # 003.DD-2 (Ricco-Adm), 2ª testemunha, lado card. segmentacao_
+    # implausivel bloqueia ANTES de qualquer cliente ser invocado — nem o
+    # GHE nem o card são chamados. O pareamento real 140/140 (titulos todos
+    # "") já está coberto em test_transcritor_card.py (4c-ii) e no PASSO 0
+    # desta sessão; não duplicado aqui.
+    cliente_ghe = MockTranscritorConstante(_GHE_VALIDO)
+    cliente_card = MockTranscritorCardConstante(_GHE_VALIDO)
+    aprovados, pendencias = preparar_ghes(_PDF_EBSERH_HUMAP, cliente_ghe, cliente_card)
+
+    assert aprovados == ()
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "segmentacao_implausivel"
+    assert pendencias[0].bloqueante is True
+    assert cliente_ghe.blocos_recebidos == []
+    assert cliente_card.pares_recebidos == []
+
+
+def test_preparar_ghes_cjr_real_gated_por_contagem_nenhum_cliente_invocado() -> None:
+    # Cjr (18 págs.) tem âncora de RECORTE card (CARGO-CBO), migra para a
+    # rota card (flip 1-por-1 espelhado em test_extracao_pgr.py), mas 1
+    # único card em doc >10 págs. dispara o gate de contagem —
+    # segmentacao_implausivel bloqueia ANTES de qualquer cliente ser
+    # invocado (mesma classe GATED-by-design do V2/003.DC).
+    cliente_ghe = MockTranscritorConstante(_GHE_VALIDO)
+    cliente_card = MockTranscritorCardConstante(_GHE_VALIDO)
+    aprovados, pendencias = preparar_ghes(_PDF_CJR, cliente_ghe, cliente_card)
+
+    assert aprovados == ()
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "segmentacao_implausivel"
+    assert cliente_ghe.blocos_recebidos == []
+    assert cliente_card.pares_recebidos == []
+
+
+def test_preparar_ghes_rota_card_transcricao_indisponivel_vira_pendencia_bloqueante() -> None:
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_card()):
+        aprovados, pendencias = preparar_ghes(
+            Path("qualquer.pdf"),
+            MockTranscritorConstante(_GHE_VALIDO),
+            MockTranscritorCardIndisponivel("CHAVE_API_GOOGLE ausente"),
+        )
+
+    assert aprovados == ()
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "transcricao_indisponivel_pgr"
+    assert pendencias[0].bloqueante is True
+    assert pendencias[0].regra_origem == "D-ARQ-57"
+    assert "CHAVE_API_GOOGLE ausente" in pendencias[0].motivo

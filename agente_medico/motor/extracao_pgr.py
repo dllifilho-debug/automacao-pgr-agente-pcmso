@@ -3,10 +3,16 @@ from __future__ import annotations
 import re
 from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import Literal
 
 import pdfplumber
 
 from agente_medico.motor.tipos import Pendencia
+
+# D-ARQ-57 peça 4 fatia 4d: rota de roteamento devolvida por avaliar_estrutura
+# — só significativa quando a Pendencia acompanhante é None (documento
+# bloqueado não chega a ser recortado/transcrito por nenhuma rota).
+Rota = Literal["ghe", "card"]
 
 # D-ARQ-57 peça 2 (gate anti-Vistamérica): limiares calibrados em 003.CP sobre
 # os 15 PGRs de DT-003CM-01.
@@ -464,58 +470,86 @@ def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
     )
 
 
-def avaliar_estrutura(paginas: Sequence[str]) -> Pendencia | None:
-    """Composto de diagnóstico de estrutura (D-ARQ-57 peça 3): sela a ordem
-    diagnóstico específico vence genérico. Tenta avaliar_familia primeiro
-    (cargo-based); se None, delega a avaliar_segmentacao (gate anti-
-    Vistamérica).
+def avaliar_estrutura(paginas: Sequence[str]) -> tuple[Rota, Pendencia | None]:
+    """Composto de diagnóstico + ROTEAMENTO de estrutura (D-ARQ-57 peça 4
+    fatia 4d): devolve (rota, pendência). A rota só é significativa quando a
+    pendência é None — um documento bloqueado não chega a ser
+    recortado/transcrito por nenhuma rota.
 
-    Exclusão mútua: um documento cargo-based emite SEMPRE pgr_cargo_based e
-    NUNCA segmentacao_implausivel — sem a peça 3, um PGR cargo-based (0/1
-    âncora GHE por definição) cairia no gate genérico de contagem e emitiria
-    o diagnóstico errado. Anti-supressão preservada nos dois ramos: um
-    documento cargo-based sempre gera pendência bloqueante (nunca silêncio),
-    e um documento não-cargo-based continua sujeito ao gate de segmentação.
+    Precedência (específico vence genérico; âncora-de-recorte vence
+    sinal-de-família):
+    1. Alguma linha casa eh_cabecalho_ghe -> ("ghe", avaliar_segmentacao(paginas))
+       — gate anti-Vistamérica de sempre, comportamento INALTERADO.
+    2. Senão, alguma linha casa eh_ancora_card_cargo -> ("card",
+       _avaliar_spans(paginas, eh_ancora_card_cargo, "card(s) cargo-based"))
+       — mesmo gate de densidade+contagem da peça 2, aplicado à unidade card
+       em vez de bloco GHE (D-ARQ-57 peça 4 fatia 4b, decisão 003.DC: card
+       1:1 é a mesma classe de risco-de-recorte-implausível que bloco GHE).
+    3. Senão -> reproduz avaliar_estrutura ATUAL na íntegra (família, senão
+       gate de segmentação): tenta avaliar_familia (cargo-based via sinal,
+       não âncora-de-recorte — ex.: grid AIHA Hetrin/Serra Dourada); se None,
+       cai no MESMO fallback avaliar_segmentacao(paginas) de sempre. Este
+       ramo 3 é EXATAMENTE o avaliar_estrutura pré-4d — o split desta fatia
+       só INSERE o ramo 2 (card) entre a âncora GHE (ramo 1) e a família
+       (ramo 3); nenhum documento sem âncora de recorte alguma muda de
+       saída. Sem este fallback, um documento sem NENHUMA âncora reconhecível
+       (nem GHE, nem card, nem sinal-de-família cargo) sairia ("ghe", None)
+       — silêncio sobre doc âncora-zero, violação D-ARQ-22/anti-supressão
+       D-ARQ-31/35 (achado do PASSO 0 desta sessão sobre o witness real
+       PGR_EBSERH_UFGD_legado_GHES.pdf, 197 págs., corrigido antes de codar).
 
-    Não altera avaliar_segmentacao nem recortar_blocos_ghe/recortar_topo.
+    Exclusão mútua preservada nos 3 ramos: cada documento cai em EXATAMENTE
+    um, nunca dois diagnósticos concorrentes. Anti-supressão preservada em
+    todos: documento sem âncora de recorte de nenhuma rota E sem sinal de
+    família, mas com massa (> _LIMIAR_PAGINAS_DOC_MINIMO páginas), ainda
+    bloqueia via segmentacao_implausivel (ramo 3, fallback); doc pequeno sem
+    âncora nenhuma segue ("ghe", None) -> blocos_ausentes no chamador, como
+    hoje.
+
+    Não altera avaliar_familia, avaliar_segmentacao (assinatura/saída
+    idênticas), recortar_blocos_ghe, recortar_topo, recortar_cards_cargo,
+    recuperar_titulos_cargo nem os dois limiares.
     """
+    linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
+
+    if any(eh_cabecalho_ghe(linha) for linha in linhas):
+        return "ghe", avaliar_segmentacao(paginas)
+
+    if any(eh_ancora_card_cargo(linha) for linha in linhas):
+        return "card", _avaliar_spans(paginas, eh_ancora_card_cargo, "card(s) cargo-based")
+
     pendencia_familia = avaliar_familia(paginas)
     if pendencia_familia is not None:
-        return pendencia_familia
-    return avaliar_segmentacao(paginas)
+        return "ghe", pendencia_familia
+    return "ghe", avaliar_segmentacao(paginas)
 
 
-def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
-    """Gate anti-Vistamérica (D-ARQ-57 peça 2): detecta segmentação GHE
-    implausível por densidade + contagem, sem depender de conteúdo — só da
-    forma do recorte de recortar_blocos_ghe. Limiares calibrados em 003.CP
-    sobre os 15 PGRs de DT-003CM-01, ratificado em 003.CN.
+def _avaliar_spans(
+    paginas: Sequence[str],
+    eh_ancora: Callable[[str], bool],
+    rotulo_unidade: str,
+) -> Pendencia | None:
+    """Núcleo do gate anti-Vistamérica (D-ARQ-57 peça 2), extraído de
+    avaliar_segmentacao para reuso pela rota card (D-ARQ-57 peça 4 fatia 4d):
+    mesma contagem + densidade, mesmos limiares _LIMIAR_* INALTERADOS, com o
+    predicado de âncora (eh_ancora) e o substantivo do motivo (rotulo_unidade
+    — "bloco(s) GHE" ou "card(s) cargo-based") parametrizados. Ver
+    avaliar_segmentacao para a especificação completa do gate; este núcleo
+    reproduz seu corpo byte-a-byte quando chamado com
+    (paginas, eh_cabecalho_ghe, "bloco(s) GHE").
 
-    Reproduz o mesmo achatamento e a mesma fronteira de bloco de
-    recortar_blocos_ghe (âncora via eh_cabecalho_ghe, bloco i = âncora i até
-    a linha anterior à âncora i+1, último bloco até o fim), mas rastreia a
-    página 1-based de cada linha achatada para medir a extensão em páginas de
-    cada bloco: pag(última linha do bloco) - pag(linha da âncora) + 1.
-
-    Dois testes independentes, qualquer um decide implausibilidade:
-    - Contagem: <= 1 bloco (inclui zero âncoras) num documento com mais de
-      _LIMIAR_PAGINAS_DOC_MINIMO páginas — massa insuficiente para um único
-      bloco cobrir o documento inteiro ser plausível.
-    - Densidade: maior bloco ocupa mais de _LIMIAR_DENSIDADE_PCT% do total de
-      páginas do documento — só avaliada em doc com mais de
-      _LIMIAR_PAGINAS_DOC_MINIMO páginas; abaixo disso um bloco único
-      legítimo satura o percentual por definição e seria falso-implausível
-      (mesmo piso já presente no teste de contagem).
-
-    Sem I/O, sem LLM (D-ARQ-09); não altera recortar_blocos_ghe/recortar_topo.
+    rotulo_unidade traz o marcador de plural entre parênteses (ex.:
+    "bloco(s) GHE"); a forma singular usada no motivo de densidade é
+    derivada removendo "(s)" (ex.: "bloco GHE").
     """
+    rotulo_singular = rotulo_unidade.replace("(s)", "")
     linhas_com_pagina: list[tuple[int, str]] = [
         (indice_pagina + 1, linha)
         for indice_pagina, pagina in enumerate(paginas)
         for linha in pagina.splitlines()
     ]
     indices_ancora = [
-        i for i, (_, linha) in enumerate(linhas_com_pagina) if eh_cabecalho_ghe(linha)
+        i for i, (_, linha) in enumerate(linhas_com_pagina) if eh_ancora(linha)
     ]
     n_blocos = len(indices_ancora)
     total_paginas = len(paginas)
@@ -525,7 +559,7 @@ def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
             tipo="segmentacao_implausivel",
             destinatario="extracao",
             motivo=(
-                f"Segmentação implausível: {n_blocos} bloco(s) GHE detectado(s) "
+                f"Segmentação implausível: {n_blocos} {rotulo_unidade} detectado(s) "
                 f"em documento de {total_paginas} páginas"
             ),
             bloqueante=True,
@@ -551,7 +585,7 @@ def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
             tipo="segmentacao_implausivel",
             destinatario="extracao",
             motivo=(
-                f"Segmentação implausível: maior bloco GHE ocupa "
+                f"Segmentação implausível: maior {rotulo_singular} ocupa "
                 f"{maior_extensao_paginas} de {total_paginas} páginas "
                 f"({percentual_maior_bloco:.1f}%)"
             ),
@@ -561,3 +595,34 @@ def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
         )
 
     return None
+
+
+def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
+    """Gate anti-Vistamérica (D-ARQ-57 peça 2): detecta segmentação GHE
+    implausível por densidade + contagem, sem depender de conteúdo — só da
+    forma do recorte de recortar_blocos_ghe. Limiares calibrados em 003.CP
+    sobre os 15 PGRs de DT-003CM-01, ratificado em 003.CN.
+
+    Reproduz o mesmo achatamento e a mesma fronteira de bloco de
+    recortar_blocos_ghe (âncora via eh_cabecalho_ghe, bloco i = âncora i até
+    a linha anterior à âncora i+1, último bloco até o fim), mas rastreia a
+    página 1-based de cada linha achatada para medir a extensão em páginas de
+    cada bloco: pag(última linha do bloco) - pag(linha da âncora) + 1.
+
+    Dois testes independentes, qualquer um decide implausibilidade:
+    - Contagem: <= 1 bloco (inclui zero âncoras) num documento com mais de
+      _LIMIAR_PAGINAS_DOC_MINIMO páginas — massa insuficiente para um único
+      bloco cobrir o documento inteiro ser plausível.
+    - Densidade: maior bloco ocupa mais de _LIMIAR_DENSIDADE_PCT% do total de
+      páginas do documento — só avaliada em doc com mais de
+      _LIMIAR_PAGINAS_DOC_MINIMO páginas; abaixo disso um bloco único
+      legítimo satura o percentual por definição e seria falso-implausível
+      (mesmo piso já presente no teste de contagem).
+
+    Sem I/O, sem LLM (D-ARQ-09); não altera recortar_blocos_ghe/recortar_topo.
+
+    Delegação para o núcleo _avaliar_spans (D-ARQ-57 peça 4 fatia 4d,
+    extração para reuso pela rota card): saída byte-idêntica à versão
+    pré-4d, eh_cabecalho_ghe e "bloco(s) GHE" fixos.
+    """
+    return _avaliar_spans(paginas, eh_cabecalho_ghe, "bloco(s) GHE")
