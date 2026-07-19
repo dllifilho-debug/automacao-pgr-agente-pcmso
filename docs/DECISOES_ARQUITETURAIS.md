@@ -2027,6 +2027,24 @@ Ratificado pelo Diovanni. Sem código, sem R-*. PAINEL não re-tirado. `[MEDIDO 
 
 **Critério de resolução.** Correção ESTRUTURAL da fronteira-fim do último span (nunca recalibração de limiar — margem restante 2,7pp, 003.DD; nunca âncora-de-fim de boilerplate n=1 — overfit, classe refutada em 003.CZ). Exige forma de fim-de-conteúdo medida em n≥3 documentos; teste de aceite: Ricco-Adm e HUMAP flipam para ingestão SEM abrir o buraco Vistamérica (cauda gigante genuína continua gated). `[DERIVADO — 003.DD-2 + 003.DK; D-ARQ-22/31/35]`
 
+### DT-003DL-01 — `is_carcinogeno_iarc` e `tem_lt` nunca foram populados com rigor; valores factualmente errados em agentes já em produção `[ABERTA — 003.DL]`
+
+**Contexto.** 003.DL precisava gravar esses dois campos para 22 agentes novos. A medição do estado anterior mostrou que o dado **nunca foi populado com rigor factual**: dos 21 agentes `tipo_ibe: EE` então existentes, **19 eram `false`/`false`**. O `false` funcionou como default de massa; só casos salientes (benzeno, cromo VI, sílica, asbesto, cádmio) receberam `true` — e `dioxido_de_titanio` está `true` sendo IARC 2B, com comentário `[A VALIDAR]` no próprio arquivo.
+
+**Suspeitas de erro `[NÃO CONFERIDAS EM FONTE PRIMÁRIA — ponto de partida da varredura, não fato]`:**
+- `is_carcinogeno_iarc: false` em **arsênio** e **tricloroetileno** — ambos IARC Grupo 1 pelo que se sabe (o tricloroetileno foi reclassificado para Grupo 1 numa reavaliação de 2012). **Conferir no IARC Monographs.**
+- `tem_lt: false` em **acetona**, **tolueno**, **xileno** e **n-hexano** — todos com limite de tolerância no Anexo 11 da NR-15 pelo que se sabe. **Conferir na NR-15 vigente.**
+
+**Decisão tomada em 003.DL — `null` nos 22 novos, não os valores corretos.** Preencher os 22 com rigor produziria vocabulário **bimodal**: 22 agentes corretos, 21 errados, sem marca distinguindo quais são confiáveis — pior que uniformemente devedor. `null` = "não verificado", semanticamente distinto de `false` = "verificado, não tem", e cria marca explícita que a varredura encontra. Precedente: `benzeno` já grava `tem_lt: None`.
+
+**Não bloqueia produção, hoje.** Os campos são **inertes no caminho do agente** (`resolvedor.py:42` e `:79`: *"carregado no índice mas não aplicado ao `Componente` nesta fatia"*, *"fica carregado mas inerte"*). O caminho ativo em `materialidade.py`/`riscos.py` é o de **componente de FDS**, não o de agente do vocabulário. E `bool(None) is False`, idêntico ao default conservador — `null` não muda saída alguma.
+
+**Torna-se bloqueante quando** a ligação agente→`Componente` for feita (DT-003CI-01, deferida): a partir daí, carcinógeno gravado `false`/`null` escapa do bypass de materialidade — supressão silenciosa, classe D-ARQ-22.
+
+**Escopo da varredura.** 79 agentes × 2 campos contra IARC Monographs + NR-15 Anexo 11 vigente. Trabalho de CONHECIMENTO com fonte primária — sessão própria, não cabe em commit data-only.
+
+`[ABERTA — 003.DL; agentes.yaml 1477cf7; relacionada a DT-003CI-01]`
+
 ## D-ARQ-58 — Resolução de predicado por identidade de agente: fallback genérico no avaliador, não um primitivo dedicado por agente
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (mesma sessão 003.CU). Autorização para virar D-ARQ é do Diovanni (ratificada).
@@ -2094,6 +2112,42 @@ Ratificado pelo Diovanni. Sem código, sem R-*. PAINEL não re-tirado. `[MEDIDO 
 **Consequência.** O guardião converte o casamento §5.9↔yaml (antes verificado a olho) em invariante de máquina; EE lote 2 nasce coberto (agente novo cai nas duas fontes ou vermelha; nome em prosa exige entrada em `APELIDOS_MAPA`). Nenhuma regra clínica criada/alterada; `R-BIO-04` mantém ID e forma. PROTOCOLO §5.9 tocado só no header. PAINEL não re-tira.
 
 `[DERIVADO — D-ARQ-59 proposta do teste; test_consistencia_mapa59_regras.py c934d72; PROTOCOLO §5.9; regras.yaml R-PKG-BZ]`.
+
+## D-ARQ-61 — Critério de escolha do indicador canônico quando o Anexo I oferece múltiplas opções ("ou")
+
+**Status:** DECISÃO DE ARQUITETURA (sessão 003.DL), aplicada na mesma sessão às 5 regras do EE lote 2 com "ou" real. Ratificada pelo Diovanni. Não cria nem altera regra clínica — governa a *escolha* dentro de R-BIO-04.
+
+**Contexto.** O Quadro 1 do Anexo I lista, para vários agentes, dois a quatro indicadores biológicos ligados por "ou" (1,1,1-tricloroetano tem 4; ciclohexanona, clorobenzeno, N,N-dimetilformamida e tetracloroetileno têm 2). O modelo emite **um** exame por regra. Até 003.DL a escolha era feita caso a caso, sem critério registrado — cinco escolhas já em produção (tolueno, CO, anilina, estireno, tricloroetileno) tinham sido tomadas sem regra explícita que as gerasse.
+
+**Decisão — critério ordenado, aplicado nesta ordem:**
+
+1. **Descartar indicadores em *ar exalado final*.** Não são exames laboratoriais de rotina; nenhuma matriz validada os emprega.
+2. **Entre os restantes, adotar o que a Matriz validada usa.**
+3. **Se a Matriz não cobrir o agente: sem default — escalar para decisão explícita e registrá-la.**
+4. **Marcar sempre `[INTERPRETADO]`** na `base_normativa`, **nomeando as opções descartadas**.
+
+**Validação retroativa — o critério explica 100% das escolhas anteriores**, nenhuma das quais foi tomada sob ele:
+
+| Agente | Opções no Anexo | Escolhido | Regra que explica |
+|---|---|---|---|
+| tolueno | sangue / urina / orto-cresol | orto-cresol | 2 (Matriz venceu o "1º listado") |
+| monóxido de carbono | COHb / ar exalado | COHb | 1 |
+| anilina | p-aminofenol / metahemoglobina | metahemoglobina | 2 (Matriz venceu o "1º listado") |
+| estireno | soma mandélico+fenilglioxílico / estireno urina | soma | 2 |
+| tricloroetileno | ác. tricloroacético / tricloroetanol sangue | ác. tricloroacético | 2 |
+| inseticidas (Quadro 2) | acetilcolinesterase / butirilcolinesterase | acetilcolinesterase | 2 |
+
+Nenhum contraexemplo encontrado no acervo.
+
+**Sobre a regra 3 (correção feita na 2ª passada).** A formulação inicial era *"se a Matriz não cobrir, adotar o 1º listado no Anexo I"*. **Rejeitada:** a ordem do Anexo não tem significado normativo declarado, logo seria default arbitrário produzindo escolha errada **em silêncio** — classe D-ARQ-22. Escalar produz decisão consciente. Não dispara no lote 2 (a Matriz cobre os 22), então o custo da correção foi zero e o ganho é futuro.
+
+**Objeção antecipada — isso não inverte a hierarquia de fontes.** A regra 2 faz a Matriz (nível 3, "referência, não gabarito") determinar o canônico. A hierarquia decide **o que é verdade normativa** — quais indicadores são válidos = Anexo I, nível 2 — e todos os candidatos já passaram por esse filtro antes de a regra 2 agir. A Matriz decide apenas **qual dos já-válidos adotar na prática**, que é escolha de prática clínica, não de norma. A prática da médica coordenadora é precisamente o conhecimento tácito que o Papel 1 existe para formalizar: usar a Matriz como desempate de canônico é o uso correto dela.
+
+**Universalidade.** O critério não depende de setor — opera sobre a estrutura do Anexo I (que é nacional e setor-agnóstica) e sobre a Matriz. Vale para construção civil, indústria química e saúde igualmente.
+
+**Consequência.** As 5 escolhas de canônico do EE lote 2 derivam do critério em vez de julgamento ad-hoc, e cada uma nomeia suas descartadas na `base_normativa` (auditável). Escolhas futuras deixam de ser decisão de sessão. `R-BIO-04` mantém ID e forma; nenhuma R-* criada ou alterada.
+
+`[DERIVADO — NR-07 Anexo I Quadro 1, Portaria MTP 567/2022, texto oficial gov.br; Matriz Dra. Patrícia 06/2025; regras.yaml 1477cf7]`
 
 ## Histórico de revisões
 
@@ -2233,3 +2287,4 @@ Ratificado pelo Diovanni. Sem código, sem R-*. PAINEL não re-tirado. `[MEDIDO 
 | v132 | 18/07/2026 | Sessão 003.DI (IMPLEMENTAÇÃO): **D-ARQ-57 fatia 4c-ii IMPLEMENTADA e mergeada** — módulo novo `motor/transcritor_card.py`: `TranscritorCard` (Protocol) + `transcrever_cards`, LLM mockado (molde 003.BN), `gate_forma_ghe` reusado sem alteração via import (003.DG-3); saída = reuso ESTRITO de `GHEVerbatim` (003.DG-1). **Decisão 003.DI-1:** contrato de 2 argumentos `transcrever(card, titulo)` (montagem-do-input é concern da 4c; tipo distinto impede reuso acidental do cliente-GHE; `""` = ausência explícita, espelho de `recuperar_titulos_cargo`); mismatch de comprimento = `ValueError`, não `Pendencia` (bug de construção, não condição de documento). 8 testes (5 núcleo + 3 reais sem skip: UFGD 105 pares com literais extremos, HUMAP 140/`""`, Cjr 1/`""`). Suíte 853+4→861+4 (+8); mypy delta-zero; falha explícita via stash. Nota 003.DI em DT-003CS-01 (4c-ii fechada, DT ABERTA até 4d). Commit `0c1e970`, merge PR #231 (`81f0962`). Nenhuma R-* criada/alterada. |
 | v133 | 18/07/2026 | Sessão 003.DJ (IMPLEMENTAÇÃO): **D-ARQ-57 fatia 4c-iii IMPLEMENTADA e mergeada** — `TranscritorGeminiCard` em `adaptadores/transcritor_gemini_card.py` (molde 003.BO/CA; reuso da cascata + `_parsear_ghe`); `_PROMPT_CARD` dedicado (003.DG-2) calibrado em PASSO 0 com literais reais dos 2 witnesses; 7 testes mockados + 2 ao vivo; sonda ao vivo VERDE 2/2 na 1ª rodada (UFGD `("Advogado",)`, HUMAP `("ADVOGADO",)`); revisão do Arquiteto endureceu gabarito HUMAP pré-merge (amend `363a78b`→`d50769f`, classe gate-fraco 003.DH). Fatia 4c COMPLETA. Suíte 861+4→868+6; mypy delta-zero. Nota 003.DJ em DT-003CS-01 (DT ABERTA até 4d). Commit `d50769f`, merge PR #233 (`6c04a51`). Nenhuma R-* criada/alterada. |
 | v134 | 19/07/2026 | Sessão 003.DK (IMPLEMENTAÇÃO): **D-ARQ-57 fatia 4d IMPLEMENTADA e mergeada — peça 4 COMPLETA; DT-003CS-01 FECHADA** (split de roteamento ghe/card + plug `preparar_ghes` + e2e EBSERH; UFGD ingere, HUMAP/Cjr gated by design). 2 bloqueadores corrigidos pré-código (fallback do 3º ramo; HUMAP gated — cauda de assinatura). **DT-003DK-01 ABERTA** (fronteira-fim do último span, 2 testemunhas). Suíte 868+6→877+6; mypy delta-zero. Commit `842ae5e`, merge PR #235 (`a249ea5`). Nenhuma R-* criada/alterada. PAINEL re-tirado (tiragem 003.DK). |
+| v135 | 19/07/2026 | Sessão 003.DL (IMPLEMENTAÇÃO + ARQUITETURA): **EE lote 2 — Quadro 1/EE FECHA em 41/41**; família `R-BIO-04-*` 24→46 regras, 22 agentes novos, 17 exames novos. **D-ARQ-61 CRIADA** (critério de canônico para "ou" do Anexo I; valida retroativamente 6 escolhas anteriores; regra 3 corrigida na 2ª passada de "1º listado" para "escalar sem default"). **DT-003DL-01 ABERTA** (`is_carcinogeno_iarc`/`tem_lt` nunca populados com rigor; `null` explícito nos 22 para evitar vocabulário bimodal). 1 bloqueador legítimo levantado pelo Code (prompt omitia os 2 campos) e corrigido pelo Arquiteto. Suíte 877+6→899+6 (+22 exato); mypy `--strict` limpo, delta-zero. Commit `1477cf7`. Nenhuma R-* criada/alterada. PAINEL não re-tira. |
