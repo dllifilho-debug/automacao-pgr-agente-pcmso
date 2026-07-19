@@ -433,12 +433,36 @@ Mapa agente→biomarcador dos agentes do vocabulário (insumo para o emissor de 
 | cádmio (inorgânico) | 2/SC | cádmio urina |
 | flúor / HF / fluoretos inorgânicos | 2/SC | fluoreto urinário |
 | inseticidas inibidores da colinesterase | 2/SC | acetilcolinesterase eritrocitária *ou* butirilcolinesterase plasma/soro |
+| tricloroetano_111 | 1/EE | ácido tricloroacético urina (canônico entre 4 opções; exame compartilhado com tricloroetileno) |
+| butadieno_13 | 1/EE | 1,2-dihidro-4-(N-acetilcisteína)butano urina |
+| hdi | 1/EE | 1,6-hexametilenodiamina urina |
+| metoxietanol_2 | 1/EE | ácido 2-metoxiacético urina (compartilhado com metoxietilacetato_2) |
+| metoxietilacetato_2 | 1/EE | ácido 2-metoxiacético urina (compartilhado com metoxietanol_2) |
+| propanol_2 | 1/EE | acetona urina (exame compartilhado com acetona) |
+| tdi | 1/EE | isômeros 2,4 e 2,6 toluenodiamino urina (soma dos isômeros) |
+| butoxietanol_2 | 1/EE | ácido butoxiacético urina (BAA) |
+| chumbo_tetraetila | 1/EE | chumbo urina |
+| ciclohexanona | 1/EE | ciclohexanol urina (canônico entre 2 opções) |
+| clorobenzeno | 1/EE | 4-clorocatecol urina (canônico entre 2 opções) |
+| etoxietanol | 1/EE | ácido etoxiacético urina (compartilhado com etoxietilacetato) |
+| etoxietilacetato | 1/EE | ácido etoxiacético urina (compartilhado com etoxietanol) |
+| furfural | 1/EE | ácido furóico urina |
+| metil_butil_cetona | 1/EE | 2,5-hexanodiona urina (exame compartilhado com n_hexano) |
+| mibk | 1/EE | MIBK urina |
+| n_metil_2_pirrolidona | 1/EE | 5-hidroxi-N-metil-2-pirrolidona urina |
+| dimetilacetamida | 1/EE | N-metilacetamida urina |
+| dimetilformamida | 1/EE | N-metilformamida total urina (canônico entre 2 opções) |
+| oxido_de_etileno | 1/EE | adutos HEV em hemoglobina |
+| tetracloroetileno | 1/EE | tetracloroetileno sangue (canônico entre 2 opções) |
+| tetrahidrofurano | 1/EE | tetrahidrofurano urina |
 
 > **Changelog 003.CU (mesma ID — materialização + correção de biomarcador do tolueno).** A família `R-BIO-04-<agente>` foi materializada em `regras.yaml`/`exames.yaml` (D-ARQ-38 fatia d, 12 regras). Entre os agentes multi-opção do mapa acima, o emissor adotou o canônico da Matriz Dra. Patrícia 06/2025, confirmado contra NR-7 vigente: **tolueno → o-cresol na urina** (`ortocresol_urina`), CO → COHb, TCE → ác. tricloroacético, estireno → soma mandélico+fenilglioxílico (exame único). Correção rastreável: a spec de 003.CT havia escolhido "tolueno urina" (`tolueno_urina`) — **erro**: não é IBE; o indicador vigente é o-cresol (Portaria SEPRT 2020, alinhada ACGIH; ácido hipúrico é o antigo). Corrigido antes da implementação; `tolueno_urina` nunca esteve em produção. Saída afetada (novo slug emitido) mas mesma ID — a família materializa R-BIO-04, não cria regra nova. `[DERIVADO — NR-07 Anexo I Quadro 1 rev.2020; Matriz Patrícia 06/2025]`
 
 > **Changelog 003.CV (mesma ID — Quadro 2/SC completo).** A família `R-BIO-04-<agente>` ganhou os 3 agentes restantes do Quadro 2 (IBE/SC): **cádmio** (cádmio urina), **flúor/HF/fluoretos inorgânicos** (fluoreto urinário) e **inseticidas inibidores da colinesterase** (acetilcolinesterase eritrocitária) — todos `[adm,per,RT,MR,dem]` 6M. Quadro 2 passa de 1/4 (só chumbo) a **4/4**. Biomarcadores confirmados contra a Matriz Dra. Patrícia 06/2025 (aba "Periodicidade Exames"), que também confirmou empiricamente o eixo de R-BIO-04: os agentes EE aparecem só com periódico, os 4 SC com os 5 momentos. O inseticida tem indicador **"OU"** (acetilcolinesterase eritrocitária *ou* butirilcolinesterase plasma/soro) → adotado o 1º canônico (listado primeiro no Quadro 2, enzima-alvo específica); `[INTERPRETADO — escolha do canônico, prioridade na revisão de saída]`. Modelado como slug-classe único (não por praga), alinhado a Anexo I + Matriz. Mesma ID — a família materializa R-BIO-04, sem regra nova. `[DERIVADO — NR-07 Anexo I Quadro 2, Portaria 567/2022; Matriz Patrícia 06/2025]`
 
 > **Changelog 003.CW (mesma ID — Quadro 1/EE lote 1).** A família `R-BIO-04-<agente>` ganhou 9 agentes IBE/EE do Quadro 1, todos `[per]` 6M / um exame: **cromo hexavalente** (cromo urina), **cobalto**, **fenol**, **metanol**, **diclorometano**, **etilbenzeno** (soma mandélico+fenilglioxílico — reusa o slug do estireno), e o cluster metahemoglobina: **anilina**, **nitrobenzeno** e a classe **indutores de metahemoglobina** (metahemoglobina no sangue, exame compartilhado pelas 3 regras). Biomarcadores conferidos linha a linha no texto oficial do Anexo I Quadro 1 (Portaria 567/2022, gov.br/MTE). Anilina tem indicador "OU" (metahemoglobina *ou* p-aminofenol urina) → canônico = metahemoglobina, alinhando o cluster num exame só e coerente com a Matriz Patrícia; `[INTERPRETADO — escolha do canônico, revisão de saída]`. Cromo: um exame (mesmo analito, dois critérios de amostragem — FJFS 25 vs aumento-na-jornada 10, não dois exames). EE do Quadro 1 passa de 12/41 a **21/41**; total de regras R-BIO-04 = **24**. Mesma ID — família materializa R-BIO-04, sem regra nova. `[DERIVADO — NR-07 Anexo I Quadro 1, Portaria 567/2022, texto oficial MTE; Matriz Patrícia 06/2025]`
+
+> **Changelog 003.DL (mesma ID — Quadro 1/EE lote 2, fecha o Quadro).** A família `R-BIO-04-<agente>` ganhou os 22 agentes restantes do Quadro 1 (IBE/EE), todos `[per]` 6M / um exame cada: 1,1,1-tricloroetano (ác. tricloroacético, canônico entre 4 opções, exame reusado de tricloroetileno), 1,3-butadieno, HDI, 2-metoxietanol + acetato de 2-metoxietila (par que converge no mesmo metabólito urinário), 2-propanol (acetona urina, exame reusado da acetona), TDI (agente-classe, 2 CAS no Anexo), 2-butoxietanol, chumbo tetraetila (chumbo urina — nota anti-confusão bilateral com R-BIO-04-chumbo, Quadro 2/SC, gravada nas duas `base_normativa`), ciclohexanona e clorobenzeno (canônico entre 2 opções cada), etoxietanol + etoxietilacetato (par convergente; CAS do etoxietanol ausente no Anexo, `null` explícito), furfural, metil-butil-cetona (2,5-hexanodiona, exame reusado do n-hexano), MIBK, N-metil-2-pirrolidona, N,N-dimetilacetamida, N,N-dimetilformamida (canônico entre 2 opções), óxido de etileno (adutos HEV), tetracloroetileno (canônico entre 2 opções) e tetrahidrofurano. Biomarcadores e opções descartadas conferidos linha a linha no texto oficial do Anexo I Quadro 1 (Portaria 567/2022, gov.br/MTE). **Quadro 1/EE fecha em 41/41; total de regras R-BIO-04 = 46.** `is_carcinogeno_iarc`/`tem_lt` gravados `null` explícito nos 22 (não verificados nesta sessão data-only — ver DT-003DL-01, varredura própria contra IARC Monographs + NR-15 Anexo 11). Mesma ID — família materializa R-BIO-04, sem regra nova. `[DERIVADO — NR-07 Anexo I Quadro 1, Portaria 567/2022, texto oficial MTE]`
 
 ---
 

@@ -10,7 +10,7 @@ from agente_medico.motor.protocolo import carregar
 PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
-def test_vocabulario_exames_carrega_com_31_slugs() -> None:
+def test_vocabulario_exames_carrega_com_48_slugs() -> None:
     p = carregar(PROTOCOLO_DIR)
     assert set(p.vocabulario.exames.keys()) == {
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg",
@@ -24,6 +24,13 @@ def test_vocabulario_exames_carrega_com_31_slugs() -> None:
         "cadmio_urina", "fluoreto_urinario", "acetilcolinesterase_eritrocitaria",
         "cromo_urina", "cobalto_urina", "fenol_urina", "metanol_urina",
         "diclorometano_urina", "metahemoglobina_sangue",
+        "dihidro_acetilcisteina_butano_urina", "hexametilenodiamina_urina",
+        "acido_metoxiacetico_urina", "toluenodiamino_urina",
+        "acido_butoxiacetico_urina", "chumbo_urina", "ciclohexanol_urina",
+        "clorocatecol_urina", "acido_etoxiacetico_urina", "acido_furoico_urina",
+        "mibk_urina", "hidroxi_metil_pirrolidona_urina", "metilacetamida_urina",
+        "metilformamida_urina", "aduto_hev_hemoglobina",
+        "tetracloroetileno_sangue", "tetrahidrofurano_urina",
     }
 
 

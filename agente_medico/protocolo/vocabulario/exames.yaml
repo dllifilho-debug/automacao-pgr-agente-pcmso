@@ -144,3 +144,71 @@ exames:
   metahemoglobina_sangue:
     nome_exibicao: "Metahemoglobina no sangue"
     categoria: laboratorial
+  dihidro_acetilcisteina_butano_urina:
+    nome_exibicao: "1,2-dihidro-4-(N-acetilcisteína)butano na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  hexametilenodiamina_urina:
+    nome_exibicao: "1,6-hexametilenodiamina na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  acido_metoxiacetico_urina:
+    nome_exibicao: "Ácido 2-metoxiacético na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  toluenodiamino_urina:
+    nome_exibicao: "Isômeros 2,4 e 2,6 toluenodiamino na urina (soma dos isômeros)"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  acido_butoxiacetico_urina:
+    nome_exibicao: "Ácido butoxiacético na urina (BAA)"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  chumbo_urina:
+    nome_exibicao: "Chumbo na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  ciclohexanol_urina:
+    nome_exibicao: "Ciclohexanol na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  clorocatecol_urina:
+    nome_exibicao: "4-clorocatecol na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  acido_etoxiacetico_urina:
+    nome_exibicao: "Ácido etoxiacético na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  acido_furoico_urina:
+    nome_exibicao: "Ácido furóico na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  mibk_urina:
+    nome_exibicao: "MIBK na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  hidroxi_metil_pirrolidona_urina:
+    nome_exibicao: "5-hidroxi-N-metil-2-pirrolidona na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  metilacetamida_urina:
+    nome_exibicao: "N-metilacetamida na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  metilformamida_urina:
+    nome_exibicao: "N-metilformamida total na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  aduto_hev_hemoglobina:
+    nome_exibicao: "Adutos de N-(2-hidroxietil)valina (HEV) em hemoglobina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  tetracloroetileno_sangue:
+    nome_exibicao: "Tetracloroetileno no sangue"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
+  tetrahidrofurano_urina:
+    nome_exibicao: "Tetrahidrofurano na urina"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
