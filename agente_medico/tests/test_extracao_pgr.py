@@ -347,11 +347,15 @@ def test_avaliar_familia_sem_ghe_e_sem_sinal_e_none() -> None:
 
 
 def test_avaliar_estrutura_cargo_based_grande_e_pgr_cargo_based_nao_segmentacao() -> None:
-    # Doc grande (>10 págs.), 0 âncoras GHE, com sinal-cargo: sem a peça 3
-    # este caso cairia no gate genérico e emitiria segmentacao_implausivel
-    # (contagem: 0 blocos em doc >10 págs.) — a peça 3 sela a exclusão mútua.
+    # Doc grande (>10 págs.), 0 âncoras GHE, com sinal-cargo (CARGO/FUNÇÃO:
+    # NÃO é âncora-de-recorte card, só sinal-de-família — 003.DC): cai no
+    # 3º ramo de avaliar_estrutura (rota "ghe", avaliar_familia). Sem a
+    # peça 3 este caso cairia no gate genérico e emitiria
+    # segmentacao_implausivel (contagem: 0 blocos em doc >10 págs.) — a
+    # peça 3 sela a exclusão mútua.
     paginas = _construir_paginas(20, {}) + ["CARGO/FUNÇÃO: JORNADA TRABALHO: 08 horas"]
-    pendencia = avaliar_estrutura(paginas)
+    rota, pendencia = avaliar_estrutura(paginas)
+    assert rota == "ghe"
     assert pendencia is not None
     assert pendencia.tipo == "pgr_cargo_based"
     assert pendencia.tipo != "segmentacao_implausivel"
@@ -359,13 +363,16 @@ def test_avaliar_estrutura_cargo_based_grande_e_pgr_cargo_based_nao_segmentacao(
 
 def test_avaliar_estrutura_ghe_implausivel_delega_segmentacao() -> None:
     paginas = _construir_paginas(20, {5: "GHE 1"})
-    pendencia = avaliar_estrutura(paginas)
+    rota, pendencia = avaliar_estrutura(paginas)
+    assert rota == "ghe"
     assert pendencia is not None
     assert pendencia.tipo == "segmentacao_implausivel"
 
 
 def test_avaliar_estrutura_viverde_e_none(paginas: list[str]) -> None:
-    assert avaliar_estrutura(paginas) is None
+    rota, pendencia = avaliar_estrutura(paginas)
+    assert rota == "ghe"
+    assert pendencia is None
 
 
 def test_avaliar_estrutura_ricco_adm_real_e_segmentacao_implausivel() -> None:
@@ -375,9 +382,12 @@ def test_avaliar_estrutura_ricco_adm_real_e_segmentacao_implausivel() -> None:
     # 10/24 págs. = 41,7% > _LIMIAR_DENSIDADE_PCT (40,0%) — gated por
     # densidade a jusante, revisão humana BY DESIGN (mesma classe do Cjr,
     # falso-positivo aceito, decisão 003.DD sobre medição real; NÃO
-    # recalibrar _LIMIAR_DENSIDADE_PCT).
+    # recalibrar _LIMIAR_DENSIDADE_PCT). Rota "ghe" inalterada pela fatia 4d
+    # (medido no PASSO 0 da 003.DK): Ricco-Adm tem âncora GHE forma 5, o
+    # split card nunca é consultado (ramo 1 vence por precedência).
     paginas_ricco = extrair_texto_pgr(CAMINHO_PGR_RICCO_ADM)
-    pendencia = avaliar_estrutura(paginas_ricco)
+    rota, pendencia = avaliar_estrutura(paginas_ricco)
+    assert rota == "ghe"
     assert pendencia is not None
     assert pendencia.tipo == "segmentacao_implausivel"
     assert pendencia.bloqueante is True
@@ -394,11 +404,84 @@ def test_recorte_blocos_ghe_ricco_adm_real() -> None:
     assert all(eh_cabecalho_ghe(bloco.splitlines()[0]) for bloco in blocos)
 
 
-def test_avaliar_estrutura_cjr_real_e_pgr_cargo_based() -> None:
-    paginas_cjr = extrair_texto_pgr(CAMINHO_PGR_CJR)
-    pendencia = avaliar_estrutura(paginas_cjr)
+# ---------------------------------------------------------------------------
+# avaliar_estrutura — split de roteamento ghe/card (D-ARQ-57 peça 4 fatia 4d,
+# FECHA DT-003CS-01). Sintéticos de fronteira + precedência; molde
+# _construir_paginas dos testes de avaliar_segmentacao acima.
+# ---------------------------------------------------------------------------
+
+
+def test_avaliar_estrutura_card_distribuido_e_none() -> None:
+    # Espelho de test_avaliar_segmentacao_blocos_distribuidos_e_none: 5
+    # âncoras card (CARGO-CBO) nas págs. 1,5,9,13,17 de 20 -> todo card tem
+    # 4 páginas (<= 40% de 20) -> sem pendência.
+    paginas = _construir_paginas(
+        20,
+        {
+            1: "CARGO A - CBO: 111111",
+            5: "CARGO B - CBO: 222222",
+            9: "CARGO C - CBO: 333333",
+            13: "CARGO D - CBO: 444444",
+            17: "CARGO E - CBO: 555555",
+        },
+    )
+    rota, pendencia = avaliar_estrutura(paginas)
+    assert rota == "card"
+    assert pendencia is None
+
+
+def test_avaliar_estrutura_card_gated_por_contagem() -> None:
+    # Espelho de test_avaliar_segmentacao_uma_ancora_doc_grande_e_pendencia_
+    # por_contagem: 1 card único num doc de 20 págs. (> _LIMIAR_PAGINAS_DOC_
+    # MINIMO) -- mesmo gate de contagem da peça 2, via _avaliar_spans reusado.
+    paginas = _construir_paginas(20, {5: "CARGO A - CBO: 111111"})
+    rota, pendencia = avaliar_estrutura(paginas)
+    assert rota == "card"
     assert pendencia is not None
-    assert pendencia.tipo == "pgr_cargo_based"
+    assert pendencia.tipo == "segmentacao_implausivel"
+
+
+def test_avaliar_estrutura_precedencia_ghe_vence_card() -> None:
+    # Doc com as duas âncoras: eh_cabecalho_ghe casa primeiro -> ramo 1
+    # sempre vence, eh_ancora_card_cargo nunca é sequer consultado.
+    paginas = _construir_paginas(20, {1: "GHE 1", 2: "CARGO A - CBO: 111111"})
+    rota, _pendencia = avaliar_estrutura(paginas)
+    assert rota == "ghe"
+
+
+def test_avaliar_estrutura_precedencia_card_vence_familia() -> None:
+    # Doc com sinal-de-família grid-AIHA (eh_sinal_cargo, NÃO
+    # eh_ancora_card_cargo) E âncora-de-recorte card (Lotação-tripla): a
+    # âncora-de-recorte vence o sinal-de-família — ramo 2, não ramo 3.
+    paginas = _construir_paginas(
+        20,
+        {
+            1: (
+                "Função Identificação de Perigo / Risco Tempo de Meio de "
+                "Nível de Eliminação ou Controle Existente"
+            ),
+            5: "Lotação: Escala de Trabalho: Qtde:",
+        },
+    )
+    rota, _pendencia = avaliar_estrutura(paginas)
+    assert rota == "card"
+
+
+def test_avaliar_estrutura_cjr_real_e_card_gated_por_contagem() -> None:
+    # FLIP 1-por-1 (D-ARQ-57 peça 4 fatia 4d, nomeado no relatório da
+    # sessão): pré-4d o Cjr saía ("pgr_cargo_based", peça 3 — CARGO-CBO era
+    # só sinal-de-família). O Cjr TEM âncora-de-recorte card (mesma linha
+    # CARGO-CBO também está em _RECORTADORES_CARGO/eh_ancora_card_cargo,
+    # 003.DC) — a fatia 4d insere o ramo 2 ANTES da família, então o Cjr
+    # migra para rota "card". 1 card em doc de 18 págs. (> _LIMIAR_PAGINAS_
+    # DOC_MINIMO=10) -> gate de contagem (mesmos limiares da peça 2, via
+    # _avaliar_spans reusado) -> segmentacao_implausivel. GATED by design,
+    # mesma classe do V2/003.DC — witness do recorte, não recalibrado.
+    paginas_cjr = extrair_texto_pgr(CAMINHO_PGR_CJR)
+    rota, pendencia = avaliar_estrutura(paginas_cjr)
+    assert rota == "card"
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
 
 
 # ---------------------------------------------------------------------------
@@ -431,20 +514,58 @@ def paginas_ebserh_humap() -> list[str]:
     return extrair_texto_pgr(CAMINHO_PGR_EBSERH_HUMAP)
 
 
-def test_avaliar_estrutura_ebserh_ufgd_v7_e_pgr_cargo_based(
+def test_avaliar_estrutura_ebserh_ufgd_v7_e_card_sem_pendencia(
     paginas_ebserh_ufgd_v7: list[str],
 ) -> None:
-    pendencia = avaliar_estrutura(paginas_ebserh_ufgd_v7)
-    assert pendencia is not None
-    assert pendencia.tipo == "pgr_cargo_based"
+    # FLIP 1-por-1 (D-ARQ-57 peça 4 fatia 4d): 105 âncoras card (Lotação-
+    # tripla) >> gate de contagem/densidade (mesmos limiares da peça 2, via
+    # _avaliar_spans reusado) -- sem pendência, EBSERH-UFGD entra em
+    # produção pela rota card.
+    rota, pendencia = avaliar_estrutura(paginas_ebserh_ufgd_v7)
+    assert rota == "card"
+    assert pendencia is None
 
 
-def test_avaliar_estrutura_ebserh_humap_e_pgr_cargo_based(
+def test_avaliar_estrutura_ebserh_humap_e_card_gated_por_densidade(
     paginas_ebserh_humap: list[str],
 ) -> None:
-    pendencia = avaliar_estrutura(paginas_ebserh_humap)
+    # Witness da classe 003.DD-2 no lado card (achado do PASSO 0 desta
+    # sessão, correção do Arquiteto ratificada pelo Diovanni): a última das
+    # 140 âncoras Lotação-tripla está na pág. 186 de 368 — depois dela vem
+    # um bloco de ASSINATURA/aprovação do documento inteiro ("Assinado
+    # eletronicamente", nomes, matrículas SIAPE), não outro card. Por
+    # construção (mesma sobre-inclusão-de-cauda de recortar_blocos_ghe/
+    # recortar_cards_cargo, D-ARQ-22), esse apêndice de 183/368 páginas
+    # (49,7%) vira o span do "último card" -> excede _LIMIAR_DENSIDADE_PCT
+    # (40,0%) -> segmentacao_implausivel. GATED by design, 2ª testemunha da
+    # mesma classe do Ricco-Adm (003.DD-2, lado GHE) — limiares INTOCADOS,
+    # revisão humana bloqueante, anti-supressão D-ARQ-22/31/35 vence.
+    rota, pendencia = avaliar_estrutura(paginas_ebserh_humap)
+    assert rota == "card"
     assert pendencia is not None
-    assert pendencia.tipo == "pgr_cargo_based"
+    assert pendencia.tipo == "segmentacao_implausivel"
+    assert pendencia.bloqueante is True
+    assert pendencia.regra_origem == "D-ARQ-57"
+    assert "card" in pendencia.motivo
+
+
+def test_avaliar_estrutura_ebserh_legado_ghes_e_segmentacao_implausivel(
+    paginas_ebserh_legado_ghes: list[str],
+) -> None:
+    # Witness de REGRESSÃO do bloqueador achado no PASSO 0 desta sessão
+    # (003.DK): o legado GHES (197 págs.) não tem NENHUMA âncora
+    # reconhecível — nem GHE numerado, nem card (eh_ancora_card_cargo), nem
+    # sinal-de-família cargo (eh_sinal_cargo; 003.CZ já confirmou zero
+    # colisão do reconhecedor-Lotação sobre este doc). Cai inteiro no 3º
+    # ramo de avaliar_estrutura: avaliar_familia devolve None (sem sinal),
+    # e o fallback para avaliar_segmentacao PRECISA disparar — sem ele, um
+    # doc âncora-zero sairia ("ghe", None) em silêncio, violação D-ARQ-22/
+    # anti-supressão D-ARQ-31/35. Corrigido pelo Arquiteto ANTES da IMPL
+    # (achado do PASSO 0, MUDANÇA 1c re-medida antes de codar).
+    rota, pendencia = avaliar_estrutura(paginas_ebserh_legado_ghes)
+    assert rota == "ghe"
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
 
 
 def test_reconhecedor_lotacao_zero_matches_no_ghes_legado(
