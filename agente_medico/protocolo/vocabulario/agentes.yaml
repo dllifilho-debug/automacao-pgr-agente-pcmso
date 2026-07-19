@@ -48,6 +48,10 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+  # termos: aliases de resolução (D-ARQ-50 Parte 2, motor/resolvedor_termos.py).
+  # Tier 1 = grafia literal da substância no Anexo I da NR-07 (Quadros 1 e 2,
+  # Portaria MTP 567/2022) quando difere do slug após normalizar_termo().
+  # Siglas comerciais (Tier 2) NÃO entram aqui — ver DT-003DM-01.
   xileno:
     tipo_ibe: EE
     cas: "1330-20-7"
@@ -55,6 +59,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    termos: ["Xilenos"]
   estireno:
     tipo_ibe: EE
     cas: "100-42-5"
@@ -76,6 +81,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    termos: ["Sulfeto de carbono"]
   tricloroetileno:
     tipo_ibe: EE
     cas: "79-01-6"
@@ -112,6 +118,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    termos: ["Mercúrio metálico"]
   arsenio:
     tipo_ibe: EE
     cas: "7440-38-2"
@@ -119,6 +126,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    termos: ["Arsênico"]   # [INTERPRETADO — recorte do literal]
   manganes:
     tipo_ibe: null
     cas: "7439-96-5"
@@ -156,6 +164,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    termos: ["Metiletilcetona (MEK)"]
   cloreto_de_hidrogenio:
     tipo_ibe: null
     cas: "7647-01-0"
@@ -320,6 +329,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    termos: ["Flúor, ácido fluorídrico e fluoretos inorgânicos"]
   inseticidas_inibidores_colinesterase:
     # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): inseticidas inibidores da colinesterase
     # → acetilcolinesterase eritrocitária (canônico entre "OU"; butirilcolinesterase plasma/soro
@@ -329,12 +339,14 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    termos: ["Inseticidas inibidores da Colinesterase"]
   cromo_hexavalente:   # R-BIO-04, NR-07 Anexo I Quadro 1 (IBE/EE): cromo hexavalente (comp. solúveis) → cromo na urina
     tipo_ibe: EE
     cas: "7440-47-3"
     is_carcinogeno_iarc: true   # IARC grupo 1; inerte no motor atual
     tem_lt: false
     protocolos_especiais: []
+    termos: ["Cromo hexavalente (compostos solúveis)"]
   cobalto:             # R-BIO-04, Quadro 1 (IBE/EE): cobalto e comp. inorg. → cobalto na urina
     tipo_ibe: EE
     cas: "7440-48-4"
@@ -383,54 +395,63 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    termos: ["Indutores de Metahemoglobina"]
   tricloroetano_111:
     tipo_ibe: EE
     cas: "71-55-6"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["1,1,1 Tricloroetano"]
   butadieno_13:
     tipo_ibe: EE
     cas: "106-99-0"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["1,3 butadieno"]
   hdi:
     tipo_ibe: EE
     cas: "822-06-0"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["1,6 diisocianato de hexametileno (HDI)"]
   metoxietanol_2:
     tipo_ibe: EE
     cas: "109-86-4"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["2-metoxietanol"]
   metoxietilacetato_2:
     tipo_ibe: EE
     cas: "109-49-6"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["2-metoxietilacetato"]
   propanol_2:
     tipo_ibe: EE
     cas: "67-63-0"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["2-propanol"]
   tdi:
     tipo_ibe: EE
     cas: null   # 2 CAS no Anexo (isômeros 2,4 e 2,6); campo é string única — null por ser agente-classe
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["Tolueno diisocianato"]   # [INTERPRETADO — recorte do literal]
   butoxietanol_2:
     tipo_ibe: EE
     cas: "111-76-2"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["2-butoxietanol"]
   chumbo_tetraetila:
     tipo_ibe: EE
     cas: "78-00-2"
@@ -479,6 +500,7 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["Metilisobutilcetona (MIBK)"]
   n_metil_2_pirrolidona:
     tipo_ibe: EE
     cas: "872-50-4"
@@ -491,12 +513,14 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["N,N Dimetilacetamida"]
   dimetilformamida:
     tipo_ibe: EE
     cas: "68-12-2"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    termos: ["N,N Dimetilformamida"]
   oxido_de_etileno:
     tipo_ibe: EE
     cas: "75-21-8"

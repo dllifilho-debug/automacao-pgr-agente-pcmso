@@ -24,8 +24,8 @@ def indice_real() -> dict[str, str]:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_79_entradas(indice_real: dict[str, str]) -> None:
-    assert len(indice_real) == 79
+def test_indice_real_tem_99_entradas(indice_real: dict[str, str]) -> None:
+    assert len(indice_real) == 99
 
 
 # ---------------------------------------------------------------------------
@@ -77,6 +77,42 @@ def test_eaquipamento_desprotegido_dist_maior_que_2(indice_real: dict[str, str])
     assert resolucao.slug is None
     assert resolucao.pendencia is not None
     assert resolucao.pendencia.tipo == "vocabulario_ausente"
+
+
+# ---------------------------------------------------------------------------
+# resolver_termo — aliases Tier 1 reais (003.DM, D-ARQ-50 Parte 2)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "termo,slug_esperado",
+    [
+        ("1,1,1 Tricloroetano", "tricloroetano_111"),
+        ("1,3 butadieno", "butadieno_13"),
+        ("1,6 diisocianato de hexametileno (HDI)", "hdi"),
+        ("2-butoxietanol", "butoxietanol_2"),
+        ("2-metoxietanol", "metoxietanol_2"),
+        ("2-metoxietilacetato", "metoxietilacetato_2"),
+        ("2-propanol", "propanol_2"),
+        ("Cromo hexavalente (compostos solúveis)", "cromo_hexavalente"),
+        ("Indutores de Metahemoglobina", "indutores_metahemoglobina"),
+        ("Mercúrio metálico", "mercurio"),
+        ("Metiletilcetona (MEK)", "metil_etil_cetona"),
+        ("Metilisobutilcetona (MIBK)", "mibk"),
+        ("N,N Dimetilacetamida", "dimetilacetamida"),
+        ("N,N Dimetilformamida", "dimetilformamida"),
+        ("Sulfeto de carbono", "dissulfeto_de_carbono"),
+        ("Xilenos", "xileno"),
+        ("Inseticidas inibidores da Colinesterase", "inseticidas_inibidores_colinesterase"),
+        ("Flúor, ácido fluorídrico e fluoretos inorgânicos", "fluoretos"),
+        ("Arsênico", "arsenio"),
+        ("Tolueno diisocianato", "tdi"),
+    ],
+)
+def test_aliases_tier1_resolvem_exata(indice_real: dict[str, str], termo: str, slug_esperado: str) -> None:
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == slug_esperado
+    assert resolucao.pendencia is None
 
 
 # ---------------------------------------------------------------------------
