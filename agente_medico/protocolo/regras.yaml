@@ -264,7 +264,9 @@ regras:
       - {exame: chumbo_sangue, periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
       - {exame: ala_urinario,  periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 2 (IBE/SC): chumbo inorgânico →
-      chumbo no sangue (Pb-S) e ALA-U. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
+      chumbo no sangue (Pb-S) e ALA-U. DISTINTO de R-BIO-04-chumbo_tetraetila (Quadro 1/EE,
+      chumbo_urina, só periódico) — mesmo elemento, agente/quadro/via analítica diferentes;
+      não confundir em auditoria de PCMSO. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
     status: VALIDADO
 
   - id: R-BIO-04-cadmio
@@ -356,5 +358,159 @@ regras:
     emite:
       - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): classe indutores de metahemoglobina → metahemoglobina no sangue. Slug-classe (molde inseticidas). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-tricloroetano_111
+    quando: tricloroetano_111
+    emite:
+      - {exame: acido_tricloroacetico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 1,1,1-tricloroetano → ácido tricloroacético na urina (canônico entre 4 opções do Anexo; descartadas: ar exalado final, tricloroetanol total urina, tricloroetanol total sangue) [INTERPRETADO — escolha do canônico, revisão de saída]. Exame compartilhado com R-BIO-04-tricloroetileno (mesmo slug de exame). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-butadieno_13
+    quando: butadieno_13
+    emite:
+      - {exame: dihidro_acetilcisteina_butano_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 1,3-butadieno → 1,2-dihidro-4-(N-acetilcisteína)butano na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-hdi
+    quando: hdi
+    emite:
+      - {exame: hexametilenodiamina_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): HDI (diisocianato de hexametileno) → 1,6-hexametilenodiamina na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-metoxietanol_2
+    quando: metoxietanol_2
+    emite:
+      - {exame: acido_metoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-metoxietanol → ácido 2-metoxiacético na urina. Exame compartilhado com R-BIO-04-metoxietilacetato_2 (mesmo metabólito urinário). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-metoxietilacetato_2
+    quando: metoxietilacetato_2
+    emite:
+      - {exame: acido_metoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): acetato de 2-metoxietila → ácido 2-metoxiacético na urina (mesmo metabólito do 2-metoxietanol). Exame compartilhado com R-BIO-04-metoxietanol_2. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-propanol_2
+    quando: propanol_2
+    emite:
+      - {exame: acetona_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-propanol (isopropanol) → acetona na urina (metabólito comum). Exame compartilhado com R-BIO-04-acetona (mesmo slug de exame). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-tdi
+    quando: tdi
+    emite:
+      - {exame: toluenodiamino_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): TDI (diisocianato de tolueno, isômeros 2,4 e 2,6) → isômeros 2,4 e 2,6 toluenodiamino na urina (soma dos isômeros). Agente-classe (2 CAS no Anexo; ver comentário em agentes.yaml). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-butoxietanol_2
+    quando: butoxietanol_2
+    emite:
+      - {exame: acido_butoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-butoxietanol → ácido butoxiacético na urina (BAA). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-chumbo_tetraetila
+    quando: chumbo_tetraetila
+    emite:
+      - {exame: chumbo_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): chumbo tetraetila → chumbo na urina. DISTINTO de R-BIO-04-chumbo (chumbo inorgânico, Quadro 2/SC, Pb-S + ALA-U, 5 momentos) — mesmo elemento, agente/quadro/via analítica diferentes; não confundir em auditoria de PCMSO. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-ciclohexanona
+    quando: ciclohexanona
+    emite:
+      - {exame: ciclohexanol_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): ciclohexanona → ciclohexanol na urina (canônico entre 2 opções do Anexo; descartada: 1,2-ciclohexanodiol na urina) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-clorobenzeno
+    quando: clorobenzeno
+    emite:
+      - {exame: clorocatecol_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): clorobenzeno → 4-clorocatecol na urina (canônico entre 2 opções do Anexo; descartada: p-clorofenol na urina) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-etoxietanol
+    quando: etoxietanol
+    emite:
+      - {exame: acido_etoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etoxietanol (linha do Anexo: 'Etoxietanol e Etoxietilacetato') → ácido etoxiacético na urina. Exame compartilhado com R-BIO-04-etoxietilacetato (mesmo metabólito urinário; CAS do Anexo atribuído ao acetato, ver comentário em agentes.yaml). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-etoxietilacetato
+    quando: etoxietilacetato
+    emite:
+      - {exame: acido_etoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etoxietilacetato → ácido etoxiacético na urina (mesmo metabólito do etoxietanol). Exame compartilhado com R-BIO-04-etoxietanol. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-furfural
+    quando: furfural
+    emite:
+      - {exame: acido_furoico_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): furfural → ácido furóico na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-metil_butil_cetona
+    quando: metil_butil_cetona
+    emite:
+      - {exame: hexanodiona_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): metil-butil-cetona (2-hexanona) → 2,5-hexanodiona na urina (metabólito comum). Exame compartilhado com R-BIO-04-n_hexano (mesmo slug de exame). Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-mibk
+    quando: mibk
+    emite:
+      - {exame: mibk_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): metil-isobutil-cetona (MIBK) → MIBK na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-n_metil_2_pirrolidona
+    quando: n_metil_2_pirrolidona
+    emite:
+      - {exame: hidroxi_metil_pirrolidona_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): N-metil-2-pirrolidona → 5-hidroxi-N-metil-2-pirrolidona na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-dimetilacetamida
+    quando: dimetilacetamida
+    emite:
+      - {exame: metilacetamida_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): N,N-dimetilacetamida → N-metilacetamida na urina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-dimetilformamida
+    quando: dimetilformamida
+    emite:
+      - {exame: metilformamida_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): N,N-dimetilformamida → N-metilformamida total na urina (canônico entre 2 opções do Anexo; descartada: N-acetil-S-(N-metilcarbamoil)cisteína na urina) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-oxido_de_etileno
+    quando: oxido_de_etileno
+    emite:
+      - {exame: aduto_hev_hemoglobina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): óxido de etileno → adutos de N-(2-hidroxietil)valina (HEV) em hemoglobina. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-tetracloroetileno
+    quando: tetracloroetileno
+    emite:
+      - {exame: tetracloroetileno_sangue, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): tetracloroetileno (percloroetileno) → tetracloroetileno no sangue (canônico entre 2 opções do Anexo; descartada: ar exalado final) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    status: VALIDADO
+
+  - id: R-BIO-04-tetrahidrofurano
+    quando: tetrahidrofurano
+    emite:
+      - {exame: tetrahidrofurano_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): tetrahidrofurano → tetrahidrofurano na urina. Momento [per], 6M."
     status: VALIDADO
 

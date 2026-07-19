@@ -383,3 +383,135 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+  tricloroetano_111:
+    tipo_ibe: EE
+    cas: "71-55-6"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  butadieno_13:
+    tipo_ibe: EE
+    cas: "106-99-0"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  hdi:
+    tipo_ibe: EE
+    cas: "822-06-0"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  metoxietanol_2:
+    tipo_ibe: EE
+    cas: "109-86-4"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  metoxietilacetato_2:
+    tipo_ibe: EE
+    cas: "109-49-6"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  propanol_2:
+    tipo_ibe: EE
+    cas: "67-63-0"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  tdi:
+    tipo_ibe: EE
+    cas: null   # 2 CAS no Anexo (isômeros 2,4 e 2,6); campo é string única — null por ser agente-classe
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  butoxietanol_2:
+    tipo_ibe: EE
+    cas: "111-76-2"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  chumbo_tetraetila:
+    tipo_ibe: EE
+    cas: "78-00-2"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  ciclohexanona:
+    tipo_ibe: EE
+    cas: "108-94-1"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  clorobenzeno:
+    tipo_ibe: EE
+    cas: "108-90-7"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  etoxietanol:
+    tipo_ibe: EE
+    cas: null   # CAS ausente no Anexo I [INCERTO — não inventar]
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  etoxietilacetato:
+    tipo_ibe: EE
+    cas: "111-15-9"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  furfural:
+    tipo_ibe: EE
+    cas: "98-01-1"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  metil_butil_cetona:
+    tipo_ibe: EE
+    cas: "591-78-6"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  mibk:
+    tipo_ibe: EE
+    cas: "108-10-1"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  n_metil_2_pirrolidona:
+    tipo_ibe: EE
+    cas: "872-50-4"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  dimetilacetamida:
+    tipo_ibe: EE
+    cas: "127-19-5"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  dimetilformamida:
+    tipo_ibe: EE
+    cas: "68-12-2"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  oxido_de_etileno:
+    tipo_ibe: EE
+    cas: "75-21-8"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  tetracloroetileno:
+    tipo_ibe: EE
+    cas: "127-18-4"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
+  tetrahidrofurano:
+    tipo_ibe: EE
+    cas: "109-99-9"
+    is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
+    tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
+    protocolos_especiais: []
