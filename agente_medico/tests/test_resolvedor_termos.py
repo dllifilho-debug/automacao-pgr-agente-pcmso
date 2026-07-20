@@ -6,7 +6,9 @@ import pytest
 
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.resolvedor_termos import (
+    PISO_FUZZY,
     Confianca,
+    _levenshtein,
     construir_indice_termos,
     resolver_termo,
 )
@@ -116,14 +118,66 @@ def test_aliases_tier1_resolvem_exata(indice_real: dict[str, str], termo: str, s
 
 
 # ---------------------------------------------------------------------------
+# resolver_termo — piso bilateral no fuzzy (DT-003DM-01, D-ARQ-50 P2)
+# ---------------------------------------------------------------------------
+
+def test_sigla_typada_nao_resolve_vizinha(indice_real: dict[str, str]) -> None:
+    # Sem o piso, "hdl" resolvia FUZZY->hdi (dist 1 única). Forma <= PISO_FUZZY
+    # não participa do fuzzy como termo de busca.
+    resolucao = resolver_termo("hdl", indice_real)
+    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
+    assert resolucao.slug is None
+    assert resolucao.pendencia is not None
+    assert resolucao.pendencia.tipo == "vocabulario_ausente"
+
+
+def test_termo_curto_com_sufixo_nao_aterrissa_em_sigla(indice_real: dict[str, str]) -> None:
+    # Lado-candidato do piso: "mibk9" tem len 5 (passa o piso de busca), dist 1
+    # de "mibk" (len 4, barrada como candidata) — única chave a dist <= 2.
+    resolucao = resolver_termo("mibk9", indice_real)
+    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
+    assert resolucao.slug is None
+    assert resolucao.pendencia is not None
+    assert resolucao.pendencia.tipo == "vocabulario_ausente"
+
+
+def test_sigla_exata_continua_exata(indice_real: dict[str, str]) -> None:
+    resolucao = resolver_termo("HDI", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "hdi"
+    assert resolucao.pendencia is None
+
+
+def test_vigia_pares_fuzzy_chaves_longas(indice_real: dict[str, str]) -> None:
+    # vigia DT-003DM-01 — par novo dentro do raio deve quebrar ruidosamente,
+    # não caducar em silêncio como em 003.BP->003.DM.
+    chaves = list(indice_real.items())
+    pares = {
+        frozenset({f1, f2})
+        for i, (f1, s1) in enumerate(chaves)
+        for f2, s2 in chaves[i + 1:]
+        if len(f1) > PISO_FUZZY and len(f2) > PISO_FUZZY and s1 != s2
+        and _levenshtein(f1, f2) <= 2
+    }
+    gabarito = {
+        frozenset({"etanol", "metanol"}),
+        frozenset({"metil_etil_cetona", "metil_butil_cetona"}),
+        frozenset({"metoxietanol_2", "butoxietanol_2"}),
+        frozenset({"2_butoxietanol", "2_metoxietanol"}),
+    }
+    assert pares == gabarito
+
+
+# ---------------------------------------------------------------------------
 # resolver_termo — sintéticos (empate fuzzy, aliases)
 # ---------------------------------------------------------------------------
 
 def test_empate_fuzzy_entre_dois_slugs_nao_resolve() -> None:
-    # "cat" está a dist 1 de "bat" e "cot" — dois slugs distintos na mesma dist mínima.
-    vocab_sintetico: dict[str, dict[str, object]] = {"bat": {}, "cot": {}}
+    # "abcdeh" está a dist 1 de "abcdef" e "abcdeg" (ambas len 6 > PISO_FUZZY)
+    # — dois slugs distintos na mesma dist mínima -> empate -> NAO_RESOLVIDO.
+    vocab_sintetico: dict[str, dict[str, object]] = {"abcdef": {}, "abcdeg": {}}
     indice = construir_indice_termos(vocab_sintetico)
-    resolucao = resolver_termo("cat", indice)
+    resolucao = resolver_termo("abcdeh", indice)
     assert resolucao.confianca == Confianca.NAO_RESOLVIDO
     assert resolucao.slug is None
     assert resolucao.pendencia is not None
