@@ -18,6 +18,11 @@ from agente_medico.motor.tipos import Pendencia
 _PONTUACAO = re.compile(r"[^\w\s]", flags=re.UNICODE)
 _ESPACOS = re.compile(r"\s+")
 
+# DT-003DM-01 (D-ARQ-50 P2): raio 2 sobre forma <=4 chars permite editar
+# >=50% da string — identidade não sobrevive. Sigla resolve só por exata,
+# nas duas direções (busca e candidata).
+PISO_FUZZY = 4
+
 
 def normalizar_termo(termo: str) -> str:
     """NFKD sem acentos, casefold, pontuação->espaço, whitespace colapsado, espaços->'_'."""
@@ -104,6 +109,9 @@ def resolver_termo(termo: str, indice: dict[str, str]) -> ResolucaoTermo:
        com dist <= 2, toma a(s) de distância mínima. Se essas apontarem para
        um único slug -> FUZZY (sinal de baixa-confiança de D-ARQ-50 P2; nunca
        aceito como certeza — roteamento p/ revisão é do consumidor futuro).
+       Piso bilateral (DT-003DM-01): forma com <= PISO_FUZZY chars não
+       participa do fuzzy, nem como termo de busca nem como chave candidata —
+       resolve só pela via exata do passo 1.
        Se não houver candidato, ou os candidatos de distância mínima
        apontarem para 2+ slugs distintos (empate) -> passo 3: escolher um
        slug arbitrariamente seria escolha silenciosa (classe D-ARQ-22).
@@ -117,15 +125,18 @@ def resolver_termo(termo: str, indice: dict[str, str]) -> ResolucaoTermo:
 
     menor_dist: Optional[int] = None
     slugs_na_menor_dist: set[str] = set()
-    for forma_candidata, slug_candidato in indice.items():
-        dist = _levenshtein(forma, forma_candidata)
-        if dist > 2:
-            continue
-        if menor_dist is None or dist < menor_dist:
-            menor_dist = dist
-            slugs_na_menor_dist = {slug_candidato}
-        elif dist == menor_dist:
-            slugs_na_menor_dist.add(slug_candidato)
+    if len(forma) > PISO_FUZZY:
+        for forma_candidata, slug_candidato in indice.items():
+            if len(forma_candidata) <= PISO_FUZZY:
+                continue
+            dist = _levenshtein(forma, forma_candidata)
+            if dist > 2:
+                continue
+            if menor_dist is None or dist < menor_dist:
+                menor_dist = dist
+                slugs_na_menor_dist = {slug_candidato}
+            elif dist == menor_dist:
+                slugs_na_menor_dist.add(slug_candidato)
 
     if menor_dist is not None and len(slugs_na_menor_dist) == 1:
         slug_unico = next(iter(slugs_na_menor_dist))
