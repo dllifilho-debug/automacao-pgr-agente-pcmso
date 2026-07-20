@@ -173,10 +173,11 @@ def test_vigia_pares_fuzzy_chaves_longas(indice_real: dict[str, str]) -> None:
 # ---------------------------------------------------------------------------
 
 def test_empate_fuzzy_entre_dois_slugs_nao_resolve() -> None:
-    # "cat" está a dist 1 de "bat" e "cot" — dois slugs distintos na mesma dist mínima.
-    vocab_sintetico: dict[str, dict[str, object]] = {"bat": {}, "cot": {}}
+    # "abcdeh" está a dist 1 de "abcdef" e "abcdeg" (ambas len 6 > PISO_FUZZY)
+    # — dois slugs distintos na mesma dist mínima -> empate -> NAO_RESOLVIDO.
+    vocab_sintetico: dict[str, dict[str, object]] = {"abcdef": {}, "abcdeg": {}}
     indice = construir_indice_termos(vocab_sintetico)
-    resolucao = resolver_termo("cat", indice)
+    resolucao = resolver_termo("abcdeh", indice)
     assert resolucao.confianca == Confianca.NAO_RESOLVIDO
     assert resolucao.slug is None
     assert resolucao.pendencia is not None
