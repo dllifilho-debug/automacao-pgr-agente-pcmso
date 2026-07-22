@@ -3787,3 +3787,17 @@ Dispatch: varrer `is_carcinogeno_iarc`/`tem_lt` (DT-003DL-01) contra IARC + NR-1
 **Achado de processo (META).** O gate de abertura — ler PROTOCOLO e DECISOES inteiros antes de arquitetar (CLAUDE.md) — foi pulado no início e recuperado só no meio da sessão, após provocação. Custo medido: o Anexo 12 (LT do manganês, LT de asbesto/sílica) e a inércia dos dois campos já estavam nos docs vivos; parte da "pesquisa" refez o que o projeto já sabia, e dois erros iniciais (`fluoretos`/`manganes` marcados por leitura parcial) vieram de afirmar ausência sem ler a fonte inteira. Registro honesto: a correção veio de passadas de verificação pedidas pelo Diovanni, não do método na primeira metade.
 
 Gates: nenhum código tocado, suíte inalterada (923+6). Docs: DECISOES v139, PROTOCOLO v59 (não move), HISTORICO 003.DP, PAINEL não re-tira. Sem commit de dado.
+
+## Sessão 003.DQ — 21/07/2026 — META
+
+Foco. Kickoff delegou; ratificada META (pauta acumulada desde 19/07 + achado de processo da 003.DP).
+
+Entrega (processo, zero código de motor). (1) Achado novo: o kickoff (SKILL.md item 5) varria DT-* [ABERTA] só em DECISOES — reportou "1 DT aberta" quando o PROTOCOLO carregava mais de uma dúzia, incluindo DT-003L-01, DT-003M-02(A) e DT-FDS-02 (as 3 que o PAINEL declara travando produção). Corrigido: varredura nos 2 docs, match invertido (exclui FECHADA/RESOLVIDA/REENQUADRADA). (2) Gate de abertura vira declaração verificável no chat ("Gate de abertura: PROTOCOLO vX lido, DECISOES vY lido (git objects @ <hash>)") — resposta ao gate pulado em 003.DP; adotado no CLAUDE.md do ambiente Arquiteto e nas instruções do projeto. (3) Instruções do projeto: corrigidas as premissas obsoletas "memória não existe entre chats" (falsa no Cowork; regra git-vence mantida pela justificativa correta: auditabilidade) e "Diovanni cola os docs" (leitura direta via git objects é o método; colagem é fallback). (4) Reclassificação DT-002V-01/DT-003BV-01/DT-003CB-01: "pergunta de método à Carolini" → derivação normativa (D-ARQ-27), mesma ID (PROTOCOLO v60). (5) Critério de numerador selado como linha de processo (DECISOES v140): superfície sem consumidor em runtime fora do numerador. (6) PAINEL re-tirado (tiragem 003.DQ, baseline cb93c76, 18/42 regras, 50/79 slugs); refresh integral da prosa da Camada 1 deferido de novo, explícito.
+
+Gates. Suíte no host: 923 passed, 6 skipped. medir_painel.py: 18/42 regras (43%), 50/79 slugs (63%). Nenhum código tocado.
+
+Docs. PROTOCOLO → v60. DECISOES → v140. PAINEL re-tirado (003.DQ). CLAUDE.md do ambiente Arquiteto e instruções do projeto atualizados fora do repo.
+
+Pendências. Varredura completa (2 docs) na próxima abertura via kickoff corrigido. Seguem ABERTAS (DECISOES): DT-003DK-01. PROTOCOLO: DT-003L-01, DT-003M-02(A), DT-FDS-02, DT-003CB-01, DT-003CI-01, DT-003CK-01, DT-003T-01, DT-003AB-01, DT-003AE-01, DT-003AW-01, DT-003AX-01, DT-003BV-01, DH-003M-01, DH-003P-01, entre [A VALIDAR] herdadas. Tier 2 de siglas segue exigindo gate de dado (critério do Diovanni). Refresh integral do PAINEL: passada dedicada.
+
+Próxima. A declarar no kickoff.

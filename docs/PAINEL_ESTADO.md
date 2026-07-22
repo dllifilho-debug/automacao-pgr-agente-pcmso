@@ -10,8 +10,8 @@
 
 ---
 
-**Tiragem corrente:** 003.DK · 19/07/2026
-**Baseline:** main `a249ea5` · 877 passed, 6 skipped · mypy `--strict` sem erro novo (46 pré-existentes em arquivos de teste — dívida de higiene anotada 003.CJ) · PROTOCOLO v58 · DECISOES v134
+**Tiragem corrente:** 003.DQ · 21/07/2026
+**Baseline:** main `cb93c76` · 923 passed, 6 skipped · mypy `--strict` sem erro novo (46 pré-existentes em arquivos de teste — dívida de higiene anotada 003.CJ) · PROTOCOLO v60 · DECISOES v140
 
 ---
 
@@ -120,6 +120,7 @@ Toda menção a "slug" em produção é **uso de campo** (lookup direto), não f
 | | DH-003M-01 / DH-003A-01 — corrupção/cosmético de markdown |
 | | DT-003CS-01 — **FECHADA (003.DK)**, EBSERH ingere |
 | | DT-003DK-01 — fronteira-fim do último span, não-bloqueante (gated→revisão humana) |
+| | DT-003DL-01 — REENQUADRADA/DEFERIDA (003.DP), campos sem consumidor |
 
 **Convergência crítica (recontada pós-fechamento DT-003AS-01):** ainda **3** dívidas travam produção — DT-003L-01, DT-003M-02, DT-FDS-02 — mas a natureza da restrição migrou de novo: não é mais "falta transcritor-FDS" (fechado 003.BI) nem "falta a travessia do parse-PGR" (fechada 003.BS, D-ARQ-52) — é "falta universalidade do parse-PGR (envelope document-derived + âncora multi-PGR) + vocabulário químico populado". Não são débitos independentes — são facetas do mesmo subsistema de ingestão (D-ARQ-25 + `name→slug` + vocabulário de composição-FDS).
 
@@ -167,7 +168,7 @@ Construir extração contra camada clínica incompleta → retrabalho se `R-CLI-
 
 ---
 
-**Nota de escopo desta tiragem (003.DK).** Re-tiragem dispara pelo instrumento oficial `scripts/medir_painel.py` (003.DE) + fechamento da peça 4 de D-ARQ-57 (003.DD–003.DK). Só os números, a headline e as células diretamente tocadas pelos eventos (cobertura clínica, porta de entrada/EBSERH, DTs) foram atualizados — a prosa longa da Camada 1 (slice map, "quanto falta") **não foi re-escrita em profundidade** nesta passada; refresh integral fica para a próxima sessão META.
+**Nota de escopo desta tiragem (003.DQ — META).** Re-tiragem obrigatória de META: números re-medidos pelo instrumento oficial + suíte no host; critério de numerador selado (DECISOES v140). O refresh integral da prosa longa da Camada 1, prometido na tiragem 003.DK "para a próxima META", foi DEFERIDO DE NOVO por decisão explícita desta sessão — paliativo sinalizado, não esquecimento: a prosa acumula estados 003.BI→003.DK e será reescrita numa passada dedicada, não como apêndice de fechamento.
 
 ---
 *Gestão à vista. Vive ao lado da produção, não a substitui. Próxima tiragem: ao próximo merge que mover um número, fechamento de marco, ou sessão META.*
