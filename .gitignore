@@ -21,6 +21,12 @@ data/cargos_desconhecidos.json
 # Dados sensíveis de clientes (matrizes reais, não commitar)
 matrizes_originais/
 
+# Relatórios de medição real (dados de cliente, não commitar — 003.DR)
+relatorios/
+
+# Segredos locais (chaves de API, nunca commitar — 003.DR)
+.env.local
+
 # Sondas/medições locais (uso único, 003.BH)
 /medir_*.py
 ._eoltest
