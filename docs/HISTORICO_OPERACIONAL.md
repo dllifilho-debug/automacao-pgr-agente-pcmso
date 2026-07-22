@@ -3775,3 +3775,15 @@ Gates (host). `mypy --strict agente_medico/motor/` → limpo, delta-zero, verifi
 Nenhuma R-* criada/alterada; PROTOCOLO não move (v59). `agentes.yaml` intocado. PAINEL não re-tira (nenhum dos 3 números move; Tier 2 nunca esteve entre as 3 dívidas que travam produção).
 
 Pendências / próxima. Fila herdada, intocada por esta sessão: Tier 2 de siglas (gate de motor cumprido, gate de dado — fonte normativa + política de ambiguidade tipo `TCE` — segue sem decisão, próxima tentativa exige critério explícito antes do kickoff); DT-003DL-01; DT-003DK-01; DT-003CK-01; R-CLI-02 via D-ARQ-39; higiene mypy 46 (arquivos de teste, pré-existente); caminhos-PDF (3 arquivos); NR-1 psicossocial (dívida agendada). Suíte verde: 923+6 (inalterada). Docs: DECISOES v138 (nota, não-D-ARQ), PROTOCOLO v59 (não move), HISTORICO 003.DO, PAINEL não re-tirado.
+
+## Sessão 003.DP — 21/07/2026 — CONHECIMENTO/ARQUITETURA (varredura refutada)
+
+Dispatch: varrer `is_carcinogeno_iarc`/`tem_lt` (DT-003DL-01) contra IARC + NR-15 e popular valores corretos. **Resultado: premissa refutada, zero mudança de dado.**
+
+**O que a investigação mediu (disco/git):** (1) `git grep tem_lt -- '*.py'` vazio — sem consumidor, já registrado em 003.Q; (2) `is_carcinogeno_iarc` do vocabulário carregado em `EntradaIndice` mas não propagado ao Componente (`resolvedor.py:42`), sob teste vivo (`test_resolvedor.py:143`); a flag do motor vem da transcrição GHS; (3) legado (`modules/*.py`) usa bancos JSON, não lê `agentes.yaml`; (4) `tem_lt` é proxy do eixo de R-BIO-02 `[DEPRECATED]`. Estado medido: iarc 28f/6t/22n, tem_lt 27f/6t/23n (56 químicos).
+
+**Decisão:** não popular; não normalizar `false`→`null` (churn sem leitor; quebraria `test_vocabulario.py:64`). DT-003DL-01 reenquadrada e deferida (precedente DT-002H-01). `is_carcinogeno_iarc` partido para DT-003CI-01 (GHS≠IARC); `arsenio`/`tricloroetileno`=`false` sendo IARC-1 apontados a ela como insumo. Pesquisa normativa preservada em `docs/referencia/GABARITO_003DP_anexo11-12_iarc.md`.
+
+**Achado de processo (META).** O gate de abertura — ler PROTOCOLO e DECISOES inteiros antes de arquitetar (CLAUDE.md) — foi pulado no início e recuperado só no meio da sessão, após provocação. Custo medido: o Anexo 12 (LT do manganês, LT de asbesto/sílica) e a inércia dos dois campos já estavam nos docs vivos; parte da "pesquisa" refez o que o projeto já sabia, e dois erros iniciais (`fluoretos`/`manganes` marcados por leitura parcial) vieram de afirmar ausência sem ler a fonte inteira. Registro honesto: a correção veio de passadas de verificação pedidas pelo Diovanni, não do método na primeira metade.
+
+Gates: nenhum código tocado, suíte inalterada (923+6). Docs: DECISOES v139, PROTOCOLO v59 (não move), HISTORICO 003.DP, PAINEL não re-tira. Sem commit de dado.
