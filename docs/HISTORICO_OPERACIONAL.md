@@ -3801,3 +3801,19 @@ Docs. PROTOCOLO → v60. DECISOES → v140. PAINEL re-tirado (003.DQ). CLAUDE.md
 Pendências. Varredura completa (2 docs) na próxima abertura via kickoff corrigido. Seguem ABERTAS (DECISOES): DT-003DK-01. PROTOCOLO: DT-003L-01, DT-003M-02(A), DT-FDS-02, DT-003CB-01, DT-003CI-01, DT-003CK-01, DT-003T-01, DT-003AB-01, DT-003AE-01, DT-003AW-01, DT-003AX-01, DT-003BV-01, DH-003M-01, DH-003P-01, entre [A VALIDAR] herdadas. Tier 2 de siglas segue exigindo gate de dado (critério do Diovanni). Refresh integral do PAINEL: passada dedicada.
 
 Próxima. A declarar no kickoff.
+
+## Sessão 003.DR — 22/07/2026 — IMPLEMENTAÇÃO/MEDIÇÃO
+
+Foco. D-ARQ-62 (redirecionamento pós-003.DQ): harness de rodada real + 1ª medição no caso-âncora Fascino (Consciente SPE 0030, construção civil).
+
+Entrega. `scripts/medicao_pgr.py` (genérico, subcomandos `ida`/`rodar`, zero literal de empresa/setor — D-ARQ-62 cl.2); `relatorios/` no .gitignore. Commit `aa40050`, merge PR #245 (`c71fb77`).
+
+Medição. `preparar_envelope` bloqueou com `topo_ausente` (D-ARQ-53) antes de qualquer chamada LLM. Causa medida pós-sessão pelo Arquiteto: 19 cabeçalhos GHE presentes, glifo separador extrai como U+0000 (`GHE 01 \x00 ENGENHARIA`), reconhecedor padrão exige `-` literal — classe 003.DD. DT-003DR-01 ABERTA. Anti-supressão validado em caso real: bloqueio nomeado, zero silêncio. Diff contra matriz humana adiado (sem saída do motor para comparar).
+
+Gates. Suíte no host: 923 passed, 6 skipped. mypy --strict limpo em scripts/medicao_pgr.py (verificado na fase impl). Motor intocado.
+
+Docs. DECISOES → v141 (D-ARQ-62 + DT-003DR-01). PAINEL re-tirado (003.DR). PROTOCOLO não move (v60).
+
+Pendências. DT-003DR-01 ABERTA (bloqueia ingestão Fascino, faceta DT-003L-01). Demais como em 003.DQ. DT-FDS-02 segue com o Arquiteto (derivação NBR 14725).
+
+Próxima. 003.DS (IMPLEMENTAÇÃO): estender classe de separador do reconhecedor padrão com literal U+0000 medido + fixture VERBATIM Fascino + re-rodar medição (fecha ou reescopa DT-003DR-01).
