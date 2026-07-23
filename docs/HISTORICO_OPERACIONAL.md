@@ -3833,3 +3833,21 @@ Disposição. DT-003DR-01 FECHADA (separador resolvido, duas rotas de âncora re
 Docs. DECISOES → v142. PAINEL → correção A. PROTOCOLO não move (v60).
 
 Próxima. Rodada Fascino ao vivo (`medicao_pgr.py ida`, com CHAVE_API_GOOGLE) — exercita transcrição de topo + `gate_forma_topo`; achados dos estágios LLM pautam a fila. DT-003DS-01 quando ≥1 forma de GHE-sem-número adicional for medida.
+
+## Sessão 003.DT — 22/07/2026 — IMPLEMENTAÇÃO/MEDIÇÃO
+
+Foco. Rodada Fascino ao vivo (`medicao_pgr.py ida`, CHAVE_API_GOOGLE) — exercitar os estágios LLM não tocados até 003.DS: `transcrever_topo` (TranscritorGeminiTopo) + `gate_forma_topo`.
+
+Entrega (zero código de motor). Rodada `ida` executada no host sobre o PDF Fascino real (Consciente SPE 0030, construção civil); artefato `relatorios/003dt_fascino_ida.json` (gitignored) gravado. Ajustes operacionais sem tocar código: invocação via `python -m scripts.medicao_pgr` (harness não é instalável — sem pyproject/setup; `-m` põe a raiz no sys.path, como `python -m pytest`); chave carregada do `.env.local` para env var de sessão (o harness lê `os.environ`/`st.secrets`, não faz `load_dotenv`).
+
+Medição (LLM ao vivo, 1ª vez). `preparar_envelope` fim-a-fim: extração → `recortar_topo` (não-None) → `transcrever_topo` (Gemini) → `gate_forma_topo` APROVOU → `serializar_envelope`. Credencial RT transcrita fielmente (Título + CREA, text-derivable). `FontBBox` no stdout = ruído benigno do pdfminer, não afeta extração. Ressalva "run com LLM não exercido" (003.DS) FECHADA para o estágio de topo.
+
+Achado. `proposta: null` — resolver não propôs validade. Causa medida (6 candidatas testadas contra `resolver_candidata`): (a) mm/aaaa ("06/2026","06/2027","11/2025") não suportado por design (DT-003BV-01, decisão D2) — Fascino confirma mm/aaaa como formato REAL, não hipótese; (b) por extenso COM "de" ("15 de junho de 2026") não casa — `_MES_ANO` exige `\s+` entre mês e ano, casa "Junho 2026" mas quebra em "junho de 2026" — LACUNA do parser que se propõe a cobrir extenso, formato mais comum no BR. Consequência: validade 100% delegada à confirmação-RT (coerente com a topologia, mas proposta vazia passa sem sinal). Ambos anexados a DT-003BV-01.
+
+Gates. Nenhum teste novo (sessão de medição); suíte permanece 928 passed, 6 skipped (herdada de 003.DS, não re-rodada). Motor e testes intocados.
+
+Disposição. DT-003BV-01 segue ABERTA, agora com medição de topo Fascino (2 formatos não cobertos). Estágio `rodar` (GHE+card ao vivo) NÃO exercido — exige artefato de volta revisado pelo RT (`desserializar_confirmacao`), inexistente. Recomendação: fix do "de" em `_MES_ANO` = próxima IMPLEMENTAÇÃO curta com teste (falha-sem/passa-com); mm/aaaa = escopo D2, só reabre por decisão de política.
+
+Docs. PROTOCOLO → v61 (nota de medição em DT-003BV-01). DECISOES → v143. PAINEL não re-tira (nenhum dos 3 números move; Marco 1 não fecha — `rodar` pendente).
+
+Próxima. A declarar no kickoff. Candidatos: (1) fix `_MES_ANO` "de" opcional; (2) volta sintética mínima para exercitar `rodar` (GHE+card ao vivo).
