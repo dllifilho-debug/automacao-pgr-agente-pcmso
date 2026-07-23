@@ -3851,3 +3851,19 @@ Disposição. DT-003BV-01 segue ABERTA, agora com medição de topo Fascino (2 f
 Docs. PROTOCOLO → v61 (nota de medição em DT-003BV-01). DECISOES → v143. PAINEL não re-tira (nenhum dos 3 números move; Marco 1 não fecha — `rodar` pendente).
 
 Próxima. A declarar no kickoff. Candidatos: (1) fix `_MES_ANO` "de" opcional; (2) volta sintética mínima para exercitar `rodar` (GHE+card ao vivo).
+
+---
+
+## Sessão 003.DU — 23/07/2026 — IMPLEMENTAÇÃO
+
+**Foco.** Fix da lacuna "de" em `_MES_ANO` medida em 003.DT (DT-003BV-01 / R-PGR-06).
+
+**Entrega.** `resolvedor_topo.py`: regex `_MES_ANO` ganha `(?:de\s+)?` entre mês e ano — "JUNHO 2026" e "JUNHO DE 2026" resolvem igual; por tolerância a prefixo, "15 DE JUNHO DE 2026" também casa, resolvendo para o 1º dia do mês (dia = edição-RT). Comentário-cabeçalho e docstring atualizados mantendo IDs R-PGR-06 (NR-01) e DT-003BV-01. Teste novo `test_de_opcional_entre_mes_e_ano_resolve` (falha-sem/passa-com): com/sem "de", dia-prefixado, regressão sem "de", e mm/aaaa segue `None` (D2).
+
+**Decisão.** Aceitar o drop do dia em "dd de mês de aaaa" → 1º do mês (coerente com o default conservador já vigente; dia exato é edição-RT). DECISOES v144.
+
+**Gates.** Suíte 928→929 passed, 6 skipped; `mypy --strict agente_medico` sem erro novo (46 pré-existentes). Commit `63edefe`, merge PR #250 `3470111`.
+
+**Disposição.** DT-003BV-01 faceta "de" FECHADA; mm/aaaa (D2) e a pergunta de método (última-atualização-vs-emissão, granularidade de dia) seguem ABERTAS. DT permanece ABERTA.
+
+**Docs.** DECISOES v144, PROTOCOLO v62 (nota em DT-003BV-01). PAINEL não re-tira (nenhum dos 3 números move).
