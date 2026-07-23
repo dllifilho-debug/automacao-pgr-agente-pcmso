@@ -53,8 +53,14 @@ def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:
     linha_normalizada = linha.strip()
     if len(linha_normalizada) > 80:
         return False
+    # 003.DS / DT-003DR-01: separador entre número e título pode extrair como
+    # U+0000 (NUL) além de "-" — glyph-mapping do separador medido no PGR
+    # Fascino (Consciente SPE 0030), 19 cabeçalhos GHE 01–19, pdfplumber.
+    # Classe análoga à perda de diacrítico [OÕ] de 003.DD. \s* flexível dos
+    # dois lados cobre "GHE 01 \x00 TÍTULO" e "GHE 16\x00 TÍTULO" (sem espaço
+    # antes do NUL, forma real medida). Alimenta R-GHE-01 (N:1, D-ARQ-57 peça 1).
     return re.fullmatch(
-        r"(INVENTÁRIO DE RISCO )?GHE:? \d+(\s*-\s*.+)?", linha_normalizada
+        r"(INVENTÁRIO DE RISCO )?GHE:? \d+(\s*[-\x00]\s*.+)?", linha_normalizada
     ) is not None
 
 

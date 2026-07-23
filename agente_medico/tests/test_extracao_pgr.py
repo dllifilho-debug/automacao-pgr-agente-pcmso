@@ -177,6 +177,11 @@ def test_recorte_topo_ancora_na_primeira_linha_devolve_vazio() -> None:
         # ambas devem casar (classe [OÕ], sem normalização NFC/NFD).
         "INFORMAÇOES SOBRE CARGOS/FUNÇÕES 01",
         "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES 01",
+        # Forma 6 (003.DS): separador U+0000 (NUL), medido no PGR Fascino
+        # (Consciente SPE 0030), 19 cabeçalhos GHE 01-19, pdfplumber.
+        "GHE 01 \x00 ENGENHARIA",  # forma dominante (17 de 19)
+        "GHE 16\x00 PINTURA",  # sem espaço antes do NUL (forma real)
+        "GHE 10 \x00 INSTALAÇÕES HIDRO\x00SANITÁRIAS",  # NUL embutido no título, preservado
     ],
 )
 def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
@@ -193,6 +198,9 @@ def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
         # após o número (fullmatch rejeita qualquer coisa além do número).
         "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES",
         "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES 01 - QUALQUER SUFIXO",
+        # 003.DS (PGR Fascino): armadilhas do separador U+0000.
+        "GHE\x00 TÉCNICO ADM / OPERACIONAL",  # GHE sem número -> DT-003DS-01 (deferido)
+        "GHE Grupo Homogêneo de Exposição: trabalhadores com perfil de exposição similar a determinados agentes",  # linha-glossário (102 char, guard de 80 rejeita)
     ],
 )
 def test_eh_cabecalho_ghe_rejeita_armadilhas_medidas(linha: str) -> None:
