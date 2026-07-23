@@ -3817,3 +3817,19 @@ Docs. DECISOES → v141 (D-ARQ-62 + DT-003DR-01). PAINEL re-tirado (003.DR). PRO
 Pendências. DT-003DR-01 ABERTA (bloqueia ingestão Fascino, faceta DT-003L-01). Demais como em 003.DQ. DT-FDS-02 segue com o Arquiteto (derivação NBR 14725).
 
 Próxima. 003.DS (IMPLEMENTAÇÃO): estender classe de separador do reconhecedor padrão com literal U+0000 medido + fixture VERBATIM Fascino + re-rodar medição (fecha ou reescopa DT-003DR-01).
+
+## Sessão 003.DS — 22/07/2026 — IMPLEMENTAÇÃO
+
+Foco. Corrigir o reconhecedor de cabeçalho GHE para o separador U+0000 medido no Fascino (achado DT-003DR-01 de 003.DR).
+
+Entrega. `_reconhece_cabecalho_ghe_padrao` (`agente_medico/motor/extracao_pgr.py`): separador `(\s*-\s*.+)?` → `(\s*[-\x00]\s*.+)?`; guard de 80 char e demais reconhecedores intocados. Precedente `[OÕ]` de 003.DD, sem novo D-ARQ. Fixture VERBATIM Fascino nas duas listas parametrizadas de `test_extracao_pgr.py` (3 positivas: dominante, `GHE 16` sem espaço, NUL embutido; 2 armadilhas: GHE sem número, glossário 102 char). Commit `536a4f4`, merge PR #247 (`66ace94`).
+
+Medição determinística (sem LLM). PDF Fascino real: 19 âncoras (esperado 19), `recortar_topo` não-None, 19 blocos, `avaliar_estrutura`=`('ghe', None)`, `avaliar_segmentacao`=`None`. Relatório em `relatorios/003ds_fascino_estrutura.md` (gitignored). Zero bloqueador.
+
+Gates. Suíte 923→928 passed (+5), 6 skipped; `mypy --strict extracao_pgr.py` limpo; Viverde `test_recorte_blocos_ghe_contagem`==31 intacto.
+
+Disposição. DT-003DR-01 FECHADA (separador resolvido, duas rotas de âncora restauradas). DT-003DS-01 ABERTA (GHE sem número pág. 89, faceta de DT-003L-01, não-bloqueante). Ressalva: run com LLM não exercido — próximo instrumento.
+
+Docs. DECISOES → v142. PAINEL → correção A. PROTOCOLO não move (v60).
+
+Próxima. Rodada Fascino ao vivo (`medicao_pgr.py ida`, com CHAVE_API_GOOGLE) — exercita transcrição de topo + `gate_forma_topo`; achados dos estágios LLM pautam a fila. DT-003DS-01 quando ≥1 forma de GHE-sem-número adicional for medida.
