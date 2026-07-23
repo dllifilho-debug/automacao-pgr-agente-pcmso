@@ -100,3 +100,10 @@ def test_ambiguidade_dois_mes_ano_na_mesma_string_resolve_para_none() -> None:
 
 def test_ano_fora_do_range_de_date_resolve_para_none() -> None:
     assert resolver_candidata("FEVEREIRO 0000").data is None
+
+
+def test_de_opcional_entre_mes_e_ano_resolve() -> None:
+    assert resolver_candidata("junho de 2026").data == date(2026, 6, 1)
+    assert resolver_candidata("15 de junho de 2026").data == date(2026, 6, 1)
+    assert resolver_candidata("Junho 2026").data == date(2026, 6, 1)  # regressão: sem "de" segue OK
+    assert resolver_candidata("06/2026").data is None  # D2: mm/aaaa segue não suportado

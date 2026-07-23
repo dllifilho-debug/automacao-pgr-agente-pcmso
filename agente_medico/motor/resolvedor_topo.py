@@ -11,7 +11,9 @@ from agente_medico.motor.tipos import CandidataValidade, EnvelopeVerbatim
 # resolvedor_termos.py). Só mês-ano PT-BR por extenso é medido em topo até
 # esta fatia (decisão D2) — dd/mm/aaaa e outros formatos NÃO são suportados
 # aqui; candidata não-parseável vira data=None, nunca bloqueia (a decisão
-# final é da confirmação-RT).
+# final é da confirmação-RT). "de" entre mês e ano é opcional (DT-003BV-01);
+# "dd de mês de aaaa" também casa por tolerância a prefixo, resolvendo para
+# o 1º dia do mês — o dia é edição do RT.
 
 _MESES = {
     "janeiro": 1,
@@ -29,7 +31,7 @@ _MESES = {
 }
 
 _MES_ANO = re.compile(
-    r"\b(" + "|".join(_MESES) + r")\b\s+(\d{4})\b",
+    r"\b(" + "|".join(_MESES) + r")\b\s+(?:de\s+)?(\d{4})\b",
     flags=re.IGNORECASE,
 )
 
@@ -44,8 +46,11 @@ def resolver_candidata(texto: str) -> CandidataValidade:
     """Resolve UMA candidata crua de validade. Regex mês-ano PT-BR (12 meses
     por extenso, case-insensitive, insensível a acento — "MARÇO"/"MARCO"
     resolvem igual), tolerante a prefixo/sufixo ("GOIÂNIA, FEVEREIRO 2023").
-    Mês-ano resolve para o 1º dia do mês — default conservador da resolução
-    parcial de DT-003BV-01 [INTERPRETADO]; dia exato é edição do RT.
+    "de" entre mês e ano é opcional (DT-003BV-01, R-PGR-06) — "JUNHO 2026" e
+    "JUNHO DE 2026" resolvem igual; por tolerância a prefixo, "15 DE JUNHO DE
+    2026" também casa. Mês-ano resolve para o 1º dia do mês — default
+    conservador da resolução parcial de DT-003BV-01 [INTERPRETADO]; dia
+    exato é edição do RT.
 
     Mais de um match mês-ano na mesma string -> data=None (ambiguidade não
     resolve em silêncio, classe D-ARQ-22). dd/mm/aaaa e qualquer outro
