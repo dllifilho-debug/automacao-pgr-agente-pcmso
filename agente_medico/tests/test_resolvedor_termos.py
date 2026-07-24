@@ -26,8 +26,8 @@ def indice_real() -> dict[str, str]:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_99_entradas(indice_real: dict[str, str]) -> None:
-    assert len(indice_real) == 99
+def test_indice_real_tem_105_entradas(indice_real: dict[str, str]) -> None:
+    assert len(indice_real) == 105
 
 
 # ---------------------------------------------------------------------------
@@ -115,6 +115,46 @@ def test_aliases_tier1_resolvem_exata(indice_real: dict[str, str], termo: str, s
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == slug_esperado
     assert resolucao.pendencia is None
+
+
+# ---------------------------------------------------------------------------
+# resolver_termo — termos de sílica (DT-003DV-01 faceta A, NR-15 Anexo 12 /
+# NR-07 Anexo III Quadro 1)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "termo",
+    [
+        "Sílica livre",
+        "Sílica livre cristalizada",
+        "Sílica livre cristalina",
+        "Quartzo",
+        "Cristobalita",
+        "Tridimita",
+    ],
+)
+def test_termos_silica_resolvem_exata(indice_real: dict[str, str], termo: str) -> None:
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "silica"
+    assert resolucao.pendencia is None
+
+
+@pytest.mark.parametrize(
+    "termo",
+    [
+        "Silicato de alumínio",
+        "Silicato tricálcico",
+        "Poeira respirável",
+        "Poeira de madeira",
+    ],
+)
+def test_termos_silicato_e_poeira_nao_resolvem_para_silica(
+    indice_real: dict[str, str], termo: str
+) -> None:
+    # anti-FP D-ARQ-22: grafias vizinhas de sílica que não são o agente sílica.
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.slug != "silica"
 
 
 # ---------------------------------------------------------------------------
