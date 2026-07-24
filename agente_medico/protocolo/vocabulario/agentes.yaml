@@ -49,8 +49,11 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
   # termos: aliases de resolução (D-ARQ-50 Parte 2, motor/resolvedor_termos.py).
-  # Tier 1 = grafia literal da substância no Anexo I da NR-07 (Quadros 1 e 2,
-  # Portaria MTP 567/2022) quando difere do slug após normalizar_termo().
+  # Tier 1 = grafia literal da substância na fonte normativa própria do agente:
+  # Anexo I da NR-07 (Quadros 1 e 2, Portaria MTP 567/2022) para agentes de
+  # biomonitoramento, OU NR-15 Anexo 12 / NR-07 Anexo III Quadro 1 para agentes
+  # de poeira mineral sem biomonitoramento (ex.: sílica, protocolo R-RX-01) —
+  # quando difere do slug após normalizar_termo().
   # Siglas comerciais (Tier 2) NÃO entram aqui — ver DT-003DM-01.
   xileno:
     tipo_ibe: EE
@@ -140,6 +143,7 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: true
     protocolos_especiais: [R-RX-01]
+    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita"]
   asbesto:
     tipo_ibe: null
     cas: "1332-21-4"
