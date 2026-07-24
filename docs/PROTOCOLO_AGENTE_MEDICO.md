@@ -1148,7 +1148,7 @@ Refinamentos aos passos da migração desta DT:
 
 **Status:** ABERTA. Não-bloqueante (a pendência bloqueante `bypass_sem_slug` já impede saída silenciosa).
 
-### DT-003CM-01 — Mapa de cabeçalhos de bloco GHE multi-PGR: âncora `SETOR/FUNÇÃO` cobre 1 de 15 `[DERIVADO — medição de 15 PGRs, 003.CM]`
+### DT-003CM-01 — Mapa de cabeçalhos de bloco GHE multi-PGR: âncora `SETOR/FUNÇÃO` cobre 1 de 15 `[FECHADA — 003.CQ, 1ª leva de D-ARQ-57 completa]`
 
 **Origem:** Sessão 003.CM (11/07/2026), medição da generalização da âncora de recorte (requisito (b) da 003.BS; medição prevista na NOTA 003.BM sobre a amostra de DT-003L-01). Varredura read-only dos 15 PGRs do acervo via pdfplumber (mesmo extrator de `extrair_texto_pgr`); Ricco Hetrin, Ricco Serra Dourada e Seconci REV3 por censo pypdf `[MEDIDO com pypdf — forma de linha a confirmar com pdfplumber se virarem caso-âncora]`.
 
@@ -1214,6 +1214,18 @@ Contagens cruzadas com 003.CZ/DA: UFGD 105 / HUMAP 140 batem exato o reconhecedo
 **Nota (003.DD) — forma documentada é a VISUAL; o verbatim extraído perde um til.** A fatia 4a (IMPLEMENTAÇÃO, PR #222) mediu o texto real extraído por pdfplumber sobre `PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf`: a 1ª palavra do header sai `INFORMAÇOES` (Õ→O, perda de diacrítico específica de fonte/glifo, codepoint `0x4f` confirmado por `hex(ord(c))` — o mesmo `Õ` em `FUNÇÕES`, mais adiante na mesma linha, extrai correto, `0xd5`). A forma `INFORMAÇÕES SOBRE CARGOS/FUNÇÕES NN` citada acima e em DT-003DB-01 é a forma VISUAL (como o documento aparenta ao olho humano/leitor de PDF), não o verbatim do parser. O reconhecedor da forma 5 (`_reconhece_cabecalho_informacoes_cargos_funcoes`) cobre as duas via classe `[OÕ]`, sem normalização NFC/NFD (convenção VERBATIM da peça 1 preservada). `[IMPLEMENTADO — 003.DD; PR #222]`
 
 **Status:** ABERTA (medição entregue; consumida pela ARQUITETURA da peça 4 de D-ARQ-57, na 003.DC). Não bloqueia. Cruza DT-003CS-01 (EBSERH/saúde), DT-003L-01 forma 6, D-ARQ-57 peça 4. Nenhuma R-* tocada.
+
+### DT-003DV-01 — Resolução de sílica no vocabulário: falso negativo (termos reais do acervo ausentes) e falso positivo potencial (fuzzy 'Silício'→'silica') `[DERIVADO — medição 003.DV, rodada `rodar` ao vivo no Fascino]`
+
+Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fascino_rodar.md`, gitignored): 232 pendências `vocabulario_ausente`, 33 `predicado_ausente`, 4 `resolucao_fuzzy`; nenhum outro tipo emitido.
+
+**Faceta A (falso negativo).** 'Sílica livre', 'Quartzo' e 'Poeira respirável' não resolvem no vocabulário de agentes (pendências `vocabulario_ausente` recorrentes; ausência confirmada por grep em `agente_medico/protocolo/`). Consequência medida: a família R-RX-01* acionou em exatamente 1 dos 19 GHEs (GHE-17). Em PGR de construção civil com sílica declarada em texto, a família de regras mais sensível do protocolo fica silenciada por lacuna de termo — classe D-ARQ-22 (erro silencioso).
+
+**Faceta B (falso positivo potencial).** O único acionamento de R-RX-01* veio da resolução fuzzy 'Silício'→'silica' (GHE-17, Serralheiro). Silício metálico/liga não é sílica cristalina; par suspeito da mesma classe do `TCE` proibido (escolha silenciosa). Revisão do par no raio fuzzy pendente.
+
+**Fechamento exige decisão de dado**, não só de motor: popular `termos:` segue o critério de grafia normativa com fonte (lição 003.DM) — não entra junto com esta DT.
+
+**Observação de instrumento (não-DT).** A pendência global do relatório não carrega o GHE de origem — atribuição termo→GHE exige cruzamento manual com o PDF. Limitação do render do harness (`scripts/medicao_pgr.py`), não do motor.
 
 ---
 
@@ -1300,3 +1312,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v60 | 21/07/2026 | Sessão 003.DQ (META): reclassificação de endereçamento em DT-002V-01, DT-003BV-01, DT-003CB-01 — "pergunta de método à Carolini" → derivação normativa (D-ARQ-27; Carolini valida saídas prontas, não método). Mesma ID nas 3 (mudança de redação; semântica da pergunta intacta). Nenhuma R-* criada/alterada. Sem código. |
 | v61 | 22/07/2026 | Sessão 003.DT (IMPLEMENTAÇÃO/MEDIÇÃO): nota de medição de topo Fascino anexada a DT-003BV-01 (mesma ID, aditiva) — rodada `ida` ao vivo confirma mm/aaaa como formato REAL (antes hipótese) e mede LACUNA nova: `_MES_ANO` não casa extenso com "de" ("15 de junho de 2026"). `proposta=None`, validade delegada ao RT. Credencial RT aprovada no `gate_forma_topo` (1º run LLM ao vivo do topo). Nenhuma R-* criada/alterada. Sem código de motor. |
 | v62 | 23/07/2026 | Sessão 003.DU (IMPLEMENTAÇÃO): nota de resolução em DT-003BV-01 — faceta "de" FECHADA (`_MES_ANO` com `(?:de\s+)?`; "JUNHO DE 2026"/"15 DE JUNHO DE 2026" → 1º dia do mês). Mesma ID (aditiva; R-PGR-06 sem mudança de semântica — só cobertura do parser). mm/aaaa (D2) e a pergunta de método seguem abertos. Commit `63edefe`, merge PR #250 `3470111`. Detalhe em DECISOES v144. |
+| v63 | 23/07/2026 | Sessão 003.DV (MEDIÇÃO): **DT-003DV-01 adicionada** (§11) — 1ª rodada `rodar` ao vivo (Fascino, 19 GHEs): resolução de sílica com falso negativo ('Sílica livre'/'Quartzo'/'Poeira respirável' ausentes; R-RX-01* acionou em 1/19 GHEs) e falso positivo potencial (fuzzy 'Silício'→'silica'). Correção de header defasado em DT-003CM-01 (FECHADA em 003.CQ; changelog v53 já registrava). Nenhuma R-* criada/alterada. Sem código. |

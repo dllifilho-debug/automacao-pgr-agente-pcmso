@@ -3802,6 +3802,8 @@ Pendências. Varredura completa (2 docs) na próxima abertura via kickoff corrig
 
 Próxima. A declarar no kickoff.
 
+**Adendo (registrado em 003.DV, decisão de processo da própria 003.DQ).** As instruções do projeto no app foram coladas pelo Diovanni com uma 4ª troca além das 3 do prompt de fechamento: a seção "Antes de qualquer pergunta à Dra. Carolini" foi reclassificada para "Antes de qualquer dúvida clínica ou normativa" (derivação normativa, D-ARQ-27). Edição fora do repo; sem PR dedicado — esta linha carrega o registro por piggyback.
+
 ## Sessão 003.DR — 22/07/2026 — IMPLEMENTAÇÃO/MEDIÇÃO
 
 Foco. D-ARQ-62 (redirecionamento pós-003.DQ): harness de rodada real + 1ª medição no caso-âncora Fascino (Consciente SPE 0030, construção civil).
@@ -3867,3 +3869,21 @@ Próxima. A declarar no kickoff. Candidatos: (1) fix `_MES_ANO` "de" opcional; (
 **Disposição.** DT-003BV-01 faceta "de" FECHADA; mm/aaaa (D2) e a pergunta de método (última-atualização-vs-emissão, granularidade de dia) seguem ABERTAS. DT permanece ABERTA.
 
 **Docs.** DECISOES v144, PROTOCOLO v62 (nota em DT-003BV-01). PAINEL não re-tira (nenhum dos 3 números move).
+
+---
+
+## Sessão 003.DV — 23/07/2026 — MEDIÇÃO (volta sintética: 1ª rodada `rodar` ao vivo)
+
+**Foco.** Exercitar o estágio `rodar` fim-a-fim com LLM real — `transcrever_ghes`/`transcrever_cards` + `gate_forma_ghe` — único gap do arco 003.DR→DU. Zero código: o harness já tinha o subcomando; a "volta sintética" é o artefato de ida com `confirmacao` preenchida.
+
+**Fonte (registro que faltou em 003.DT).** PDF: `matrizes_originais/PGR - CONSCIENTE CONSTRUTORA E INCORPORADORA SPE 0030 - FASCINO  (15.07.26).pdf` (dois espaços antes do parêntese).
+
+**Método.** (1) Re-rodada `ida` → `relatorios/003dv_fascino_ida.json`: fix 003.DU medido ao vivo — "15 de Junho de 2026" → `2026-06-01`, `proposta` não-nula; mm/aaaa seguem null por design (D2). (2) Volta sintética `003dv_fascino_volta.json`: papel de RT-sintético declarado — `assinatura_engenheiro=true` e validade = proposta aceita como está; exercício de instrumento, não produção. Semântica conferida antes: `pgr.validade` = data de emissão (gate R-PGR-06, 730 dias), emissão 2026-06-01 vs hoje = passa limpo. (3) `rodar` → `relatorios/003dv_fascino_rodar.md` (gitignored, commit `1980a00`).
+
+**Medição.** 19 GHEs transcritos pelo Gemini — bate exato com as 19 âncoras determinísticas de 003.DS (sem perda no caminho LLM; consistente com DT-003DS-01, 20º cabeçalho sem número fora). `gate_forma_ghe` aprovou 19/19; seção de pendências globais de forma vazia; tipos emitidos no relatório inteiro: `vocabulario_ausente` 232, `predicado_ausente` 33, `resolucao_fuzzy` 4. Status `PRELIMINAR`; 13 GHEs `BLOQUEADA` por R-AUD-01/02 (ruído sem quantificação — anti-erro-silencioso correto, não bug), 4 `PARCIAL` (GHE-10/15/16/17, exames de monitoramento biológico e R-VIB plausíveis), 2 `VÁLIDA` sem exames (GHE-14/19 — plausível no protocolo atual).
+
+**Achado → DT-003DV-01 (PROTOCOLO v63).** Resolução de sílica: falso negativo (termos reais ausentes; R-RX-01* em 1/19 GHEs) + falso positivo potencial (fuzzy 'Silício'→'silica', único acionamento). Detalhe na DT.
+
+**Disposição.** Ressalva "run com LLM não exercido" (003.DS) FECHADA para o pipeline completo (topo 003.DT; GHE+card aqui). Fila de enriquecimento (não-DT): ~232 termos químicos de cimento/tinta (D-ARQ-14) e ~40 cargos sem mapeamento R-GHE-02. Correção de header defasado: DT-003CM-01 → FECHADA/003.CQ.
+
+**Docs.** PROTOCOLO v63. DECISOES intocado (sem D-ARQ novo — volta sintética é instrumento). PAINEL não re-tira (medição; nenhum dos 3 números move).
