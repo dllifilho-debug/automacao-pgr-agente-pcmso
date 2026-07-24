@@ -3887,3 +3887,19 @@ Próxima. A declarar no kickoff. Candidatos: (1) fix `_MES_ANO` "de" opcional; (
 **Disposição.** Ressalva "run com LLM não exercido" (003.DS) FECHADA para o pipeline completo (topo 003.DT; GHE+card aqui). Fila de enriquecimento (não-DT): ~232 termos químicos de cimento/tinta (D-ARQ-14) e ~40 cargos sem mapeamento R-GHE-02. Correção de header defasado: DT-003CM-01 → FECHADA/003.CQ.
 
 **Docs.** PROTOCOLO v63. DECISOES intocado (sem D-ARQ novo — volta sintética é instrumento). PAINEL não re-tira (medição; nenhum dos 3 números move).
+
+---
+
+## Sessão 003.DW — 24/07/2026 — CONHECIMENTO/dado (DT-003DV-01 faceta A)
+
+**Foco.** Resolver o falso negativo de sílica (DT-003DV-01 faceta A) medido na 1ª rodada `rodar` ao vivo (003.DV): 'Sílica livre'/'Quartzo'/'Poeira respirável' não resolviam → R-RX-01* silenciada em 18/19 GHEs do Fascino.
+
+**Fonte.** Relatório `relatorios/003dv_fascino_rodar.md` (gitignored) + NR-15 Anexo 12 / NR-07 Anexo III Quadro 1 (grafia vigente conferida via web; literal cristalizada/cristalina [INCERTO — MTE]).
+
+**Achado.** A família de termos-ausentes é maior e traiçoeira: além da sílica verdadeira (Sílica livre, Quartzo, Sílica), o corpus traz silicatos (tricálcico/dicálcico/alumínio/zircônio), poeira respirável, poeira de madeira e Silício — NENHUM é sílica cristalina livre; resolvê-los para `silica` seria falso-positivo de silicose (D-ARQ-22).
+
+**Decisão de dado.** `silica.termos` = 6 grafias de sílica cristalina livre apenas. Silicatos/poeira → `vocabulario_ausente` (pendência honesta), anti-FP cravado em teste. Critério Tier 1 estendido: fonte-por-natureza-do-agente (biomonitoramento=Anexo I; poeira-mineral/RX=NR-15 Anexo 12 / NR-07 Anexo III Q1).
+
+**Medição.** Índice 99→105, slugs 79 inalterado, sem colisão; pytest 929→939, 6 skipped; mypy --strict motor/ limpo; vigia fuzzy (003.DN) verde sob +6 aliases. Commit `8363fcb`, merge PR #253 (`862fd57`).
+
+**Disposição.** DT-003DV-01 faceta A RESOLVIDA; faceta B (fuzzy `Silício`→`silica`, mecanismo) ABERTA → 003.DX. Fila de enriquecimento não-DT: silicatos (slug próprio/PNOS); poeira respirável (decidir só com o diff da matriz humana no Marco 1).
