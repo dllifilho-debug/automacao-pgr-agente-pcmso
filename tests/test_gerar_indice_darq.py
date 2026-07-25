@@ -40,3 +40,11 @@ def test_ids_sem_buraco_nem_duplicata() -> None:
 
 def test_historico_de_revisoes_nao_virou_decisao() -> None:
     assert "Histórico de revisões" not in gerar_indice()
+
+
+def test_status_de_subsecao_nao_vaza_para_o_darq() -> None:
+    linha = next(
+        linha for linha in gerar_indice().splitlines() if linha.startswith("| D-ARQ-63 ")
+    )
+    status = linha.split(" | ")[2]
+    assert status == ""
