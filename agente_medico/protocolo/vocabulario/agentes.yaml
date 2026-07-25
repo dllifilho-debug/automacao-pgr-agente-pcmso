@@ -162,6 +162,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    fuzzy_permitido: true
   metil_etil_cetona:
     tipo_ibe: EE
     cas: "78-93-3"
@@ -175,6 +176,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    fuzzy_permitido: true
   dioxido_de_titanio:
     # [A VALIDAR] anexo NR-07 e tem_lt: TiO2 e poeira (IARC 2B inalacao), nao esta no Anexo 11 de vapores. Carolini confirma via de exame (RX?).
     tipo_ibe: null
@@ -182,6 +184,7 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: false
     protocolos_especiais: []
+    fuzzy_permitido: true
   propanediamina_tridecyloxy:
     # [A VALIDAR] 1,3-Propanediamine N-[3-(tridecyloxy)propyl] (componente de graxa/betume). CAS, anexo e LT nao confirmados.
     tipo_ibe: null
@@ -189,6 +192,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    fuzzy_permitido: true
   ruido:
     tipo_ibe: null
     cas: null
@@ -207,18 +211,21 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    fuzzy_permitido: true
   umidade:
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    fuzzy_permitido: true
   microrganismos:
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    fuzzy_permitido: true
   piso_escorregadio:
     tipo_ibe: null
     cas: null
@@ -226,6 +233,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   queimadura_termica:
     tipo_ibe: null
     cas: null
@@ -233,6 +241,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   queda_de_materiais:
     tipo_ibe: null
     cas: null
@@ -240,6 +249,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   acidente_disco_corte:
     tipo_ibe: null
     cas: null
@@ -247,6 +257,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   acidente_perfurocortante:
     tipo_ibe: null
     cas: null
@@ -254,6 +265,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   esforco_fisico:
     tipo_ibe: null
     cas: null
@@ -261,6 +273,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   movimento_repetitivo:
     tipo_ibe: null
     cas: null
@@ -268,6 +281,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   postura_inadequada:
     tipo_ibe: null
     cas: null
@@ -275,6 +289,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   dermatite_contato:
     tipo_ibe: null
     cas: null
@@ -282,6 +297,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   quimico_nao_especificado:
     tipo_ibe: null
     cas: null
@@ -289,6 +305,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     disparador_clinico: false
+    fuzzy_permitido: true
   acetona:
     # Solvente de FDS (Adesivo PVC Tigre, T65 GHE 11). CAS conferido fixture 003.M.
     # is_carcinogeno_iarc=false [DERIVADO — IARC: não classificado nas Monografias].
@@ -309,6 +326,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    fuzzy_permitido: true
   # benzeno — [DERIVADO — CAS Registry 71-43-2; IARC grupo 1].
   # benzeno: tipo_ibe=EE (NR-07 Anexo I, Quadro 1). O roteamento de biomonitoramento do benzeno dispara por identidade de agente (R-PKG-BZ), independente do tipo_ibe.
   benzeno:

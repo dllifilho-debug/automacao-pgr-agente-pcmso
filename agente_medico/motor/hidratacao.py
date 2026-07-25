@@ -26,13 +26,13 @@ from datetime import date
 
 from agente_medico.motor.classificacao_ruido import classificar_ruido
 from agente_medico.motor.quantificacao import parsear_quantificacao
-from agente_medico.motor.resolvedor_termos import Confianca, resolver_termo
+from agente_medico.motor.resolvedor_termos import Confianca, IndiceTermos, resolver_termo
 from agente_medico.motor.tipos import GHEPGR, PGR, GHEVerbatim, Pendencia, RiscoPGR
 
 
 def hidratar_ghe(
     ghe: GHEVerbatim,
-    indice: dict[str, str],
+    indice: IndiceTermos,
     posicao: int,
 ) -> tuple[GHEPGR, list[Pendencia]]:
     """Hidrata um bloco GHE transcrito em GHEPGR + pendências (D-ARQ-51).
@@ -130,7 +130,7 @@ def hidratar_ghe(
 
 def hidratar_pgr(
     ghes: Sequence[GHEVerbatim],
-    indice: dict[str, str],
+    indice: IndiceTermos,
     validade: date,
     assinatura_engenheiro: bool,
 ) -> tuple[PGR, list[Pendencia]]:

@@ -2343,6 +2343,88 @@ parte da decisão, não detalhe de execução.
 
 **Status:** ABERTA. Não-bloqueante. Método, não motor. Nenhuma R-* tocada.
 
+## D-ARQ-64 — Ramo FUZZY opt-in por allowlist de dado: o veto é do resultado, nunca filtro de candidato
+
+**Contexto.** DT-003DV-01 faceta B: o único acionamento de R-RX-01* na 1ª rodada ao vivo
+(Fascino, 003.DV) veio do fuzzy 'Silício'→'silica' (dist 2) — silício metálico não é sílica
+cristalina; falso-positivo da família de regras mais sensível do protocolo, classe D-ARQ-22.
+O fuzzy generalista (D-ARQ-50 P2, raio 2 + piso DT-003DM-01) opera sobre um vocabulário onde
+a maioria dos slugs carrega criticidade (regra, predicado, ototoxicidade ou risco implícito
+de cargo): aproximação ortográfica que aterrissa em slug carregado dispara conduta clínica.
+Medição desta sessão `[MEDIDO — 003.DY, código real sobre o vocabulário real]`:
+
+| Grandeza | Valor medido |
+|---|---|
+| Índice de termos | **105 formas / 79 slugs** |
+| Pares protegidos por empate (vigia 003.DN) | **4** |
+| Zonas fuzzy exclusivas (chave elegível sem vizinho de outro slug no raio) | **94 = 77 carregadas + 17 de cauda** |
+| Slugs carregados pelos canais de criticidade | **61/79** — regras.yaml 51 (token YAML, não texto bruto) + predicados.py 12 + is_ototoxico 12 + cargos.yaml 2 + epis.yaml 0 (medido vazio) |
+| Allowlist `fuzzy_permitido` | **18 slugs** |
+| Invariantes de fechamento | **77+17=94 · 61+18=79** |
+
+**Decisão — 6 cláusulas.**
+
+1. **Opt-in por dado, nunca inferido.** Campo `fuzzy_permitido: true` em
+   `agentes.yaml`, por slug. Só slug marcado pode ser devolvido como `Confianca.FUZZY`.
+   Tiragem inicial: 18 slugs de cauda (acidentes mecânicos, ergonômicos, físicos sem
+   regra, químicos sem canal de criticidade). Ausência do campo = não permitido.
+2. **A allowlist viaja com o índice.** `IndiceTermos` (frozen dataclass,
+   `resolvedor_termos.py`): `slug_por_forma: dict[str, str]` +
+   `fuzzy_permitido: frozenset[str]`, ambos construídos por `construir_indice_termos`
+   (mesma lógica de colisão→`ValueError`). Consumidores (`hidratar_ghe`/`hidratar_pgr`,
+   `processar_arquivo_pgr`) recebem o tipo, não dois argumentos soltos.
+3. **O veto é do RESULTADO, nunca filtro de candidato.** A busca fuzzy roda inalterada
+   (todos os candidatos elegíveis pelo piso, distância mínima, empate→NAO_RESOLVIDO);
+   a allowlist incide SÓ sobre o vencedor eleito. Caso-âncora do falso-positivo evitado:
+   'metanoll' tem `metanol` a dist 1 (vencedor único, fora da allowlist) e `etanol` a
+   dist 2 (na allowlist). Vetar o resultado recusa `metanol` nomeadamente; filtrar
+   candidatos apagaria `metanol` da disputa e faria `etanol` vencer sozinho — resolução
+   FUZZY para o agente errado. Regressão cravada em
+   `test_metanoll_recusa_metanol_e_nunca_resolve_etanol`.
+4. **Recusa é pendência nomeada, não silêncio.** Vencedor fora da allowlist →
+   `NAO_RESOLVIDO` + `Pendencia(tipo="fuzzy_recusado", destinatario="extracao",
+   bloqueante=False, regra_origem="D-ARQ-64")` cujo motivo nomeia o termo, o slug
+   vencedor e a distância medida. O ramo `else` de `hidratar_ghe` já trata (agente=None
+   + pendência com `ghe_id` injetado, assert do seam 3 de D-ARQ-51 mantido).
+5. **Sincronia allowlist × criticidade é teste computado, nunca lista digitada.**
+   Nenhum slug `fuzzy_permitido` pode aparecer na união dos canais de criticidade —
+   átomos de `quando` em `regras.yaml` (token YAML parseado, estável contra edição de
+   prosa/comentário), literais de agente em `predicados.py`, `is_ototoxico` em
+   `agentes.yaml`, `riscos_implicitos` em `cargos.yaml`. O teste
+   (`test_allowlist_disjunta_dos_canais_de_criticidade`) computa os canais do dado real;
+   slug que ganhar criticidade com allowlist ligada quebra vermelho, não caduca.
+6. **Medição de conjunto fecha com par de invariantes, não com número solto.**
+   `77+17=94` (toda zona exclusiva é carregada ou cauda; zero órfãs) e `61+18=79`
+   (todo slug é carregado ou permitido; interseção vazia). A tiragem original do
+   Arquiteto não tinha as invariantes e por isso um furo passou: `cargos.yaml` varrido
+   só contra a cauda e `radiacao_uv_ir` excluído da allowlist sem ser somado à união —
+   reportava 60/79 e 76 zonas carregadas, deixando 1 zona órfã inexplicada (76+17=93≠94).
+   Valores desta decisão são os medidos pelo Code (cláusula de divergência dos prompts
+   cirúrgicos, 2º BLOQUEADOR da sessão; o 1º pegou 'netanol' empatando etanol/metanol a
+   dist 1 — termo do caso-âncora trocado por 'metanoll', com medição, antes do teste).
+
+**Consequência.**
+
+- Fuzzy sobre slug carregado morre recusado e nomeado; a zona de cauda (17 zonas,
+  ex.: 'Microrganismo'→`microrganismos`) sobrevive intacta. Empate segue decidido ANTES
+  do veto — os 4 pares do vigia continuam protegidos pelo mecanismo de empate, não pela
+  allowlist.
+- Adicionar slug à allowlist é decisão de dado auditável: o teste de sincronia recusa
+  slug carregado; carga nova em slug permitido (regra, predicado, ototoxicidade, cargo)
+  também quebra o teste — o par allowlist/criticidade não diverge em silêncio.
+- `etanol` está na allowlist mas sua zona é protegida por empate (par etanol/metanol) —
+  a allowlist não o expõe a falso-positivo por construção do veto-de-resultado.
+
+**Fronteiras (não confundir).** D-ARQ-50 P2 — a busca fuzzy (raio, piso, empate) não
+muda; muda só o que se devolve. DT-003DM-01 — piso bilateral intocado. D-ARQ-22 —
+aplicação direta: recusa nomeada onde havia escolha de baixa confiança sobre slug
+crítico. D-ARQ-14 — `vocabulario_ausente` segue para termo sem candidato ou empate;
+`fuzzy_recusado` é tipo novo, exclusivo do veto. Nenhuma R-* criada ou alterada.
+
+**Base.** Sessão 003.DY (25/07/2026), branch `feat/003dy-fuzzy-opt-in`. Suíte 945→949
+passed, 6 skipped; `mypy --strict` sem erro novo. Fecha DT-003DV-01 faceta B e a DT
+inteira (PROTOCOLO v66).
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2493,3 +2575,4 @@ parte da decisão, não detalhe de execução.
 | v144 | 23/07/2026 | Sessão 003.DU (IMPLEMENTAÇÃO): fix `_MES_ANO` — `(?:de\s+)?` torna o "de" opcional entre mês e ano (`resolvedor_topo.py`); "JUNHO DE 2026" e, por tolerância a prefixo, "15 DE JUNHO DE 2026" resolvem para o 1º dia do mês (**decisão: aceitar o drop do dia** — dia é edição-RT, coerente com o default conservador de DT-003BV-01). Fecha a faceta "de" medida em 003.DT; mm/aaaa permanece deferido (D2). Teste novo falha-sem/passa-com (`test_de_opcional_entre_mes_e_ano_resolve`). Suíte 928→929 passed, 6 skipped; `mypy --strict` sem erro novo. Commit `63edefe`, merge PR #250 `3470111`. Nenhuma R-* criada/alterada (R-PGR-06 semântica intacta — só o parser determinístico ganha cobertura). PROTOCOLO v62. PAINEL não re-tira (nenhum dos 3 números move; contagem de testes é carimbo de baseline, não um dos 3 números). |
 | v145 | 24/07/2026 | Sessão 003.DW (CONHECIMENTO/dado): nota de aplicação 003.DW em D-ARQ-50 Parte 2 (mesma ID) — `silica.termos` populado (DT-003DV-01 faceta A); critério Tier 1 estendido a fonte-por-natureza-do-agente (NR-15 Anexo 12 / NR-07 Anexo III Quadro 1, não só Anexo I). Anti-FP dos não-sílica em teste. Índice 99→105, slugs 79 inalterado. Faceta B → 003.DX. Commit `8363fcb`, PR #253. Nenhum D-ARQ novo, nenhuma R-* criada/alterada. |
 | v146 | 24/07/2026 | Sessão 003.DX (META): **D-ARQ-63 CRIADA** — gate de abertura em dois níveis: `docs/INDICE_DARQ.md` derivado (peça 1, PR #255, `scripts/gerar_indice_darq.py`, suíte 939→944) + nível 1 (PROTOCOLO + ÍNDICE + transversais D-ARQ-06/09/22) integral sempre, nível 2 (eixo nomeado) por sessão. Causa: DECISOES 64× em 68 dias (8.734→561.889 bytes), 49% diário (acreção pós-decisão + tabela de revisões). **DT-003DX-01 ABERTA** (PROTOCOLO v65) — migrar acreção para satélites `docs/darq/`. CLAUDE.md substitui o parágrafo do gate. Nenhuma R-* criada/alterada. |
+| v147 | 25/07/2026 | Sessão 003.DY (IMPLEMENTAÇÃO): **D-ARQ-64 CRIADA** — ramo FUZZY opt-in por allowlist de dado (`fuzzy_permitido: true` em 18 slugs de cauda de `agentes.yaml`); `IndiceTermos` (frozen: `slug_por_forma` + `fuzzy_permitido`); veto de RESULTADO pós-eleição, nunca filtro de candidato (caso-âncora metanoll/metanol/etanol); recusa = `NAO_RESOLVIDO` + `fuzzy_recusado` nomeando termo/slug/distância. Medição: índice 105/79, 4 pares por empate, 94 zonas exclusivas = 77 carregadas + 17 cauda, 61/79 carregados, invariantes 77+17=94 e 61+18=79 (corrigem furo da tiragem original do Arquiteto: 60/76). **Fecha DT-003DV-01 faceta B e a DT inteira** (PROTOCOLO v66). Suíte 945→949, mypy --strict sem erro novo. Nenhuma R-* criada/alterada. |

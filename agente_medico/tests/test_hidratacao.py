@@ -8,7 +8,7 @@ import pytest
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_ghe, hidratar_pgr
 from agente_medico.motor.protocolo import carregar
-from agente_medico.motor.resolvedor_termos import construir_indice_termos
+from agente_medico.motor.resolvedor_termos import IndiceTermos, construir_indice_termos
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 from agente_medico.tests.fixtures.pgr_viverde import build_pgr_viverde
 
@@ -16,7 +16,7 @@ PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
 @pytest.fixture(scope="module")
-def indice_real() -> dict[str, str]:
+def indice_real() -> IndiceTermos:
     p = carregar(PROTOCOLO_DIR)
     return construir_indice_termos(p.vocabulario.agentes)
 
@@ -29,7 +29,7 @@ def _ghe_verbatim(*, riscos: tuple[RiscoVerbatim, ...]) -> GHEVerbatim:
 # tri-estado do resolver
 # ---------------------------------------------------------------------------
 
-def test_exata_resolve_slug_sem_pendencia(indice_real: dict[str, str]) -> None:
+def test_exata_resolve_slug_sem_pendencia(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Ruído", quantificacao="82,2 dB(A)", fonte_geradora=""),)
     )
@@ -40,7 +40,7 @@ def test_exata_resolve_slug_sem_pendencia(indice_real: dict[str, str]) -> None:
     assert pendencias == []
 
 
-def test_fuzzy_resolve_slug_com_pendencia_nao_bloqueante(indice_real: dict[str, str]) -> None:
+def test_fuzzy_resolve_slug_com_pendencia_nao_bloqueante(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Microrganismo", quantificacao="", fonte_geradora=""),)
     )
@@ -56,7 +56,7 @@ def test_fuzzy_resolve_slug_com_pendencia_nao_bloqueante(indice_real: dict[str, 
     assert pend.ghe_id == "GHE-01"
 
 
-def test_nao_resolvido_agente_none_com_pendencia_e_risco_preservado(indice_real: dict[str, str]) -> None:
+def test_nao_resolvido_agente_none_com_pendencia_e_risco_preservado(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Thinner", quantificacao="", fonte_geradora=""),)
     )
@@ -76,7 +76,7 @@ def test_nao_resolvido_agente_none_com_pendencia_e_risco_preservado(indice_real:
 # parse de quantificacao (D-ARQ-51 fatia 2)
 # ---------------------------------------------------------------------------
 
-def test_quantificacao_parseavel_preenchida_sem_pendencia(indice_real: dict[str, str]) -> None:
+def test_quantificacao_parseavel_preenchida_sem_pendencia(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Ruído", quantificacao="82,2 dB(A)", fonte_geradora=""),)
     )
@@ -90,7 +90,7 @@ def test_quantificacao_parseavel_preenchida_sem_pendencia(indice_real: dict[str,
 
 
 def test_quantificacao_ininteligivel_vira_none_com_pendencia_nao_bloqueante(
-    indice_real: dict[str, str],
+    indice_real: IndiceTermos,
 ) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Ruído", quantificacao="lixo qualquer", fonte_geradora=""),)
@@ -106,7 +106,7 @@ def test_quantificacao_ininteligivel_vira_none_com_pendencia_nao_bloqueante(
     assert pend.ghe_id == "GHE-01"
 
 
-def test_quantificacao_vazia_vira_none_sem_pendencia(indice_real: dict[str, str]) -> None:
+def test_quantificacao_vazia_vira_none_sem_pendencia(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Ruído", quantificacao="", fonte_geradora=""),)
     )
@@ -120,7 +120,7 @@ def test_quantificacao_vazia_vira_none_sem_pendencia(indice_real: dict[str, str]
 # classificação dB(A) -> relacao_LT (D-ARQ-51 fatia 3, R-RUIDO-01)
 # ---------------------------------------------------------------------------
 
-def test_ruido_abaixo_acao_classifica_relacao_lt(indice_real: dict[str, str]) -> None:
+def test_ruido_abaixo_acao_classifica_relacao_lt(indice_real: IndiceTermos) -> None:
     # âncora Viverde: 78,8 dB(A) < 80 -> abaixo_acao.
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Ruído", quantificacao="78,8 dB(A)", fonte_geradora=""),)
@@ -132,7 +132,7 @@ def test_ruido_abaixo_acao_classifica_relacao_lt(indice_real: dict[str, str]) ->
     assert quantificacao.relacao_LT == "abaixo_acao"
 
 
-def test_ruido_acima_lt_classifica_relacao_lt(indice_real: dict[str, str]) -> None:
+def test_ruido_acima_lt_classifica_relacao_lt(indice_real: IndiceTermos) -> None:
     # âncora Viverde: 89,6 dB(A) >= 85 -> acima_LT.
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Ruído", quantificacao="89,6 dB(A)", fonte_geradora=""),)
@@ -144,7 +144,7 @@ def test_ruido_acima_lt_classifica_relacao_lt(indice_real: dict[str, str]) -> No
     assert quantificacao.relacao_LT == "acima_LT"
 
 
-def test_risco_nao_ruido_com_dba_nao_classifica(indice_real: dict[str, str]) -> None:
+def test_risco_nao_ruido_com_dba_nao_classifica(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Thinner", quantificacao="89,6 dB(A)", fonte_geradora=""),)
     )
@@ -155,7 +155,7 @@ def test_risco_nao_ruido_com_dba_nao_classifica(indice_real: dict[str, str]) -> 
     assert quantificacao.relacao_LT is None
 
 
-def test_ruido_sem_quantificacao_nao_classifica(indice_real: dict[str, str]) -> None:
+def test_ruido_sem_quantificacao_nao_classifica(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Ruído", quantificacao="", fonte_geradora=""),)
     )
@@ -168,7 +168,7 @@ def test_ruido_sem_quantificacao_nao_classifica(indice_real: dict[str, str]) -> 
 # id posicional (D-ARQ-51 seam 1)
 # ---------------------------------------------------------------------------
 
-def test_id_posicional_formatado_e_deterministico(indice_real: dict[str, str]) -> None:
+def test_id_posicional_formatado_e_deterministico(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(riscos=())
 
     ghe_pgr_a, _ = hidratar_ghe(ghe, indice_real, posicao=1)
@@ -182,7 +182,7 @@ def test_id_posicional_formatado_e_deterministico(indice_real: dict[str, str]) -
 # pareamento agente=None <-> pendência (D-ARQ-51 seam 3)
 # ---------------------------------------------------------------------------
 
-def test_todo_agente_none_tem_pendencia_correspondente(indice_real: dict[str, str]) -> None:
+def test_todo_agente_none_tem_pendencia_correspondente(indice_real: IndiceTermos) -> None:
     ghe = _ghe_verbatim(
         riscos=(
             RiscoVerbatim(agente="Ruído", quantificacao="", fonte_geradora=""),
@@ -202,7 +202,7 @@ def test_todo_agente_none_tem_pendencia_correspondente(indice_real: dict[str, st
 # gabarito de forma (D-ARQ-50 C1) — compara forma, não contagem 42vs32
 # ---------------------------------------------------------------------------
 
-def test_gabarito_de_forma_ghepgr(indice_real: dict[str, str]) -> None:
+def test_gabarito_de_forma_ghepgr(indice_real: IndiceTermos) -> None:
     # D-ARQ-50 C1: molda o GHEVerbatim sintético num GHE real da fixture Viverde
     # (nome/cargos copiados de Est-01) — compara FORMA do GHEPGR produzido, não
     # contagem 42vs32 (o re-agrupamento MAPA é fatia downstream).
@@ -236,7 +236,7 @@ def test_gabarito_de_forma_ghepgr(indice_real: dict[str, str]) -> None:
 # costura plural: hidratar_pgr (D-ARQ-51 seam 1, consumidor de hidratar_ghe)
 # ---------------------------------------------------------------------------
 
-def test_hidratar_pgr_ids_posicionais_ordem_preservada(indice_real: dict[str, str]) -> None:
+def test_hidratar_pgr_ids_posicionais_ordem_preservada(indice_real: IndiceTermos) -> None:
     ghe_a = _ghe_verbatim(riscos=())
     ghe_b = _ghe_verbatim(riscos=())
 
@@ -249,7 +249,7 @@ def test_hidratar_pgr_ids_posicionais_ordem_preservada(indice_real: dict[str, st
     assert pgr.ghes[1].nome == ghe_b.nome
 
 
-def test_hidratar_pgr_agrega_pendencias_com_ghe_id_correto(indice_real: dict[str, str]) -> None:
+def test_hidratar_pgr_agrega_pendencias_com_ghe_id_correto(indice_real: IndiceTermos) -> None:
     ghe_fuzzy = _ghe_verbatim(
         riscos=(RiscoVerbatim(agente="Microrganismo", quantificacao="", fonte_geradora=""),)
     )
@@ -271,7 +271,7 @@ def test_hidratar_pgr_agrega_pendencias_com_ghe_id_correto(indice_real: dict[str
     assert pendencias[1].ghe_id == "GHE-02"
 
 
-def test_hidratar_pgr_repassa_envelope_verbatim(indice_real: dict[str, str]) -> None:
+def test_hidratar_pgr_repassa_envelope_verbatim(indice_real: IndiceTermos) -> None:
     validade = date(2026, 3, 15)
 
     pgr, _ = hidratar_pgr((), indice_real, validade=validade, assinatura_engenheiro=False)
@@ -280,7 +280,7 @@ def test_hidratar_pgr_repassa_envelope_verbatim(indice_real: dict[str, str]) -> 
     assert pgr.assinatura_engenheiro is False
 
 
-def test_hidratar_pgr_sequencia_vazia_legitima(indice_real: dict[str, str]) -> None:
+def test_hidratar_pgr_sequencia_vazia_legitima(indice_real: IndiceTermos) -> None:
     pgr, pendencias = hidratar_pgr(
         (), indice_real, validade=date(2025, 1, 1), assinatura_engenheiro=True
     )
@@ -289,7 +289,7 @@ def test_hidratar_pgr_sequencia_vazia_legitima(indice_real: dict[str, str]) -> N
     assert pendencias == []
 
 
-def test_hidratar_pgr_e2e_sintetico_processar_pgr(indice_real: dict[str, str]) -> None:
+def test_hidratar_pgr_e2e_sintetico_processar_pgr(indice_real: IndiceTermos) -> None:
     # D-ARQ-50 C1: GHEVerbatim moldado no Est-01 do Viverde (forma emprestada da
     # fixture); asserção de forma (matriz produzida), não de contagem.
     ghe_real = build_pgr_viverde().ghes[0]

@@ -35,7 +35,21 @@ def normalizar_termo(termo: str) -> str:
     return colapsado.replace(" ", "_")
 
 
-def construir_indice_termos(agentes_vocab: dict[str, Any]) -> dict[str, str]:
+@dataclass(frozen=True)
+class IndiceTermos:
+    """Vocabulário de agentes invertido + allowlist de opt-in fuzzy (D-ARQ-64).
+
+    slug_por_forma é o mesmo índice forma->slug de sempre. fuzzy_permitido
+    é o conjunto de slugs cujo campo agentes.yaml `fuzzy_permitido: true`
+    autoriza devolver Confianca.FUZZY para esse slug — dado, não heurística
+    (D-ARQ-64).
+    """
+
+    slug_por_forma: dict[str, str]
+    fuzzy_permitido: frozenset[str]
+
+
+def construir_indice_termos(agentes_vocab: dict[str, Any]) -> IndiceTermos:
     """Inverte o vocabulário de agentes: forma normalizada -> slug.
 
     O próprio slug é sempre uma entrada. Se a meta do slug tiver campo
@@ -44,14 +58,19 @@ def construir_indice_termos(agentes_vocab: dict[str, Any]) -> dict[str, str]:
     (popular aliases é sessão de dado futura).
     Colisão (mesma forma normalizada apontando para slugs distintos) levanta
     ValueError — dado malformado, classe D-ARQ-22.
+    fuzzy_permitido (D-ARQ-64) é lido de meta["fuzzy_permitido"] is True —
+    opt-in por slug, dado explícito no vocabulário, nunca inferido.
     """
     indice: dict[str, str] = {}
+    fuzzy_permitido: set[str] = set()
     for slug, meta in agentes_vocab.items():
         formas_brutas: list[str] = [slug]
         if isinstance(meta, dict):
             aliases = meta.get("termos")
             if aliases:
                 formas_brutas.extend(aliases)
+            if meta.get("fuzzy_permitido") is True:
+                fuzzy_permitido.add(slug)
         for forma_bruta in formas_brutas:
             forma = normalizar_termo(str(forma_bruta))
             if forma in indice and indice[forma] != slug:
@@ -60,7 +79,7 @@ def construir_indice_termos(agentes_vocab: dict[str, Any]) -> dict[str, str]:
                     f"{indice[forma]!r} e {slug!r}"
                 )
             indice[forma] = slug
-    return indice
+    return IndiceTermos(slug_por_forma=indice, fuzzy_permitido=frozenset(fuzzy_permitido))
 
 
 def _levenshtein(a: str, b: str) -> int:
@@ -100,33 +119,39 @@ class ResolucaoTermo:
     pendencia: Optional[Pendencia]
 
 
-def resolver_termo(termo: str, indice: dict[str, str]) -> ResolucaoTermo:
+def resolver_termo(termo: str, indice: IndiceTermos) -> ResolucaoTermo:
     """Resolve um termo (já normalizado linguisticamente pelo LLM, D-ARQ-50 P2)
     contra o índice termo->slug.
 
     1. Hit exato na forma normalizada -> EXATA.
     2. Sem hit: Levenshtein contra todas as chaves do índice; entre as chaves
        com dist <= 2, toma a(s) de distância mínima. Se essas apontarem para
-       um único slug -> FUZZY (sinal de baixa-confiança de D-ARQ-50 P2; nunca
-       aceito como certeza — roteamento p/ revisão é do consumidor futuro).
-       Piso bilateral (DT-003DM-01): forma com <= PISO_FUZZY chars não
-       participa do fuzzy, nem como termo de busca nem como chave candidata —
-       resolve só pela via exata do passo 1.
+       um único slug -> candidato a FUZZY (sinal de baixa-confiança de
+       D-ARQ-50 P2; nunca aceito como certeza — roteamento p/ revisão é do
+       consumidor futuro). Piso bilateral (DT-003DM-01): forma com
+       <= PISO_FUZZY chars não participa do fuzzy, nem como termo de busca
+       nem como chave candidata — resolve só pela via exata do passo 1.
        Se não houver candidato, ou os candidatos de distância mínima
        apontarem para 2+ slugs distintos (empate) -> passo 3: escolher um
        slug arbitrariamente seria escolha silenciosa (classe D-ARQ-22).
+       D-ARQ-64: o veto de allowlist roda SÓ DEPOIS de eleito o vencedor —
+       nunca filtrando candidatos durante a busca de menor distância (fazer
+       isso deixaria um candidato fora da allowlist escorregar para um 2º
+       candidato mais distante como falso-positivo). Se o vencedor não está
+       em indice.fuzzy_permitido -> NAO_RESOLVIDO com Pendencia
+       fuzzy_recusado nomeando o termo, o slug vencedor e a distância.
     3. NAO_RESOLVIDO + Pendencia(vocabulario_ausente, D-ARQ-14), não-bloqueante.
     """
     forma = normalizar_termo(termo)
 
-    slug_exato = indice.get(forma)
+    slug_exato = indice.slug_por_forma.get(forma)
     if slug_exato is not None:
         return ResolucaoTermo(termo=termo, slug=slug_exato, confianca=Confianca.EXATA, pendencia=None)
 
     menor_dist: Optional[int] = None
     slugs_na_menor_dist: set[str] = set()
     if len(forma) > PISO_FUZZY:
-        for forma_candidata, slug_candidato in indice.items():
+        for forma_candidata, slug_candidato in indice.slug_por_forma.items():
             if len(forma_candidata) <= PISO_FUZZY:
                 continue
             dist = _levenshtein(forma, forma_candidata)
@@ -140,7 +165,21 @@ def resolver_termo(termo: str, indice: dict[str, str]) -> ResolucaoTermo:
 
     if menor_dist is not None and len(slugs_na_menor_dist) == 1:
         slug_unico = next(iter(slugs_na_menor_dist))
-        return ResolucaoTermo(termo=termo, slug=slug_unico, confianca=Confianca.FUZZY, pendencia=None)
+        if slug_unico in indice.fuzzy_permitido:
+            return ResolucaoTermo(termo=termo, slug=slug_unico, confianca=Confianca.FUZZY, pendencia=None)
+        pendencia_recusada = Pendencia(
+            tipo="fuzzy_recusado",
+            destinatario="extracao",
+            motivo=(
+                f"termo '{termo}' aproximaria de '{slug_unico}' (distância {menor_dist}) "
+                "mas o slug não está na allowlist fuzzy_permitido (D-ARQ-64)"
+            ),
+            bloqueante=False,
+            regra_origem="D-ARQ-64",
+        )
+        return ResolucaoTermo(
+            termo=termo, slug=None, confianca=Confianca.NAO_RESOLVIDO, pendencia=pendencia_recusada
+        )
 
     pendencia = Pendencia(
         tipo="vocabulario_ausente",

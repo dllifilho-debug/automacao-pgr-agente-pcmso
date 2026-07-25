@@ -3923,3 +3923,19 @@ Próxima. A declarar no kickoff. Candidatos: (1) fix `_MES_ANO` "de" opcional; (
 **Docs.** DECISOES v146 (63 decisões). PROTOCOLO v65. Índice regenerado após todas as edições do DECISOES (62→63, v145→v146). Suíte 944 passed, 6 skipped (PR B é só doc, sem teste novo). Nenhuma R-* criada/alterada; motor intocado.
 
 **PR C (fix/003dx-status-aninhado).** O gerador atribuía a um D-ARQ o `**Status:**` de subseção `### ` aninhada no bloco dele. Alcance 1/63 — D-ARQ-63 saía como "ABERTA", status de DT-003DX-02. Fix: varrer Status só antes da 1ª subseção. Teste falha-sem/passa-com; suíte 944→945. Células preenchidas seguem 28, confirmando que nenhum status legítimo se perdeu. Bug de spec do Arquiteto, pego na verificação pós-commit, não em produção.
+
+---
+
+## Sessão 003.DY — 25/07/2026 — IMPLEMENTAÇÃO (D-ARQ-64: fuzzy opt-in por allowlist)
+
+**Foco.** Fechar DT-003DV-01 faceta B (fuzzy `Silício`→`silica`, FUZZY-FP medido ao vivo em 003.DV): o ramo FUZZY do resolvedor passa a ser opt-in por allowlist de dado.
+
+**Entrega.** `fuzzy_permitido: true` em 18 slugs de cauda de `agentes.yaml` (zero deleção, nenhum campo pré-existente tocado). `IndiceTermos` (frozen dataclass: `slug_por_forma` + `fuzzy_permitido: frozenset`) devolvido por `construir_indice_termos`; tipo propagado em `hidratar_ghe`/`hidratar_pgr` e `processar_arquivo_pgr`. O veto incide SÓ no vencedor eleito — busca fuzzy inalterada (piso, raio 2, empate); vencedor fora da allowlist → `NAO_RESOLVIDO` + `Pendencia(fuzzy_recusado, extracao, não-bloqueante, D-ARQ-64)` nomeando termo, slug e distância. Ramo `else` de `hidratar_ghe` já tratava; assert do seam 3 mantido.
+
+**Bloqueadores da sessão (cláusula de divergência, 2×).** (1) O teste-âncora especificado usava 'netanol' assumindo metanol vencedor único; medição real: dist 1 EMPATADA para etanol E metanol → ramo de empate, sem nomear slug. Parado, reportado, termo trocado por 'metanoll' (metanol dist 1 único, etanol dist 2) — que exercita as duas facetas: recusa nomeando metanol E regressão do falso-positivo de filtro-de-candidato (filtrar faria etanol vencer). (2) A tiragem do Arquiteto reportava 60/79 carregados e 76 zonas carregadas; medição real: 61 e 77. Furo confirmado pelo Arquiteto: `cargos.yaml` varrido só contra a cauda; `radiacao_uv_ir` excluído da allowlist sem ser somado à união. **Lição: medição de conjunto fecha com par de invariantes (77+17=94 · 61+18=79), não com um número solto** — a tiragem original não as tinha e a aritmética órfã (76+17=93≠94) foi o que expôs o furo.
+
+**Medição (D-ARQ-64).** Índice 105 formas / 79 slugs · 4 pares protegidos por empate · 94 zonas exclusivas = 77 carregadas + 17 cauda · 61/79 carregados (regras.yaml 51 por token YAML + predicados.py 12 + is_ototoxico 12 + cargos.yaml 2 + epis.yaml 0 medido vazio) · allowlist 18 · allowlist ∩ carregados = ∅.
+
+**Testes.** `test_silicio_recusa_fuzzy_para_silica` (Silício/Silicio → `fuzzy_recusado` com silica e dist 2), `test_metanoll_recusa_metanol_e_nunca_resolve_etanol` (anti-filtro), `test_microrganismo_singular_sobrevive_na_cauda`, empate sintético com slugs marcados (exercita EMPATE, não recusa), `test_allowlist_disjunta_dos_canais_de_criticidade` (canais computados do dado, nunca lista digitada). 3 casos de Microrganismo em `test_hidratacao.py` verdes sem alteração de comportamento. Suíte 945→949 passed, 6 skipped; `mypy --strict` sem erro novo.
+
+**Docs.** DECISOES v147 (D-ARQ-64 criada, 64 decisões; índice regenerado). PROTOCOLO v66 (DT-003DV-01 faceta B RESOLVIDA — **DT inteira FECHADA**). PAINEL re-tirado (suíte move a baseline). Nenhuma R-* criada/alterada.
