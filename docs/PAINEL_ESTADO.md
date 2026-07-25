@@ -11,7 +11,7 @@
 ---
 
 **Tiragem corrente:** 003.DY · 25/07/2026
-**Baseline:** branch `feat/003dy-fuzzy-opt-in` sobre main `1371845` · 949 passed, 6 skipped · mypy `--strict` sem erro novo · PROTOCOLO v66 · DECISOES v147
+**Baseline:** main `7dd0ad3` (merge PR #259) · 949 passed, 6 skipped · mypy `--strict` sem erro novo · PROTOCOLO v66 · DECISOES v147
 
 ---
 
