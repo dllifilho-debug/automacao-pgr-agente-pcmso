@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v145 · 62 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v146 · 63 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -70,3 +70,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v145 · 62 decisões
 | D-ARQ-60 | Reconciliação nome-de-exibição §5.9 → slug canônico mora no guardião (registro explícito), não no doc; §5.9 é fonte humana, `regras.yaml` a chave de máquina | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 2129 | 3530 |
 | D-ARQ-61 | Critério de escolha do indicador canônico quando o Anexo I oferece múltiplas opções ("ou") | DECISÃO DE ARQUITETURA (sessão 003 | 2153 | 3566 |
 | D-ARQ-62 | Redirecionamento de foco pós-003.DQ: Marco 1 via caso-âncora real; recorte construção civil como sequenciamento, não arquitetura | DECISÃO DE FOCO (sessão 003 | 2189 | 4598 |
+| D-ARQ-63 | Gate de abertura em dois níveis: índice derivado + eixo nomeado | ABERTA | 2211 | 8398 |

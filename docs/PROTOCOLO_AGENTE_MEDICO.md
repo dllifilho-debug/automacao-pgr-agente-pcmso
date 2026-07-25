@@ -1235,6 +1235,20 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 
 (DT-003DV-01 permanece ABERTA — faceta B em aberto; mesma ID.)
 
+### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
+
+D-ARQ-63 (003.DX) mediu 49% do DECISOES_ARQUITETURAIS.md como diário — acreção pós-decisão
+(`Changelog`, `Nota de implementação`, `Aplicação na sessão`, `Andamento`, 39% do corpo,
+177.214 chars) somada à tabela de revisões (16%, 87.328 chars). O gate de dois níveis
+(D-ARQ-63) contorna o custo de leitura; não resolve a causa. Três frentes, nenhuma
+pré-requisito da outra: (a) mover a acreção de cada D-ARQ para um satélite
+`docs/darq/D-ARQ-NN.md` com ponteiro no bloco original; (b) D-ARQ-57 é 13,2% do corpo
+sozinho (59.755 chars, 51.818 de acreção) — candidato à primeira migração, maior retorno
+isolado; (c) a tabela de revisões (87.328 chars, 100% diário) como arquivo próprio,
+`docs/HISTORICO_REVISOES_DARQ.md` ou equivalente. Reduziria o corpo-decisão de ~453 mil
+para ~276 mil chars. Não-bloqueante — a leitura via `INDICE_DARQ.md` + gate de dois níveis
+já cabe em contexto sem esta migração.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1322,3 +1336,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v62 | 23/07/2026 | Sessão 003.DU (IMPLEMENTAÇÃO): nota de resolução em DT-003BV-01 — faceta "de" FECHADA (`_MES_ANO` com `(?:de\s+)?`; "JUNHO DE 2026"/"15 DE JUNHO DE 2026" → 1º dia do mês). Mesma ID (aditiva; R-PGR-06 sem mudança de semântica — só cobertura do parser). mm/aaaa (D2) e a pergunta de método seguem abertos. Commit `63edefe`, merge PR #250 `3470111`. Detalhe em DECISOES v144. |
 | v63 | 23/07/2026 | Sessão 003.DV (MEDIÇÃO): **DT-003DV-01 adicionada** (§11) — 1ª rodada `rodar` ao vivo (Fascino, 19 GHEs): resolução de sílica com falso negativo ('Sílica livre'/'Quartzo'/'Poeira respirável' ausentes; R-RX-01* acionou em 1/19 GHEs) e falso positivo potencial (fuzzy 'Silício'→'silica'). Correção de header defasado em DT-003CM-01 (FECHADA em 003.CQ; changelog v53 já registrava). Nenhuma R-* criada/alterada. Sem código. |
 | v64 | 24/07/2026 | Sessão 003.DW (CONHECIMENTO/dado): DT-003DV-01 **faceta A RESOLVIDA** — `silica.termos` com 6 grafias de sílica cristalina livre (NR-15 Anexo 12 / NR-07 Anexo III Quadro 1); critério Tier 1 estendido a fonte-por-natureza-do-agente. Registro anti-FP dos não-sílica (silicatos/poeira respirável/poeira de madeira → `vocabulario_ausente`). Faceta B (fuzzy `Silício`→`silica`) deferida a 003.DX. Índice 99→105, slugs 79 inalterado. Commit `8363fcb`, PR #253 (`862fd57`). Nenhuma R-* criada/alterada. |
+| v65 | 24/07/2026 | Sessão 003.DX (META): **DT-003DX-01 adicionada** (§11) — migrar acreção pós-decisão do DECISOES_ARQUITETURAIS.md para satélites `docs/darq/` (três frentes: acreção geral 39%/177k chars, D-ARQ-57 sozinho 13,2%/59.755 chars, tabela de revisões 16%/87.328 chars). Não-bloqueante — D-ARQ-63 (gate de dois níveis + índice derivado) já resolve o custo de leitura. Nenhuma R-* criada/alterada. Sem código de motor. |
