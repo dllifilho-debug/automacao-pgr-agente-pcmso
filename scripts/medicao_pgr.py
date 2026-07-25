@@ -1,7 +1,7 @@
 """Harness de medição de rodada REAL do pipeline PGR (D-ARQ-62).
 
 Genérico por construção: recebe o caminho do PDF por argumento, não
-hard-coda literal de empresa/cliente/setor. Dois subcomandos:
+hard-coda literal de empresa/cliente/setor. Subcomandos:
 
   ida <pdf> <saida_ida>
       preparar_envelope (TranscritorGeminiTopo) -> artefato JSON de ida ao
@@ -12,8 +12,15 @@ hard-coda literal de empresa/cliente/setor. Dois subcomandos:
       processar_arquivo_pgr (TranscritorGeminiGHE + TranscritorGeminiCard)
       -> relatório markdown com pendências e matrizes decididas.
 
-Requer CHAVE_API_GOOGLE no ambiente antes de qualquer subcomando ao vivo
-— ausência é STOP-and-report, nunca mock nem chave inventada.
+  rodar-offline <pdf> <artefato_volta> <relatorio_md>
+      mesma trilha de `rodar`, mas com clientes-bomba (TranscritorGHEOffline
+      + TranscritorCardOffline) no lugar dos clientes Gemini: qualquer
+      invocação ao LLM vira pendência bloqueante transcricao_indisponivel_pgr
+      nomeada, nunca mock silencioso (D-ARQ-65).
+
+CHAVE_API_GOOGLE é exigida nos subcomandos ao vivo (`ida`, `rodar`) —
+ausência é STOP-and-report, nunca mock nem chave inventada. `rodar-offline`
+não exige a chave, por design.
 """
 
 from __future__ import annotations
@@ -26,12 +33,15 @@ from datetime import date
 from pathlib import Path
 
 from agente_medico.adaptadores.orquestracao_pgr import preparar_envelope, processar_arquivo_pgr
+from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.adaptadores.transcritor_gemini_topo import TranscritorGeminiTopo
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao
-from agente_medico.motor.tipos import Pendencia, Resultado
+from agente_medico.motor.tipos import GHEVerbatim, Pendencia, Resultado
+from agente_medico.motor.transcritor_card import TranscritorCard
+from agente_medico.motor.transcritor_pgr import TranscritorGHE
 
 _RAIZ = Path(__file__).resolve().parent.parent
 
@@ -40,6 +50,24 @@ def _exigir_chave() -> None:
     if not os.environ.get("CHAVE_API_GOOGLE"):
         print("STOP-and-report: variável de ambiente CHAVE_API_GOOGLE ausente.", file=sys.stderr)
         sys.exit(1)
+
+
+class TranscritorGHEOffline:
+    """Rodada OFFLINE (D-ARQ-65): recusa nomeada, nunca mock — se a rota
+    determinística for recusada, o fallback LLM cai aqui e vira pendência
+    bloqueante transcricao_indisponivel_pgr no relatório."""
+
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        raise TranscricaoIndisponivel("rodada offline: cliente LLM indisponível por design")
+
+
+class TranscritorCardOffline:
+    """Rodada OFFLINE (D-ARQ-65): recusa nomeada, nunca mock — se a rota
+    determinística for recusada, o fallback LLM cai aqui e vira pendência
+    bloqueante transcricao_indisponivel_pgr no relatório."""
+
+    def transcrever(self, card: str, titulo: str) -> GHEVerbatim:
+        raise TranscricaoIndisponivel("rodada offline: cliente LLM indisponível por design")
 
 
 def _hash_commit() -> str:
@@ -140,20 +168,37 @@ def _renderizar_relatorio(pdf: Path, resultado: Resultado | None, pendencias: tu
     return "\n".join(linhas) + "\n"
 
 
-def cmd_rodar(args: argparse.Namespace) -> None:
-    _exigir_chave()
-    pdf = Path(args.pdf)
-    texto_volta = Path(args.artefato_volta).read_text(encoding="utf-8")
+def _rodar(pdf: Path, artefato_volta: Path, relatorio_md: Path, cliente: TranscritorGHE, cliente_card: TranscritorCard) -> None:
+    texto_volta = artefato_volta.read_text(encoding="utf-8")
     envelope = desserializar_confirmacao(texto_volta)
     protocolo = carregar(_RAIZ / "agente_medico" / "protocolo")
-    resultado, pendencias = processar_arquivo_pgr(
-        pdf, protocolo, TranscritorGeminiGHE(), TranscritorGeminiCard(), envelope
-    )
+    resultado, pendencias = processar_arquivo_pgr(pdf, protocolo, cliente, cliente_card, envelope)
     relatorio = _renderizar_relatorio(pdf, resultado, pendencias)
-    Path(args.relatorio_md).write_text(relatorio, encoding="utf-8")
-    print(f"Relatório gravado em {args.relatorio_md}")
+    relatorio_md.write_text(relatorio, encoding="utf-8")
+    print(f"Relatório gravado em {relatorio_md}")
     if resultado is None:
         sys.exit(1)
+
+
+def cmd_rodar(args: argparse.Namespace) -> None:
+    _exigir_chave()
+    _rodar(
+        Path(args.pdf),
+        Path(args.artefato_volta),
+        Path(args.relatorio_md),
+        TranscritorGeminiGHE(),
+        TranscritorGeminiCard(),
+    )
+
+
+def cmd_rodar_offline(args: argparse.Namespace) -> None:
+    _rodar(
+        Path(args.pdf),
+        Path(args.artefato_volta),
+        Path(args.relatorio_md),
+        TranscritorGHEOffline(),
+        TranscritorCardOffline(),
+    )
 
 
 def main() -> None:
@@ -170,6 +215,12 @@ def main() -> None:
     p_rodar.add_argument("artefato_volta")
     p_rodar.add_argument("relatorio_md")
     p_rodar.set_defaults(func=cmd_rodar)
+
+    p_rodar_offline = subparsers.add_parser("rodar-offline")
+    p_rodar_offline.add_argument("pdf")
+    p_rodar_offline.add_argument("artefato_volta")
+    p_rodar_offline.add_argument("relatorio_md")
+    p_rodar_offline.set_defaults(func=cmd_rodar_offline)
 
     args = parser.parse_args()
     args.func(args)
