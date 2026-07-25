@@ -2425,6 +2425,85 @@ crítico. D-ARQ-14 — `vocabulario_ausente` segue para termo sem candidato ou e
 passed, 6 skipped; `mypy --strict` sem erro novo. Fecha DT-003DV-01 faceta B e a DT
 inteira (PROTOCOLO v66).
 
+## D-ARQ-65 — Extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo, não rotina
+
+**Contexto.** A rodada 003.DZ pediu apenas a re-execução do `rodar` medido em 003.DV, sem
+qualquer código de motor no escopo. A extração LLM (`transcritor_gemini_pgr.py`, cascata
+`_MODELOS` de D-ARQ-52) bloqueou 2× seguidas com `429 RESOURCE_EXHAUSTED` — quota diária
+free-tier do projeto Gemini esgotada (`generate_content_free_tier_requests`, limite 20/dia
+por modelo), diagnosticado por sonda HTTP direta fora do harness. Zero âncoras, zero blocos,
+pendência bloqueante `transcricao_indisponivel_pgr`/D-ARQ-52 nas duas tentativas — o caminho
+crítico de extração do Fascino inteiro depende de um terceiro cuja quota está fora do
+controle do projeto. Medição adicional sobre o mesmo PDF (pdfplumber, sem LLM) mostrou que a
+família de template Consciente/Fascino tem estrutura estável o bastante para um parser
+determinístico: **20 âncoras**, rótulos de cabeçalho **20/20**, **237 linhas-de-risco**
+ancoradas por token de categoria (`FISICO|QUIMICO|ERGONOMICO|ACIDENTE|BIOLOGICO`), bandas x
+estáveis (`GRUPO@56`, `AGENTE@[113,177)`, `FONTE@177+`), **zero** quantificação numérica e
+**zero** FDS apontada em todo o documento. Isso não é generalizável a qualquer PGR (D-ARQ-41
+segue de pé para o caso geral) — é uma propriedade **de família de template**, medida.
+
+**Decisão — 4 cláusulas.**
+
+1. **Rota determinística por família medida.** Para uma família de template com estrutura
+   medida (bandas x estáveis, âncoras de cabeçalho e de categoria-de-risco regulares), a
+   extração pode rodar por um parser determinístico dedicado à família, emitindo o MESMO
+   verbatim tipado (`GHEVerbatim`/`RiscoVerbatim`) sob o MESMO gate de forma
+   (`gate_forma_ghe`) que a rota LLM já usa — o consumidor a jusante (hidratação, motor) não
+   distingue a origem do verbatim.
+2. **Roteamento por família.** Família reconhecida-e-medida → determinístico, sem tocar
+   LLM. Família não-reconhecida → LLM-se-disponível, com `Pendencia` nomeando a família nova
+   (sinal para medição futura, não silêncio). LLM indisponível (quota, rede, cascata sem
+   `200 + STOP`) só vira pendência BLOQUEANTE quando a família em questão não é medida —
+   família medida nunca fica refém de terceiro.
+3. **Procedência no verbatim.** O verbatim carrega a origem (`deterministico:<familia>` |
+   `llm` | `manual`), para que pendências e auditoria distingam de onde o dado veio.
+   Implementação do campo e da costura de procedência é **deferida à fatia do roteamento**
+   (fatia 2) — esta fatia (1) constrói o parser isolado, sem plugá-lo.
+4. **Manual é corretivo, não rotina.** Entrada manual (RT corrigindo um verbatim) segue
+   existindo como via de correção pontual sobre um caso que falhou nas duas rotas
+   automáticas — nunca substitui rotina de extração, nem para família não-medida.
+
+**Registrar.** Esta decisão **NÃO revoga D-ARQ-41/49/50** — o parser universal
+determinístico (documento→`tipos.PGR` para QUALQUER PGR) segue inexistente e não é o que
+está sendo proposto; D-ARQ-41 continua sendo o padrão bicamada (transcritor-LLM +
+resolvedor) para o caso geral. O que muda é a existência de um parser **POR FAMÍLIA**
+medida, como atalho determinístico quando a família específica já foi caracterizada — LLM
+rebaixado de único caminho a acelerador-de-cobertura para família ainda não medida. Risco
+declarado: **drift de template** (nova revisão do PGR de uma construtora muda o layout e o
+parser determinístico da família passa a produzir lixo silencioso) — mitigado por
+gate de forma (rejeita verbatim malformado, família ou não), fixture VERBATIM (literais
+reais travados em teste, drift vira teste vermelho) e falha explícita (nunca fallback
+silencioso para dado incompleto). Contexto que motivou a decisão: `429` free-tier medido
+2× em 003.DZ — requisito de independência de terceiro no caminho crítico de extração.
+
+**Consequência.**
+- Família Consciente/Fascino ganha caminho de extração que não depende de quota de
+  terceiro; medição desta sessão é o gabarito de bandas/âncoras da fatia 1 (parser
+  isolado).
+- Roteamento entre as rotas (determinístico/LLM/pendência-de-família-nova) e a costura de
+  procedência no verbatim são trabalho da fatia 2 — não desta sessão.
+- Nenhuma R-* criada ou alterada; motor clínico intocado. Decisão de arquitetura da camada
+  de extração, não do protocolo.
+
+**Fronteiras (não confundir).**
+- **D-ARQ-41** — intocada; padrão bicamada segue sendo a via para família não-medida
+  (Parte 1/2/3 inalteradas). Esta decisão não é uma terceira camada — é uma rota
+  alternativa à camada-LLM, restrita a família medida.
+- **D-ARQ-49/50** — o contrato do parse-PGR e o mecanismo termo→slug (resolvedor)
+  seguem os mesmos; o parser determinístico por família produz o MESMO verbatim que a
+  rota LLM entregaria, entrando no mesmo resolvedor a jusante.
+- **D-ARQ-52** — pendência `transcricao_indisponivel_pgr` segue existindo para a rota LLM;
+  esta decisão apenas evita que ela seja bloqueante quando a família tem rota
+  determinística disponível.
+- **D-ARQ-09** — preservada: o parser determinístico é motor (determinístico, puro sobre
+  bytes do documento no wrapper de I/O), não introduz não-determinismo novo.
+
+**Base.** Sessão 003.DZ (25/07/2026), ratificado pelo Diovanni. Origem: bloqueio de quota
+429 (2× medido) no `rodar` do Fascino expôs dependência de terceiro no caminho crítico;
+medição de bandas/âncoras da família Consciente confirmou viabilidade de parser
+determinístico por família. Implementação em fatias: fatia 1 (esta sessão) = parser
+isolado, sem plug; fatia 2 (futura) = roteamento + procedência no verbatim.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2576,3 +2655,4 @@ inteira (PROTOCOLO v66).
 | v145 | 24/07/2026 | Sessão 003.DW (CONHECIMENTO/dado): nota de aplicação 003.DW em D-ARQ-50 Parte 2 (mesma ID) — `silica.termos` populado (DT-003DV-01 faceta A); critério Tier 1 estendido a fonte-por-natureza-do-agente (NR-15 Anexo 12 / NR-07 Anexo III Quadro 1, não só Anexo I). Anti-FP dos não-sílica em teste. Índice 99→105, slugs 79 inalterado. Faceta B → 003.DX. Commit `8363fcb`, PR #253. Nenhum D-ARQ novo, nenhuma R-* criada/alterada. |
 | v146 | 24/07/2026 | Sessão 003.DX (META): **D-ARQ-63 CRIADA** — gate de abertura em dois níveis: `docs/INDICE_DARQ.md` derivado (peça 1, PR #255, `scripts/gerar_indice_darq.py`, suíte 939→944) + nível 1 (PROTOCOLO + ÍNDICE + transversais D-ARQ-06/09/22) integral sempre, nível 2 (eixo nomeado) por sessão. Causa: DECISOES 64× em 68 dias (8.734→561.889 bytes), 49% diário (acreção pós-decisão + tabela de revisões). **DT-003DX-01 ABERTA** (PROTOCOLO v65) — migrar acreção para satélites `docs/darq/`. CLAUDE.md substitui o parágrafo do gate. Nenhuma R-* criada/alterada. |
 | v147 | 25/07/2026 | Sessão 003.DY (IMPLEMENTAÇÃO): **D-ARQ-64 CRIADA** — ramo FUZZY opt-in por allowlist de dado (`fuzzy_permitido: true` em 18 slugs de cauda de `agentes.yaml`); `IndiceTermos` (frozen: `slug_por_forma` + `fuzzy_permitido`); veto de RESULTADO pós-eleição, nunca filtro de candidato (caso-âncora metanoll/metanol/etanol); recusa = `NAO_RESOLVIDO` + `fuzzy_recusado` nomeando termo/slug/distância. Medição: índice 105/79, 4 pares por empate, 94 zonas exclusivas = 77 carregadas + 17 cauda, 61/79 carregados, invariantes 77+17=94 e 61+18=79 (corrigem furo da tiragem original do Arquiteto: 60/76). **Fecha DT-003DV-01 faceta B e a DT inteira** (PROTOCOLO v66). Suíte 945→949, mypy --strict sem erro novo. Nenhuma R-* criada/alterada. |
+| v148 | 25/07/2026 | Sessão 003.DZ (ARQUITETURA): **D-ARQ-65 CRIADA** — extração determinística por família de template; parser dedicado a família medida emite o MESMO verbatim tipado sob o MESMO gate de forma da rota LLM; LLM rebaixado a acelerador para família não-medida (pendência nomeia família nova); indisponibilidade de LLM só bloqueia família não-medida; procedência no verbatim (`deterministico:<familia>`\|`llm`\|`manual`) deferida à fatia de roteamento; manual é corretivo, não rotina. Origem: `429 RESOURCE_EXHAUSTED` (quota free-tier Gemini) bloqueou o `rodar` do Fascino 2× seguidas — dependência de terceiro no caminho crítico. Medição da família Consciente/Fascino: 20 âncoras, rótulos de cabeçalho 20/20, 237 linhas-de-risco ancoradas por token de categoria, bandas x estáveis (GRUPO@56, AGENTE@[113,177), FONTE@177+), zero quantificação numérica, zero FDS apontada. **NÃO revoga D-ARQ-41/49/50** — parser universal segue inexistente, o que muda é parser POR FAMÍLIA. Sem código nesta linha (fatia 1/parser isolado é o próximo commit da mesma sessão). Nenhuma R-* criada/alterada. |
