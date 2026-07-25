@@ -3973,3 +3973,19 @@ Testes. 6 novos (4 cenários de roteamento + Fascino real 19/19 com cliente-bomb
 Docs. DECISOES v149 (nota de aplicação 003.EA em D-ARQ-65; índice regenerado). PROTOCOLO inalterado (nenhuma R-*).
 
 Pendências. Fatia 3 de D-ARQ-65 (procedência no verbatim) — não urgente. Próxima: 003.EB — rodada Fascino OFFLINE + diff contra a matriz humana (Marco 1); inclui ajuste do harness (`_exigir_chave` de `scripts/medicao_pgr.py` não pode barrar rodada que não invoca LLM).
+
+---
+
+## Sessão 003.EB — 25/07/2026
+
+Foco. Rodada Fascino OFFLINE + diff contra a matriz humana (Marco 1).
+
+Entrega. Subcomando `rodar-offline` em `scripts/medicao_pgr.py` (commit 6f29928): sem `_exigir_chave`, clientes-bomba levantam `TranscricaoIndisponivel` se invocados — recusa nomeada, não mock; `rodar` ao vivo intacto. Rodada sem chave: exit 0, 19/19 GHEs, zero `familia_nao_medida`, zero `transcricao_indisponivel_pgr` — a rota determinística (D-ARQ-65 fatia 2) segurou o caso real inteiro sem LLM. Relatórios locais (gitignored): `003eb_fascino_rodar.md`, `003eb_fascino_diff.md`.
+
+Medição (diff motor × matriz humana 08/07/26, validada Dra. Carolini). Motor: 14 BLOQUEADA, 3 PARCIAL (GHE-10/15/16), 2 VÁLIDA (GHE-14/19), 7 linhas emitidas. Humana: pacote-base de 10 exames em 19/19 GHEs + extras (carboxihemoglobina GHE-09/17, manganês GHE-17, RX coluna GHE-15). Concordância: 3 células (RX coluna + audiometria GHE-15 via R-VIB-01/02; audiometria GHE-16 via R-AUD-01). Achados: (1) pacote-base incondicional ≈ ~190 células sem conceito no motor → DT-003EB-01; (2) conduta risco-baixo — humana não solicita indicador biológico onde o PGR marca risco baixo, R-BIO-04 emitiu 4 nesses GHEs → DT-003EB-02; (3) bloqueios R-AUD-01/02 e R-RX-01 (14 GHEs) refletem PGR sem quantificação — humana emite mesmo assim, RX OIT PER 60m no GHE-09 vs 12m nos demais sugere banda conhecida por fora; anti-supressão validada; (4) emissões do motor sem DEM/RET — humana pede DEM em audiometria/espirometria/RX OIT e RET no clínico; (5) vocabulário: 5 termos sem slug nomeados; fila 003.DV da poeira respirável agora tem o dado (espirometria 24m + RX OIT no pacote de todos os GHEs).
+
+Testes. Nenhum novo (lógica determinística coberta em 003.EA; scripts/ sem suite por precedente). Suíte 963 passed, 6 skipped; mypy --strict delta-zero.
+
+Docs. PROTOCOLO → v67 (DT-003EB-01/02; higiene header DT-003DV-01 → FECHADA). DECISOES → v150 (nota de aplicação 003.EB em D-ARQ-62). PAINEL re-tirado (tiragem 003.EB).
+
+Pendências (íntegra). DT-003EB-01 e DT-003EB-02 exigem sessão CONHECIMENTO (gate D-ARQ-63) antes de virar R-*. Fatia 3 de D-ARQ-65 (procedência no verbatim) não urgente. Marco 1: rodada e2e real EXISTE (offline, determinística, diff instrumentado); faltam cobertura (pacote-base, momentos) e aceite da Dra. Carolini sobre saída do motor. Próxima: decisão no kickoff.

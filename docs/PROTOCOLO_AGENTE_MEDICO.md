@@ -1215,7 +1215,7 @@ Contagens cruzadas com 003.CZ/DA: UFGD 105 / HUMAP 140 batem exato o reconhecedo
 
 **Status:** ABERTA (medição entregue; consumida pela ARQUITETURA da peça 4 de D-ARQ-57, na 003.DC). Não bloqueia. Cruza DT-003CS-01 (EBSERH/saúde), DT-003L-01 forma 6, D-ARQ-57 peça 4. Nenhuma R-* tocada.
 
-### DT-003DV-01 — Resolução de sílica no vocabulário: falso negativo (termos reais do acervo ausentes) e falso positivo potencial (fuzzy 'Silício'→'silica') `[DERIVADO — medição 003.DV, rodada `rodar` ao vivo no Fascino]`
+### DT-003DV-01 — Resolução de sílica no vocabulário: falso negativo (termos reais do acervo ausentes) e falso positivo potencial (fuzzy 'Silício'→'silica') `[FECHADA — facetas A (003.DW) e B (003.DY)]`
 
 Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fascino_rodar.md`, gitignored): 232 pendências `vocabulario_ausente`, 33 `predicado_ausente`, 4 `resolucao_fuzzy`; nenhum outro tipo emitido.
 
@@ -1234,6 +1234,28 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 **Status faceta B: RESOLVIDA (003.DY, D-ARQ-64).** Ramo FUZZY passou a ser opt-in por allowlist de dado: `fuzzy_permitido: true` em 18 slugs de cauda de `agentes.yaml`; `silica` fora da allowlist. 'Silício'/'Silicio' → `NAO_RESOLVIDO` + pendência `fuzzy_recusado` (não-bloqueante, destinatário extração) nomeando o termo, `silica` e a distância 2 — cravado em `test_silicio_recusa_fuzzy_para_silica`. O veto é do resultado eleito, nunca filtro de candidato (caso-âncora metanoll/metanol/etanol em D-ARQ-64 cl. 3); a cauda legítima sobrevive ('Microrganismo'→`microrganismos` FUZZY). Sincronia allowlist × canais de criticidade é teste computado do dado (`test_allowlist_disjunta_dos_canais_de_criticidade`). Suíte 945→949. Detalhe e medição completa (105/79 · 4 pares · 94=77+17 · 61+18=79) em D-ARQ-64.
 
 **(DT-003DV-01 FECHADA — facetas A (003.DW) e B (003.DY) resolvidas.)**
+
+### DT-003EB-01 — Pacote-base incondicional da matriz humana sem conceito correspondente no motor `[ABERTA — 003.EB]`
+
+**Origem:** Sessão 003.EB (25/07/2026), diff da rodada `rodar-offline` (Fascino, D-ARQ-65) contra a matriz humana `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (validada Dra. Carolini) — Marco 1.
+
+**Situação.** A matriz humana aplica um pacote-base incondicional de **10 exames em 19/19 GHEs do Fascino**, inclusive no setor sem risco ocupacional específico — a atribuição não depende de risco declarado no PGR. O motor não tem esse conceito: toda emissão de exame é condicionada a um predicado de risco (agente/atividade presente). Medido: **~190 de ~194 células** do diff (19 GHEs × 10 exames, com pequenas variações) não têm conceito correspondente no motor hoje — a maior massa isolada do diff.
+
+**Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura):** o pacote-base é fundamentado em quê — cargo genérico de obra (NR-18), admissional/periódico obrigatório independente de risco específico, ou outra norma? Qual o método de composição do pacote (os 10 exames, suas periodicidades) e ele varia por tipo de obra/atividade, ou é fixo?
+
+**Status:** ABERTA. Formalização exige sessão CONHECIMENTO com gate D-ARQ-63 antes de virar R-*.
+
+### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[ABERTA — 003.EB]`
+
+**Origem:** Sessão 003.EB (25/07/2026), mesmo diff acima.
+
+**Situação.** Sob anotação explícita de risco baixo no PGR, a matriz humana solicita apenas **menção documental no PCMSO**, não o indicador biológico em si. R-BIO-04 emitiu 4 indicadores biológicos nesses GHEs do Fascino (GHE-10: acetona_urina, mek_urina; GHE-16: ortocresol_urina, acido_metilhipurico — todos PER 6m).
+
+**Hipótese:** falta um gate de nível de risco no predicado de R-BIO-04 (risco baixo → menção documental, não exame).
+
+**Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura):** o que caracteriza "risco baixo" para fins de dispensa do indicador biológico — a anotação explícita no PGR é suficiente, ou há um limiar quantitativo por trás? A menção documental tem forma própria (texto padrão no PCMSO) ou é livre?
+
+**Status:** ABERTA. Formalização exige sessão CONHECIMENTO com gate D-ARQ-63 antes de alterar R-BIO-04.
 
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
@@ -1338,3 +1360,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v64 | 24/07/2026 | Sessão 003.DW (CONHECIMENTO/dado): DT-003DV-01 **faceta A RESOLVIDA** — `silica.termos` com 6 grafias de sílica cristalina livre (NR-15 Anexo 12 / NR-07 Anexo III Quadro 1); critério Tier 1 estendido a fonte-por-natureza-do-agente. Registro anti-FP dos não-sílica (silicatos/poeira respirável/poeira de madeira → `vocabulario_ausente`). Faceta B (fuzzy `Silício`→`silica`) deferida a 003.DX. Índice 99→105, slugs 79 inalterado. Commit `8363fcb`, PR #253 (`862fd57`). Nenhuma R-* criada/alterada. |
 | v65 | 24/07/2026 | Sessão 003.DX (META): **DT-003DX-01 adicionada** (§11) — migrar acreção pós-decisão do DECISOES_ARQUITETURAIS.md para satélites `docs/darq/` (três frentes: acreção geral 39%/177k chars, D-ARQ-57 sozinho 13,2%/59.755 chars, tabela de revisões 16%/87.328 chars). Não-bloqueante — D-ARQ-63 (gate de dois níveis + índice derivado) já resolve o custo de leitura. Nenhuma R-* criada/alterada. Sem código de motor. |
 | v66 | 25/07/2026 | Sessão 003.DY (IMPLEMENTAÇÃO): **DT-003DV-01 faceta B RESOLVIDA — DT inteira FECHADA** (§11) — ramo FUZZY opt-in por allowlist de dado (D-ARQ-64, DECISOES v147): `fuzzy_permitido: true` em 18 slugs de cauda; `silica` fora → `Silício`/`Silicio` recusados com pendência `fuzzy_recusado` nomeando termo/slug/distância; veto de resultado, não filtro de candidato. Suíte 945→949 passed, 6 skipped. Nenhuma R-* criada/alterada. |
+| v67 | 25/07/2026 | Sessão 003.EB (MEDIÇÃO): **DT-003EB-01 e DT-003EB-02 adicionadas** (§11) — 1ª rodada `rodar-offline` (D-ARQ-65) no Fascino, 19/19 GHEs, zero invocação LLM, + diff contra a matriz humana validada (Marco 1): DT-003EB-01 (pacote-base incondicional de 10 exames em 19/19 GHEs sem conceito no motor, ~190 de ~194 células do diff) e DT-003EB-02 (R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo, GHE-10/16). Higiene: header da DT-003DV-01 corrigido para `[FECHADA — facetas A (003.DW) e B (003.DY)]`, coerente com o corpo. Nenhuma R-* criada/alterada. Sem código de motor. |
