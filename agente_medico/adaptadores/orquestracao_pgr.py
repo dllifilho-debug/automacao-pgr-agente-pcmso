@@ -14,6 +14,7 @@ from agente_medico.motor.extracao_pgr import (
 )
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_pgr
+from agente_medico.motor.parser_familia_consciente import FamiliaNaoReconhecida, parsear_arquivo
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor_termos import construir_indice_termos
 from agente_medico.motor.resolvedor_topo import resolver_validade
@@ -106,17 +107,35 @@ def preparar_ghes(
 
     - Pendência de estrutura não-None (qualquer rota): bloqueia aqui, sem
       gastar chamada LLM sobre recorte inválido/implausível — como sempre.
-    - Rota "ghe": recortar_blocos_ghe -> transcrever_ghes(cliente) ->
-      gate_forma_ghe. Fluxo INALTERADO (inclui "blocos_ausentes" se
-      avaliar_estrutura devolveu ("ghe", None) num doc pequeno sem âncora —
-      gate inaplicável, mesmo comportamento pré-4d).
+    - Rota "ghe" (D-ARQ-65 fatia 2, roteamento determinístico-primeiro):
+      DEPOIS do check de blocos_ausentes, tenta parsear_arquivo(caminho) —
+      2ª leitura do PDF sobre o mesmo `caminho` (precedente já documentado
+      em processar_arquivo_pgr: o seam humano de confirmação-RT entre
+      preparar_envelope e preparar_ghes impede passada única de I/O; aqui é
+      a mesma classe, dentro da própria preparar_ghes). Aceita a rota
+      determinística SOMENTE se (i) nenhum FamiliaNaoReconhecida foi
+      levantado E (ii) len(candidatos) == len(blocos) — as duas rotas usam
+      eh_cabecalho_ghe sobre reconstruções de linha diferentes
+      (parsear_arquivo/pdfplumber.extract_words vs. recortar_blocos_ghe/
+      extrair_texto_pgr), então divergência de contagem é tratada como
+      família não reconhecida (conservador, motivo nomeia as duas
+      contagens). Aceita -> gate_forma_ghe(candidatos), cliente LLM NUNCA é
+      invocado. Recusada (exceção OU contagem divergente) -> Pendencia
+      NÃO-bloqueante tipo "familia_nao_medida" (destinatario="extracao",
+      regra_origem="D-ARQ-65") é anexada às pendências devolvidas, e o
+      fluxo LLM segue EXATAMENTE como antes desta fatia (transcrever_ghes
+      -> gate_forma_ghe) — TranscricaoIndisponivel no fallback continua
+      bloqueante como sempre. Procedência no verbatim
+      (`deterministico:<familia>`|`llm`|`manual`) NÃO é desta fatia
+      (D-ARQ-65 fatia 3).
     - Rota "card": recortar_cards_cargo + recuperar_titulos_cargo ->
       transcrever_cards(cliente_card) -> gate_forma_ghe. SEM ramo
       equivalente a "blocos_ausentes": a rota card só é devolvida por
       avaliar_estrutura quando pelo menos 1 linha já casou
       eh_ancora_card_cargo (ramo 2 do composto), logo recortar_cards_cargo
       SEMPRE devolve >= 1 card por construção — zero-âncoras nesta rota é
-      inatingível, não uma omissão.
+      inatingível, não uma omissão. Família EBSERH (card) não é medida
+      para o parser determinístico — rota INTOCADA por esta fatia.
 
     TranscricaoIndisponivel em QUALQUER rota vira Pendencia tipo
     "transcricao_indisponivel_pgr" (tipo EXISTENTE — mesma falha de
@@ -165,10 +184,38 @@ def preparar_ghes(
                 regra_origem="D-ARQ-52",
             ),
         )
+
+    pendencia_familia: Pendencia | None = None
+    try:
+        candidatos_deterministicos = parsear_arquivo(caminho)
+    except FamiliaNaoReconhecida as e:
+        pendencia_familia = Pendencia(
+            tipo="familia_nao_medida",
+            destinatario="extracao",
+            motivo=str(e),
+            bloqueante=False,
+            regra_origem="D-ARQ-65",
+        )
+    else:
+        if len(candidatos_deterministicos) == len(blocos):
+            return gate_forma_ghe(candidatos_deterministicos)
+        pendencia_familia = Pendencia(
+            tipo="familia_nao_medida",
+            destinatario="extracao",
+            motivo=(
+                f"Contagem divergente entre rota determinística "
+                f"({len(candidatos_deterministicos)} blocos) e recorte LLM "
+                f"({len(blocos)} blocos) em {caminho} — família não reconhecida"
+            ),
+            bloqueante=False,
+            regra_origem="D-ARQ-65",
+        )
+
     try:
         candidatos = transcrever_ghes(blocos, cliente)
     except TranscricaoIndisponivel as e:
         return (), (
+            pendencia_familia,
             Pendencia(
                 tipo="transcricao_indisponivel_pgr",
                 destinatario="extracao",
@@ -177,7 +224,8 @@ def preparar_ghes(
                 regra_origem="D-ARQ-52",
             ),
         )
-    return gate_forma_ghe(candidatos)
+    aprovados, pend_forma = gate_forma_ghe(candidatos)
+    return aprovados, (pendencia_familia, *pend_forma)
 
 
 def processar_arquivo_pgr(
