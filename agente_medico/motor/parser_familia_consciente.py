@@ -58,6 +58,12 @@ _TOKENS_CATEGORIA = frozenset(
 )
 
 
+class FamiliaNaoReconhecida(ValueError):
+    """Bloco não casa a forma medida da família Consciente/Fascino (D-ARQ-65
+    fatia 2) — sinal de roteamento para o caller decidir o fallback LLM,
+    distinto de ValueError genérico."""
+
+
 class PalavraPDF(NamedTuple):
     """Palavra pré-extraída de uma página do PDF — contrato mínimo que o
     núcleo puro consome (texto + posição), independente do extrator real
@@ -261,7 +267,7 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
 
     cabecalho = _localizar_cabecalho_tabela(linhas_bloco)
     if cabecalho is None:
-        raise ValueError(
+        raise FamiliaNaoReconhecida(
             f"Bloco {nome!r}: cabeçalho de tabela (GRUPO/PERIGO/FONTE/AGRAVO) "
             "não localizado — bloqueador de calibração por bloco (D-ARQ-65 fatia 1)"
         )
@@ -270,7 +276,7 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
         abs(grupo_x - _X_GRUPO_ESPERADO) > _TOLERANCIA_SANITY_PT
         or abs(agente_x - _X_AGENTE_ESPERADO) > _TOLERANCIA_SANITY_PT
     ):
-        raise ValueError(
+        raise FamiliaNaoReconhecida(
             f"Bloco {nome!r}: cabeçalho fora do sanity-check GRUPO~57/AGENTE~113 "
             f"(medido grupo={grupo_x}, agente={agente_x}) — família pode não ser "
             "Consciente/Fascino (D-ARQ-65 fatia 1)"

@@ -5,6 +5,8 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from agente_medico.adaptadores.orquestracao_pgr import (
     preparar_envelope,
     preparar_ghes,
@@ -12,6 +14,7 @@ from agente_medico.adaptadores.orquestracao_pgr import (
 )
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe
+from agente_medico.motor.parser_familia_consciente import FamiliaNaoReconhecida
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao
 from agente_medico.motor.tipos import EnvelopeConfirmado, EnvelopeVerbatim, GHEVerbatim, RiscoVerbatim
@@ -24,8 +27,17 @@ _PDF_VIVERDE = _MATRIZES_DIR / "PGR VIVERDE V02 - 03.02.25.pdf"
 _PDF_EBSERH_UFGD_V7 = _MATRIZES_DIR / "PGR_EBSERH_UFGD_v7.pdf"
 _PDF_EBSERH_HUMAP = _MATRIZES_DIR / "PGR_EBSERH_HUMAP.pdf"
 _PDF_CJR = _MATRIZES_DIR / "pgr_Cjr Engenharia Ltda (M Construtora).pdf"
+_PDF_FASCINO = _MATRIZES_DIR / "PGR - CONSCIENTE CONSTRUTORA E INCORPORADORA SPE 0030 - FASCINO  (15.07.26).pdf"
+
+# Harness de integração da rota determinística (molde requer_pdfs de
+# test_parser_familia_consciente.py, 003.DZ).
+requer_pdfs = pytest.mark.skipif(
+    not (_PDF_FASCINO.exists() and _PDF_VIVERDE.exists()),
+    reason="PDF Fascino/Viverde ausente; harness integração 003.EA indisponível",
+)
 
 _ALVO_EXTRACAO = "agente_medico.adaptadores.orquestracao_pgr.extrair_texto_pgr"
+_ALVO_PARSER_DETERMINISTICO = "agente_medico.adaptadores.orquestracao_pgr.parsear_arquivo"
 
 _GHE_VALIDO = GHEVerbatim(
     nome="Setor Teste",
@@ -76,6 +88,16 @@ class MockTranscritorIndisponivel:
 
     def transcrever(self, bloco: str) -> GHEVerbatim:
         raise TranscricaoIndisponivel(self._motivo)
+
+
+class MockTranscritorGHENuncaChamado:
+    """Cliente-bomba: se a rota determinística for aceita (D-ARQ-65 fatia 2),
+    preparar_ghes NUNCA deve invocar o cliente LLM — falha alto e explícito
+    em vez de mascarar em silêncio uma invocação indevida (molde
+    MockTranscritorCardNuncaChamado)."""
+
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        raise AssertionError("cliente LLM não deveria ser invocado — rota determinística aceita")
 
 
 class MockTranscritorCardConstante:
@@ -217,7 +239,9 @@ def test_doc_grande_sem_ancora_emite_segmentacao_nao_blocos_ausentes() -> None:
 
 
 def test_transcricao_indisponivel_vira_none_e_pendencia_bloqueante() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()):
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
         resultado, pendencias = processar_arquivo_pgr(
             Path("qualquer.pdf"),
             _PROTO,
@@ -227,10 +251,13 @@ def test_transcricao_indisponivel_vira_none_e_pendencia_bloqueante() -> None:
         )
 
     assert resultado is None
-    assert len(pendencias) == 1
-    assert pendencias[0].tipo == "transcricao_indisponivel_pgr"
-    assert pendencias[0].bloqueante is True
-    assert "CHAVE_API_GOOGLE ausente" in pendencias[0].motivo
+    assert len(pendencias) == 2
+    pendencia_bloqueante = next(p for p in pendencias if p.bloqueante)
+    assert pendencia_bloqueante.tipo == "transcricao_indisponivel_pgr"
+    assert "CHAVE_API_GOOGLE ausente" in pendencia_bloqueante.motivo
+    pendencia_familia = next(p for p in pendencias if p.tipo == "familia_nao_medida")
+    assert pendencia_familia.bloqueante is False
+    assert pendencia_familia.regra_origem == "D-ARQ-65"
 
 
 def test_aprovacao_parcial_processa_aprovados_e_carrega_pendencia_de_forma() -> None:
@@ -239,7 +266,9 @@ def test_aprovacao_parcial_processa_aprovados_e_carrega_pendencia_de_forma() -> 
         "GHE 2 - Setor Ruim\nCargo B"
     ]
     mock = MockTranscritorSequencial((_GHE_VALIDO, _GHE_INVALIDO))
-    with patch(_ALVO_EXTRACAO, return_value=paginas):
+    with patch(_ALVO_EXTRACAO, return_value=paginas), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
         resultado, pendencias = processar_arquivo_pgr(
             Path("qualquer.pdf"),
             _PROTO,
@@ -252,12 +281,15 @@ def test_aprovacao_parcial_processa_aprovados_e_carrega_pendencia_de_forma() -> 
     assert len(resultado.matrizes) == 1
     tipos_pendencia = [p.tipo for p in pendencias]
     assert "forma_verbatim_pgr" in tipos_pendencia
+    assert "familia_nao_medida" in tipos_pendencia
     pendencia_forma = next(p for p in pendencias if p.tipo == "forma_verbatim_pgr")
     assert pendencia_forma.bloqueante is True
 
 
 def test_envelope_validade_atravessa_ate_o_gate_r_pgr_06() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()):
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
         resultado, _ = processar_arquivo_pgr(
             Path("qualquer.pdf"),
             _PROTO,
@@ -354,7 +386,9 @@ def test_ida_e_volta_validade_antiga_gera_pendencia_r_pgr_06_bloqueante() -> Non
         titulo_rt="Eng.",
         registro_profissional="CREA 1",
     )
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()):
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
         artefato, pend_envelope = preparar_envelope(
             Path("qualquer.pdf"), MockTranscritorTopoConstante(envelope_bruto)
         )
@@ -388,7 +422,9 @@ def test_ida_e_volta_validade_recente_nao_gera_pendencia_r_pgr_06() -> None:
         titulo_rt="Eng.",
         registro_profissional="CREA 1",
     )
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()):
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
         artefato, _ = preparar_envelope(
             Path("qualquer.pdf"), MockTranscritorTopoConstante(envelope_bruto)
         )
@@ -484,3 +520,105 @@ def test_preparar_ghes_rota_card_transcricao_indisponivel_vira_pendencia_bloquea
     assert pendencias[0].bloqueante is True
     assert pendencias[0].regra_origem == "D-ARQ-57"
     assert "CHAVE_API_GOOGLE ausente" in pendencias[0].motivo
+
+
+# ---------------------------------------------------------------------------
+# preparar_ghes — rota "ghe", roteamento determinístico-primeiro (D-ARQ-65
+# fatia 2): parsear_arquivo tentado ANTES do cliente LLM; aceito só sob as
+# duas condições (sem FamiliaNaoReconhecida E contagem == blocos), senão
+# fallback LLM inalterado + Pendencia não-bloqueante "familia_nao_medida".
+# ---------------------------------------------------------------------------
+
+
+def test_preparar_ghes_rota_deterministica_aceita_sem_invocar_cliente_llm() -> None:
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+        _ALVO_PARSER_DETERMINISTICO, return_value=(_GHE_VALIDO,)
+    ):
+        aprovados, pendencias = preparar_ghes(
+            Path("qualquer.pdf"), MockTranscritorGHENuncaChamado(), _CLIENTE_CARD_NUNCA_CHAMADO
+        )
+
+    assert aprovados == (_GHE_VALIDO,)
+    assert pendencias == ()
+
+
+def test_preparar_ghes_rota_deterministica_recusada_por_excecao_aciona_fallback_llm() -> None:
+    mock = MockTranscritorConstante(_GHE_VALIDO)
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
+        aprovados, pendencias = preparar_ghes(Path("qualquer.pdf"), mock, _CLIENTE_CARD_NUNCA_CHAMADO)
+
+    assert len(mock.blocos_recebidos) == 1
+    assert aprovados == (_GHE_VALIDO,)
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "familia_nao_medida"
+    assert pendencias[0].bloqueante is False
+    assert pendencias[0].regra_origem == "D-ARQ-65"
+    assert "família não medida (teste)" in pendencias[0].motivo
+
+
+def test_preparar_ghes_rota_deterministica_recusada_e_llm_indisponivel_ambas_pendencias() -> None:
+    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
+        aprovados, pendencias = preparar_ghes(
+            Path("qualquer.pdf"),
+            MockTranscritorIndisponivel("CHAVE_API_GOOGLE ausente"),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
+        )
+
+    assert aprovados == ()
+    assert len(pendencias) == 2
+    pendencia_bloqueante = next(p for p in pendencias if p.bloqueante)
+    assert pendencia_bloqueante.tipo == "transcricao_indisponivel_pgr"
+    assert "CHAVE_API_GOOGLE ausente" in pendencia_bloqueante.motivo
+    pendencia_familia = next(p for p in pendencias if p.tipo == "familia_nao_medida")
+    assert pendencia_familia.bloqueante is False
+
+
+def test_preparar_ghes_rota_deterministica_recusada_por_contagem_divergente() -> None:
+    paginas = ["GHE 1 - Setor Bom\nCargo A\nGHE 2 - Setor Ruim\nCargo B"]
+    mock = MockTranscritorSequencial((_GHE_VALIDO, _GHE_VALIDO))
+    with patch(_ALVO_EXTRACAO, return_value=paginas), patch(
+        _ALVO_PARSER_DETERMINISTICO, return_value=(_GHE_VALIDO,)
+    ):
+        aprovados, pendencias = preparar_ghes(Path("qualquer.pdf"), mock, _CLIENTE_CARD_NUNCA_CHAMADO)
+
+    assert len(mock.blocos_recebidos) == 2
+    assert len(aprovados) == 2
+    assert len(pendencias) == 1
+    assert pendencias[0].tipo == "familia_nao_medida"
+    assert pendencias[0].bloqueante is False
+    assert "1 blocos" in pendencias[0].motivo
+    assert "2 blocos" in pendencias[0].motivo
+
+
+# ---------------------------------------------------------------------------
+# Integração (marcador requer_pdfs) — PDFs reais Fascino (família medida,
+# D-ARQ-65) e Viverde (família NÃO medida — testemunha negativa).
+# ---------------------------------------------------------------------------
+
+
+@requer_pdfs
+def test_preparar_ghes_fascino_real_rota_deterministica_aceita_zero_invocacao_llm() -> None:
+    aprovados, pendencias = preparar_ghes(
+        _PDF_FASCINO, MockTranscritorGHENuncaChamado(), _CLIENTE_CARD_NUNCA_CHAMADO
+    )
+
+    assert len(aprovados) == 19
+    assert pendencias == ()
+
+
+@requer_pdfs
+def test_preparar_ghes_viverde_real_familia_nao_reconhecida_aciona_fallback_llm() -> None:
+    mock = MockTranscritorConstante(_GHE_VALIDO)
+    aprovados, pendencias = preparar_ghes(_PDF_VIVERDE, mock, _CLIENTE_CARD_NUNCA_CHAMADO)
+
+    assert len(mock.blocos_recebidos) > 0
+    assert aprovados == tuple(_GHE_VALIDO for _ in mock.blocos_recebidos)
+    tipos_pendencia = [p.tipo for p in pendencias]
+    assert "familia_nao_medida" in tipos_pendencia
+    pendencia_familia = next(p for p in pendencias if p.tipo == "familia_nao_medida")
+    assert pendencia_familia.bloqueante is False
+    assert pendencia_familia.regra_origem == "D-ARQ-65"

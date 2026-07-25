@@ -2504,6 +2504,24 @@ medição de bandas/âncoras da família Consciente confirmou viabilidade de par
 determinístico por família. Implementação em fatias: fatia 1 (esta sessão) = parser
 isolado, sem plug; fatia 2 (futura) = roteamento + procedência no verbatim.
 
+**Nota de aplicação (003.EA — fatia 2, roteamento).** `preparar_ghes` (rota "ghe") tenta
+`parsear_arquivo(caminho)` (2ª leitura do PDF, mesma classe do seam humano de
+`processar_arquivo_pgr` — D-ARQ-52) ANTES do cliente LLM. Aceitação exige as DUAS
+condições: nenhum `FamiliaNaoReconhecida` (exceção tipada nova, `ValueError`, levantada
+pelos dois pontos de falha de `_parsear_bloco`) E `len(candidatos) == len(blocos)` — as
+duas rotas reconstroem linha por caminhos distintos (`pdfplumber.extract_words` direto vs.
+`extrair_texto_pgr`/`recortar_blocos_ghe`), então divergência de contagem é tratada como
+família não reconhecida (conservador; motivo nomeia as duas contagens). Aceita →
+`gate_forma_ghe(candidatos)`, cliente LLM NUNCA invocado. Recusada (exceção OU contagem) →
+`Pendencia` NÃO-bloqueante nova, tipo `familia_nao_medida` (`destinatario="extracao"`,
+`regra_origem="D-ARQ-65"`), anexada às pendências devolvidas; fluxo LLM segue INALTERADO
+(`transcrever_ghes` → `gate_forma_ghe`) — `transcricao_indisponivel_pgr` no fallback segue
+bloqueante como sempre. Rota "card" (EBSERH — família não medida para o parser)
+INTOCADA. Procedência no verbatim (`deterministico:<familia>`\|`llm`\|`manual`) segue
+deferida (fatia 3). Testemunha positiva: Fascino real, 19/19 aprovados, zero invocação
+LLM. Testemunha negativa: Viverde real, `FamiliaNaoReconhecida` (família não medida) aciona
+o fallback LLM sem bloquear.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2656,3 +2674,4 @@ isolado, sem plug; fatia 2 (futura) = roteamento + procedência no verbatim.
 | v146 | 24/07/2026 | Sessão 003.DX (META): **D-ARQ-63 CRIADA** — gate de abertura em dois níveis: `docs/INDICE_DARQ.md` derivado (peça 1, PR #255, `scripts/gerar_indice_darq.py`, suíte 939→944) + nível 1 (PROTOCOLO + ÍNDICE + transversais D-ARQ-06/09/22) integral sempre, nível 2 (eixo nomeado) por sessão. Causa: DECISOES 64× em 68 dias (8.734→561.889 bytes), 49% diário (acreção pós-decisão + tabela de revisões). **DT-003DX-01 ABERTA** (PROTOCOLO v65) — migrar acreção para satélites `docs/darq/`. CLAUDE.md substitui o parágrafo do gate. Nenhuma R-* criada/alterada. |
 | v147 | 25/07/2026 | Sessão 003.DY (IMPLEMENTAÇÃO): **D-ARQ-64 CRIADA** — ramo FUZZY opt-in por allowlist de dado (`fuzzy_permitido: true` em 18 slugs de cauda de `agentes.yaml`); `IndiceTermos` (frozen: `slug_por_forma` + `fuzzy_permitido`); veto de RESULTADO pós-eleição, nunca filtro de candidato (caso-âncora metanoll/metanol/etanol); recusa = `NAO_RESOLVIDO` + `fuzzy_recusado` nomeando termo/slug/distância. Medição: índice 105/79, 4 pares por empate, 94 zonas exclusivas = 77 carregadas + 17 cauda, 61/79 carregados, invariantes 77+17=94 e 61+18=79 (corrigem furo da tiragem original do Arquiteto: 60/76). **Fecha DT-003DV-01 faceta B e a DT inteira** (PROTOCOLO v66). Suíte 945→949, mypy --strict sem erro novo. Nenhuma R-* criada/alterada. |
 | v148 | 25/07/2026 | Sessão 003.DZ (ARQUITETURA): **D-ARQ-65 CRIADA** — extração determinística por família de template; parser dedicado a família medida emite o MESMO verbatim tipado sob o MESMO gate de forma da rota LLM; LLM rebaixado a acelerador para família não-medida (pendência nomeia família nova); indisponibilidade de LLM só bloqueia família não-medida; procedência no verbatim (`deterministico:<familia>`\|`llm`\|`manual`) deferida à fatia de roteamento; manual é corretivo, não rotina. Origem: `429 RESOURCE_EXHAUSTED` (quota free-tier Gemini) bloqueou o `rodar` do Fascino 2× seguidas — dependência de terceiro no caminho crítico. Medição da família Consciente/Fascino: 20 âncoras, rótulos de cabeçalho 20/20, 237 linhas-de-risco ancoradas por token de categoria, bandas x estáveis (GRUPO@56, AGENTE@[113,177), FONTE@177+), zero quantificação numérica, zero FDS apontada. **NÃO revoga D-ARQ-41/49/50** — parser universal segue inexistente, o que muda é parser POR FAMÍLIA. Sem código nesta linha (fatia 1/parser isolado é o próximo commit da mesma sessão). Nenhuma R-* criada/alterada. |
+| v149 | 25/07/2026 | Sessão 003.EA (IMPLEMENTAÇÃO): **D-ARQ-65 fatia 2 IMPLEMENTADA — roteamento determinístico-primeiro.** `FamiliaNaoReconhecida(ValueError)` nova em `parser_familia_consciente.py` (substitui os 2 `ValueError` genéricos de `_parsear_bloco`, mensagens inalteradas). `preparar_ghes` (rota "ghe") tenta `parsear_arquivo(caminho)` ANTES do cliente LLM (2ª leitura do PDF, mesma classe do seam humano D-ARQ-52); aceita só se nenhum `FamiliaNaoReconhecida` E `len(candidatos) == len(blocos)` (divergência de contagem = família não reconhecida, conservador); aceita → `gate_forma_ghe` direto, cliente LLM nunca invocado; recusada → `Pendencia` não-bloqueante `familia_nao_medida` (`regra_origem="D-ARQ-65"`) anexada, fallback LLM segue inalterado. Rota "card" intocada; procedência no verbatim segue deferida (fatia 3). Testemunhas reais: Fascino 19/19 aprovados sem invocação LLM; Viverde (família não medida) aciona fallback via `FamiliaNaoReconhecida`, testemunha negativa. Nota de aplicação 003.EA em D-ARQ-65. Suíte 957+6→963+6 (+6 exato); `mypy --strict` delta-zero (46 erros pré-existentes em 5 arquivos FDS-side, nenhum nos arquivos tocados). Nenhuma R-* criada/alterada. PROTOCOLO não move. PAINEL não re-tirado nesta sessão (fechamento é sessão própria). |
