@@ -3804,6 +3804,8 @@ Próxima. A declarar no kickoff.
 
 **Adendo (registrado em 003.DV, decisão de processo da própria 003.DQ).** As instruções do projeto no app foram coladas pelo Diovanni com uma 4ª troca além das 3 do prompt de fechamento: a seção "Antes de qualquer pergunta à Dra. Carolini" foi reclassificada para "Antes de qualquer dúvida clínica ou normativa" (derivação normativa, D-ARQ-27). Edição fora do repo; sem PR dedicado — esta linha carrega o registro por piggyback.
 
+Adendo (registro tardio, 003.DZ): as app-instructions do Arquiteto tiveram a seção "Antes de qualquer dúvida clínica ou normativa" reclassificada para derivação normativa (D-ARQ-27) — editado no app em 003.DQ, registrado aqui.
+
 ## Sessão 003.DR — 22/07/2026 — IMPLEMENTAÇÃO/MEDIÇÃO
 
 Foco. D-ARQ-62 (redirecionamento pós-003.DQ): harness de rodada real + 1ª medição no caso-âncora Fascino (Consciente SPE 0030, construção civil).
@@ -3939,3 +3941,21 @@ Próxima. A declarar no kickoff. Candidatos: (1) fix `_MES_ANO` "de" opcional; (
 **Testes.** `test_silicio_recusa_fuzzy_para_silica` (Silício/Silicio → `fuzzy_recusado` com silica e dist 2), `test_metanoll_recusa_metanol_e_nunca_resolve_etanol` (anti-filtro), `test_microrganismo_singular_sobrevive_na_cauda`, empate sintético com slugs marcados (exercita EMPATE, não recusa), `test_allowlist_disjunta_dos_canais_de_criticidade` (canais computados do dado, nunca lista digitada). 3 casos de Microrganismo em `test_hidratacao.py` verdes sem alteração de comportamento. Suíte 945→949 passed, 6 skipped; `mypy --strict` sem erro novo.
 
 **Docs.** DECISOES v147 (D-ARQ-64 criada, 64 decisões; índice regenerado). PROTOCOLO v66 (DT-003DV-01 faceta B RESOLVIDA — **DT inteira FECHADA**). PAINEL re-tirado (suíte move a baseline). Nenhuma R-* criada/alterada.
+
+---
+
+## Sessão 003.DZ — 25/07/2026
+
+Foco. Original: rodada `rodar` no Fascino pós-D-ARQ-64 + diff contra matriz humana (Marco 1). Pivô por bloqueio: 429 RESOURCE_EXHAUSTED (free-tier Gemini, 20 req/dia, 2 tentativas idênticas) parou a rodada; requisito do Diovanni formalizado — nenhum terceiro no caminho crítico, sem contratação paga, digitação em volume inaceitável.
+
+Entrega. D-ARQ-65 (DECISOES v148): extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo. Fatia 1 implementada: `motor/parser_familia_consciente.py` (núcleo puro + wrapper I/O; calibração de bandas POR BLOCO derivada da linha-cabeçalho GRUPO/FONTE/AGRAVO — não constantes; reusa `eh_cabecalho_ghe`) + `test_parser_familia_consciente.py` (literais VERBATIM do GHE 16, caso cabeçalho-deslocado molde GHE09/17, integração 19 blocos + invariante 237). Parser isolado — roteamento em `preparar_ghes` e procedência no verbatim = fatia 2.
+
+Bloqueadores da sessão (cláusula de divergência, 2×). (1) Rodada `rodar`: cascata Gemini sem resposta íntegra 2×; causa medida por sonda direta: 429 free-tier diário. Motivou o pivô. (2) Medição fina refutou banda fixa AGENTE/FONTE do prompt (FONTE varia 168,3–198,5 por página; corte fixo em 177 classificaria mal ≥3 blocos em silêncio): corrigido pelo Arquiteto para calibração por bloco; varredura-invariante 19/19 blocos, desvio máx 0,00pt, 237 linhas-de-categoria fecham exato.
+
+Medição (família Consciente/Fascino). 20 âncoras + rótulos 20/20; 237 linhas-de-risco por token de categoria; zero quantificação numérica (família qualitativa — S/P+nível); zero FDS apontada; 19 blocos parseados aprovam integralmente no `gate_forma_ghe`, zero pendências.
+
+Testes. 949→957 passed (+8 exato), 6 skipped; mypy --strict delta-zero.
+
+Docs. DECISOES v148 (D-ARQ-65, 65 decisões; índice regenerado). PROTOCOLO inalterado (nenhuma R-* tocada).
+
+Pendências. Fatia 2 de D-ARQ-65 (roteamento determinístico-primeiro em `preparar_ghes` + campo procedência) → 003.EA; com ela, rodada Fascino + diff Marco 1 saem offline. DT-003DS-01 (GHE sem número) inalterada. Cache/replay e cascata multi-fornecedor rebaixados a otimização (D-ARQ-65).
