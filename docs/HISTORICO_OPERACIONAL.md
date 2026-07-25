@@ -3959,3 +3959,17 @@ Testes. 949→957 passed (+8 exato), 6 skipped; mypy --strict delta-zero.
 Docs. DECISOES v148 (D-ARQ-65, 65 decisões; índice regenerado). PROTOCOLO inalterado (nenhuma R-* tocada).
 
 Pendências. Fatia 2 de D-ARQ-65 (roteamento determinístico-primeiro em `preparar_ghes` + campo procedência) → 003.EA; com ela, rodada Fascino + diff Marco 1 saem offline. DT-003DS-01 (GHE sem número) inalterada. Cache/replay e cascata multi-fornecedor rebaixados a otimização (D-ARQ-65).
+
+---
+
+## Sessão 003.EA — 25/07/2026
+
+Foco. Fatia 2 de D-ARQ-65: roteamento determinístico-primeiro em `preparar_ghes` (rota "ghe").
+
+Entrega. `FamiliaNaoReconhecida(ValueError)` tipada no parser (substitui os 2 ValueError genéricos). `preparar_ghes` tenta `parsear_arquivo` antes do LLM; aceitação exige zero exceção E contagem det == blocos (reconstruções de linha distintas — divergência = recusa conservadora nomeando as duas contagens); recusa → `Pendencia` não-bloqueante `familia_nao_medida` (regra_origem D-ARQ-65) + fallback LLM inalterado; `transcricao_indisponivel_pgr` segue bloqueante, agora restrita a família não-medida (D-ARQ-65 cl.2 materializada). Rota "card" intocada. 2ª leitura do PDF documentada (precedente do seam humano). Procedência no verbatim NÃO entrou — fatia 3 (blast radius do frozen dataclass).
+
+Testes. 6 novos (4 cenários de roteamento + Fascino real 19/19 com cliente-bomba sem invocação LLM + Viverde testemunha negativa); 5 existentes ajustados (patch de `parsear_arquivo` — a 2ª leitura agora é real e path fictício quebraria). Suíte 957→963 passed, 6 skipped; mypy --strict delta-zero.
+
+Docs. DECISOES v149 (nota de aplicação 003.EA em D-ARQ-65; índice regenerado). PROTOCOLO inalterado (nenhuma R-*).
+
+Pendências. Fatia 3 de D-ARQ-65 (procedência no verbatim) — não urgente. Próxima: 003.EB — rodada Fascino OFFLINE + diff contra a matriz humana (Marco 1); inclui ajuste do harness (`_exigir_chave` de `scripts/medicao_pgr.py` não pode barrar rodada que não invoca LLM).
