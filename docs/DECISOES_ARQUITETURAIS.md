@@ -2208,6 +2208,141 @@ Nenhum contraexemplo encontrado no acervo.
 
 **DT-003DS-01 (ABERTA — 003.DS; faceta de DT-003L-01; não-bloqueante de ingestão):** 20º cabeçalho do Fascino é `GHE\x00 TÉCNICO ADM / OPERACIONAL` (pág. 89) — GHE **sem número**. `_reconhece_cabecalho_ghe_padrao` exige `\d+` (fullmatch) → não casa, por design nesta sessão. Deferido por 3 razões: (1) reconhecer "GHE" sem dígito exige derrubar o guard-de-dígito que hoje rejeita a linha-glossário `GHE Grupo Homogêneo de Exposição:` (102 char) — precisa de discriminador novo, não tweak; (2) fora do repertório medido DT-003CM-01 (as 5 formas têm número); (3) o ` / ` de "TÉCNICO ADM / OPERACIONAL" é padrão cargo-slash — pode ser rota card (`eh_ancora_card_cargo`), decisão de classificação. Custo de deferir (nomeado): sem âncora própria, o conteúdo da pág. 89 funde na cauda do bloco de GHE 19 VENDAS → risco de **mis-segmentação** dos cargos técnico/adm. Resolução: decidir rota (GHE-sem-número vs card) derivada de ≥1 forma adicional no acervo; aceite = pág. 89 recorta em bloco próprio sem reabrir a linha-glossário como falso-positivo. `[DERIVADO — medição 003.DS Fascino]`
 
+## D-ARQ-63 — Gate de abertura em dois níveis: índice derivado + eixo nomeado
+
+**Contexto.** O gate de abertura (CLAUDE.md, obrigação declarável instituída pela META
+003.DQ após o gate pulado em 003.DP) exige leitura integral de PROTOCOLO e DECISOES antes
+de qualquer formalização. Medição 003.DX: o DECISOES saiu de 8.734 bytes (17/05/2026) para
+561.889 (24/07/2026) — 64× em 68 dias, com taxa recente (10/07→24/07) de ~10,6 mil
+bytes/dia e acelerando, não estabilizando. Somado ao PROTOCOLO (~169 mil bytes), o gate
+integral pede ~732 mil bytes, aproximadamente 185 mil tokens `[APROXIMADO — estimativa de
+tokenização, conferir se o número for usado para decisão]`. Não cabe em contexto algum
+junto com o trabalho da sessão. É aritmética, não desleixo: a regra foi escrita quando o
+DECISOES era uma fração disso, e passou a ser impagável sem que nada quebrasse visivelmente
+— a sessão apenas declarava o gate e seguia.
+
+Causa medida `[MEDIDO — 003.DX, git objects @ 86cda09]`, em caracteres (não bytes — o
+documento é UTF-8 com acentuação densa; não misturar as duas unidades):
+
+- Corpo das 62 decisões: **453.685 chars**, dos quais **177.214 (39%) são acreção
+  pós-decisão** — blocos `Changelog`, `Nota de implementação`, `Aplicação na sessão`,
+  `Andamento`.
+- Tabela de revisões: **87.328 chars, 16% do documento** — 145 linhas, 100% diário.
+- Somadas, a massa de diário é **264 mil de 541 mil chars: 49% do DECISOES**.
+- Concentração parcial: **D-ARQ-57 sozinho é 59.755 chars (13,2% do corpo), 51.818 de
+  acreção**; D-ARQ-42 é 25.396. A cauda é longa — não há dois vilões, há um padrão.
+
+O DECISOES virou registro de decisões **mais** diário de implementação. O diário duplica o
+HISTORICO. O gate obriga a reler, toda sessão, o histórico de fatiamento de PRs que já está
+registrado em outro documento vivo.
+
+Nota de justiça sobre a causa: cada nota individual foi a coisa certa a escrever — registrar
+onde a decisão foi materializada é rastreabilidade regulatória, exigência do PCMSO. O que
+faltou não foi disciplina, foi um teto para onde a nota mora.
+
+**Decisão — duas peças, ambas necessárias; nenhuma resolve sozinha.**
+
+*Peça 1 — índice derivado, nunca escrito à mão.* `docs/INDICE_DARQ.md`, uma linha por
+decisão (ID, título, status quando presente, linha de início, tamanho em chars), **gerado
+por `scripts/gerar_indice_darq.py` a partir do próprio DECISOES**. Índice mantido à mão é
+cache, e cache diverge — é a doutrina anti-cache do projeto aplicada a si mesma. Teste de
+não-divergência (`gerar_indice()` == arquivo em disco) torna a divergência vermelha em vez
+de descoberta tardia. O campo `chars` não é enfeite: é o que permite orçar o nível 2 antes
+de começar a ler. Status sai vazio quando o bloco não declara um `[MEDIDO: 28 dos 62
+declaram]` — ausência não é inferida.
+
+*Peça 2 — gate em dois níveis, declarado nominalmente.*
+
+- **Nível 1, sempre integral:** PROTOCOLO inteiro + `INDICE_DARQ.md` inteiro + corpo
+  integral das decisões-mãe transversais **D-ARQ-06** (universalidade), **D-ARQ-09**
+  (pureza do motor) e **D-ARQ-22** (modelo de qualidade) — as três incidem sobre qualquer
+  decisão, independente do eixo.
+- **Nível 2, por eixo:** corpo integral dos D-ARQ da cadeia que a sessão toca, escolhidos
+  pelo Arquiteto a partir dos títulos do índice e **nomeados na linha do gate**.
+
+Forma da declaração:
+
+`Gate de abertura: PROTOCOLO vX integral, ÍNDICE vY integral, transversais D-ARQ-{06,09,22}, eixo <nome> = D-ARQ-{...} integral (git objects @ <hash>)`
+
+Segue bloqueável pelo Diovanni em uma linha, sem auditar a leitura — que era o ponto da
+003.DQ. Muda o que se lê; não muda se se lê, nem se se declara.
+
+**Consequência.**
+
+- O gate volta a caber: nível 1 ≈ PROTOCOLO (169k bytes) + índice (~5k) + as três
+  transversais (~6,4k chars somados); nível 2 orçado pelo campo `chars` do índice antes de
+  abrir qualquer bloco.
+- **Risco residual assumido:** eixo mal escolhido faz a sessão pular um D-ARQ relevante —
+  falha silenciosa, classe D-ARQ-22. Mitigação: a escolha é nominal e auditável contra o
+  índice; não elimina o risco, torna-o visível e contestável. `[INTERPRETADO — prioridade
+  na revisão de saída]`
+- **Índice sem campo `eixo`, deliberadamente.** Eixo não é derivável do documento hoje;
+  classificar as 62 decisões é trabalho de julgamento, fatia própria. Enquanto não existir,
+  o nível 2 é escolha nominal do Arquiteto sobre os títulos, não lookup. Inventar o campo
+  agora o faria nascer como cache.
+- **Atrito novo, aceito:** o campo `chars` muda a cada edição de qualquer D-ARQ, logo toda
+  PR que tocar o DECISOES precisa regenerar o índice ou o teste fica vermelho. É o
+  comportamento desejado — é o que impede o índice de virar cache — mas é custo real em
+  toda sessão de doc. Se o atrito se mostrar alto, a saída é rodar o gerador como hook de
+  pre-commit; decisão adiada até haver evidência, não antecipada.
+- **Dívida aberta (DT-003DX-01), três frentes:** (a) migrar a acreção pós-decisão para
+  satélites `docs/darq/D-ARQ-NN.md` com ponteiro no D-ARQ; (b) D-ARQ-57 especificamente,
+  13% do corpo sozinho; (c) a tabela de revisões (87k chars), candidata a arquivo próprio.
+  Reduziria o corpo-decisão a ~276 mil chars. **Não é pré-requisito** desta decisão — não
+  resolve o gate sozinha (ainda seriam ~70 mil tokens) — mas para a hemorragia e barateia
+  o nível 2.
+
+**Fronteiras (não confundir).**
+
+- **CLAUDE.md (pasta do projeto Cowork) / META 003.DQ** — não revoga a obrigação
+  do gate nem a linha declarável; substitui o conteúdo do nível 1 e acrescenta o
+  nível 2. O texto normativo do gate vive hoje FORA do git `[MEDIDO — 003.DX]`,
+  o que esta decisão não corrige — ver DT-003DX-02.
+- **D-ARQ-26 (`/kickoff`)** — intocado. O kickoff coleta ESTADO (git, HISTORICO); o gate lê
+  CONHECIMENTO ACUMULADO (protocolo, decisões). Momentos e objetos distintos; nenhum cobre
+  o outro. A skill não passa a ler DECISOES.
+- **D-ARQ-22** — o índice derivado é aplicação direta do gate de procedência ao próprio
+  aparato de método: valor não-derivável (eixo) não entra no artefato derivado.
+- **D-ARQ-44** — o índice é `.md`, logo já coberto por `*.md text eol=lf`; o terminador não
+  é decisão nova.
+- Não toca motor, protocolo clínico nem vocabulário. **Nenhuma R-* criada ou alterada.**
+
+**Base.** Sessão 003.DX (24/07/2026), META. Origem: o gate integral revelou-se impossível de
+cumprir na abertura da própria 003.DX — medido e reportado em vez de contornado com uma
+declaração vazia. Peça 1 implementada em PR #255 (`scripts/gerar_indice_darq.py`,
+`docs/INDICE_DARQ.md`, `tests/test_gerar_indice_darq.py`; suíte 939→944).
+
+**Correção de medição interna à sessão (registrada por rastreabilidade).** A primeira
+medição do Arquiteto reportou 50% de acreção e "D-ARQ-62 com 92k chars". Estava errada: a
+delimitação de bloco ia do header até o fim do arquivo, e como D-ARQ-62 é a última decisão,
+seu bloco engoliu a tabela de revisões inteira. A saída correta do gerador (que exclui
+`## Histórico de revisões` por spec) expôs o defeito. Números desta decisão são os
+corrigidos. O episódio é evidência a favor da cláusula de divergência dos prompts
+cirúrgicos — que aqui pegou erro do Arquiteto, não do Code.
+
+### DT-003DX-02 — A regra do gate mora fora do git `[ABERTA — higiene de método]`
+
+**Origem:** Sessão 003.DX, bloqueio da PR B: o prompt cirúrgico assumia
+`CLAUDE.md` no repo; o arquivo não existe no working tree nem no histórico
+(`git log --all -- CLAUDE.md` vazio) `[MEDIDO — Code, 003.DX]`. A regra do gate
+vive em `CLAUDE.md` na pasta do projeto Cowork, não versionado.
+
+**Situação.** A obrigação declarável do gate (META 003.DQ, ampliada por
+D-ARQ-63) e o protocolo do Claude Code (branch, `git add` nominal, cláusula de
+divergência) são regras normativas do projeto que hoje não têm histórico, diff
+nem PR. Podem divergir em silêncio. É exatamente a categoria que a doutrina do
+projeto reserva a "ponteiro e julgamento, nunca fonte" — mas está carregando
+fonte.
+
+**O que a resolução exige (sessão própria).** Decidir a casa canônica das regras
+de método no git (candidatos: `docs/METODO_ARQUITETO.md`; `CLAUDE.md` na raiz do
+repo, que o Claude Code autocarrega) e reduzir o CLAUDE.md do Cowork a ponteiro.
+Cuidado: as regras hoje misturam dois públicos — Arquiteto (gate, universalidade,
+paliativos) e Code (branch, add nominal, divergência); a partição por público é
+parte da decisão, não detalhe de execução.
+
+**Status:** ABERTA. Não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2357,3 +2492,4 @@ Nenhum contraexemplo encontrado no acervo.
 | v143 | 22/07/2026 | Sessão 003.DT (IMPLEMENTAÇÃO/MEDIÇÃO): rodada Fascino `ida` ao vivo — 1º exercício dos estágios LLM (`transcrever_topo`+`gate_forma_topo`); pipeline de topo fim-a-fim OK, credencial RT transcrita e aprovada, artefato `relatorios/003dt_fascino_ida.json` (gitignored). Ressalva "run LLM não exercido" (003.DS) FECHADA p/ o topo. Achado → DT-003BV-01 (PROTOCOLO v61): `proposta=None` porque as 6 candidatas caem em mm/aaaa (design D2, agora medido real) + extenso-com-"de" (LACUNA `_MES_ANO`). `rodar` (GHE+card) ainda não exercido (falta volta-RT). Sem código de motor; suíte inalterada 928/6. PROTOCOLO v61. PAINEL não re-tira (números não movem; Marco 1 não fecha). |
 | v144 | 23/07/2026 | Sessão 003.DU (IMPLEMENTAÇÃO): fix `_MES_ANO` — `(?:de\s+)?` torna o "de" opcional entre mês e ano (`resolvedor_topo.py`); "JUNHO DE 2026" e, por tolerância a prefixo, "15 DE JUNHO DE 2026" resolvem para o 1º dia do mês (**decisão: aceitar o drop do dia** — dia é edição-RT, coerente com o default conservador de DT-003BV-01). Fecha a faceta "de" medida em 003.DT; mm/aaaa permanece deferido (D2). Teste novo falha-sem/passa-com (`test_de_opcional_entre_mes_e_ano_resolve`). Suíte 928→929 passed, 6 skipped; `mypy --strict` sem erro novo. Commit `63edefe`, merge PR #250 `3470111`. Nenhuma R-* criada/alterada (R-PGR-06 semântica intacta — só o parser determinístico ganha cobertura). PROTOCOLO v62. PAINEL não re-tira (nenhum dos 3 números move; contagem de testes é carimbo de baseline, não um dos 3 números). |
 | v145 | 24/07/2026 | Sessão 003.DW (CONHECIMENTO/dado): nota de aplicação 003.DW em D-ARQ-50 Parte 2 (mesma ID) — `silica.termos` populado (DT-003DV-01 faceta A); critério Tier 1 estendido a fonte-por-natureza-do-agente (NR-15 Anexo 12 / NR-07 Anexo III Quadro 1, não só Anexo I). Anti-FP dos não-sílica em teste. Índice 99→105, slugs 79 inalterado. Faceta B → 003.DX. Commit `8363fcb`, PR #253. Nenhum D-ARQ novo, nenhuma R-* criada/alterada. |
+| v146 | 24/07/2026 | Sessão 003.DX (META): **D-ARQ-63 CRIADA** — gate de abertura em dois níveis: `docs/INDICE_DARQ.md` derivado (peça 1, PR #255, `scripts/gerar_indice_darq.py`, suíte 939→944) + nível 1 (PROTOCOLO + ÍNDICE + transversais D-ARQ-06/09/22) integral sempre, nível 2 (eixo nomeado) por sessão. Causa: DECISOES 64× em 68 dias (8.734→561.889 bytes), 49% diário (acreção pós-decisão + tabela de revisões). **DT-003DX-01 ABERTA** (PROTOCOLO v65) — migrar acreção para satélites `docs/darq/`. CLAUDE.md substitui o parágrafo do gate. Nenhuma R-* criada/alterada. |

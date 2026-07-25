@@ -3903,3 +3903,21 @@ Próxima. A declarar no kickoff. Candidatos: (1) fix `_MES_ANO` "de" opcional; (
 **Medição.** Índice 99→105, slugs 79 inalterado, sem colisão; pytest 929→939, 6 skipped; mypy --strict motor/ limpo; vigia fuzzy (003.DN) verde sob +6 aliases. Commit `8363fcb`, merge PR #253 (`862fd57`).
 
 **Disposição.** DT-003DV-01 faceta A RESOLVIDA; faceta B (fuzzy `Silício`→`silica`, mecanismo) ABERTA → 003.DX. Fila de enriquecimento não-DT: silicatos (slug próprio/PNOS); poeira respirável (decidir só com o diff da matriz humana no Marco 1).
+
+---
+
+## Sessão 003.DX — 24/07/2026 — META (gate de abertura em dois níveis)
+
+**Foco.** O gate de abertura (obrigação declarável da META 003.DQ) tornou-se impagável em contexto algum — medido na própria abertura da 003.DX, não presumido.
+
+**Medição (caracteres, não bytes — DECISOES é UTF-8 com acentuação densa).** Corpo das 62 decisões pré-sessão: 453.685 chars, dos quais 177.214 (39%) são acreção pós-decisão (`Changelog`, `Nota de implementação`, `Aplicação na sessão`, `Andamento`). Tabela de revisões: 87.328 chars, 16% do documento. Massa de diário somada: 264 mil de 541 mil chars — 49% do DECISOES. Concentração parcial: D-ARQ-57 sozinho é 59.755 chars (13,2% do corpo), 51.818 de acreção; segunda maior, D-ARQ-42, 25.396. Curva de crescimento (bytes, `wc -c`): 8.734 em 17/05/2026 → 561.889 em 24/07/2026 — 64× em 68 dias, taxa recente (10/07→24/07) ~10,6 mil bytes/dia, acelerando.
+
+**Correção de medição interna à sessão (registrada por rastreabilidade).** A 1ª passada do Arquiteto reportou 50% de acreção e "D-ARQ-62 com 92k chars" — errada: a delimitação de bloco ia do header até o fim do arquivo, e como D-ARQ-62 é a última decisão antes do histórico, seu bloco engoliu a tabela de revisões inteira. A saída correta do gerador (que exclui `## Histórico de revisões` por spec) expôs o defeito; os números acima são os corrigidos.
+
+**Decisão — D-ARQ-63, duas peças.** Peça 1: `docs/INDICE_DARQ.md`, derivado por `scripts/gerar_indice_darq.py` a partir do próprio DECISOES (ID, título, status quando presente, linha, chars); teste de não-divergência torna cache desatualizado vermelho em vez de descoberta tardia. Peça 2: gate em dois níveis — nível 1 sempre integral (PROTOCOLO + ÍNDICE + transversais D-ARQ-06/09/22); nível 2 por eixo, escolhido pelo Arquiteto a partir dos títulos do índice e nomeado na linha do gate. Detalhe completo em DECISOES v146.
+
+**Bloqueador da sessão (PR B, passo 3 original).** O prompt cirúrgico assumia `CLAUDE.md` versionado no repo para trocar o parágrafo do gate. Medido: não existe no working tree nem no histórico (`git log --all -- CLAUDE.md` vazio); a regra do gate vive em `CLAUDE.md` na pasta do projeto Cowork, fora do git. O Code parou e reportou em vez de criar o arquivo por adivinhação — cláusula de divergência dos prompts cirúrgicos funcionando como desenhado. Abriu **DT-003DX-02** (regra de método fora do git, ABERTA, não-bloqueante).
+
+**Entregas.** D-ARQ-63 criada (DECISOES v146). Peça 1 implementada e mergeada em PR #255 (`scripts/gerar_indice_darq.py`, `docs/INDICE_DARQ.md`, `tests/test_gerar_indice_darq.py`; suíte 939→944). **DT-003DX-01 ABERTA** (PROTOCOLO v65) — migrar acreção pós-decisão para satélites `docs/darq/`, três frentes (acreção geral, D-ARQ-57, tabela de revisões). **DT-003DX-02 ABERTA** (DECISOES, corpo do D-ARQ-63) — regra do gate fora do git. `CLAUDE.md` do projeto Cowork atualizado fora deste repo (fora de escopo do Code).
+
+**Docs.** DECISOES v146 (63 decisões). PROTOCOLO v65. Índice regenerado após todas as edições do DECISOES (62→63, v145→v146). Suíte 944 passed, 6 skipped (PR B é só doc, sem teste novo). Nenhuma R-* criada/alterada; motor intocado.
