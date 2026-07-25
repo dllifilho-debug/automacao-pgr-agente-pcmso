@@ -19,6 +19,7 @@ _CAMINHO_INDICE = _RAIZ / "docs" / "INDICE_DARQ.md"
 
 _REGEX_HEADER = re.compile(r"^## D-ARQ-(\d+) — (.+)$", re.MULTILINE)
 _REGEX_HISTORICO = re.compile(r"^## Histórico de revisões$", re.MULTILINE)
+_REGEX_SUBSECAO = re.compile(r"^### ", re.MULTILINE)
 _REGEX_STATUS = re.compile(r"^\*\*Status:?\*\*\s*(.+)$", re.MULTILINE)
 _REGEX_VERSAO = re.compile(r"^\|\s*v(\d+)\s*\|", re.MULTILINE)
 
@@ -28,7 +29,9 @@ def _escapar_pipe(texto: str) -> str:
 
 
 def _status_do_bloco(bloco: str) -> str:
-    correspondencia = _REGEX_STATUS.search(bloco)
+    subsecao = _REGEX_SUBSECAO.search(bloco)
+    corpo_proprio = bloco[: subsecao.start()] if subsecao is not None else bloco
+    correspondencia = _REGEX_STATUS.search(corpo_proprio)
     if correspondencia is None:
         return ""
     return correspondencia.group(1).split(".")[0].strip()
