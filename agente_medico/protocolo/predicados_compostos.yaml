@@ -3,7 +3,7 @@ predicados_compostos:
     ou:
       - altura
       - espaco_confinado
-      - maquina_pesada
+      - motorista_equipamento_pesado
 
   vibracao_qualquer:
     ou:

@@ -489,6 +489,31 @@ Pacotes são conjuntos pré-formalizados de exames que disparam em bloco quando 
 
 **Observação arquitetural:** hemograma e glicemia entram aqui como **rastreio de comorbidade** (não como biomonitoramento). A lógica é: comorbidade não detectada contraindica atividade crítica.
 
+> **Nota de implementação (003.ED, mesma ID).** A regra existia em `regras.yaml` desde
+> 002.C mas era inalcançável por duas das três pernas de `atividade_critica`. Corrigido:
+> (a) `trabalho_altura` ganhou alias Tier 1 `"Trabalho em Altura"` — antes o termo que o PGR
+> escreve não resolvia (dist 3 do slug, fora do raio fuzzy). Fonte: NR-35, título e item
+> 35.2.1, redação Portaria MTP 4.218/2022, texto vigente conferido `nr-35-atualizada-2025-1.pdf`
+> (última alteração Portaria MTE 1.680, de 02/10/2025). `[DERIVADO — NR-35 título e 35.2.1]`
+> (b) o primitivo `maquina_pesada` comparava slug inexistente; `atividade_critica` passa a
+> referenciar `motorista_equipamento_pesado` (D-ARQ-67).
+> **Efeito medido (Fascino, rodada offline determinística, D-ARQ-65):** 16 dos 19 GHEs
+> passaram a emitir as 5 linhas da regra; cruzamento NOMINAL contra o gabarito
+> `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Hemograma/Glicemia/ECG
+> em 16/19) deu interseção 16 e conjuntos "só no motor" e "só no gabarito" VAZIOS — mesmos IDs,
+> não apenas mesma contagem. As 16 pendências `vocabulario_ausente` de 'Trabalho em Altura'
+> desapareceram.
+> **Ressalva `[INTERPRETADO — prioridade na revisão de saída]`.** Identificar "operação de
+> máquina pesada" (R-PKG-ATIVCRIT) com "motorista de equipamento pesado" (R-AUD-01) é leitura
+> do Arquiteto: o protocolo usa os dois rótulos e não declara que denotam o mesmo conceito.
+> Nível 4 de D-ARQ-22 — norma não cobre, matriz-precedente não medida, não é analogia. A
+> consequência prevista (GHE com esse risco isolado passa a receber o pacote completo) é REAL
+> no motor e **NÃO exercitada por nenhum caso do acervo**: medição isolada dos três primitivos
+> por GHE no Fascino deu `trabalho_altura` 16, `motorista_equipamento_pesado` **0**,
+> `espaco_confinado` **0**, sobreposição 0 (soma fecha 16). Inspecionar na primeira matriz
+> gerada para PGR que declare o risco.
+> Conteúdo clínico inalterado; nenhuma R-* criada ou alterada.
+
 ### R-PKG-SOLD — Pacote Soldador `[VALIDADO]`
 **Predicado:** cargo "soldador" presente, ou exposição a fumos metálicos declarada.
 
@@ -1232,7 +1257,7 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 
 **Fechamento exige decisão de dado**, não só de motor: popular `termos:` segue o critério de grafia normativa com fonte (lição 003.DM) — não entra junto com esta DT.
 
-**Observação de instrumento (não-DT).** A pendência global do relatório não carrega o GHE de origem — atribuição termo→GHE exige cruzamento manual com o PDF. Limitação do render do harness (`scripts/medicao_pgr.py`), não do motor.
+**Observação de instrumento (não-DT) — REFUTADA por medição (003.ED).** Esta observação dizia que a pendência global do relatório não carrega o GHE de origem, exigindo cruzamento manual com o PDF. Medido em 003.ED: o relatório de `rodar-offline` TEM identidade por GHE — cada seção `### GHE` carrega sua própria lista de pendências e tabela de exames. A limitação era presumida, não medida; procedência corrigida aqui em vez de apagada (D-ARQ-06/registro de erro).
 
 **Status faceta A: RESOLVIDA (003.DW).** `silica.termos` populado com 6 grafias de sílica cristalina livre — "Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita" → slug `silica`, EXATA. Fonte: NR-15 Anexo 12 ("Sílica Livre Cristalizada": quartzo/cristobalita/tridimita) + NR-07 Anexo III Quadro 1; CAS 14808-60-7. Estende o critério Tier 1 (D-ARQ-50 P2) de "grafia do Anexo I" para fonte-por-natureza-do-agente (poeira-mineral/RX não tem biomonitoramento). Índice 99→105, slugs 79 inalterado, sem colisão; teste `test_termos_silica_resolvem_exata`. Commit `8363fcb`, PR #253. Literal "cristalizada" vs "cristalina" `[INCERTO — confirmar texto oficial MTE]`.
 
@@ -1271,6 +1296,14 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 **Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura, classe 4):** `Av. Médica de Saúde Mental` é conceito próprio, distinto de Avaliação Psicossocial, ou duplicidade de rótulo? A Avaliação Psicossocial incondicional é conduta atualizada da matriz, ou anotação de rascunho não-validada?
 
 **Status:** REENQUADRADA, não fechada. Resíduo (classe 4) exige sessão CONHECIMENTO com gate D-ARQ-63 e 2º PGR no acervo antes de tocar R-PSY-01 ou criar regra nova.
+
+**Nota (003.ED).** Classe (2) perdeu a maior fatia: o alias de altura fechou 16 GHEs × 5
+exames = 80 células, com cruzamento nominal contra o gabarito sem falso positivo nem falso
+negativo. Classe (4) inalterada. Achado novo a medir: **GHE-19 (Vendas) tem `ctx.riscos == []`**
+— o gabarito pede Acuidade Visual ali e o motor não tem nada a emitir. Falta distinguir
+"o PGR não declara risco para Vendas" de "declara e nada resolveu": a primeira leitura manda
+a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, para classe (2)
+(lacuna de vocabulário). `[A MEDIR — não concluir sem medir]`
 
 ### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[ABERTA — 003.EB]`
 
@@ -1352,6 +1385,54 @@ Documentos envolvidos: HUMAP, UFGD-v7, Fascino, Viverde.
 **Por que importa além do conforto.** 22 minutos por rodada encarece exatamente a disciplina de medir-antes-de-afirmar, que em 003.EC pegou três defeitos que relatório verde não pegava: os 4 testes exigidos que não existiam (denunciados por 963→963), as 48 falhas não reconciliadas (denunciadas por 7+17+1≠48) e o índice derivado defasado (denunciado por 966≠967). Instrumento caro é instrumento que se deixa de usar.
 
 **Correção de suspeita (registrar).** A hipótese inicial do Arquiteto era I/O de rede em `tests/test_gemini_extracao.py` — **REFUTADA** pela medição. É CPU de pdfplumber sobre documentos grandes, não espera de socket.
+
+**Status:** ABERTA. Não-bloqueante.
+
+### DT-003ED-01 — Grafia natural com preposição não resolve contra slug sem preposição `[ABERTA — 003.ED]`
+
+**Origem:** 003.ED, ao medir por que R-PKG-ATIVCRIT não acionava no caso real.
+
+**Situação.** O slug do vocabulário elide a preposição; o PGR escreve a forma natural. A
+distância é sempre 3 ("em_", "de_"), fora do raio fuzzy 2 — nunca salvável por Levenshtein,
+mesmo padrão que a Tier 1 de 003.DM mediu nos químicos. Medido `[MEDIDO — resolvedor real
+sobre o vocabulário real @ e7311fd]`:
+
+| termo | resolve |
+|---|---|
+| `Trabalho em Altura` | NAO_RESOLVIDO (FECHADO em 003.ED por alias NR-35) |
+| `Motorista de equipamento pesado` | NAO_RESOLVIDO |
+| `Motorista equipamento pesado` | EXATA |
+| `Vibração de corpo inteiro` | NAO_RESOLVIDO |
+| `Vibracao corpo inteiro` | EXATA |
+| `Operador de máquina pesada` | NAO_RESOLVIDO |
+| `Espaço confinado` / `Ruído` / `Eletricidade` / `Umidade` | EXATA |
+
+**Impacto.** Atinge R-VIB-01 e R-VIB-02 `[VALIDADO]` pela via da vibração, e a perna de
+máquina pesada de R-PKG-ATIVCRIT/R-ECG-01. Classe (2) de DT-003EB-01.
+
+**O que a resolução exige (fatia de dado própria, uma fonte por vez).** Vibração: grafia
+literal do **Anexo I da NR-09** — "Vibrações em Mãos e Braços (VMB)" e "Vibrações de Corpo
+Inteiro (VCI)" `[INCERTO — literal NÃO conferido no texto vigente; a NR-09 tem atualização
+2026, conferir `nr-09-atualizada-2026.pdf` antes de gravar]`. Máquina pesada: **sem grafia
+normativa** — é Tier 2, bloqueada por DT-003DM-01; caminho alternativo é `riscos_implicitos`
+por cargo (R-GHE-02) nos cargos operadores, decisão de dado própria com teste de
+indissociabilidade vs. contingência (R-GHE-05).
+
+**Status:** ABERTA. Não-bloqueante.
+
+### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[ABERTA — higiene de instrumento]`
+
+**Origem:** 003.ED, ao tentar atribuir causa às 16 emissões de R-PKG-ATIVCRIT.
+
+**Situação.** O relatório de `rodar-offline` imprime pendências e, por GHE, a tabela de exames
+com `regra_id` — mas NÃO os slugs resolvidos em `ctx.riscos` nem qual perna de um predicado
+composto disparou. Consequência medida: o relatório não distingue "risco resolvido e não
+relevante aqui" de "risco nunca presente"; responder "por que esta linha foi emitida" exigiu
+reabrir o motor em memória. D-ARQ-22 Parte B exige que cada exame emitido carregue **regra de
+origem, gatilho e status de validação** — o instrumento entrega a regra e omite os outros dois.
+
+**Correção candidata.** Por GHE, listar slugs resolvidos; por linha emitida, o átomo do
+predicado que a satisfez e o status da regra. Irmã de DH-003EC-01.
 
 **Status:** ABERTA. Não-bloqueante.
 
@@ -1447,3 +1528,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v67 | 25/07/2026 | Sessão 003.EB (MEDIÇÃO): **DT-003EB-01 e DT-003EB-02 adicionadas** (§11) — 1ª rodada `rodar-offline` (D-ARQ-65) no Fascino, 19/19 GHEs, zero invocação LLM, + diff contra a matriz humana validada (Marco 1): DT-003EB-01 (pacote-base incondicional de 10 exames em 19/19 GHEs sem conceito no motor, ~190 de ~194 células do diff) e DT-003EB-02 (R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo, GHE-10/16). Higiene: header da DT-003DV-01 corrigido para `[FECHADA — facetas A (003.DW) e B (003.DY)]`, coerente com o corpo. Nenhuma R-* criada/alterada. Sem código de motor. |
 | v68 | 26/07/2026 | Sessão 003.EC (IMPLEMENTAÇÃO): **R-CLI-01 materializada** — nota de implementação (mesma ID, §5.1): primitivo incondicional `todo_trabalhador` (D-ARQ-66), slug `exame_clinico` novo em `exames.yaml`, 12M em `[adm, per, MR, RT, dem]`. **DT-003EB-01 REENQUADRADA** (não fechada) — premissa "pacote-base ~190/~194 células" REFUTADA por medição direta do gabarito Fascino: medido 4 exames em 19/19 (não ~190), GHE-06 Administração recebe 4/GHE-19 Vendas recebe 5 (oposto de "pacote incondicional universal"); gap decomposto em 4 classes (regras órfãs / lacuna de vocabulário / divergência de periodicidade / conceito ausente), 003.EC fecha a maior fatia da classe (1); resíduo ABERTO = classe (4) (`Av. Médica de Saúde Mental` + Avaliação Psicossocial incondicional vs R-PSY-01 condicionada), gatilho de formalização = 2º PGR no acervo (D-ARQ-06), não n=1; ressalva sobre anotações de rascunho no corpo do gabarito (D-ARQ-18); correção factual 003.EB (RX 60m também em GHE-08, não só GHE-09). **DT-003EC-01 CRIADA (ABERTA, não-bloqueante)** — RX Tórax OIT 12M no gabarito onde R-RX-01 sem-medição prescreve 24M, pergunta de método (D-ARQ-27); resolve de passagem o pré-registro de DT-003DV-01/003.DW ('Poeira respirável' tratada como sílica-like, não PNOS). Suíte 963→967 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `f175e76`. |
 | v69 | 26/07/2026 | Sessão 003.EC (META): re-tiragem do `PAINEL_ESTADO.md` pós-merge do PR #263 (main `e3cba55`) — regras 20/42 pelo instrumento (48%) / 19/42 pela intenção do painel (R-TEMP-01 é citação, não regra executável), vocabulário/CAS 50/79 (63%, substitui a medição manual 003.AI de 21/45, obsoleta desde 003.EC), suíte 967 passed/6 skipped (1366s). **DH-003EC-01 e DH-003EC-02 adicionadas** (§11) — higiene do instrumento `scripts/medir_painel.py` (cegueira a suíte vermelha, ID citado em prosa contando como implementado, `INDICE_DARQ.md` sem vigilância de divergência) e higiene de suíte (79% do tempo é reparse de PDF real em setup por-teste, candidato a fixture `scope="session"`). Nenhuma regra clínica criada ou alterada. |
+| v70 | 26/07/2026 | Sessão 003.ED (IMPLEMENTAÇÃO): nota de implementação em R-PKG-ATIVCRIT (mesma ID, §6) — alias Tier 1 `"Trabalho em Altura"` (NR-35 título + item 35.2.1, Portaria MTP 4.218/2022) e substituição do primitivo órfão `maquina_pesada` por `motorista_equipamento_pesado` (D-ARQ-67) em `atividade_critica`; efeito medido no Fascino: 16/19 GHEs passam a emitir R-PKG-ATIVCRIT, cruzamento nominal contra o gabarito com interseção 16 e conjuntos "só motor"/"só gabarito" vazios. Ressalva `[INTERPRETADO]` registrada — os dois rótulos ("máquina pesada" vs "motorista de equipamento pesado") não são declarados como o mesmo conceito pelo protocolo; consequência não exercitada por nenhum caso do acervo (0 GHEs via `motorista_equipamento_pesado`, 0 via `espaco_confinado`). **DT-003ED-01 CRIADA (ABERTA)** (§11) — grafia natural com preposição não resolve contra slug sem preposição (atinge R-VIB-01/02 e a perna de máquina pesada). **DH-003ED-01 CRIADA (ABERTA)** (§11) — relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto disparador. **DT-003DV-01: observação de instrumento REFUTADA por medição** — o relatório TEM identidade por GHE. **DT-003EB-01: nota adicionada** — classe (2) perdeu a maior fatia; achado novo `[A MEDIR]` sobre GHE-19 (Vendas, `ctx.riscos == []`). Suíte 967→968 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `7b2e65d`. Nenhuma R-* criada/alterada; conteúdo clínico inalterado. |

@@ -27,8 +27,8 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_105_entradas(indice_real: IndiceTermos) -> None:
-    assert len(indice_real.slug_por_forma) == 105
+def test_indice_real_tem_106_entradas(indice_real: IndiceTermos) -> None:
+    assert len(indice_real.slug_por_forma) == 106
 
 
 # ---------------------------------------------------------------------------
@@ -102,6 +102,7 @@ def test_eaquipamento_desprotegido_dist_maior_que_2(indice_real: IndiceTermos) -
         ("Flúor, ácido fluorídrico e fluoretos inorgânicos", "fluoretos"),
         ("Arsênico", "arsenio"),
         ("Tolueno diisocianato", "tdi"),
+        ("Trabalho em Altura", "trabalho_altura"),
     ],
 )
 def test_aliases_tier1_resolvem_exata(indice_real: IndiceTermos, termo: str, slug_esperado: str) -> None:

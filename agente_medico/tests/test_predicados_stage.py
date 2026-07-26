@@ -57,12 +57,18 @@ def test_popula_primitivos_referenciados() -> None:
     assert "vibracao_corpo_inteiro" in ctx.predicados
     assert "ruido" in ctx.predicados
 
-    # Nota: espaco_confinado e maquina_pesada NÃO são avaliados porque o `ou`
+    # Nota: espaco_confinado NÃO é avaliado porque o `ou` de atividade_critica
     # curto-circuita assim que altura=True é encontrado. Decisão arquitetural:
     # Stage 4 preserva semântica preguiçosa, cacheia apenas o caminho real de
     # avaliação. Ver docs/HISTORICO_OPERACIONAL.md § Sessão 002.D2.
     assert "espaco_confinado" not in ctx.predicados
-    assert "maquina_pesada" not in ctx.predicados
+
+    # motorista_equipamento_pesado (003.ED, substitui maquina_pesada em
+    # atividade_critica.ou) É avaliado mesmo com o curto-circuito acima,
+    # porque R-AUD-01 também referencia esse primitivo diretamente em seu
+    # próprio "quando" — outra regra popula o cache independentemente do
+    # short-circuit de atividade_critica.
+    assert "motorista_equipamento_pesado" in ctx.predicados
 
 
 def test_idempotencia() -> None:
