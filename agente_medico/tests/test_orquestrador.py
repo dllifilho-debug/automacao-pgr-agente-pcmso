@@ -8,9 +8,11 @@ from agente_medico.motor.orquestrador import executar
 from agente_medico.motor.protocolo import Protocolo, Vocabulario, carregar
 from agente_medico.motor.tipos import (
     GHEPGR,
+    Momento,
     PGR,
     RiscoPGR,
 )
+from agente_medico.tests.invariantes import linhas_de_risco
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
@@ -236,9 +238,9 @@ def test_integracao_end_to_end() -> None:
     assert resultado.status == "OK"
     assert len(resultado.matrizes) == 1
     matriz = resultado.matrizes[0]
-    assert len(matriz.linhas) == 5
+    assert len(matriz.linhas) == 6
     nomes = {e.exame.strip().lower() for e in matriz.linhas}
-    assert nomes == {"hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg"}
+    assert nomes == {"hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg", "exame_clinico"}
     for e in matriz.linhas:
         assert e.periodicidade_meses == 12
 
@@ -301,3 +303,66 @@ def test_ghe_parcial_linhas_presentes_com_bloqueio() -> None:
     audiometria = next(ln for ln in matriz.linhas if ln.exame == "audiometria")
     assert any(p.bloqueante for p in audiometria.pendencias_anexadas)
     assert not any(p.bloqueante for p in matriz.pendencias)
+
+
+# ---------------------------------------------------------------------------
+# R-CLI-01 — piso universal (003.EC). Usa o protocolo real (regras.yaml em
+# disco) porque R-CLI-01 é a regra sob teste, não um fixture sintético.
+# ---------------------------------------------------------------------------
+
+_TODOS_MOMENTOS = {Momento.ADM, Momento.PER, Momento.MR, Momento.RT, Momento.DEM}
+
+
+def test_rcli01_emite_exame_clinico_12m_5_momentos_sem_risco() -> None:
+    # (a) GHE sem nenhum risco: R-CLI-01 é incondicional, deve emitir mesmo assim.
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=())
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    clinico = next(ln for ln in matriz.linhas if ln.exame == "exame_clinico")
+    assert clinico.periodicidade_meses == 12
+    assert clinico.momentos == _TODOS_MOMENTOS
+    assert matriz.status == "VÁLIDA"
+
+
+def test_rcli01_emite_tambem_em_ghe_com_risco() -> None:
+    # (b) R-CLI-01 não é exclusivo do GHE sem risco: convive com linhas de risco.
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=(_risco("trabalho_altura"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    nomes = {ln.exame for ln in matriz.linhas}
+    assert "exame_clinico" in nomes
+    assert len(linhas_de_risco(matriz.linhas)) >= 1, "deveria ter linhas de risco além do clínico"
+    assert matriz.status == "VÁLIDA"
+
+
+def test_rcli01_unico_risco_bloqueado_com_clinico_presente_fecha_bloqueada() -> None:
+    # (c) fatia 2 (003.EC): a linha do clínico nunca falta, mas ela sozinha não
+    # basta para tirar o GHE de BLOQUEADA quando o único risco não determinou nada.
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=(_risco("ruido"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    nomes = {ln.exame for ln in matriz.linhas}
+    assert "exame_clinico" in nomes, "linha do clínico deve estar presente"
+    assert linhas_de_risco(matriz.linhas) == [], "nenhuma linha de risco determinada"
+    assert matriz.status == "BLOQUEADA"
+
+
+def test_rcli01_um_risco_determinado_mais_um_bloqueado_segue_parcial() -> None:
+    # (d) mistura: trabalho_altura determina (R-PKG-ATIVCRIT, 5 linhas) e ruído
+    # bloqueia (R-AUD-01 Ausente) na mesma GHE — o clínico soma, mas o status
+    # continua PARCIAL, não VÁLIDA nem BLOQUEADA.
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=(_risco("trabalho_altura"), _risco("ruido")))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    nomes = {ln.exame for ln in matriz.linhas}
+    assert "exame_clinico" in nomes
+    assert len(linhas_de_risco(matriz.linhas)) >= 1
+    assert matriz.status == "PARCIAL"

@@ -18,6 +18,7 @@ from agente_medico.motor.tipos import (
     Risco,
     RiscoPGR,
 )
+from agente_medico.tests.invariantes import linhas_de_risco as _linhas_de_risco
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
@@ -136,7 +137,7 @@ def test_rvib01_vibracao_generica_sem_emissao_com_pendencia_bloqueante() -> None
     ctx = _ctx("vibracao")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
-    assert result == []
+    assert _linhas_de_risco(result) == []
     # R-VIB-01 e R-VIB-02 ambos usam vibracao_corpo_inteiro → 2 pendências bloqueantes
     assert len(ctx.pendencias) == 2
     assert all(p.bloqueante for p in ctx.pendencias)
@@ -167,7 +168,7 @@ def test_raud01_ruido_sem_quantificacao_gera_pendencia_bloqueante() -> None:
     ctx = _ctx("ruido")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
-    assert result == []
+    assert _linhas_de_risco(result) == []
     assert any(p.bloqueante and p.regra_origem == "R-AUD-01" for p in ctx.pendencias)
 
 
@@ -216,7 +217,7 @@ def test_execucao_vibracao_generica_status_preliminar_linhas_vazias() -> None:
     resultado = executar(pgr, proto, hoje=HOJE)
     assert resultado.status == "PRELIMINAR"
     matriz = resultado.matrizes[0]
-    assert matriz.linhas == []
+    assert _linhas_de_risco(matriz.linhas) == []
 
 
 # ---------------------------------------------------------------------------

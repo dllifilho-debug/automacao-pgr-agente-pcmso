@@ -10,6 +10,11 @@ ResultadoPredicado = Union[bool, Ausente]
 
 REGISTRO_PRIMITIVOS: dict[str, Callable[[GHEContext], ResultadoPredicado]] = {}
 
+# Predicados incondicionais (sempre True, independente de risco) — usados pelo
+# orquestrador (D-ARQ-31 fatia 2) para excluir linhas de piso universal do
+# cálculo do tri-estado, preservando o poder discriminante VÁLIDA/PARCIAL/BLOQUEADA.
+PRIMITIVOS_INCONDICIONAIS: frozenset[str] = frozenset({"todo_trabalhador"})
+
 
 class PredicadoDesconhecido(KeyError):
     pass
@@ -26,6 +31,12 @@ def primitivo(nome: str) -> Callable[[Callable[[GHEContext], ResultadoPredicado]
         REGISTRO_PRIMITIVOS[nome] = fn
         return fn
     return decorator
+
+
+@primitivo("todo_trabalhador")
+def _todo_trabalhador(ctx: GHEContext) -> bool:
+    """R-CLI-01; NR-07 item 7.5.8 (exame clínico para todo empregado)."""
+    return True
 
 
 @primitivo("altura")

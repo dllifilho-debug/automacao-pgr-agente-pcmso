@@ -7,6 +7,7 @@ import pytest
 from agente_medico.motor.estagios.emissao import stage_5_emissao
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import GHEContext, GHEPGR, Momento, Risco
+from agente_medico.tests.invariantes import linhas_de_risco
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
@@ -93,7 +94,11 @@ def test_regra_bio_04_grupo_ee(proto, agente: str, regra_id: str, exame: str) ->
     assert linha.motivos[0].regra_id == regra_id
     assert linha.periodicidade_meses == 6
     assert linha.momentos == _MOMENTOS_PER
-    assert len(emitidos) == 1, f"{agente}: esperado apenas 1 exame emitido, got {list(por_exame)}"
+    # R-CLI-01 (piso universal, 003.EC) soma exame_clinico a toda matriz; a
+    # contagem que importa é a das linhas de origem em risco.
+    assert len(linhas_de_risco(emitidos)) == 1, (
+        f"{agente}: esperado apenas 1 exame de risco emitido, got {list(por_exame)}"
+    )
 
 
 def test_regra_bio_04_chumbo_grupo_sc(proto) -> None:  # type: ignore[no-untyped-def]
@@ -103,7 +108,7 @@ def test_regra_bio_04_chumbo_grupo_sc(proto) -> None:  # type: ignore[no-untyped
 
     assert "chumbo_sangue" in por_exame
     assert "ala_urinario" in por_exame
-    assert len(emitidos) == 2
+    assert len(linhas_de_risco(emitidos)) == 2
 
     for slug in ("chumbo_sangue", "ala_urinario"):
         linha = por_exame[slug]
@@ -134,10 +139,12 @@ def test_regra_bio_04_grupo_sc_agente_unico(proto, agente: str, regra_id: str, e
     assert linha.motivos[0].regra_id == regra_id
     assert linha.periodicidade_meses == 6
     assert linha.momentos == _MOMENTOS_QUADRO_2
-    assert len(emitidos) == 1, f"{agente}: esperado 1 exame, got {list(por_exame)}"
+    assert len(linhas_de_risco(emitidos)) == 1, (
+        f"{agente}: esperado 1 exame de risco, got {list(por_exame)}"
+    )
 
 
 def test_sem_agente_nao_emite_biomonitoramento(proto) -> None:  # type: ignore[no-untyped-def]
     ctx = _ctx_com_agente("ruido")
     emitidos = stage_5_emissao(ctx, proto)
-    assert emitidos == []
+    assert linhas_de_risco(emitidos) == []

@@ -2527,6 +2527,45 @@ deferida (fatia 3). Testemunha positiva: Fascino real, 19/19 aprovados, zero inv
 LLM. Testemunha negativa: Viverde real, `FamiliaNaoReconhecida` (família não medida) aciona
 o fallback LLM sem bloquear.
 
+## D-ARQ-66 — Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas
+
+**Contexto.** Até 003.EC toda emissão era condicionada a predicado de risco. R-CLI-01
+(clínico anual, piso universal) é [VALIDADO] desde a v2 do protocolo e nunca foi
+implementada por falta de caminho para regra incondicional. DT-003EB-01 enquadrava isso
+como "pacote-base sem conceito no motor"; a medição do gabarito Fascino (003.EC) refutou a
+premissa — ver reenquadramento no PROTOCOLO.
+
+**Achado que dimensiona a decisão.** `stage_5_emissao` já itera sobre REGRAS (não sobre
+riscos) e já grava `risco_origem=None`. O invariante "toda linha deriva de um risco" nunca
+existiu em código. Emitir incondicionalmente custou um primitivo — zero mudança em
+`tipos.py`, `emissao.py` ou contrato de `MatrizGHE`.
+
+**Decisão — 2 cláusulas.**
+
+1. **O primitivo incondicional é nomeado pelo sentido clínico** (`todo_trabalhador`), não
+   vacuamente (`sempre`), porque vai para o audit trail em `Motivo.predicado` e é lido na
+   revisão de saída. Registrado em `PRIMITIVOS_INCONDICIONAIS`.
+2. **O tri-estado VÁLIDA/PARCIAL/BLOQUEADA de D-ARQ-31 passa a ser computado sobre
+   `linhas_com_risco`** — exclui as linhas cujos `Motivo.predicado` sejam todos
+   incondicionais. `MatrizGHE.linhas` segue carregando a linha incondicional; muda só o
+   gate do status.
+
+**Justificativa da cláusula 2.** Sem ela, `linhas` nunca fica vazia, BLOQUEADA vira estado
+inalcançável e "nenhum risco determinou" se apresenta como PARCIAL — erro silencioso
+plausível da classe que D-ARQ-22 combate, no ponto exato onde a revisão de saída mais
+precisa do sinal. Massa medida: no Fascino, 14 de 19 GHEs BLOQUEADA passariam a PARCIAL sem
+que um único risco determinasse.
+
+**Fronteiras.** D-ARQ-31 preservado (bloqueio por-risco/por-linha, anexação
+pendência-à-linha, requisito piso-sem-teto). D-ARQ-15 intacto. Anti-supressão intacta: a
+linha É emitida e visível, apenas não conta para o status.
+
+**Universalidade (D-ARQ-06).** Clínico anual para todo trabalhador vale construção,
+indústria química e saúde igualmente. Não é regra de construção civil.
+
+**Base.** Sessão 003.EC. Commit f175e76 (11 arquivos, 154+/22−; suíte 963→967; mypy
+--strict delta-zero em `motor` + `invariantes.py`).
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2681,3 +2720,4 @@ o fallback LLM sem bloquear.
 | v148 | 25/07/2026 | Sessão 003.DZ (ARQUITETURA): **D-ARQ-65 CRIADA** — extração determinística por família de template; parser dedicado a família medida emite o MESMO verbatim tipado sob o MESMO gate de forma da rota LLM; LLM rebaixado a acelerador para família não-medida (pendência nomeia família nova); indisponibilidade de LLM só bloqueia família não-medida; procedência no verbatim (`deterministico:<familia>`\|`llm`\|`manual`) deferida à fatia de roteamento; manual é corretivo, não rotina. Origem: `429 RESOURCE_EXHAUSTED` (quota free-tier Gemini) bloqueou o `rodar` do Fascino 2× seguidas — dependência de terceiro no caminho crítico. Medição da família Consciente/Fascino: 20 âncoras, rótulos de cabeçalho 20/20, 237 linhas-de-risco ancoradas por token de categoria, bandas x estáveis (GRUPO@56, AGENTE@[113,177), FONTE@177+), zero quantificação numérica, zero FDS apontada. **NÃO revoga D-ARQ-41/49/50** — parser universal segue inexistente, o que muda é parser POR FAMÍLIA. Sem código nesta linha (fatia 1/parser isolado é o próximo commit da mesma sessão). Nenhuma R-* criada/alterada. |
 | v149 | 25/07/2026 | Sessão 003.EA (IMPLEMENTAÇÃO): **D-ARQ-65 fatia 2 IMPLEMENTADA — roteamento determinístico-primeiro.** `FamiliaNaoReconhecida(ValueError)` nova em `parser_familia_consciente.py` (substitui os 2 `ValueError` genéricos de `_parsear_bloco`, mensagens inalteradas). `preparar_ghes` (rota "ghe") tenta `parsear_arquivo(caminho)` ANTES do cliente LLM (2ª leitura do PDF, mesma classe do seam humano D-ARQ-52); aceita só se nenhum `FamiliaNaoReconhecida` E `len(candidatos) == len(blocos)` (divergência de contagem = família não reconhecida, conservador); aceita → `gate_forma_ghe` direto, cliente LLM nunca invocado; recusada → `Pendencia` não-bloqueante `familia_nao_medida` (`regra_origem="D-ARQ-65"`) anexada, fallback LLM segue inalterado. Rota "card" intocada; procedência no verbatim segue deferida (fatia 3). Testemunhas reais: Fascino 19/19 aprovados sem invocação LLM; Viverde (família não medida) aciona fallback via `FamiliaNaoReconhecida`, testemunha negativa. Nota de aplicação 003.EA em D-ARQ-65. Suíte 957+6→963+6 (+6 exato); `mypy --strict` delta-zero (46 erros pré-existentes em 5 arquivos FDS-side, nenhum nos arquivos tocados). Nenhuma R-* criada/alterada. PROTOCOLO não move. PAINEL não re-tirado nesta sessão (fechamento é sessão própria). |
 | v150 | 25/07/2026 | Sessão 003.EB (MEDIÇÃO): nota de aplicação 003.EB em D-ARQ-62 — subcomando `rodar-offline` em `scripts/medicao_pgr.py` dispensa `CHAVE_API_GOOGLE`; clientes-bomba levantam `TranscricaoIndisponivel` se invocados, recusa nomeada vira pendência bloqueante, nunca mock (coerente com D-ARQ-65). Rodada Fascino offline: 19/19 GHEs, zero `familia_nao_medida`, zero `transcricao_indisponivel_pgr`. Diff contra a matriz humana (Marco 1) instrumentado: DT-003EB-01 (pacote-base incondicional sem conceito no motor, ~190/~194 células) e DT-003EB-02 (R-BIO-04 emite indicador biológico onde a matriz humana pede menção documental em risco baixo) — ambas em PROTOCOLO v67 §11. Suíte 963 passed, 6 skipped (inalterada); `mypy --strict` delta-zero. Nenhuma R-* criada/alterada. Nenhum D-ARQ novo. |
+| v151 | 26/07/2026 | Sessão 003.EC (IMPLEMENTAÇÃO): **D-ARQ-66 CRIADA** — emissão incondicional é regra de primeira classe (primitivo `todo_trabalhador`, `PRIMITIVOS_INCONDICIONAIS`); tri-estado de D-ARQ-31 passa a computar sobre `linhas_com_risco`, excluindo linhas cujo `Motivo.predicado` seja todo incondicional (`MatrizGHE.linhas` segue carregando a linha incondicional — muda só o gate do status). **R-CLI-01 materializada** (exame clínico 12M, `[adm, per, MR, RT, dem]`, `exame_clinico` novo em `exames.yaml`) — fecha a maior fatia de DT-003EB-01. **DT-003EB-01 REENQUADRADA** (não fechada): premissa "pacote-base incondicional ~190/~194 células" refutada por medição do gabarito Fascino (4 exames em 19/19, não ~190; GHE-06 Administração recebe 4, GHE-19 Vendas recebe 5); gap decomposto em 4 classes, só classe (4) — conceito genuinamente ausente — exige CONHECIMENTO; resíduo ABERTO = `Av. Médica de Saúde Mental` (inexistente em regra) + Avaliação Psicossocial incondicional vs R-PSY-01 [VALIDADO] condicionada, gatilho de formalização = 2º PGR no acervo (D-ARQ-06), não n=1. **DT-003EC-01 CRIADA (ABERTA)**: gabarito Fascino emite RX Tórax OIT 12M em GHEs sem quantificação onde R-RX-01 sem-medição prescreve 24M — pergunta de método (D-ARQ-27), não-bloqueante; resolve de passagem o pré-registro de DT-003DV-01/003.DW ('Poeira respirável' tratada como sílica-like, não PNOS, no gabarito). 4 testes falha-sem/passa-com em `test_orquestrador.py`, verificados empiricamente red/green (regra marcada `DEPRECATED` → 4 falham; restaurada → 4 passam). Helper `linhas_de_risco` consolidado em `agente_medico/tests/invariantes.py` (precedente de auditor compartilhado), substitui 2 cópias locais duplicadas + evita uma 3ª. Lição de processo: escopo de quebra esperada por lista-de-arquivos-à-mão falhou 2× (7→48 falhas reais); critério correto é semântico ("teste carrega o protocolo real e assere contagem exata/lista vazia de emissões"), não enumeração. Suíte 963→967 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` (alvo correto do projeto) delta-zero. Commit `f175e76`. PROTOCOLO v68. PAINEL não re-tirado nesta sessão. |

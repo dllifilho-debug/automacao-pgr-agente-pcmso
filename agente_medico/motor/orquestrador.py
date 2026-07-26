@@ -11,6 +11,7 @@ from agente_medico.motor.estagios.gates import stage_1_gates
 from agente_medico.motor.estagios.pendencias_estruturais import stage_3_pendencias_estruturais
 from agente_medico.motor.estagios.predicados_stage import stage_4_predicados
 from agente_medico.motor.estagios.riscos import stage_2_riscos
+from agente_medico.motor.predicados import PRIMITIVOS_INCONDICIONAIS
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor import EntradaIndice
 from agente_medico.motor.tipos import (
@@ -75,6 +76,13 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
             tem_anexada = any(ln.pendencias_anexadas for ln in linhas)
             tem_bloqueio = bool(bloqueantes_restantes) or tem_anexada
             pendencias_matriz = nao_bloqueantes + bloqueantes_restantes
+            # R-CLI-01 (piso universal) emite sempre — linhas nunca fica vazia.
+            # Tri-estado computa só sobre linhas com origem em risco, excluindo
+            # as emitidas por regra incondicional (D-ARQ-31 fatia 2, 003.EC).
+            linhas_com_risco = [
+                ln for ln in linhas
+                if any(m.predicado not in PRIMITIVOS_INCONDICIONAIS for m in ln.motivos)
+            ]
             if not tem_bloqueio:
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
@@ -83,7 +91,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     regime_aplicado=ctx.regime,
                     status="VÁLIDA",
                 )
-            elif linhas:
+            elif linhas_com_risco:
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
                     linhas=linhas,

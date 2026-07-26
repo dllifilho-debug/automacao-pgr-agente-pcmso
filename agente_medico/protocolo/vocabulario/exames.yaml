@@ -7,6 +7,11 @@
 # forem adicionadas (sessões futuras).
 
 exames:
+  exame_clinico:
+    nome_exibicao: "Exame Clínico"
+    categoria: ocupacional
+    fonte_matriz: "R-CLI-01 — piso universal"
+
   hemograma:
     nome_exibicao: "Hemograma"
     categoria: laboratorial

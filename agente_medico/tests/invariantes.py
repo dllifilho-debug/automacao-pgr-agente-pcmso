@@ -2,7 +2,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from agente_medico.motor.tipos import Resultado
+from agente_medico.motor.predicados import PRIMITIVOS_INCONDICIONAIS
+from agente_medico.motor.tipos import ExameEmitido, Resultado
+
+
+def linhas_de_risco(exames: list[ExameEmitido]) -> list[ExameEmitido]:
+    """Exclui linhas de regra incondicional (R-CLI-01, piso universal, 003.EC) —
+    isola o que a exposição/risco sob teste efetivamente contribuiu para a matriz.
+
+    Uma linha é de origem incondicional quando TODOS os seus Motivo.predicado
+    pertencem a PRIMITIVOS_INCONDICIONAIS (ex.: 'todo_trabalhador'). Helper
+    compartilhado — não duplicar por arquivo de teste."""
+    return [
+        e for e in exames
+        if any(m.predicado not in PRIMITIVOS_INCONDICIONAIS for m in e.motivos)
+    ]
 
 
 @dataclass(frozen=True)

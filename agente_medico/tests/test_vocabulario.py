@@ -10,9 +10,12 @@ from agente_medico.motor.protocolo import carregar
 PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
-def test_vocabulario_exames_carrega_com_48_slugs() -> None:
+def test_vocabulario_exames_carrega_com_slugs_esperados() -> None:
+    # Teste-guardião: adição de slug ao vocabulário é deliberada — atualizar
+    # este conjunto é o comportamento pretendido (não afrouxar para superconjunto).
     p = carregar(PROTOCOLO_DIR)
     assert set(p.vocabulario.exames.keys()) == {
+        "exame_clinico",
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg",
         "rx_coluna_lombo_sacra", "rx_torax_oit",
         "reticulocitos", "acido_transmuconico",

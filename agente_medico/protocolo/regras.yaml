@@ -1,4 +1,15 @@
 regras:
+  - id: R-CLI-01
+    quando: todo_trabalhador
+    emite:
+      - {exame: exame_clinico, periodicidade_meses: 12,
+         momentos: [adm, per, MR, RT, dem]}
+    base_normativa: "Protocolo Dra. Carolini R-CLI-01 [VALIDADO] — clínico anual
+      é o piso, vale inclusive para administrativo sem risco. Momentos:
+      R-TEMP-01 (5 momentos) [DERIVADO — medição da matriz humana Fascino
+      08/07/26, 19/19 GHEs em ADM/PER/MRO/RET/DEM]"
+    status: VALIDADO
+
   - id: R-PKG-ATIVCRIT
     quando: atividade_critica
     emite:
