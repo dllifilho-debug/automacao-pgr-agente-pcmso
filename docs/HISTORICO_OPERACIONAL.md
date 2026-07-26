@@ -4016,3 +4016,34 @@ Re-tiragem do `PAINEL_ESTADO.md` (tiragem 003.EC, pós-merge, sobre `main e3cba5
 **DH-003EC-01** (higiene de `scripts/medir_painel.py`) e **DH-003EC-02** (79% do tempo da suíte é reparse de PDF real em setup por-teste) adicionadas ao PROTOCOLO §11 (v69). Nenhuma regra clínica criada ou alterada por esta re-tiragem.
 
 Lição de método. Sessão que CRIA um D-ARQ tem de regerar `INDICE_DARQ.md` no MESMO commit — o índice é derivado e é o Nível 1 do gate D-ARQ-63.
+
+## Sessão 003.ED — 26/07/2026 — IMPLEMENTAÇÃO (alias Tier 1 de altura; primitivo órfão morto)
+
+Foco. `resolver_termo("Trabalho em Altura", ...)` nunca resolvia (dist 3 do slug, fora do raio fuzzy) e o primitivo `maquina_pesada` comparava um slug que nunca existiu em `agentes.yaml` — R-PKG-ATIVCRIT `[VALIDADO]` silenciado por duas das três pernas de `atividade_critica`, código inalcançável verde na suíte havia várias sessões.
+
+Entrega 1 — dado. `termos: ["Trabalho em Altura"]` em `trabalho_altura` (`vocabulario/agentes.yaml`); critério Tier 1 (D-ARQ-50 P2, estendido 003.DW), fonte NR-35 título + item 35.2.1, redação Portaria MTP 4.218/2022, texto vigente `nr-35-atualizada-2025-1.pdf` (última alteração Portaria MTE 1.680, 02/10/2025). Índice 105→106.
+
+Entrega 2 — motor. Removido `@primitivo("maquina_pesada")`/`_maquina_pesada` de `predicados.py`; `atividade_critica.ou` (`predicados_compostos.yaml`) passa a referenciar `motorista_equipamento_pesado` (primitivo vivo, já registrado). Um conceito → um slug → um primitivo (D-ARQ-67).
+
+Entrega 3 — testes. Alias coberto no parametrize existente de `test_resolvedor_termos.py`; guard de inventário renomeado (105→106 entradas). Teste computado anti-órfão novo (`test_predicados.py`) — extrai via AST todo literal de `r.agente` comparado em `predicados.py` e cruza contra as chaves reais de `agentes.yaml`; verificado falha-sem (detecta `maquina_pesada` reintroduzido), passa-com (0 órfãos, 12 literais). Fiação GHE (real, único risco `trabalho_altura` → 5 linhas de R-PKG-ATIVCRIT) já coberta por teste existente (`test_integracao_002c.py`) — reportado em vez de duplicado, só assinaturas ajustadas.
+
+Quebra fora da lista prevista (varredura por literal `maquina_pesada` não pegou). `test_exposicao_fisica.py::test_raud01_motorista_equipamento_pesado_emite_audiometria_adm_per_mr` quebrou: com `motorista_equipamento_pesado` agora também satisfazendo `atividade_critica`, esse risco isolado passa a emitir audiometria por DUAS linhas pré-consolidação (R-PKG-ATIVCRIT e R-AUD-01); o teste pegava a primeira com `next(...)`. Corrigido para filtrar pela linha de R-AUD-01. Confirma a lição 003.EC: escopo de quebra é semântico (todo teste que carrega o protocolo real e assere emissão exata), não a lista de arquivos que citam o literal removido.
+
+Short-circuit medido, não presumido. Nos dois testes que asseriam `"maquina_pesada" not in ctx.predicados` (`test_integracao_002c.py`, `test_predicados_stage.py`): a asserção correspondente para `motorista_equipamento_pesado` **inverteu** — ENTRA no cache mesmo com o `ou` de `atividade_critica` curto-circuitado por `altura=True`, porque R-AUD-01 também o referencia diretamente em seu próprio `quando`, outra regra populando o cache independentemente. `espaco_confinado` permanece fora, como antes.
+
+Entrega 4 — medição (Fascino, `rodar-offline`, D-ARQ-65). 16/19 GHEs passam a emitir as 5 linhas de R-PKG-ATIVCRIT (80 linhas = 16×5); as 16 pendências `vocabulario_ausente` de 'Trabalho em Altura' desaparecem (194→178).
+
+Medição complementar (nominal, não só contagem). Cruzamento GHE-a-GHE contra o gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (aberto via `antiword` — `.doc` legado, sem libreoffice/catdoc no ambiente): interseção 16, "só no motor" e "só no gabarito" vazios — mesmos IDs (GHE-01,02,03,04,05,07,08,09,10,11,13,14,15,16,17,18), confirmado por nome de cargo, não só por número ordinal. GHE-06 (Administração), GHE-12 (Betoneira) e GHE-19 (Vendas) ficam de fora dos dois lados — nenhum declara `trabalho_altura`/`motorista_equipamento_pesado` no PGR e nenhum recebe o pacote-base no gabarito. 17º GHE de Acuidade Visual do gabarito = GHE-19 (Vendas), não explicado pelo pacote — GHE-19 tem `ctx.riscos == []` (nenhum risco resolvido), então a Acuidade Visual ali é exigência isolada do gabarito, sem contrapartida de risco no motor.
+
+Medição isolada das 3 pernas (sem short-circuit, protocolo real sobre o mesmo input). `trabalho_altura` resolve em 16 GHEs (mesma lista da interseção acima); `motorista_equipamento_pesado` resolve em **zero** GHEs do Fascino; `espaco_confinado` resolve em **zero**. Soma fecha 16 = 16 (só altura) + 0 (só maq.) + 0 (ambos) — a expansão de escopo introduzida na Entrega 2 é real no motor mas não observada neste PGR específico.
+
+Prova de mesmo-input (gate antes de medir). Nem o relatório nem o harness registram o caminho do `artefato_volta` usado. Provado por reconstituição: chamando `processar_arquivo_pgr` em memória com o mesmo pdf + mesmo `relatorios/003dv_fascino_volta.json`, o markdown resultante bateu byte-a-byte contra `relatorios/003ed_fascino_rodar.md` (única diferença: a linha `commit:`, porque o commit desta sessão aconteceu entre a geração do relatório e a medição). Padrão mais forte que hash/mtime — adotar quando houver dúvida de procedência de insumo de medição.
+
+Docs. DECISOES → v152 (**D-ARQ-67 CRIADA**). PROTOCOLO → v70 (nota de implementação R-PKG-ATIVCRIT, mesma ID; **DT-003ED-01 CRIADA**; **DH-003ED-01 CRIADA**; DT-003DV-01 observação de instrumento refutada por medição; nota em DT-003EB-01 sobre GHE-19).
+
+Lições de método.
+- Teste sintético sobre primitivo não prova alcançabilidade — só prova que a função funciona. A cobertura de alcançabilidade tem de ser teste computado do dado real (D-ARQ-67), não teste de unidade.
+- Cruzamento por CONTAGEM não é aceite. 16 = 16 só virou evidência quando os conjuntos nominais "só no motor" e "só no gabarito" saíram vazios — a mesma contagem podia esconder GHEs trocados.
+- Prova de mesmo-input por reconstituição byte-a-byte do relatório é padrão superior a hash/mtime quando o instrumento não registra a própria procedência.
+
+Pendências (íntegra). DT-003ED-01 (ABERTA, não-bloqueante) — grafia natural com preposição não resolve contra slug sem preposição (vibração NR-09 `[INCERTO]`, máquina pesada sem grafia normativa, Tier 2 bloqueada por DT-003DM-01). DH-003ED-01 (ABERTA, não-bloqueante) — relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto disparador. DT-003EB-01: achado `[A MEDIR]` sobre GHE-19 (Vendas) não decomposto entre classe (2) e classe (4). Suíte 967→**968 passed, 6 skipped** (+2 novos, −1 removido); `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `7b2e65d`. PROTOCOLO v70. PAINEL **não re-tirado nesta sessão** — re-tiragem é pós-merge (números só movem em `main`).
