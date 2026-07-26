@@ -66,15 +66,17 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     assert "maquina_pesada" not in ctx.predicados
 
     exames = stage_5_emissao(ctx, proto)
-    assert len(exames) == 5
 
     exames_final = stage_8_consolidacao(exames)
-    assert len(exames_final) == 5
 
     nomes = {e.exame.strip().lower() for e in exames_final}
-    assert nomes == {"hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg"}
+    # Superconjunto, não contagem exata: R-CLI-01 (piso universal, 003.EC) soma
+    # exame_clinico a toda matriz; cravar "6" quebraria na próxima regra incondicional.
+    assert {"hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg"}.issubset(nomes)
+    assert "exame_clinico" in nomes
 
-    for e in exames_final:
+    exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() != "exame_clinico"]
+    for e in exames_ativcrit:
         assert e.periodicidade_meses == 12
         assert e.momentos == {Momento.ADM, Momento.PER, Momento.MR}
         assert e.motivos[0].regra_id == "R-PKG-ATIVCRIT"

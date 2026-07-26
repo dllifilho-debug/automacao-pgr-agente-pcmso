@@ -22,6 +22,7 @@ from agente_medico.motor.tipos import (
     Quantificacao,
     RiscoPGR,
 )
+from agente_medico.tests.invariantes import linhas_de_risco as _linhas_de_risco
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
@@ -135,16 +136,18 @@ def test_fracao_ausente_gera_pendencia_bloqueante() -> None:
     pgr, proto = _pgr_silica(q)
     resultado = executar(pgr, proto, hoje=date.today())
 
-    # (i) nenhuma linha de RX emitida para o GHE
+    # (i) nenhuma linha de RX (nem qualquer linha de origem em risco) emitida para o GHE
     assert len(resultado.matrizes) == 1
-    assert resultado.matrizes[0].linhas == []
+    assert _linhas_de_risco(resultado.matrizes[0].linhas) == []
 
     # (ii) Pendencia(bloqueante=True) presente no Resultado
     bloqueantes = [p for m in resultado.matrizes for p in m.pendencias if p.bloqueante]
     assert bloqueantes, "Deve haver pendência bloqueante quando fracao=None"
     assert any("fração" in p.motivo or "fracao" in p.motivo for p in bloqueantes)
 
-    # (iii) orquestrador.py linha 78: houve_bloqueio → status "PRELIMINAR"
+    # (iii) D-ARQ-31 fatia 2 (003.EC): sem nenhuma linha de risco determinada,
+    # o GHE fecha BLOQUEADA — R-CLI-01 (piso universal) não mascara o bloqueio.
+    assert resultado.matrizes[0].status == "BLOQUEADA"
     assert resultado.status == "PRELIMINAR"
 
 
@@ -162,13 +165,15 @@ def test_silica_mineracao_total_leo_indefinido_bloqueante() -> None:
     pgr, proto = _pgr_silica(q, cenario=cenario)
     resultado = executar(pgr, proto, hoje=date.today())
 
-    # nenhuma linha de RX emitida
-    assert resultado.matrizes[0].linhas == []
+    # nenhuma linha de RX (nem qualquer linha de origem em risco) emitida
+    assert _linhas_de_risco(resultado.matrizes[0].linhas) == []
 
     # pendência bloqueante com mensagem de LEO indefinido
     bloqueantes = [p for m in resultado.matrizes for p in m.pendencias if p.bloqueante]
     assert bloqueantes
     assert any("indefinido" in p.motivo.lower() for p in bloqueantes)
 
-    # orquestrador.py linha 78: houve_bloqueio → "PRELIMINAR"
+    # D-ARQ-31 fatia 2 (003.EC): sem nenhuma linha de risco determinada,
+    # o GHE fecha BLOQUEADA — R-CLI-01 (piso universal) não mascara o bloqueio.
+    assert resultado.matrizes[0].status == "BLOQUEADA"
     assert resultado.status == "PRELIMINAR"
