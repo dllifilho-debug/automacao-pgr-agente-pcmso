@@ -181,6 +181,13 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 Exame clínico **anual** é o piso — vale inclusive para administrativo sem risco.
 **Justificativa clínica:** trabalhadores com doença crônica devem ter clínico anual; como não há triagem prévia, padroniza-se anual para todos.
 
+> **Nota de implementação (003.EC, mesma ID).** Materializada em `regras.yaml` via
+> primitivo incondicional `todo_trabalhador` (D-ARQ-66); slug `exame_clinico` novo em
+> `exames.yaml`; 12M em `[adm, per, MR, RT, dem]`. Momentos `[DERIVADO — R-TEMP-01 (5
+> momentos) + medição da matriz humana Fascino 08/07/26, 19/19 GHEs em
+> ADM/PER/MRO/RET/DEM]`. Quatro testes falha-sem/passa-com em `test_orquestrador.py`.
+> Conteúdo clínico inalterado.
+
 #### R-CLI-02 — Quadro 1 e Quadro 2 do Anexo I (NR-07) `[VALIDADO]`
 Exposição a agente biomonitorado do Anexo I (Quadro 1 ou Quadro 2) demanda clínico **semestral**. Quando exposto a agentes de **ambos os Quadros**, registrar em **uma única linha** semestral (não duplicar).
 
@@ -1235,15 +1242,35 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 
 **(DT-003DV-01 FECHADA — facetas A (003.DW) e B (003.DY) resolvidas.)**
 
-### DT-003EB-01 — Pacote-base incondicional da matriz humana sem conceito correspondente no motor `[ABERTA — 003.EB]`
+### DT-003EB-01 — Pacote-base incondicional da matriz humana sem conceito correspondente no motor `[REENQUADRADA — 003.EC, não fechada]`
 
 **Origem:** Sessão 003.EB (25/07/2026), diff da rodada `rodar-offline` (Fascino, D-ARQ-65) contra a matriz humana `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (validada Dra. Carolini) — Marco 1.
 
-**Situação.** A matriz humana aplica um pacote-base incondicional de **10 exames em 19/19 GHEs do Fascino**, inclusive no setor sem risco ocupacional específico — a atribuição não depende de risco declarado no PGR. O motor não tem esse conceito: toda emissão de exame é condicionada a um predicado de risco (agente/atividade presente). Medido: **~190 de ~194 células** do diff (19 GHEs × 10 exames, com pequenas variações) não têm conceito correspondente no motor hoje — a maior massa isolada do diff.
+**Situação original (003.EB).** A matriz humana aplicaria um pacote-base incondicional de **10 exames em 19/19 GHEs do Fascino**, inclusive no setor sem risco ocupacional específico. Medido: **~190 de ~194 células** do diff sem conceito correspondente no motor — a maior massa isolada do diff.
 
-**Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura):** o pacote-base é fundamentado em quê — cargo genérico de obra (NR-18), admissional/periódico obrigatório independente de risco específico, ou outra norma? Qual o método de composição do pacote (os 10 exames, suas periodicidades) e ele varia por tipo de obra/atividade, ou é fixo?
+**Reenquadramento (003.EC) — premissa REFUTADA por medição do próprio gabarito.** Contagem direta contra `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` mostra que "pacote-base de 10 exames em 19/19 GHEs" não é o que o gabarito contém:
 
-**Status:** ABERTA. Formalização exige sessão CONHECIMENTO com gate D-ARQ-63 antes de virar R-*.
+- **Medido:** apenas **4 exames em 19/19 GHEs** (Exame Clínico, Audiometria, Avaliação Psicossocial, Av. Médica de Saúde Mental); Acuidade Visual 17/19; Hemograma/Glicemia/ECG 16/19; Espirometria/RX Tórax OIT 16/19.
+- Células distintas somam **~177, não ~194**.
+- **GHE-06 (Administração) recebe 4 exames** e **GHE-19 (Vendas) recebe 5** — o oposto de "inclusive o setor sem risco recebe o pacote".
+
+**O gap decompõe em 4 classes** (não uma massa homogênea):
+1. Regras `[VALIDADO]` órfãs de `regras.yaml` (existiam no protocolo, nunca materializadas).
+2. Lacuna de vocabulário ('Poeira respirável', 'Poeira de madeira', 'Poeiras Respiráveis/Metálicas', 'Trabalho em Altura').
+3. Divergência de periodicidade contra regra já existente (ver DT-003EC-01).
+4. Conceito genuinamente ausente — só esta classe exige sessão CONHECIMENTO.
+
+**003.EC fecha a maior fatia da classe (1)** — R-CLI-01 materializado (D-ARQ-66).
+
+**Resíduo ABERTO = classe (4).** `Av. Médica de Saúde Mental` não existe em nenhuma regra do protocolo. A Avaliação Psicossocial aparece **incondicional** no gabarito, contra R-PSY-01 `[VALIDADO]` **condicionada** — mesmo arco de NR-1 psicossocial da entrevista original. **NÃO formalizar sobre n=1**: supersedir uma regra `[VALIDADO]` com base em um único PGR de uma empresa reprova em D-ARQ-06 (universalidade). Gatilho de formalização = **2º PGR atualizado no acervo**, não este.
+
+**Ressalva sobre a qualidade do gabarito.** O documento carrega anotações de rascunho no próprio corpo (ex.: "veja com a Segurança, acho que é betoneira"; "Incluir no WORD do PCMSI idade maior ou igual 18 anos") — "validada Dra. Carolini" merece qualificação antes de servir de gabarito de regressão (D-ARQ-18): confirmar com a Dra. Carolini se as anotações de rascunho compõem a matriz validada ou são resíduo de edição.
+
+**Correção factual ao relatório 003.EB.** RX 60m ocorre em **GHE-08 (Carpintaria) E GHE-09 (Armação)**, não só GHE-09 — corrige o texto de 003.EB.
+
+**Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura, classe 4):** `Av. Médica de Saúde Mental` é conceito próprio, distinto de Avaliação Psicossocial, ou duplicidade de rótulo? A Avaliação Psicossocial incondicional é conduta atualizada da matriz, ou anotação de rascunho não-validada?
+
+**Status:** REENQUADRADA, não fechada. Resíduo (classe 4) exige sessão CONHECIMENTO com gate D-ARQ-63 e 2º PGR no acervo antes de tocar R-PSY-01 ou criar regra nova.
 
 ### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[ABERTA — 003.EB]`
 
@@ -1256,6 +1283,18 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 **Pergunta para a Dra. Carolini (sessão CONHECIMENTO futura):** o que caracteriza "risco baixo" para fins de dispensa do indicador biológico — a anotação explícita no PGR é suficiente, ou há um limiar quantitativo por trás? A menção documental tem forma própria (texto padrão no PCMSO) ou é livre?
 
 **Status:** ABERTA. Formalização exige sessão CONHECIMENTO com gate D-ARQ-63 antes de alterar R-BIO-04.
+
+### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[ABERTA — 003.EC, não-bloqueante]`
+
+**Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
+
+**Situação.** O gabarito dá RX Tórax OIT em **12M em 14 GHEs** e **60M em GHE-08 (poeira de madeira)** e **GHE-09 (poeiras respiráveis/metálicas)**. O 60M casa com PNOS/Quadro 2 (faixa "sem avaliação quantitativa" → 60M, já implementada). O **12M NÃO casa com R-RX-01**: 12M é a faixa >100% LEO do Quadro 1 (sílica/asbesto), e "sem avaliação quantitativa" prescreve **24M** `[DERIVADO — NR-7 Anexo III Quadro 1]` — não 12M. O PGR não traz quantificação para esses GHEs.
+
+**Pergunta de método (derivação normativa, D-ARQ-27):** a conduta de 12M no gabarito corresponde a uma leitura de exposição >100% LEO feita por fora do PGR escrito (ex.: conhecimento de campo da Dra. Carolini sobre o canteiro), ou a um critério distinto do Quadro 1 que o protocolo ainda não capturou? Buscar o **método** por trás da conduta, não só resolver os 14 GHEs do caso.
+
+**Resolve de passagem** o pré-registro de DT-003DV-01 (achado 003.DW): 'Poeira respirável' é tratada como **sílica-like** no gabarito (RX 12M/24M, não faixa PNOS), **NÃO como PNOS** — confirma a suspeita registrada em 003.DW sem fechar a lacuna de vocabulário (classe 2 de DT-003EB-01).
+
+**Status:** ABERTA. Não-bloqueante — nenhuma regra alterada por esta DT; questão de método para sessão CONHECIMENTO futura.
 
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
@@ -1361,3 +1400,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v65 | 24/07/2026 | Sessão 003.DX (META): **DT-003DX-01 adicionada** (§11) — migrar acreção pós-decisão do DECISOES_ARQUITETURAIS.md para satélites `docs/darq/` (três frentes: acreção geral 39%/177k chars, D-ARQ-57 sozinho 13,2%/59.755 chars, tabela de revisões 16%/87.328 chars). Não-bloqueante — D-ARQ-63 (gate de dois níveis + índice derivado) já resolve o custo de leitura. Nenhuma R-* criada/alterada. Sem código de motor. |
 | v66 | 25/07/2026 | Sessão 003.DY (IMPLEMENTAÇÃO): **DT-003DV-01 faceta B RESOLVIDA — DT inteira FECHADA** (§11) — ramo FUZZY opt-in por allowlist de dado (D-ARQ-64, DECISOES v147): `fuzzy_permitido: true` em 18 slugs de cauda; `silica` fora → `Silício`/`Silicio` recusados com pendência `fuzzy_recusado` nomeando termo/slug/distância; veto de resultado, não filtro de candidato. Suíte 945→949 passed, 6 skipped. Nenhuma R-* criada/alterada. |
 | v67 | 25/07/2026 | Sessão 003.EB (MEDIÇÃO): **DT-003EB-01 e DT-003EB-02 adicionadas** (§11) — 1ª rodada `rodar-offline` (D-ARQ-65) no Fascino, 19/19 GHEs, zero invocação LLM, + diff contra a matriz humana validada (Marco 1): DT-003EB-01 (pacote-base incondicional de 10 exames em 19/19 GHEs sem conceito no motor, ~190 de ~194 células do diff) e DT-003EB-02 (R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo, GHE-10/16). Higiene: header da DT-003DV-01 corrigido para `[FECHADA — facetas A (003.DW) e B (003.DY)]`, coerente com o corpo. Nenhuma R-* criada/alterada. Sem código de motor. |
+| v68 | 26/07/2026 | Sessão 003.EC (IMPLEMENTAÇÃO): **R-CLI-01 materializada** — nota de implementação (mesma ID, §5.1): primitivo incondicional `todo_trabalhador` (D-ARQ-66), slug `exame_clinico` novo em `exames.yaml`, 12M em `[adm, per, MR, RT, dem]`. **DT-003EB-01 REENQUADRADA** (não fechada) — premissa "pacote-base ~190/~194 células" REFUTADA por medição direta do gabarito Fascino: medido 4 exames em 19/19 (não ~190), GHE-06 Administração recebe 4/GHE-19 Vendas recebe 5 (oposto de "pacote incondicional universal"); gap decomposto em 4 classes (regras órfãs / lacuna de vocabulário / divergência de periodicidade / conceito ausente), 003.EC fecha a maior fatia da classe (1); resíduo ABERTO = classe (4) (`Av. Médica de Saúde Mental` + Avaliação Psicossocial incondicional vs R-PSY-01 condicionada), gatilho de formalização = 2º PGR no acervo (D-ARQ-06), não n=1; ressalva sobre anotações de rascunho no corpo do gabarito (D-ARQ-18); correção factual 003.EB (RX 60m também em GHE-08, não só GHE-09). **DT-003EC-01 CRIADA (ABERTA, não-bloqueante)** — RX Tórax OIT 12M no gabarito onde R-RX-01 sem-medição prescreve 24M, pergunta de método (D-ARQ-27); resolve de passagem o pré-registro de DT-003DV-01/003.DW ('Poeira respirável' tratada como sílica-like, não PNOS). Suíte 963→967 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `f175e76`. |

@@ -3989,3 +3989,22 @@ Testes. Nenhum novo (lógica determinística coberta em 003.EA; scripts/ sem sui
 Docs. PROTOCOLO → v67 (DT-003EB-01/02; higiene header DT-003DV-01 → FECHADA). DECISOES → v150 (nota de aplicação 003.EB em D-ARQ-62). PAINEL re-tirado (tiragem 003.EB).
 
 Pendências (íntegra). DT-003EB-01 e DT-003EB-02 exigem sessão CONHECIMENTO (gate D-ARQ-63) antes de virar R-*. Fatia 3 de D-ARQ-65 (procedência no verbatim) não urgente. Marco 1: rodada e2e real EXISTE (offline, determinística, diff instrumentado); faltam cobertura (pacote-base, momentos) e aceite da Dra. Carolini sobre saída do motor. Próxima: decisão no kickoff.
+
+---
+
+## Sessão 003.EC — 26/07/2026 — IMPLEMENTAÇÃO (R-CLI-01 materializada; tri-estado por origem em risco)
+
+Foco. Materializar R-CLI-01 (exame clínico anual, piso universal) em `regras.yaml` preservando o poder discriminante do tri-estado de D-ARQ-31.
+
+Entrega. Primitivo incondicional `todo_trabalhador` (`predicados.py`, registrado em `PRIMITIVOS_INCONDICIONAIS`); slug `exame_clinico` novo em `exames.yaml`; regra `R-CLI-01` em `regras.yaml` (12M, `[adm, per, MR, RT, dem]`). Orquestrador: tri-estado VÁLIDA/PARCIAL/BLOQUEADA passa a computar sobre `linhas_com_risco`, excluindo linhas cujo `Motivo.predicado` seja todo incondicional — `MatrizGHE.linhas` segue carregando a linha do clínico, muda só o gate do status (D-ARQ-66).
+
+Testes. 4 novos falha-sem/passa-com em `test_orquestrador.py` (sem risco emite 12M/5 momentos; convive com risco presente; único risco bloqueado + clínico presente fecha BLOQUEADA; risco determinado + risco bloqueado segue PARCIAL) — verificados empiricamente red/green (regra marcada `DEPRECATED` → 4 falham; restaurada → 4 passam). Ajuste de forma esperada (piso universal soma +1 linha a toda matriz real): contagem exata de emissões (`test_regra_biomonitoramento.py`, 47 casos, `test_b2_fracao_resolver.py`, `test_exposicao_fisica.py`, `test_integracao_002c.py`) e slug-guardião renomeado (`test_vocabulario.py`). Helper `linhas_de_risco` consolidado em `agente_medico/tests/invariantes.py` — substitui 2 cópias locais e evita uma 3ª. Suíte 963→967 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero.
+
+Docs. DECISOES → v151 (D-ARQ-66 CRIADA). PROTOCOLO → v68 (nota de implementação R-CLI-01, mesma ID; DT-003EB-01 REENQUADRADA — não fechada; DT-003EC-01 CRIADA — ABERTA, RX 12M vs 24M).
+
+Lições de método.
+- Escopo de quebra esperada por LISTA DE ARQUIVOS falhou duas vezes (7 → 48). O critério correto é "todo teste que carrega o protocolo real e assere contagem exata ou lista vazia de emissões". Corrigido a meio da sessão; helper `linhas_de_risco` consolidado em um só lugar.
+- Suíte fechando NO baseline (963→963) após adicionar regra foi o único sinal de que os 4 testes exigidos não existiam. Nenhuma outra evidência pegou. Contagem estável em sessão que adiciona código é sempre pergunta, nunca confirmação.
+- Alvo de mypy do prompt do Arquiteto estava errado (pasta de testes inteira em vez de motor + invariantes.py), gerando 46 erros de ruído. Alvo correto: `agente_medico/motor agente_medico/tests/invariantes.py`.
+
+Pendências (íntegra). DT-003EB-01 residual (classe 4 — `Av. Médica de Saúde Mental` / Avaliação Psicossocial incondicional vs R-PSY-01 condicionada) exige 2º PGR no acervo antes de sessão CONHECIMENTO — não n=1. DT-003EC-01 (RX 12M vs 24M) — pergunta de método, não-bloqueante. Fatia 3 de D-ARQ-65 (procedência no verbatim) segue não urgente. Commit `f175e76` (11 arquivos, 154+/22−).
