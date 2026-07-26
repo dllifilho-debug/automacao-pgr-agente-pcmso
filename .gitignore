@@ -17,6 +17,7 @@ data/cargos_desconhecidos.json
 
 # Dumps de inspeção (uso único)
 **/*_diff.txt
+suite*.txt
 
 # Dados sensíveis de clientes (matrizes reais, não commitar)
 matrizes_originais/
