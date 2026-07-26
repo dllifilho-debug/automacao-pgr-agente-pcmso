@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v150 · 65 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v151 · 66 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -73,3 +73,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v150 · 65 decisões
 | D-ARQ-63 | Gate de abertura em dois níveis: índice derivado + eixo nomeado |  | 2216 | 8398 |
 | D-ARQ-64 | Ramo FUZZY opt-in por allowlist de dado: o veto é do resultado, nunca filtro de candidato |  | 2351 | 5616 |
 | D-ARQ-65 | Extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo, não rotina |  | 2433 | 6970 |
+| D-ARQ-66 | Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas |  | 2530 | 2159 |
