@@ -225,16 +225,22 @@ def test_execucao_vibracao_generica_status_preliminar_linhas_vazias() -> None:
 # ---------------------------------------------------------------------------
 
 def test_raud01_motorista_equipamento_pesado_emite_audiometria_adm_per_mr() -> None:
+    # 003.ED: motorista_equipamento_pesado entrou em atividade_critica.ou (substitui
+    # o primitivo órfão maquina_pesada), então este risco sozinho agora dispara
+    # também R-PKG-ATIVCRIT — resultado tem 2 linhas de audiometria pré-consolidação
+    # (R-PKG-ATIVCRIT e R-AUD-01). Filtra pela linha de R-AUD-01 especificamente.
     ctx = _ctx("motorista_equipamento_pesado")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
-    assert any(e.exame == "audiometria" for e in result)
-    audio = next(e for e in result if e.exame == "audiometria")
+    audiometrias_raud01 = [
+        e for e in result if e.exame == "audiometria" and any(m.regra_id == "R-AUD-01" for m in e.motivos)
+    ]
+    assert audiometrias_raud01
+    audio = audiometrias_raud01[0]
     assert Momento.ADM in audio.momentos
     assert Momento.PER in audio.momentos
     assert Momento.MR in audio.momentos
     assert audio.periodicidade_meses == 12
-    assert any(m.regra_id == "R-AUD-01" for m in audio.motivos)
     assert ctx.pendencias == []
 
 

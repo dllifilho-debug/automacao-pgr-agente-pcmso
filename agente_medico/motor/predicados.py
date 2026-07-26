@@ -49,11 +49,6 @@ def _espaco_confinado(ctx: GHEContext) -> bool:
     return any(r.agente == "espaco_confinado" for r in ctx.riscos)
 
 
-@primitivo("maquina_pesada")
-def _maquina_pesada(ctx: GHEContext) -> bool:
-    return any(r.agente == "maquina_pesada" for r in ctx.riscos)
-
-
 @primitivo("ruido")
 def _ruido(ctx: GHEContext) -> bool:
     return any(r.agente == "ruido" for r in ctx.riscos)

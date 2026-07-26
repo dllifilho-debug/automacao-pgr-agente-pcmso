@@ -37,7 +37,7 @@ def _protocolo_ativcrit() -> Protocolo:
     return Protocolo(
         vocabulario=_vocab(),
         predicados_compostos={
-            "atividade_critica": {"ou": ["altura", "espaco_confinado", "maquina_pesada"]}
+            "atividade_critica": {"ou": ["altura", "espaco_confinado", "motorista_equipamento_pesado"]}
         },
         regras=[
             {

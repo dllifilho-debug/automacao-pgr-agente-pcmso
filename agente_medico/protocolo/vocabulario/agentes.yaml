@@ -17,6 +17,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-PKG-ATIVCRIT, R-VIS-01, R-ECG-01]
+    termos: ["Trabalho em Altura"]  # NR-35 (título) e item 35.2.1
   vibracao_corpo_inteiro:
     tipo_ibe: null
     cas: null

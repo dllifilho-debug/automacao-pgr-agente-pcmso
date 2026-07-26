@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ast
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -14,8 +16,11 @@ from agente_medico.motor.predicados import (
     avaliar_predicado,
     primitivo,
 )
-from agente_medico.motor.protocolo import Vocabulario
+from agente_medico.motor.protocolo import Vocabulario, carregar
 from agente_medico.motor.tipos import Ausente, GHEContext, GHEPGR, Quantificacao, Risco
+
+_PREDICADOS_PATH = Path(__file__).parent.parent / "motor" / "predicados.py"
+_PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
 def _ghe_vazio() -> GHEPGR:
@@ -77,10 +82,6 @@ def test_altura_false_quando_sem_risco() -> None:
 
 def test_espaco_confinado_true_quando_presente() -> None:
     assert REGISTRO_PRIMITIVOS["espaco_confinado"](_ctx("espaco_confinado")) is True
-
-
-def test_maquina_pesada_true_quando_presente() -> None:
-    assert REGISTRO_PRIMITIVOS["maquina_pesada"](_ctx("maquina_pesada")) is True
 
 
 def test_ruido_true_quando_presente() -> None:
@@ -208,9 +209,9 @@ def test_avaliar_predicado_resolve_primitivo() -> None:
 
 
 def test_avaliar_predicado_resolve_composto() -> None:
-    compostos = {"atividade_critica": {"ou": ["altura", "espaco_confinado", "maquina_pesada"]}}
+    compostos = {"atividade_critica": {"ou": ["altura", "espaco_confinado", "motorista_equipamento_pesado"]}}
     proto = _protocolo_stub(compostos)
-    ctx = _ctx("maquina_pesada")
+    ctx = _ctx("motorista_equipamento_pesado")
     assert avaliar_predicado("atividade_critica", ctx, proto) is True
 
 
@@ -314,3 +315,69 @@ def test_fallback_agente_nao_aplica_a_nome_fora_do_vocabulario() -> None:
     proto = _protocolo_stub_agentes({"chumbo": {}})
     with pytest.raises(PredicadoDesconhecido):
         avaliar_predicado("agente_com_typo", _ctx(), proto)
+
+
+# ---------------------------------------------------------------------------
+# Anti-órfão (003.ED, molde D-ARQ-64 cláusula 5): extrai do próprio fonte de
+# predicados.py todo literal comparado contra `r.agente` (== ou `in {...}`) e
+# cruza com as chaves reais de vocabulario/agentes.yaml. Um literal sem slug
+# correspondente é um primitivo morto em produção — o bug de 003.ED
+# (maquina_pesada) não tinha nenhum teste que pudesse detectá-lo porque os
+# testes de predicados constroem contexto sintético. Este teste computa do
+# dado real; nunca digite a lista de literais aqui.
+# ---------------------------------------------------------------------------
+
+def _e_r_agente(node: ast.AST) -> bool:
+    return (
+        isinstance(node, ast.Attribute)
+        and node.attr == "agente"
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "r"
+    )
+
+
+def _literal_str(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+
+def _literais_agente_comparados(caminho: Path) -> set[str]:
+    arvore = ast.parse(caminho.read_text(encoding="utf-8"), filename=str(caminho))
+    literais: set[str] = set()
+    for node in ast.walk(arvore):
+        if not isinstance(node, ast.Compare) or len(node.ops) != 1:
+            continue
+        op = node.ops[0]
+        esquerda = node.left
+        direita = node.comparators[0]
+        if isinstance(op, ast.Eq):
+            if _e_r_agente(esquerda):
+                literal = _literal_str(direita)
+            elif _e_r_agente(direita):
+                literal = _literal_str(esquerda)
+            else:
+                literal = None
+            if literal is not None:
+                literais.add(literal)
+        elif isinstance(op, ast.In) and _e_r_agente(esquerda):
+            if isinstance(direita, (ast.Set, ast.Tuple, ast.List)):
+                for elt in direita.elts:
+                    literal = _literal_str(elt)
+                    if literal is not None:
+                        literais.add(literal)
+    return literais
+
+
+def test_todo_literal_de_agente_em_predicados_existe_no_vocabulario() -> None:
+    literais = _literais_agente_comparados(_PREDICADOS_PATH)
+    assert literais, "nenhum literal de agente extraído — extrator quebrado ou predicados.py vazio"
+
+    protocolo = carregar(_PROTOCOLO_DIR)
+    slugs = set(protocolo.vocabulario.agentes.keys())
+
+    orfaos = literais - slugs
+    assert orfaos == set(), (
+        f"literais de r.agente == '...' em predicados.py sem slug correspondente "
+        f"em vocabulario/agentes.yaml (primitivo morto em produção): {sorted(orfaos)}"
+    )
