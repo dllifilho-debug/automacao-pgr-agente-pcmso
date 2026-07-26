@@ -1312,6 +1312,51 @@ já cabe em contexto sem esta migração.
 
 ---
 
+### DH-003EC-01 — `scripts/medir_painel.py` reporta verde sobre vermelho, conta prosa como implementação e não vigia derivados `[ABERTA — higiene de instrumento]`
+
+**Origem:** re-tiragem do painel na sessão 003.EC (26/07/2026), pós-merge do PR #263. Três facetas medidas, em ordem de gravidade.
+
+**(a) Cegueira a falha.** `medir_suite()` casa apenas `(\d+) passed(?:, (\d+) skipped)?` sobre o stdout do pytest e nunca lê `resultado.returncode`. Suíte vermelha é reportada como o número de verdes, sem sinal algum. Caso real desta sessão: a tiragem devolveu "966 passed, 6 skipped" com `tests/test_gerar_indice_darq.py::test_indice_em_disco_nao_divergiu` quebrado — 973 coletados − 966 passed − 6 skipped = 1 teste engolido pelo parser. É a classe de erro silencioso plausível de D-ARQ-22 dentro do próprio artefato de gestão à vista: o número que existe para dar visibilidade é cego ao estado que mais importa. Correção candidata: checar `returncode` e levantar quando ≠ 0; capturar `failed`/`error` no regex.
+
+**(b) ID citado conta como ID implementado.** `medir_cobertura_clinica()` casa `R-[A-Z]+-[0-9]+` em qualquer string de `regras.yaml`, inclusive prosa de `base_normativa`. R-TEMP-01 entrou no numerador em 003.EC por ser citado na `base_normativa` de R-CLI-01. Contradiz o critério que a reconciliação 003.DE aplicou ao excluir R-ECG-01/R-OP-01/R-VIS-01. Correção candidata: em `regras.yaml`, casar somente o campo `id:`; manter o grep amplo em `motor/**/*.py` (onde a menção em docstring É rastreabilidade de código). NÃO editar `base_normativa` para o número se comportar — citação normativa é rastreabilidade protegida pela exceção de comentário do projeto; mexer no dado para consertar a métrica é pior que a métrica torta.
+
+**(c) Derivado sem vigilância.** `docs/INDICE_DARQ.md` é gerado por `scripts/gerar_indice_darq.py` e é o Nível 1 do gate D-ARQ-63. Ficou defasado (v150 · 65 decisões contra v151 · 66) por um commit inteiro em main, sem que nada no painel piscasse — a próxima sessão teria cumprido o gate lendo um índice que não contém D-ARQ-66. Correção candidata: 4º número no painel, ou gate no ritual de fechamento que rode o gerador e falhe se o diff não for vazio.
+
+**Procedência das facetas (b) e (c):** ambas causadas por omissões do prompt do Arquiteto em 003.EC — citar R-TEMP-01 na `base_normativa` e não mandar regerar o derivado ao criar D-ARQ-66. Registrado para que a causa não se perca na correção do instrumento.
+
+**Status:** ABERTA. Não-bloqueante. Doc/instrumento, não toca regra clínica.
+
+### DH-003EC-02 — 79% do tempo da suíte é reparse de PDF real em setup por-teste `[ABERTA — higiene de instrumento]`
+
+**Origem:** medição `--durations=15` da suíte completa, sessão 003.EC, baseline main `e3cba55`.
+
+**Situação.** Suíte completa em **1366s (22min46)** para 973 testes coletados. Os 15 mais lentos somam ~1074s — cerca de **79% do tempo** — e todos são parse de PDF real, a maioria em `setup`, logo repetido a cada teste em vez de compartilhado:
+
+| tempo | fase | teste |
+|---|---|---|
+| 134,6s | call | test_orquestracao_pgr.py::...fascino_real_rota_deterministica_aceita_zero_invocacao_llm |
+| 93,2s | setup | test_extracao_pgr.py::...ebserh_humap_e_card_gated_por_densidade |
+| 90,5s | call | test_orquestracao_pgr.py::...humap_real_gated_por_densidade |
+| 90,4s | setup | test_transcritor_card.py::...ufgd_v7_real_105_pares_titulos_extremos |
+| 90,2s | call | test_orquestracao_pgr.py::...ufgd_real_105_invocacoes_card_titulo |
+| 84,7s | setup | test_transcritor_card.py::...humap_real_140_pares_titulos_vazios |
+| 84,5s | setup | test_extracao_pgr.py::...ebserh_ufgd_v7_e_card_sem_pendencia |
+| 75,1s | call | test_orquestracao_pgr.py::test_e2e_arquivo_real_ate_resultado |
+| 74,8s | call | test_orquestracao_pgr.py::...viverde_real_familia_nao_reconhecida |
+| 65,7s | setup | test_parser_familia_consciente.py::...devolve_19_blocos |
+
+Documentos envolvidos: HUMAP, UFGD-v7, Fascino, Viverde.
+
+**Correção candidata.** Fixture `scope="session"` para o texto extraído de cada PDF real, substituindo a extração por-setup. Toca APENAS quantas vezes o PDF é lido — nada do que os testes asseram muda. Fatia de higiene, não de comportamento.
+
+**Por que importa além do conforto.** 22 minutos por rodada encarece exatamente a disciplina de medir-antes-de-afirmar, que em 003.EC pegou três defeitos que relatório verde não pegava: os 4 testes exigidos que não existiam (denunciados por 963→963), as 48 falhas não reconciliadas (denunciadas por 7+17+1≠48) e o índice derivado defasado (denunciado por 966≠967). Instrumento caro é instrumento que se deixa de usar.
+
+**Correção de suspeita (registrar).** A hipótese inicial do Arquiteto era I/O de rede em `tests/test_gemini_extracao.py` — **REFUTADA** pela medição. É CPU de pdfplumber sobre documentos grandes, não espera de socket.
+
+**Status:** ABERTA. Não-bloqueante.
+
+---
+
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
 
 Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
@@ -1401,3 +1446,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v66 | 25/07/2026 | Sessão 003.DY (IMPLEMENTAÇÃO): **DT-003DV-01 faceta B RESOLVIDA — DT inteira FECHADA** (§11) — ramo FUZZY opt-in por allowlist de dado (D-ARQ-64, DECISOES v147): `fuzzy_permitido: true` em 18 slugs de cauda; `silica` fora → `Silício`/`Silicio` recusados com pendência `fuzzy_recusado` nomeando termo/slug/distância; veto de resultado, não filtro de candidato. Suíte 945→949 passed, 6 skipped. Nenhuma R-* criada/alterada. |
 | v67 | 25/07/2026 | Sessão 003.EB (MEDIÇÃO): **DT-003EB-01 e DT-003EB-02 adicionadas** (§11) — 1ª rodada `rodar-offline` (D-ARQ-65) no Fascino, 19/19 GHEs, zero invocação LLM, + diff contra a matriz humana validada (Marco 1): DT-003EB-01 (pacote-base incondicional de 10 exames em 19/19 GHEs sem conceito no motor, ~190 de ~194 células do diff) e DT-003EB-02 (R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo, GHE-10/16). Higiene: header da DT-003DV-01 corrigido para `[FECHADA — facetas A (003.DW) e B (003.DY)]`, coerente com o corpo. Nenhuma R-* criada/alterada. Sem código de motor. |
 | v68 | 26/07/2026 | Sessão 003.EC (IMPLEMENTAÇÃO): **R-CLI-01 materializada** — nota de implementação (mesma ID, §5.1): primitivo incondicional `todo_trabalhador` (D-ARQ-66), slug `exame_clinico` novo em `exames.yaml`, 12M em `[adm, per, MR, RT, dem]`. **DT-003EB-01 REENQUADRADA** (não fechada) — premissa "pacote-base ~190/~194 células" REFUTADA por medição direta do gabarito Fascino: medido 4 exames em 19/19 (não ~190), GHE-06 Administração recebe 4/GHE-19 Vendas recebe 5 (oposto de "pacote incondicional universal"); gap decomposto em 4 classes (regras órfãs / lacuna de vocabulário / divergência de periodicidade / conceito ausente), 003.EC fecha a maior fatia da classe (1); resíduo ABERTO = classe (4) (`Av. Médica de Saúde Mental` + Avaliação Psicossocial incondicional vs R-PSY-01 condicionada), gatilho de formalização = 2º PGR no acervo (D-ARQ-06), não n=1; ressalva sobre anotações de rascunho no corpo do gabarito (D-ARQ-18); correção factual 003.EB (RX 60m também em GHE-08, não só GHE-09). **DT-003EC-01 CRIADA (ABERTA, não-bloqueante)** — RX Tórax OIT 12M no gabarito onde R-RX-01 sem-medição prescreve 24M, pergunta de método (D-ARQ-27); resolve de passagem o pré-registro de DT-003DV-01/003.DW ('Poeira respirável' tratada como sílica-like, não PNOS). Suíte 963→967 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `f175e76`. |
+| v69 | 26/07/2026 | Sessão 003.EC (META): re-tiragem do `PAINEL_ESTADO.md` pós-merge do PR #263 (main `e3cba55`) — regras 20/42 pelo instrumento (48%) / 19/42 pela intenção do painel (R-TEMP-01 é citação, não regra executável), vocabulário/CAS 50/79 (63%, substitui a medição manual 003.AI de 21/45, obsoleta desde 003.EC), suíte 967 passed/6 skipped (1366s). **DH-003EC-01 e DH-003EC-02 adicionadas** (§11) — higiene do instrumento `scripts/medir_painel.py` (cegueira a suíte vermelha, ID citado em prosa contando como implementado, `INDICE_DARQ.md` sem vigilância de divergência) e higiene de suíte (79% do tempo é reparse de PDF real em setup por-teste, candidato a fixture `scope="session"`). Nenhuma regra clínica criada ou alterada. |

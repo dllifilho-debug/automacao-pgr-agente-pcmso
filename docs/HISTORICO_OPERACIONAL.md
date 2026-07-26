@@ -4008,3 +4008,11 @@ Lições de método.
 - Alvo de mypy do prompt do Arquiteto estava errado (pasta de testes inteira em vez de motor + invariantes.py), gerando 46 erros de ruído. Alvo correto: `agente_medico/motor agente_medico/tests/invariantes.py`.
 
 Pendências (íntegra). DT-003EB-01 residual (classe 4 — `Av. Médica de Saúde Mental` / Avaliação Psicossocial incondicional vs R-PSY-01 condicionada) exige 2º PGR no acervo antes de sessão CONHECIMENTO — não n=1. DT-003EC-01 (RX 12M vs 24M) — pergunta de método, não-bloqueante. Fatia 3 de D-ARQ-65 (procedência no verbatim) segue não urgente. Commit `f175e76` (11 arquivos, 154+/22−).
+
+Apêndice — regeração do índice + re-tiragem do painel (26/07/2026). Após o merge do PR #263 (`f175e76`), `docs/INDICE_DARQ.md` ficou defasado (v150 · 65 decisões contra DECISOES v151 · 66, que já carregava D-ARQ-66) — achado pela **divergência 966≠967 na suíte**, não por leitura do índice. Commit `e3cba55` regenerou o derivado (`scripts/gerar_indice_darq.py`) direto em `main`, sem branch/PR — desvio de processo consciente, recomendado pelo Arquiteto e fora da regra padrão do projeto; dano concreto zero (arquivo gerado, duas linhas de diff), precedente registrado para não virar hábito.
+
+Re-tiragem do `PAINEL_ESTADO.md` (tiragem 003.EC, pós-merge, sobre `main e3cba55`): regras **20/42** pelo instrumento (48%) / **19/42** pela intenção do painel (R-TEMP-01 entra só por citação em `base_normativa`, sem `quando`/`emite` — não roda); vocabulário/CAS **50/79** (63%) substitui a medição manual 003.AI (21/45, 23/06/2026), 5 sessões defasada; suíte **967 passed, 6 skipped** (1366s/22min46).
+
+**DH-003EC-01** (higiene de `scripts/medir_painel.py`) e **DH-003EC-02** (79% do tempo da suíte é reparse de PDF real em setup por-teste) adicionadas ao PROTOCOLO §11 (v69). Nenhuma regra clínica criada ou alterada por esta re-tiragem.
+
+Lição de método. Sessão que CRIA um D-ARQ tem de regerar `INDICE_DARQ.md` no MESMO commit — o índice é derivado e é o Nível 1 do gate D-ARQ-63.
