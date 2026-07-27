@@ -61,12 +61,20 @@ def medir_suite() -> tuple[int, int]:
         capture_output=True,
         text=True,
     )
-    correspondencia = re.search(r"(\d+) passed(?:, (\d+) skipped)?", resultado.stdout)
-    if correspondencia is None:
+    contagens = {
+        palavra: int(numero)
+        for numero, palavra in re.findall(r"(\d+) (passed|failed|skipped|error)", resultado.stdout)
+    }
+    if not contagens:
         raise RuntimeError(f"saída do pytest não reconhecida:\n{resultado.stdout}")
-    passed = int(correspondencia.group(1))
-    skipped = int(correspondencia.group(2) or 0)
-    return passed, skipped
+    if resultado.returncode != 0:
+        raise RuntimeError(
+            f"suite vermelha (returncode {resultado.returncode}): "
+            f"{contagens.get('failed', 0)} failed, {contagens.get('error', 0)} error, "
+            f"{contagens.get('passed', 0)} passed, {contagens.get('skipped', 0)} skipped\n"
+            f"{resultado.stdout[-2000:]}"
+        )
+    return contagens.get("passed", 0), contagens.get("skipped", 0)
 
 
 def _baseline() -> str:

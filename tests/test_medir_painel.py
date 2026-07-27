@@ -6,13 +6,14 @@ from __future__ import annotations
 import io
 import re
 from contextlib import redirect_stdout
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from scripts.medir_painel import (
     _ids_ativos_protocolo,
     main,
     medir_cas,
     medir_cobertura_clinica,
+    medir_suite,
 )
 
 
@@ -32,6 +33,35 @@ def test_cas_total_tem_piso_57() -> None:
     populados, total = medir_cas()
     assert total >= 57
     assert populados <= total
+
+
+def test_medir_suite_verde_devolve_passed_e_skipped() -> None:
+    fake = MagicMock(returncode=0, stdout="3 passed, 2 skipped in 1.02s\n")
+    with patch("scripts.medir_painel.subprocess.run", return_value=fake):
+        assert medir_suite() == (3, 2)
+
+
+def test_medir_suite_vermelho_levanta_runtime_error() -> None:
+    fake = MagicMock(returncode=1, stdout="1 failed, 5 passed in 0.77s\n")
+    with patch("scripts.medir_painel.subprocess.run", return_value=fake):
+        try:
+            medir_suite()
+        except RuntimeError as erro:
+            assert "vermelha" in str(erro)
+            assert "1 failed" in str(erro)
+        else:
+            raise AssertionError("medir_suite() deveria ter levantado RuntimeError")
+
+
+def test_medir_suite_saida_irreconhecivel_levanta_runtime_error() -> None:
+    fake = MagicMock(returncode=0, stdout="output inesperado sem contagens\n")
+    with patch("scripts.medir_painel.subprocess.run", return_value=fake):
+        try:
+            medir_suite()
+        except RuntimeError as erro:
+            assert "não reconhecida" in str(erro)
+        else:
+            raise AssertionError("medir_suite() deveria ter levantado RuntimeError")
 
 
 def test_main_sem_flag_suite_imprime_4_linhas_no_formato_esperado() -> None:
