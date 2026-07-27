@@ -4047,3 +4047,20 @@ Lições de método.
 - Prova de mesmo-input por reconstituição byte-a-byte do relatório é padrão superior a hash/mtime quando o instrumento não registra a própria procedência.
 
 Pendências (íntegra). DT-003ED-01 (ABERTA, não-bloqueante) — grafia natural com preposição não resolve contra slug sem preposição (vibração NR-09 `[INCERTO]`, máquina pesada sem grafia normativa, Tier 2 bloqueada por DT-003DM-01). DH-003ED-01 (ABERTA, não-bloqueante) — relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto disparador. DT-003EB-01: achado `[A MEDIR]` sobre GHE-19 (Vendas) não decomposto entre classe (2) e classe (4). Suíte 967→**968 passed, 6 skipped** (+2 novos, −1 removido); `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `7b2e65d`. PROTOCOLO v70. PAINEL **não re-tirado nesta sessão** — re-tiragem é pós-merge (números só movem em `main`).
+
+## Sessão 003.EE — 26/07/2026 — IMPLEMENTAÇÃO (D-ARQ-39 materializada; piso component-wise no dedup)
+
+Foco. Implementar D-ARQ-39 — decidida em 003.AF, sem código desde então: o caminho de convergência do `stage_8_consolidacao` troca `igualdade-estrita-ou-raise` por piso component-wise.
+
+Entrega 1 — motor. Toca só `consolidacao.py`: `existing.periodicidade_meses = min(existing.periodicidade_meses, exame.periodicidade_meses)`; `existing.periodicidade_apos_15a` por `min` tratando `None` como +∞, resultado `None` só quando ambos os lados são `None`. Docstring atualizada. As três mutações incondicionais (`momentos |=`, `motivos.extend`, `pendencias_anexadas.extend`) intactas no lugar.
+
+Entrega 2 — testes. 5 casos de piso novos em `test_consolidacao.py` (base, `apos_15a` com `None`=+∞, ambos `None`, preservação de `pendencias_anexadas`, preservação de `motivos`); −1 removido (o de conflito, que deixou de existir); `test_rx_periodicidade.py` e `test_orquestrador.py` reescritos 1-para-1 do caminho `raise` para o caminho de piso.
+
+Entrega 3 — medição. Regressão Viverde tri-estado (32 GHEs) recomputada e **inalterada**; lista de GHEs afetados **vazia**. Dois motivos independentes medidos na fixture `agente_medico/tests/fixtures/pgr_viverde.py`: `fumos_metalicos` ocorre em **zero** GHEs; as **4** ocorrências de `silica` têm todas `quantificacao` preenchida — `silica_asbesto_sem_medicao` nunca dispara, então nenhum GHE muda de forma.
+
+Lições de método.
+- Previsão de mudança-de-forma escrita numa D-ARQ é hipótese, não gabarito — a IMPL mede antes de "atualizar a asserção". A nota de implementação obrigatória de D-ARQ-39 mandava tratar quebra de GHE como esperada; não houve quebra nenhuma, e tratar a previsão como fato teria produzido uma asserção sem base.
+- "Caso-âncora vivo" precisa citar o artefato e o GHE nominal, não o nome do cliente — "presente no diagnóstico Viverde" não foi verificável contra a fixture; a âncora era iminente, não viva.
+- Remover o único `raise` de uma exceção sem medir o repo inteiro deixa código inalcançável verde na suíte — mesma classe de erro que D-ARQ-67 pagou em 003.ED.
+
+Pendências (íntegra). DT-003EE-01 (ABERTA, não-bloqueante). DT-003EC-01 segue candidata da fila. Suíte 968→972 passed, 6 skipped. `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `52aa6f3`. DECISOES v153, PROTOCOLO v71. PAINEL não re-tirado — nenhum dos 3 números se move.
