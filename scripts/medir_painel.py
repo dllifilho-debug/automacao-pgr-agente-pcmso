@@ -16,6 +16,9 @@ from pathlib import Path
 
 import yaml
 
+from scripts.gerar_indice_darq import _CAMINHO_INDICE as _CAMINHO_INDICE_DARQ
+from scripts.gerar_indice_darq import gerar_indice
+
 _RAIZ = Path(__file__).resolve().parent.parent
 _REGEX_ID = re.compile(r"R-[A-Z]+-[0-9]+")
 _REGEX_HEADER_ID = re.compile(r"^(#{2,4}\s+(R-[A-Z]+-[0-9]+)\b.*)$", re.MULTILINE)
@@ -54,6 +57,10 @@ def medir_cas() -> tuple[int, int]:
     return populados, len(agentes)
 
 
+def medir_indice_darq() -> bool:
+    return gerar_indice() == _CAMINHO_INDICE_DARQ.read_text(encoding="utf-8")
+
+
 def medir_suite() -> tuple[int, int]:
     resultado = subprocess.run(
         [sys.executable, "-m", "pytest", "agente_medico/tests/", "tests/", "-q", "--tb=no"],
@@ -61,12 +68,20 @@ def medir_suite() -> tuple[int, int]:
         capture_output=True,
         text=True,
     )
-    correspondencia = re.search(r"(\d+) passed(?:, (\d+) skipped)?", resultado.stdout)
-    if correspondencia is None:
+    contagens = {
+        palavra: int(numero)
+        for numero, palavra in re.findall(r"(\d+) (passed|failed|skipped|error)", resultado.stdout)
+    }
+    if not contagens:
         raise RuntimeError(f"saída do pytest não reconhecida:\n{resultado.stdout}")
-    passed = int(correspondencia.group(1))
-    skipped = int(correspondencia.group(2) or 0)
-    return passed, skipped
+    if resultado.returncode != 0:
+        raise RuntimeError(
+            f"suite vermelha (returncode {resultado.returncode}): "
+            f"{contagens.get('failed', 0)} failed, {contagens.get('error', 0)} error, "
+            f"{contagens.get('passed', 0)} passed, {contagens.get('skipped', 0)} skipped\n"
+            f"{resultado.stdout[-2000:]}"
+        )
+    return contagens.get("passed", 0), contagens.get("skipped", 0)
 
 
 def _baseline() -> str:
@@ -94,6 +109,11 @@ def main() -> None:
     numerador_cas, denominador_cas = medir_cas()
     percentual_cas = 100 * numerador_cas / denominador_cas
     print(f"cas: {numerador_cas}/{denominador_cas} slugs ({percentual_cas:.0f}%)")
+
+    if medir_indice_darq():
+        print("indice: sincronizado")
+    else:
+        print("indice: DIVERGENTE — rode python -m scripts.gerar_indice_darq")
 
     if args.suite:
         passed, skipped = medir_suite()

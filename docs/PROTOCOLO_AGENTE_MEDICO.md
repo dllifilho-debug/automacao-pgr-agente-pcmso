@@ -1349,7 +1349,7 @@ já cabe em contexto sem esta migração.
 
 ---
 
-### DH-003EC-01 — `scripts/medir_painel.py` reporta verde sobre vermelho, conta prosa como implementação e não vigia derivados `[ABERTA — higiene de instrumento]`
+### DH-003EC-01 — `scripts/medir_painel.py` reporta verde sobre vermelho, conta prosa como implementação e não vigia derivados `[PARCIALMENTE RESOLVIDA — 003.EF; faceta (b) ABERTA]`
 
 **Origem:** re-tiragem do painel na sessão 003.EC (26/07/2026), pós-merge do PR #263. Três facetas medidas, em ordem de gravidade.
 
@@ -1361,7 +1361,10 @@ já cabe em contexto sem esta migração.
 
 **Procedência das facetas (b) e (c):** ambas causadas por omissões do prompt do Arquiteto em 003.EC — citar R-TEMP-01 na `base_normativa` e não mandar regerar o derivado ao criar D-ARQ-66. Registrado para que a causa não se perca na correção do instrumento.
 
-**Status:** ABERTA. Não-bloqueante. Doc/instrumento, não toca regra clínica.
+**Status:** PARCIALMENTE RESOLVIDA (003.EF).
+(a) cegueira a falha — RESOLVIDA: `medir_suite()` lê `returncode` e levanta em suíte vermelha (`4abfeb5`), 3 testes falha-sem/passa-com.
+(c) derivado sem vigilância — RESOLVIDA: `INDICE_DARQ` regenerado (`c89f569`) e estado do derivado exposto como 4ª linha do painel (`642a705`), 2 testes. O gate já existia (`test_indice_em_disco_nao_divergiu`); 003.EF tornou-o visível sem pagar a suíte completa.
+(b) ID citado conta como ID implementado — ABERTA, não tocada em 003.EF. Correção candidata inalterada: casar somente o campo `id:` em `regras.yaml`. Consequência viva: o painel segue com dois números (20 pelo instrumento / 19 pela intenção).
 
 ### DH-003EC-02 — 79% do tempo da suíte é reparse de PDF real em setup por-teste `[ABERTA — higiene de instrumento]`
 
@@ -1543,3 +1546,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v69 | 26/07/2026 | Sessão 003.EC (META): re-tiragem do `PAINEL_ESTADO.md` pós-merge do PR #263 (main `e3cba55`) — regras 20/42 pelo instrumento (48%) / 19/42 pela intenção do painel (R-TEMP-01 é citação, não regra executável), vocabulário/CAS 50/79 (63%, substitui a medição manual 003.AI de 21/45, obsoleta desde 003.EC), suíte 967 passed/6 skipped (1366s). **DH-003EC-01 e DH-003EC-02 adicionadas** (§11) — higiene do instrumento `scripts/medir_painel.py` (cegueira a suíte vermelha, ID citado em prosa contando como implementado, `INDICE_DARQ.md` sem vigilância de divergência) e higiene de suíte (79% do tempo é reparse de PDF real em setup por-teste, candidato a fixture `scope="session"`). Nenhuma regra clínica criada ou alterada. |
 | v70 | 26/07/2026 | Sessão 003.ED (IMPLEMENTAÇÃO): nota de implementação em R-PKG-ATIVCRIT (mesma ID, §6) — alias Tier 1 `"Trabalho em Altura"` (NR-35 título + item 35.2.1, Portaria MTP 4.218/2022) e substituição do primitivo órfão `maquina_pesada` por `motorista_equipamento_pesado` (D-ARQ-67) em `atividade_critica`; efeito medido no Fascino: 16/19 GHEs passam a emitir R-PKG-ATIVCRIT, cruzamento nominal contra o gabarito com interseção 16 e conjuntos "só motor"/"só gabarito" vazios. Ressalva `[INTERPRETADO]` registrada — os dois rótulos ("máquina pesada" vs "motorista de equipamento pesado") não são declarados como o mesmo conceito pelo protocolo; consequência não exercitada por nenhum caso do acervo (0 GHEs via `motorista_equipamento_pesado`, 0 via `espaco_confinado`). **DT-003ED-01 CRIADA (ABERTA)** (§11) — grafia natural com preposição não resolve contra slug sem preposição (atinge R-VIB-01/02 e a perna de máquina pesada). **DH-003ED-01 CRIADA (ABERTA)** (§11) — relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto disparador. **DT-003DV-01: observação de instrumento REFUTADA por medição** — o relatório TEM identidade por GHE. **DT-003EB-01: nota adicionada** — classe (2) perdeu a maior fatia; achado novo `[A MEDIR]` sobre GHE-19 (Vendas, `ctx.riscos == []`). Suíte 967→968 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `7b2e65d`. Nenhuma R-* criada/alterada; conteúdo clínico inalterado. |
 | v71 | 26/07/2026 | Sessão 003.EE (IMPLEMENTAÇÃO): **DT-003EE-01 CRIADA** (`ConflitoProtocolo` sem disparador após D-ARQ-39; decisão MANTER). Nota de aplicação 003.EE em R-GHE-03 — dedup compõe periodicidade por piso, mesma ID, sem mudança de semântica clínica. Nenhuma R-* criada ou alterada. Detalhe em DECISOES v153 e HISTORICO 003.EE. |
+| v72 | 26/07/2026 | Sessão 003.EF (IMPLEMENTAÇÃO): **DH-003EC-01 PARCIALMENTE RESOLVIDA** (§11) — facetas (a) cegueira a falha e (c) derivado sem vigilância FECHADAS (`medir_suite()` lê `returncode` e levanta em suíte vermelha; `INDICE_DARQ.md` regenerado e seu estado exposto como 4ª linha do painel); faceta (b) ID citado conta como implementado segue ABERTA. Nenhuma R-* nem D-ARQ criada/alterada. Sem código de motor. Detalhe em HISTORICO 003.EF. |
