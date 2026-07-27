@@ -1,21 +1,28 @@
 from __future__ import annotations
 
-import pytest
-
-from agente_medico.motor.estagios.consolidacao import ConflitoProtocolo, stage_8_consolidacao
-from agente_medico.motor.tipos import ExameEmitido, Momento, Motivo
+from agente_medico.motor.estagios.consolidacao import stage_8_consolidacao
+from agente_medico.motor.tipos import ExameEmitido, Momento, Motivo, Pendencia
 
 
 def _motivo(regra_id: str) -> Motivo:
     return Motivo(regra_id=regra_id, predicado="teste", risco_origem=None, detalhe=None)
 
 
-def _exame(nome: str, periodicidade: int, momentos: set[Momento], regra_id: str = "R-A") -> ExameEmitido:
+def _exame(
+    nome: str,
+    periodicidade: int,
+    momentos: set[Momento],
+    regra_id: str = "R-A",
+    apos_15a: int | None = None,
+    pendencias: list[Pendencia] | None = None,
+) -> ExameEmitido:
     return ExameEmitido(
         exame=nome,
         periodicidade_meses=periodicidade,
         momentos=set(momentos),
         motivos=[_motivo(regra_id)],
+        periodicidade_apos_15a=apos_15a,
+        pendencias_anexadas=list(pendencias) if pendencias is not None else [],
     )
 
 
@@ -92,18 +99,71 @@ def test_dedup_slugs_diferentes_nao_mergem() -> None:
     assert len(result) == 2
 
 
-def test_conflito_periodicidade_levanta_excecao() -> None:
+def test_piso_periodicidade_base_convergente() -> None:
+    """
+    D-ARQ-39: periodicidade divergente no mesmo exame não é mais
+    ConflitoProtocolo — resolve por piso (mínimo). 24M x 60M -> 24M.
+    """
     entrada = [
-        _exame("Hemograma", 12, {Momento.ADM}, "R-A"),
-        _exame("Hemograma",  6, {Momento.PER}, "R-B"),
+        _exame("Raio-X torax", 24, {Momento.ADM}, "R-A"),
+        _exame("Raio-X torax", 60, {Momento.PER}, "R-B"),
     ]
-    with pytest.raises(ConflitoProtocolo) as exc_info:
-        stage_8_consolidacao(entrada)
-    msg = str(exc_info.value)
-    assert "R-A" in msg
-    assert "R-B" in msg
-    assert "12" in msg
-    assert "6" in msg
+    result = stage_8_consolidacao(entrada)
+    assert len(result) == 1
+    assert result[0].periodicidade_meses == 24
+
+
+def test_piso_periodicidade_apos_15a_none_como_infinito() -> None:
+    """
+    Caso-âncora D-ARQ-39 cláusula 4: R-RX-01-sem (24, 12) x R-RX-02 (60, None)
+    -> piso (24, 12). None em apenas um lado não derruba o piso do outro lado.
+    """
+    entrada = [
+        _exame("Raio-X torax", 24, {Momento.ADM}, "R-RX-01-sem", apos_15a=12),
+        _exame("Raio-X torax", 60, {Momento.PER}, "R-RX-02", apos_15a=None),
+    ]
+    result = stage_8_consolidacao(entrada)
+    assert len(result) == 1
+    assert result[0].periodicidade_meses == 24
+    assert result[0].periodicidade_apos_15a == 12
+
+
+def test_piso_apos_15a_ambos_none_permanece_none() -> None:
+    """Ambos os lados com apos_15a=None -> resultado None, não 0, não erro."""
+    entrada = [
+        _exame("Hemograma", 24, {Momento.ADM}, "R-A", apos_15a=None),
+        _exame("Hemograma", 60, {Momento.PER}, "R-B", apos_15a=None),
+    ]
+    result = stage_8_consolidacao(entrada)
+    assert len(result) == 1
+    assert result[0].periodicidade_apos_15a is None
+
+
+def test_piso_preserva_pendencias_anexadas_dos_dois_lados() -> None:
+    """
+    Requisito piso-sem-teto de D-ARQ-31: pendência bloqueante anexada a
+    qualquer um dos lados nunca é perdida no caminho de piso.
+    """
+    pend_a = Pendencia(tipo="teto", destinatario="RT", motivo="a", bloqueante=True)
+    pend_b = Pendencia(tipo="teto", destinatario="RT", motivo="b", bloqueante=True)
+    entrada = [
+        _exame("Raio-X torax", 24, {Momento.ADM}, "R-A", pendencias=[pend_a]),
+        _exame("Raio-X torax", 60, {Momento.PER}, "R-B", pendencias=[pend_b]),
+    ]
+    result = stage_8_consolidacao(entrada)
+    assert len(result) == 1
+    assert result[0].pendencias_anexadas == [pend_a, pend_b]
+
+
+def test_piso_preserva_motivos_dos_dois_lados() -> None:
+    """Proveniência (motivos) dos dois lados preservada no caminho de piso."""
+    entrada = [
+        _exame("Raio-X torax", 24, {Momento.ADM}, "R-A"),
+        _exame("Raio-X torax", 60, {Momento.PER}, "R-B"),
+    ]
+    result = stage_8_consolidacao(entrada)
+    assert len(result) == 1
+    assert [m.regra_id for m in result[0].motivos] == ["R-A", "R-B"]
 
 
 def test_exames_distintos_preservados() -> None:

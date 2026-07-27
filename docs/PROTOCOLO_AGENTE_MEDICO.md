@@ -95,6 +95,10 @@ Esta regra é a expressão clínica do princípio *"não existe solda sem fumos 
 ### R-GHE-03 — Múltiplos riscos, mesmo exame `[VALIDADO]`
 Quando o mesmo exame é exigido por riscos distintos no mesmo GHE → **linha única** na matriz. A periodicidade não se altera em função do número de riscos que pedem o exame.
 
+**Nota de aplicação 003.EE.** O dedup de R-GHE-03 passa a compor periodicidade por piso
+component-wise (D-ARQ-39 IMPLEMENTADA), não mais por igualdade estrita. As regras permanecem
+distintas — o piso é dedup, não fusão. Sem mudança de semântica clínica.
+
 ### R-GHE-04 — Risco listado mas não convincente `[VALIDADO]`
 Quando o PGR lista um risco que parece não realista para o GHE, a Dra. Carolini **segue o inventário** sem reinterpretar nem rejeitar. O documento é a fonte de verdade do escopo de risco.
 
@@ -1436,6 +1440,15 @@ predicado que a satisfez e o status da regra. Irmã de DH-003EC-01.
 
 **Status:** ABERTA. Não-bloqueante.
 
+### DT-003EE-01 — `ConflitoProtocolo` sem disparador após D-ARQ-39 `[ABERTA, não-bloqueante]`
+
+Medido em 003.EE: `grep -rn "raise ConflitoProtocolo" --include=*.py .` = zero no repo. `ConflitoProtocolo`
+(`consolidacao.py:6`) e `except ConflitoProtocolo` (`orquestrador.py:52`) permanecem definidos e inalcançáveis.
+Decisão de 003.EE: MANTER — o veículo de captura por-GHE é contrato de D-ARQ-15; removê-lo é revogação parcial de
+D-ARQ-15, não limpeza. Registrado para não virar descoberta-surpresa (classe de erro que D-ARQ-67 pagou em 003.ED:
+código inalcançável verde na suíte). Fecha quando (a) um call-site futuro voltar a levantá-la, ou (b) uma sessão
+ARQUITETURA decidir que D-ARQ-15 não precisa mais do veículo.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1529,3 +1542,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v68 | 26/07/2026 | Sessão 003.EC (IMPLEMENTAÇÃO): **R-CLI-01 materializada** — nota de implementação (mesma ID, §5.1): primitivo incondicional `todo_trabalhador` (D-ARQ-66), slug `exame_clinico` novo em `exames.yaml`, 12M em `[adm, per, MR, RT, dem]`. **DT-003EB-01 REENQUADRADA** (não fechada) — premissa "pacote-base ~190/~194 células" REFUTADA por medição direta do gabarito Fascino: medido 4 exames em 19/19 (não ~190), GHE-06 Administração recebe 4/GHE-19 Vendas recebe 5 (oposto de "pacote incondicional universal"); gap decomposto em 4 classes (regras órfãs / lacuna de vocabulário / divergência de periodicidade / conceito ausente), 003.EC fecha a maior fatia da classe (1); resíduo ABERTO = classe (4) (`Av. Médica de Saúde Mental` + Avaliação Psicossocial incondicional vs R-PSY-01 condicionada), gatilho de formalização = 2º PGR no acervo (D-ARQ-06), não n=1; ressalva sobre anotações de rascunho no corpo do gabarito (D-ARQ-18); correção factual 003.EB (RX 60m também em GHE-08, não só GHE-09). **DT-003EC-01 CRIADA (ABERTA, não-bloqueante)** — RX Tórax OIT 12M no gabarito onde R-RX-01 sem-medição prescreve 24M, pergunta de método (D-ARQ-27); resolve de passagem o pré-registro de DT-003DV-01/003.DW ('Poeira respirável' tratada como sílica-like, não PNOS). Suíte 963→967 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `f175e76`. |
 | v69 | 26/07/2026 | Sessão 003.EC (META): re-tiragem do `PAINEL_ESTADO.md` pós-merge do PR #263 (main `e3cba55`) — regras 20/42 pelo instrumento (48%) / 19/42 pela intenção do painel (R-TEMP-01 é citação, não regra executável), vocabulário/CAS 50/79 (63%, substitui a medição manual 003.AI de 21/45, obsoleta desde 003.EC), suíte 967 passed/6 skipped (1366s). **DH-003EC-01 e DH-003EC-02 adicionadas** (§11) — higiene do instrumento `scripts/medir_painel.py` (cegueira a suíte vermelha, ID citado em prosa contando como implementado, `INDICE_DARQ.md` sem vigilância de divergência) e higiene de suíte (79% do tempo é reparse de PDF real em setup por-teste, candidato a fixture `scope="session"`). Nenhuma regra clínica criada ou alterada. |
 | v70 | 26/07/2026 | Sessão 003.ED (IMPLEMENTAÇÃO): nota de implementação em R-PKG-ATIVCRIT (mesma ID, §6) — alias Tier 1 `"Trabalho em Altura"` (NR-35 título + item 35.2.1, Portaria MTP 4.218/2022) e substituição do primitivo órfão `maquina_pesada` por `motorista_equipamento_pesado` (D-ARQ-67) em `atividade_critica`; efeito medido no Fascino: 16/19 GHEs passam a emitir R-PKG-ATIVCRIT, cruzamento nominal contra o gabarito com interseção 16 e conjuntos "só motor"/"só gabarito" vazios. Ressalva `[INTERPRETADO]` registrada — os dois rótulos ("máquina pesada" vs "motorista de equipamento pesado") não são declarados como o mesmo conceito pelo protocolo; consequência não exercitada por nenhum caso do acervo (0 GHEs via `motorista_equipamento_pesado`, 0 via `espaco_confinado`). **DT-003ED-01 CRIADA (ABERTA)** (§11) — grafia natural com preposição não resolve contra slug sem preposição (atinge R-VIB-01/02 e a perna de máquina pesada). **DH-003ED-01 CRIADA (ABERTA)** (§11) — relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto disparador. **DT-003DV-01: observação de instrumento REFUTADA por medição** — o relatório TEM identidade por GHE. **DT-003EB-01: nota adicionada** — classe (2) perdeu a maior fatia; achado novo `[A MEDIR]` sobre GHE-19 (Vendas, `ctx.riscos == []`). Suíte 967→968 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `7b2e65d`. Nenhuma R-* criada/alterada; conteúdo clínico inalterado. |
+| v71 | 26/07/2026 | Sessão 003.EE (IMPLEMENTAÇÃO): **DT-003EE-01 CRIADA** (`ConflitoProtocolo` sem disparador após D-ARQ-39; decisão MANTER). Nota de aplicação 003.EE em R-GHE-03 — dedup compõe periodicidade por piso, mesma ID, sem mudança de semântica clínica. Nenhuma R-* criada ou alterada. Detalhe em DECISOES v153 e HISTORICO 003.EE. |

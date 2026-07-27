@@ -246,20 +246,31 @@ def test_integracao_end_to_end() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Teste de conflito de protocolo
+# Teste de periodicidade divergente no mesmo exame (D-ARQ-39: piso, não conflito)
 # ---------------------------------------------------------------------------
 
 
-def test_conflito_protocolo_vira_pendencia() -> None:
+def test_periodicidade_divergente_resolve_por_piso() -> None:
+    """
+    D-ARQ-39: duas regras convergindo no mesmo exame com periodicidades
+    distintas (R-CONFLITO-A 12M / R-CONFLITO-B 6M) não bloqueiam mais o GHE
+    via ConflitoProtocolo — resolvem por piso (mínimo). Substitui
+    test_conflito_protocolo_vira_pendencia (comportamento antigo removido).
+    """
     ghe = _ghe(riscos=(_risco("trabalho_altura"),))
     pgr = _pgr(ghes=(ghe,))
     resultado = executar(pgr, _protocolo_conflito(), hoje=HOJE)
 
-    assert resultado.status == "PRELIMINAR"
+    assert resultado.status == "OK"
     assert len(resultado.matrizes) == 1
     matriz = resultado.matrizes[0]
-    assert matriz.linhas == []
-    assert any(p.tipo == "conflito_protocolo" and p.bloqueante for p in matriz.pendencias)
+    assert matriz.status == "VÁLIDA"
+    assert not any(p.tipo == "conflito_protocolo" for p in matriz.pendencias)
+    assert len(matriz.linhas) == 1
+    linha = matriz.linhas[0]
+    assert linha.exame == "hemograma"
+    assert linha.periodicidade_meses == 6
+    assert linha.momentos == {Momento.ADM, Momento.PER}
 
 
 # ---------------------------------------------------------------------------

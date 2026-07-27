@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from agente_medico.motor.estagios.consolidacao import ConflitoProtocolo, stage_8_consolidacao
+from agente_medico.motor.estagios.consolidacao import stage_8_consolidacao
 from agente_medico.motor.estagios.emissao import stage_5_emissao
 from agente_medico.motor.estagios.predicados_stage import stage_4_predicados
 from agente_medico.motor.estagios.riscos import stage_2_riscos
@@ -195,7 +195,8 @@ def _motivo(regra_id: str) -> Motivo:
     return Motivo(regra_id=regra_id, predicado="teste", risco_origem=None, detalhe=None)
 
 
-def test_stage8_conflito_apos15a_diferente() -> None:
+def test_stage8_piso_apos15a_diferente() -> None:
+    """D-ARQ-39: apos_15a divergente não é mais ConflitoProtocolo — resolve por piso."""
     exames = [
         ExameEmitido(
             exame="rx_torax_oit",
@@ -212,8 +213,9 @@ def test_stage8_conflito_apos15a_diferente() -> None:
             periodicidade_apos_15a=6,
         ),
     ]
-    with pytest.raises(ConflitoProtocolo):
-        stage_8_consolidacao(exames)
+    result = stage_8_consolidacao(exames)
+    assert len(result) == 1
+    assert result[0].periodicidade_apos_15a == 6
 
 
 def test_stage8_merge_preserva_apos15a() -> None:
