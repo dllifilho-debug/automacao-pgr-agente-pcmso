@@ -1519,6 +1519,34 @@ bruto continua grande e reproduzível sob demanda.
 
 **Status:** ABERTA. Não-bloqueante.
 
+### DH-003EG-03 — Derivado do `INDICE_DARQ` tem vigilância, mas o ritual não a invoca em sessão docs-only `[ABERTA — higiene de método]`
+
+**Origem:** 003.EG (emenda), ao fechar a sessão principal.
+
+**Situação.** 003.EF implementou a vigilância do derivado (`medir_indice_darq()`, 4ª linha do
+painel) depois que `docs/INDICE_DARQ.md` ficou defasado no merge do PR #267. Na sessão
+seguinte a mesma classe se repetiu: o commit `186150e` (DECISOES v154→v155) inseriu 24 linhas
+sem regenerar o índice — 94 linhas divergentes, `test_indice_em_disco_nao_divergiu` vermelho.
+Corrigido em `973a343` (47 linhas trocadas). Causa nomeada: o prompt de fechamento do
+Arquiteto dispensou a suíte com a justificativa "docs-only" — a rede existia e foi desligada
+por instrução, não por falha do instrumento; o teste que teria pego roda em 0,43s.
+
+**Por que detectar não previne.** A vigilância só dispara quando alguém roda a suíte (ou o
+teste específico), e a sessão docs-only é justamente a que não roda — o instrumento é
+correto, o ritual em torno dele é que tinha um buraco.
+
+**Correção instalada nesta emenda.** Cláusula fixa em `CLAUDE.md` ("Verificação": nenhum
+prompt dispensa a suíte; toda sessão que toca `DECISOES_ARQUITETURAIS.md` regenera o índice)
+e passo 3 do `docs/RITUAL_FECHAMENTO.md`.
+
+**Resíduo ABERTO.** Ambas as correções dependem de leitura humana/agente — nenhum mecanismo
+impede a 3ª ocorrência. Automação real (hook de pre-commit que regenera o índice quando
+`DECISOES_ARQUITETURAIS.md` está staged) fica candidata, com a ressalva medida de que
+`core.hooksPath` mora em `.git/config`, não versionado — o hook falharia em silêncio em outro
+clone sem um passo de setup explícito.
+
+**Status:** ABERTA. Não-bloqueante.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1615,3 +1643,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v71 | 26/07/2026 | Sessão 003.EE (IMPLEMENTAÇÃO): **DT-003EE-01 CRIADA** (`ConflitoProtocolo` sem disparador após D-ARQ-39; decisão MANTER). Nota de aplicação 003.EE em R-GHE-03 — dedup compõe periodicidade por piso, mesma ID, sem mudança de semântica clínica. Nenhuma R-* criada ou alterada. Detalhe em DECISOES v153 e HISTORICO 003.EE. |
 | v72 | 26/07/2026 | Sessão 003.EF (IMPLEMENTAÇÃO): **DH-003EC-01 PARCIALMENTE RESOLVIDA** (§11) — facetas (a) cegueira a falha e (c) derivado sem vigilância FECHADAS (`medir_suite()` lê `returncode` e levanta em suíte vermelha; `INDICE_DARQ.md` regenerado e seu estado exposto como 4ª linha do painel); faceta (b) ID citado conta como implementado segue ABERTA. Nenhuma R-* nem D-ARQ criada/alterada. Sem código de motor. Detalhe em HISTORICO 003.EF. |
 | v73 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): **DH-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — facetas `riscos_resolvidos` (slugs por GHE) e `predicado` (expressão real, fim do literal `"<composto>"`) FECHADAS; faceta `risco_origem` segue ABERTA (exigiria mudar a assinatura de `predicados.avaliar`, recorte deixado fora por decisão do Arquiteto). **DT-003EG-01 CRIADA (ABERTA)** — audiometria emitida em 16/19 GHEs com motivo `R-PKG-ATIVCRIT` em 15 deles onde o gatilho clínico real é ruído bloqueado por `predicado_ausente` (exame certo, razão errada), só visível porque o motivo por linha passou a ser impresso. **DH-003EG-01 CRIADA (ABERTA — higiene de instrumento)** — 122 bytes NUL do verbatim do PGR vazam para `motivo` de pendências `vocabulario_ausente` no relatório, `grep` classifica-o como binário; `\r\n` recorrente (classe DH-003M-01). **DH-003EG-02 CRIADA (ABERTA — higiene de método)** — `relatorios/` inteiro fora do git (`.gitignore:26`), o diff motor×gabarito que pauta a fila desde D-ARQ-62 envelheceu 4 sessões sem sinal em `git log` (mesma classe de DT-003DX-02). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame (baseline 003.EB: 14 BLOQUEADA / 3 PARCIAL / 2 VÁLIDA, 7 linhas — divergência esperada, motor mudou em 4 sessões desde então). Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. Nenhuma R-* criada/alterada. Detalhe em DECISOES v155 e HISTORICO 003.EG. |
+| v74 | 27/07/2026 | Sessão 003.EG (EMENDA — correção de método): **DH-003EG-03 CRIADA (ABERTA)** (§11) — vigilância do `INDICE_DARQ` (003.EF) existe mas o ritual não a invoca em sessão docs-only; o commit `186150e` desta mesma sessão ficou defasado 94 linhas por a suíte ter sido dispensada por instrução ("docs-only"), corrigido em `973a343`; 2ª ocorrência da classe em 2 sessões (1ª: `c89f569`, 003.EF). Causa nomeada no Arquiteto, não no Code. Correção instalada: `CLAUDE.md` na raiz (NOVO) — regras de método versionadas e lidas pelo Code, endereça DT-003DX-02 — e `docs/RITUAL_FECHAMENTO.md` (NOVO) — checklist fixo de 7 passos que substitui redação livre do prompt de fechamento. Resíduo ABERTO: ambas dependem de leitura humana/agente, sem mecanismo que impeça 3ª ocorrência; hook de pre-commit é candidato, com ressalva de que `core.hooksPath` não é versionado. Suíte inalterada nesta emenda (nenhum código tocado). Detalhe em DECISOES v156 e HISTORICO 003.EG. |
