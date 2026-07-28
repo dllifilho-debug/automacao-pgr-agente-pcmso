@@ -172,6 +172,16 @@ def test_raud01_ruido_sem_quantificacao_gera_pendencia_bloqueante() -> None:
     assert any(p.bloqueante and p.regra_origem == "R-AUD-01" for p in ctx.pendencias)
 
 
+def test_raud01_motivo_predicado_serializa_expressao_composta() -> None:
+    ctx = _ctx_ruido_quant("acima_acao")
+    proto = carregar(_PROTOCOLO_DIR)
+    result = stage_5_emissao(ctx, proto)
+    audio = next(e for e in result if e.exame == "audiometria")
+    motivo = next(m for m in audio.motivos if m.regra_id == "R-AUD-01")
+    assert motivo.predicado == "ou(ruido_acima_acao, motorista_equipamento_pesado, ototoxico)"
+    assert motivo.predicado != "<composto>"
+
+
 # ---------------------------------------------------------------------------
 # Testes 9-10: R-VIB-02
 # ---------------------------------------------------------------------------
