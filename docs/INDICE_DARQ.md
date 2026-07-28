@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v155 · 67 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v156 · 67 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -70,8 +70,8 @@ Fonte: DECISOES_ARQUITETURAIS.md v155 · 67 decisões
 | D-ARQ-60 | Reconciliação nome-de-exibição §5.9 → slug canônico mora no guardião (registro explícito), não no doc; §5.9 é fonte humana, `regras.yaml` a chave de máquina | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 2192 | 3530 |
 | D-ARQ-61 | Critério de escolha do indicador canônico quando o Anexo I oferece múltiplas opções ("ou") | DECISÃO DE ARQUITETURA (sessão 003 | 2216 | 3566 |
 | D-ARQ-62 | Redirecionamento de foco pós-003.DQ: Marco 1 via caso-âncora real; recorte construção civil como sequenciamento, não arquitetura | DECISÃO DE FOCO (sessão 003 | 2252 | 4921 |
-| D-ARQ-63 | Gate de abertura em dois níveis: índice derivado + eixo nomeado |  | 2279 | 8398 |
-| D-ARQ-64 | Ramo FUZZY opt-in por allowlist de dado: o veto é do resultado, nunca filtro de candidato |  | 2414 | 5616 |
-| D-ARQ-65 | Extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo, não rotina |  | 2496 | 6970 |
-| D-ARQ-66 | Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas |  | 2593 | 2159 |
-| D-ARQ-67 | Literal de vocabulário em código é contrato verificado por teste computado do dado |  | 2632 | 1815 |
+| D-ARQ-63 | Gate de abertura em dois níveis: índice derivado + eixo nomeado |  | 2279 | 9410 |
+| D-ARQ-64 | Ramo FUZZY opt-in por allowlist de dado: o veto é do resultado, nunca filtro de candidato |  | 2426 | 5616 |
+| D-ARQ-65 | Extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo, não rotina |  | 2508 | 6970 |
+| D-ARQ-66 | Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas |  | 2605 | 2159 |
+| D-ARQ-67 | Literal de vocabulário em código é contrato verificado por teste computado do dado |  | 2644 | 1815 |
