@@ -114,9 +114,16 @@ def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausent
         return False
     q = risco.quantificacao
     if q is None:                                                   # (b)
-        return Ausente(
-            "Sílica/asbesto sem quantificação nem indicação de ausência de "
-            "avaliação — medir ou declarar ausência de laudo"
+        # R-RX-01 / NR-07 Anexo III Quadro 1, ramo "Empresas sem avaliações
+        # quantitativas" (Portaria MTP 567/2022): sem laudo é faixa válida, não
+        # pendência — os dois ramos do Quadro 1 são exaustivos.
+        return Quantificacao(
+            valor=None,
+            unidade=None,
+            relacao_LT=None,
+            pct_LT=None,
+            apenas_qualitativa=False,
+            sem_avaliacao_quantitativa=True,
         )
     if (
         q.pct_LT is None
@@ -216,7 +223,7 @@ def _helper_pnos(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
     q = risco.quantificacao
     if q is None:
         # Sem laudo = sem_medicao (faixa válida do Quadro 2: adm+60M). NÃO bloqueia.
-        # Distinto de sílica: PNOS sem laudo é faixa válida, não pendência.
+        # Ambos os Quadros (1 e 2) do Anexo III têm ramo de ausência exaustivo.
         return Quantificacao(
             valor=None,
             unidade=None,

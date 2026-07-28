@@ -86,7 +86,8 @@ def test_rx_silica_sem_medicao_roteia_24m_apos12() -> None:
 
 
 def test_rx_pnos_sem_medicao_roteia_60m() -> None:
-    # q=None -> sem_medicao (faixa válida Quadro 2: adm+60M). NÃO bloqueia (vs sílica).
+    # q=None -> sem_medicao (faixa válida Quadro 2: adm+60M). NÃO bloqueia — mesmo
+    # tratamento do ramo (b) da sílica (Quadro 1) desde 003.EH.
     ctx, proto = _ctx_com_agente("poeira_nao_classificada")
     exames = stage_5_emissao(ctx, proto)
     rx = next(e for e in exames if e.exame == "rx_torax_oit")
@@ -128,14 +129,54 @@ def test_rx_silica_pct5_roteia_apenas_adm() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Ausente bloqueante quando silica sem quantificacao
+# 003.EH — R-RX-01 / NR-07 Anexo III Quadro 1, ramo "Empresas sem avaliações
+# quantitativas" (Portaria MTP 567/2022): quantificacao=None é faixa válida
+# (sem_medicao), não pendência — os dois ramos do Quadro 1 são exaustivos.
+# Redireciona test_rx_silica_sem_quantificacao_gera_ausente_bloqueante (comportamento
+# antigo: Ausente bloqueante). Antes: rx_list == [] e pendencia bloqueante com
+# "laudo"/"avaliação" no motivo. Depois: emite rx_torax_oit 24M/12 e zero pendência.
 # ---------------------------------------------------------------------------
 
-def test_rx_silica_sem_quantificacao_gera_ausente_bloqueante() -> None:
+def test_rx_silica_quantificacao_none_roteia_24m_apos12() -> None:
     ctx, proto = _ctx_com_agente("silica", None)
     exames = stage_5_emissao(ctx, proto)
+    rx = next(e for e in exames if e.exame == "rx_torax_oit")
+    assert rx.periodicidade_meses == 24
+    assert rx.periodicidade_apos_15a == 12
+    assert {Momento.ADM, Momento.PER, Momento.MR, Momento.DEM}.issubset(rx.momentos)
+    assert any(m.regra_id == "R-RX-01-sem" for m in rx.motivos)
+
+
+def test_rx_silica_quantificacao_none_sem_pendencia_ausente() -> None:
+    ctx, proto = _ctx_com_agente("silica", None)
+    stage_5_emissao(ctx, proto)
+    pendencias_silica = [
+        p
+        for p in ctx.pendencias
+        if p.tipo == "predicado_ausente" and "silica_asbesto" in p.motivo
+    ]
+    assert pendencias_silica == [], f"Não deveria haver pendência: {pendencias_silica}"
+
+
+# ---------------------------------------------------------------------------
+# Regressão — ramo (d): medição afirmada (valor) mas não roteável (pct_quartzo
+# ausente) segue Ausente. D-ARQ-08/13 intactos: não escolher faixa inventa número.
+# ---------------------------------------------------------------------------
+
+def test_rx_silica_valor_sem_pct_quartzo_continua_ausente_bloqueante() -> None:
+    q_incompleta = Quantificacao(
+        valor=0.05,
+        unidade="mg/m³",
+        relacao_LT=None,
+        pct_LT=None,
+        apenas_qualitativa=False,
+        sem_avaliacao_quantitativa=False,
+        pct_quartzo=None,
+    )
+    ctx, proto = _ctx_com_agente("silica", q_incompleta)
+    exames = stage_5_emissao(ctx, proto)
     rx_list = [e for e in exames if e.exame == "rx_torax_oit"]
-    assert rx_list == [], "Não deve emitir rx_torax_oit quando silica sem quantificacao"
+    assert rx_list == [], "Medição não roteável (sem pct_quartzo) não deve emitir rx_torax_oit"
     bloqueantes = [p for p in ctx.pendencias if p.bloqueante]
     assert bloqueantes, "Deve haver pendencia bloqueante"
     assert any("laudo" in p.motivo.lower() or "avaliação" in p.motivo.lower() for p in bloqueantes)
