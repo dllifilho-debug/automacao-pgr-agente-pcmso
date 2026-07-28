@@ -1427,9 +1427,9 @@ indissociabilidade vs. contingência (R-GHE-05).
 
 **Status:** ABERTA. Não-bloqueante.
 
-### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[ABERTA — higiene de instrumento]`
+### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[PARCIALMENTE RESOLVIDA — 003.EG; faceta risco_origem ABERTA]`
 
-**Origem:** 003.ED, ao tentar atribuir causa às 16 emissões de R-PKG-ATIVCRIT.
+**Origem:** 003.ED, ao tentar atribuir causa às 16 emissões de R-PKG-ATIVCRIT. Precedente: DH-003EC-01.
 
 **Situação.** O relatório de `rodar-offline` imprime pendências e, por GHE, a tabela de exames
 com `regra_id` — mas NÃO os slugs resolvidos em `ctx.riscos` nem qual perna de um predicado
@@ -1441,7 +1441,17 @@ origem, gatilho e status de validação** — o instrumento entrega a regra e om
 **Correção candidata.** Por GHE, listar slugs resolvidos; por linha emitida, o átomo do
 predicado que a satisfez e o status da regra. Irmã de DH-003EC-01.
 
-**Status:** ABERTA. Não-bloqueante.
+**Resolução (003.EG).** Facetas FECHADAS: `MatrizGHE.riscos_resolvidos` traz os slugs por GHE
+(`ctx.riscos`, espelhados via `_diagnostico(ctx)` no orquestrador) e `Motivo.predicado` passa a
+serializar a expressão real do `quando` da regra (`e(...)`/`ou(...)`/`nao(...)`, fim do literal
+`"<composto>"`) — o átomo disparador de cada linha agora é derivável por inspeção de
+`predicados_avaliados` sem reabrir o motor em memória. Faceta ABERTA: `Motivo.risco_origem`
+segue `None` — qual risco específico satisfez a perna vencedora de um predicado composto não é
+explícito, só derivável por leitura de `predicados_avaliados`. Rastro real exigiria mudar a
+assinatura de `predicados.avaliar` (usada em todo o motor) — recorte deixado fora por decisão
+do Arquiteto.
+
+**Status:** PARCIALMENTE RESOLVIDA (003.EG). Faceta `risco_origem` ABERTA, não-bloqueante.
 
 ### DT-003EE-01 — `ConflitoProtocolo` sem disparador após D-ARQ-39 `[ABERTA, não-bloqueante]`
 
@@ -1451,6 +1461,91 @@ Decisão de 003.EE: MANTER — o veículo de captura por-GHE é contrato de D-AR
 D-ARQ-15, não limpeza. Registrado para não virar descoberta-surpresa (classe de erro que D-ARQ-67 pagou em 003.ED:
 código inalcançável verde na suíte). Fecha quando (a) um call-site futuro voltar a levantá-la, ou (b) uma sessão
 ARQUITETURA decidir que D-ARQ-15 não precisa mais do veículo.
+
+### DT-003EG-01 — Audiometria emitida pelo motivo errado quando a perna do ruído está bloqueada `[ABERTA]`
+
+**Origem:** medição `003eg_fascino_rodar.md` (Fascino, 19 GHEs, commit `5a2d15b`), habilitada
+pela Entrega 3 de 003.EG — o motivo por linha só ficou visível no relatório a partir desta sessão.
+
+**Situação.** `audiometria` 12M é emitida em 16 de 19 GHEs. Em 15 deles o motivo é
+`R-PKG-ATIVCRIT` (atividade crítica); `R-AUD-01` (ruído) aparece em apenas 1. Em GHEs onde o PGR
+cita ruído, a perna de R-AUD-01 está bloqueada por `predicado_ausente` (quantificação ausente
+via `ruido_acima_acao`) — mas o exame sai de qualquer forma, só que por outra regra, cujo
+gatilho não é a exposição a ruído. Exame certo, razão errada: a linha não aponta para a
+exposição que clinicamente a justificaria.
+
+**Impacto.** Atrito direto com D-ARQ-22 Parte B (regra de origem, gatilho e status por exame
+emitido) — o exame está presente, mas o `regra_id`/`predicado` da linha não é o do risco que
+motivaria a auditoria a olhar para ele. Não-bloqueante para rodar (o exame certo sai de todo
+modo); bloqueante para auditoria de PCMSO (a linha engana sobre a causa clínica). Só ficou
+visível porque a Entrega 3 de 003.EG passou a imprimir o motivo por linha — antes, o relatório
+mostrava só que `audiometria` saiu, não por qual regra.
+
+**Status:** ABERTA. Não-bloqueante para rodar; candidata de investigação para sessão futura.
+
+### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[ABERTA — higiene de instrumento]`
+
+**Origem:** medição `003eg_fascino_rodar.md` (Fascino, commit `5a2d15b`).
+
+**Situação.** O relatório carrega 122 bytes `\x00`, originados do texto verbatim do Fascino
+(ex.: `'Microorganismos \x00Bacterias, virus, fungos e protozoários'`) dentro do campo `motivo`
+de pendências `vocabulario_ausente`. Efeito medido: `grep` classifica o relatório como binário e
+recusa saída de texto — o instrumento de diagnóstico quebra a ferramenta que o lê. DT-003DR-01
+foi FECHADA em 003.DS no reconhecedor; a sanitização não alcança o artefato de saída do harness
+de medição.
+
+**Correção candidata.** Sanitizar NUL na renderização (`_renderizar_relatorio` ou o ponto de
+formatação de `motivo`), não no dado — o dado verbatim é evidência, não deve ser reescrito na
+origem.
+
+**Registro adicional.** O arquivo é gravado com `\r\n` — recorrência da classe DH-003M-01.
+
+**Status:** ABERTA. Não-bloqueante.
+
+### DH-003EG-02 — O instrumento que pauta a fila vive fora do git `[ABERTA — higiene de método]`
+
+**Origem:** 003.EG, ao abrir a sessão contra um diff desatualizado.
+
+**Situação.** `.gitignore:26` ignora `relatorios/` inteiro (`git ls-files relatorios/` = vazio).
+O diff motor×gabarito é o instrumento que pauta a fila desde D-ARQ-62, e nada em `git log`
+denuncia um relatório vencido. Consequência medida: o último diff completo era de 003.EB
+(`6f29928`) e envelheceu 4 sessões — 003.EC/ED/EE/EF mudaram o motor sem que a evidência fosse
+re-tirada; a fila de 003.EG chegou a ser pautada contra ele. Mesma classe de DT-003DX-02 (regra
+do gate fora do git).
+
+**Correção candidata.** Versionar o sumário do diff (contagens + achados), mantendo o relatório
+bruto ignorado — o sumário é pequeno, revisável em PR, e denuncia idade por si; o relatório
+bruto continua grande e reproduzível sob demanda.
+
+**Status:** ABERTA. Não-bloqueante.
+
+### DH-003EG-03 — Derivado do `INDICE_DARQ` tem vigilância, mas o ritual não a invoca em sessão docs-only `[ABERTA — higiene de método]`
+
+**Origem:** 003.EG (emenda), ao fechar a sessão principal.
+
+**Situação.** 003.EF implementou a vigilância do derivado (`medir_indice_darq()`, 4ª linha do
+painel) depois que `docs/INDICE_DARQ.md` ficou defasado no merge do PR #267. Na sessão
+seguinte a mesma classe se repetiu: o commit `186150e` (DECISOES v154→v155) inseriu 24 linhas
+sem regenerar o índice — 94 linhas divergentes, `test_indice_em_disco_nao_divergiu` vermelho.
+Corrigido em `973a343` (47 linhas trocadas). Causa nomeada: o prompt de fechamento do
+Arquiteto dispensou a suíte com a justificativa "docs-only" — a rede existia e foi desligada
+por instrução, não por falha do instrumento; o teste que teria pego roda em 0,43s.
+
+**Por que detectar não previne.** A vigilância só dispara quando alguém roda a suíte (ou o
+teste específico), e a sessão docs-only é justamente a que não roda — o instrumento é
+correto, o ritual em torno dele é que tinha um buraco.
+
+**Correção instalada nesta emenda.** Cláusula fixa em `CLAUDE.md` ("Verificação": nenhum
+prompt dispensa a suíte; toda sessão que toca `DECISOES_ARQUITETURAIS.md` regenera o índice)
+e passo 3 do `docs/RITUAL_FECHAMENTO.md`.
+
+**Resíduo ABERTO.** Ambas as correções dependem de leitura humana/agente — nenhum mecanismo
+impede a 3ª ocorrência. Automação real (hook de pre-commit que regenera o índice quando
+`DECISOES_ARQUITETURAIS.md` está staged) fica candidata, com a ressalva medida de que
+`core.hooksPath` mora em `.git/config`, não versionado — o hook falharia em silêncio em outro
+clone sem um passo de setup explícito.
+
+**Status:** ABERTA. Não-bloqueante.
 
 ---
 
@@ -1547,3 +1642,5 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v70 | 26/07/2026 | Sessão 003.ED (IMPLEMENTAÇÃO): nota de implementação em R-PKG-ATIVCRIT (mesma ID, §6) — alias Tier 1 `"Trabalho em Altura"` (NR-35 título + item 35.2.1, Portaria MTP 4.218/2022) e substituição do primitivo órfão `maquina_pesada` por `motorista_equipamento_pesado` (D-ARQ-67) em `atividade_critica`; efeito medido no Fascino: 16/19 GHEs passam a emitir R-PKG-ATIVCRIT, cruzamento nominal contra o gabarito com interseção 16 e conjuntos "só motor"/"só gabarito" vazios. Ressalva `[INTERPRETADO]` registrada — os dois rótulos ("máquina pesada" vs "motorista de equipamento pesado") não são declarados como o mesmo conceito pelo protocolo; consequência não exercitada por nenhum caso do acervo (0 GHEs via `motorista_equipamento_pesado`, 0 via `espaco_confinado`). **DT-003ED-01 CRIADA (ABERTA)** (§11) — grafia natural com preposição não resolve contra slug sem preposição (atinge R-VIB-01/02 e a perna de máquina pesada). **DH-003ED-01 CRIADA (ABERTA)** (§11) — relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto disparador. **DT-003DV-01: observação de instrumento REFUTADA por medição** — o relatório TEM identidade por GHE. **DT-003EB-01: nota adicionada** — classe (2) perdeu a maior fatia; achado novo `[A MEDIR]` sobre GHE-19 (Vendas, `ctx.riscos == []`). Suíte 967→968 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `7b2e65d`. Nenhuma R-* criada/alterada; conteúdo clínico inalterado. |
 | v71 | 26/07/2026 | Sessão 003.EE (IMPLEMENTAÇÃO): **DT-003EE-01 CRIADA** (`ConflitoProtocolo` sem disparador após D-ARQ-39; decisão MANTER). Nota de aplicação 003.EE em R-GHE-03 — dedup compõe periodicidade por piso, mesma ID, sem mudança de semântica clínica. Nenhuma R-* criada ou alterada. Detalhe em DECISOES v153 e HISTORICO 003.EE. |
 | v72 | 26/07/2026 | Sessão 003.EF (IMPLEMENTAÇÃO): **DH-003EC-01 PARCIALMENTE RESOLVIDA** (§11) — facetas (a) cegueira a falha e (c) derivado sem vigilância FECHADAS (`medir_suite()` lê `returncode` e levanta em suíte vermelha; `INDICE_DARQ.md` regenerado e seu estado exposto como 4ª linha do painel); faceta (b) ID citado conta como implementado segue ABERTA. Nenhuma R-* nem D-ARQ criada/alterada. Sem código de motor. Detalhe em HISTORICO 003.EF. |
+| v73 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): **DH-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — facetas `riscos_resolvidos` (slugs por GHE) e `predicado` (expressão real, fim do literal `"<composto>"`) FECHADAS; faceta `risco_origem` segue ABERTA (exigiria mudar a assinatura de `predicados.avaliar`, recorte deixado fora por decisão do Arquiteto). **DT-003EG-01 CRIADA (ABERTA)** — audiometria emitida em 16/19 GHEs com motivo `R-PKG-ATIVCRIT` em 15 deles onde o gatilho clínico real é ruído bloqueado por `predicado_ausente` (exame certo, razão errada), só visível porque o motivo por linha passou a ser impresso. **DH-003EG-01 CRIADA (ABERTA — higiene de instrumento)** — 122 bytes NUL do verbatim do PGR vazam para `motivo` de pendências `vocabulario_ausente` no relatório, `grep` classifica-o como binário; `\r\n` recorrente (classe DH-003M-01). **DH-003EG-02 CRIADA (ABERTA — higiene de método)** — `relatorios/` inteiro fora do git (`.gitignore:26`), o diff motor×gabarito que pauta a fila desde D-ARQ-62 envelheceu 4 sessões sem sinal em `git log` (mesma classe de DT-003DX-02). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame (baseline 003.EB: 14 BLOQUEADA / 3 PARCIAL / 2 VÁLIDA, 7 linhas — divergência esperada, motor mudou em 4 sessões desde então). Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. Nenhuma R-* criada/alterada. Detalhe em DECISOES v155 e HISTORICO 003.EG. |
+| v74 | 27/07/2026 | Sessão 003.EG (EMENDA — correção de método): **DH-003EG-03 CRIADA (ABERTA)** (§11) — vigilância do `INDICE_DARQ` (003.EF) existe mas o ritual não a invoca em sessão docs-only; o commit `186150e` desta mesma sessão ficou defasado 94 linhas por a suíte ter sido dispensada por instrução ("docs-only"), corrigido em `973a343`; 2ª ocorrência da classe em 2 sessões (1ª: `c89f569`, 003.EF). Causa nomeada no Arquiteto, não no Code. Correção instalada: `CLAUDE.md` na raiz (NOVO) — regras de método versionadas e lidas pelo Code, endereça DT-003DX-02 — e `docs/RITUAL_FECHAMENTO.md` (NOVO) — checklist fixo de 7 passos que substitui redação livre do prompt de fechamento. Resíduo ABERTO: ambas dependem de leitura humana/agente, sem mecanismo que impeça 3ª ocorrência; hook de pre-commit é candidato, com ressalva de que `core.hooksPath` não é versionado. Suíte inalterada nesta emenda (nenhum código tocado). Detalhe em DECISOES v156 e HISTORICO 003.EG. |

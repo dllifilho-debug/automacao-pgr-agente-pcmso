@@ -488,6 +488,18 @@ nomeada. Os dois concordavam no fundo; divergiam só em ONDE a fonte aparece. No
 fonte NO MARCADOR. Convenção do PROTOCOLO alinhada. Sem reclassificação de regra. Rastreabilidade no
 marcador vence economia visual (mesma lógica da exceção ID+NR em código).
 
+**Nota de aplicação 003.EG — Parte B materializada na saída do motor.** `MatrizGHE` ganha dois
+campos aditivos, com default e ordem estável: `riscos_resolvidos` (slugs de `ctx.riscos` por
+GHE) e `predicados_avaliados` (cache nome→valor de `ctx.predicados`, serializado —
+`True`/`False`/`AUSENTE: <mensagem>`). `Motivo.predicado` passa a carregar a expressão real do
+`quando` da regra (`e(...)`/`ou(...)`/`nao(...)`), não mais o literal `"<composto>"`. Decisão do
+Arquiteto: não abrir D-ARQ nova — o contrato de rastreabilidade por linha já existe na Parte B
+acima; isto a materializa na saída, não a redecide. Recorte descartado, registrado para não ser
+esquecido: rastro estruturado dentro de `predicados.avaliar` (qual risco específico satisfez a
+perna vencedora de um predicado composto) mudaria a assinatura da função, usada em todo o motor
+— avaliado e deixado fora desta sessão. Detalhe em PROTOCOLO DH-003ED-01 (PARCIALMENTE
+RESOLVIDA, faceta `risco_origem` ABERTA) e HISTORICO 003.EG.
+
 **Base.** Sessão 002.M (28/05/2026). Decisão de metodologia — sem caso-âncora de código.
 
 ---
@@ -1171,6 +1183,17 @@ Cardinalidade heterogênea do mapa agente→biomarcador **confirma o data-bloque
   esta IMPL. `ConflitoProtocolo` (`consolidacao.py:6`) e o `except` (`orquestrador.py:52`) permanecem definidos e
   inalcançáveis. Decisão: MANTER ambos — o veículo de captura por-GHE de D-ARQ-15 segue sendo contrato, e removê-lo
   exigiria revogar D-ARQ-15 nesse ponto. Registrado como DT-003EE-01, não-bloqueante.
+
+**Nota de aplicação 003.EG (correção de procedência, mesma ID, status inalterado).** O
+fechamento de 003.EE atribuiu a latência do caso-âncora a D-ARQ-23 ainda PROPOSTA (via "operação
+confirmada"). Medição da rodada Fascino (`003eg_fascino_rodar.md`, commit `5a2d15b`): a rota de
+convergência do dedup **passou a ter tráfego** — duas linhas de `audiometria` unificam motivos de
+mais de uma regra: `[R-PKG-ATIVCRIT, R-VIB-02]` e `[R-PKG-ATIVCRIT, R-AUD-01]`. O disparador real
+foi o alias Tier 1 de "Trabalho em Altura" (003.ED, D-ARQ-67), não D-ARQ-23 — a via viva não é a
+que a nota de 003.EE apontava. **Status permanece LATENTE**: as duas convergências medidas são
+ambas 12M, logo o piso component-wise (`min` entre periodicidades distintas) segue sem exercício
+— o que roda hoje é dedup de motivos (`motivos.extend`, cláusula 2), não a cláusula 1 (`min`).
+Corrige-se a causa atribuída à latência, não o veredito.
 
 **Fronteiras (não confundir):**
 - **D-ARQ-31** — não revoga; completa o recorte que a nota da fatia 3 (003.D) deixou explicitamente aberto. O requisito piso-sem-teto da fatia 3/4 é preservado por construção (cláusula 2).
@@ -2365,7 +2388,7 @@ seu bloco engoliu a tabela de revisões inteira. A saída correta do gerador (qu
 corrigidos. O episódio é evidência a favor da cláusula de divergência dos prompts
 cirúrgicos — que aqui pegou erro do Arquiteto, não do Code.
 
-### DT-003DX-02 — A regra do gate mora fora do git `[ABERTA — higiene de método]`
+### DT-003DX-02 — A regra do gate mora fora do git `[PARCIALMENTE RESOLVIDA — 003.EG]`
 
 **Origem:** Sessão 003.DX, bloqueio da PR B: o prompt cirúrgico assumia
 `CLAUDE.md` no repo; o arquivo não existe no working tree nem no histórico
@@ -2386,7 +2409,19 @@ Cuidado: as regras hoje misturam dois públicos — Arquiteto (gate, universalid
 paliativos) e Code (branch, add nominal, divergência); a partição por público é
 parte da decisão, não detalhe de execução.
 
-**Status:** ABERTA. Não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+**Resolução (003.EG, emenda).** A regra de método do público Code passa a existir versionada
+em `CLAUDE.md` na raiz do repo — auditável, com histórico, diff e PR, e autocarregada pelo
+Claude Code (candidato citado acima, escolhido). Disparador: a mesma classe de erro que esta
+DT descreve ("regra fora do git diverge em silêncio") se materializou em código nesta própria
+sessão — DH-003EG-03, `INDICE_DARQ` defasado por uma instrução de fechamento que dispensou a
+suíte, sem rede versionada que a contestasse. Convenção adotada: o `CLAUDE.md` do repo é a
+fonte; o `CLAUDE.md` do projeto Cowork (público Arquiteto — gate, universalidade, paliativos)
+é reduzido a ponteiro para ele quanto às regras de método do Code. **Resíduo ABERTO:** nenhum
+mecanismo detecta divergência entre os dois arquivos — se o Cowork for editado sem espelhar o
+repo, a divergência silenciosa que esta DT nomeia continua possível, só que agora com metade
+do problema (Code) resolvida e a outra metade (Arquiteto) intacta.
+
+**Status:** PARCIALMENTE RESOLVIDA (003.EG). Método, não motor. Nenhuma R-* tocada.
 
 ## D-ARQ-64 — Ramo FUZZY opt-in por allowlist de dado: o veto é do resultado, nunca filtro de candidato
 
@@ -2794,3 +2829,5 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 | v152 | 26/07/2026 | Sessão 003.ED (IMPLEMENTAÇÃO): **D-ARQ-67 CRIADA** — literal de vocabulário em código é contrato verificado por teste computado do dado (literais extraídos via AST de `predicados.py` cruzados contra slugs reais de `agentes.yaml`; um conceito → um slug → um primitivo). Origem: primitivo `maquina_pesada` comparava slug inexistente — código inalcançável em produção, verde na suíte (testes sintéticos do primitivo casavam o literal consigo mesmo; o `ou` de `atividade_critica` mascarava a perna morta). Alias Tier 1 `"Trabalho em Altura"` (NR-35 título + item 35.2.1, Portaria MTP 4.218/2022, texto vigente `nr-35-atualizada-2025-1.pdf`) resolve o termo que antes ficava a distância 3 do slug (fora do raio fuzzy); `atividade_critica.ou` passa a referenciar `motorista_equipamento_pesado` no lugar do primitivo órfão. Medição Fascino (`rodar-offline`, D-ARQ-65): 16/19 GHEs passam a emitir R-PKG-ATIVCRIT, cruzamento NOMINAL contra o gabarito humano com interseção 16 e conjuntos "só motor"/"só gabarito" vazios; medição isolada das 3 pernas de `atividade_critica` por GHE (sem short-circuit) fecha 16 = 16 (trabalho_altura) + 0 (motorista_equipamento_pesado) + 0 (espaço_confinado) − 0 (sobreposição). **DT-003ED-01 CRIADA (ABERTA)**: grafia natural com preposição não resolve contra slug sem preposição (dist. 3, fora do raio fuzzy 2) — atinge R-VIB-01/02 pela via de vibração e a perna de máquina pesada de R-PKG-ATIVCRIT/R-ECG-01. **DH-003ED-01 CRIADA (ABERTA)**: relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto que disparou uma linha — só a regra final. **DT-003DV-01 refutada por medição**: o relatório TEM identidade por GHE (cada seção `### GHE` carrega tabela própria); observação de instrumento anterior estava errada. Suíte 967→968 passed, 6 skipped (+2 novos: alias no parametrize + teste computado anti-órfão; −1 removido: teste sintético do primitivo morto); `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero; índice de termos 105→106. Commit `7b2e65d`. PROTOCOLO v70. PAINEL não re-tirado nesta sessão (re-tiragem é pós-merge). |
 | v153 | 26/07/2026 | Sessão 003.EE (IMPLEMENTAÇÃO): **D-ARQ-39 IMPLEMENTADA** — o caminho de convergência do `stage_8_consolidacao` troca `igualdade-estrita-ou-raise` por piso component-wise (`min` em `periodicidade_meses`; `min` com `None`=+∞ em `periodicidade_apos_15a`, resultado `None` só quando ambos os lados são `None`). As três mutações incondicionais (`momentos |=`, `motivos.extend`, `pendencias_anexadas.extend`) intactas no lugar, cláusula 2. Toca só `consolidacao.py` no motor. **Duas correções de procedência medidas** (nota de aplicação 003.EE em D-ARQ-39): (i) cláusula 1 imprecisa — `periodicidade_meses` é `int` não-Optional (`tipos.py:270`), `None` irrepresentável, tratamento de `None` só cabe em `apos_15a`; redação, mesma ID; (ii) **nota de implementação obrigatória REFUTADA** — a fixture `pgr_viverde.py` tem `fumos_metalicos` em zero GHEs e as 4 ocorrências de `silica` todas com `quantificacao`, então `silica_asbesto_sem_medicao` nunca dispara: regressão tri-estado **inalterada**, lista de GHEs afetados **vazia**, âncora era iminente e não viva. D-ARQ-39 entra **latente**. **DT-003EE-01 CRIADA (ABERTA, não-bloqueante)**: zero `raise ConflitoProtocolo` no repo após a IMPL — classe e `except` do orquestrador inalcançáveis; decisão é MANTER (contrato D-ARQ-15), não remover. Testes: 5 de piso novos em `test_consolidacao.py` (base, `apos_15a` com `None`=+∞, ambos `None`, preservação de `pendencias_anexadas`, preservação de `motivos`), −1 removido (o de conflito); `test_rx_periodicidade.py` e `test_orquestrador.py` reescritos 1-para-1 de raise para piso. Suíte 968→**972 passed, 6 skipped** (+4 líquido, previsto = medido); `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `52aa6f3`. PROTOCOLO v71. PAINEL **não re-tirado** — nenhum dos 3 números se move. |
 | v154 | 26/07/2026 | Sessão 003.EE (emenda de evidência, docs only): a refutação da nota de implementação de D-ARQ-39 foi medida em **três vias**, não uma — a redação de v153 provava só a via explícita (`RiscoPGR` na fixture) e calava sobre a via por cargo e a via por operação. **(b) Por cargo:** único injetor de `fumos_metalicos` é `soldador`, ausente da fixture; `Est-09 "Solda / serralheria"` usa `serralheiro`/`meio_oficial_serralheiro`/`servente` com `riscos_implicitos: []`, que **é R-GHE-05 `[VALIDADO]` cumprida, não lacuna**; 39 cargos, zero órfãos. **(c) Por operação:** inexistente — `GHEPGR` não modela operações, **D-ARQ-23 PROPOSTA**. Conclusão **inalterada** (lista de GHEs afetados vazia, D-ARQ-39 latente) — só a evidência era insuficiente. **Causa estrutural:** as três vias fechadas simultaneamente tornam o caso-âncora **inalcançável por construção** até D-ARQ-23 ser implementada; já documentado na nota 002.M de R-GHE-05, a emenda só passa a citá-lo. **Origem provável do erro de procedência `[INTERPRETADO]`:** o cromo do serralheiro está na RQ.61 (matriz de SAÍDA), não no PGR de entrada — confusão de camada. **`[A MEDIR]` do artefato FECHADO:** nenhum arquivo versionado com "diagnost". Correção de rota registrada: a v153 atribuiu a causa a DT-002K-02 supondo-a aberta; DT-002K-02 está **RESOLVIDA** desde 002.L-estudo e a referência correta é D-ARQ-23 — erro pego pelo bloqueio do Code antes de qualquer escrita. PROTOCOLO **não move** nesta emenda. Sem mudança de código, suíte não re-executada (árvore de docs). |
+| v155 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): nota de aplicação em D-ARQ-22 Parte B — `MatrizGHE.riscos_resolvidos`/`predicados_avaliados` (aditivos, default, ordem estável) e `Motivo.predicado` serializando a expressão real (fim do literal `"<composto>"`) materializam a rastreabilidade por linha na saída do motor; recorte descartado registrado (rastro dentro de `predicados.avaliar` mudaria assinatura usada em todo o motor); nenhum D-ARQ novo. **Correção de procedência em D-ARQ-39** (mesma ID, status inalterado): a rota de convergência do dedup passou a ter tráfego na rodada Fascino (duas linhas de `audiometria` unificando motivos, `[R-PKG-ATIVCRIT, R-VIB-02]` e `[R-PKG-ATIVCRIT, R-AUD-01]`), mas o disparador foi o alias de altura de 003.ED (D-ARQ-67), não D-ARQ-23 como a nota de 003.EE atribuía; status permanece LATENTE — as duas convergências medidas são ambas 12M, o piso `min` segue sem exercício. DH-003ED-01 PARCIALMENTE RESOLVIDA (PROTOCOLO §11) — facetas `riscos_resolvidos`/`predicado` FECHADAS, faceta `risco_origem` ABERTA. DT-003EG-01 (audiometria pelo motivo errado quando a perna do ruído bloqueia), DH-003EG-01 (bytes NUL do PGR vazam para o relatório) e DH-003EG-02 (instrumento de diff fora do git) CRIADAS (§11 do PROTOCOLO). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame. Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. PROTOCOLO v72→v73. Detalhe em HISTORICO 003.EG. |
+| v156 | 27/07/2026 | Sessão 003.EG (EMENDA — correção de método): **DT-003DX-02 PARCIALMENTE RESOLVIDA** — regra de método do público Code passa a existir versionada em `CLAUDE.md` na raiz do repo (auditável, autocarregada pelo Claude Code); `CLAUDE.md` do Cowork reduzido a ponteiro quanto a essas regras. Resíduo ABERTO: nenhum mecanismo detecta divergência entre os dois arquivos. Disparador: DH-003EG-03 (PROTOCOLO v74, §11) — `INDICE_DARQ` ficou defasado 94 linhas no commit `186150e` desta mesma sessão porque o prompt de fechamento dispensou a suíte por "docs-only", 2ª ocorrência da classe em 2 sessões (1ª: `c89f569`, 003.EF); corrigido em `973a343`. Correção instalada: cláusula fixa em `CLAUDE.md` + `docs/RITUAL_FECHAMENTO.md` (NOVO, checklist de 7 passos). Causa nomeada no Arquiteto, não no Code. Esta emenda toca `DECISOES_ARQUITETURAIS.md` — a regra que ela institui foi aplicada a ela mesma: `INDICE_DARQ.md` regenerado, `test_indice_em_disco_nao_divergiu` verde. Suíte inalterada (nenhum código tocado); `agente_medico/tests/ tests/` = 982 passed, 6 skipped (medido, árvore parada). Nenhuma R-* criada/alterada. PROTOCOLO v73→v74. Detalhe em HISTORICO 003.EG. |

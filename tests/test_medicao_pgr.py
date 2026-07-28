@@ -1,0 +1,55 @@
+"""Testes de scripts/medicao_pgr.py — _renderizar_relatorio sobre Resultado sintético."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from unittest.mock import patch
+
+from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Motivo, Resultado
+from scripts.medicao_pgr import _renderizar_relatorio
+
+
+def _resultado_com_diagnostico() -> Resultado:
+    motivo = Motivo(
+        regra_id="R-AUD-01",
+        predicado="ou(ruido_acima_acao, motorista_equipamento_pesado, ototoxico)",
+        risco_origem=None,
+        detalhe="Emitido por regra R-AUD-01",
+    )
+    exame = ExameEmitido(
+        exame="audiometria",
+        periodicidade_meses=12,
+        momentos={Momento.ADM, Momento.PER, Momento.MR},
+        motivos=[motivo],
+    )
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        linhas=[exame],
+        status="VÁLIDA",
+        riscos_resolvidos=("ruido", "vibracao_corpo_inteiro"),
+        predicados_avaliados=(("ruido_acima_acao", "True"), ("vibracao_corpo_inteiro", "True")),
+    )
+    return Resultado(status="OK", matrizes=[matriz])
+
+
+def test_renderizar_relatorio_imprime_riscos_e_predicados_avaliados() -> None:
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), _resultado_com_diagnostico(), ())
+    assert "- riscos_resolvidos: `ruido`, `vibracao_corpo_inteiro`" in relatorio
+    assert "- predicados_avaliados: ruido_acima_acao=True; vibracao_corpo_inteiro=True" in relatorio
+
+
+def test_renderizar_relatorio_tabela_tem_colunas_predicado_e_detalhe() -> None:
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), _resultado_com_diagnostico(), ())
+    assert "| predicado | detalhe |" in relatorio
+    assert "ou(ruido_acima_acao, motorista_equipamento_pesado, ototoxico)" in relatorio
+    assert "Emitido por regra R-AUD-01" in relatorio
+
+
+def test_renderizar_relatorio_sem_riscos_resolvidos_mostra_nenhum() -> None:
+    matriz = MatrizGHE(ghe_id="GHE-02", linhas=[], status="BLOQUEADA")
+    resultado = Resultado(status="PRELIMINAR", matrizes=[matriz])
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
+    assert "- riscos_resolvidos: (nenhum)" in relatorio

@@ -23,6 +23,19 @@ def _converter_momento(raw: str, regra_id: str, exame: str) -> Momento:
     return _MOMENTOS[key]
 
 
+def _serializar_predicado(expr: object) -> str:
+    if isinstance(expr, str):
+        return expr
+    if isinstance(expr, dict):
+        if "e" in expr:
+            return f"e({', '.join(_serializar_predicado(f) for f in expr['e'])})"
+        if "ou" in expr:
+            return f"ou({', '.join(_serializar_predicado(f) for f in expr['ou'])})"
+        if "nao" in expr:
+            return f"nao({_serializar_predicado(expr['nao'])})"
+    raise ValueError(f"Expressão de predicado inválida: {expr!r}")
+
+
 def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]:
     """
     Para cada regra em protocolo.regras:
@@ -64,11 +77,7 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
         if not resultado:
             continue
 
-        predicado_str = (
-            str(regra["quando"])
-            if isinstance(regra["quando"], str)
-            else "<composto>"
-        )
+        predicado_str = _serializar_predicado(regra["quando"])
         motivo = Motivo(
             regra_id=str(regra["id"]),
             predicado=predicado_str,

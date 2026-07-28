@@ -172,6 +172,16 @@ def test_raud01_ruido_sem_quantificacao_gera_pendencia_bloqueante() -> None:
     assert any(p.bloqueante and p.regra_origem == "R-AUD-01" for p in ctx.pendencias)
 
 
+def test_raud01_motivo_predicado_serializa_expressao_composta() -> None:
+    ctx = _ctx_ruido_quant("acima_acao")
+    proto = carregar(_PROTOCOLO_DIR)
+    result = stage_5_emissao(ctx, proto)
+    audio = next(e for e in result if e.exame == "audiometria")
+    motivo = next(m for m in audio.motivos if m.regra_id == "R-AUD-01")
+    assert motivo.predicado == "ou(ruido_acima_acao, motorista_equipamento_pesado, ototoxico)"
+    assert motivo.predicado != "<composto>"
+
+
 # ---------------------------------------------------------------------------
 # Testes 9-10: R-VIB-02
 # ---------------------------------------------------------------------------
@@ -209,6 +219,20 @@ def test_execucao_vci_e_ruido_acima_acao_status_ok_com_rx_e_audiometria() -> Non
     assert "audiometria" in slugs
     audio = next(e for e in matriz.linhas if e.exame == "audiometria")
     assert audio.periodicidade_meses == 12
+
+
+def test_execucao_vci_e_ruido_matriz_traz_diagnostico_riscos_e_predicados() -> None:
+    pgr = _pgr_com_riscos("GHE-01", (
+        _risco_pgr("vibracao_corpo_inteiro"),
+        _risco_pgr("ruido", _quant_acima_acao()),
+    ))
+    proto = carregar(_PROTOCOLO_DIR)
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.riscos_resolvidos == ("ruido", "vibracao_corpo_inteiro")
+    assert list(matriz.predicados_avaliados) == sorted(matriz.predicados_avaliados)
+    assert ("vibracao_corpo_inteiro", "True") in matriz.predicados_avaliados
+    assert ("ruido_acima_acao", "True") in matriz.predicados_avaliados
 
 
 def test_execucao_vibracao_generica_status_preliminar_linhas_vazias() -> None:

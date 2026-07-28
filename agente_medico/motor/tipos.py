@@ -304,6 +304,12 @@ class MatrizGHE:
     # (default VÁLIDA); produtor de status (PARCIAL/BLOQUEADA) entra na fatia 2
     # junto com o fim do zeramento de linhas no orquestrador.
     status: Literal["VÁLIDA", "PARCIAL", "BLOQUEADA"] = "VÁLIDA"
+    # D-ARQ-22 Parte B: rastreabilidade do exame emitido — regra de origem,
+    # gatilho e status de validação. riscos_resolvidos espelha ctx.riscos
+    # (slugs resolvidos para o GHE); predicados_avaliados espelha ctx.predicados
+    # (cache nome→valor populado por avaliar_predicado), serializado para diagnóstico.
+    riscos_resolvidos: tuple[str, ...] = ()
+    predicados_avaliados: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass
