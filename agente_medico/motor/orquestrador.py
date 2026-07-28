@@ -15,6 +15,7 @@ from agente_medico.motor.predicados import PRIMITIVOS_INCONDICIONAIS
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor import EntradaIndice
 from agente_medico.motor.tipos import (
+    Ausente,
     ExameEmitido,
     GHEContext,
     MatrizGHE,
@@ -22,6 +23,20 @@ from agente_medico.motor.tipos import (
     Pendencia,
     Resultado,
 )
+
+
+def _serializar_valor_predicado(v: bool | Ausente) -> str:
+    if isinstance(v, Ausente):
+        return f"AUSENTE: {v.mensagem}"
+    return "True" if v else "False"
+
+
+def _diagnostico(ctx: GHEContext) -> tuple[tuple[str, ...], tuple[tuple[str, str], ...]]:
+    riscos_resolvidos = tuple(sorted({r.agente for r in ctx.riscos}))
+    predicados_avaliados = tuple(
+        sorted((nome, _serializar_valor_predicado(v)) for nome, v in ctx.predicados.items())
+    )
+    return riscos_resolvidos, predicados_avaliados
 
 
 def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Resultado:
@@ -43,6 +58,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
         stage_4_predicados(ctx, protocolo)
         exames: list[ExameEmitido] = stage_5_emissao(ctx, protocolo)
         # Stage 6 (regime) encaixará aqui
+        riscos_resolvidos, predicados_avaliados = _diagnostico(ctx)
 
         # D-ARQ-31 fatia 2: consolidação roda SEMPRE (inclusive sob pendência
         # bloqueante) para distinguir PARCIAL (linhas determináveis presentes)
@@ -66,6 +82,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 pendencias=list(ctx.pendencias),
                 regime_aplicado=ctx.regime,
                 status="BLOQUEADA",
+                riscos_resolvidos=riscos_resolvidos,
+                predicados_avaliados=predicados_avaliados,
             )
         else:
             bloqueantes = [p for p in ctx.pendencias if p.bloqueante]
@@ -90,6 +108,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     pendencias=pendencias_matriz,
                     regime_aplicado=ctx.regime,
                     status="VÁLIDA",
+                    riscos_resolvidos=riscos_resolvidos,
+                    predicados_avaliados=predicados_avaliados,
                 )
             elif linhas_com_risco:
                 matriz = MatrizGHE(
@@ -98,6 +118,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     pendencias=pendencias_matriz,
                     regime_aplicado=ctx.regime,
                     status="PARCIAL",
+                    riscos_resolvidos=riscos_resolvidos,
+                    predicados_avaliados=predicados_avaliados,
                 )
             else:
                 matriz = MatrizGHE(
@@ -106,6 +128,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     pendencias=pendencias_matriz,
                     regime_aplicado=ctx.regime,
                     status="BLOQUEADA",
+                    riscos_resolvidos=riscos_resolvidos,
+                    predicados_avaliados=predicados_avaliados,
                 )
         matrizes.append(matriz)
 

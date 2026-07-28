@@ -211,6 +211,20 @@ def test_execucao_vci_e_ruido_acima_acao_status_ok_com_rx_e_audiometria() -> Non
     assert audio.periodicidade_meses == 12
 
 
+def test_execucao_vci_e_ruido_matriz_traz_diagnostico_riscos_e_predicados() -> None:
+    pgr = _pgr_com_riscos("GHE-01", (
+        _risco_pgr("vibracao_corpo_inteiro"),
+        _risco_pgr("ruido", _quant_acima_acao()),
+    ))
+    proto = carregar(_PROTOCOLO_DIR)
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.riscos_resolvidos == ("ruido", "vibracao_corpo_inteiro")
+    assert list(matriz.predicados_avaliados) == sorted(matriz.predicados_avaliados)
+    assert ("vibracao_corpo_inteiro", "True") in matriz.predicados_avaliados
+    assert ("ruido_acima_acao", "True") in matriz.predicados_avaliados
+
+
 def test_execucao_vibracao_generica_status_preliminar_linhas_vazias() -> None:
     pgr = _pgr_com_riscos("GHE-01", (_risco_pgr("vibracao"),))
     proto = carregar(_PROTOCOLO_DIR)
