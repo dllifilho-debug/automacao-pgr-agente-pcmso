@@ -146,6 +146,19 @@ regras:
     base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS sem avaliação quantitativa: adm + 60M."
     status: INTERPRETADO
 
+  - id: R-ESP-02
+    quando: poeira_mineral
+    emite:
+      - exame: espirometria
+        periodicidade_meses: 24
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "NR-07 Anexo III item 3.1 (Portaria MTP 567/2022): exposto a poeira
+      mineral do inventário do PGR → espirometria no admissional e a cada dois anos.
+      Momentos MR/dem [DERIVADO — matrizes Carolini 07/2026 e Patrícia 04/2025]; a norma
+      crava só adm+per. Sucede R-ESP-01 (DEPRECATED)."
+    status: DERIVADO
+
   - id: R-RX-02
     quando: fumos_metalicos
     emite:

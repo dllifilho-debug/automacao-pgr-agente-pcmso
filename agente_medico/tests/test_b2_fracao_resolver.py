@@ -136,18 +136,23 @@ def test_fracao_ausente_gera_pendencia_bloqueante() -> None:
     pgr, proto = _pgr_silica(q)
     resultado = executar(pgr, proto, hoje=date.today())
 
-    # (i) nenhuma linha de RX (nem qualquer linha de origem em risco) emitida para o GHE
+    # (i) RX não emitido: fração ausente bloqueia todas as faixas de R-RX-01
     assert len(resultado.matrizes) == 1
-    assert _linhas_de_risco(resultado.matrizes[0].linhas) == []
+    exames_emitidos = {e.exame for e in resultado.matrizes[0].linhas}
+    assert "rx_torax_oit" not in exames_emitidos, "RX não deve emitir com fração ausente"
 
-    # (ii) Pendencia(bloqueante=True) presente no Resultado
+    # (ii) Pendencia(bloqueante=True) presente no Resultado — família sílica intacta
     bloqueantes = [p for m in resultado.matrizes for p in m.pendencias if p.bloqueante]
     assert bloqueantes, "Deve haver pendência bloqueante quando fracao=None"
     assert any("fração" in p.motivo or "fracao" in p.motivo for p in bloqueantes)
 
-    # (iii) D-ARQ-31 fatia 2 (003.EC): sem nenhuma linha de risco determinada,
-    # o GHE fecha BLOQUEADA — R-CLI-01 (piso universal) não mascara o bloqueio.
-    assert resultado.matrizes[0].status == "BLOQUEADA"
+    # Redirecionado em 003.EI: D-ARQ-31 cl.1 define BLOQUEADA como "nenhuma contribuição
+    # de risco determinada"; R-ESP-02 (independente de quantificação) agora determina
+    # espirometria para o mesmo risco que bloqueia o RX — não é mais o caso.
+    linhas_risco = _linhas_de_risco(resultado.matrizes[0].linhas)
+    assert [e.exame for e in linhas_risco] == ["espirometria"]
+    assert all(m.regra_id == "R-ESP-02" for e in linhas_risco for m in e.motivos)
+    assert resultado.matrizes[0].status == "PARCIAL"
     assert resultado.status == "PRELIMINAR"
 
 
@@ -165,15 +170,20 @@ def test_silica_mineracao_total_leo_indefinido_bloqueante() -> None:
     pgr, proto = _pgr_silica(q, cenario=cenario)
     resultado = executar(pgr, proto, hoje=date.today())
 
-    # nenhuma linha de RX (nem qualquer linha de origem em risco) emitida
-    assert _linhas_de_risco(resultado.matrizes[0].linhas) == []
+    # RX não emitido: LEO indefinido bloqueia todas as faixas de R-RX-01
+    exames_emitidos = {e.exame for e in resultado.matrizes[0].linhas}
+    assert "rx_torax_oit" not in exames_emitidos, "RX não deve emitir com LEO indefinido"
 
-    # pendência bloqueante com mensagem de LEO indefinido
+    # pendência bloqueante com mensagem de LEO indefinido — família sílica intacta
     bloqueantes = [p for m in resultado.matrizes for p in m.pendencias if p.bloqueante]
     assert bloqueantes
     assert any("indefinido" in p.motivo.lower() for p in bloqueantes)
 
-    # D-ARQ-31 fatia 2 (003.EC): sem nenhuma linha de risco determinada,
-    # o GHE fecha BLOQUEADA — R-CLI-01 (piso universal) não mascara o bloqueio.
-    assert resultado.matrizes[0].status == "BLOQUEADA"
+    # Redirecionado em 003.EI: D-ARQ-31 cl.1 define BLOQUEADA como "nenhuma contribuição
+    # de risco determinada"; R-ESP-02 (independente de quantificação) agora determina
+    # espirometria para o mesmo risco que bloqueia o RX — não é mais o caso.
+    linhas_risco = _linhas_de_risco(resultado.matrizes[0].linhas)
+    assert [e.exame for e in linhas_risco] == ["espirometria"]
+    assert all(m.regra_id == "R-ESP-02" for e in linhas_risco for m in e.motivos)
+    assert resultado.matrizes[0].status == "PARCIAL"
     assert resultado.status == "PRELIMINAR"
