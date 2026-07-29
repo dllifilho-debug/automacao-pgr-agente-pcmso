@@ -17,7 +17,7 @@ def test_vocabulario_exames_carrega_com_slugs_esperados() -> None:
     assert set(p.vocabulario.exames.keys()) == {
         "exame_clinico",
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg",
-        "rx_coluna_lombo_sacra", "rx_torax_oit",
+        "rx_coluna_lombo_sacra", "rx_torax_oit", "espirometria",
         "reticulocitos", "acido_transmuconico",
         "acetona_urina", "arsenio_urina", "ttca_urina",
         "acido_mandelico_fenilglioxilico", "mercurio_urina", "mek_urina",

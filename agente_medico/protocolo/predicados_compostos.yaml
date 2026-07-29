@@ -10,3 +10,9 @@ predicados_compostos:
       - vibracao_corpo_inteiro
       - vibracao_mao_braco
 
+  poeira_mineral:
+    ou:
+      - silica
+      - asbesto
+      - pnos
+

@@ -163,6 +163,18 @@ def _fumos_metalicos(ctx: GHEContext) -> bool:
     return any(r.agente == "fumos_metalicos" for r in ctx.riscos)
 
 
+@primitivo("silica")
+def _silica(ctx: GHEContext) -> bool:
+    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022)."""
+    return any(r.agente == "silica" for r in ctx.riscos)
+
+
+@primitivo("asbesto")
+def _asbesto(ctx: GHEContext) -> bool:
+    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022)."""
+    return any(r.agente == "asbesto" for r in ctx.riscos)
+
+
 @primitivo("benzeno")
 def _benzeno(ctx: GHEContext) -> bool:
     return any(r.agente == "benzeno" for r in ctx.riscos)
@@ -210,7 +222,8 @@ def _silica_asbesto_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
 
 @primitivo("pnos")
 def _pnos(ctx: GHEContext) -> bool:
-    # DEPRECATED (002.Y): usado só por R-RX-01-pnos (aposentada). Faixas usam pnos_leo_*/pnos_sem_medicao.
+    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022). Também usado por
+    R-RX-01-pnos (faixas de RX usam pnos_leo_*/pnos_sem_medicao, não este)."""
     return any(r.agente == "poeira_nao_classificada" for r in ctx.riscos)
 
 

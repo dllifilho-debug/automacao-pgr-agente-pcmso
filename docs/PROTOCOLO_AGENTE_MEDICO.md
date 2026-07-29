@@ -58,7 +58,7 @@ A **fonte geradora do risco** é consultada apenas quando necessária para escla
 ### R-PGR-03 — Sinal indireto via EPI `[VALIDADO]`
 Quando o PGR exige **máscara de proteção respiratória (PFF2, PFF3 ou facial)** mas **não declara risco químico no inventário** → presumir exposição química respiratória.
 
-**Consequência mínima:** incluir espirometria (ver R-ESP-01).
+**Consequência mínima:** incluir espirometria (ver R-ESP-02).
 
 **Base normativa:** NR-07, item de espirometria. Confirmado pela Dra. Carolini como exigência normativa, não conduta clínica isolada.
 
@@ -262,11 +262,33 @@ Audiometria realizada há **mais de 120 dias** → refazer no demissional.
 
 ### 5.3 Espirometria
 
-#### R-ESP-01 — Default e exceção via EPI `[VALIDADO]`
-- **Default** = 24 meses (adm/per/MR/dem) — exposição a químico respiratório, fumos metálicos
-- **Exceção (sinal por EPI):** PGR exige máscara (PFF2/PFF3) sem risco químico declarado → espirometria **adm + MR apenas** (sem periódico, sem demissional)
+#### R-ESP-01 — Default e exceção via EPI `[DEPRECATED — sucedida por R-ESP-02 em 003.EI]`
 
-**Base normativa:** NR-07, item de espirometria. Confirmado pela Dra. Carolini como exigência normativa.
+> **Redação original preservada para rastreabilidade (não remover — auditoria histórica do PCMSO):**
+> - **Default** = 24 meses (adm/per/MR/dem) — exposição a químico respiratório, fumos metálicos
+> - **Exceção (sinal por EPI):** PGR exige máscara (PFF2/PFF3) sem risco químico declarado → espirometria **adm + MR apenas** (sem periódico, sem demissional)
+>
+> **Base normativa:** NR-07, item de espirometria. Confirmado pela Dra. Carolini como exigência normativa.
+
+**Motivo da depreciação.** O default ("químico respiratório, fumos metálicos") e a exceção-EPI ("adm + MR apenas") não têm âncora no texto vigente do Anexo III; os itens 3.2 e 3.3 condicionam esses casos a sinais/sintomas respiratórios. Escopo de aplicação alterado → nova ID (regra de versionamento do projeto; precedente R-BIO-02→R-BIO-04). Sucessora: R-ESP-02.
+
+#### R-ESP-02 — Espirometria ocupacional por exposição a poeira mineral `[DERIVADO — NR-07 Anexo III item 3.1 (Portaria MTP 567/2022), texto oficial MTE conferido em 003.EI]`
+
+Sucede R-ESP-01. Trabalhador exposto a poeira mineral indicada no inventário de riscos do PGR → espirometria 24 meses em [adm, per, MR, dem].
+
+- Gatilho e periodicidade `[DERIVADO — NR-07 Anexo III 3.1, literal: "devem ser submetidos a espirometria nos exames médicos admissional e a cada dois anos"]`.
+- Momentos MR e dem `[DERIVADO — matriz-precedente: Carolini 07/2026 (Fascino) e Patrícia 04/2025 (Reserva 0028), ambas (ADM, PER, MRO, DEM)]`. A norma crava só admissional + periódico; os dois momentos extras são conduta convergente em duas matrizes, nível 2 de D-ARQ-22 Parte A.
+- Poeira mineral = sílica, asbesto e PNOS. Carvão mineral fica fora até DT-002X-01 (LEO não resolvido).
+- NÃO depende de quantificação: o item 3.1 não roteia por faixa. Presença no inventário basta. Contrasta deliberadamente com R-RX-01, que faixa por CLSC/LEO no mesmo anexo.
+- Bloqueio bloqueante do RX por medição incompleta (D-ARQ-31, bloqueio por-risco/por-linha) não se propaga à espirometria: o mesmo GHE com sílica sem laudo completo bloqueia `rx_torax_oit` e emite `espirometria` normalmente — assimetria intencional, travada por teste.
+
+Alcançabilidade em produção `[MEDIDO — 003.EI]`: dos três slugs do composto `poeira_mineral`, apenas `silica` tem chave `termos:` em `agentes.yaml`. `asbesto` e `poeira_nao_classificada` não têm — os primitivos correspondentes nascem verdes na suíte e inalcançáveis em produção, mesma classe de D-ARQ-67 (literal órfão) e da consequência registrada em D-ARQ-68 ("regra materializada e verde pode estar inalcançável quando o campo que seu predicado lê não é escrito por produtor real"). Não bloqueia: `silica` alcança e responde pela cobertura prevista. Fechar exige popular `termos:` com grafia normativa por fonte — classe (2) de DT-003EB-01, sessão de dado própria, junto com `fumos_metalicos` (resíduo já nomeado em 003.EH).
+
+Fora do escopo do motor (D-ARQ-09 — o motor é função pura sobre o PGR, não vê dado clínico individual nem resultado de exame):
+- 3.2 (outros agentes agressores pulmonares — "sensibilizantes e/ou irritantes pelos critérios do GHS") → espirometria só se desenvolverem sinais ou sintomas respiratórios.
+- 3.3 (funções com indicação de EPI respiratório) → só empregados com histórico de doença respiratória crônica ou sinais/sintomas.
+- 3.4 (alteração espirométrica → conduta) → condicionado a resultado; mesma classe de DT-002X-03.
+- 3.5 (pós-demissional asbesto, periodicidade igual à do RX) → DT-002X-02, já aberta.
 
 ### 5.4 Raio-X de Tórax (OIT)
 
@@ -1583,6 +1605,26 @@ O sinal correto seria pendência NÃO-bloqueante anexada à linha ("faixa pode e
 
 **Status:** ABERTA. Não-bloqueante.
 
+### DT-003EI-01 — R-PKG-SOLD e R-PKG-ARMADOR prescrevem espirometria incondicional onde o Anexo III 3.2 condiciona a sintoma `[ABERTA — 003.EI]`
+
+**Origem:** 003.EI, ao materializar R-ESP-02 (poeira mineral, item 3.1) e depreciar R-ESP-01.
+
+**Situação.** R-PKG-SOLD e R-PKG-ARMADOR são `[VALIDADO]` e prescrevem "Espirometria 24M (adm/per/MR/dem)" por fumos metálicos / policorte — agentes que caem no item 3.2 (agressor pulmonar não-mineral), cujo gatilho normativo é sinais ou sintomas respiratórios, não exposição.
+
+**Pergunta de método (derivação normativa, D-ARQ-27):** a conduta é adição clínica legítima sobre o piso normativo, ou herdou a leitura do anexo anterior à 567/2022?
+
+**Status:** ABERTA. Não-bloqueante — nenhuma das duas está materializada em `regras.yaml` `[VERIFICADO — grep do campo id:, 003.EI]`.
+
+### DH-003EI-01 — Campo `status` de `regras.yaml` sem enum validado; convenção do PROTOCOLO diverge do dado real `[ABERTA — higiene de instrumento]`
+
+**Origem:** 003.EI, ao gravar R-ESP-02 com `status: DERIVADO`.
+
+**Faceta 1 — `status` não é enum validado.** R-ESP-02 introduz `DERIVADO`, quarto valor do campo `status` em `regras.yaml` (hoje: `VALIDADO` 58, `INTERPRETADO` 5, `DEPRECATED` 1). O carregador (`protocolo.py:64`) só distingue `DEPRECATED`, para excluí-lo do motor de avaliação; qualquer outra string passa sem checagem contra um conjunto fechado. `[MEDIDO — 003.EI]`.
+
+**Faceta 2 — o campo `status` de `regras.yaml` diverge da convenção do PROTOCOLO.** Regras derivadas de texto normativo estão gravadas como `VALIDADO` (`R-RX-01-sem`, `R-BIO-04-*`), e o campo é lido num único ponto (`protocolo.py:64`), apenas para excluir `DEPRECATED` — não alcança `ExameEmitido` nem `Motivo`. Consequência: D-ARQ-22 Parte B ("a saída distingue por exame o status de validação da regra que o gerou") segue descumprida neste eixo, apesar de a Entrega 3 de 003.EG ter materializado `riscos_resolvidos` e `predicado`.
+
+**Status:** ABERTA. Não-bloqueante. Reconciliar exige varrer os 64 status existentes — sessão própria.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1681,3 +1723,5 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v73 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): **DH-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — facetas `riscos_resolvidos` (slugs por GHE) e `predicado` (expressão real, fim do literal `"<composto>"`) FECHADAS; faceta `risco_origem` segue ABERTA (exigiria mudar a assinatura de `predicados.avaliar`, recorte deixado fora por decisão do Arquiteto). **DT-003EG-01 CRIADA (ABERTA)** — audiometria emitida em 16/19 GHEs com motivo `R-PKG-ATIVCRIT` em 15 deles onde o gatilho clínico real é ruído bloqueado por `predicado_ausente` (exame certo, razão errada), só visível porque o motivo por linha passou a ser impresso. **DH-003EG-01 CRIADA (ABERTA — higiene de instrumento)** — 122 bytes NUL do verbatim do PGR vazam para `motivo` de pendências `vocabulario_ausente` no relatório, `grep` classifica-o como binário; `\r\n` recorrente (classe DH-003M-01). **DH-003EG-02 CRIADA (ABERTA — higiene de método)** — `relatorios/` inteiro fora do git (`.gitignore:26`), o diff motor×gabarito que pauta a fila desde D-ARQ-62 envelheceu 4 sessões sem sinal em `git log` (mesma classe de DT-003DX-02). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame (baseline 003.EB: 14 BLOQUEADA / 3 PARCIAL / 2 VÁLIDA, 7 linhas — divergência esperada, motor mudou em 4 sessões desde então). Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. Nenhuma R-* criada/alterada. Detalhe em DECISOES v155 e HISTORICO 003.EG. |
 | v74 | 27/07/2026 | Sessão 003.EG (EMENDA — correção de método): **DH-003EG-03 CRIADA (ABERTA)** (§11) — vigilância do `INDICE_DARQ` (003.EF) existe mas o ritual não a invoca em sessão docs-only; o commit `186150e` desta mesma sessão ficou defasado 94 linhas por a suíte ter sido dispensada por instrução ("docs-only"), corrigido em `973a343`; 2ª ocorrência da classe em 2 sessões (1ª: `c89f569`, 003.EF). Causa nomeada no Arquiteto, não no Code. Correção instalada: `CLAUDE.md` na raiz (NOVO) — regras de método versionadas e lidas pelo Code, endereça DT-003DX-02 — e `docs/RITUAL_FECHAMENTO.md` (NOVO) — checklist fixo de 7 passos que substitui redação livre do prompt de fechamento. Resíduo ABERTO: ambas dependem de leitura humana/agente, sem mecanismo que impeça 3ª ocorrência; hook de pre-commit é candidato, com ressalva de que `core.hooksPath` não é versionado. Suíte inalterada nesta emenda (nenhum código tocado). Detalhe em DECISOES v156 e HISTORICO 003.EG. |
 | v75 | 28/07/2026 | Sessão 003.EH (FECHAMENTO — docs): nota de aplicação em R-RX-01 (mesma ID — ausência de laudo é ramo do Quadro 1, não pendência; ponte `[INTERPRETADO]`; efeito medido 14/19, 70→0, 104→118, 2/16/1); nota de procedência LSC vs. CLSC. **DT-003EH-01 CRIADA (ABERTA)** e **DH-003EH-01 CRIADA (ABERTA)** (§11). Nota aditiva em DT-003EC-01 (divergência 24M×12M medida em 14 GHEs). **D-ARQ-68 CRIADA** em DECISOES v157. Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EH. |
+| v76 | 28/07/2026 | Sessão 003.EI (CONHECIMENTO — docs): **R-ESP-02 CRIADA** `[DERIVADO — NR-07 Anexo III item 3.1, Portaria MTP 567/2022]` — espirometria 24M (adm/per/MR/dem) por exposição a poeira mineral (sílica/asbesto/PNOS) do inventário do PGR, sem depender de quantificação; momentos MR/dem `[DERIVADO — matrizes Carolini 07/2026 e Patrícia 04/2025]`. **R-ESP-01 → DEPRECATED** (sucedida por R-ESP-02; default e exceção-EPI sem âncora no Anexo III vigente, itens 3.2/3.3 condicionam a sinal/sintoma). Call-site de R-PGR-03 (§2) reapontado para R-ESP-02. **DT-003EI-01 CRIADA (ABERTA)** (§11) — R-PKG-SOLD/R-PKG-ARMADOR prescrevem espirometria incondicional sob agentes do item 3.2 (condicionado a sintoma), não materializadas em `regras.yaml`. Detalhe em HISTORICO 003.EI. |
+| v77 | 28/07/2026 | Sessão 003.EI (EMENDA do Arquiteto — docs): nota de alcançabilidade em produção em R-ESP-02 (mesma ID) — `asbesto`/`poeira_nao_classificada` sem chave `termos:` em `agentes.yaml`, primitivos verdes na suíte porém inalcançáveis em produção, classe D-ARQ-67/D-ARQ-68; `silica` alcança e cobre. Nota de assimetria RX×espirometria em R-ESP-02, citando D-ARQ-31 (bloqueio bloqueante do RX não se propaga à espirometria, intencional). **DH-003EI-01 CRIADA (ABERTA)** (§11) — campo `status` de `regras.yaml` sem enum validado (`DERIVADO` é o 4º valor, só `DEPRECATED` é distinguido pelo carregador) e divergente da convenção do PROTOCOLO (regras `[DERIVADO]` gravadas como `VALIDADO`; campo não alcança `ExameEmitido`/`Motivo`, D-ARQ-22 Parte B segue descumprida neste eixo). Medido (não alterado): `protocolos_especiais` em `agentes.yaml` segue sem consumidor em runtime (`motor/`, `adaptadores/`, `superficie/`, `scripts/` — zero grep), confirma PAINEL_ESTADO/D-ARQ v140; não tocado. Nenhuma R-* criada/alterada. Detalhe em HISTORICO 003.EI. |

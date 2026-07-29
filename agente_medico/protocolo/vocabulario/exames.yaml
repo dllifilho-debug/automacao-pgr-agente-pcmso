@@ -47,6 +47,11 @@ exames:
     categoria: imagem
     fonte_matriz: "SÍLICA / ASBESTO / POEIRAS"
 
+  espirometria:
+    nome_exibicao: "Espirometria"
+    categoria: ocupacional
+    fonte_matriz: "R-ESP-02 — poeira mineral (NR-07 Anexo III 3.1)"
+
   reticulocitos:
     nome_exibicao: "Reticulócitos"
     categoria: laboratorial
