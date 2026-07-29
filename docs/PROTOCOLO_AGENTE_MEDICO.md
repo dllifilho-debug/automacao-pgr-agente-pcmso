@@ -331,6 +331,18 @@ Fração do PNOS é sempre RESPIRAVEL (Quadro 2 mede "poeira respirável"); sem 
 
 **TODO normativo — RESOLVIDO em 002.N `[DERIVADO]`:** faixas, periodicidades e corte de 15 anos do Quadro 1 (sílica/asbesto) conferidos contra o texto literal do Anexo III (Portaria 567/2022, site do MTE). Resíduos abertos: (a) classificador de faixa deve rotear por CLSC e tratar bordas com `≤` (fix de código); (b) PNOS achata o Quadro 2 (DT); (c) R-RX-02 fumos sem âncora no Anexo III (DT).
 
+**Nota de aplicação (003.EH, mesma ID)** — ausência de laudo é ramo do Quadro 1, não pendência. O Quadro 1 do Anexo III parte as empresas em dois ramos exaustivos: "Empresas com medições quantitativas periódicas" (as 4 faixas por LSC/LEO) e "Empresas sem avaliações quantitativas" ("na admissão; a cada 2 anos até 15 anos de exposição, e, após, a cada ano; e na demissão, se o último exame foi realizado há mais de 1 ano"). Não há terceiro ramo — toda empresa cai em um dos dois, e nos dois o RX é emitido. `[DERIVADO — NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), texto oficial MTE, conferido em 003.EH]`
+
+Até 003.EG o motor mantinha um terceiro estado sem correspondente normativo: `_helper_silica_asbesto` devolvia `Ausente` bloqueante quando o risco chegava sem `quantificacao`, e `R-RX-01-sem` — que já prescrevia o ramo correto desde a v6 — era inalcançável em produção: `sem_avaliacao_quantitativa=True` só era escrito por fixture, `parsear_quantificacao` nunca o seta `[VERIFICADO — git grep, 003.EH]`. Corrigido em `7dd68e6`: o ramo `q is None` devolve `Quantificacao(sem_avaliacao_quantitativa=True)`, espelhando `_helper_pnos`/Quadro 2. Conduta clínica inalterada — a regra sempre prescreveu 24M (12M após 15 anos) para sem-avaliação; muda o mapeamento input→estado, que é camada de motor. Mesma ID; precedente R-PKG-ATIVCRIT (003.ED).
+
+Ponte `[INTERPRETADO — prioridade na revisão de saída]`: a norma fala de empresa sem avaliações; o motor só vê o documento. Ler "PGR silencioso" como "empresa sem avaliação" é leitura do Arquiteto. Risco nomeado: empresa que tem laudo omitido do PGR recebe 24M onde a faixa real poderia ser 12M (>100% LEO) — subdimensionamento. A mitigação (sinal não-bloqueante de confirmação) depende de D-ARQ-28 — ver DT-003EH-01.
+
+Fronteira preservada: afirmação incompleta continua bloqueando (ramos (c)/(d) do helper) — `pct_LT` junto com `sem_avaliacao_quantitativa`, ou `valor` sem `pct_quartzo`/`fracao`. Ali a empresa se declara no ramo "com medições" e escolher faixa inventaria número (D-ARQ-08/13). Generalização da regra de mapeamento em D-ARQ-68.
+
+Efeito medido (Fascino, `rodar-offline` @ `37cdda6`): 14 dos 19 GHEs passam a emitir `rx_torax_oit` 24M / `periodicidade_apos_15a` 12 / `[adm, per, MR, dem]` / `R-RX-01-sem`; pendências `predicado_ausente` de `silica_asbesto_*` 70 → 0; linhas de exame 104 → 118; status 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA → 2 / 16 / 1 (GHE-12 BLOQUEADA→PARCIAL, único a mudar).
+
+Nota de procedência — LSC vs. CLSC. O literal do Quadro 1 é LSC ("Limite superior do intervalo de confiança da média aritmética estimada para uma distribuição lognormal com confiança estatística de 95%"). Este protocolo, D-ARQ-24, DT-002V-01 e DT-003CB-01 escrevem "CLSC" para a mesma grandeza, com definição idêntica. Rótulo divergente do texto oficial, semântica intacta; os sítios históricos ficam preservados para rastreabilidade.
+
 #### R-RX-02 — Fumos metálicos `[INTERPRETADO — prioridade na revisão de saída]`
 Cargo com exposição a fumos metálicos (incluindo soldador) → RX **60 meses** em adm/per/MR/dem.
 **Ressalva normativa (002.N):** o 60M NÃO tem âncora no Anexo III da NR-07 — fumos metálicos não são poeira mineral (Quadro 1) nem PNOS (Quadro 2). O valor provém da matriz Patrícia ou de analogia, não de norma vigente conferida. Além disso, DT-002K-02 (resolvida) firmou que o risco é por exposição real ao metal individual (Mn, Cr⁶⁺...), não pela categoria genérica "fumos metálicos". O roteamento correto de RX por fumos depende da decomposição em metais individuais — ver DT-D3-02. Até lá, R-RX-02 mantém o caso âncora (soldador) funcional, mas o 60M é [INTERPRETADO], não [VALIDADO].
@@ -1331,6 +1343,8 @@ a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, 
 
 **Resolve de passagem** o pré-registro de DT-003DV-01 (achado 003.DW): 'Poeira respirável' é tratada como **sílica-like** no gabarito (RX 12M/24M, não faixa PNOS), **NÃO como PNOS** — confirma a suspeita registrada em 003.DW sem fechar a lacuna de vocabulário (classe 2 de DT-003EB-01).
 
+**Nota (003.EH)** — a divergência saiu de hipótese para medida. Com o ramo de ausência destravado, o motor emite 24M em 14 GHEs exatamente onde o gabarito dá 12M — os mesmos 14 (GHE-01–05, 07, 10–13, 15–18). A pergunta de método é idêntica, mas agora com contraparte medida dos dois lados, não com um lado vazio. Mantida a norma (24M): supersedir regra derivada de texto literal sobre n=1 empresa reprova em D-ARQ-06 — o gatilho de reabertura segue sendo o 2º PGR atualizado no acervo. Os outros 2 GHEs com RX no gabarito (GHE-08 poeira de madeira, GHE-09 poeiras respiráveis/metálicas, ambos 60M) seguem sem emitir por lacuna de vocabulário — `poeira_nao_classificada` e `fumos_metalicos` não têm chave `termos:` em `agentes.yaml` `[VERIFICADO — 003.EH]`. Classe (2) de DT-003EB-01; sessão de dado própria, com critério de grafia normativa por fonte.
+
 **Status:** ABERTA. Não-bloqueante — nenhuma regra alterada por esta DT; questão de método para sessão CONHECIMENTO futura.
 
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
@@ -1547,6 +1561,28 @@ clone sem um passo de setup explícito.
 
 **Status:** ABERTA. Não-bloqueante.
 
+### DT-003EH-01 — Faixa de RX pode encurtar quando o laudo existe mas não está no PGR, e não há sinal `[ABERTA — depende de D-ARQ-28]`
+
+**Origem:** 003.EH, ao destravar o ramo de ausência de R-RX-01.
+
+**Situação.** O motor passa a emitir 24M para PGR silencioso sobre medição (ramo "empresas sem avaliações quantitativas"). Se a empresa de fato tiver avaliação quantitativa não transcrita no PGR e a faixa real for >100% LEO (12M), o motor subdimensiona sem sinal — a classe de erro silencioso plausível que D-ARQ-22 combate.
+
+O sinal correto seria pendência NÃO-bloqueante anexada à linha ("faixa pode encurtar se houver avaliação quantitativa"), no molde da cláusula 3 de D-ARQ-31. Mecanismo inexistente: `emissao.py` só cria `Pendencia` no ramo `Ausente`, sempre `bloqueante=True` `[VERIFICADO — leitura de emissao.py:56-75, 003.EH]`; o trilho declarativo regra→pendência-não-bloqueante é D-ARQ-28, ainda PROPOSTA — mesma dependência de DT-002Y-01. Construí-lo em 003.EH violaria "uma coisa por vez".
+
+**Status:** ABERTA. Não-bloqueante — a conduta emitida é a que a norma prescreve para o estado que o documento revela. Fecha com D-ARQ-28 ou por decisão própria.
+
+### DH-003EH-01 — Mensagem do ramo (d) de `_helper_silica_asbesto` ficou órfã de sentido `[ABERTA — higiene de instrumento]`
+
+**Origem:** 003.EH, revisão do Arquiteto sobre `7dd68e6` (achado de revisão, não de rodada).
+
+**Situação.** Até 003.EG os ramos (b) e (d) compartilhavam o texto "Sílica/asbesto sem quantificação nem indicação de ausência de avaliação — medir ou declarar ausência de laudo". Com (b) reclassificado, (d) só é alcançável quando há medição afirmada mas não roteável (`valor` presente sem `pct_quartzo`/`fracao`) — e a mensagem manda "declarar ausência de laudo" a quem tem laudo, sem nomear o dado que realmente falta.
+
+**Comportamento correto, diagnóstico enganoso.** Mesma classe de DT-003EG-01 (a linha não aponta para a causa real) e atrito com D-ARQ-22 Parte B (a pendência deve nomear o gatilho).
+
+**Correção candidata.** Mensagem própria do ramo (d), nomeando `pct_quartzo`/`fracao`; toca a asserção de `test_rx_silica_valor_sem_pct_quartzo_continua_ausente_bloqueante`. Não empilhada em 003.EH por ser implementação nova, não redação.
+
+**Status:** ABERTA. Não-bloqueante.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1644,3 +1680,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v72 | 26/07/2026 | Sessão 003.EF (IMPLEMENTAÇÃO): **DH-003EC-01 PARCIALMENTE RESOLVIDA** (§11) — facetas (a) cegueira a falha e (c) derivado sem vigilância FECHADAS (`medir_suite()` lê `returncode` e levanta em suíte vermelha; `INDICE_DARQ.md` regenerado e seu estado exposto como 4ª linha do painel); faceta (b) ID citado conta como implementado segue ABERTA. Nenhuma R-* nem D-ARQ criada/alterada. Sem código de motor. Detalhe em HISTORICO 003.EF. |
 | v73 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): **DH-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — facetas `riscos_resolvidos` (slugs por GHE) e `predicado` (expressão real, fim do literal `"<composto>"`) FECHADAS; faceta `risco_origem` segue ABERTA (exigiria mudar a assinatura de `predicados.avaliar`, recorte deixado fora por decisão do Arquiteto). **DT-003EG-01 CRIADA (ABERTA)** — audiometria emitida em 16/19 GHEs com motivo `R-PKG-ATIVCRIT` em 15 deles onde o gatilho clínico real é ruído bloqueado por `predicado_ausente` (exame certo, razão errada), só visível porque o motivo por linha passou a ser impresso. **DH-003EG-01 CRIADA (ABERTA — higiene de instrumento)** — 122 bytes NUL do verbatim do PGR vazam para `motivo` de pendências `vocabulario_ausente` no relatório, `grep` classifica-o como binário; `\r\n` recorrente (classe DH-003M-01). **DH-003EG-02 CRIADA (ABERTA — higiene de método)** — `relatorios/` inteiro fora do git (`.gitignore:26`), o diff motor×gabarito que pauta a fila desde D-ARQ-62 envelheceu 4 sessões sem sinal em `git log` (mesma classe de DT-003DX-02). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame (baseline 003.EB: 14 BLOQUEADA / 3 PARCIAL / 2 VÁLIDA, 7 linhas — divergência esperada, motor mudou em 4 sessões desde então). Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. Nenhuma R-* criada/alterada. Detalhe em DECISOES v155 e HISTORICO 003.EG. |
 | v74 | 27/07/2026 | Sessão 003.EG (EMENDA — correção de método): **DH-003EG-03 CRIADA (ABERTA)** (§11) — vigilância do `INDICE_DARQ` (003.EF) existe mas o ritual não a invoca em sessão docs-only; o commit `186150e` desta mesma sessão ficou defasado 94 linhas por a suíte ter sido dispensada por instrução ("docs-only"), corrigido em `973a343`; 2ª ocorrência da classe em 2 sessões (1ª: `c89f569`, 003.EF). Causa nomeada no Arquiteto, não no Code. Correção instalada: `CLAUDE.md` na raiz (NOVO) — regras de método versionadas e lidas pelo Code, endereça DT-003DX-02 — e `docs/RITUAL_FECHAMENTO.md` (NOVO) — checklist fixo de 7 passos que substitui redação livre do prompt de fechamento. Resíduo ABERTO: ambas dependem de leitura humana/agente, sem mecanismo que impeça 3ª ocorrência; hook de pre-commit é candidato, com ressalva de que `core.hooksPath` não é versionado. Suíte inalterada nesta emenda (nenhum código tocado). Detalhe em DECISOES v156 e HISTORICO 003.EG. |
+| v75 | 28/07/2026 | Sessão 003.EH (FECHAMENTO — docs): nota de aplicação em R-RX-01 (mesma ID — ausência de laudo é ramo do Quadro 1, não pendência; ponte `[INTERPRETADO]`; efeito medido 14/19, 70→0, 104→118, 2/16/1); nota de procedência LSC vs. CLSC. **DT-003EH-01 CRIADA (ABERTA)** e **DH-003EH-01 CRIADA (ABERTA)** (§11). Nota aditiva em DT-003EC-01 (divergência 24M×12M medida em 14 GHEs). **D-ARQ-68 CRIADA** em DECISOES v157. Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EH. |
