@@ -222,8 +222,9 @@ def _silica_asbesto_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
 
 @primitivo("pnos")
 def _pnos(ctx: GHEContext) -> bool:
-    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022). Também usado por
-    R-RX-01-pnos (faixas de RX usam pnos_leo_*/pnos_sem_medicao, não este)."""
+    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022). Único consumidor em
+    runtime: R-ESP-02 — R-RX-01-pnos é DEPRECATED e filtrada pelo carregador; as faixas
+    de RX usam pnos_leo_*/pnos_sem_medicao, não este."""
     return any(r.agente == "poeira_nao_classificada" for r in ctx.riscos)
 
 

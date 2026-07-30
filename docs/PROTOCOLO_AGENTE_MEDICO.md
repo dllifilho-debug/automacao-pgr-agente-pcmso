@@ -312,7 +312,7 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 
 **Notas:**
 - "Sem avaliação quantitativa" é estado distinto de "qualitativa": dispara **24M**, não 12M. Corrige A-VAL-06 (v2), que simplificou demais.
-- A periodicidade da **espirometria** (adm + 24M, R-ESP-01) é independente do RX — não confundir o 24M dos dois exames.
+- A periodicidade da **espirometria** (24M, R-ESP-02) é independente da do RX, apesar de os dois exames compartilharem o gatilho (poeira mineral, Anexo III). O RX roteia por faixa do Quadro 1 — 24M é a faixa sem-avaliação-quantitativa; a espirometria é 24M sempre, por força do item 3.1, que não roteia por faixa. Coincidência de valor em 24M, não dependência: quando o PGR traz medição, o RX muda de faixa e a espirometria não muda. `[003.EI]`
 - O corte de 15 anos é **tempo de exposição acumulado** → resolvido pelo agendador, não pelo motor (ver D-ARQ-19).
 
 **Implementação (002.L0, D-ARQ-20).** R-RX-01 é implementada como família de regras de periodicidade constante em `regras.yaml`, uma por faixa:
@@ -708,6 +708,8 @@ de saída]` quando decidida. Não bloqueia (R-PGR-04 / Stage 3 cobrem o caso ân
 - RX 24M para PNOS (madeira/gesso) → **erro** (correto 60M).
 - RX 24M para sílica/asbesto sem medição → **correto**.
 - RX 24M no pintor (agente = tinta) → **confusão de exames**: tinta pede espirometria 24M (R-ESP-01), não RX.
+
+**Nota (003.EI):** sob R-ESP-02 este veredito fica desatualizado — tinta é agente químico não-mineral, cai no item 3.2 do Anexo III (condicionado a sinais ou sintomas respiratórios), logo NÃO dispara espirometria por exposição. O veredito original é preservado como registro do que se sabia em 002.L-estudo.
 
 ### DT-002K-02 — Serralheiro e o pacote de fumos metálicos `[A VALIDAR]`
 
@@ -1624,6 +1626,20 @@ O sinal correto seria pendência NÃO-bloqueante anexada à linha ("faixa pode e
 **Faceta 2 — o campo `status` de `regras.yaml` diverge da convenção do PROTOCOLO.** Regras derivadas de texto normativo estão gravadas como `VALIDADO` (`R-RX-01-sem`, `R-BIO-04-*`), e o campo é lido num único ponto (`protocolo.py:64`), apenas para excluir `DEPRECATED` — não alcança `ExameEmitido` nem `Motivo`. Consequência: D-ARQ-22 Parte B ("a saída distingue por exame o status de validação da regra que o gerou") segue descumprida neste eixo, apesar de a Entrega 3 de 003.EG ter materializado `riscos_resolvidos` e `predicado`.
 
 **Status:** ABERTA. Não-bloqueante. Reconciliar exige varrer os 64 status existentes — sessão própria.
+
+### DH-003EI-02 — Taxonomia de `categoria` de exame diverge entre D-ARQ-12, o validador e o dado `[ABERTA — higiene de dado]`
+
+**Origem:** 003.EI, bloqueador ao inserir o slug `espirometria`. Registro restaurado na passada de verificação do Arquiteto — a DH-003EI-01 original foi reescrita para o eixo `status` e este achado ficou sem casa.
+
+Três conjuntos distintos `[MEDIDO — 003.EI]`: D-ARQ-12 prevê {clínico, biomonitoramento, imagem, funcional}; `test_vocabulario.py` valida {clinico, ocupacional, laboratorial, imagem}; o dado usa {laboratorial 43, ocupacional 4, imagem 2} — `clinico` está na lista validada com zero ocorrências. A implementação (002.D1) divergiu do texto decidido e nunca foi resincronizada.
+
+Consumo de produção do campo: ZERO `[VERIFICADO — git grep "categoria" em motor/, superficie/, adaptadores/, scripts/, 003.EI]`. Único leitor é o teste de forma. Quarta instância da classe "campo sem consumidor" em quatro sessões (`anexo_nr07`, `tipo_ibe`, `disparador_clinico`, esta).
+
+Decisão de 003.EI: espirometria seguiu a convenção do dado (`ocupacional`, precedente audiometria/ECG/acuidade_visual, todos funcionais), sem ampliar a enumeração.
+
+Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função — sessão própria.
+
+**Status:** ABERTA. Não-bloqueante.
 
 ---
 
