@@ -27,8 +27,8 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_106_entradas(indice_real: IndiceTermos) -> None:
-    assert len(indice_real.slug_por_forma) == 106
+def test_indice_real_tem_112_entradas(indice_real: IndiceTermos) -> None:
+    assert len(indice_real.slug_por_forma) == 112
 
 
 # ---------------------------------------------------------------------------
@@ -109,6 +109,56 @@ def test_aliases_tier1_resolvem_exata(indice_real: IndiceTermos, termo: str, slu
     resolucao = resolver_termo(termo, indice_real)
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == slug_esperado
+    assert resolucao.pendencia is None
+
+
+# ---------------------------------------------------------------------------
+# resolver_termo — aliases de vibração Tier 1-C (003.EJ, D-ARQ-70)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "termo,slug_esperado",
+    [
+        ("Vibrações localizadas (mão e braço)", "vibracao_mao_braco"),
+        ("Vibração (mão e braço)", "vibracao_mao_braco"),
+        ("VMB", "vibracao_mao_braco"),
+        ("VCI", "vibracao_corpo_inteiro"),
+    ],
+)
+def test_aliases_vibracao_tier1c_resolvem_exata(
+    indice_real: IndiceTermos, termo: str, slug_esperado: str
+) -> None:
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == slug_esperado
+    assert resolucao.pendencia is None
+
+
+@pytest.mark.parametrize(
+    "termo",
+    [
+        "Vibrações localizadas (mão e braço)",
+        "Vibração (mão e braço)",
+        "VMB",
+        "Vibrações em Mãos e Braços",
+    ],
+)
+def test_aliases_mao_braco_nao_resolvem_para_corpo_inteiro_ou_generico(
+    indice_real: IndiceTermos, termo: str
+) -> None:
+    # anti-FP D-ARQ-70 cl.1.iv: grafia de mão-e-braço não pode escorregar para
+    # o slug vizinho da mesma família (corpo inteiro) nem para o genérico.
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.slug != "vibracao_corpo_inteiro"
+    assert resolucao.slug != "vibracao"
+
+
+def test_vibracao_generica_continua_resolvendo_slug_generico(indice_real: IndiceTermos) -> None:
+    # "Vibração" segue alimentando o ramo Ausente de D-ARQ-13/D-ARQ-16 — os
+    # aliases de corpus não deslocam o slug genérico.
+    resolucao = resolver_termo("Vibração", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "vibracao"
     assert resolucao.pendencia is None
 
 
