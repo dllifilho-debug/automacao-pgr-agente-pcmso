@@ -312,7 +312,7 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 
 **Notas:**
 - "Sem avaliação quantitativa" é estado distinto de "qualitativa": dispara **24M**, não 12M. Corrige A-VAL-06 (v2), que simplificou demais.
-- A periodicidade da **espirometria** (adm + 24M, R-ESP-01) é independente do RX — não confundir o 24M dos dois exames.
+- A periodicidade da **espirometria** (24M, R-ESP-02) é independente da do RX, apesar de os dois exames compartilharem o gatilho (poeira mineral, Anexo III). O RX roteia por faixa do Quadro 1 — 24M é a faixa sem-avaliação-quantitativa; a espirometria é 24M sempre, por força do item 3.1, que não roteia por faixa. Coincidência de valor em 24M, não dependência: quando o PGR traz medição, o RX muda de faixa e a espirometria não muda. `[003.EI]`
 - O corte de 15 anos é **tempo de exposição acumulado** → resolvido pelo agendador, não pelo motor (ver D-ARQ-19).
 
 **Implementação (002.L0, D-ARQ-20).** R-RX-01 é implementada como família de regras de periodicidade constante em `regras.yaml`, uma por faixa:
@@ -708,6 +708,8 @@ de saída]` quando decidida. Não bloqueia (R-PGR-04 / Stage 3 cobrem o caso ân
 - RX 24M para PNOS (madeira/gesso) → **erro** (correto 60M).
 - RX 24M para sílica/asbesto sem medição → **correto**.
 - RX 24M no pintor (agente = tinta) → **confusão de exames**: tinta pede espirometria 24M (R-ESP-01), não RX.
+
+**Nota (003.EI):** sob R-ESP-02 este veredito fica desatualizado — tinta é agente químico não-mineral, cai no item 3.2 do Anexo III (condicionado a sinais ou sintomas respiratórios), logo NÃO dispara espirometria por exposição. O veredito original é preservado como registro do que se sabia em 002.L-estudo.
 
 ### DT-002K-02 — Serralheiro e o pacote de fumos metálicos `[A VALIDAR]`
 
@@ -1625,6 +1627,20 @@ O sinal correto seria pendência NÃO-bloqueante anexada à linha ("faixa pode e
 
 **Status:** ABERTA. Não-bloqueante. Reconciliar exige varrer os 64 status existentes — sessão própria.
 
+### DH-003EI-02 — Taxonomia de `categoria` de exame diverge entre D-ARQ-12, o validador e o dado `[ABERTA — higiene de dado]`
+
+**Origem:** 003.EI, bloqueador ao inserir o slug `espirometria`. Registro restaurado na passada de verificação do Arquiteto — a DH-003EI-01 original foi reescrita para o eixo `status` e este achado ficou sem casa.
+
+Três conjuntos distintos `[MEDIDO — 003.EI]`: D-ARQ-12 prevê {clínico, biomonitoramento, imagem, funcional}; `test_vocabulario.py` valida {clinico, ocupacional, laboratorial, imagem}; o dado usa {laboratorial 43, ocupacional 4, imagem 2} — `clinico` está na lista validada com zero ocorrências. A implementação (002.D1) divergiu do texto decidido e nunca foi resincronizada.
+
+Consumo de produção do campo: ZERO `[VERIFICADO — git grep "categoria" em motor/, superficie/, adaptadores/, scripts/, 003.EI]`. Único leitor é o teste de forma. Quarta instância da classe "campo sem consumidor" em quatro sessões (`anexo_nr07`, `tipo_ibe`, `disparador_clinico`, esta).
+
+Decisão de 003.EI: espirometria seguiu a convenção do dado (`ocupacional`, precedente audiometria/ECG/acuidade_visual, todos funcionais), sem ampliar a enumeração.
+
+Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função — sessão própria.
+
+**Status:** ABERTA. Não-bloqueante.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1725,3 +1741,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v75 | 28/07/2026 | Sessão 003.EH (FECHAMENTO — docs): nota de aplicação em R-RX-01 (mesma ID — ausência de laudo é ramo do Quadro 1, não pendência; ponte `[INTERPRETADO]`; efeito medido 14/19, 70→0, 104→118, 2/16/1); nota de procedência LSC vs. CLSC. **DT-003EH-01 CRIADA (ABERTA)** e **DH-003EH-01 CRIADA (ABERTA)** (§11). Nota aditiva em DT-003EC-01 (divergência 24M×12M medida em 14 GHEs). **D-ARQ-68 CRIADA** em DECISOES v157. Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EH. |
 | v76 | 28/07/2026 | Sessão 003.EI (CONHECIMENTO — docs): **R-ESP-02 CRIADA** `[DERIVADO — NR-07 Anexo III item 3.1, Portaria MTP 567/2022]` — espirometria 24M (adm/per/MR/dem) por exposição a poeira mineral (sílica/asbesto/PNOS) do inventário do PGR, sem depender de quantificação; momentos MR/dem `[DERIVADO — matrizes Carolini 07/2026 e Patrícia 04/2025]`. **R-ESP-01 → DEPRECATED** (sucedida por R-ESP-02; default e exceção-EPI sem âncora no Anexo III vigente, itens 3.2/3.3 condicionam a sinal/sintoma). Call-site de R-PGR-03 (§2) reapontado para R-ESP-02. **DT-003EI-01 CRIADA (ABERTA)** (§11) — R-PKG-SOLD/R-PKG-ARMADOR prescrevem espirometria incondicional sob agentes do item 3.2 (condicionado a sintoma), não materializadas em `regras.yaml`. Detalhe em HISTORICO 003.EI. |
 | v77 | 28/07/2026 | Sessão 003.EI (EMENDA do Arquiteto — docs): nota de alcançabilidade em produção em R-ESP-02 (mesma ID) — `asbesto`/`poeira_nao_classificada` sem chave `termos:` em `agentes.yaml`, primitivos verdes na suíte porém inalcançáveis em produção, classe D-ARQ-67/D-ARQ-68; `silica` alcança e cobre. Nota de assimetria RX×espirometria em R-ESP-02, citando D-ARQ-31 (bloqueio bloqueante do RX não se propaga à espirometria, intencional). **DH-003EI-01 CRIADA (ABERTA)** (§11) — campo `status` de `regras.yaml` sem enum validado (`DERIVADO` é o 4º valor, só `DEPRECATED` é distinguido pelo carregador) e divergente da convenção do PROTOCOLO (regras `[DERIVADO]` gravadas como `VALIDADO`; campo não alcança `ExameEmitido`/`Motivo`, D-ARQ-22 Parte B segue descumprida neste eixo). Medido (não alterado): `protocolos_especiais` em `agentes.yaml` segue sem consumidor em runtime (`motor/`, `adaptadores/`, `superficie/`, `scripts/` — zero grep), confirma PAINEL_ESTADO/D-ARQ v140; não tocado. Nenhuma R-* criada/alterada. Detalhe em HISTORICO 003.EI. |
+| v78 | 28-29/07/2026 | Sessão 003.EI (FECHAMENTO — docs): correção de 4 achados da passada de verificação do Arquiteto. **DH-003EI-02 CRIADA (ABERTA)** (§11) — taxonomia de `categoria` de exame diverge entre D-ARQ-12/validador/dado (achado que a redação da DH-003EI-01 original perdeu ao ser reescrita para o eixo `status`; restaurado em DH própria). Nota de R-RX-01 reescrita (periodicidade da espirometria independe da faixa do RX, mesmo compartilhando o gatilho poeira mineral — coincidência de valor em 24M, não dependência). Nota aditiva em DT-002K-01 (veredito tinta/RX de 002.L-estudo desatualizado sob R-ESP-02, preservado como registro histórico). Docstring de `_pnos` corrigida (`predicados.py`) — único consumidor em runtime é R-ESP-02, R-RX-01-pnos é DEPRECATED. Nenhuma R-* criada/alterada. Detalhe em HISTORICO 003.EI. |

@@ -2700,6 +2700,29 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 
 **Base.** Sessão 003.EH. Texto literal do Anexo III conferido no PDF oficial do MTE (Portaria MTP 567/2022). Commit `7dd68e6`, merge `37cdda6` (PR #270).
 
+## D-ARQ-69 — Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita
+
+**Contexto.** R-ESP-01 era `[VALIDADO]` desde a v2 do protocolo (17/05/2026) e citava "NR-07, item de espirometria" como base normativa. Ao materializá-la em 003.EI, a conferência do Anexo III vigente (Portaria MTP 567/2022, PDF oficial MTE) mostrou divergência nas duas pernas: o gatilho é **poeira mineral** (item 3.1), não "químico respiratório / fumos metálicos"; e a exceção-EPI (3.3) é condicionada a histórico de doença respiratória crônica ou sinais/sintomas, condicionante ausente da redação. Sem a conferência, a sessão ia instalar campo novo (`via_respiratoria`) em `agentes.yaml` e emitir espirometria por solvente — superemissão contra a norma, classe D-ARQ-22. Custo medido do desvio: três reformulações de escopo antes de alguém abrir a norma que a própria regra citava.
+
+**Decisão — 3 cláusulas.**
+
+1. Regra clínica redigida em sessão anterior e ainda não materializada não é materializada sem conferência do texto vigente da norma que ela cita como base. A conferência é declarada com fonte e data, no corpo da regra.
+2. Divergência encontrada resolve pela hierarquia de D-ARQ-22 Parte A (norma vigente vence redação antiga), e o resultado obedece à regra de versionamento do projeto: conduta prescrita alterada → nova ID + antiga DEPRECATED.
+3. `[VALIDADO]` não dispensa a conferência. O marcador atesta crivo clínico no momento da entrevista (16-17/05/2026), não vigência normativa perene — a norma pode ter mudado depois do crivo, e nesse caso a redação carrega o texto revogado.
+
+**Fronteiras (não confundir).**
+
+- D-ARQ-22 — Parte A já põe norma vigente como nível 1. Esta decisão não a repete: nomeia o MOMENTO em que a conferência passa a ser obrigatória (materialização), que a Parte A não fixa.
+- D-ARQ-27 — derivação normativa é o método; esta é o gatilho que o convoca.
+- D-ARQ-68 — irmã: aquela trata de como input vira estado; esta, de como regra escrita se relaciona com norma vigente.
+- Não toca motor. Nenhuma R-* criada ou alterada por esta decisão.
+
+**Caso-âncora:** R-ESP-01 → R-ESP-02 (003.EI). Contra-exemplo registrado: R-CLI-01 foi materializada em 003.EC sem conferência prévia e bateu com a norma — resultado correto por sorte, não por método; é o tipo de acerto que esconde a lacuna.
+
+**Universalidade (D-ARQ-06):** vale para qualquer regra do protocolo, qualquer setor.
+
+**Base.** Sessão 003.EI. Texto do Anexo III conferido no PDF oficial do MTE.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2861,3 +2884,4 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 | v155 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): nota de aplicação em D-ARQ-22 Parte B — `MatrizGHE.riscos_resolvidos`/`predicados_avaliados` (aditivos, default, ordem estável) e `Motivo.predicado` serializando a expressão real (fim do literal `"<composto>"`) materializam a rastreabilidade por linha na saída do motor; recorte descartado registrado (rastro dentro de `predicados.avaliar` mudaria assinatura usada em todo o motor); nenhum D-ARQ novo. **Correção de procedência em D-ARQ-39** (mesma ID, status inalterado): a rota de convergência do dedup passou a ter tráfego na rodada Fascino (duas linhas de `audiometria` unificando motivos, `[R-PKG-ATIVCRIT, R-VIB-02]` e `[R-PKG-ATIVCRIT, R-AUD-01]`), mas o disparador foi o alias de altura de 003.ED (D-ARQ-67), não D-ARQ-23 como a nota de 003.EE atribuía; status permanece LATENTE — as duas convergências medidas são ambas 12M, o piso `min` segue sem exercício. DH-003ED-01 PARCIALMENTE RESOLVIDA (PROTOCOLO §11) — facetas `riscos_resolvidos`/`predicado` FECHADAS, faceta `risco_origem` ABERTA. DT-003EG-01 (audiometria pelo motivo errado quando a perna do ruído bloqueia), DH-003EG-01 (bytes NUL do PGR vazam para o relatório) e DH-003EG-02 (instrumento de diff fora do git) CRIADAS (§11 do PROTOCOLO). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame. Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. PROTOCOLO v72→v73. Detalhe em HISTORICO 003.EG. |
 | v156 | 27/07/2026 | Sessão 003.EG (EMENDA — correção de método): **DT-003DX-02 PARCIALMENTE RESOLVIDA** — regra de método do público Code passa a existir versionada em `CLAUDE.md` na raiz do repo (auditável, autocarregada pelo Claude Code); `CLAUDE.md` do Cowork reduzido a ponteiro quanto a essas regras. Resíduo ABERTO: nenhum mecanismo detecta divergência entre os dois arquivos. Disparador: DH-003EG-03 (PROTOCOLO v74, §11) — `INDICE_DARQ` ficou defasado 94 linhas no commit `186150e` desta mesma sessão porque o prompt de fechamento dispensou a suíte por "docs-only", 2ª ocorrência da classe em 2 sessões (1ª: `c89f569`, 003.EF); corrigido em `973a343`. Correção instalada: cláusula fixa em `CLAUDE.md` + `docs/RITUAL_FECHAMENTO.md` (NOVO, checklist de 7 passos). Causa nomeada no Arquiteto, não no Code. Esta emenda toca `DECISOES_ARQUITETURAIS.md` — a regra que ela institui foi aplicada a ela mesma: `INDICE_DARQ.md` regenerado, `test_indice_em_disco_nao_divergiu` verde. Suíte inalterada (nenhum código tocado); `agente_medico/tests/ tests/` = 982 passed, 6 skipped (medido, árvore parada). Nenhuma R-* criada/alterada. PROTOCOLO v73→v74. Detalhe em HISTORICO 003.EG. |
 | v157 | 28/07/2026 | Sessão 003.EH (FECHAMENTO — docs): **D-ARQ-68 CRIADA** — silêncio documental mapeia para o ramo normativo de ausência quando a norma o define, condicionada (D-ARQ-13 prevalece sem esse ramo); caso-âncora R-RX-01 (Quadro 1, commit `7dd68e6`); contra-exemplo medido: ruído (`R-AUD-01`/`R-AUD-02`) não destrava, pela ausência de ramo normativo de faixa-default. Detalhe em HISTORICO 003.EH. |
+| v158 | 28-29/07/2026 | Sessão 003.EI (FECHAMENTO — docs): **D-ARQ-69 CRIADA** — regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita (3 cláusulas: obrigatoriedade da conferência declarada com fonte/data; divergência resolve por D-ARQ-22 Parte A + nova ID/DEPRECATED; `[VALIDADO]` não dispensa a conferência); caso-âncora R-ESP-01 → R-ESP-02 (003.EI), três reformulações de escopo antes de conferir o Anexo III que a própria regra citava; contra-exemplo registrado R-CLI-01 (003.EC, bateu com a norma sem conferência prévia — acerto por sorte, não por método). Detalhe em HISTORICO 003.EI. |
