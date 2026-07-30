@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v157 · 68 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v158 · 69 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -76,3 +76,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v157 · 68 decisões
 | D-ARQ-66 | Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas |  | 2605 | 2159 |
 | D-ARQ-67 | Literal de vocabulário em código é contrato verificado por teste computado do dado |  | 2644 | 1815 |
 | D-ARQ-68 | Silêncio documental mapeia para o ramo normativo de ausência quando a norma o define; sem esse ramo, D-ARQ-13 prevalece |  | 2674 | 3810 |
+| D-ARQ-69 | Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita |  | 2703 | 2395 |
