@@ -4129,7 +4129,7 @@ Pendências (íntegra). **DT-003EH-01 CRIADA (ABERTA)** — depende de D-ARQ-28.
 
 PAINEL (passo 5 do ritual): NÃO re-tirar. Nenhum dos 3 números se moveu — R-RX-01 já constava como implementada (a família `R-RX-01-*` existe em `regras.yaml` desde 002.L0), a porta de entrada não mudou, e as 3 dívidas que travam produção (DT-003L-01, DT-003M-02(A), DT-FDS-02) seguem idênticas. Registrar que o descompasso do painel contra o git real (baseline 968/v70/v152 vs. 984/v75/v157) já acumula 5 sessões — matéria de sessão META, não desta.
 
-## Sessão 003.EI — 28/07/2026 — CONHECIMENTO → IMPLEMENTAÇÃO → MEDIÇÃO (R-ESP-02 criada; R-ESP-01 DEPRECATED)
+## Sessão 003.EI — 28-29/07/2026 — CONHECIMENTO → IMPLEMENTAÇÃO → MEDIÇÃO (R-ESP-02 criada; R-ESP-01 DEPRECATED)
 
 Foco. CONHECIMENTO → IMPLEMENTAÇÃO → MEDIÇÃO. R-ESP-02 criada `[DERIVADO — NR-07 Anexo III item 3.1, Portaria MTP 567/2022]` — espirometria 24M (adm/per/MR/dem) por exposição a poeira mineral (sílica/asbesto/PNOS) do inventário do PGR, sem depender de quantificação. R-ESP-01 → DEPRECATED (default e exceção-EPI sem âncora no Anexo III vigente).
 

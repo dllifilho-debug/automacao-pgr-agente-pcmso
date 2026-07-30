@@ -10,7 +10,7 @@
 
 ---
 
-**Tiragem corrente:** 003.EI · 28/07/2026
+**Tiragem corrente:** 003.EI · 28-29/07/2026
 **Baseline:** main `6edee2c` (PR #272, R-ESP-02 materializada) · 990 passed, 6 skipped · PROTOCOLO v78 · DECISOES v158 — hash do merge desta branch de fechamento (`feat/003ei-fechamento-docs`) fica pendente até o Diovanni mergear; PROTOCOLO/DECISOES nas versões reais desta branch, não de `main`
 
 ---
