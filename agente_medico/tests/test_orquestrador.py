@@ -364,6 +364,45 @@ def test_rcli01_unico_risco_bloqueado_com_clinico_presente_fecha_bloqueada() -> 
     assert matriz.status == "BLOQUEADA"
 
 
+# ---------------------------------------------------------------------------
+# D-ARQ-71 cl.2/cl.3 — pendência não-bloqueante anexada não derruba VÁLIDA
+# ---------------------------------------------------------------------------
+
+
+def _protocolo_ou_absorvido() -> Protocolo:
+    return Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={},
+        regras=[
+            {
+                "id": "R-TESTE-ABSORVIDO",
+                "quando": {"ou": ["ruido_acima_acao", "altura"]},
+                "emite": [
+                    {"exame": "audiometria", "periodicidade_meses": 12, "momentos": ["adm"]}
+                ],
+            }
+        ],
+        regimes={},
+    )
+
+
+def test_ghe_valida_com_pendencia_nao_bloqueante_anexada() -> None:
+    # Sem o fix de tem_anexada (D-ARQ-71 cl.3), esta GHE cairia para PARCIAL só por
+    # ter uma pendência não-bloqueante anexada — o bug latente nomeado pelo Arquiteto.
+    ghe = _ghe(riscos=(_risco("ruido"), _risco("trabalho_altura")))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ou_absorvido(), hoje=HOJE)
+    assert resultado.status == "OK"
+    matriz = resultado.matrizes[0]
+    assert matriz.status == "VÁLIDA"
+    assert len(matriz.linhas) == 1
+    audiometria = matriz.linhas[0]
+    assert len(audiometria.pendencias_anexadas) == 1
+    assert audiometria.pendencias_anexadas[0].tipo == "perna_ausente_absorvida"
+    assert audiometria.pendencias_anexadas[0].bloqueante is False
+    assert not any(p.bloqueante for p in matriz.pendencias)
+
+
 def test_rcli01_um_risco_determinado_mais_um_bloqueado_segue_parcial() -> None:
     # (d) mistura: trabalho_altura determina (R-PKG-ATIVCRIT, 5 linhas) e ruído
     # bloqueia (R-AUD-01 Ausente) na mesma GHE — o clínico soma, mas o status

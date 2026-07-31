@@ -51,6 +51,35 @@ def test_interseccao_parcial_anexa_so_o_presente() -> None:
     assert linhas[0].pendencias_anexadas == [p]
 
 
+def _pend_nao_bloqueante(regra: str, alvo: tuple[str, ...]) -> Pendencia:
+    return Pendencia(
+        tipo="perna_ausente_absorvida",
+        destinatario="elaborador_pgr",
+        motivo=f"absorvida {regra}",
+        bloqueante=False,
+        regra_origem=regra,
+        exames_alvo=alvo,
+    )
+
+
+def test_anexa_nao_bloqueante_quando_slug_casa() -> None:
+    # D-ARQ-71 cl.2: anexar_pendencias não discrimina por polaridade — a mesma
+    # regra de match vale para bloqueante e não-bloqueante.
+    linhas = [_linha("audiometria")]
+    p = _pend_nao_bloqueante("R-AUD-02", ("audiometria",))
+    linhas, restantes = anexar_pendencias(linhas, [p])
+    assert restantes == []
+    assert linhas[0].pendencias_anexadas == [p]
+
+
+def test_nao_bloqueante_sem_match_volta_para_matriz() -> None:
+    linhas = [_linha("audiometria")]
+    p = _pend_nao_bloqueante("R-AUD-02", ("rx_torax_oit",))
+    linhas, restantes = anexar_pendencias(linhas, [p])
+    assert restantes == [p]
+    assert linhas[0].pendencias_anexadas == []
+
+
 def test_piso_nunca_sem_teto_visivel() -> None:
     # Requisito de segurança D-ARQ-31: linha com âncora-casando NUNCA sai sem a
     # pendência anexada. Cinco pendências (família sílica) sobre uma linha de RX.
