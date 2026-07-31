@@ -161,17 +161,24 @@ def _renderizar_relatorio(pdf: Path, resultado: Resultado | None, pendencias: tu
                 linhas.append("  " + _formatar_pendencia(p).replace("\n", "\n  ").rstrip())
         linhas.append("")
         if matriz.linhas:
-            linhas.append("| exame | periodicidade_meses | periodicidade_apos_15a | momentos | motivos (regra_id) | predicado | detalhe |")
-            linhas.append("|---|---|---|---|---|---|---|")
+            linhas.append("| exame | periodicidade_meses | periodicidade_apos_15a | momentos | motivos (regra_id) | predicado | detalhe | pendências anexadas |")
+            linhas.append("|---|---|---|---|---|---|---|---|")
             for exame in matriz.linhas:
                 momentos = ", ".join(sorted(m.value for m in exame.momentos))
                 motivos = ", ".join(m.regra_id for m in exame.motivos)
                 predicados = ", ".join(m.predicado for m in exame.motivos)
                 detalhes = ", ".join(m.detalhe for m in exame.motivos if m.detalhe is not None)
+                if exame.pendencias_anexadas:
+                    pendencias_anexadas = ", ".join(
+                        f"{p.tipo} ({p.regra_origem}, {'bloqueante' if p.bloqueante else 'nao-bloqueante'})"
+                        for p in exame.pendencias_anexadas
+                    )
+                else:
+                    pendencias_anexadas = "(nenhuma)"
                 linhas.append(
                     f"| {exame.exame} | {exame.periodicidade_meses} | "
                     f"{exame.periodicidade_apos_15a} | {momentos} | {motivos} | "
-                    f"{predicados} | {detalhes} |"
+                    f"{predicados} | {detalhes} | {pendencias_anexadas} |"
                 )
         else:
             linhas.append("(sem exames emitidos)")

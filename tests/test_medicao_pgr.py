@@ -66,6 +66,44 @@ def test_formatar_pendencia_sem_ghe_id_nao_ganha_linha_vazia() -> None:
     assert "ghe_id" not in _formatar_pendencia(pendencia)
 
 
+def test_renderizar_relatorio_coluna_pendencias_anexadas_nenhuma() -> None:
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), _resultado_com_diagnostico(), ())
+    assert "| pendências anexadas |" in relatorio
+    assert "| (nenhuma) |" in relatorio
+
+
+def test_renderizar_relatorio_coluna_pendencias_anexadas_com_conteudo() -> None:
+    motivo = Motivo(
+        regra_id="R-AUD-02",
+        predicado="ou(ruido_acima_acao, altura)",
+        risco_origem=None,
+        detalhe="Emitido por regra R-AUD-02",
+    )
+    exame = ExameEmitido(
+        exame="audiometria",
+        periodicidade_meses=12,
+        momentos={Momento.ADM},
+        motivos=[motivo],
+    )
+    exame.pendencias_anexadas.append(
+        Pendencia(
+            tipo="perna_ausente_absorvida",
+            destinatario="elaborador_pgr",
+            motivo="Regra R-AUD-02: emitiu por outra perna, mas ruido_acima_acao ficou ausente",
+            bloqueante=False,
+            regra_origem="R-AUD-02",
+            ghe_id="GHE-16",
+            exames_alvo=("audiometria",),
+        )
+    )
+    matriz = MatrizGHE(ghe_id="GHE-16", linhas=[exame], status="VÁLIDA")
+    resultado = Resultado(status="OK", matrizes=[matriz])
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
+    assert "perna_ausente_absorvida (R-AUD-02, nao-bloqueante)" in relatorio
+
+
 def test_renderizar_relatorio_sem_riscos_resolvidos_mostra_nenhum() -> None:
     matriz = MatrizGHE(ghe_id="GHE-02", linhas=[], status="BLOQUEADA")
     resultado = Resultado(status="PRELIMINAR", matrizes=[matriz])
