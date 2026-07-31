@@ -201,6 +201,15 @@ def test_perna_ausente_absorvida_gera_pendencia_nao_bloqueante() -> None:
     assert p.exames_alvo == ("audiometria",)
 
 
+def test_perna_ausente_absorvida_motivo_nomeia_a_perna() -> None:
+    # Teste 14: a pendência de emissao.py carrega o nome do predicado ausente no
+    # motivo — não só a mensagem genérica de 823d467.
+    ctx = _ctx_ruido_sem_quant_e_altura()
+    stage_5_emissao(ctx, _protocolo_ou_absorvido())
+    assert len(ctx.pendencias) == 1
+    assert "'ruido_acima_acao'" in ctx.pendencias[0].motivo
+
+
 def test_conversao_momento_case_insensitive() -> None:
     ctx = _ctx_com_risco("trabalho_altura")
     proto = Protocolo(

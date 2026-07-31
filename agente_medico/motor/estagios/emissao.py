@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from agente_medico.motor.predicados import ResultadoPredicado, avaliar, pernas_ausentes_absorvidas
+from agente_medico.motor.predicados import (
+    ResultadoPredicado,
+    _serializar_predicado,
+    avaliar,
+    pernas_ausentes_absorvidas,
+)
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import (
     Ausente,
@@ -21,19 +26,6 @@ def _converter_momento(raw: str, regra_id: str, exame: str) -> Momento:
             f"Momento inválido '{raw}' na regra '{regra_id}', exame '{exame}'"
         )
     return _MOMENTOS[key]
-
-
-def _serializar_predicado(expr: object) -> str:
-    if isinstance(expr, str):
-        return expr
-    if isinstance(expr, dict):
-        if "e" in expr:
-            return f"e({', '.join(_serializar_predicado(f) for f in expr['e'])})"
-        if "ou" in expr:
-            return f"ou({', '.join(_serializar_predicado(f) for f in expr['ou'])})"
-        if "nao" in expr:
-            return f"nao({_serializar_predicado(expr['nao'])})"
-    raise ValueError(f"Expressão de predicado inválida: {expr!r}")
 
 
 def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]:
@@ -77,14 +69,14 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
         if not resultado:
             continue
 
-        for ausente in pernas_ausentes_absorvidas(regra["quando"], ctx, protocolo):
+        for nome, ausente in pernas_ausentes_absorvidas(regra["quando"], ctx, protocolo):
             ctx.pendencias.append(
                 Pendencia(
                     tipo="perna_ausente_absorvida",
                     destinatario="elaborador_pgr",
                     motivo=(
-                        f"Regra {regra['id']}: emitiu por outra perna do predicado, "
-                        f"mas uma perna do predicado não pôde ser avaliada — {ausente.mensagem}"
+                        f"Regra {regra['id']}: emitiu por outra perna do predicado, mas "
+                        f"'{nome}' não pôde ser avaliado — {ausente.mensagem}"
                     ),
                     bloqueante=False,
                     regra_origem=str(regra["id"]),

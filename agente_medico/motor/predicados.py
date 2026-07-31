@@ -332,9 +332,37 @@ def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[st
     raise ValueError(f"Expressão de predicado inválida: {expr!r}")
 
 
+def _serializar_predicado(expr: object) -> str:
+    if isinstance(expr, str):
+        return expr
+    if isinstance(expr, dict):
+        if "e" in expr:
+            return f"e({', '.join(_serializar_predicado(f) for f in expr['e'])})"
+        if "ou" in expr:
+            return f"ou({', '.join(_serializar_predicado(f) for f in expr['ou'])})"
+        if "nao" in expr:
+            return f"nao({_serializar_predicado(expr['nao'])})"
+    raise ValueError(f"Expressão de predicado inválida: {expr!r}")
+
+
 def _coletar_pernas_ausentes_absorvidas(
-    expr: Any, ctx: GHEContext, protocolo: Any, acc: list[Ausente]
+    expr: Any,
+    ctx: GHEContext,
+    protocolo: Any,
+    acc: list[tuple[str, Ausente]],
+    _visitados: frozenset[str] = frozenset(),
 ) -> None:
+    if isinstance(expr, str):
+        # D-ARQ-71 cl.1 emenda: expande composto nomeado — a absorção pode morar
+        # DENTRO do composto (ex.: vibracao_qualquer = ou(VCI, VMB)), não só na
+        # expressão literal da regra. Primitivo/fallback-agente/desconhecido não
+        # tem onde descer — comportamento atual (sem coleta) preservado.
+        compostos: dict[str, Any] = protocolo.predicados_compostos
+        if expr in compostos and expr not in _visitados:
+            _coletar_pernas_ausentes_absorvidas(
+                compostos[expr], ctx, protocolo, acc, _visitados | {expr}
+            )
+        return
     if not isinstance(expr, dict):
         return
     if "ou" in expr:
@@ -343,24 +371,33 @@ def _coletar_pernas_ausentes_absorvidas(
         alguma_true = any(v is True for v in valores)
         for filho, valor in zip(filhos, valores):
             if alguma_true and isinstance(valor, Ausente):
-                acc.append(valor)
-            _coletar_pernas_ausentes_absorvidas(filho, ctx, protocolo, acc)
+                nome = filho if isinstance(filho, str) else _serializar_predicado(filho)
+                acc.append((nome, valor))
+            _coletar_pernas_ausentes_absorvidas(filho, ctx, protocolo, acc, _visitados)
     elif "e" in expr:
         for filho in expr["e"]:
-            _coletar_pernas_ausentes_absorvidas(filho, ctx, protocolo, acc)
+            _coletar_pernas_ausentes_absorvidas(filho, ctx, protocolo, acc, _visitados)
     elif "nao" in expr:
-        _coletar_pernas_ausentes_absorvidas(expr["nao"], ctx, protocolo, acc)
+        _coletar_pernas_ausentes_absorvidas(expr["nao"], ctx, protocolo, acc, _visitados)
 
 
-def pernas_ausentes_absorvidas(expr: Any, ctx: GHEContext, protocolo: Any) -> tuple[Ausente, ...]:
+def pernas_ausentes_absorvidas(
+    expr: Any, ctx: GHEContext, protocolo: Any
+) -> tuple[tuple[str, Ausente], ...]:
     """D-ARQ-71 cl.1: dentro de cada nó `ou` da expressão, uma perna que resolve
     Ausente fica invisível quando outra perna do mesmo `ou` resolve True — `avaliar`
     descarta o Ausente ao dar `return True` no curto-circuito (nota 002.D2 de
     D-ARQ-10, preservada). Esta função reavalia a expressão inteira (sem short-circuit)
     só para achar essas pernas, sem alterar `avaliar`/`avaliar_predicado`. `e`/`nao` só
     recorrem: seu próprio Ausente já propaga para cima e vira pendência bloqueante
-    pelo caminho existente — não duplicar aqui."""
-    acc: list[Ausente] = []
+    pelo caminho existente — não duplicar aqui. Atravessa predicado composto nomeado
+    (emenda D-ARQ-71 cl.1) com guarda de ciclo estrutural própria — a detecção e
+    sinalização de ciclo real continuam sendo de `avaliar`/`avaliar_predicado`
+    (D-ARQ-09); esta guarda é defesa em profundidade, não caminho esperado.
+    Retorna pares (nome_da_perna, Ausente) em ordem estável de ocorrência — o nome é
+    a perna literal quando string, ou a serialização de `_serializar_predicado`
+    quando sub-expressão."""
+    acc: list[tuple[str, Ausente]] = []
     _coletar_pernas_ausentes_absorvidas(expr, ctx, protocolo, acc)
     return tuple(acc)
 
