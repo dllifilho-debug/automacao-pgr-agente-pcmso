@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
-from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Motivo, Resultado
-from scripts.medicao_pgr import _renderizar_relatorio
+from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Motivo, Pendencia, Resultado
+from scripts.medicao_pgr import _formatar_pendencia, _renderizar_relatorio
 
 
 def _resultado_com_diagnostico() -> Resultado:
@@ -45,6 +45,25 @@ def test_renderizar_relatorio_tabela_tem_colunas_predicado_e_detalhe() -> None:
     assert "| predicado | detalhe |" in relatorio
     assert "ou(ruido_acima_acao, motorista_equipamento_pesado, ototoxico)" in relatorio
     assert "Emitido por regra R-AUD-01" in relatorio
+
+
+def test_formatar_pendencia_com_ghe_id_imprime_linha_ghe() -> None:
+    pendencia = Pendencia(
+        tipo="vocabulario_ausente",
+        destinatario="protocolo",
+        motivo="termo 'X' não resolvido",
+        ghe_id="GHE-12",
+    )
+    assert "ghe_id: `GHE-12`" in _formatar_pendencia(pendencia)
+
+
+def test_formatar_pendencia_sem_ghe_id_nao_ganha_linha_vazia() -> None:
+    pendencia = Pendencia(
+        tipo="vocabulario_ausente",
+        destinatario="protocolo",
+        motivo="termo 'X' não resolvido",
+    )
+    assert "ghe_id" not in _formatar_pendencia(pendencia)
 
 
 def test_renderizar_relatorio_sem_riscos_resolvidos_mostra_nenhum() -> None:

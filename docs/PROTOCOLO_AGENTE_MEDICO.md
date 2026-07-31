@@ -72,6 +72,18 @@ PGR com riscos genéricos, sem quantificação, sem agentes especificados:
 
 Não rejeitar o PGR por essa razão.
 
+**Nota de aplicação 003.EJ — fração declarada sem agente é caso de R-PGR-05, não de vocabulário ausente.** `[DERIVADO — NR-07 Anexo III Quadros 1 e 2 (Portaria MTP 567/2022), texto oficial MTE conferido em 29/07/2026]`
+
+Nos dois quadros do Anexo III a **fração é o que se mede** e o **agente é o que a poeira contém**: o Quadro 1 é "poeira contendo sílica, asbesto ou carvão mineral"; o Quadro 2 é "poeiras contendo partículas insolúveis ou pouco solúveis de baixa toxicidade e não classificadas de outra forma", com o ramo "empresas com medições quantitativas periódicas **de poeira respirável**". O roteamento entre os dois quadros depende exclusivamente da identidade e das propriedades da substância contida — nunca da fração.
+
+Logo, PGR que declara só a fração (`Poeira respirável`, `Poeiras Respiráveis/Metálicas`) **não permite rotear**: as três condições do rodapé do Quadro 2 (não possuir LEO definido; ser insolúvel ou pouco solúvel; ter baixa toxicidade, não sensibilizante) são predicados sobre o material, e nenhuma é verificável sem a substância. Mapear a fração para `poeira_nao_classificada` inventa a classificação PNOS; mapeá-la para `silica` presume o agente mais severo sem evidência documental (é o que a matriz humana faz — ver DT-003EC-01) e contradiz `test_termos_silicato_e_poeira_nao_resolvem_para_silica`.
+
+**D-ARQ-68 não se aplica:** os quadros têm ramo exaustivo para ausência de **medição**, dentro de um quadro já escolhido; não há ramo para ausência de **identidade do agente**. Vale a cláusula 2 — D-ARQ-13 prevalece, a resolução falha e a pendência permanece.
+
+A conduta já está prescrita por esta regra: solicitar FDS, conversar com o elaborador, **não rejeitar o PGR**. O destinatário correto da pendência é o elaborador do PGR, não o vocabulário do protocolo. Nenhuma regra nova; ID e semântica de R-PGR-05 intactas.
+
+**Medido no Fascino (003.EJ):** `Poeira respirável` em 14 GHEs, dos quais **13 já declaram sílica** e já recebem RX 24M + espirometria — o valor clínico incremental de resolvê-la é praticamente nulo no caso medido. Consequência estrutural (bloquear ou seguir com ressalva) segue em **DT-002I-01**, ABERTA.
+
 ---
 
 ## 3. MODELO DE GHE
@@ -411,6 +423,12 @@ Exposição confirmada a **vibração de corpo inteiro** → RX coluna **lombo-s
 
 #### R-VIB-02 — Vibração ativa audiometria `[VALIDADO]`
 Qualquer vibração (corpo inteiro ou mãos-braços) → **audiometria 12M**, mesmo com ruído abaixo do nível de ação. Ver R-AUD-01.
+
+**Nota de aplicação 003.EJ.** A regra existia em `regras.yaml` desde 002.G, mas só era alcançável por `vibracao_corpo_inteiro` — e mesmo essa perna só por coincidência ortográfica (`Vibração (corpo inteiro)` normaliza para o próprio slug, sem alias). Com os aliases Tier 1-C de D-ARQ-70 (VMB/VCI + grafias de corpus), a perna mão-braço passa a ser alcançável pela primeira vez.
+
+Efeito medido no Fascino (003.EJ, rodada offline determinística): a pendência `vocabulario_ausente` de `Vibrações localizadas (mão e braço)` cai de 9 para 0. GHE-12 (Betoneira), que hoje não emitia nenhuma audiometria (`atividade_critica=False`, `ruido_acima_acao=AUSENTE`), ganha 1 linha nova de audiometria 12M [ADM, PER, MR] por R-VIB-02. Os outros 8 GHEs (07, 08, 09, 10, 11, 16, 17, 18) já emitiam audiometria por `R-PKG-ATIVCRIT`/`R-AUD-01` e passam a somar R-VIB-02 como motivo adicional, sem linha nova (dedup por piso, R-GHE-03/D-ARQ-39). Total de linhas de exame na matriz: 132 → 133 (+1, a linha de GHE-12).
+
+Um desses 8 (GHE-16) expôs um efeito de segunda ordem em R-AUD-02, não previsto antes da medição — ver **DT-003EJ-02**. Conteúdo clínico de R-VIB-02 inalterado; nenhuma R-* criada ou modificada.
 
 ### 5.9 Biomonitoramento Químico
 
@@ -1369,6 +1387,8 @@ a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, 
 
 **Nota (003.EH)** — a divergência saiu de hipótese para medida. Com o ramo de ausência destravado, o motor emite 24M em 14 GHEs exatamente onde o gabarito dá 12M — os mesmos 14 (GHE-01–05, 07, 10–13, 15–18). A pergunta de método é idêntica, mas agora com contraparte medida dos dois lados, não com um lado vazio. Mantida a norma (24M): supersedir regra derivada de texto literal sobre n=1 empresa reprova em D-ARQ-06 — o gatilho de reabertura segue sendo o 2º PGR atualizado no acervo. Os outros 2 GHEs com RX no gabarito (GHE-08 poeira de madeira, GHE-09 poeiras respiráveis/metálicas, ambos 60M) seguem sem emitir por lacuna de vocabulário — `poeira_nao_classificada` e `fumos_metalicos` não têm chave `termos:` em `agentes.yaml` `[VERIFICADO — 003.EH]`. Classe (2) de DT-003EB-01; sessão de dado própria, com critério de grafia normativa por fonte.
 
+**Correção 003.EJ (não apagar a nota 003.EH acima — D-ARQ-06, registro de erro).** A nota de 003.EH atribui a ausência de RX em GHE-08 e GHE-09 a "lacuna de vocabulário". Medido e derivado em 003.EJ, o diagnóstico é outro: **GHE-08** declara `Poeira de madeira` — agente identificável que não é sílica/asbesto/carvão (fora do Quadro 1, literal) e cujo enquadramento no Quadro 2 depende do rodapé (não sensibilizante, baixa toxicidade); **GHE-09** declara `Poeiras Respiráveis/Metálicas`, fração + categoria sem substância → R-PGR-05. Em nenhum dos dois a ausência de RX é lacuna de vocabulário. Ver DT-003EJ-01 (GHE-08) e a nota de aplicação 003.EJ em R-PGR-05 (GHE-09).
+
 **Status:** ABERTA. Não-bloqueante — nenhuma regra alterada por esta DT; questão de método para sessão CONHECIMENTO futura.
 
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
@@ -1433,7 +1453,7 @@ Documentos envolvidos: HUMAP, UFGD-v7, Fascino, Viverde.
 
 **Status:** ABERTA. Não-bloqueante.
 
-### DT-003ED-01 — Grafia natural com preposição não resolve contra slug sem preposição `[ABERTA — 003.ED]`
+### DT-003ED-01 — Grafia natural com preposição não resolve contra slug sem preposição `[PARCIALMENTE RESOLVIDA — 003.EJ; faceta máquina pesada ABERTA]`
 
 **Origem:** 003.ED, ao medir por que R-PKG-ATIVCRIT não acionava no caso real.
 
@@ -1463,7 +1483,13 @@ normativa** — é Tier 2, bloqueada por DT-003DM-01; caminho alternativo é `ri
 por cargo (R-GHE-02) nos cargos operadores, decisão de dado própria com teste de
 indissociabilidade vs. contingência (R-GHE-05).
 
-**Status:** ABERTA. Não-bloqueante.
+**Atualização 003.EJ.** O `[INCERTO — literal NÃO conferido]` da vibração está **resolvido**:
+NR-09 Anexo I, itens 1.1 e 2.1, "Vibrações em Mãos e Braços - VMB" e "Vibrações de Corpo
+Inteiro - VCI", texto vigente `nr-09-atualizada-2026.pdf` conferido em 29/07/2026. Faceta
+vibração **RESOLVIDA** (003.EJ, D-ARQ-70). Faceta **máquina pesada segue ABERTA** — sem grafia
+normativa, caminho por `riscos_implicitos` de cargo.
+
+**Status:** PARCIALMENTE RESOLVIDA (003.EJ). Faceta vibração RESOLVIDA; faceta máquina pesada ABERTA, não-bloqueante.
 
 ### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[PARCIALMENTE RESOLVIDA — 003.EG; faceta risco_origem ABERTA]`
 
@@ -1641,6 +1667,40 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 
 **Status:** ABERTA. Não-bloqueante.
 
+### DT-003EJ-01 — `Poeira de madeira` é agente identificável fora dos dois quadros do Anexo III `[ABERTA — não-bloqueante]`
+
+**Origem:** 003.EJ, derivação da ausência de RX em GHE-08 (Carpintaria) do Fascino.
+
+**Situação.** O PGR declara `Poeira de madeira` — diferente de `Poeira respirável`, é agente identificável e admitiria slug próprio. Mas: (a) não é sílica, asbesto nem carvão mineral → fora do Quadro 1 `[DERIVADO — literal do Quadro 1]`; (b) o Quadro 2 exige, pelo rodapé, material não sensibilizante e de baixa toxicidade — poeira de madeira é sensibilizante respiratório reconhecido e há classificação de carcinogenicidade para poeira de madeira `[INCERTO — não conferido em fonte primária nesta sessão; a lista IARC não é capturável por fetch, conferir no monograph oficial antes de cravar]`. Se (b) se confirmar, madeira **não é PNOS** e fica fora dos dois quadros → sem RX pelo Anexo III, e sem espirometria pelo 3.1 (não é poeira mineral; cai no 3.2, condicionado a sinais/sintomas, fora do motor por D-ARQ-09).
+
+**Consequência.** O RX 60M que a matriz humana prescreve em GHE-08 fica sem âncora nos dois quadros — mesma classe de DT-003EC-01, e o gatilho de reabertura é o mesmo (2º PGR atualizado no acervo, não n=1).
+
+**O que a resolução exige.** Conferir a classificação de carcinogenicidade e de sensibilização da poeira de madeira em fonte primária; decidir se madeira ganha slug próprio com regime próprio ou permanece `vocabulario_ausente` honesto. Não-bloqueante: hoje o motor não emite, que é o comportamento correto sob a derivação acima.
+
+### DT-003EJ-02 — Perna `Ausente` absorvida por `ou` verdadeiro não gera pendência; matriz vai a VÁLIDA com lacuna ambiental real ainda visível em `predicados_avaliados` `[A DECIDIR]`
+
+**Origem:** 003.EJ, medição do Fascino — GHE-16 muda de `PARCIAL` para `VÁLIDA` ao resolver o alias de vibração mão-braço (D-ARQ-70), sem previsão do Arquiteto.
+
+**Situação.** O sinal não se perdeu: `predicados_avaliados` do GHE-16 registra `ruido_acima_acao=AUSENTE` e o relatório o imprime. O que desapareceu foi a Pendencia, e o tri-estado de D-ARQ-31 computa sobre pendências e linhas, não sobre predicados avaliados — por isso a matriz vai a VÁLIDA com lacuna ambiental real registrada dois campos ao lado. O remédio NÃO exige D-ARQ-28 (trilho declarativo regra→pendência) nem mudar a assinatura de `predicados.avaliar`: a informação já está disponível no ponto da avaliação. Exige decidir se "perna Ausente absorvida por um `ou` verdadeiro" gera pendência não-bloqueante — decisão de arquitetura própria, marcada `[A DECIDIR]`, não herdada de D-ARQ-28.
+
+**Família correta:** irmã de DH-003ED-01 faceta `risco_origem` (o avaliador sabe qual perna decidiu e não conta) e de DT-003EG-01 (a linha não aponta para a causa real).
+
+**Caso-âncora:** GHE-16 do Fascino, PARCIAL → VÁLIDA com ruído sem laudo, 003.EJ.
+
+**Status:** `[A DECIDIR]`. Não-bloqueante para rodar — o exame emitido (audiometria via R-AUD-01/R-VIB-02) é o correto; a lacuna é de visibilidade da matriz, não de conduta.
+
+### DH-003EJ-01 — O relatório do harness omite informação de pendência: atribuição por GHE e anexação por linha `[PARCIALMENTE RESOLVIDA — 003.EJ; faceta (b) ABERTA]`
+
+**Origem:** 003.EJ. Duas facetas do mesmo eixo — `scripts/medicao_pgr.py`, `_formatar_pendencia` / `_renderizar_relatorio`.
+
+**Faceta (a) — `ghe_id` não impresso. RESOLVIDA (003.EJ, commit afb8889).** `Pendencia.ghe_id` existe (`tipos.py:284`) e é preenchido (`hidratacao.py:116`), mas o formatador não o imprimia: 159 das 178 pendências de vocabulário saíam na seção global sem identidade de GHE, e atribuí-las exigia reparsear o PDF por fora.
+
+**Faceta (b) — `ExameEmitido.pendencias_anexadas` não impressas. ABERTA.** A tabela de exames tem 7 colunas e nenhuma é a pendência anexada à linha. Consequência medida nesta sessão: GHE-16 aparecia `PARCIAL` sem causa visível no relatório, e diagnosticar a divergência da previsão #5 exigiu rerun in-process contra dois vocabulários. D-ARQ-31 cl.3 anexa a pendência à linha justamente para matar subdimensionamento silencioso (D-ARQ-22) — e o instrumento não a mostra. Correção candidata: coluna de pendências anexadas na tabela, ou linha própria por exame com pendência.
+
+**Registro de procedência:** a mensagem do commit `afb8889` rotula a faceta (a) como "DH-003ED-01 faceta de atribuicao". Rótulo impreciso do Arquiteto — DH-003ED-01 trata do gatilho por linha (`riscos_resolvidos`/`predicado`/`risco_origem`), eixo distinto. Não alterar DH-003ED-01; a correção fica registrada aqui.
+
+**Status:** PARCIALMENTE RESOLVIDA. Não-bloqueante. Irmãs: DH-003EC-01, DH-003ED-01, DH-003EG-01 — quarta faceta do mesmo harness.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1742,3 +1802,5 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v76 | 28/07/2026 | Sessão 003.EI (CONHECIMENTO — docs): **R-ESP-02 CRIADA** `[DERIVADO — NR-07 Anexo III item 3.1, Portaria MTP 567/2022]` — espirometria 24M (adm/per/MR/dem) por exposição a poeira mineral (sílica/asbesto/PNOS) do inventário do PGR, sem depender de quantificação; momentos MR/dem `[DERIVADO — matrizes Carolini 07/2026 e Patrícia 04/2025]`. **R-ESP-01 → DEPRECATED** (sucedida por R-ESP-02; default e exceção-EPI sem âncora no Anexo III vigente, itens 3.2/3.3 condicionam a sinal/sintoma). Call-site de R-PGR-03 (§2) reapontado para R-ESP-02. **DT-003EI-01 CRIADA (ABERTA)** (§11) — R-PKG-SOLD/R-PKG-ARMADOR prescrevem espirometria incondicional sob agentes do item 3.2 (condicionado a sintoma), não materializadas em `regras.yaml`. Detalhe em HISTORICO 003.EI. |
 | v77 | 28/07/2026 | Sessão 003.EI (EMENDA do Arquiteto — docs): nota de alcançabilidade em produção em R-ESP-02 (mesma ID) — `asbesto`/`poeira_nao_classificada` sem chave `termos:` em `agentes.yaml`, primitivos verdes na suíte porém inalcançáveis em produção, classe D-ARQ-67/D-ARQ-68; `silica` alcança e cobre. Nota de assimetria RX×espirometria em R-ESP-02, citando D-ARQ-31 (bloqueio bloqueante do RX não se propaga à espirometria, intencional). **DH-003EI-01 CRIADA (ABERTA)** (§11) — campo `status` de `regras.yaml` sem enum validado (`DERIVADO` é o 4º valor, só `DEPRECATED` é distinguido pelo carregador) e divergente da convenção do PROTOCOLO (regras `[DERIVADO]` gravadas como `VALIDADO`; campo não alcança `ExameEmitido`/`Motivo`, D-ARQ-22 Parte B segue descumprida neste eixo). Medido (não alterado): `protocolos_especiais` em `agentes.yaml` segue sem consumidor em runtime (`motor/`, `adaptadores/`, `superficie/`, `scripts/` — zero grep), confirma PAINEL_ESTADO/D-ARQ v140; não tocado. Nenhuma R-* criada/alterada. Detalhe em HISTORICO 003.EI. |
 | v78 | 28-29/07/2026 | Sessão 003.EI (FECHAMENTO — docs): correção de 4 achados da passada de verificação do Arquiteto. **DH-003EI-02 CRIADA (ABERTA)** (§11) — taxonomia de `categoria` de exame diverge entre D-ARQ-12/validador/dado (achado que a redação da DH-003EI-01 original perdeu ao ser reescrita para o eixo `status`; restaurado em DH própria). Nota de R-RX-01 reescrita (periodicidade da espirometria independe da faixa do RX, mesmo compartilhando o gatilho poeira mineral — coincidência de valor em 24M, não dependência). Nota aditiva em DT-002K-01 (veredito tinta/RX de 002.L-estudo desatualizado sob R-ESP-02, preservado como registro histórico). Docstring de `_pnos` corrigida (`predicados.py`) — único consumidor em runtime é R-ESP-02, R-RX-01-pnos é DEPRECATED. Nenhuma R-* criada/alterada. Detalhe em HISTORICO 003.EI. |
+| v79 | 30/07/2026 | Sessão 003.EJ (IMPLEMENTAÇÃO + MEDIÇÃO): nota de aplicação em R-PGR-05 (mesma ID) — fração declarada sem agente (`Poeira respirável`, `Poeiras Respiráveis/Metálicas`) não permite rotear Quadro 1/2 do Anexo III, D-ARQ-68 não se aplica; medido no Fascino, 14 GHEs, 13 já com sílica. Nota de aplicação em R-VIB-02 (mesma ID) — aliases de D-ARQ-70 destravam a perna mão-braço; efeito medido: 9→0 pendências, GHE-12 ganha audiometria nova, 8 GHEs somam R-VIB-02 como motivo, 132→133 linhas. **DT-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — faceta vibração RESOLVIDA (NR-09 Anexo I 1.1/2.1, VMB/VCI); faceta máquina pesada segue ABERTA. Correção (não-apagamento) em DT-003EC-01 — GHE-08/GHE-09 não são lacuna de vocabulário (Poeira de madeira fora dos Quadros; Poeiras Respiráveis/Metálicas é R-PGR-05). **DT-003EJ-01 CRIADA (ABERTA)** — poeira de madeira agente identificável fora dos dois quadros. **DT-003EJ-02 CRIADA `[A DECIDIR]`** — GHE-16 do Fascino vai PARCIAL→VÁLIDA quando a perna Ausente de R-AUD-02 é absorvida por um `ou` verdadeiro; tri-estado de D-ARQ-31 computa sobre pendências/linhas, não sobre predicados avaliados. Detalhe em HISTORICO 003.EJ. |
+| v80 | 30/07/2026 | Sessão 003.EJ (EMENDA — verificação de aceite pré-push do Arquiteto): **DH-003EJ-01 CRIADA (§11)** — instrumento do harness (`scripts/medicao_pgr.py`) tem duas facetas do mesmo eixo (pendência não atribuída/anexada no relatório): (a) `ghe_id` não impresso, RESOLVIDA (003.EJ, commit `afb8889`); (b) `ExameEmitido.pendencias_anexadas` não impressas na tabela de exames, ABERTA — foi o que exigiu rerun in-process para diagnosticar GHE-16 (DT-003EJ-02). Corrige rótulo impreciso do commit `afb8889` (citava DH-003ED-01, eixo distinto) sem alterar DH-003ED-01. Nenhum código tocado, só docs. |

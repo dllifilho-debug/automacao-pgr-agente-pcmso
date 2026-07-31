@@ -82,12 +82,14 @@ def _hash_commit() -> str:
 
 
 def _formatar_pendencia(p: Pendencia) -> str:
+    linha_ghe = f"  ghe_id: `{p.ghe_id}`\n" if p.ghe_id is not None else ""
     return (
         f"- tipo: `{p.tipo}`\n"
         f"  destinatario: `{p.destinatario}`\n"
         f"  motivo: {p.motivo}\n"
         f"  bloqueante: {p.bloqueante}\n"
         f"  regra_origem: {p.regra_origem}\n"
+        f"{linha_ghe}"
     )
 
 

@@ -24,6 +24,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: [R-VIB-01]
+    termos: ["Vibrações de Corpo Inteiro", "VCI"]
   motorista_equipamento_pesado:
     tipo_ibe: null
     cas: null
@@ -36,6 +37,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)"]
   vibracao:
     tipo_ibe: null
     cas: null
@@ -56,6 +58,17 @@ agentes:
   # de poeira mineral sem biomonitoramento (ex.: sílica, protocolo R-RX-01) —
   # quando difere do slug após normalizar_termo().
   # Siglas comerciais (Tier 2) NÃO entram aqui — ver DT-003DM-01.
+  # Tier 1-C (D-ARQ-70) — porta de entrada da grafia de corpus medida em
+  # documento real do acervo, ancorada em literal normativo vigente, com fonte
+  # dupla e teste anti-FP:
+  # "Vibrações de Corpo Inteiro", "VCI", "Vibrações em Mãos e Braços", "VMB" —
+  # [DERIVADO — NR-09 Anexo I, itens 1.1 e 2.1 (Portaria MTP 426/2021; texto
+  # vigente nr-09-atualizada-2026.pdf, gov.br/trabalho-e-emprego, conferido em
+  # 29/07/2026)].
+  # "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)" —
+  # [DERIVADO — D-ARQ-70 Tier 1-C; grafia medida em "PGR - CONSCIENTE ...
+  # FASCINO (15.07.26).pdf", 9 GHEs; ancorada no literal "Vibrações em Mãos e
+  # Braços" da NR-09 Anexo I 1.1].
   xileno:
     tipo_ibe: EE
     cas: "1330-20-7"
