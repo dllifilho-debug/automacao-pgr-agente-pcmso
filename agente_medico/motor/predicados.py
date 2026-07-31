@@ -332,6 +332,39 @@ def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[st
     raise ValueError(f"Expressão de predicado inválida: {expr!r}")
 
 
+def _coletar_pernas_ausentes_absorvidas(
+    expr: Any, ctx: GHEContext, protocolo: Any, acc: list[Ausente]
+) -> None:
+    if not isinstance(expr, dict):
+        return
+    if "ou" in expr:
+        filhos = expr["ou"]
+        valores = [avaliar(filho, ctx, protocolo) for filho in filhos]
+        alguma_true = any(v is True for v in valores)
+        for filho, valor in zip(filhos, valores):
+            if alguma_true and isinstance(valor, Ausente):
+                acc.append(valor)
+            _coletar_pernas_ausentes_absorvidas(filho, ctx, protocolo, acc)
+    elif "e" in expr:
+        for filho in expr["e"]:
+            _coletar_pernas_ausentes_absorvidas(filho, ctx, protocolo, acc)
+    elif "nao" in expr:
+        _coletar_pernas_ausentes_absorvidas(expr["nao"], ctx, protocolo, acc)
+
+
+def pernas_ausentes_absorvidas(expr: Any, ctx: GHEContext, protocolo: Any) -> tuple[Ausente, ...]:
+    """D-ARQ-71 cl.1: dentro de cada nó `ou` da expressão, uma perna que resolve
+    Ausente fica invisível quando outra perna do mesmo `ou` resolve True — `avaliar`
+    descarta o Ausente ao dar `return True` no curto-circuito (nota 002.D2 de
+    D-ARQ-10, preservada). Esta função reavalia a expressão inteira (sem short-circuit)
+    só para achar essas pernas, sem alterar `avaliar`/`avaliar_predicado`. `e`/`nao` só
+    recorrem: seu próprio Ausente já propaga para cima e vira pendência bloqueante
+    pelo caminho existente — não duplicar aqui."""
+    acc: list[Ausente] = []
+    _coletar_pernas_ausentes_absorvidas(expr, ctx, protocolo, acc)
+    return tuple(acc)
+
+
 def avaliar_predicado(nome: str, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:
     if nome in ctx.predicados:
         return ctx.predicados[nome]

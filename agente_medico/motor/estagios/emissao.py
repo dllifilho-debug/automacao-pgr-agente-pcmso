@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from agente_medico.motor.predicados import ResultadoPredicado, avaliar
+from agente_medico.motor.predicados import ResultadoPredicado, avaliar, pernas_ausentes_absorvidas
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import (
     Ausente,
@@ -76,6 +76,22 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
 
         if not resultado:
             continue
+
+        for ausente in pernas_ausentes_absorvidas(regra["quando"], ctx, protocolo):
+            ctx.pendencias.append(
+                Pendencia(
+                    tipo="perna_ausente_absorvida",
+                    destinatario="elaborador_pgr",
+                    motivo=(
+                        f"Regra {regra['id']}: emitiu por outra perna do predicado, "
+                        f"mas uma perna do predicado não pôde ser avaliada — {ausente.mensagem}"
+                    ),
+                    bloqueante=False,
+                    regra_origem=str(regra["id"]),
+                    ghe_id=ctx.pgr_ghe.id,
+                    exames_alvo=tuple(str(item["exame"]) for item in regra["emite"]),
+                )
+            )
 
         predicado_str = _serializar_predicado(regra["quando"])
         motivo = Motivo(

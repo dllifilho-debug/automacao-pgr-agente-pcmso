@@ -88,6 +88,33 @@ def _ctx_ruido_sem_quantificacao(ghe_id: str = "GHE-01") -> GHEContext:
     return GHEContext(pgr_ghe=_ghe(ghe_id), riscos=[risco])
 
 
+def _protocolo_ou_absorvido() -> Protocolo:
+    return Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={},
+        regras=[
+            {
+                "id": "R-TESTE-ABSORVIDO",
+                "quando": {"ou": ["ruido_acima_acao", "altura"]},
+                "emite": [
+                    {"exame": "audiometria", "periodicidade_meses": 12, "momentos": ["adm"]}
+                ],
+                "base_normativa": "teste",
+                "status": "VALIDADO",
+            }
+        ],
+        regimes={},
+    )
+
+
+def _ctx_ruido_sem_quant_e_altura(ghe_id: str = "GHE-01") -> GHEContext:
+    riscos = [
+        Risco(agente="ruido", fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None),
+        Risco(agente="trabalho_altura", fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None),
+    ]
+    return GHEContext(pgr_ghe=_ghe(ghe_id), riscos=riscos)
+
+
 _MOMENTOS_ESPERADOS = {Momento.ADM, Momento.PER, Momento.MR}
 
 
@@ -153,6 +180,25 @@ def test_predicado_desconhecido_propaga_excecao() -> None:
     )
     with pytest.raises(PredicadoDesconhecido):
         stage_5_emissao(ctx, proto)
+
+
+# ---------------------------------------------------------------------------
+# perna_ausente_absorvida (D-ARQ-71 cl.1): regra emite por outra perna do `ou`,
+# mas a perna Ausente some do tri-estado — visibilidade via pendência não-bloqueante.
+# ---------------------------------------------------------------------------
+
+
+def test_perna_ausente_absorvida_gera_pendencia_nao_bloqueante() -> None:
+    ctx = _ctx_ruido_sem_quant_e_altura()
+    result = stage_5_emissao(ctx, _protocolo_ou_absorvido())
+    assert len(result) == 1  # a regra emitiu — a perna 'altura' resolveu True
+    assert len(ctx.pendencias) == 1
+    p = ctx.pendencias[0]
+    assert p.tipo == "perna_ausente_absorvida"
+    assert p.bloqueante is False
+    assert p.regra_origem == "R-TESTE-ABSORVIDO"
+    assert p.ghe_id == "GHE-01"
+    assert p.exames_alvo == ("audiometria",)
 
 
 def test_conversao_momento_case_insensitive() -> None:
