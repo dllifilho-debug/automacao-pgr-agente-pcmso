@@ -332,16 +332,16 @@ def avaliar(expr: Any, ctx: GHEContext, protocolo: Any, _visitados: frozenset[st
     raise ValueError(f"Expressão de predicado inválida: {expr!r}")
 
 
-def _serializar_predicado(expr: object) -> str:
+def serializar_predicado(expr: object) -> str:
     if isinstance(expr, str):
         return expr
     if isinstance(expr, dict):
         if "e" in expr:
-            return f"e({', '.join(_serializar_predicado(f) for f in expr['e'])})"
+            return f"e({', '.join(serializar_predicado(f) for f in expr['e'])})"
         if "ou" in expr:
-            return f"ou({', '.join(_serializar_predicado(f) for f in expr['ou'])})"
+            return f"ou({', '.join(serializar_predicado(f) for f in expr['ou'])})"
         if "nao" in expr:
-            return f"nao({_serializar_predicado(expr['nao'])})"
+            return f"nao({serializar_predicado(expr['nao'])})"
     raise ValueError(f"Expressão de predicado inválida: {expr!r}")
 
 
@@ -371,7 +371,7 @@ def _coletar_pernas_ausentes_absorvidas(
         alguma_true = any(v is True for v in valores)
         for filho, valor in zip(filhos, valores):
             if alguma_true and isinstance(valor, Ausente):
-                nome = filho if isinstance(filho, str) else _serializar_predicado(filho)
+                nome = filho if isinstance(filho, str) else serializar_predicado(filho)
                 acc.append((nome, valor))
             _coletar_pernas_ausentes_absorvidas(filho, ctx, protocolo, acc, _visitados)
     elif "e" in expr:
@@ -395,7 +395,7 @@ def pernas_ausentes_absorvidas(
     sinalização de ciclo real continuam sendo de `avaliar`/`avaliar_predicado`
     (D-ARQ-09); esta guarda é defesa em profundidade, não caminho esperado.
     Retorna pares (nome_da_perna, Ausente) em ordem estável de ocorrência — o nome é
-    a perna literal quando string, ou a serialização de `_serializar_predicado`
+    a perna literal quando string, ou a serialização de `serializar_predicado`
     quando sub-expressão."""
     acc: list[tuple[str, Ausente]] = []
     _coletar_pernas_ausentes_absorvidas(expr, ctx, protocolo, acc)

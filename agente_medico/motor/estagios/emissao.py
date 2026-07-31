@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from agente_medico.motor.predicados import (
     ResultadoPredicado,
-    _serializar_predicado,
     avaliar,
     pernas_ausentes_absorvidas,
+    serializar_predicado,
 )
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import (
@@ -85,7 +85,7 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
                 )
             )
 
-        predicado_str = _serializar_predicado(regra["quando"])
+        predicado_str = serializar_predicado(regra["quando"])
         motivo = Motivo(
             regra_id=str(regra["id"]),
             predicado=predicado_str,

@@ -332,11 +332,13 @@ def _protocolo_ou_absorvido_sem_emite() -> Protocolo:
 
 
 def test_pendencia_nao_bloqueante_sem_match_fica_na_matriz_valida() -> None:
-    # Teste 15: par do teste 8, no nível onde a polaridade de fato é lida
-    # (orquestrador). exames_alvo vazio (regra sem 'emite') nunca casa nenhuma
-    # linha — a pendência não-bloqueante volta pro nível da matriz, e por não
-    # ser bloqueante o status segue VÁLIDA (D-ARQ-71 cl.3), sem anexação a linha
-    # nenhuma.
+    # Estado que o pipeline real NUNCA produz: exames_alvo deriva de regra["emite"],
+    # e a pendência só nasce quando a regra emite — logo a âncora sempre casa uma
+    # linha presente. "Não-bloqueante com âncora que não casa" é estruturalmente
+    # inalcançável em produção; fabricado aqui via 'emite: []' (mesma categoria de
+    # test_violacao_fabricada_e_detectada em test_invariante_piso_teto.py, D-ARQ-31
+    # fatia 4) — sem este caso sintético, o fallback de matriz (sem anexação) jamais
+    # seria exercitado no vermelho.
     ghe = _ghe(riscos=(_risco("ruido"), _risco("trabalho_altura")))
     pgr = _pgr(ghes=(ghe,))
     resultado = executar(pgr, _protocolo_ou_absorvido_sem_emite(), hoje=HOJE)
