@@ -86,14 +86,18 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 predicados_avaliados=predicados_avaliados,
             )
         else:
-            bloqueantes = [p for p in ctx.pendencias if p.bloqueante]
-            nao_bloqueantes = [p for p in ctx.pendencias if not p.bloqueante]
-            # D-ARQ-31 fatia 3: pendência bloqueante com âncora vai para a linha;
-            # sem match, volta ao nível da matriz. Status decidido PÓS-anexação.
-            linhas, bloqueantes_restantes = anexar_pendencias(linhas, bloqueantes)
-            tem_anexada = any(ln.pendencias_anexadas for ln in linhas)
+            # D-ARQ-31 fatia 3 (estendido por D-ARQ-71 cl.2): pendência com âncora vai
+            # para a linha — bloqueante ou não; sem match, volta ao nível da matriz.
+            # Status decidido PÓS-anexação.
+            linhas, restantes = anexar_pendencias(linhas, list(ctx.pendencias))
+            bloqueantes_restantes = [p for p in restantes if p.bloqueante]
+            nao_bloqueantes_restantes = [p for p in restantes if not p.bloqueante]
+            # D-ARQ-71 cl.3: conta só anexada BLOQUEANTE — anexada não-bloqueante não
+            # deve derrubar VÁLIDA para PARCIAL (bug latente que a fatia 2a introduziria
+            # sem este fix).
+            tem_anexada = any(p.bloqueante for ln in linhas for p in ln.pendencias_anexadas)
             tem_bloqueio = bool(bloqueantes_restantes) or tem_anexada
-            pendencias_matriz = nao_bloqueantes + bloqueantes_restantes
+            pendencias_matriz = nao_bloqueantes_restantes + bloqueantes_restantes
             # R-CLI-01 (piso universal) emite sempre — linhas nunca fica vazia.
             # Tri-estado computa só sobre linhas com origem em risco, excluindo
             # as emitidas por regra incondicional (D-ARQ-31 fatia 2, 003.EC).

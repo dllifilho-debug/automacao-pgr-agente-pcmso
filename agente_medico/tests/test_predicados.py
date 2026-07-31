@@ -14,6 +14,7 @@ from agente_medico.motor.predicados import (
     ResultadoPredicado,
     avaliar,
     avaliar_predicado,
+    pernas_ausentes_absorvidas,
     primitivo,
 )
 from agente_medico.motor.protocolo import Vocabulario, carregar
@@ -367,6 +368,123 @@ def _literais_agente_comparados(caminho: Path) -> set[str]:
                     if literal is not None:
                         literais.add(literal)
     return literais
+
+
+# ---------------------------------------------------------------------------
+# pernas_ausentes_absorvidas (D-ARQ-71 cl.1): perna Ausente de um `ou` some do
+# tri-estado quando outra perna do MESMO `ou` resolve True — avaliar() descarta
+# via curto-circuito (nota 002.D2 de D-ARQ-10). Esta função reavalia sem
+# curto-circuito só para tornar essa perna visível, sem tocar avaliar/avaliar_predicado.
+# ---------------------------------------------------------------------------
+
+def _ctx_ruido_sem_quant_e(*agentes: str) -> GHEContext:
+    risco_ruido = Risco(agente="ruido", fonte="teste", detalhe=None, quantificacao=None, tipo_ibe=None)
+    outros = [Risco(agente=a, fonte="teste", detalhe=None, quantificacao=None, tipo_ibe=None) for a in agentes]
+    return GHEContext(pgr_ghe=_ghe_vazio(), riscos=[risco_ruido, *outros])
+
+
+def test_pernas_ausentes_absorvidas_ou_ausente_antes_de_true() -> None:
+    ctx = _ctx_ruido_sem_quant_e("trabalho_altura")
+    expr = {"ou": ["ruido_acima_acao", "altura"]}
+    resultado = pernas_ausentes_absorvidas(expr, ctx, _p)
+    assert len(resultado) == 1
+    nome, ausente = resultado[0]
+    assert nome == "ruido_acima_acao"
+    assert isinstance(ausente, Ausente)
+
+
+def test_pernas_ausentes_absorvidas_ou_ausente_depois_de_true_ordem_invertida() -> None:
+    # Prova que a detecção não é ordem-dependente — sem este teste a fatia não está pronta.
+    ctx = _ctx_ruido_sem_quant_e("trabalho_altura")
+    expr = {"ou": ["altura", "ruido_acima_acao"]}
+    resultado = pernas_ausentes_absorvidas(expr, ctx, _p)
+    assert len(resultado) == 1
+    nome, ausente = resultado[0]
+    assert nome == "ruido_acima_acao"
+    assert isinstance(ausente, Ausente)
+
+
+def test_pernas_ausentes_absorvidas_ou_false_true_nao_detecta_nada() -> None:
+    ctx = _ctx("trabalho_altura")
+    expr = {"ou": ["espaco_confinado", "altura"]}
+    assert pernas_ausentes_absorvidas(expr, ctx, _p) == ()
+
+
+def test_pernas_ausentes_absorvidas_ou_ausente_sem_true_nao_absorve() -> None:
+    # O `ou` inteiro resolve Ausente (bolha pra cima) — caminho bloqueante existente
+    # (predicado_ausente) segue como está; esta função não deve reportar nada aqui.
+    ctx = _ctx_ruido_sem_quant_e()
+    expr = {"ou": ["ruido_acima_acao", "espaco_confinado"]}
+    assert pernas_ausentes_absorvidas(expr, ctx, _p) == ()
+
+
+def test_pernas_ausentes_absorvidas_e_nao_coleta() -> None:
+    # `e` com perna Ausente propaga Ausente pra cima e já vira pendência bloqueante
+    # pelo caminho existente — não duplicar aqui.
+    ctx = _ctx_ruido_sem_quant_e("trabalho_altura")
+    expr = {"e": ["altura", "ruido_acima_acao"]}
+    assert pernas_ausentes_absorvidas(expr, ctx, _p) == ()
+
+
+def test_pernas_ausentes_absorvidas_ou_aninhado_dentro_de_e_detectado() -> None:
+    ctx = _ctx_ruido_sem_quant_e("trabalho_altura", "espaco_confinado")
+    expr = {"e": [{"ou": ["ruido_acima_acao", "altura"]}, "espaco_confinado"]}
+    resultado = pernas_ausentes_absorvidas(expr, ctx, _p)
+    assert len(resultado) == 1
+    nome, ausente = resultado[0]
+    assert nome == "ruido_acima_acao"
+    assert isinstance(ausente, Ausente)
+
+
+# ---------------------------------------------------------------------------
+# pernas_ausentes_absorvidas — emenda D-ARQ-71 cl.1: atravessa predicado
+# composto nomeado (a absorção pode morar DENTRO do composto, ex.:
+# vibracao_qualquer = ou(vibracao_corpo_inteiro, vibracao_mao_braco)).
+# ---------------------------------------------------------------------------
+
+
+def test_pernas_ausentes_absorvidas_composto_nomeado_string_pura() -> None:
+    # Teste 10: quando é string pura nomeando um composto — antes da emenda,
+    # _coletar... retornava () na primeira linha (isinstance(expr, dict) falso).
+    compostos = {"c": {"ou": ["ruido_acima_acao", "altura"]}}
+    proto = _protocolo_stub(compostos)
+    ctx = _ctx_ruido_sem_quant_e("trabalho_altura")
+    resultado = pernas_ausentes_absorvidas("c", ctx, proto)
+    assert len(resultado) == 1
+    nome, ausente = resultado[0]
+    assert nome == "ruido_acima_acao"
+    assert isinstance(ausente, Ausente)
+
+
+def test_pernas_ausentes_absorvidas_composto_aninhado_em_e() -> None:
+    # Teste 11: composto nomeado como filho de um "e".
+    compostos = {"c": {"ou": ["ruido_acima_acao", "altura"]}}
+    proto = _protocolo_stub(compostos)
+    ctx = _ctx_ruido_sem_quant_e("trabalho_altura", "espaco_confinado")
+    expr = {"e": ["espaco_confinado", "c"]}
+    resultado = pernas_ausentes_absorvidas(expr, ctx, proto)
+    assert len(resultado) == 1
+    nome, ausente = resultado[0]
+    assert nome == "ruido_acima_acao"
+    assert isinstance(ausente, Ausente)
+
+
+def test_pernas_ausentes_absorvidas_ciclo_propaga_ciclopredicados() -> None:
+    # Teste 12: composto que se referencia — a chamada avaliar(filho, ...) dentro da
+    # travessia levanta CicloPredicados antes que a guarda estrutural própria importe
+    # (nota de realidade do Arquiteto). Contrato: exceção propagada, não retorno vazio.
+    compostos = {"a": {"ou": ["a"]}}
+    proto = _protocolo_stub(compostos)
+    with pytest.raises(CicloPredicados):
+        pernas_ausentes_absorvidas("a", _ctx(), proto)
+
+
+def test_pernas_ausentes_absorvidas_composto_sem_absorcao() -> None:
+    # Teste 13: composto cujas pernas resolvem True/False sem Ausente — zero pendência.
+    compostos = {"c": {"ou": ["altura", "espaco_confinado"]}}
+    proto = _protocolo_stub(compostos)
+    ctx = _ctx("trabalho_altura")
+    assert pernas_ausentes_absorvidas("c", ctx, proto) == ()
 
 
 def test_todo_literal_de_agente_em_predicados_existe_no_vocabulario() -> None:

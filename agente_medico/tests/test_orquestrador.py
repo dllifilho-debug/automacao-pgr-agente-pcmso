@@ -316,6 +316,39 @@ def test_ghe_parcial_linhas_presentes_com_bloqueio() -> None:
     assert not any(p.bloqueante for p in matriz.pendencias)
 
 
+def _protocolo_ou_absorvido_sem_emite() -> Protocolo:
+    return Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={},
+        regras=[
+            {
+                "id": "R-TESTE-ABSORVIDO-VAZIO",
+                "quando": {"ou": ["ruido_acima_acao", "altura"]},
+                "emite": [],
+            }
+        ],
+        regimes={},
+    )
+
+
+def test_pendencia_nao_bloqueante_sem_match_fica_na_matriz_valida() -> None:
+    # Teste 15: par do teste 8, no nível onde a polaridade de fato é lida
+    # (orquestrador). exames_alvo vazio (regra sem 'emite') nunca casa nenhuma
+    # linha — a pendência não-bloqueante volta pro nível da matriz, e por não
+    # ser bloqueante o status segue VÁLIDA (D-ARQ-71 cl.3), sem anexação a linha
+    # nenhuma.
+    ghe = _ghe(riscos=(_risco("ruido"), _risco("trabalho_altura")))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ou_absorvido_sem_emite(), hoje=HOJE)
+    assert resultado.status == "OK"
+    matriz = resultado.matrizes[0]
+    assert matriz.status == "VÁLIDA"
+    assert any(
+        p.tipo == "perna_ausente_absorvida" and not p.bloqueante for p in matriz.pendencias
+    )
+    assert all(not ln.pendencias_anexadas for ln in matriz.linhas)
+
+
 # ---------------------------------------------------------------------------
 # R-CLI-01 — piso universal (003.EC). Usa o protocolo real (regras.yaml em
 # disco) porque R-CLI-01 é a regra sob teste, não um fixture sintético.
@@ -362,6 +395,45 @@ def test_rcli01_unico_risco_bloqueado_com_clinico_presente_fecha_bloqueada() -> 
     assert "exame_clinico" in nomes, "linha do clínico deve estar presente"
     assert linhas_de_risco(matriz.linhas) == [], "nenhuma linha de risco determinada"
     assert matriz.status == "BLOQUEADA"
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-71 cl.2/cl.3 — pendência não-bloqueante anexada não derruba VÁLIDA
+# ---------------------------------------------------------------------------
+
+
+def _protocolo_ou_absorvido() -> Protocolo:
+    return Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={},
+        regras=[
+            {
+                "id": "R-TESTE-ABSORVIDO",
+                "quando": {"ou": ["ruido_acima_acao", "altura"]},
+                "emite": [
+                    {"exame": "audiometria", "periodicidade_meses": 12, "momentos": ["adm"]}
+                ],
+            }
+        ],
+        regimes={},
+    )
+
+
+def test_ghe_valida_com_pendencia_nao_bloqueante_anexada() -> None:
+    # Sem o fix de tem_anexada (D-ARQ-71 cl.3), esta GHE cairia para PARCIAL só por
+    # ter uma pendência não-bloqueante anexada — o bug latente nomeado pelo Arquiteto.
+    ghe = _ghe(riscos=(_risco("ruido"), _risco("trabalho_altura")))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ou_absorvido(), hoje=HOJE)
+    assert resultado.status == "OK"
+    matriz = resultado.matrizes[0]
+    assert matriz.status == "VÁLIDA"
+    assert len(matriz.linhas) == 1
+    audiometria = matriz.linhas[0]
+    assert len(audiometria.pendencias_anexadas) == 1
+    assert audiometria.pendencias_anexadas[0].tipo == "perna_ausente_absorvida"
+    assert audiometria.pendencias_anexadas[0].bloqueante is False
+    assert not any(p.bloqueante for p in matriz.pendencias)
 
 
 def test_rcli01_um_risco_determinado_mais_um_bloqueado_segue_parcial() -> None:
