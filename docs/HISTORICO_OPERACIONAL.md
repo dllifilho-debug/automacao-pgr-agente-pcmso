@@ -4148,3 +4148,36 @@ Pendências criadas: **DT-003EI-01** (R-PKG-SOLD/R-PKG-ARMADOR prescrevem espiro
 Nova instância de DH-003EC-01(b): a `base_normativa` de R-ESP-02 cita "R-ESP-01 (DEPRECATED)", e o instrumento do painel casa `R-[A-Z]+-[0-9]+` em prosa — R-ESP-01 deve aparecer no numerador por citação, como R-TEMP-01 em 003.EC. NÃO editar a `base_normativa` para o número se comportar; registrar a instância.
 
 3ª ocorrência da classe DH-003EG-03: a sessão foi declarada encerrada no merge do PR #272, com HISTORICO/PAINEL/DECISOES em zero menções a 003.EI. Não foi instrução que dispensou passo — foi o merge tomado como fim de sessão. O resíduo daquela DH previa isto.
+
+## Sessão 003.EJ — 30/07/2026 — ARQUITETURA + MEDIÇÃO (D-ARQ-70 criada; aliases Tier 1-C de vibração)
+
+Foco. ARQUITETURA + dado + docs. Nenhuma regra clínica nova; nenhuma R-* criada ou alterada. Quatro fatias: (1) 6 aliases de vibração em `agentes.yaml` + testes; (2) `ghe_id` em `_formatar_pendencia` (`scripts/medicao_pgr.py`); (3) medição Fascino contra 8 previsões do Arquiteto; (4) docs.
+
+D-ARQ-70 CRIADA (DECISOES v159) — alias de corpus medido entra no vocabulário só ancorado em literal normativo, com fonte dupla e teste anti-FP (5 cláusulas). 6 aliases gravados em `agentes.yaml`, dois slugs: `vibracao_corpo_inteiro.termos = ["Vibrações de Corpo Inteiro", "VCI"]`; `vibracao_mao_braco.termos = ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)"]`. Fonte dupla: NR-09 Anexo I itens 1.1/2.1 (Portaria MTP 426/2021, `nr-09-atualizada-2026.pdf`, conferido 29/07/2026) para os 4 literais/siglas normativos; `PGR ... FASCINO (15.07.26).pdf`, 9 GHEs, para a grafia de corpus mão-braço.
+
+Gabarito 106→112 previsto pelo Arquiteto (simulação prévia de `construir_indice_termos` + Levenshtein reais @ `c2b5dc8`) × medido na sessão: bateram exatamente — formas 106→112, slugs 79→79 (inalterado), zero colisão, 4 pares fuzzy dist≤2 inalterados, as 4 grafias-alvo resolvendo EXATA (VMB/VCI abaixo de `PISO_FUZZY=4`, só por exata), anti-FP confirmado (mão-braço não resolve para corpo-inteiro nem para o slug genérico `vibracao`).
+
+Medição Fascino (`rodar-offline`, `relatorios/003ej_fascino_rodar.md`, gitignored) — 8 previsões do Arquiteto × medido:
+
+| # | Previsão | Medido |
+|---|---|---|
+| 1 | 9→0 pendências `vocabulario_ausente` de "Vibrações localizadas (mão e braço)" | 9→0, bate |
+| 2 | +1 linha audiometria 12M [adm,per,MR] em GHE-12, motivo R-VIB-02 | bate |
+| 3 | 8 GHEs (07,08,09,10,11,16,17,18) ganham R-VIB-02 como motivo, sem linha nova | bate |
+| 4 | R-VIB-01 não move | bate |
+| 5 | R-AUD-02 não dispara pela perna `e(ruido,ototoxico,vibracao_qualquer)` — ototoxico=False nos 9 GHEs | DIVERGE — GHE-16 é o único dos 9 com ototoxico=True (declara tolueno/xileno); R-AUD-02 dispara ali |
+| 6 | rx_torax_oit/espirometria inalterados, 14 GHEs | bate |
+| 7 | Total linhas: 132 + previsão 2 | 133, bate |
+| 8 | Status 2 VÁLIDA/16 PARCIAL/1 BLOQUEADA, inalterado | DIVERGE — 3/15/1; GHE-16 PARCIAL→VÁLIDA |
+
+As previsões 5 e 8 divergem pelo mesmo mecanismo, isolado por rodada em processo (vocabulário `c2b5dc8` vs. atual, mesmo envelope `003dv_fascino_volta.json`): em GHE-16, R-AUD-02 tinha uma `Pendencia(predicado_ausente, bloqueante=True)` anexada à linha de audiometria porque a perna `ou(ruido_acima_acao=AUSENTE, e(ruido,ototoxico,vibracao_qualquer))` era Ausente (nem leg True, nem False definitivo). Com `vibracao_qualquer` resolvendo True (alias novo), a perna `e(...)` fecha True e o `ou` deixa de ser Ausente — a pendência bloqueante desaparece, e a matriz vai de PARCIAL para VÁLIDA com `ruido_acima_acao=AUSENTE` ainda registrado em `predicados_avaliados`, só que sem pendência que o carregue. Reportado como BLOQUEADOR (regra fixa do prompt), decisão do Arquiteto: registrar como DT-003EJ-02 `[A DECIDIR]`, não como bug — o exame emitido é o correto, a lacuna é de visibilidade da matriz, não de conduta.
+
+Pendências criadas/alteradas em §11 do PROTOCOLO (v79). DT-003EJ-01 CRIADA (ABERTA) — poeira de madeira agente identificável fora dos dois quadros do Anexo III (GHE-08). DT-003EJ-02 CRIADA `[A DECIDIR]` — mecanismo acima. DT-003ED-01 PARCIALMENTE RESOLVIDA — faceta vibração RESOLVIDA (NR-09 Anexo I 1.1/2.1); faceta máquina pesada segue ABERTA. DT-003EC-01 ganha correção (nota preservada, não apagada, D-ARQ-06): GHE-08/GHE-09 não são lacuna de vocabulário — GHE-08 é poeira de madeira fora dos quadros (DT-003EJ-01), GHE-09 é fração sem agente (R-PGR-05).
+
+Duas correções de rota do Arquiteto nesta sessão. (1) A hipótese de abertura de que a lacuna de RX em GHE-08/GHE-09 seria "sessão de dado" (popular `termos:` de `poeira_nao_classificada`/`fumos_metalicos`) foi refutada por medição: os dois casos não são lacuna de vocabulário — são agente-fora-dos-quadros (GHE-08) e fração-sem-agente (GHE-09), ambos diagnósticos de regra/dado já existente (R-PGR-05, DT-003EJ-01), não candidatos a alias. (2) A alavanca clínica de resolver `Poeira respirável` foi medida como quase nula: dos 14 GHEs que a declaram, 13 já têm sílica e já recebem RX+espirometria — o ganho incremental de um slug próprio seria marginal no caso medido (registrado em DT-002I-01, ABERTA).
+
+Suíte: baseline 990 passed, 6 skipped → 1001 passed, 6 skipped, árvore parada. 11 testes novos (9 em `test_resolvedor_termos.py`: 4 aliases-alvo EXATA + 4 anti-FP + 1 genérico; 2 em `test_medicao_pgr.py`: `ghe_id` presente/ausente em `_formatar_pendencia`). Aritmética: 1001 − 11 = 990, fecha exatamente. `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py`: sucesso, 34 arquivos, delta-zero.
+
+PAINEL (passo 5 do ritual): nenhum dos três números do painel se move nesta tiragem; PAINEL não re-tirado. Razão: nenhuma R-* criada nesta sessão; porta de entrada intacta; as 3 dívidas bloqueantes (DT-003L-01, DT-003M-02(A), DT-FDS-02) não foram tocadas — as DTs/DH desta sessão (DT-003EJ-01, DT-003EJ-02) nascem não-bloqueantes. Correção do Arquiteto durante a própria sessão: o prompt original listava a suíte como um dos três números do painel — não é; a suíte vive no Baseline. Rodar `medir_painel.py` re-pagaria os ~23min da suíte completa pela segunda vez na mesma sessão; não rodado.
+
+Commits: `f44e8ef` (fatia 1), `afb8889` (fatia 2). Fatia 3 não gera commit (`relatorios/` gitignored, DH-003EG-02). Fatia 4 (docs) commitada ao fim desta sessão.
