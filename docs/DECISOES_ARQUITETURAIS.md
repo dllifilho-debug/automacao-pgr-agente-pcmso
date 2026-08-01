@@ -2768,6 +2768,31 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 
 **Base.** Sessão 003.EK. Resolve DT-003EJ-02 e a faceta (b) de DH-003EJ-01. Commits `4f5c91f`, `cd39cb8`, `823d467`, `1894602`; merge `54637e4` (PR #275). Suíte 1001→1013→1019 passed, 6 skipped; `mypy --strict` delta-zero, 34 arquivos. Sem caso medido no acervo para a expansão de composto da cl.1 — no Fascino, GHE-16 tem `vibracao_mao_braco` qualificado e nenhum `vibracao` genérico, logo `vibracao_corpo_inteiro` resolve `False`, não `Ausente`. A cláusula é justificada por leitura de disco (R-VIB-02/R-AUD-02 citam `vibracao_qualquer` por nome), não por medição — registrado para não se confundir com regra exercitada.
 
+## D-ARQ-72 — Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo`
+
+**Aviso de procedência.** O corpo abaixo é reconstrução do Arquiteto a partir do código em disco (`apresentacao_matriz.py`, `tipos.py`, `emissao.py`, mensagens de commit) — o prompt original de 003.EM não estava disponível ao redigir este fechamento.
+
+**Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003.EM).
+
+**Contexto.** D-ARQ-54 fechou a confirmação-de-entrada (envelope + FDS) e deixou explicitamente fora de escopo: "render de saída (matriz tri-estado D-ARQ-31 + pendências) fica FORA — é apresentação-de-saída, D-ARQ próprio." Esta é essa D-ARQ. O render existia, mas inline em `scripts/medicao_pgr.py` — um harness de medição, com um único consumidor. Sem superfície própria, o critério de pronto do Marco 1 ("a coordenadora clínica valida a matriz de exames de saída") não tem sobre o que operar.
+
+**Cláusulas.**
+
+1. A apresentação-de-saída não toca o motor. `renderizar_matriz(matriz: MatrizGHE) -> list[str]` (`agente_medico/superficie/apresentacao_matriz.py`) é função pura sobre o resultado; lógica-de-domínio zero. Herda D-ARQ-54 P1 e preserva D-ARQ-09. Medido: status das matrizes do Fascino inalterado (3 VÁLIDA / 15 PARCIAL / 1 BLOQUEADA).
+2. Mora em `superficie/`, não em `scripts/`. O harness (`scripts/medicao_pgr.py`) passa a ser consumidor do render, não dono. Extração byte-idêntica (fatia 1) — os 7 testes existentes de `tests/test_medicao_pgr.py` passaram sem alteração e sem teste novo, o que é o próprio gate da preservação `[VERIFICADO — git show d86de25:tests/test_medicao_pgr.py, 7 testes inalterados]`.
+3. O status de validação da regra atravessa até `Motivo.status_regra` (`agente_medico/motor/tipos.py`), populado de `regra.get("status")` em `agente_medico/motor/estagios/emissao.py`. Fecha D-ARQ-22 Parte B no eixo que DH-003EI-01 faceta 2 registrava como descumprido: a saída passa a distinguir, por exame, o status da regra que o gerou.
+4. Ordem de leitura da revisão: `INTERPRETADO` primeiro, `DERIVADO` depois, `VALIDADO` nunca entra no bloco "inspecionar primeiro" (`_STATUS_INSPECIONAR_PRIMEIRO` em `apresentacao_matriz.py:13`). Materializa a priorização que D-ARQ-22 Parte B descreve em prosa. Literal digitado em código sem teste computado do dado — registrado como DH-003EM-01, classe D-ARQ-67.
+
+**Fronteiras (não confundir).**
+
+* D-ARQ-54 — confirmação de entrada; esta é saída. Compartilham a postura apresentação-pura, não o artefato.
+* D-ARQ-31 — o tri-estado é consumido pelo render, nunca recomputado.
+* Escopo desta D-ARQ: markdown. Emissores Word/HTML no formato do escritório e app de upload são fatias futuras, fora daqui.
+
+**Consequência.** A matriz ganha superfície própria — precondição do Marco 1, não o Marco 1. Nenhuma regra clínica criada ou alterada.
+
+**Base.** Sessão 003.EM. Fatias 0-2, commits `9ca7372`, `d86de25`, `69d035e`. Fecha faceta 2 de DH-003EI-01; abre DH-003EM-01 e DH-003EM-02 (§11 do PROTOCOLO). Detalhe em HISTORICO 003.EM.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2932,3 +2957,4 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 | v158 | 28-29/07/2026 | Sessão 003.EI (FECHAMENTO — docs): **D-ARQ-69 CRIADA** — regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita (3 cláusulas: obrigatoriedade da conferência declarada com fonte/data; divergência resolve por D-ARQ-22 Parte A + nova ID/DEPRECATED; `[VALIDADO]` não dispensa a conferência); caso-âncora R-ESP-01 → R-ESP-02 (003.EI), três reformulações de escopo antes de conferir o Anexo III que a própria regra citava; contra-exemplo registrado R-CLI-01 (003.EC, bateu com a norma sem conferência prévia — acerto por sorte, não por método). Detalhe em HISTORICO 003.EI. |
 | v159 | 30/07/2026 | Sessão 003.EJ (IMPLEMENTAÇÃO + MEDIÇÃO): **D-ARQ-70 CRIADA** — aliases Tier 1-C de vibração (VMB/VCI + grafias de corpus mão-braço) em `agentes.yaml`, índice termo→slug 106→112 (medido, zero colisão, 4 pares fuzzy inalterados); `_formatar_pendencia` (`scripts/medicao_pgr.py`) passa a imprimir `ghe_id`. Medição Fascino confirma 6 das 8 previsões do Arquiteto; 2 divergem e viram DT-003EJ-02 (GHE-16 PARCIAL→VÁLIDA: pendência `predicado_ausente` de R-AUD-02 some porque a perna e(ruido,ototoxico,vibracao_qualquer) deixa de ser Ausente quando vibracao_qualquer resolve True — único dos 9 GHEs com VMB que também é ototóxico). DT-003EJ-01 aberta (poeira de madeira, GHE-08). Suíte e mypy do fechamento: [A MEDIR]. |
 | v160 | 31/07/2026 | Sessão 003.EK (FECHAMENTO): **D-ARQ-71 CRIADA** — perna `Ausente` absorvida por `ou` verdadeiro (curto-circuito de `avaliar`) gera pendência não-bloqueante `perna_ausente_absorvida` anexada à linha via passada de diagnóstico separada que atravessa predicado composto nomeado (`pernas_ausentes_absorvidas`); tri-estado não se move (`tem_anexada` conta só bloqueante). Resolve DT-003EJ-02 e faceta (b) de DH-003EJ-01. Medição Fascino: 2 pendências, ambas GHE-16, ancoradas em `audiometria`; status 3 VÁLIDA / 15 PARCIAL / 1 BLOQUEADA inalterado. Suíte 1001→1013→1019 passed, 6 skipped; `mypy --strict` delta-zero, 34 arquivos. Commits `4f5c91f`, `cd39cb8`, `823d467`, `1894602`; merge `54637e4` (PR #275). |
+| v161 | 31/07/2026 | Sessão 003.EM (FECHAMENTO): **D-ARQ-72 CRIADA** — apresentação-de-saída da matriz (`renderizar_matriz`, `agente_medico/superficie/apresentacao_matriz.py`) é superfície própria, apresentação-pura herdando D-ARQ-54 P1 (lógica-de-domínio zero); extraída byte-idêntica de `scripts/medicao_pgr.py` (7 testes existentes inalterados); `Motivo.status_regra` populado de `regra.get("status")` fecha D-ARQ-22 Parte B no eixo que DH-003EI-01 faceta 2 registrava descumprido; ordem de leitura `INTERPRETADO`→`DERIVADO` materializa o bloco "inspecionar primeiro". Fecha faceta 2 de DH-003EI-01 (§11 PROTOCOLO); abre DH-003EM-01 (literal `_STATUS_INSPECIONAR_PRIMEIRO` sem teste computado, classe D-ARQ-67) e DH-003EM-02 (bloco nunca exercitado no nível `INTERPRETADO` no Fascino). Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EM. |
