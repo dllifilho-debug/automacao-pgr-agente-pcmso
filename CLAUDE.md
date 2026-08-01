@@ -16,6 +16,14 @@ de memória — ler do disco.
 - Instrução que remove uma checagem existente exige justificativa com custo medido. Sem
   número, a checagem fica.
 - Número ou estado não medido na sessão corrente sai marcado `[A MEDIR]` ou não sai.
+- Prompt que pede teste novo nomeia, junto, a reversão de código que deve deixá-lo vermelho.
+  Teste cuja reversão não é nomeável não entra. Antes de entregar, a verificação é a varredura
+  inversa (teste a teste, qual reversão o mata) — grep de símbolos é checagem de sintaxe, não
+  verificação. Origem medida: 003.EK, 5 testes especificados que não tocavam o comportamento
+  que diziam cobrir (aninhamento literal em vez de composto nomeado; unidade sobre função que
+  nunca leu o campo; estado inalcançável; caminho estruturalmente inalcançável). Varredura
+  inversa da fatia 1 deu 7/12 discriminantes; da emenda, 4/6. Causa nomeada no Arquiteto, não
+  no Code.
 
 ## Git
 
