@@ -1,0 +1,158 @@
+> **PENDÊNCIA DE VERSIONAMENTO — executar no fechamento do S2, não em sessão própria.**
+> Este arquivo vive na pasta do Cowork, **fora do git**, e já carrega decisão citável
+> (§S0: adiar deploy, com RAM/tempo medidos; correção da premissa do Streamlit).
+> Doc de decisão fora do git não é auditável nem tem histórico — é a dívida já registrada
+> como irmã de `DH-003EG-02` e `DT-003DX-02`.
+>
+> **Ação:** mover para `docs/PLANO_V1.md` como cláusula do fechamento do S2 (a sessão já
+> toca docs; sessão própria só para mover arquivo não se paga). `git add` nominal. A partir
+> daí, a pasta do Cowork deixa de ser fonte deste conteúdo — atualizações vão no git.
+> Os `PROMPT_*.md` da pasta **não** migram: são insumo de sessão, descartáveis pós-merge.
+>
+> **Cumprida em 003.EO** (`docs/PLANO_V1.md`, `git add` nominal). A pasta do Cowork deixou
+> de ser fonte deste conteúdo a partir daqui.
+
+# Plano V1 — "projeto rodando num site"
+
+**Definição de pronto (Diovanni, 01/08/2026):** um técnico insere um PGR de construção civil
+num site e recebe a matriz de exames, com a explicação de como o sistema chegou nela,
+exportável em HTML e Word para a Dra. Carolini validar.
+
+**Restrição que manda:** prazo.
+
+---
+
+## O que já está pronto e não precisa ser construído
+
+- **A explicação já existe nos dados.** D-ARQ-22 Parte B, materializada em 003.EG/003.EM:
+  `Motivo.regra_id` + `predicado` (expressão real do `quando`) + `detalhe` + `status_regra`;
+  `MatrizGHE.riscos_resolvidos` + `predicados_avaliados` + pendências anexadas por linha.
+- **A matriz tem superfície própria** — `superficie/apresentacao_matriz.py` (D-ARQ-72, 003.EM),
+  com coluna de status e bloco "inspecionar primeiro". **[ATUALIZADO — 003.EO]** Existe também
+  `superficie/documento_matriz.py` (D-ARQ-73) — superfície DISTINTA: `apresentacao_matriz.py`
+  é o render de diagnóstico (rastreabilidade completa, para a revisão regra-a-regra);
+  `documento_matriz.py` é o documento do escritório (HTML/DOCX, sem rastreabilidade, é o que a
+  Dra. Carolini assina). Não confundir as duas ao ler este plano.
+- **O formato de saída não precisa ser desenhado** — está pronto em `matrizes_originais/`:
+  cabeçalho `Empresa / Obra / tipo / Data`, corpo com uma tabela 2 colunas
+  `FUNÇÃO | EXAMES SOLICITADOS` por GHE, rodapé com responsável e médica validadora.
+  Texto de célula: `Nome do Exame (ADM, PER [N meses], MRO, RET, DEM)`. **[REFINADO — 003.EO,
+  fatia 0]** O número de meses só aparece quando a periodicidade é ≠ 12M — **exceto RX Tórax
+  OIT, que sempre traz o número**, mesmo quando vale 12. Regra por exame, não constante solta;
+  materializada como `ordem_exibicao`/formatação em `documento_matriz.py`.
+- **A ingestão determinística do Fascino atravessa** — 19/19 GHEs, sem LLM (003.EB, D-ARQ-65).
+
+## A alavanca de prazo
+
+Com justificativa por linha, **divergência contra o gabarito vira conversa, não erro**.
+Não é preciso zerar o diff antes de mostrar à coordenadora — é preciso que cada célula
+se defenda. Duas exceções que não se defendem sozinhas e por isso são caminho crítico:
+
+- **Superemissão** — motor emite 6 exames/GHE em 16 GHEs, gabarito tem 4. `[A MEDIR]` desde 003.EG.
+  **[REFUTADO — 003.EO, fatia 4, medição contra o Fascino real]** O eixo estava descrito ao
+  contrário e a magnitude era outra: medido **4 células de superemissão em 2 GHEs** (GHE-10:
+  `acetona_urina`/`mek_urina`; GHE-16: `ortocresol_urina`/`acido_metilhipurico` — DT-003EB-02) e
+  **10 células de subemissão em 5 GHEs** (GHE-06/08/09/17/19). Não é caminho crítico do prazo
+  na forma descrita aqui — cada célula divergente tem causa nomeada (DT-003EB-02, DT-003EI-01,
+  DT-003EO-03), não é um bloco de 16 GHEs com 2 exames a mais cada. Registro anterior preservado
+  acima por D-ARQ-06; não apagado, substituído em vigência por esta nota.
+- **DT-003EG-01** — audiometria com motivo `R-PKG-ATIVCRIT` em 15/16 GHEs onde o gatilho real
+  é ruído bloqueado. Exame certo, razão errada — e agora visível, porque a razão é impressa.
+
+---
+
+## Sequência
+
+| # | Sessão | Estado |
+|---|---|---|
+| **S1** | Regra psicossocial — `R-PSY-02` sucede `R-PSY-01` (DEPRECATED) | **prompt pronto:** `PROMPT_003EN_psicossocial.md` |
+| **S2** | Emissor Word + HTML no formato do escritório | **[ATUALIZADO — 003.EO]** parcialmente entregue: emissores HTML e DOCX prontos e testados (D-ARQ-73); expansão GHE→cargo implementada e correta, **sem efeito em produção** até o parser separar os cargos (DT-003EO-04) — fecha em 003.EP |
+| **S3** | App: upload PGR → envelope → processa → matriz na tela → download | não começou |
+| **S0** | Decisão de hospedagem | **não decidido — risco de prazo subestimado** |
+
+### S2 — o que falta, nomeado
+
+1. **Expansão GHE→cargo.** O motor produz `MatrizGHE` (19 linhas no Fascino); a matriz humana
+   é por **cargo** (41 no Fascino). A expansão é apresentação — cada cargo do GHE herda a
+   matriz do GHE — mas alguém tem que escrevê-la. ~~`GHEPGR` já carrega os cargos.~~
+   **[CORRIGIDO — 003.EO, D-ARQ-06: registro do erro preservado, não apagado]** Esta frase
+   estava **errada** e é a razão de o S2 não fechar em 003.EO: `GHEPGR` **não** carrega os
+   cargos separados. Medido em 003.EO: `_extrair_cargos_da_linha`
+   (`parser_familia_consciente.py`, D-ARQ-65 fatia 1) devolve uma tupla de **UM elemento** com
+   a linha inteira da coluna Cargo/Função, delimitador inconsistente entre vírgula e
+   ponto-e-vírgula. Pior: **6 dos 41 cargos nem chegam a existir** em `GHEPGR` — quebra de
+   linha física na tabela do PDF perde o resto da lista em 2 de 19 GHEs (GHE-03, GHE-06).
+   `montar_documento` (D-ARQ-73) expande corretamente o que recebe; o problema é o dado de
+   entrada, não a expansão. Ver DT-003EO-04 (duas facetas, fecha em `003.EP`).
+2. **Emissor DOCX** — `python-docx` já está em `requirements.txt`. **[FEITO em 003.EO.]**
+3. **Emissor HTML** sobre a mesma estrutura intermediária. **[FEITO em 003.EO.]**
+4. **Decisão de arquitetura recomendada:** a explicação **não entra no Word da Dra.** O Word
+   dela é o formato do escritório, limpo, do jeito que ela já assina. A rastreabilidade
+   (regra, predicado, norma, status) vai na tela e num anexo separado. Misturar atrapalha
+   a validação em vez de ajudar.
+
+### S0 — hospedagem `[MEDIDO 01/08/2026 — decisão recomendada: adiar]`
+
+**Correção de premissa.** "Streamlit Community Cloud não serve repo privado" é **falso** — ele
+serve, via Deploy Key SSH + scope `repo` do OAuth. O limite do free tier é **1 app privado**.
+`[fonte: docs.streamlit.io/deploy/streamlit-community-cloud/status]`
+
+O diagnóstico correto do legado Seconci já existia desde 12/07/2026 e nunca disse
+"impossível": *"Streamlit Cloud não usa PAT dos Secrets pra clonar — usa deploy key SSH
+própria via OAuth do GitHub App (escopo `repo`); fix provável não testado é revoke+reconnect
+completo em `github.com/settings/applications` + reautorizar em share.streamlit.io"*.
+A leitura "não serve repo privado" foi degradação minha do registro, repetida várias vezes
+antes de eu reabrir o arquivo. **O fix nunca foi testado** — continua sendo a primeira
+tentativa mais barata, se o Community Cloud voltar a ser considerado.
+
+**O gargalo real é RAM e tempo, não repo privado.** Medido: parse do PGR Fascino
+(10,4 MB, 119 páginas) com pdfplumber — pág. 25 em 21s/142 MB RSS, pág. 50 em 39s/228 MB,
+**>130s sem terminar**, extrapolação ~450-500 MB de pico. `flush_cache()` por página não
+conteve o crescimento. `[MEDIDO em sandbox Linux — tempo é indicativo (hardware difere),
+memória é mais transferível]`
+
+Consequências:
+- **1 GB do Community Cloud não fecha:** ~200-250 MB de Streamlit/libs + ~450-500 MB do parse
+  = teto com **um** usuário. Dois simultâneos derrubam.
+- **Render Starter ($7/mês, 512 MB) é insuficiente.** Piso viável ≈ 2 GB.
+- **~2 min por PGR** exige barra de progresso (Streamlit aguenta — websocket, sem timeout HTTP).
+
+**Recomendação: não hospedar na V1.** Rodar `streamlit run` local na máquina do escritório.
+Tira do caminho crítico o item de maior incerteza; o valor que a Dra. valida está no **Word**,
+não no site; e **não gera retrabalho** — é o mesmo app, o deploy vira empacotamento depois.
+
+Se o site for exigido: **Railway** (~$5-20/mês, usage-based) ou **Render 2 GB** (~$25/mês).
+Community Cloud como plano C.
+
+**Duas perguntas abertas que travam qualquer opção paga:**
+1. Quem usa? Só a equipe do escritório, ou técnicos das construtoras também sobem PGR?
+   Se for só interno, local pode resolver de vez.
+2. PGR de cliente pode ir para nuvem de terceiro? Se o SECONCI ou os contratos vedam,
+   sobra servidor próprio — e o prazo do deploy dobra.
+
+---
+
+## Cortes explícitos da V1 (paliativos, sinalizados)
+
+- **Universalidade multi-PGR: fora.** Só as famílias que já ingerem. O Marco 1 diz "um PGR
+  nomeado" — D-ARQ-62 cl.1 já cravou o Fascino.
+- **Fluxo de FDS/química: fora.** As 178 pendências `vocabulario_ausente` aparecem como
+  pendência visível, não travam a entrega.
+- **Cobertura clínica congelada em 21/42.** Nenhuma regra nova salvo o que a medição exigir.
+  **[DESATUALIZADO — já em 003.EN]** R-PSY-02 moveu o número para **22/42** pelo instrumento
+  (21/42 pela intenção do painel) antes mesmo desta migração; 003.EO não moveu de novo
+  (nenhuma R-* tocada). Número corrente: ver `docs/PAINEL_ESTADO.md`, não este arquivo.
+- **~20 DTs/DHs não-bloqueantes ficam abertas.**
+
+## Fora de escopo da V1, nomeado
+
+- **Periodicidade do RX Tórax OIT** (DT-003EC-01). Medido no acervo: 60M em 108 ocorrências,
+  12M em 107, 24M em 3 — **bimodal**, provável discriminante de faixa de exposição
+  (família `R-RX-01-*`). Exige medição própria cruzando com o risco do GHE.
+- **Audiometria universal** — hipótese levantada e **refutada** pela medição (universal em
+  1 de 19 documentos; o Fascino é outlier). O motor está correto ao tratá-la como condicional.
+- **Gate mecânico contra medição concorrente.** 4ª ocorrência da classe em 6 sessões, com a
+  lição já versionada em `CLAUDE.md` e reincidindo — inclusive dentro do fechamento cujo
+  prompt a documentava. Documentar não previne; o controle é disciplina, não mecanismo.
+  Correção estrutural: alvo de suíte que checa `git status` limpo ao iniciar e aborta se a
+  árvore mudar durante. Barato, mas não bloqueia a V1.

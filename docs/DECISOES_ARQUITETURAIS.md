@@ -2793,6 +2793,92 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 
 **Base.** Sessão 003.EM. Fatias 0-2, commits `9ca7372`, `d86de25`, `69d035e`. Fecha faceta 2 de DH-003EI-01; abre DH-003EM-01 e DH-003EM-02 (§11 do PROTOCOLO). Detalhe em HISTORICO 003.EM.
 
+## D-ARQ-73 — Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano
+
+**Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003.EO + EMENDA 1).
+
+**Contexto.** D-ARQ-72 fechou a apresentação-de-saída em markdown de diagnóstico, para a
+coordenadora clínica revisar regra a regra. Falta o documento que a Dra. Carolini efetivamente
+assina — Word/HTML no formato que o escritório já usa (`matrizes_originais/*.doc(x)`), por
+cargo, sem rastreabilidade. Medição da fatia 0 (relatório `003eo_gabarito_forma.md`, não
+versionado): o gabarito Fascino (19 GHEs, 41 linhas de função) mostrou que a ordem de exibição
+dos exames dentro da célula **não é constante** entre GHEs — dois GHEs administrativos (sem
+exames laboratoriais) invertem a posição relativa de `Avaliação Psicossocial` e `Av. Médica de
+Saúde Mental` frente ao template dos outros 17. Isso bloqueou a fatia 2 até decisão do
+Arquiteto (EMENDA 1).
+
+**Cláusulas.**
+
+1. **Estrutura intermediária única, N renderizadores.** `DocumentoMatriz` (`CabecalhoDocumento`,
+   `BlocoGHE`/`LinhaCargo`, `RodapeDocumento`) é dataclass frozen, pura, sem I/O
+   (`agente_medico/superficie/documento_matriz.py`, D-ARQ-72 cl.2 — mora ao lado de
+   `apresentacao_matriz.py`). `renderizar_html` e `renderizar_docx` consomem a MESMA estrutura;
+   nenhum recalcula nada — só formatam.
+2. **Expansão GHE→cargo é apresentação, não regra nova.** `montar_documento` replica a mesma
+   tupla de células para cada cargo de `MatrizGHE.cargos` — herança pura, ancorada em R-GHE-01
+   `[VALIDADO]` ("todas as funções dentro de um mesmo GHE recebem matriz idêntica") e em
+   D-ARQ-21 (o agrupamento em GHE é canônico). GHE com `cargos == ()` emite bloco com
+   `linhas == ()` — nunca inventa placeholder.
+3. **Ordem de exibição é dado cravado no vocabulário, não literal solto no emissor.** Decisão do
+   Arquiteto (EMENDA 1 a 003.EO): a inversão medida em 2 GHEs administrativos não é replicada —
+   ordem de exames dentro da célula **não é conduta clínica** (nenhuma R-\*/NR a prescreve; o
+   que a revisão de saída valida são os três invariantes de D-ARQ-22 Parte B: quais exames,
+   quais momentos, qual periodicidade — não a ordem deles). Sob a hipótese "ruído de digitação"
+   do gabarito, replicar a inversão reproduziria um artefato de edição; sob "padrão
+   administrativo", o custo de não replicar é diferença cosmética **visível por construção**
+   (a coordenadora vê e corrige em segundos) — o oposto do erro silencioso que D-ARQ-22 combate.
+   A alternativa rejeitada — ordem como função do perfil do cargo — inventaria um eixo de dado
+   sobre 2 observações do mesmo documento (viola D-ARQ-06, mesmo padrão do precedente
+   R-PSY-02 que esperou o 2º PGR do acervo). Materializada como `ordem_exibicao: int` opcional
+   em `agente_medico/protocolo/vocabulario/exames.yaml`, ao lado de `nome_exibicao` — mesma
+   casa, mesma natureza de dado de apresentação; só os slugs medidos na sequência majoritária
+   (17/19 GHEs) o carregam, os demais saem depois em ordem alfabética de slug (fallback do
+   emissor, D-ARQ-67: guardado por teste de unicidade computado do yaml + teste de que o
+   fallback nunca usa sentinela que suba o exame sem ordem para o topo).
+4. **Mapa `Momento→rótulo` do escritório é literal guardado por teste computado do enum**
+   (D-ARQ-67, precedente DH-003EM-01): `test_mapa_momentos_cobre_todos_os_membros_do_enum`
+   computa `set(Momento)` e afirma cobertura total — `Momento` novo quebra o teste, não some
+   da célula em silêncio.
+5. **Cabeçalho/rodapé são parâmetro do emissor, nunca derivados de `MatrizGHE`/`Resultado`.**
+   Medição da fatia 0: nenhum tipo do motor carrega razão social, nome de obra ou tipo de
+   documento (Obra Nova/Atualização/Adendo/Funções Iniciais). Isto é lacuna real, não dívida a
+   fechar aqui — mesma classe de seam humano de D-ARQ-53 P2 (confirmação-RT); registrada como
+   DT-003EO-01, não-bloqueante.
+6. **Sanitização de controle na renderização, nunca no dado.** Cargo/nome-de-GHE verbatim do
+   PGR pode carregar bytes NUL (glifo de CBO quebrado, mesma origem de DT-003DR-01/DH-003EG-01
+   — medido no Fascino, 19/19 GHEs). `documento_matriz.py` sanitiza controle ASCII só na
+   formatação de célula/cargo/título — `MatrizGHE.cargos` permanece verbatim, é evidência,
+   como DH-003EG-01 já prescrevia como correção candidata.
+
+**Fronteiras (não confundir).**
+
+* D-ARQ-72 — render de diagnóstico (markdown, rastreabilidade completa, consumida pela revisão
+  regra-a-regra). D-ARQ-73 é o documento limpo que a médica assina — a rastreabilidade fica
+  DE FORA por decisão do Arquiteto (§S2.4 do `docs/PLANO_V1.md`): misturar atrapalha a
+  validação em vez de ajudar. Compartilham a postura apresentação-pura, D-ARQ-54 P1, não o
+  artefato nem o público.
+* D-ARQ-54 — confirmação de entrada (envelope + FDS); esta é emissão de saída.
+* D-ARQ-21/R-GHE-01 — a expansão GHE→cargo CONSOME a garantia (matriz idêntica por GHE); não a
+  recomputa nem a reinterpreta.
+* Escopo desta D-ARQ: HTML + DOCX no formato do escritório. App de upload (S3 do
+  `docs/PLANO_V1.md`) e hospedagem (S0) são fatias futuras, fora daqui.
+
+**Consequência.** Achado de granularidade (fora do previsto, medido na fatia 4 contra o
+Fascino real): `GHEPGR.cargos` chega do parser da família Consciente
+(`parser_familia_consciente.py`, D-ARQ-65 fatia 1) como UM elemento por GHE — a linha inteira
+da coluna Cargo/Função, verbatim, não uma lista de cargos individuais (decisão já documentada
+no código: "separação fina de CBO/cargo individual não é desta fatia"). A expansão GHE→cargo
+desta D-ARQ está correta para o dado que recebe; com um único elemento, produz uma única linha
+— a forma visual do gabarito (uma linha por cargo) só se realiza quando o parser da família
+entregar cargos separados. Registrado como DT-003EO-04, não-bloqueante, candidato natural da
+fatia 2 do roteamento de D-ARQ-65 (que já precisa tocar o parser). Nenhuma regra clínica criada
+ou alterada nesta D-ARQ.
+
+**Base.** Sessão 003.EO + EMENDA 1 (01/08/2026). Fatia 0 (medição, bloqueou fatia 2 original);
+EMENDA 1 do Arquiteto resolveu ordem_exibicao e corrigiu a medição de contagem de cargos do
+prompt original (41 linhas reais, não 37 — causa nomeada no parser do Arquiteto, não no Code).
+Detalhe em HISTORICO 003.EO.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -2958,3 +3044,4 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 | v159 | 30/07/2026 | Sessão 003.EJ (IMPLEMENTAÇÃO + MEDIÇÃO): **D-ARQ-70 CRIADA** — aliases Tier 1-C de vibração (VMB/VCI + grafias de corpus mão-braço) em `agentes.yaml`, índice termo→slug 106→112 (medido, zero colisão, 4 pares fuzzy inalterados); `_formatar_pendencia` (`scripts/medicao_pgr.py`) passa a imprimir `ghe_id`. Medição Fascino confirma 6 das 8 previsões do Arquiteto; 2 divergem e viram DT-003EJ-02 (GHE-16 PARCIAL→VÁLIDA: pendência `predicado_ausente` de R-AUD-02 some porque a perna e(ruido,ototoxico,vibracao_qualquer) deixa de ser Ausente quando vibracao_qualquer resolve True — único dos 9 GHEs com VMB que também é ototóxico). DT-003EJ-01 aberta (poeira de madeira, GHE-08). Suíte e mypy do fechamento: [A MEDIR]. |
 | v160 | 31/07/2026 | Sessão 003.EK (FECHAMENTO): **D-ARQ-71 CRIADA** — perna `Ausente` absorvida por `ou` verdadeiro (curto-circuito de `avaliar`) gera pendência não-bloqueante `perna_ausente_absorvida` anexada à linha via passada de diagnóstico separada que atravessa predicado composto nomeado (`pernas_ausentes_absorvidas`); tri-estado não se move (`tem_anexada` conta só bloqueante). Resolve DT-003EJ-02 e faceta (b) de DH-003EJ-01. Medição Fascino: 2 pendências, ambas GHE-16, ancoradas em `audiometria`; status 3 VÁLIDA / 15 PARCIAL / 1 BLOQUEADA inalterado. Suíte 1001→1013→1019 passed, 6 skipped; `mypy --strict` delta-zero, 34 arquivos. Commits `4f5c91f`, `cd39cb8`, `823d467`, `1894602`; merge `54637e4` (PR #275). |
 | v161 | 31/07/2026 | Sessão 003.EM (FECHAMENTO): **D-ARQ-72 CRIADA** — apresentação-de-saída da matriz (`renderizar_matriz`, `agente_medico/superficie/apresentacao_matriz.py`) é superfície própria, apresentação-pura herdando D-ARQ-54 P1 (lógica-de-domínio zero); extraída byte-idêntica de `scripts/medicao_pgr.py` (7 testes existentes inalterados); `Motivo.status_regra` populado de `regra.get("status")` fecha D-ARQ-22 Parte B no eixo que DH-003EI-01 faceta 2 registrava descumprido; ordem de leitura `INTERPRETADO`→`DERIVADO` materializa o bloco "inspecionar primeiro". Fecha faceta 2 de DH-003EI-01 (§11 PROTOCOLO); abre DH-003EM-01 (literal `_STATUS_INSPECIONAR_PRIMEIRO` sem teste computado, classe D-ARQ-67) e DH-003EM-02 (bloco nunca exercitado no nível `INTERPRETADO` no Fascino). Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EM. |
+| v162 | 01/08/2026 | Sessão 003.EO + EMENDA 1 (FECHAMENTO): **D-ARQ-73 CRIADA** — emissor de saída no formato do escritório (`agente_medico/superficie/documento_matriz.py`): `DocumentoMatriz` única + `renderizar_html`/`renderizar_docx`; expansão GHE→cargo ancorada em R-GHE-01/D-ARQ-21; ordem de exibição dos exames cravada como `ordem_exibicao` opcional em `exames.yaml` (decisão do Arquiteto na EMENDA 1, após medição achar ordem não-constante entre GHEs — bloqueador nomeado da fatia 0); cabeçalho/rodapé seam humano (DT-003EO-01); sanitização de controle (NUL) só na renderização (DH-003EG-01). `MatrizGHE` ganha `nome_ghe`/`cargos` aditivos (fatia 1). Medição fatia 4 contra Fascino real: tabela da EMENDA 1 confirmada exatamente (12/19 GHEs idênticos, 4 células de superemissão, 10 de subemissão); achados novos confirmados (RX 12M×24M em 14 GHEs, clínico 6M×12M em GHE-09/17 → DT-003EO-03); achado fora do previsto: `GHEPGR.cargos` chega como 1 string por GHE (D-ARQ-65 fatia 1, já documentado no parser) → DT-003EO-04. Grafia Glicemia/RX ficou indecisa (D-ARQ-06) → DT-003EO-02, yaml intocado. `docs/PLANO_V1.md` migrado da pasta do Cowork (pendência de versionamento do próprio arquivo). Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EO. |

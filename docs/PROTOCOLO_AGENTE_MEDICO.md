@@ -1744,6 +1744,68 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 
 **Status:** ABERTA. Não-bloqueante.
 
+### DT-003EO-01 — Empresa/obra/tipo-de-documento não têm casa no modelo do motor `[ABERTA — não-bloqueante]`
+
+**Origem:** 003.EO, fatia 2 (D-ARQ-73).
+
+**Situação.** Nenhum tipo do motor (`PGR`, `GHEPGR`, `EnvelopeVerbatim`, `EnvelopeConfirmado`, `MatrizGHE`, `Resultado`) carrega razão social, nome de obra ou tipo de documento (Obra Nova/Atualização/Adendo/Funções Iniciais) — dado presente no cabeçalho de todo `matrizes_originais/*.doc(x)` medido. `CabecalhoDocumento` (`documento_matriz.py`) recebe esses campos por parâmetro do emissor, sem confirmação-RT nem persistência — irmã de DT-003BV-01 (validade) e da mesma classe de seam humano de D-ARQ-53 P2.
+
+**Consequência.** Quem chama `montar_documento` hoje (harness de medição, futuro app S3) precisa preencher o cabeçalho manualmente por PGR. Não bloqueia o emissor — é lacuna de modelo, não de apresentação.
+
+**Status:** ABERTA. Não-bloqueante.
+
+### DT-003EO-02 — Grafia de `Glicemia`/`RX Tórax` no vocabulário: indecisa, não resolvida `[ABERTA — indeciso, D-ARQ-06]`
+
+**Origem:** 003.EO, fatia 0 (medição 0b).
+
+**Situação.** Medido por CRM (Patrícia CRM-GO 14.949; Carolini CRM-GO 14.864) em ~30 documentos de `matrizes_originais/`: `Glicemia de Jejum` × `Glicemia em Jejum` e `RX Tórax` × `RX de Tórax` **convivem dentro do mesmo médico e, em vários casos, dentro do mesmo documento** (`CONSCIENTE RESERVA 0028`, `CMO VARANDAS BUENO`, `SECONCI GOIÁS`, `GPL INCORPORAÇÃO R78` trazem as duas grafias no mesmo arquivo). Não há corte limpo por médica que decida a grafia dominante — parece copy-paste de template ao longo do tempo, não convenção pessoal.
+
+**Decisão (D-ARQ-06 aplicado):** yaml não tocado. `nome_exibicao` de `glicemia` e `rx_torax_oit` permanecem como estavam antes de 003.EO.
+
+**O que reabriria isto.** Uma amostra maior e mais recente (pós-2026) com corte temporal claro, ou confirmação direta da médica sobre qual grafia é a atual.
+
+**Status:** ABERTA. Não-bloqueante.
+
+### DT-003EO-03 — Clínico semestral de R-CLI-02/R-CLI-03 sem alcance em produção nos GHEs com manganês (serralheiro/armador) `[ABERTA — não-bloqueante]`
+
+**Origem:** 003.EO EMENDA 1, fatia 4 — medição confirmada contra o Fascino real.
+
+**Situação.** O gabarito Fascino prescreve `Exame Clínico` semestral (6M) para GHE-09 (Armador) e GHE-17 (Serralheiro) — R-CLI-03 `[VALIDADO]` (manganês fora do Anexo I dispara clínico semestral) e possivelmente R-CLI-02. O motor emite 12M (default R-CLI-01) nos dois GHEs, medido nesta sessão. Mesma raiz de DT-003EI-01: o pacote clínico serralheiro/armador (`R-PKG-SOLD`/`R-PKG-ARMADOR`) não está materializado em `regras.yaml` — o motor nunca resolve manganês para esses GHEs, logo R-CLI-03 nunca dispara.
+
+**Não materializado nesta sessão** — 003.EO não toca conduta clínica, por cláusula fixa do prompt. Registro do achado, não correção.
+
+**Manganês não tem slug em `exames.yaml` — `R-BIO-03` `[VALIDADO]` não é materializável enquanto ele não existir** `[VERIFICADO — grep em `regras.yaml` e `exames.yaml` @ árvore de trabalho, 003.EO EMENDA 3]`. `manganes` não aparece em `regras.yaml` em nenhuma forma (nem `id:`, nem `emite`, nem `quando`), e não há slug de exame para "Manganês no sangue"/"Manganês sanguíneo" em `exames.yaml` (existe só como agente em `agentes.yaml`). R-BIO-03 (NR-15: qualquer exposição confirmada a Mn → manganês sanguíneo semestral em adm/per/MR, regra do protocolo desde a v2) **nunca foi materializada, e não é materializável enquanto o exame não existir no vocabulário** — mesma classe de achado de 003.EH sobre `R-RX-01-sem`. Popular o slug é pré-requisito de qualquer materialização do pacote Mn/serralheiro-armador, antes mesmo de `R-PKG-SOLD`/`R-PKG-ARMADOR` entrarem em `regras.yaml`.
+
+**Status:** ABERTA. Não-bloqueante. Resolve-se junto com DT-003EI-01 (materializar o pacote Mn — o slug de manganês é a peça que falta primeiro).
+
+### DT-003EO-04 — `GHEPGR.cargos` chega como 1 string por GHE do parser da família Consciente; a expansão GHE→cargo de D-ARQ-73 não separa cargos reais `[ABERTA — não-bloqueante (D-ARQ-08); o S2 não fecha sem ela]`
+
+**Origem:** 003.EO, fatia 4 — medição contra o Fascino real (achado fora do previsto pela EMENDA 1); quantificado nas EMENDAs 3 e 4.
+
+**Situação — duas facetas de gravidade diferente**, ambas do mesmo `_extrair_cargos_da_linha` (`agente_medico/motor/parser_familia_consciente.py:133`, docstring atualizado nesta sessão):
+
+- **(a) Concatenação — cosmética.** `GHEPGR.cargos` chega como tupla de UM elemento por GHE, a linha inteira da coluna Cargo/Função verbatim (ex.: `"Auxiliar de Engenharia \x003121\x0005\x00, Estagiário de Engenharia \x004110\x0010\x00, ..."`, CBO colado ao nome com NUL embutido), delimitador inconsistente entre vírgula (maioria) e ponto-e-vírgula (GHE-07). Os cargos estão todos lá, numa string só; o documento sai com uma linha em vez de N. Feio, recuperável, visível.
+- **(b) Perda por quebra de linha — silenciosa, a faceta grave.** `_extrair_cargos_da_linha` só captura a linha física do próprio rótulo "Cargo / Função"; cargo cuja lista continua na linha física seguinte da tabela **não chega a `GHEPGR` de jeito nenhum** — por instrução explícita da sessão 003.DZ (escopo declarado, não bug). Um cargo perdido é um trabalhador sem matriz de exames, e o documento sai sem sinal de que ele existia — erro silencioso plausível, a classe exata que D-ARQ-22 combate, invisível justamente porque o documento parece completo.
+
+**Medição nominal (003.EO EMENDA 3, cruzamento contra os 41 cargos do gabarito, read-only):** **35 de 41 cargos sobrevivem (85%); 6 são perdidos pela faceta (b), concentrados em 2 de 19 GHEs.** Os outros 17 GHEs preservam 100% dos cargos.
+
+| GHE | cargos do gabarito | sobrevivem | perdidos |
+|---|---|---|---|
+| GHE-03 | 8 | 4 | Encarregado de Pintor; Encarregado de Carpinteiro; Supervisor de Instalações Elétricas; Auxiliar de Obra |
+| GHE-06 | 5 | 3 | Aprendiz Administrativo de Obra; Assistente Administrativo de Obras |
+
+GHE-03 é o caso originalmente medido em 003.DZ. **GHE-06 é um 2º caso, não citado na medição original** — o limite era mais amplo do que o registro anterior indicava (docstring corrigido nesta sessão, commit `d826f46`).
+
+**Consequência visível agora.** A expansão GHE→cargo de D-ARQ-73 (`montar_documento`) está correta para o dado que recebe — com 1 elemento (ou com elemento faltando por (b)), produz exatamente isso. Mas esta é a primeira sessão com emissor de documento real, e as duas facetas ficam visíveis pela primeira vez: o HTML/DOCX do Fascino sai com uma linha por GHE em vez de uma por cargo (a), e 6 cargos reais do gabarito simplesmente não aparecem em lugar nenhum do documento (b).
+
+**Decisão (EMENDA 4 do Arquiteto): fecha em `003.EP`, não nesta sessão.** Três razões: (1) recuperar a linha física seguinte reverte escopo declarado por outra sessão (003.DZ) — decisão de Arquiteto com D-ARQ próprio, não patch de fim de sessão; (2) o separador não é decidível sem desenho — delimitador inconsistente + CBO colado ao nome com NUL embutido (`Encarregado de Elétrica 99501\x0005\x00`) fazem um split ingênuo por vírgula produzir cargo fantasma a partir de código CBO, dano pior que o atual (hoje faltam cargos; ali sobrariam cargos inexistentes); (3) uma coisa por vez — 003.EO já tem 12 testes, 3 arquivos novos, uma D-ARQ e quatro DTs. `003.EP` = duas peças: recuperação de linha física (exige D-ARQ que reveja o escopo de 003.DZ) + separação cargo/CBO (exige decidir separador, CBO e nome).
+
+**Caminho avaliado e rejeitado nesta sessão:** emitir `Pendencia` não-bloqueante ("lista de cargos pode estar truncada"), no molde de D-ARQ-71, tornando o erro visível sem consertá-lo. Rejeitado porque a **detecção é o problema em aberto, não a pendência**: o parser não sabe que truncou. Saber exigiria heurística de continuação de linha (frágil) ou uma contagem de cargos declarada que o PGR não fornece — o campo que existe é "Quantidade de Funcionários expostos neste GHE", que conta pessoas, não cargos. `003.EP` reavalia este caminho com o desenho em mãos, não do zero.
+
+**Candidato natural:** fatia 2 do roteamento de D-ARQ-65 (que já precisa tocar `parser_familia_consciente.py`).
+
+**Status:** ABERTA. Não-bloqueante para o motor/merge (D-ARQ-08); **o marco S2 não fecha sem ela** — ver PLANO_V1.md.
+
 ---
 
 ## 11. PONTOS VALIDADOS NA SEGUNDA RODADA (17/05/2026)
@@ -1850,3 +1912,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v81 | 31/07/2026 | Sessão 003.EK (FECHAMENTO — docs): **DT-003EJ-02 RESOLVIDA** (§11) por D-ARQ-71 — correção sem apagar "a informação já está disponível no ponto da avaliação": vale só para a perna avaliada antes do primeiro `True` do `ou`, registro do erro preservado (D-ARQ-06). **DH-003EJ-01 RESOLVIDA** (§11) — faceta (b) fechada pela 8ª coluna do relatório (commit `823d467`). Nota aditiva em DT-003EG-01 (§11) — segue ABERTA, mas o eixo ganhou instrumento (coluna nova + pendência de perna absorvida tornam a causa visível). Nenhuma R-* criada ou alterada. |
 | v82 | 31/07/2026 | Sessão 003.EM (FECHAMENTO — docs): **DH-003EI-01 PARCIALMENTE RESOLVIDA** (§11) — faceta 2 (campo `status` não alcançava `ExameEmitido`/`Motivo`) RESOLVIDA por D-ARQ-72 (`Motivo.status_regra` populado de `regra.get("status")`, renderizado por exame); faceta 1 (enum não validado) segue ABERTA, medido 65 regras (`VALIDADO` 58 / `INTERPRETADO` 5 / `DERIVADO` 1 / `DEPRECATED` 1). **DH-003EM-01 CRIADA** (§11, achado da revisão do Arquiteto) — `_STATUS_INSPECIONAR_PRIMEIRO` em `superficie/apresentacao_matriz.py:13` é literal de vocabulário digitado em código sem teste computado do dado (classe D-ARQ-67), ABERTA. **DH-003EM-02 CRIADA** (§11) — bloco "inspecionar primeiro" nunca exercitado no nível `INTERPRETADO` no Fascino (0 ocorrências em 19 GHEs, apesar de 5 regras `INTERPRETADO` existirem), ABERTA, não é defeito. **D-ARQ-72 CRIADA** (DECISOES v161, 72 decisões) — apresentação-de-saída da matriz extraída para `superficie/apresentacao_matriz.py`, apresentação-pura herdando D-ARQ-54 P1; status de validação da regra atravessa até `Motivo`. Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EM. |
 | v83 | 01/08/2026 | Sessão 003.EN (CONHECIMENTO → IMPLEMENTAÇÃO → MEDIÇÃO): **R-PSY-02 CRIADA** (§5.7) — Avaliação Psicossocial + Av. Médica de Saúde Mental, incondicional via `todo_trabalhador` (D-ARQ-66), 12M em `[adm, per, MR]`; base normativa NR-01 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 (Portaria MTE 1.419/2024, vigência 26/05/2026 pela Portaria MTE 765/2025) — a norma obriga inventariar/gerenciar o FRPRT, não prescreve exame; conduta `[DERIVADO]` do corpus (6 matrizes pós-vigência, 5 clientes, 2 médicas, 284 cargos, 99% de cobertura, contra ~0% em 13 matrizes pré-vigência). **R-PSY-01 marcada `[DEPRECATED — sucedida por R-PSY-02]`**, corpo preservado. **DT-003EB-01 classe (4) FECHADA** — gatilho "2º PGR atualizado no acervo" satisfeito e medido; classes (2) e (3) seguem ABERTAS. Slugs `avaliacao_psicossocial`/`avaliacao_saude_mental` novos em `exames.yaml`. Nova instância de DH-003EC-01(b) registrada (§11) — citação "R-PSY-01 (DEPRECATED)" na `base_normativa` de R-PSY-02 não infla o painel, verificado por script. Medição Fascino (`rodar-offline`, `relatorios/003en_fascino_rodar.md`, gitignored): linhas de exame 133→171 (+2×19 GHEs), status 3 VÁLIDA/15 PARCIAL/1 BLOQUEADA inalterado, GHE-06/GHE-19 passam a receber os 2 exames sem mudar de status, pendências 154 inalterado, bloco "inspecionar primeiro" não-vazio 14/19→19/19 GHEs, status por motivo VALIDADO 130 inalterado/DERIVADO 14→52. Painel: regras 21/42→22/42 pelo instrumento (20/42→21/42 pela intenção). Suíte 1025→1027 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Detalhe em HISTORICO 003.EN. |
+| v84 | 01/08/2026 | Sessão 003.EO + EMENDAs 1-4 (IMPLEMENTAÇÃO + MEDIÇÃO): emissor de saída no formato do escritório — `agente_medico/superficie/documento_matriz.py` (D-ARQ-73, DECISOES v162), `MatrizGHE.nome_ghe`/`cargos` aditivos, `ordem_exibicao` cravado em `exames.yaml` (decisão do Arquiteto após a fatia 0 medir que a ordem de exame não é constante entre GHEs — bloqueador nomeado, resolvido na EMENDA 1). Medição contra o Fascino real confirma exatamente a tabela corrigida da EMENDA 1 (12/19 GHEs idênticos; 4 células de superemissão GHE-10/16; 10 de subemissão GHE-06/08/09/17/19). **DT-003EO-01 CRIADA** (cabeçalho/rodapé sem casa no modelo). **DT-003EO-02 CRIADA** (grafia Glicemia/RX indecisa, D-ARQ-06, yaml intocado). **DT-003EO-03 CRIADA** (clínico semestral do pacote Mn sem alcance, confirma raiz de DT-003EI-01; **R-BIO-03 `[VALIDADO]` verificado como não-materializável** — manganês sem slug em `exames.yaml`, `grep` em `regras.yaml` = zero em qualquer forma). **DT-003EO-04 CRIADA e refinada em duas facetas** (EMENDA 3: `GHEPGR.cargos` do parser da família Consciente, `parser_familia_consciente.py`/D-ARQ-65 fatia 1 — (a) concatenação, cosmética; (b) perda por quebra de linha física na tabela, silenciosa, medida em **2/19 GHEs e 6/41 cargos** nomeados — GHE-03 4/8, GHE-06 2/5, 2º caso não citado na medição original de 003.DZ, docstring corrigido). **Decisão do Arquiteto (EMENDA 4): fecha em `003.EP`**, não nesta sessão — recuperar linha física reverte escopo declarado de 003.DZ (exige D-ARQ própria); separador não é decidível sem desenho (delimitador vírgula/ponto-e-vírgula inconsistente + CBO colado ao nome com NUL); paliativo via `Pendencia` avaliado e rejeitado (detecção é o problema em aberto, não a pendência). `docs/PLANO_V1.md` migrado da pasta do Cowork e corrigido contra premissa refutada pela própria sessão (linha 44: "motor emite 6/GHE em 16, gabarito 4" — `[A MEDIR]` desde 003.EG — REFUTADO, o eixo estava descrito ao contrário; medido 4 células de superemissão em 2 GHEs, 10 de subemissão). S2 **parcialmente entregue** — emissores HTML/DOCX prontos e testados; expansão GHE→cargo correta para o dado que recebe, sem efeito em produção até DT-003EO-04 fechar. Suíte 1027→1039 passed, 6 skipped (+12 testes); `mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py` limpo, 42 arquivos (não comparável ao baseline 34 — o comando desta sessão passou a incluir `superficie/` pela primeira vez, não é crescimento de escopo anterior). Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EO. |
