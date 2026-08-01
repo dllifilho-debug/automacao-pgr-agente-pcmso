@@ -1547,6 +1547,8 @@ mostrava só que `audiometria` saiu, não por qual regra.
 
 **Status:** ABERTA. Não-bloqueante para rodar; candidata de investigação para sessão futura.
 
+**Nota aditiva (003.EK).** Segue ABERTA — nenhuma regra mudou de motivo. Mas o eixo ganhou instrumento: D-ARQ-71 (pendência `perna_ausente_absorvida`) e a 8ª coluna do relatório (DH-003EJ-01 faceta b) tornam a causa visível quando o motivo impresso não é o esperado — a mesma classe de lacuna que esta DT descreve agora aparece na saída em vez de exigir rerun in-process para diagnosticar. Não fecha esta DT: o motivo errado continua saindo, só passou a ser auditável sem instrumentação ad-hoc.
+
 ### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[ABERTA — higiene de instrumento]`
 
 **Origem:** medição `003eg_fascino_rodar.md` (Fascino, commit `5a2d15b`).
@@ -1677,29 +1679,29 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 
 **O que a resolução exige.** Conferir a classificação de carcinogenicidade e de sensibilização da poeira de madeira em fonte primária; decidir se madeira ganha slug próprio com regime próprio ou permanece `vocabulario_ausente` honesto. Não-bloqueante: hoje o motor não emite, que é o comportamento correto sob a derivação acima.
 
-### DT-003EJ-02 — Perna `Ausente` absorvida por `ou` verdadeiro não gera pendência; matriz vai a VÁLIDA com lacuna ambiental real ainda visível em `predicados_avaliados` `[A DECIDIR]`
+### DT-003EJ-02 — Perna `Ausente` absorvida por `ou` verdadeiro não gera pendência; matriz vai a VÁLIDA com lacuna ambiental real ainda visível em `predicados_avaliados` `[RESOLVIDA — D-ARQ-71, 003.EK]`
 
 **Origem:** 003.EJ, medição do Fascino — GHE-16 muda de `PARCIAL` para `VÁLIDA` ao resolver o alias de vibração mão-braço (D-ARQ-70), sem previsão do Arquiteto.
 
-**Situação.** O sinal não se perdeu: `predicados_avaliados` do GHE-16 registra `ruido_acima_acao=AUSENTE` e o relatório o imprime. O que desapareceu foi a Pendencia, e o tri-estado de D-ARQ-31 computa sobre pendências e linhas, não sobre predicados avaliados — por isso a matriz vai a VÁLIDA com lacuna ambiental real registrada dois campos ao lado. O remédio NÃO exige D-ARQ-28 (trilho declarativo regra→pendência) nem mudar a assinatura de `predicados.avaliar`: a informação já está disponível no ponto da avaliação. Exige decidir se "perna Ausente absorvida por um `ou` verdadeiro" gera pendência não-bloqueante — decisão de arquitetura própria, marcada `[A DECIDIR]`, não herdada de D-ARQ-28.
+**Situação.** O sinal não se perdeu: `predicados_avaliados` do GHE-16 registra `ruido_acima_acao=AUSENTE` e o relatório o imprime. O que desapareceu foi a Pendencia, e o tri-estado de D-ARQ-31 computa sobre pendências e linhas, não sobre predicados avaliados — por isso a matriz vai a VÁLIDA com lacuna ambiental real registrada dois campos ao lado. O remédio NÃO exige D-ARQ-28 (trilho declarativo regra→pendência) nem mudar a assinatura de `predicados.avaliar`: a informação já está disponível no ponto da avaliação — mas só parcialmente: correção de 003.EK (`[MEDIDO — leitura de disco]`), a afirmação vale apenas para a perna avaliada ANTES do primeiro `True` no loop do `ou` (o loop descarta `primeiro_ausente_ou` ao retornar). No caso-âncora funciona por acidente de ordem — registro do erro preservado por D-ARQ-06 (correção ordem-dependente reprova).
 
 **Família correta:** irmã de DH-003ED-01 faceta `risco_origem` (o avaliador sabe qual perna decidiu e não conta) e de DT-003EG-01 (a linha não aponta para a causa real).
 
 **Caso-âncora:** GHE-16 do Fascino, PARCIAL → VÁLIDA com ruído sem laudo, 003.EJ.
 
-**Status:** `[A DECIDIR]`. Não-bloqueante para rodar — o exame emitido (audiometria via R-AUD-01/R-VIB-02) é o correto; a lacuna é de visibilidade da matriz, não de conduta.
+**Status:** RESOLVIDA em 003.EK por **D-ARQ-71** — passada de diagnóstico separada (`pernas_ausentes_absorvidas`) detecta a perna absorvida sem depender de ordem, gera `Pendencia` não-bloqueante anexada à linha; tri-estado não se move.
 
-### DH-003EJ-01 — O relatório do harness omite informação de pendência: atribuição por GHE e anexação por linha `[PARCIALMENTE RESOLVIDA — 003.EJ; faceta (b) ABERTA]`
+### DH-003EJ-01 — O relatório do harness omite informação de pendência: atribuição por GHE e anexação por linha `[RESOLVIDA — 003.EK]`
 
 **Origem:** 003.EJ. Duas facetas do mesmo eixo — `scripts/medicao_pgr.py`, `_formatar_pendencia` / `_renderizar_relatorio`.
 
 **Faceta (a) — `ghe_id` não impresso. RESOLVIDA (003.EJ, commit afb8889).** `Pendencia.ghe_id` existe (`tipos.py:284`) e é preenchido (`hidratacao.py:116`), mas o formatador não o imprimia: 159 das 178 pendências de vocabulário saíam na seção global sem identidade de GHE, e atribuí-las exigia reparsear o PDF por fora.
 
-**Faceta (b) — `ExameEmitido.pendencias_anexadas` não impressas. ABERTA.** A tabela de exames tem 7 colunas e nenhuma é a pendência anexada à linha. Consequência medida nesta sessão: GHE-16 aparecia `PARCIAL` sem causa visível no relatório, e diagnosticar a divergência da previsão #5 exigiu rerun in-process contra dois vocabulários. D-ARQ-31 cl.3 anexa a pendência à linha justamente para matar subdimensionamento silencioso (D-ARQ-22) — e o instrumento não a mostra. Correção candidata: coluna de pendências anexadas na tabela, ou linha própria por exame com pendência.
+**Faceta (b) — `ExameEmitido.pendencias_anexadas` não impressas. RESOLVIDA (003.EK, commit `823d467`).** A tabela de exames ganhou 8ª coluna de pendências anexadas. Consequência que motivou a correção: GHE-16 aparecia `PARCIAL` sem causa visível no relatório, e diagnosticar a divergência da previsão #5 exigiu rerun in-process contra dois vocabulários. D-ARQ-31 cl.3 anexa a pendência à linha justamente para matar subdimensionamento silencioso (D-ARQ-22) — o instrumento agora mostra.
 
 **Registro de procedência:** a mensagem do commit `afb8889` rotula a faceta (a) como "DH-003ED-01 faceta de atribuicao". Rótulo impreciso do Arquiteto — DH-003ED-01 trata do gatilho por linha (`riscos_resolvidos`/`predicado`/`risco_origem`), eixo distinto. Não alterar DH-003ED-01; a correção fica registrada aqui.
 
-**Status:** PARCIALMENTE RESOLVIDA. Não-bloqueante. Irmãs: DH-003EC-01, DH-003ED-01, DH-003EG-01 — quarta faceta do mesmo harness.
+**Status:** RESOLVIDA. Irmãs: DH-003EC-01, DH-003ED-01, DH-003EG-01 — quarta faceta do mesmo harness, agora fechada.
 
 ---
 
@@ -1804,3 +1806,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v78 | 28-29/07/2026 | Sessão 003.EI (FECHAMENTO — docs): correção de 4 achados da passada de verificação do Arquiteto. **DH-003EI-02 CRIADA (ABERTA)** (§11) — taxonomia de `categoria` de exame diverge entre D-ARQ-12/validador/dado (achado que a redação da DH-003EI-01 original perdeu ao ser reescrita para o eixo `status`; restaurado em DH própria). Nota de R-RX-01 reescrita (periodicidade da espirometria independe da faixa do RX, mesmo compartilhando o gatilho poeira mineral — coincidência de valor em 24M, não dependência). Nota aditiva em DT-002K-01 (veredito tinta/RX de 002.L-estudo desatualizado sob R-ESP-02, preservado como registro histórico). Docstring de `_pnos` corrigida (`predicados.py`) — único consumidor em runtime é R-ESP-02, R-RX-01-pnos é DEPRECATED. Nenhuma R-* criada/alterada. Detalhe em HISTORICO 003.EI. |
 | v79 | 30/07/2026 | Sessão 003.EJ (IMPLEMENTAÇÃO + MEDIÇÃO): nota de aplicação em R-PGR-05 (mesma ID) — fração declarada sem agente (`Poeira respirável`, `Poeiras Respiráveis/Metálicas`) não permite rotear Quadro 1/2 do Anexo III, D-ARQ-68 não se aplica; medido no Fascino, 14 GHEs, 13 já com sílica. Nota de aplicação em R-VIB-02 (mesma ID) — aliases de D-ARQ-70 destravam a perna mão-braço; efeito medido: 9→0 pendências, GHE-12 ganha audiometria nova, 8 GHEs somam R-VIB-02 como motivo, 132→133 linhas. **DT-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — faceta vibração RESOLVIDA (NR-09 Anexo I 1.1/2.1, VMB/VCI); faceta máquina pesada segue ABERTA. Correção (não-apagamento) em DT-003EC-01 — GHE-08/GHE-09 não são lacuna de vocabulário (Poeira de madeira fora dos Quadros; Poeiras Respiráveis/Metálicas é R-PGR-05). **DT-003EJ-01 CRIADA (ABERTA)** — poeira de madeira agente identificável fora dos dois quadros. **DT-003EJ-02 CRIADA `[A DECIDIR]`** — GHE-16 do Fascino vai PARCIAL→VÁLIDA quando a perna Ausente de R-AUD-02 é absorvida por um `ou` verdadeiro; tri-estado de D-ARQ-31 computa sobre pendências/linhas, não sobre predicados avaliados. Detalhe em HISTORICO 003.EJ. |
 | v80 | 30/07/2026 | Sessão 003.EJ (EMENDA — verificação de aceite pré-push do Arquiteto): **DH-003EJ-01 CRIADA (§11)** — instrumento do harness (`scripts/medicao_pgr.py`) tem duas facetas do mesmo eixo (pendência não atribuída/anexada no relatório): (a) `ghe_id` não impresso, RESOLVIDA (003.EJ, commit `afb8889`); (b) `ExameEmitido.pendencias_anexadas` não impressas na tabela de exames, ABERTA — foi o que exigiu rerun in-process para diagnosticar GHE-16 (DT-003EJ-02). Corrige rótulo impreciso do commit `afb8889` (citava DH-003ED-01, eixo distinto) sem alterar DH-003ED-01. Nenhum código tocado, só docs. |
+| v81 | 31/07/2026 | Sessão 003.EK (FECHAMENTO — docs): **DT-003EJ-02 RESOLVIDA** (§11) por D-ARQ-71 — correção sem apagar "a informação já está disponível no ponto da avaliação": vale só para a perna avaliada antes do primeiro `True` do `ou`, registro do erro preservado (D-ARQ-06). **DH-003EJ-01 RESOLVIDA** (§11) — faceta (b) fechada pela 8ª coluna do relatório (commit `823d467`). Nota aditiva em DT-003EG-01 (§11) — segue ABERTA, mas o eixo ganhou instrumento (coluna nova + pendência de perna absorvida tornam a causa visível). Nenhuma R-* criada ou alterada. |
