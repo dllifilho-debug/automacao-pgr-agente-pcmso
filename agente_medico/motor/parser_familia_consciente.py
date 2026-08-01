@@ -130,25 +130,41 @@ def _eh_linha_rotulo_cargo(linha: _Linha) -> bool:
     )
 
 
-def _extrair_cargos_da_linha(linha: _Linha) -> tuple[str, ...]:
-    """cargos = resto da linha de rótulo "Cargo / Função", VERBATIM, UMA
-    entrada — separação fina de CBO/cargo individual não é desta fatia
-    (D-ARQ-65 fatia 1). LIMITE CONHECIDO: cargo cuja lista dá quebra de
-    linha na tabela (medido originalmente no GHE 03 — "Encarregado"
-    seguido de "de Pintor..." na linha física seguinte) não é recuperado;
-    só a linha física do próprio rótulo é capturada, por instrução
-    explícita da sessão 003.DZ — não um bug, um escopo declarado.
+def _extrair_cargos_da_linha(
+    linhas_bloco: Sequence[_Linha], idx_rotulo: int
+) -> tuple[str, ...]:
+    """cargos = resto da linha de rótulo "Cargo / Função" MAIS as linhas
+    físicas seguintes cuja 1ª palavra cai na banda do valor — célula
+    inteira, ainda UMA entrada (separação fina de CBO/cargo individual é
+    D-ARQ-65 fatia 1 seguinte, 003.EP fatia 2).
 
-    Alcance medido (003.EO, contra o Fascino real, `GHEPGR.cargos` pós-
-    ingestão): **2 de 19 GHEs** perdem cargo por este limite — GHE-03
-    (4 de 8 cargos sobrevivem) e **GHE-06** (3 de 5; 2º caso, não citado
-    na medição original de 003.DZ — o limite era mais amplo do que o
-    registro anterior indicava). No total, **6 dos 41 cargos do gabarito
-    não chegam a `GHEPGR`** — perda silenciosa, não cosmética: o cargo
-    simplesmente não existe a jusante. Ver DT-003EO-04 (nomeia os 6
-    cargos, a rota de fechamento em 003.EP e o paliativo avaliado e
-    rejeitado)."""
-    resto = " ".join(p.text for p in linha.palavras[3:]).strip()
+    Banda do valor = x0 de `palavras[3]` da própria linha de rótulo, com a
+    mesma `_TOLERANCIA_COLUNA_PT` da banda AGENTE/FONTE (calibração por
+    bloco, não constante fixa). Medição 003.EP fatia 0 (`relatorios/
+    003ep_anatomia_cargo.md`, M1/M2, 19/19 blocos do Fascino): onde existe
+    continuação real (2/19 blocos — GHE-03, GHE-06), o desvio contra a
+    banda do valor é 0,0pt exato; a linha que encerra a célula tem x0 na
+    banda do RÓTULO (não na do valor) — por isso o critério de parada é a
+    própria condição do laço (sai da banda do valor), sem ancorar no
+    literal do próximo rótulo (que nunca foi verificado contra o
+    repertório de campos do formulário).
+
+    LIMITE QUE ESTA FATIA FECHA (D-ARQ-65 fatia 1 / DT-003EO-04): antes
+    desta função só lia a linha do próprio rótulo — 6 dos 41 cargos do
+    gabarito (GHE-03: 4; GHE-06: 2) se perdiam por quebra de linha física
+    na tabela (ex.: "Encarregado" no fim do rótulo + "de Pintor..." na
+    continuação). Junção entre linhas é espaço simples (medido)."""
+    linha_rotulo = linhas_bloco[idx_rotulo]
+    palavras_rotulo = linha_rotulo.palavras
+    partes = [p.text for p in palavras_rotulo[3:]]
+    if len(palavras_rotulo) > 3:
+        x0_valor = palavras_rotulo[3].x0
+        for linha in linhas_bloco[idx_rotulo + 1 :]:
+            x0_primeira = linha.palavras[0].x0
+            if abs(x0_primeira - x0_valor) > _TOLERANCIA_COLUNA_PT:
+                break
+            partes.append(linha.texto)
+    resto = " ".join(partes).strip()
     return (resto,) if resto else ()
 
 
@@ -270,9 +286,9 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
     nome = _extrair_titulo_ancora(ancora.texto)
 
     cargos: tuple[str, ...] = ()
-    for linha in linhas_bloco[1:]:
+    for idx_linha, linha in enumerate(linhas_bloco[1:], start=1):
         if _eh_linha_rotulo_cargo(linha):
-            cargos = _extrair_cargos_da_linha(linha)
+            cargos = _extrair_cargos_da_linha(linhas_bloco, idx_linha)
             break
 
     cabecalho = _localizar_cabecalho_tabela(linhas_bloco)

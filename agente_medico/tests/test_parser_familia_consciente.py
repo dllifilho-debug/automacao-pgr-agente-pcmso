@@ -145,6 +145,54 @@ def test_calibracao_por_bloco_acompanha_cabecalho_deslocado() -> None:
 
 
 # ---------------------------------------------------------------------------
+# 003.EP fatia 1 — overflow da célula "Cargo / Função": sintético com DUAS
+# linhas de continuação na banda do valor, seguidas por uma linha na banda
+# do rótulo (simula "Qt. Trabalhadores") e então OUTRA linha de volta na
+# banda do valor (simula continuação de um campo seguinte, ex. "Descrição
+# das Atividades" — medição 003.EP fatia 0 mostrou que essa banda não é
+# exclusiva da célula de cargo). Nunca exercitado nos 19 blocos reais do
+# Fascino (só têm 0 ou 1 linha de overflow) — cobre o item 1 dos "abertos"
+# de 003ep_anatomia_cargo.md.
+# ---------------------------------------------------------------------------
+
+_PAGINA_CARGO_OVERFLOW_DUPLO: tuple[PalavraPDF, ...] = (
+    _p("GHE", 10.0, 10.0),
+    _p("99", 30.0, 10.0),
+    _p("-", 45.0, 10.0),
+    _p("TESTE", 50.0, 10.0),
+    _p("PERIGO", 113.1, 20.0),
+    _p("GRUPO", 57.0, 25.0),
+    _p("FONTE", 177.5, 25.0),
+    _p("AGRAVO", 296.8, 25.0),
+    # rótulo "Cargo / Função" + 1ª palavra do valor (banda do valor = x0=279.2)
+    _p("Cargo", 58.5, 50.0),
+    _p("/", 68.0, 50.0),
+    _p("Função", 72.0, 50.0),
+    _p("PrimeiroCargo", 279.2, 50.0),
+    # continuação 1 — banda do valor, DEVE entrar
+    _p("SegundoCargo", 279.2, 60.0),
+    # continuação 2 — banda do valor, DEVE entrar
+    _p("TerceiroCargo", 279.2, 70.0),
+    # linha na banda do RÓTULO (simula "Qt. Trabalhadores") — encerra a célula
+    _p("Qt.", 58.5, 80.0),
+    _p("Trabalhadores", 68.0, 80.0),
+    _p("05", 120.0, 80.0),
+    # de volta à banda do valor — NÃO deve entrar (já encerrou em cima)
+    _p("NaoDeveEntrar", 279.2, 90.0),
+)
+
+
+def test_celula_cargo_para_ao_voltar_para_banda_do_rotulo() -> None:
+    ghes = parsear_paginas([_PAGINA_CARGO_OVERFLOW_DUPLO])
+    assert len(ghes) == 1
+    (celula,) = ghes[0].cargos
+    assert "PrimeiroCargo" in celula
+    assert "SegundoCargo" in celula
+    assert "TerceiroCargo" in celula
+    assert "NaoDeveEntrar" not in celula
+
+
+# ---------------------------------------------------------------------------
 # Integração (marcador requer_pdfs) — PDF real do Fascino. parsear_arquivo
 # roda pdfplumber.extract_words sobre as 119 páginas do documento (~1min,
 # medido 003.DZ) — fixture de módulo evita repetir o custo por teste.
@@ -154,6 +202,75 @@ def test_calibracao_por_bloco_acompanha_cabecalho_deslocado() -> None:
 @pytest.fixture(scope="module")
 def ghes_fascino() -> tuple[GHEVerbatim, ...]:
     return parsear_arquivo(CAMINHO_PDF_FASCINO)
+
+
+@requer_pdfs
+def test_celula_cargo_captura_overflow_ghe03_real(ghes_fascino: tuple[GHEVerbatim, ...]) -> None:
+    # GHE-03 (003.EP fatia 0, M1/M2): único bloco (com GHE-06) cuja lista de
+    # cargos quebra em 2 linhas físicas na tabela — "Encarregado" no fim do
+    # rótulo, "de Pintor..." na continuação (quebra no MEIO da palavra).
+    supervisao = next(
+        g for g in ghes_fascino if g.nome == "SUPERVISÃO DE ATIVIDADES EM OBRA"
+    )
+    (celula,) = supervisao.cargos
+    assert "Encarregado de Pintor" in celula
+    assert "Auxiliar de Obra" in celula
+
+
+@requer_pdfs
+def test_ghes_sem_overflow_inalterados_real(ghes_fascino: tuple[GHEVerbatim, ...]) -> None:
+    # Os 17 blocos SEM overflow (todos exceto GHE-03/GHE-06, 003.EP fatia 0
+    # M1) mantêm a célula byte-a-byte igual ao baseline pré-fatia-1: só
+    # `palavras[3:]` da própria linha de rótulo, verbatim (\x00 incluso).
+    esperado_por_nome = {
+        "ENGENHARIA": (
+            "Auxiliar de Engenharia \x003121\x0005\x00, Estagiário de "
+            "Engenharia \x004110\x0010\x00, Assistente de Engenharia "
+            "\x003121\x0005\x00, Estagiário de Obra \x004110\x0010\x00"
+        ),
+        "SESMT": (
+            "Técnico de Segurança do Trabalho \x003516\x0005\x00, "
+            "Supervisor de Segurança do Trabalho \x004101\x0005\x00"
+        ),
+        "ALMOXARIFADO": (
+            "Almoxarife \x004141\x0005\x00, Auxiliar de Almoxarifado "
+            "\x004141\x0005\x00, Assistente de Almoxarifado \x004141\x0005\x00, "
+            "Supervisor de Almoxarifado \x004141\x0005\x00"
+        ),
+        "LIMPEZA": "Auxiliar de limpeza e conservação \x005143\x0020\x00",
+        "PRODUÇÃO": (
+            "Pedreiro \x007152\x0010\x00; Ajudante de produção civil "
+            "\x007170\x0020\x00"
+        ),
+        "CARPINTARIA": "Carpinteiro \x007155\x0005\x00",
+        "ARMAÇÃO": "Armador \x007153\x0015\x00",
+        "INSTALAÇÕES HIDRO\x00SANITÁRIAS": (
+            "Encanador \x007241\x0010\x00, Auxiliar de Encanador \x007241\x0010\x00"
+        ),
+        "ELÉTRICA": (
+            "Eletricista \x007156\x0015\x00, Auxiliar de eletricista "
+            "\x007156\x0015\x00"
+        ),
+        "BETONEIRA": "Operador de Betoneiro \x007154\x0005\x00",
+        "SINALIZAÇÃO DE GRUA": "Sinaleiro \x007821\x0045\x00",
+        "OPERAÇÃO DE GRUA": "Operador de grua \x007821\x0010\x00.",
+        "OPERAÇÃO COM ELEVADOR DE CARGA": (
+            "Operador de Elevador de carga \x007822\x0005\x00"
+        ),
+        "PINTURA": "Pintor \x007166\x0010\x00",
+        "SERRALHERIA": "Serralheiro \x007244\x0040\x00",
+        "MONTAGEM": "Montador \x007251\x0005\x00",
+        "VENDAS": (
+            "Recepcionista Demonstradora \x004221\x0005\x00, Recepcionista "
+            "Comercial \x004221\x0005\x00"
+        ),
+    }
+    assert len(esperado_por_nome) == 17
+    for ghe in ghes_fascino:
+        if ghe.nome not in esperado_por_nome:
+            continue
+        (celula,) = ghe.cargos
+        assert celula == esperado_por_nome[ghe.nome], ghe.nome
 
 
 @requer_pdfs
