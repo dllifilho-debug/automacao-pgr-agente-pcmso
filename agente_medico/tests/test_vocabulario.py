@@ -16,6 +16,7 @@ def test_vocabulario_exames_carrega_com_slugs_esperados() -> None:
     p = carregar(PROTOCOLO_DIR)
     assert set(p.vocabulario.exames.keys()) == {
         "exame_clinico",
+        "avaliacao_psicossocial", "avaliacao_saude_mental",
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg",
         "rx_coluna_lombo_sacra", "rx_torax_oit", "espirometria",
         "reticulocitos", "acido_transmuconico",
@@ -46,6 +47,17 @@ def test_todo_exame_tem_nome_exibicao_e_categoria() -> None:
         assert meta.get("categoria") in categorias_validas, (
             f"'{slug}' tem categoria inválida: {meta.get('categoria')}"
         )
+
+
+def test_vocabulario_psicossocial_tem_nome_exibicao_byte_exato() -> None:
+    # Grafia medida no gabarito (271/283 ocorrências pós-vigência NR-01 26/05/2026,
+    # 003.EN). Reversão: alterar qualquer nome_exibicao ou remover uma das chaves.
+    p = carregar(PROTOCOLO_DIR)
+    exames = p.vocabulario.exames
+    assert "avaliacao_psicossocial" in exames
+    assert exames["avaliacao_psicossocial"]["nome_exibicao"] == "Avaliação Psicossocial"
+    assert "avaliacao_saude_mental" in exames
+    assert exames["avaliacao_saude_mental"]["nome_exibicao"] == "Av. Médica de Saúde Mental"
 
 
 def test_regra_ativcrit_referencia_apenas_slugs_validos() -> None:

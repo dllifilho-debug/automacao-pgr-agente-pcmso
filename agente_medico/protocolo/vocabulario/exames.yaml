@@ -12,6 +12,16 @@ exames:
     categoria: ocupacional
     fonte_matriz: "R-CLI-01 — piso universal"
 
+  avaliacao_psicossocial:
+    nome_exibicao: "Avaliação Psicossocial"
+    categoria: ocupacional
+    fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
+
+  avaliacao_saude_mental:
+    nome_exibicao: "Av. Médica de Saúde Mental"
+    categoria: ocupacional
+    fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
+
   hemograma:
     nome_exibicao: "Hemograma"
     categoria: laboratorial

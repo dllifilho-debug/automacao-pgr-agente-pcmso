@@ -238,9 +238,12 @@ def test_integracao_end_to_end() -> None:
     assert resultado.status == "OK"
     assert len(resultado.matrizes) == 1
     matriz = resultado.matrizes[0]
-    assert len(matriz.linhas) == 6
+    assert len(matriz.linhas) == 8
     nomes = {e.exame.strip().lower() for e in matriz.linhas}
-    assert nomes == {"hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg", "exame_clinico"}
+    assert nomes == {
+        "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg", "exame_clinico",
+        "avaliacao_psicossocial", "avaliacao_saude_mental",
+    }
     for e in matriz.linhas:
         assert e.periodicidade_meses == 12
 
@@ -451,3 +454,27 @@ def test_rcli01_um_risco_determinado_mais_um_bloqueado_segue_parcial() -> None:
     assert "exame_clinico" in nomes
     assert len(linhas_de_risco(matriz.linhas)) >= 1
     assert matriz.status == "PARCIAL"
+
+
+# ---------------------------------------------------------------------------
+# R-PSY-02 — psicossocial incondicional (003.EN). Sucede R-PSY-01 (DEPRECATED,
+# condicionada). NR-01 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3. Usa o protocolo real
+# porque R-PSY-02 é a regra sob teste, não um fixture sintético.
+# ---------------------------------------------------------------------------
+
+_MOMENTOS_PSY = {Momento.ADM, Momento.PER, Momento.MR}
+
+
+def test_rpsy02_emite_psicossocial_e_saude_mental_12m_sem_risco() -> None:
+    # GHE sem nenhum risco: R-PSY-02 é incondicional, deve emitir mesmo assim.
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=())
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    psicossocial = next(ln for ln in matriz.linhas if ln.exame == "avaliacao_psicossocial")
+    saude_mental = next(ln for ln in matriz.linhas if ln.exame == "avaliacao_saude_mental")
+    for linha in (psicossocial, saude_mental):
+        assert linha.periodicidade_meses == 12
+        assert linha.momentos == _MOMENTOS_PSY
+        assert any(m.regra_id == "R-PSY-02" for m in linha.motivos)

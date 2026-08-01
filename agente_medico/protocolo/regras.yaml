@@ -10,6 +10,23 @@ regras:
       08/07/26, 19/19 GHEs em ADM/PER/MRO/RET/DEM]"
     status: VALIDADO
 
+  - id: R-PSY-02
+    quando: todo_trabalhador
+    emite:
+      - {exame: avaliacao_psicossocial,  periodicidade_meses: 12, momentos: [adm, per, MR]}
+      - {exame: avaliacao_saude_mental,  periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "NR-01 itens 1.5.3.1.4, 1.5.3.2.1 e 1.5.4.4.5.3 (redação da
+      Portaria MTE 1.419/2024; vigência 26/05/2026 pela Portaria MTE 765/2025) —
+      a norma obriga inventariar e gerenciar o fator de risco psicossocial (FRPRT),
+      mas NÃO prescreve exame. A conduta é [DERIVADO — corpus de 6 matrizes
+      pós-vigência, 5 clientes, 2 médicas, 284 cargos, 99% de cobertura; grupo de
+      controle de 13 matrizes pré-vigência em ~0%]. Incondicional (não condicionada
+      à declaração no PGR): medido PGR sem FRPRT cuja matriz emite mesmo assim
+      (Ricco 2026 Adm) — silêncio documental não desobriga, postura D-ARQ-68.
+      Sucede R-PSY-01 (DEPRECATED): mudança de escopo de aplicação
+      (condicionada → incondicional) exige ID nova."
+    status: DERIVADO
+
   - id: R-PKG-ATIVCRIT
     quando: atividade_critica
     emite:

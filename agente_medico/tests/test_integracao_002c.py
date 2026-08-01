@@ -73,12 +73,15 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     exames_final = stage_8_consolidacao(exames)
 
     nomes = {e.exame.strip().lower() for e in exames_final}
-    # Superconjunto, não contagem exata: R-CLI-01 (piso universal, 003.EC) soma
-    # exame_clinico a toda matriz; cravar "6" quebraria na próxima regra incondicional.
+    # Superconjunto, não contagem exata: R-CLI-01 (piso universal, 003.EC) e
+    # R-PSY-02 (psicossocial incondicional, 003.EN) somam exames a toda
+    # matriz; cravar contagem fixa quebraria na próxima regra incondicional.
     assert {"hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg"}.issubset(nomes)
     assert "exame_clinico" in nomes
+    assert {"avaliacao_psicossocial", "avaliacao_saude_mental"}.issubset(nomes)
 
-    exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() != "exame_clinico"]
+    _INCONDICIONAIS = {"exame_clinico", "avaliacao_psicossocial", "avaliacao_saude_mental"}
+    exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() not in _INCONDICIONAIS]
     for e in exames_ativcrit:
         assert e.periodicidade_meses == 12
         assert e.momentos == {Momento.ADM, Momento.PER, Momento.MR}
