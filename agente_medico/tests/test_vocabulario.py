@@ -60,6 +60,21 @@ def test_vocabulario_psicossocial_tem_nome_exibicao_byte_exato() -> None:
     assert exames["avaliacao_saude_mental"]["nome_exibicao"] == "Av. Médica de Saúde Mental"
 
 
+def test_ordem_exibicao_e_unica_entre_exames_que_a_declaram() -> None:
+    # 003.EO EMENDA 1: ordem_exibicao é opcional (nem todo exame do vocabulário
+    # foi medido no gabarito) mas, entre os que declaram, não pode colidir —
+    # colisão quebraria a ordem determinística da célula. Reversão: duplicar
+    # um valor no yaml.
+    p = carregar(PROTOCOLO_DIR)
+    valores = [
+        meta["ordem_exibicao"]
+        for meta in p.vocabulario.exames.values()
+        if "ordem_exibicao" in meta
+    ]
+    assert len(valores) >= 1
+    assert len(valores) == len(set(valores)), f"ordem_exibicao duplicada: {valores}"
+
+
 def test_regra_ativcrit_referencia_apenas_slugs_validos() -> None:
     p = carregar(PROTOCOLO_DIR)
     slugs = set(p.vocabulario.exames.keys())

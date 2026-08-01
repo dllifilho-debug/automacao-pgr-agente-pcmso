@@ -311,6 +311,11 @@ class MatrizGHE:
     # (cache nome→valor populado por avaliar_predicado), serializado para diagnóstico.
     riscos_resolvidos: tuple[str, ...] = ()
     predicados_avaliados: tuple[tuple[str, str], ...] = ()
+    # 003.EO fatia 1: cargos/nome do GHE para expansão GHE→cargo na apresentação
+    # de saída (D-ARQ-73). Aditivos, populados no orquestrador a partir de
+    # ctx.pgr_ghe — MatrizGHE não ganhou lógica nova, só passa o dado adiante.
+    nome_ghe: str = ""
+    cargos: tuple[str, ...] = ()
 
 
 @dataclass

@@ -4,6 +4,9 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
+import pytest
+
+from agente_medico.motor.estagios.consolidacao import ConflitoProtocolo
 from agente_medico.motor.orquestrador import executar
 from agente_medico.motor.protocolo import Protocolo, Vocabulario, carregar
 from agente_medico.motor.tipos import (
@@ -478,3 +481,79 @@ def test_rpsy02_emite_psicossocial_e_saude_mental_12m_sem_risco() -> None:
         assert linha.periodicidade_meses == 12
         assert linha.momentos == _MOMENTOS_PSY
         assert any(m.regra_id == "R-PSY-02" for m in linha.motivos)
+
+
+# ---------------------------------------------------------------------------
+# 003.EO fatia 1 — MatrizGHE ganha nome_ghe/cargos (D-ARQ-73), populados no
+# orquestrador a partir de ctx.pgr_ghe em todos os sítios de construção.
+# ---------------------------------------------------------------------------
+
+
+def test_matriz_ghe_carrega_cargos_do_pgr() -> None:
+    # Reversão que mata: remover `cargos=ctx.pgr_ghe.cargos` (e `nome_ghe=...`)
+    # do ramo `else` (sucesso) do orquestrador -> volta ao default `()`/"" ->
+    # asserção falha.
+    ghe1 = GHEPGR(
+        id="GHE-01",
+        nome="Estrutura de Concreto",
+        cargos=("Carpinteiro", "Ajudante de Carpintaria"),
+        riscos=(_risco("trabalho_altura"),),
+        epis=(),
+        produtos_quimicos=(),
+        psicossocial=False,
+    )
+    ghe2 = GHEPGR(
+        id="GHE-02",
+        nome="Elétrica",
+        cargos=("Eletricista",),
+        riscos=(_risco("trabalho_altura"),),
+        epis=(),
+        produtos_quimicos=(),
+        psicossocial=False,
+    )
+    pgr = _pgr(ghes=(ghe1, ghe2))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+
+    m1 = next(m for m in resultado.matrizes if m.ghe_id == "GHE-01")
+    m2 = next(m for m in resultado.matrizes if m.ghe_id == "GHE-02")
+
+    assert m1.nome_ghe == "Estrutura de Concreto"
+    assert m1.cargos == ("Carpinteiro", "Ajudante de Carpintaria")
+    assert m2.nome_ghe == "Elétrica"
+    assert m2.cargos == ("Eletricista",)
+
+
+def test_matriz_bloqueada_tambem_carrega_cargos(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: remover `cargos=ctx.pgr_ghe.cargos` (e `nome_ghe=...`)
+    # do ramo `except ConflitoProtocolo` do orquestrador -> o teste do ramo
+    # feliz (acima) continua verde e só este cai. Este é o motivo de existir
+    # um 2º teste: o 1º não discrimina o sítio esquecido.
+    #
+    # DT-003EE-01: após D-ARQ-39, `stage_8_consolidacao` não levanta mais
+    # `ConflitoProtocolo` em produção (grep `raise ConflitoProtocolo` = zero
+    # no repo) — o ramo `except` do orquestrador é código morto alcançável só
+    # por injeção controlada. Forçamos aqui via monkeypatch para exercitar o
+    # ramo diretamente; não afirma que o pipeline real o alcança.
+    def _consolidacao_explode(exames: list[Any]) -> list[Any]:
+        raise ConflitoProtocolo("conflito fabricado para teste")
+
+    monkeypatch.setattr(
+        "agente_medico.motor.orquestrador.stage_8_consolidacao", _consolidacao_explode
+    )
+
+    ghe = GHEPGR(
+        id="GHE-09",
+        nome="Armação",
+        cargos=("Armador",),
+        riscos=(_risco("trabalho_altura"),),
+        epis=(),
+        produtos_quimicos=(),
+        psicossocial=False,
+    )
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+
+    matriz = resultado.matrizes[0]
+    assert matriz.status == "BLOQUEADA"
+    assert matriz.nome_ghe == "Armação"
+    assert matriz.cargos == ("Armador",)
