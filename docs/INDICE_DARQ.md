@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v160 · 71 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v161 · 72 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -79,3 +79,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v160 · 71 decisões
 | D-ARQ-69 | Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita |  | 2703 | 2395 |
 | D-ARQ-70 | Alias de corpus medido entra no vocabulário só ancorado em literal normativo, com fonte dupla e teste anti-FP |  | 2726 | 3464 |
 | D-ARQ-71 | Perna `Ausente` absorvida por `ou` verdadeiro gera pendência não-bloqueante anexada à linha; o tri-estado não se move |  | 2746 | 5506 |
+| D-ARQ-72 | Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo` | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003 | 2771 | 2928 |

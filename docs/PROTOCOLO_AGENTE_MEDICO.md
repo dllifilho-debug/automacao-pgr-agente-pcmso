@@ -1645,7 +1645,7 @@ O sinal correto seria pendência NÃO-bloqueante anexada à linha ("faixa pode e
 
 **Status:** ABERTA. Não-bloqueante — nenhuma das duas está materializada em `regras.yaml` `[VERIFICADO — grep do campo id:, 003.EI]`.
 
-### DH-003EI-01 — Campo `status` de `regras.yaml` sem enum validado; convenção do PROTOCOLO diverge do dado real `[ABERTA — higiene de instrumento]`
+### DH-003EI-01 — Campo `status` de `regras.yaml` sem enum validado; convenção do PROTOCOLO diverge do dado real `[PARCIALMENTE RESOLVIDA — 003.EM; faceta 1 (enum não validado) ABERTA]`
 
 **Origem:** 003.EI, ao gravar R-ESP-02 com `status: DERIVADO`.
 
@@ -1653,7 +1653,11 @@ O sinal correto seria pendência NÃO-bloqueante anexada à linha ("faixa pode e
 
 **Faceta 2 — o campo `status` de `regras.yaml` diverge da convenção do PROTOCOLO.** Regras derivadas de texto normativo estão gravadas como `VALIDADO` (`R-RX-01-sem`, `R-BIO-04-*`), e o campo é lido num único ponto (`protocolo.py:64`), apenas para excluir `DEPRECATED` — não alcança `ExameEmitido` nem `Motivo`. Consequência: D-ARQ-22 Parte B ("a saída distingue por exame o status de validação da regra que o gerou") segue descumprida neste eixo, apesar de a Entrega 3 de 003.EG ter materializado `riscos_resolvidos` e `predicado`.
 
-**Status:** ABERTA. Não-bloqueante. Reconciliar exige varrer os 64 status existentes — sessão própria.
+**Resolução da faceta 2 — 003.EM (D-ARQ-72).** `Motivo.status_regra` (`agente_medico/motor/tipos.py`) populado em `agente_medico/motor/estagios/emissao.py` via `regra.get("status")`, e renderizado por exame na coluna "status regra" de `superficie/apresentacao_matriz.py`. `Motivo`/`ExameEmitido` agora carregam o status de validação da regra que gerou a linha — o eixo que esta faceta registrava como descumprido fecha.
+
+**Faceta 1 segue ABERTA.** `status` continua sem enum fechado. Medido em 003.EM: 65 regras em `regras.yaml`, todas com o campo, distribuídas em `VALIDADO` 58 / `INTERPRETADO` 5 / `DERIVADO` 1 / `DEPRECATED` 1.
+
+**Status:** PARCIALMENTE RESOLVIDA. Faceta 1 ABERTA, não-bloqueante. Reconciliar exige varrer os 65 status existentes e fechar o enum — candidata a fechar junto com DH-003EM-01 (mesma sessão, mesmo dado).
 
 ### DH-003EI-02 — Taxonomia de `categoria` de exame diverge entre D-ARQ-12, o validador e o dado `[ABERTA — higiene de dado]`
 
@@ -1702,6 +1706,28 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 **Registro de procedência:** a mensagem do commit `afb8889` rotula a faceta (a) como "DH-003ED-01 faceta de atribuicao". Rótulo impreciso do Arquiteto — DH-003ED-01 trata do gatilho por linha (`riscos_resolvidos`/`predicado`/`risco_origem`), eixo distinto. Não alterar DH-003ED-01; a correção fica registrada aqui.
 
 **Status:** RESOLVIDA. Irmãs: DH-003EC-01, DH-003ED-01, DH-003EG-01 — quarta faceta do mesmo harness, agora fechada.
+
+### DH-003EM-01 — Ordem de leitura da revisão em `apresentacao_matriz.py` é literal de vocabulário digitado em código, sem teste computado do dado `[ABERTA — higiene de instrumento]`
+
+**Origem:** revisão do Arquiteto sobre a fatia 2 de 003.EM (D-ARQ-72).
+
+**Situação.** `_STATUS_INSPECIONAR_PRIMEIRO = ("INTERPRETADO", "DERIVADO")` em `superficie/apresentacao_matriz.py:13` é literal de vocabulário digitado em código, sem teste computado do dado — a classe exata que D-ARQ-67 ("literal de vocabulário em código é contrato verificado por teste computado do dado") existe para impedir.
+
+**Modo de falha nomeado.** Renomear ou acrescentar um valor de `status` em `regras.yaml` (ex.: `DERIVADA`, ou um `INTERPRETADO` virando `INTERPRETADA`) faz o bloco "inspecionar primeiro" esvaziar em silêncio, sem teste vermelho. É supressão silenciosa de exatamente a informação que D-ARQ-22 Parte B quer destacar para a revisão clínica.
+
+**Correção candidata (não implementada nesta sessão).** Teste que computa o conjunto de `status` distintos de `regras.yaml` e afirma que todo valor fora de `{VALIDADO, DEPRECATED}` está coberto por `_STATUS_INSPECIONAR_PRIMEIRO`. Casa com a faceta 1 de DH-003EI-01 — as duas se resolvem na mesma sessão.
+
+**Status:** ABERTA. Não-bloqueante.
+
+### DH-003EM-02 — Bloco "inspecionar primeiro" nunca exercitado no primeiro nível de leitura (`INTERPRETADO`) no acervo real `[ABERTA — higiene de método]`
+
+**Origem:** medição do Fascino, 003.EM.
+
+**Situação.** Medido: `INTERPRETADO` = 0 ocorrências em 19 GHEs, apesar de existirem 5 regras `INTERPRETADO` em `regras.yaml`. O primeiro nível da ordem de leitura de D-ARQ-22 Parte B nunca é exercido neste PGR — o bloco "inspecionar primeiro" só mostra `DERIVADO`, e apenas de `R-ESP-02`.
+
+**Não é defeito** — é medição de que o instrumento não está sendo exercido no caminho que mais importa. Registrado para que a ausência não seja lida como "não há regra interpretada".
+
+**Status:** ABERTA. Não-bloqueante.
 
 ---
 
@@ -1807,3 +1833,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v79 | 30/07/2026 | Sessão 003.EJ (IMPLEMENTAÇÃO + MEDIÇÃO): nota de aplicação em R-PGR-05 (mesma ID) — fração declarada sem agente (`Poeira respirável`, `Poeiras Respiráveis/Metálicas`) não permite rotear Quadro 1/2 do Anexo III, D-ARQ-68 não se aplica; medido no Fascino, 14 GHEs, 13 já com sílica. Nota de aplicação em R-VIB-02 (mesma ID) — aliases de D-ARQ-70 destravam a perna mão-braço; efeito medido: 9→0 pendências, GHE-12 ganha audiometria nova, 8 GHEs somam R-VIB-02 como motivo, 132→133 linhas. **DT-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — faceta vibração RESOLVIDA (NR-09 Anexo I 1.1/2.1, VMB/VCI); faceta máquina pesada segue ABERTA. Correção (não-apagamento) em DT-003EC-01 — GHE-08/GHE-09 não são lacuna de vocabulário (Poeira de madeira fora dos Quadros; Poeiras Respiráveis/Metálicas é R-PGR-05). **DT-003EJ-01 CRIADA (ABERTA)** — poeira de madeira agente identificável fora dos dois quadros. **DT-003EJ-02 CRIADA `[A DECIDIR]`** — GHE-16 do Fascino vai PARCIAL→VÁLIDA quando a perna Ausente de R-AUD-02 é absorvida por um `ou` verdadeiro; tri-estado de D-ARQ-31 computa sobre pendências/linhas, não sobre predicados avaliados. Detalhe em HISTORICO 003.EJ. |
 | v80 | 30/07/2026 | Sessão 003.EJ (EMENDA — verificação de aceite pré-push do Arquiteto): **DH-003EJ-01 CRIADA (§11)** — instrumento do harness (`scripts/medicao_pgr.py`) tem duas facetas do mesmo eixo (pendência não atribuída/anexada no relatório): (a) `ghe_id` não impresso, RESOLVIDA (003.EJ, commit `afb8889`); (b) `ExameEmitido.pendencias_anexadas` não impressas na tabela de exames, ABERTA — foi o que exigiu rerun in-process para diagnosticar GHE-16 (DT-003EJ-02). Corrige rótulo impreciso do commit `afb8889` (citava DH-003ED-01, eixo distinto) sem alterar DH-003ED-01. Nenhum código tocado, só docs. |
 | v81 | 31/07/2026 | Sessão 003.EK (FECHAMENTO — docs): **DT-003EJ-02 RESOLVIDA** (§11) por D-ARQ-71 — correção sem apagar "a informação já está disponível no ponto da avaliação": vale só para a perna avaliada antes do primeiro `True` do `ou`, registro do erro preservado (D-ARQ-06). **DH-003EJ-01 RESOLVIDA** (§11) — faceta (b) fechada pela 8ª coluna do relatório (commit `823d467`). Nota aditiva em DT-003EG-01 (§11) — segue ABERTA, mas o eixo ganhou instrumento (coluna nova + pendência de perna absorvida tornam a causa visível). Nenhuma R-* criada ou alterada. |
+| v82 | 31/07/2026 | Sessão 003.EM (FECHAMENTO — docs): **DH-003EI-01 PARCIALMENTE RESOLVIDA** (§11) — faceta 2 (campo `status` não alcançava `ExameEmitido`/`Motivo`) RESOLVIDA por D-ARQ-72 (`Motivo.status_regra` populado de `regra.get("status")`, renderizado por exame); faceta 1 (enum não validado) segue ABERTA, medido 65 regras (`VALIDADO` 58 / `INTERPRETADO` 5 / `DERIVADO` 1 / `DEPRECATED` 1). **DH-003EM-01 CRIADA** (§11, achado da revisão do Arquiteto) — `_STATUS_INSPECIONAR_PRIMEIRO` em `superficie/apresentacao_matriz.py:13` é literal de vocabulário digitado em código sem teste computado do dado (classe D-ARQ-67), ABERTA. **DH-003EM-02 CRIADA** (§11) — bloco "inspecionar primeiro" nunca exercitado no nível `INTERPRETADO` no Fascino (0 ocorrências em 19 GHEs, apesar de 5 regras `INTERPRETADO` existirem), ABERTA, não é defeito. **D-ARQ-72 CRIADA** (DECISOES v161, 72 decisões) — apresentação-de-saída da matriz extraída para `superficie/apresentacao_matriz.py`, apresentação-pura herdando D-ARQ-54 P1; status de validação da regra atravessa até `Motivo`. Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EM. |

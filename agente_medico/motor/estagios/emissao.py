@@ -91,6 +91,7 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
             predicado=predicado_str,
             risco_origem=None,
             detalhe=f"Emitido por regra {regra['id']}",
+            status_regra=regra.get("status"),
         )
 
         for item in regra["emite"]:

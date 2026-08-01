@@ -262,6 +262,7 @@ class Motivo:
     predicado: str
     risco_origem: Optional[str]
     detalhe: Optional[str]
+    status_regra: Optional[str] = None
 
 
 @dataclass

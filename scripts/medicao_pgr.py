@@ -42,6 +42,7 @@ from agente_medico.motor.revisao_envelope import desserializar_confirmacao
 from agente_medico.motor.tipos import GHEVerbatim, Pendencia, Resultado
 from agente_medico.motor.transcritor_card import TranscritorCard
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
+from agente_medico.superficie.apresentacao_matriz import renderizar_matriz
 
 _RAIZ = Path(__file__).resolve().parent.parent
 
@@ -144,45 +145,7 @@ def _renderizar_relatorio(pdf: Path, resultado: Resultado | None, pendencias: tu
         linhas.append("")
 
     for matriz in resultado.matrizes:
-        linhas.append(f"### GHE `{matriz.ghe_id}` — status matriz: `{matriz.status}`")
-        linhas.append("")
-        if matriz.regime_aplicado is not None:
-            linhas.append(f"- regime_aplicado: {matriz.regime_aplicado}")
-        if matriz.riscos_resolvidos:
-            riscos_fmt = ", ".join(f"`{r}`" for r in matriz.riscos_resolvidos)
-        else:
-            riscos_fmt = "(nenhum)"
-        linhas.append(f"- riscos_resolvidos: {riscos_fmt}")
-        predicados_fmt = "; ".join(f"{nome}={valor}" for nome, valor in matriz.predicados_avaliados)
-        linhas.append(f"- predicados_avaliados: {predicados_fmt}")
-        if matriz.pendencias:
-            linhas.append("- pendências da matriz:")
-            for p in matriz.pendencias:
-                linhas.append("  " + _formatar_pendencia(p).replace("\n", "\n  ").rstrip())
-        linhas.append("")
-        if matriz.linhas:
-            linhas.append("| exame | periodicidade_meses | periodicidade_apos_15a | momentos | motivos (regra_id) | predicado | detalhe | pendências anexadas |")
-            linhas.append("|---|---|---|---|---|---|---|---|")
-            for exame in matriz.linhas:
-                momentos = ", ".join(sorted(m.value for m in exame.momentos))
-                motivos = ", ".join(m.regra_id for m in exame.motivos)
-                predicados = ", ".join(m.predicado for m in exame.motivos)
-                detalhes = ", ".join(m.detalhe for m in exame.motivos if m.detalhe is not None)
-                if exame.pendencias_anexadas:
-                    pendencias_anexadas = ", ".join(
-                        f"{p.tipo} ({p.regra_origem}, {'bloqueante' if p.bloqueante else 'nao-bloqueante'})"
-                        for p in exame.pendencias_anexadas
-                    )
-                else:
-                    pendencias_anexadas = "(nenhuma)"
-                linhas.append(
-                    f"| {exame.exame} | {exame.periodicidade_meses} | "
-                    f"{exame.periodicidade_apos_15a} | {momentos} | {motivos} | "
-                    f"{predicados} | {detalhes} | {pendencias_anexadas} |"
-                )
-        else:
-            linhas.append("(sem exames emitidos)")
-        linhas.append("")
+        linhas.extend(renderizar_matriz(matriz))
 
     return "\n".join(linhas) + "\n"
 

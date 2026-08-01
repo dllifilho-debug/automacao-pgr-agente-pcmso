@@ -110,3 +110,99 @@ def test_renderizar_relatorio_sem_riscos_resolvidos_mostra_nenhum() -> None:
     with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
         relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
     assert "- riscos_resolvidos: (nenhum)" in relatorio
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-72 fatia 2 (003.EM): coluna "status regra" (2a) e bloco
+# "inspecionar primeiro" (2b) — entrega de D-ARQ-22 Parte B na apresentação.
+# ---------------------------------------------------------------------------
+
+
+def _bloco_inspecionar_primeiro(relatorio: str) -> str:
+    inicio = relatorio.index("- inspecionar primeiro:")
+    fim = relatorio.index("\n\n", inicio)
+    return relatorio[inicio:fim]
+
+
+def test_status_regra_interpretado_aparece_na_coluna() -> None:
+    # Reversão: remover a coluna "status regra" do render (2a) —
+    # a sequência "R-RX-02 | INTERPRETADO | fumos_metalicos" some da linha.
+    motivo = Motivo(
+        regra_id="R-RX-02",
+        predicado="fumos_metalicos",
+        risco_origem=None,
+        detalhe="Emitido por regra R-RX-02",
+        status_regra="INTERPRETADO",
+    )
+    exame = ExameEmitido(
+        exame="rx_torax",
+        periodicidade_meses=12,
+        momentos={Momento.ADM},
+        motivos=[motivo],
+    )
+    matriz = MatrizGHE(ghe_id="GHE-20", linhas=[exame], status="VÁLIDA")
+    resultado = Resultado(status="OK", matrizes=[matriz])
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
+    assert "| status regra |" in relatorio
+    assert "R-RX-02 | INTERPRETADO | fumos_metalicos" in relatorio
+
+
+def test_inspecionar_primeiro_lista_interpretado_nao_lista_validado() -> None:
+    # Reversão: remover o bloco "inspecionar primeiro" (2b) do render.
+    motivo_interp = Motivo(
+        regra_id="R-RX-02",
+        predicado="fumos_metalicos",
+        risco_origem=None,
+        detalhe="Emitido por regra R-RX-02",
+        status_regra="INTERPRETADO",
+    )
+    exame_interp = ExameEmitido(
+        exame="rx_torax",
+        periodicidade_meses=12,
+        momentos={Momento.ADM},
+        motivos=[motivo_interp],
+    )
+    motivo_validado = Motivo(
+        regra_id="R-AUD-01",
+        predicado="ruido_acima_acao",
+        risco_origem=None,
+        detalhe="Emitido por regra R-AUD-01",
+        status_regra="VALIDADO",
+    )
+    exame_validado = ExameEmitido(
+        exame="audiometria",
+        periodicidade_meses=12,
+        momentos={Momento.ADM},
+        motivos=[motivo_validado],
+    )
+    matriz = MatrizGHE(ghe_id="GHE-21", linhas=[exame_interp, exame_validado], status="VÁLIDA")
+    resultado = Resultado(status="OK", matrizes=[matriz])
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
+    bloco = _bloco_inspecionar_primeiro(relatorio)
+    assert "rx_torax (INTERPRETADO)" in bloco
+    assert "audiometria" not in bloco
+
+
+def test_inspecionar_primeiro_so_validado_diz_nenhuma() -> None:
+    # Reversão: remover o bloco "inspecionar primeiro" (2b) — a string "(nenhuma)" some.
+    motivo = Motivo(
+        regra_id="R-AUD-01",
+        predicado="ruido_acima_acao",
+        risco_origem=None,
+        detalhe="Emitido por regra R-AUD-01",
+        status_regra="VALIDADO",
+    )
+    exame = ExameEmitido(
+        exame="audiometria",
+        periodicidade_meses=12,
+        momentos={Momento.ADM},
+        motivos=[motivo],
+    )
+    matriz = MatrizGHE(ghe_id="GHE-22", linhas=[exame], status="VÁLIDA")
+    resultado = Resultado(status="OK", matrizes=[matriz])
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
+    bloco = _bloco_inspecionar_primeiro(relatorio)
+    assert "(nenhuma)" in bloco
