@@ -1,20 +1,29 @@
 from __future__ import annotations
 
+from datetime import date, timedelta
+from pathlib import Path
 from typing import Any
 
 import pytest
 
 from agente_medico.motor.estagios.emissao import stage_5_emissao
+from agente_medico.motor.estagios.gates import stage_1_gates
+from agente_medico.motor.estagios.predicados_stage import stage_4_predicados
+from agente_medico.motor.estagios.riscos import stage_2_riscos
 from agente_medico.motor.predicados import PredicadoDesconhecido
-from agente_medico.motor.protocolo import Protocolo, Vocabulario
+from agente_medico.motor.protocolo import Protocolo, Vocabulario, carregar
 from agente_medico.motor.tipos import (
     Ausente,
     GHEContext,
     GHEPGR,
     Momento,
+    PGR,
     Quantificacao,
     Risco,
+    RiscoPGR,
 )
+
+_PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
 
 def _ghe(ghe_id: str = "GHE-01") -> GHEPGR:
@@ -229,3 +238,101 @@ def test_conversao_momento_case_insensitive() -> None:
     result = stage_5_emissao(ctx, proto)
     assert len(result) == 1
     assert result[0].momentos == {Momento.ADM, Momento.PER, Momento.MR}
+
+
+# ---------------------------------------------------------------------------
+# Motivo.status_regra (D-ARQ-22 Parte B / DH-003EI-01 faceta 2, 003.EM fatia 0)
+# ---------------------------------------------------------------------------
+
+
+def test_protocolo_real_todo_motivo_tem_status_regra_valido() -> None:
+    # Reversão que mata: remover status_regra=regra.get("status") de emissao.py
+    # (todo Motivo emitido volta a ter status_regra is None).
+    pgr = PGR(
+        validade=date.today() - timedelta(days=30),
+        assinatura_engenheiro=True,
+        ghes=(
+            GHEPGR(
+                id="GHE-01",
+                nome="Trabalho em estrutura",
+                cargos=("carpinteiro",),
+                riscos=(
+                    RiscoPGR(
+                        tipo="fisico",
+                        agente="trabalho_altura",
+                        quantificacao=None,
+                        severidade=None,
+                    ),
+                ),
+                epis=(),
+                produtos_quimicos=(),
+                psicossocial=False,
+            ),
+        ),
+    )
+    proto = carregar(_PROTOCOLO_DIR)
+    assert stage_1_gates(pgr) == []
+
+    ghe = pgr.ghes[0]
+    ctx = GHEContext(pgr_ghe=ghe)
+    stage_2_riscos(ctx, proto)
+    stage_4_predicados(ctx, proto)
+    result = stage_5_emissao(ctx, proto)
+
+    assert len(result) > 0
+    for exame in result:
+        for motivo in exame.motivos:
+            assert motivo.status_regra is not None
+            assert motivo.status_regra in {"VALIDADO", "DERIVADO", "INTERPRETADO"}
+
+
+def test_status_regra_propaga_valor_da_regra() -> None:
+    # Reversão que mata: mesma de acima — remover a propagação em emissao.py.
+    ctx = _ctx_com_risco("trabalho_altura")
+    proto = Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={
+            "atividade_critica": {"ou": ["altura", "espaco_confinado", "motorista_equipamento_pesado"]}
+        },
+        regras=[
+            {
+                "id": "R-TESTE-INTERPRETADO",
+                "quando": "atividade_critica",
+                "emite": [
+                    {"exame": "hemograma", "periodicidade_meses": 12, "momentos": ["adm"]},
+                ],
+                "base_normativa": "teste",
+                "status": "INTERPRETADO",
+            }
+        ],
+        regimes={},
+    )
+    result = stage_5_emissao(ctx, proto)
+    assert len(result) == 1
+    assert result[0].motivos[0].status_regra == "INTERPRETADO"
+
+
+def test_status_regra_ausente_na_regra_nao_levanta() -> None:
+    # Guarda: NÃO discrimina comportamento novo, passa com ou sem a fatia 0.
+    # Existe para travar o contrato do default (status_regra: Optional[str] = None).
+    ctx = _ctx_com_risco("trabalho_altura")
+    proto = Protocolo(
+        vocabulario=_vocab(),
+        predicados_compostos={
+            "atividade_critica": {"ou": ["altura", "espaco_confinado", "motorista_equipamento_pesado"]}
+        },
+        regras=[
+            {
+                "id": "R-TESTE-SEM-STATUS",
+                "quando": "atividade_critica",
+                "emite": [
+                    {"exame": "hemograma", "periodicidade_meses": 12, "momentos": ["adm"]},
+                ],
+                "base_normativa": "teste",
+            }
+        ],
+        regimes={},
+    )
+    result = stage_5_emissao(ctx, proto)
+    assert len(result) == 1
+    assert result[0].motivos[0].status_regra is None
