@@ -5,62 +5,82 @@
 # Esta sessão (002.D1) popula APENAS os exames atualmente referenciados
 # em regras.yaml. Demais exames da matriz entram conforme novas regras
 # forem adicionadas (sessões futuras).
+#
+# ordem_exibicao (003.EO EMENDA 1, D-ARQ-73): posição do exame na célula da
+# matriz de saída. Ordem não é conduta clínica — nenhuma R-*/NR prescreve
+# ordem de exibição — por isso o campo é opcional: só os slugs medidos na
+# sequência majoritária de 17/19 GHEs do gabarito Fascino (08/07/26) o
+# carregam; os demais saem depois, em ordem alfabética de slug (fallback do
+# emissor, não deste arquivo). "Manganês no sangue" apareceu no gabarito mas
+# não tem slug no vocabulário (DT-003EI-01: pacote serralheiro/armador não
+# materializado) — não inventado aqui.
 
 exames:
   exame_clinico:
     nome_exibicao: "Exame Clínico"
     categoria: ocupacional
     fonte_matriz: "R-CLI-01 — piso universal"
+    ordem_exibicao: 1
 
   avaliacao_psicossocial:
     nome_exibicao: "Avaliação Psicossocial"
     categoria: ocupacional
     fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
+    ordem_exibicao: 8
 
   avaliacao_saude_mental:
     nome_exibicao: "Av. Médica de Saúde Mental"
     categoria: ocupacional
     fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
+    ordem_exibicao: 9
 
   hemograma:
     nome_exibicao: "Hemograma"
     categoria: laboratorial
     fonte_matriz: "ASO PADRÃO / TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
+    ordem_exibicao: 4
 
   glicemia:
     nome_exibicao: "Glicemia de Jejum"
     categoria: laboratorial
     fonte_matriz: "TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
+    ordem_exibicao: 5
 
   audiometria:
     nome_exibicao: "Audiometria"
     categoria: ocupacional
     fonte_matriz: "RUÍDO / MOTORISTA"
+    ordem_exibicao: 2
 
   acuidade_visual:
     nome_exibicao: "Acuidade Visual"
     categoria: ocupacional
     fonte_matriz: "PORTEIRO / ELETRICIDADE / TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
+    ordem_exibicao: 3
 
   ecg:
     nome_exibicao: "ECG"
     categoria: ocupacional
     fonte_matriz: "TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA / ELETRICIDADE"
+    ordem_exibicao: 6
 
   rx_coluna_lombo_sacra:
     nome_exibicao: "RX Coluna Lombo-Sacra"
     categoria: imagem
     fonte_matriz: "VIBRAÇÃO CORPO INTEIRO"
+    ordem_exibicao: 11
 
   rx_torax_oit:
     nome_exibicao: "RX Tórax OIT"
     categoria: imagem
     fonte_matriz: "SÍLICA / ASBESTO / POEIRAS"
+    ordem_exibicao: 12
 
   espirometria:
     nome_exibicao: "Espirometria"
     categoria: ocupacional
     fonte_matriz: "R-ESP-02 — poeira mineral (NR-07 Anexo III 3.1)"
+    ordem_exibicao: 10
 
   reticulocitos:
     nome_exibicao: "Reticulócitos"
@@ -106,6 +126,7 @@ exames:
     nome_exibicao: "Carboxihemoglobina no sangue"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+    ordem_exibicao: 7
 
   hexanodiona_urina:
     nome_exibicao: "2,5-hexanodiona na urina"

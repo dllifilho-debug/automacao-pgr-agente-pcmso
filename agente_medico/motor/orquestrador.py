@@ -84,6 +84,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 status="BLOQUEADA",
                 riscos_resolvidos=riscos_resolvidos,
                 predicados_avaliados=predicados_avaliados,
+                nome_ghe=ctx.pgr_ghe.nome,
+                cargos=ctx.pgr_ghe.cargos,
             )
         else:
             # D-ARQ-31 fatia 3 (estendido por D-ARQ-71 cl.2): pendência com âncora vai
@@ -114,6 +116,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     status="VÁLIDA",
                     riscos_resolvidos=riscos_resolvidos,
                     predicados_avaliados=predicados_avaliados,
+                    nome_ghe=ctx.pgr_ghe.nome,
+                    cargos=ctx.pgr_ghe.cargos,
                 )
             elif linhas_com_risco:
                 matriz = MatrizGHE(
@@ -124,6 +128,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     status="PARCIAL",
                     riscos_resolvidos=riscos_resolvidos,
                     predicados_avaliados=predicados_avaliados,
+                    nome_ghe=ctx.pgr_ghe.nome,
+                    cargos=ctx.pgr_ghe.cargos,
                 )
             else:
                 matriz = MatrizGHE(
@@ -134,6 +140,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     status="BLOQUEADA",
                     riscos_resolvidos=riscos_resolvidos,
                     predicados_avaliados=predicados_avaliados,
+                    nome_ghe=ctx.pgr_ghe.nome,
+                    cargos=ctx.pgr_ghe.cargos,
                 )
         matrizes.append(matriz)
 

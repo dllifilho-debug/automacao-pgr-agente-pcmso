@@ -134,10 +134,20 @@ def _extrair_cargos_da_linha(linha: _Linha) -> tuple[str, ...]:
     """cargos = resto da linha de rótulo "Cargo / Função", VERBATIM, UMA
     entrada — separação fina de CBO/cargo individual não é desta fatia
     (D-ARQ-65 fatia 1). LIMITE CONHECIDO: cargo cuja lista dá quebra de
-    linha na tabela (medido no GHE 03 — "Encarregado" seguido de "de
-    Pintor..." na linha física seguinte) não é recuperado; só a linha
-    física do próprio rótulo é capturada, por instrução explícita da
-    sessão 003.DZ — não um bug, um escopo declarado."""
+    linha na tabela (medido originalmente no GHE 03 — "Encarregado"
+    seguido de "de Pintor..." na linha física seguinte) não é recuperado;
+    só a linha física do próprio rótulo é capturada, por instrução
+    explícita da sessão 003.DZ — não um bug, um escopo declarado.
+
+    Alcance medido (003.EO, contra o Fascino real, `GHEPGR.cargos` pós-
+    ingestão): **2 de 19 GHEs** perdem cargo por este limite — GHE-03
+    (4 de 8 cargos sobrevivem) e **GHE-06** (3 de 5; 2º caso, não citado
+    na medição original de 003.DZ — o limite era mais amplo do que o
+    registro anterior indicava). No total, **6 dos 41 cargos do gabarito
+    não chegam a `GHEPGR`** — perda silenciosa, não cosmética: o cargo
+    simplesmente não existe a jusante. Ver DT-003EO-04 (nomeia os 6
+    cargos, a rota de fechamento em 003.EP e o paliativo avaliado e
+    rejeitado)."""
     resto = " ".join(p.text for p in linha.palavras[3:]).strip()
     return (resto,) if resto else ()
 
