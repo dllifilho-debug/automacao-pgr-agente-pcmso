@@ -130,13 +130,58 @@ def _eh_linha_rotulo_cargo(linha: _Linha) -> bool:
     )
 
 
+# Separador ENTRE entradas de cargo da célula (003.EP fatia 2, M3): vírgula
+# na maioria dos blocos, ponto-e-vírgula em GHE-07/PRODUÇÃO (medição 41
+# entradas / 19 blocos). NUNCA \x00 — o glifo ocorre DENTRO de nome
+# composto (classe já registrada em HIDRO\x00SANITÁRIAS, D-ARQ-57 peça 1),
+# dividir por ele quebraria um nome ao meio.
+_PADRAO_DELIMITADOR_ENTRADAS = re.compile(r"[,;]")
+
+# Cauda CBO-2002 de uma entrada: a corrida FINAL de dígitos e glifos-
+# separadores (\x00, espaço, hífen) — 40/41 entradas medidas têm o glifo
+# antes do 1º dígito da família (4 dígitos); 1/41 ("Encarregado de
+# Elétrica 99501\x0005\x00", DT-003EO-04) não tem, e a família aparece com
+# 5 dígitos contíguos. Por isso o padrão NÃO crava 4 dígitos fixos — cravar
+# faria esse caso sobrar um "9" residual no nome (regressão nomeada:
+# ver reversão do teste test_separacao_sem_glifo_antes_do_cbo_ghe03_real).
+# `\s` no padrão cobre o espaço legítimo entre nome e CBO sem confundir com
+# espaços internos do nome: só a corrida MAIS À DIREITA da string é usada
+# (`finditer(...)[-1]`), nunca a 1ª ocorrência.
+_PADRAO_CAUDA_CBO = re.compile(r"[\d\x00\s-]+")
+
+
+def _separar_nome_cbo(entrada_bruta: str) -> str:
+    """nome = tudo antes da cauda CBO, aparado à direita de espaço e glifo-
+    hífen (\\x00/espaço/-). CBO é DESCARTADO nesta fatia (003.EP fatia 2):
+    nenhum consumidor a jusante lê CBO hoje — criar campo novo sem
+    consumidor na mesma fatia repetiria a classe D-ARQ-DG-1 (campo-sem-
+    consumidor). Candidato natural de consumo futuro: faceta de máquina
+    pesada (DT-003ED-01), que já lida com cargo/função ocupacional; ligar
+    os dois é decisão de fatia própria, não desta."""
+    entrada = entrada_bruta.strip()
+    ocorrencias = list(_PADRAO_CAUDA_CBO.finditer(entrada))
+    if not ocorrencias:
+        return entrada
+    cauda = ocorrencias[-1]
+    return entrada[: cauda.start()].rstrip(" \x00-")
+
+
+def _separar_cargos_da_celula(celula: str) -> tuple[str, ...]:
+    nomes = [
+        _separar_nome_cbo(entrada)
+        for entrada in _PADRAO_DELIMITADOR_ENTRADAS.split(celula)
+    ]
+    return tuple(nome for nome in nomes if nome)
+
+
 def _extrair_cargos_da_linha(
     linhas_bloco: Sequence[_Linha], idx_rotulo: int
 ) -> tuple[str, ...]:
-    """cargos = resto da linha de rótulo "Cargo / Função" MAIS as linhas
-    físicas seguintes cuja 1ª palavra cai na banda do valor — célula
-    inteira, ainda UMA entrada (separação fina de CBO/cargo individual é
-    D-ARQ-65 fatia 1 seguinte, 003.EP fatia 2).
+    """cargos = nomes distintos da célula "Cargo / Função" — rótulo MAIS as
+    linhas físicas seguintes cuja 1ª palavra cai na banda do valor
+    (overflow, 003.EP fatia 1), separados entrada a entrada e com a cauda
+    CBO removida (003.EP fatia 2). Uma tupla por cargo distinto, não mais
+    uma célula inteira como string única.
 
     Banda do valor = x0 de `palavras[3]` da própria linha de rótulo, com a
     mesma `_TOLERANCIA_COLUNA_PT` da banda AGENTE/FONTE (calibração por
@@ -149,11 +194,13 @@ def _extrair_cargos_da_linha(
     literal do próximo rótulo (que nunca foi verificado contra o
     repertório de campos do formulário).
 
-    LIMITE QUE ESTA FATIA FECHA (D-ARQ-65 fatia 1 / DT-003EO-04): antes
+    LIMITE QUE A FATIA 1 FECHOU (D-ARQ-65 fatia 1 / DT-003EO-04): antes
     desta função só lia a linha do próprio rótulo — 6 dos 41 cargos do
     gabarito (GHE-03: 4; GHE-06: 2) se perdiam por quebra de linha física
     na tabela (ex.: "Encarregado" no fim do rótulo + "de Pintor..." na
-    continuação). Junção entre linhas é espaço simples (medido)."""
+    continuação). Junção entre linhas físicas é espaço simples (medido).
+    Separação de entradas e descarte do CBO: ver `_separar_cargos_da_celula`
+    / `_separar_nome_cbo`."""
     linha_rotulo = linhas_bloco[idx_rotulo]
     palavras_rotulo = linha_rotulo.palavras
     partes = [p.text for p in palavras_rotulo[3:]]
@@ -164,8 +211,8 @@ def _extrair_cargos_da_linha(
             if abs(x0_primeira - x0_valor) > _TOLERANCIA_COLUNA_PT:
                 break
             partes.append(linha.texto)
-    resto = " ".join(partes).strip()
-    return (resto,) if resto else ()
+    celula = " ".join(partes).strip()
+    return _separar_cargos_da_celula(celula) if celula else ()
 
 
 def _localizar_cabecalho_tabela(

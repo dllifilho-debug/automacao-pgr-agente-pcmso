@@ -164,32 +164,34 @@ _PAGINA_CARGO_OVERFLOW_DUPLO: tuple[PalavraPDF, ...] = (
     _p("GRUPO", 57.0, 25.0),
     _p("FONTE", 177.5, 25.0),
     _p("AGRAVO", 296.8, 25.0),
-    # rótulo "Cargo / Função" + 1ª palavra do valor (banda do valor = x0=279.2)
+    # rótulo "Cargo / Função" + 1ª entrada (banda do valor = x0=279.2),
+    # cauda CBO sintética glued com vírgula (molde real: vírgula colada no
+    # fim do token de CBO, sem espaço antes dela — medição 003.EP fatia 0)
     _p("Cargo", 58.5, 50.0),
     _p("/", 68.0, 50.0),
     _p("Função", 72.0, 50.0),
     _p("PrimeiroCargo", 279.2, 50.0),
+    _p("\x001111\x0011\x00,", 360.0, 50.0),
     # continuação 1 — banda do valor, DEVE entrar
     _p("SegundoCargo", 279.2, 60.0),
+    _p("\x002222\x0022\x00,", 360.0, 60.0),
     # continuação 2 — banda do valor, DEVE entrar
     _p("TerceiroCargo", 279.2, 70.0),
+    _p("\x003333\x0033\x00", 360.0, 70.0),
     # linha na banda do RÓTULO (simula "Qt. Trabalhadores") — encerra a célula
     _p("Qt.", 58.5, 80.0),
     _p("Trabalhadores", 68.0, 80.0),
     _p("05", 120.0, 80.0),
     # de volta à banda do valor — NÃO deve entrar (já encerrou em cima)
     _p("NaoDeveEntrar", 279.2, 90.0),
+    _p("\x004444\x0044\x00", 360.0, 90.0),
 )
 
 
 def test_celula_cargo_para_ao_voltar_para_banda_do_rotulo() -> None:
     ghes = parsear_paginas([_PAGINA_CARGO_OVERFLOW_DUPLO])
     assert len(ghes) == 1
-    (celula,) = ghes[0].cargos
-    assert "PrimeiroCargo" in celula
-    assert "SegundoCargo" in celula
-    assert "TerceiroCargo" in celula
-    assert "NaoDeveEntrar" not in celula
+    assert ghes[0].cargos == ("PrimeiroCargo", "SegundoCargo", "TerceiroCargo")
 
 
 # ---------------------------------------------------------------------------
@@ -209,68 +211,118 @@ def test_celula_cargo_captura_overflow_ghe03_real(ghes_fascino: tuple[GHEVerbati
     # GHE-03 (003.EP fatia 0, M1/M2): único bloco (com GHE-06) cuja lista de
     # cargos quebra em 2 linhas físicas na tabela — "Encarregado" no fim do
     # rótulo, "de Pintor..." na continuação (quebra no MEIO da palavra).
+    # Pós-fatia-2, cargos já vem separado/sem CBO — checa por elemento.
     supervisao = next(
         g for g in ghes_fascino if g.nome == "SUPERVISÃO DE ATIVIDADES EM OBRA"
     )
-    (celula,) = supervisao.cargos
-    assert "Encarregado de Pintor" in celula
-    assert "Auxiliar de Obra" in celula
+    assert "Encarregado de Pintor" in supervisao.cargos
+    assert "Auxiliar de Obra" in supervisao.cargos
 
 
 @requer_pdfs
 def test_ghes_sem_overflow_inalterados_real(ghes_fascino: tuple[GHEVerbatim, ...]) -> None:
     # Os 17 blocos SEM overflow (todos exceto GHE-03/GHE-06, 003.EP fatia 0
-    # M1) mantêm a célula byte-a-byte igual ao baseline pré-fatia-1: só
-    # `palavras[3:]` da própria linha de rótulo, verbatim (\x00 incluso).
+    # M1) não ganham nem perdem cargo por causa do laço de overflow (fatia
+    # 1) — mesmos nomes finais que a separação nome/CBO (fatia 2) produz a
+    # partir da célula-fonte medida em 003ep_anatomia_cargo.md, sem CBO.
     esperado_por_nome = {
         "ENGENHARIA": (
-            "Auxiliar de Engenharia \x003121\x0005\x00, Estagiário de "
-            "Engenharia \x004110\x0010\x00, Assistente de Engenharia "
-            "\x003121\x0005\x00, Estagiário de Obra \x004110\x0010\x00"
+            "Auxiliar de Engenharia",
+            "Estagiário de Engenharia",
+            "Assistente de Engenharia",
+            "Estagiário de Obra",
         ),
-        "SESMT": (
-            "Técnico de Segurança do Trabalho \x003516\x0005\x00, "
-            "Supervisor de Segurança do Trabalho \x004101\x0005\x00"
-        ),
+        "SESMT": ("Técnico de Segurança do Trabalho", "Supervisor de Segurança do Trabalho"),
         "ALMOXARIFADO": (
-            "Almoxarife \x004141\x0005\x00, Auxiliar de Almoxarifado "
-            "\x004141\x0005\x00, Assistente de Almoxarifado \x004141\x0005\x00, "
-            "Supervisor de Almoxarifado \x004141\x0005\x00"
+            "Almoxarife",
+            "Auxiliar de Almoxarifado",
+            "Assistente de Almoxarifado",
+            "Supervisor de Almoxarifado",
         ),
-        "LIMPEZA": "Auxiliar de limpeza e conservação \x005143\x0020\x00",
-        "PRODUÇÃO": (
-            "Pedreiro \x007152\x0010\x00; Ajudante de produção civil "
-            "\x007170\x0020\x00"
-        ),
-        "CARPINTARIA": "Carpinteiro \x007155\x0005\x00",
-        "ARMAÇÃO": "Armador \x007153\x0015\x00",
-        "INSTALAÇÕES HIDRO\x00SANITÁRIAS": (
-            "Encanador \x007241\x0010\x00, Auxiliar de Encanador \x007241\x0010\x00"
-        ),
-        "ELÉTRICA": (
-            "Eletricista \x007156\x0015\x00, Auxiliar de eletricista "
-            "\x007156\x0015\x00"
-        ),
-        "BETONEIRA": "Operador de Betoneiro \x007154\x0005\x00",
-        "SINALIZAÇÃO DE GRUA": "Sinaleiro \x007821\x0045\x00",
-        "OPERAÇÃO DE GRUA": "Operador de grua \x007821\x0010\x00.",
-        "OPERAÇÃO COM ELEVADOR DE CARGA": (
-            "Operador de Elevador de carga \x007822\x0005\x00"
-        ),
-        "PINTURA": "Pintor \x007166\x0010\x00",
-        "SERRALHERIA": "Serralheiro \x007244\x0040\x00",
-        "MONTAGEM": "Montador \x007251\x0005\x00",
-        "VENDAS": (
-            "Recepcionista Demonstradora \x004221\x0005\x00, Recepcionista "
-            "Comercial \x004221\x0005\x00"
-        ),
+        "LIMPEZA": ("Auxiliar de limpeza e conservação",),
+        "PRODUÇÃO": ("Pedreiro", "Ajudante de produção civil"),
+        "CARPINTARIA": ("Carpinteiro",),
+        "ARMAÇÃO": ("Armador",),
+        "INSTALAÇÕES HIDRO\x00SANITÁRIAS": ("Encanador", "Auxiliar de Encanador"),
+        "ELÉTRICA": ("Eletricista", "Auxiliar de eletricista"),
+        "BETONEIRA": ("Operador de Betoneiro",),
+        "SINALIZAÇÃO DE GRUA": ("Sinaleiro",),
+        "OPERAÇÃO DE GRUA": ("Operador de grua",),
+        "OPERAÇÃO COM ELEVADOR DE CARGA": ("Operador de Elevador de carga",),
+        "PINTURA": ("Pintor",),
+        "SERRALHERIA": ("Serralheiro",),
+        "MONTAGEM": ("Montador",),
+        "VENDAS": ("Recepcionista Demonstradora", "Recepcionista Comercial"),
     }
     assert len(esperado_por_nome) == 17
     for ghe in ghes_fascino:
         if ghe.nome not in esperado_por_nome:
             continue
-        (celula,) = ghe.cargos
-        assert celula == esperado_por_nome[ghe.nome], ghe.nome
+        assert ghe.cargos == esperado_por_nome[ghe.nome], ghe.nome
+
+
+@requer_pdfs
+def test_separacao_entradas_regulares_ghe01_real(ghes_fascino: tuple[GHEVerbatim, ...]) -> None:
+    engenharia = next(g for g in ghes_fascino if g.nome == "ENGENHARIA")
+    assert engenharia.cargos == (
+        "Auxiliar de Engenharia",
+        "Estagiário de Engenharia",
+        "Assistente de Engenharia",
+        "Estagiário de Obra",
+    )
+
+
+@requer_pdfs
+def test_separacao_sem_glifo_antes_do_cbo_ghe03_real(ghes_fascino: tuple[GHEVerbatim, ...]) -> None:
+    # DT-003EO-04: "Encarregado de Elétrica 99501\x0005\x00" não tem o
+    # \x00 antes do 1º dígito (família com 5 dígitos contíguos em vez de
+    # 4) — o nome tem que sair limpo, sem "9" residual.
+    supervisao = next(
+        g for g in ghes_fascino if g.nome == "SUPERVISÃO DE ATIVIDADES EM OBRA"
+    )
+    assert "Encarregado de Elétrica" in supervisao.cargos
+    assert not any(c.startswith("Encarregado de Elétrica 9") for c in supervisao.cargos)
+
+
+@requer_pdfs
+def test_separacao_delimitador_ponto_e_virgula_ghe07_real(ghes_fascino: tuple[GHEVerbatim, ...]) -> None:
+    producao = next(g for g in ghes_fascino if g.nome == "PRODUÇÃO")
+    assert producao.cargos == ("Pedreiro", "Ajudante de produção civil")
+
+
+@requer_pdfs
+def test_fascino_total_41_cargos_real(ghes_fascino: tuple[GHEVerbatim, ...]) -> None:
+    total = sum(len(g.cargos) for g in ghes_fascino)
+    assert total == 41
+
+
+# ---------------------------------------------------------------------------
+# 003.EP fatia 2 — separação nome/CBO preserva glifo \x00 DENTRO do nome
+# (classe já registrada em HIDRO\x00SANITÁRIAS): dividir a cauda CBO não
+# pode confundir um \x00 interno ao nome com o separador nome/CBO.
+# ---------------------------------------------------------------------------
+
+_PAGINA_CARGO_GLIFO_INTERNO: tuple[PalavraPDF, ...] = (
+    _p("GHE", 10.0, 10.0),
+    _p("99", 30.0, 10.0),
+    _p("-", 45.0, 10.0),
+    _p("TESTE", 50.0, 10.0),
+    _p("PERIGO", 113.1, 20.0),
+    _p("GRUPO", 57.0, 25.0),
+    _p("FONTE", 177.5, 25.0),
+    _p("AGRAVO", 296.8, 25.0),
+    _p("Cargo", 58.5, 50.0),
+    _p("/", 68.0, 50.0),
+    _p("Função", 72.0, 50.0),
+    _p("Ajudante\x00Geral", 279.2, 50.0),
+    _p("\x004121\x0005\x00", 360.0, 50.0),
+)
+
+
+def test_separacao_preserva_glifo_dentro_do_nome() -> None:
+    ghes = parsear_paginas([_PAGINA_CARGO_GLIFO_INTERNO])
+    assert len(ghes) == 1
+    assert ghes[0].cargos == ("Ajudante\x00Geral",)
 
 
 @requer_pdfs
