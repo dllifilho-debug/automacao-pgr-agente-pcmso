@@ -130,26 +130,89 @@ def _eh_linha_rotulo_cargo(linha: _Linha) -> bool:
     )
 
 
-def _extrair_cargos_da_linha(linha: _Linha) -> tuple[str, ...]:
-    """cargos = resto da linha de rótulo "Cargo / Função", VERBATIM, UMA
-    entrada — separação fina de CBO/cargo individual não é desta fatia
-    (D-ARQ-65 fatia 1). LIMITE CONHECIDO: cargo cuja lista dá quebra de
-    linha na tabela (medido originalmente no GHE 03 — "Encarregado"
-    seguido de "de Pintor..." na linha física seguinte) não é recuperado;
-    só a linha física do próprio rótulo é capturada, por instrução
-    explícita da sessão 003.DZ — não um bug, um escopo declarado.
+# Separador ENTRE entradas de cargo da célula (003.EP fatia 2, M3): vírgula
+# na maioria dos blocos, ponto-e-vírgula em GHE-07/PRODUÇÃO (medição 41
+# entradas / 19 blocos). NUNCA \x00 — o glifo ocorre DENTRO de nome
+# composto (classe já registrada em HIDRO\x00SANITÁRIAS, D-ARQ-57 peça 1),
+# dividir por ele quebraria um nome ao meio.
+_PADRAO_DELIMITADOR_ENTRADAS = re.compile(r"[,;]")
 
-    Alcance medido (003.EO, contra o Fascino real, `GHEPGR.cargos` pós-
-    ingestão): **2 de 19 GHEs** perdem cargo por este limite — GHE-03
-    (4 de 8 cargos sobrevivem) e **GHE-06** (3 de 5; 2º caso, não citado
-    na medição original de 003.DZ — o limite era mais amplo do que o
-    registro anterior indicava). No total, **6 dos 41 cargos do gabarito
-    não chegam a `GHEPGR`** — perda silenciosa, não cosmética: o cargo
-    simplesmente não existe a jusante. Ver DT-003EO-04 (nomeia os 6
-    cargos, a rota de fechamento em 003.EP e o paliativo avaliado e
-    rejeitado)."""
-    resto = " ".join(p.text for p in linha.palavras[3:]).strip()
-    return (resto,) if resto else ()
+# Cauda CBO-2002 de uma entrada: a corrida FINAL de dígitos e glifos-
+# separadores (\x00, espaço, hífen) — 40/41 entradas medidas têm o glifo
+# antes do 1º dígito da família (4 dígitos); 1/41 ("Encarregado de
+# Elétrica 99501\x0005\x00", DT-003EO-04) não tem, e a família aparece com
+# 5 dígitos contíguos. Por isso o padrão NÃO crava 4 dígitos fixos — cravar
+# faria esse caso sobrar um "9" residual no nome (regressão nomeada:
+# ver reversão do teste test_separacao_sem_glifo_antes_do_cbo_ghe03_real).
+# `\s` no padrão cobre o espaço legítimo entre nome e CBO sem confundir com
+# espaços internos do nome: só a corrida MAIS À DIREITA da string é usada
+# (`finditer(...)[-1]`), nunca a 1ª ocorrência.
+_PADRAO_CAUDA_CBO = re.compile(r"[\d\x00\s-]+")
+
+
+def _separar_nome_cbo(entrada_bruta: str) -> str:
+    """nome = tudo antes da cauda CBO, aparado à direita de espaço e glifo-
+    hífen (\\x00/espaço/-). CBO é DESCARTADO nesta fatia (003.EP fatia 2):
+    nenhum consumidor a jusante lê CBO hoje — criar campo novo sem
+    consumidor na mesma fatia repetiria a classe D-ARQ-DG-1 (campo-sem-
+    consumidor). Candidato natural de consumo futuro: faceta de máquina
+    pesada (DT-003ED-01), que já lida com cargo/função ocupacional; ligar
+    os dois é decisão de fatia própria, não desta."""
+    entrada = entrada_bruta.strip()
+    ocorrencias = list(_PADRAO_CAUDA_CBO.finditer(entrada))
+    if not ocorrencias:
+        return entrada
+    cauda = ocorrencias[-1]
+    return entrada[: cauda.start()].rstrip(" \x00-")
+
+
+def _separar_cargos_da_celula(celula: str) -> tuple[str, ...]:
+    nomes = [
+        _separar_nome_cbo(entrada)
+        for entrada in _PADRAO_DELIMITADOR_ENTRADAS.split(celula)
+    ]
+    return tuple(nome for nome in nomes if nome)
+
+
+def _extrair_cargos_da_linha(
+    linhas_bloco: Sequence[_Linha], idx_rotulo: int
+) -> tuple[str, ...]:
+    """cargos = nomes distintos da célula "Cargo / Função" — rótulo MAIS as
+    linhas físicas seguintes cuja 1ª palavra cai na banda do valor
+    (overflow, 003.EP fatia 1), separados entrada a entrada e com a cauda
+    CBO removida (003.EP fatia 2). Uma tupla por cargo distinto, não mais
+    uma célula inteira como string única.
+
+    Banda do valor = x0 de `palavras[3]` da própria linha de rótulo, com a
+    mesma `_TOLERANCIA_COLUNA_PT` da banda AGENTE/FONTE (calibração por
+    bloco, não constante fixa). Medição 003.EP fatia 0 (`relatorios/
+    003ep_anatomia_cargo.md`, M1/M2, 19/19 blocos do Fascino): onde existe
+    continuação real (2/19 blocos — GHE-03, GHE-06), o desvio contra a
+    banda do valor é 0,0pt exato; a linha que encerra a célula tem x0 na
+    banda do RÓTULO (não na do valor) — por isso o critério de parada é a
+    própria condição do laço (sai da banda do valor), sem ancorar no
+    literal do próximo rótulo (que nunca foi verificado contra o
+    repertório de campos do formulário).
+
+    LIMITE QUE A FATIA 1 FECHOU (D-ARQ-65 fatia 1 / DT-003EO-04): antes
+    desta função só lia a linha do próprio rótulo — 6 dos 41 cargos do
+    gabarito (GHE-03: 4; GHE-06: 2) se perdiam por quebra de linha física
+    na tabela (ex.: "Encarregado" no fim do rótulo + "de Pintor..." na
+    continuação). Junção entre linhas físicas é espaço simples (medido).
+    Separação de entradas e descarte do CBO: ver `_separar_cargos_da_celula`
+    / `_separar_nome_cbo`."""
+    linha_rotulo = linhas_bloco[idx_rotulo]
+    palavras_rotulo = linha_rotulo.palavras
+    partes = [p.text for p in palavras_rotulo[3:]]
+    if len(palavras_rotulo) > 3:
+        x0_valor = palavras_rotulo[3].x0
+        for linha in linhas_bloco[idx_rotulo + 1 :]:
+            x0_primeira = linha.palavras[0].x0
+            if abs(x0_primeira - x0_valor) > _TOLERANCIA_COLUNA_PT:
+                break
+            partes.append(linha.texto)
+    celula = " ".join(partes).strip()
+    return _separar_cargos_da_celula(celula) if celula else ()
 
 
 def _localizar_cabecalho_tabela(
@@ -270,9 +333,9 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
     nome = _extrair_titulo_ancora(ancora.texto)
 
     cargos: tuple[str, ...] = ()
-    for linha in linhas_bloco[1:]:
+    for idx_linha, linha in enumerate(linhas_bloco[1:], start=1):
         if _eh_linha_rotulo_cargo(linha):
-            cargos = _extrair_cargos_da_linha(linha)
+            cargos = _extrair_cargos_da_linha(linhas_bloco, idx_linha)
             break
 
     cabecalho = _localizar_cabecalho_tabela(linhas_bloco)

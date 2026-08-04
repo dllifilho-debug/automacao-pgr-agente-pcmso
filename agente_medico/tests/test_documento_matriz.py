@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import time
+from datetime import date
 from pathlib import Path
 
+import pytest
 from docx import Document as DocxDocument
 
-from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento
+from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
+from agente_medico.motor.protocolo import carregar
+from agente_medico.motor.tipos import EnvelopeConfirmado, ExameEmitido, GHEVerbatim, MatrizGHE, Momento
 from agente_medico.superficie.documento_matriz import (
     _ROTULO_MOMENTO,
     CabecalhoDocumento,
@@ -199,3 +204,81 @@ def test_docx_celula_de_exames_preserva_quebra_por_exame(tmp_path: Path) -> None
     assert textos[0].startswith("Exame Clínico")
     assert textos[1].startswith("Audiometria")
     assert textos[2].startswith("Hemograma")
+
+
+# ---------------------------------------------------------------------------
+# 003.EP fatia 3 — e2e real: PDF Fascino -> parse determinístico -> hidratação
+# -> processar_arquivo_pgr -> montar_documento. Fecha o critério de pronto do
+# S2 (D-ARQ-65 fatia 1/2, 003.EP): os 41 cargos (não mais 19 células
+# combinadas) têm de sobreviver até a estrutura que o emissor HTML/DOCX
+# consome — as fatias 1-2 mediram só até GHEVerbatim, nunca até aqui.
+# ---------------------------------------------------------------------------
+
+_MATRIZES_DIR = Path(__file__).parent.parent.parent / "matrizes_originais"
+_PDF_FASCINO = (
+    _MATRIZES_DIR / "PGR - CONSCIENTE CONSTRUTORA E INCORPORADORA SPE 0030 - FASCINO  (15.07.26).pdf"
+)
+_PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
+
+requer_pdfs = pytest.mark.skipif(
+    not _PDF_FASCINO.exists(),
+    reason="PDF Fascino ausente; harness integração e2e (003.EP fatia 3) indisponível",
+)
+
+
+class _TranscritorGHENuncaChamado:
+    """Cliente-bomba (molde MockTranscritorGHENuncaChamado, test_orquestracao_pgr.py):
+    a rota determinística (D-ARQ-65) tem que ser aceita para o Fascino sem
+    invocar LLM — falha alto e explícito em vez de mascarar em silêncio uma
+    invocação indevida."""
+
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        raise AssertionError("cliente LLM GHE não deveria ser invocado — rota determinística aceita")
+
+
+class _TranscritorCardNuncaChamado:
+    """Dummy para a rota ghe (molde MockTranscritorCardNuncaChamado): se
+    processar_arquivo_pgr chamar cliente_card fora da rota card, é bug de
+    roteamento."""
+
+    def transcrever(self, card: str, titulo: str) -> GHEVerbatim:
+        raise AssertionError("cliente_card não deveria ser invocado na rota ghe")
+
+
+@requer_pdfs
+def test_pipeline_real_fascino_ate_documento_41_linhas_cargo() -> None:
+    protocolo = carregar(_PROTOCOLO_DIR)
+    envelope = EnvelopeConfirmado(validade=date.today(), assinatura_engenheiro=True)
+
+    inicio = time.monotonic()
+    resultado, _pendencias = processar_arquivo_pgr(
+        _PDF_FASCINO,
+        protocolo,
+        _TranscritorGHENuncaChamado(),
+        _TranscritorCardNuncaChamado(),
+        envelope=envelope,
+    )
+    assert resultado is not None
+
+    doc = montar_documento(
+        resultado.matrizes, protocolo.vocabulario.exames, _cabecalho(), _rodape()
+    )
+    duracao = time.monotonic() - inicio
+    if duracao > 150:
+        print(f"AVISO 003.EP fatia 3: pipeline e2e Fascino levou {duracao:.1f}s (> 150s)")
+
+    total_linhas_cargo = sum(len(bloco.linhas) for bloco in doc.blocos)
+    assert total_linhas_cargo == 41
+
+    cargos_extraidos = {linha.cargo for bloco in doc.blocos for linha in bloco.linhas}
+    for cargo_recuperado in (
+        "Encarregado de Pintor",
+        "Encarregado de Carpinteiro",
+        "Supervisor de Instalações Elétricas",
+        "Auxiliar de Obra",
+        "Aprendiz Administrativo de Obra",
+        "Assistente Administrativo de Obras",
+    ):
+        assert cargo_recuperado in cargos_extraidos
+
+    assert all(linha.cargo != "" for bloco in doc.blocos for linha in bloco.linhas)

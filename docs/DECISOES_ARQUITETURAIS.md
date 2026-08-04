@@ -2602,6 +2602,45 @@ deferida (fatia 3). Testemunha positiva: Fascino real, 19/19 aprovados, zero inv
 LLM. Testemunha negativa: Viverde real, `FamiliaNaoReconhecida` (família não medida) aciona
 o fallback LLM sem bloquear.
 
+**Cláusula 5 NOVA (003.EP fatia 0/1) — o bloco é um formulário de 2 colunas fixas, não só
+uma tabela de riscos.** Medição 003.EP fatia 0 (`relatorios/003ep_anatomia_cargo.md`, M1/M2,
+19/19 blocos do Fascino real): a célula "Cargo / Função" pertence a um formulário de rótulos
+ordenados em duas colunas — rótulo à esquerda, valor à direita — com `x0` **idênticos
+bit-a-bit nos 19/19 blocos** (`58.499347642527084` / `279.2172167102426`); onde existe
+continuação física do valor (2/19 blocos), o desvio contra a banda do valor é **0,0pt
+exato**. Célula = linha do rótulo + linhas físicas seguintes cuja 1ª palavra cai na banda do
+valor, terminando na primeira linha que volta para a banda do rótulo — critério de
+**transição de banda**, nunca o literal do próximo rótulo (nenhum campo específico,
+"Qt. Trabalhadores" incluso, é verificado contra repertório algum). Isso é **distinto** da
+calibração por bloco da tabela de riscos (banda AGENTE/FONTE, cláusulas 1-4 acima) — lá a
+indentação varia PORQUE o conteúdo da célula anterior varia (`x0` de FONTE mede 168,3–198,5pt
+entre blocos); aqui as colunas do formulário são fixas, o mesmo `x0` nos 19/19. A
+distinção importa porque barateia qualquer campo futuro do mesmo formulário ("Qt.
+Trabalhadores", "Descrição das Atividades", "Local de Trabalho" — todos já medidos usando as
+mesmas duas bandas, `relatorios/003ep_anatomia_cargo.md` M1/M2): a mesma rotina de captura
+serve, sem recalibração por bloco.
+
+**Nota de aplicação (003.EP fatias 1-3, commits `aaa9eca`/`486d54d`/`7f19cf4`).**
+`_extrair_cargos_da_linha` (`parser_familia_consciente.py`) passa a aplicar a Cláusula 5: lê
+a célula "Cargo / Função" inteira (rótulo + overflow por transição de banda, fatia 1),
+separa cada entrada por delimitador (`,`/`;`, nunca `\x00` — glifo interno a nome composto)
+e descarta a cauda CBO-2002 (fatia 2). **O CBO é descartado, não modelado** — precedente
+003.DG-1 (campo novo exige consumidor a jusante na mesma fatia; seria a 5ª instância de
+campo-sem-consumidor, após `anexo_nr07`, `tipo_ibe`, `disparador_clinico`, `categoria`).
+Dívida nomeada COM consumidor candidato: **DT-003ED-01 faceta máquina pesada**, cujo caminho
+declarado é `riscos_implicitos` por cargo — o CBO seria chave melhor que nome livre para
+esse mapeamento, decisão de fatia própria. Medição de não-regressão (`relatorios/
+003ep_fascino_rodar.md` vs. `003eo_fascino_rodar.md`): linhas de exame **171→171** e status
+por GHE **idêntico nos 19/19** — o único movimento é a pendência não-bloqueante
+`regra_origem="R-GHE-02"`, **19→41** (DT-003EP-01, PROTOCOLO §11), efeito colateral esperado
+de cargos reais chegarem ao vocabulário pela 1ª vez, não regressão de conduta.
+
+**Por que não abrir D-ARQ nova para 003.EP.** 003.DZ declarou um RECORTE de escopo (fatia 1
+= parser isolado, sem separação cargo/CBO), não um invariante de desenho da família — a
+Cláusula 5 e sua nota de aplicação **estendem** o recorte medido, no mesmo molde que
+D-ARQ-57 peça 1 usou para acrescentar as formas 4 e 5 de âncora GHE sem abrir uma decisão
+nova a cada forma de template descoberta.
+
 ## D-ARQ-66 — Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas
 
 **Contexto.** Até 003.EC toda emissão era condicionada a predicado de risco. R-CLI-01
@@ -3045,3 +3084,4 @@ Detalhe em HISTORICO 003.EO.
 | v160 | 31/07/2026 | Sessão 003.EK (FECHAMENTO): **D-ARQ-71 CRIADA** — perna `Ausente` absorvida por `ou` verdadeiro (curto-circuito de `avaliar`) gera pendência não-bloqueante `perna_ausente_absorvida` anexada à linha via passada de diagnóstico separada que atravessa predicado composto nomeado (`pernas_ausentes_absorvidas`); tri-estado não se move (`tem_anexada` conta só bloqueante). Resolve DT-003EJ-02 e faceta (b) de DH-003EJ-01. Medição Fascino: 2 pendências, ambas GHE-16, ancoradas em `audiometria`; status 3 VÁLIDA / 15 PARCIAL / 1 BLOQUEADA inalterado. Suíte 1001→1013→1019 passed, 6 skipped; `mypy --strict` delta-zero, 34 arquivos. Commits `4f5c91f`, `cd39cb8`, `823d467`, `1894602`; merge `54637e4` (PR #275). |
 | v161 | 31/07/2026 | Sessão 003.EM (FECHAMENTO): **D-ARQ-72 CRIADA** — apresentação-de-saída da matriz (`renderizar_matriz`, `agente_medico/superficie/apresentacao_matriz.py`) é superfície própria, apresentação-pura herdando D-ARQ-54 P1 (lógica-de-domínio zero); extraída byte-idêntica de `scripts/medicao_pgr.py` (7 testes existentes inalterados); `Motivo.status_regra` populado de `regra.get("status")` fecha D-ARQ-22 Parte B no eixo que DH-003EI-01 faceta 2 registrava descumprido; ordem de leitura `INTERPRETADO`→`DERIVADO` materializa o bloco "inspecionar primeiro". Fecha faceta 2 de DH-003EI-01 (§11 PROTOCOLO); abre DH-003EM-01 (literal `_STATUS_INSPECIONAR_PRIMEIRO` sem teste computado, classe D-ARQ-67) e DH-003EM-02 (bloco nunca exercitado no nível `INTERPRETADO` no Fascino). Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EM. |
 | v162 | 01/08/2026 | Sessão 003.EO + EMENDA 1 (FECHAMENTO): **D-ARQ-73 CRIADA** — emissor de saída no formato do escritório (`agente_medico/superficie/documento_matriz.py`): `DocumentoMatriz` única + `renderizar_html`/`renderizar_docx`; expansão GHE→cargo ancorada em R-GHE-01/D-ARQ-21; ordem de exibição dos exames cravada como `ordem_exibicao` opcional em `exames.yaml` (decisão do Arquiteto na EMENDA 1, após medição achar ordem não-constante entre GHEs — bloqueador nomeado da fatia 0); cabeçalho/rodapé seam humano (DT-003EO-01); sanitização de controle (NUL) só na renderização (DH-003EG-01). `MatrizGHE` ganha `nome_ghe`/`cargos` aditivos (fatia 1). Medição fatia 4 contra Fascino real: tabela da EMENDA 1 confirmada exatamente (12/19 GHEs idênticos, 4 células de superemissão, 10 de subemissão); achados novos confirmados (RX 12M×24M em 14 GHEs, clínico 6M×12M em GHE-09/17 → DT-003EO-03); achado fora do previsto: `GHEPGR.cargos` chega como 1 string por GHE (D-ARQ-65 fatia 1, já documentado no parser) → DT-003EO-04. Grafia Glicemia/RX ficou indecisa (D-ARQ-06) → DT-003EO-02, yaml intocado. `docs/PLANO_V1.md` migrado da pasta do Cowork (pendência de versionamento do próprio arquivo). Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EO. |
+| v163 | 03/08/2026 | Sessão 003.EP fatias 0-4 (MEDIÇÃO + IMPLEMENTAÇÃO + FECHAMENTO): **D-ARQ-65 Cláusula 5 NOVA** — o bloco da família medida é um formulário de rótulos em 2 colunas fixas (rótulo esquerda/valor direita), não só a tabela de riscos já calibrada por bloco; `x0` idênticos bit-a-bit nos 19/19 blocos do Fascino (`58.499347642527084`/`279.2172167102426`), continuações do valor com desvio 0,0pt exato; critério de fim de célula é transição de banda, nunca o literal do próximo rótulo. Nota de aplicação: `_extrair_cargos_da_linha` passa a capturar overflow por banda (fatia 1) e separar nome/CBO por entrada (fatia 2, CBO descartado — precedente 003.DG-1, candidato de consumo futuro DT-003ED-01 faceta máquina pesada); correção de premissa da EMENDA 4 de 003.EO preservada (D-ARQ-06): delimitador e CBO-colado-ao-nome não eram dois problemas, é 1 código CBO-2002 partido pelo mesmo glifo-hífen (`\x00`≡`-`) já catalogado em `_PADRAO_TITULO_ANCORA`. Não abriu D-ARQ nova — extensão de recorte medido, molde D-ARQ-57 peça 1. Fecha **DT-003EO-04** (PROTOCOLO §11) nas duas facetas, evidência: gate nominal 0 divergências (41 nomes) + e2e real (41 `LinhaCargo`). Abre **DT-003EP-01** (R-GHE-02 inalcançável — `cargos_vocab.get(cargo)` sem resolver, 19→41 pendências medido), **DT-003EP-02** (dois caminhos de silêncio remanescentes no parser, não exercitados no Fascino) e **DH-003EP-01** (`_sanitizar` apaga glifo-hífen no documento assinado). Nota aditiva em DH-003EG-01 (bytes NUL do relatório 122→18, resíduo de outra origem). Não-regressão medida: linhas de exame 171→171, status por GHE idêntico nos 19/19. Suíte 1039→1048 passed, 6 skipped; `mypy --strict` 42 arquivos, limpo. Commits `aaa9eca`/`486d54d`/`7f19cf4`. Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EP. |

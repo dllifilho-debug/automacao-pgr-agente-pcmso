@@ -66,8 +66,8 @@ se defenda. Duas exceções que não se defendem sozinhas e por isso são caminh
 | # | Sessão | Estado |
 |---|---|---|
 | **S1** | Regra psicossocial — `R-PSY-02` sucede `R-PSY-01` (DEPRECATED) | **prompt pronto:** `PROMPT_003EN_psicossocial.md` |
-| **S2** | Emissor Word + HTML no formato do escritório | **[ATUALIZADO — 003.EO]** parcialmente entregue: emissores HTML e DOCX prontos e testados (D-ARQ-73); expansão GHE→cargo implementada e correta, **sem efeito em produção** até o parser separar os cargos (DT-003EO-04) — fecha em 003.EP |
-| **S3** | App: upload PGR → envelope → processa → matriz na tela → download | não começou |
+| **S2** | Emissor Word + HTML no formato do escritório | **[ATUALIZADO — 003.EP] entregue** — emissores HTML e DOCX prontos e testados (D-ARQ-73); expansão GHE→cargo com os 41 cargos reais do Fascino, em produção (DT-003EO-04 fechada — ver §"S2 — o que falta"). Ressalva preservada, não é lacuna: cabeçalho/rodapé seguem seam humano por desenho (DT-003EO-01/D-ARQ-73 cl.5), resolvido no S3, não no S2 |
+| **S3** | App: upload PGR → envelope → processa → matriz na tela → download | não começou — **próximo da fila** |
 | **S0** | Decisão de hospedagem | **não decidido — risco de prazo subestimado** |
 
 ### S2 — o que falta, nomeado
@@ -84,6 +84,15 @@ se defenda. Duas exceções que não se defendem sozinhas e por isso são caminh
    linha física na tabela do PDF perde o resto da lista em 2 de 19 GHEs (GHE-03, GHE-06).
    `montar_documento` (D-ARQ-73) expande corretamente o que recebe; o problema é o dado de
    entrada, não a expansão. Ver DT-003EO-04 (duas facetas, fecha em `003.EP`).
+   **[FECHADO — 003.EP, D-ARQ-06: registro acima preservado, não apagado]** DT-003EO-04
+   fechada nas duas facetas (PROTOCOLO §11) — `_extrair_cargos_da_linha` passa a capturar
+   overflow por transição de banda (D-ARQ-65 cláusula 5) e a separar nome/CBO por entrada,
+   CBO descartado. Os 41 cargos do gabarito chegam a `GHEPGR` e a `montar_documento` (e2e
+   real medido: 41 `LinhaCargo`, os 6 antes perdidos presentes nominalmente). **Ressalva que
+   NÃO fecha aqui, por desenho, não por lacuna:** cabeçalho/rodapé seguem sendo parâmetro
+   humano do emissor (D-ARQ-73 cl.5 / DT-003EO-01) — é seam humano intencional (mesma classe
+   de DT-003BV-01/confirmação-RT), resolvido quando o S3 (app) tiver onde capturar esse dado
+   de um humano, não uma lacuna do S2.
 2. **Emissor DOCX** — `python-docx` já está em `requirements.txt`. **[FEITO em 003.EO.]**
 3. **Emissor HTML** sobre a mesma estrutura intermediária. **[FEITO em 003.EO.]**
 4. **Decisão de arquitetura recomendada:** a explicação **não entra no Word da Dra.** O Word
