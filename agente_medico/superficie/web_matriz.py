@@ -70,7 +70,19 @@ def gerar_documento(
 
 def _rodar_parse_deterministico(
     caminho_pdf: Path, envelope: EnvelopeConfirmado
-) -> tuple[tuple[MatrizGHE, ...] | None, dict[str, Any], tuple[Pendencia, ...]]:
+) -> tuple[
+    tuple[MatrizGHE, ...] | None,
+    dict[str, Any],
+    tuple[Pendencia, ...],
+    str | None,
+    tuple[Pendencia, ...],
+]:
+    """Devolve, além de matrizes/exames_vocab/pendencias (extração+hidratação),
+    resultado.status e resultado.pendencias_globais — sem esses dois campos a
+    casca não consegue distinguir um gate eliminatório (R-PGR-01/R-PGR-06,
+    Resultado(status="REJEITADO", matrizes=[])) de um parse legitimamente
+    vazio (achado 003.EQ emenda 3: `matrizes=[]` não é None, então esse ramo
+    passava reto pelo guard `doc is None`)."""
     protocolo = carregar(Path(__file__).resolve().parent.parent / "protocolo")
     resultado, pendencias = processar_arquivo_pgr(
         caminho_pdf,
@@ -80,7 +92,9 @@ def _rodar_parse_deterministico(
         envelope,
     )
     matrizes = tuple(resultado.matrizes) if resultado is not None else None
-    return matrizes, protocolo.vocabulario.exames, pendencias
+    status = resultado.status if resultado is not None else None
+    pendencias_globais = tuple(resultado.pendencias_globais) if resultado is not None else ()
+    return matrizes, protocolo.vocabulario.exames, pendencias, status, pendencias_globais
 
 
 def executar_rota_determinista(
@@ -95,7 +109,9 @@ def executar_rota_determinista(
     (None, None, pendencias) — nunca inventa matriz (D-ARQ-22). Primitiva
     sem cache — executar_rota_determinista_cacheada é a versão que a casca
     usa de fato."""
-    matrizes, exames_vocab, pendencias = _rodar_parse_deterministico(caminho_pdf, envelope)
+    matrizes, exames_vocab, pendencias, _status, _pendencias_globais = _rodar_parse_deterministico(
+        caminho_pdf, envelope
+    )
     if matrizes is None:
         return None, None, pendencias
     doc, html = gerar_documento(matrizes, exames_vocab, cabecalho, rodape)
@@ -106,12 +122,16 @@ def executar_rota_determinista(
 class CacheMatrizes:
     """Resultado cacheado da parte CARA (processar_arquivo_pgr) da rota
     determinística. `chave` vem de calcular_chave_cache — PDF + envelope,
-    nunca cabeçalho/rodapé."""
+    nunca cabeçalho/rodapé. `status`/`pendencias_globais` espelham
+    Resultado — a casca usa `status == "REJEITADO"` para parar duro
+    (003.EQ emenda 3, elo A)."""
 
     chave: str
     matrizes: tuple[MatrizGHE, ...] | None
     exames_vocab: dict[str, Any]
     pendencias: tuple[Pendencia, ...]
+    status: str | None
+    pendencias_globais: tuple[Pendencia, ...]
 
 
 def calcular_chave_cache(conteudo_pdf: bytes, envelope: EnvelopeConfirmado) -> str:
@@ -145,12 +165,16 @@ def executar_rota_determinista_cacheada(
     persistir em st.session_state."""
     chave_atual = calcular_chave_cache(conteudo_pdf, envelope)
     if cache is None or deve_reprocessar(chave_atual, cache.chave):
-        matrizes, exames_vocab, pendencias = _rodar_parse_deterministico(caminho_pdf, envelope)
+        matrizes, exames_vocab, pendencias, status, pendencias_globais = _rodar_parse_deterministico(
+            caminho_pdf, envelope
+        )
         cache = CacheMatrizes(
             chave=chave_atual,
             matrizes=matrizes,
             exames_vocab=exames_vocab,
             pendencias=pendencias,
+            status=status,
+            pendencias_globais=pendencias_globais,
         )
 
     if cache.matrizes is None:
@@ -237,6 +261,22 @@ def pagina_matriz() -> None:
                 caminho_pdf, conteudo_pdf, envelope, cabecalho, rodape, cache
             )
 
+        # Elo A (003.EQ emenda 3): gate eliminatório (R-PGR-01/R-PGR-06) é
+        # parada dura — Resultado(status="REJEITADO", matrizes=[]) tem
+        # matrizes=() != None, então o guard `doc is None` mais abaixo NUNCA
+        # pegava esse ramo; documento vazio assinável saía com os dois
+        # downloads. Checa ANTES de gerar docx/gravar cache.
+        if cache.status == "REJEITADO":
+            st.error("PGR rejeitado — pendências bloqueantes impedem a emissão da matriz:")
+            for p in cache.pendencias_globais:
+                if p.bloqueante:
+                    st.write(f"- `{p.tipo}` ({p.regra_origem}): {p.motivo}")
+            # Elo D: nunca grava cache de um estado REJEITADO — a chave não
+            # pode mascarar a rejeição num rerun (ex.: clique de download de
+            # uma submissão anterior bem-sucedida ainda em session_state).
+            st.session_state.pop("web_matriz_cache", None)
+            return
+
         docx_bytes = None
         if doc is not None:
             destino_docx = Path(tmp) / "matriz.docx"
@@ -251,10 +291,29 @@ def pagina_matriz() -> None:
             st.write(f"- `{p.tipo}`: {p.motivo}")
         return
 
+    # Elo B: pendências GLOBAIS (D-ARQ-08, prioridade visual) sempre entram
+    # na tela, em bloco próprio, ANTES das pendências de extração/hidratação
+    # — senão as centenas de vocabulario_ausente afogam a única que importa.
+    if cache.pendencias_globais:
+        st.subheader("Pendências globais")
+        for p in cache.pendencias_globais:
+            st.write(f"- `{p.tipo}` ({p.regra_origem}): {p.motivo}")
+
     if pendencias:
         st.subheader("Pendências")
         for p in pendencias:
             st.write(f"- `{p.tipo}`: {p.motivo}")
+
+    # Elo C: guarda anti-documento-vazio, independente do gate — documento
+    # assinável sem nenhuma linha de cargo (nenhum exame emitido) não sai da
+    # máquina em hipótese nenhuma (D-ARQ-22).
+    total_linhas_cargo = sum(len(bloco.linhas) for bloco in doc.blocos)
+    if total_linhas_cargo == 0:
+        st.error(
+            "Documento sem nenhuma linha de cargo — nenhum exame emitido. "
+            "Nenhum download oferecido (D-ARQ-22)."
+        )
+        return
 
     for bloco in doc.blocos:
         st.subheader(f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip())

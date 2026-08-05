@@ -237,3 +237,153 @@ def test_troca_de_cabecalho_regenera_documento_sem_reprocessar(
     assert doc1.cabecalho.empresa == "Empresa Teste"
     assert doc2.cabecalho.empresa == "Outra Empresa"
     assert cache2.chave == cache.chave
+
+
+# ---------------------------------------------------------------------------
+# Emenda 003.EQ (3ª) — bloqueador do documento vazio assinável. Achado real
+# (upload nativo, máquina do Diovanni): Resultado(status="REJEITADO",
+# matrizes=[]) tem matrizes=() != None, então o guard `doc is None` nunca
+# pegava esse ramo — a casca montava e oferecia um documento sem tabela
+# nenhuma para download. Quatro elos corrigidos: A) parada dura no gate
+# eliminatório; B) pendencias_globais sempre na tela, antes das de extração
+# (D-ARQ-08); C) guarda anti-documento-vazio independente do gate (D-ARQ-22);
+# D) estado REJEITADO nunca grava cache.
+# ---------------------------------------------------------------------------
+
+
+def _submeter_formulario(at: AppTest, validade: str = "2026-12-31") -> None:
+    at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    indice_validade = len(at.text_input) - 1
+    at.text_input[indice_validade].set_value(validade).run()
+    at.checkbox[0].set_value(True).run()
+    at.button[0].click().run()
+
+
+def test_status_rejeitado_mostra_motivo_e_nao_oferece_download(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: trocar `cache.status == "REJEITADO"` por
+    # `cache.status is None` — status de um Resultado REJEITADO de verdade é
+    # a STRING "REJEITADO", nunca None, então o guard revertido nunca
+    # dispara e o motivo do gate (R-PGR-01/NR-18) nunca aparece na tela — só
+    # a guarda genérica anti-vazio (elo C) pegaria o caso, com outro texto.
+    chamadas_download: list[int] = []
+
+    def _download_espiao(*args: Any, **kwargs: Any) -> bool:
+        chamadas_download.append(1)
+        return False
+
+    monkeypatch.setattr("streamlit.download_button", _download_espiao)
+
+    pendencia_gate = Pendencia(
+        tipo="assinatura_invalida",
+        destinatario="empresa",
+        motivo="PGR não assinado por engenheiro de segurança do trabalho (NR-18)",
+        bloqueante=True,
+        regra_origem="R-PGR-01",
+    )
+    resultado_rejeitado = Resultado(
+        status="REJEITADO",
+        matrizes=[],
+        pendencias_globais=[pendencia_gate],
+        motivo_rejeicao=pendencia_gate.motivo,
+    )
+
+    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
+        return resultado_rejeitado, ()
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
+    )
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+
+    assert not at.exception
+    assert at.error
+    # Especificamente a mensagem do elo A ("PGR rejeitado...") — não basta o
+    # motivo aparecer em algum lugar da tela: o elo B (pendencias_globais
+    # sempre visíveis) também renderiza o mesmo motivo, então checar só
+    # "R-PGR-01 in texto" não discrimina a reversão (ela ainda passaria pelo
+    # elo B + pela guarda genérica do elo C).
+    assert any("PGR rejeitado" in e.value for e in at.error)
+    texto_markdown = "\n".join(el.value for el in at.markdown)
+    assert "R-PGR-01" in texto_markdown
+    assert "NR-18" in texto_markdown
+    assert chamadas_download == []
+
+
+def test_pendencias_globais_aparecem_antes_das_de_extracao(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: remover o bloco `if cache.pendencias_globais: ...`
+    # — o marcador MOTIVO-GLOBAL-UNICO some do texto renderizado.
+    pendencia_global = Pendencia(
+        tipo="pgr_informativo_global",
+        destinatario="empresa",
+        motivo="MOTIVO-GLOBAL-UNICO",
+        bloqueante=False,
+        regra_origem="R-PGR-99",
+    )
+    pendencia_extracao = Pendencia(
+        tipo="vocabulario_ausente",
+        destinatario="extracao",
+        motivo="MOTIVO-EXTRACAO-UNICO",
+        bloqueante=False,
+        regra_origem="D-ARQ-14",
+    )
+    exame = ExameEmitido(exame="exame_clinico", periodicidade_meses=12, momentos={Momento.ADM})
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=("Cargo Teste",))
+    resultado = Resultado(status="OK", matrizes=[matriz], pendencias_globais=[pendencia_global])
+
+    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
+        return resultado, (pendencia_extracao,)
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
+    )
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+
+    assert not at.exception
+    textos = [el.value for el in at.markdown]
+    idx_global = next(i for i, t in enumerate(textos) if "MOTIVO-GLOBAL-UNICO" in t)
+    idx_extracao = next(i for i, t in enumerate(textos) if "MOTIVO-EXTRACAO-UNICO" in t)
+    assert idx_global < idx_extracao
+
+
+def test_documento_sem_linha_cargo_nao_e_oferecido_para_download(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: remover o bloco `if total_linhas_cargo == 0: ...
+    # return` — o documento sem nenhuma LinhaCargo (GHE com cargos=())
+    # passaria a oferecer os dois downloads mesmo vazio.
+    chamadas_download: list[int] = []
+
+    def _download_espiao(*args: Any, **kwargs: Any) -> bool:
+        chamadas_download.append(1)
+        return False
+
+    monkeypatch.setattr("streamlit.download_button", _download_espiao)
+
+    exame = ExameEmitido(exame="exame_clinico", periodicidade_meses=12, momentos={Momento.ADM})
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=())
+    resultado = Resultado(status="OK", matrizes=[matriz])
+
+    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
+        return resultado, ()
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
+    )
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+
+    assert not at.exception
+    assert at.error
+    assert chamadas_download == []
