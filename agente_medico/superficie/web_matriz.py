@@ -1,19 +1,34 @@
-"""Página web da matriz — rota determinística, S3 fatia 1 (003.EQ).
+"""Página web da matriz — rota determinística, S3 fatia 1 (003.EQ + emendas).
 
 Mesma topologia de web_envelope.py: núcleo puro que não importa streamlit +
-casca pagina_matriz() que importa streamlit dentro da função. Costura
-processar_arquivo_pgr (adaptadores/orquestracao_pgr.py) até
-montar_documento/renderizar_html/renderizar_docx (documento_matriz.py) —
-lógica de domínio zero, a superfície não reimplementa expansão GHE→cargo
-nem ordenação de exame.
+casca pagina_matriz() que importa streamlit dentro da função. O núcleo
+carrega o trabalho (D-ARQ-54 P1, molde web_envelope.py).
+
+executar_rota_determinista_cacheada separa o CARO (processar_arquivo_pgr —
+parse do PDF, minutos) do BARATO (gerar_documento — montagem/render sobre
+matrizes já calculadas, milissegundos): deve_reprocessar decide, por uma
+chave que deriva do CONTEÚDO do PDF + do envelope (nunca de cabeçalho/
+rodapé — apresentação não é identidade do parse, D-ARQ-22: trocar só o
+cabeçalho não pode mascarar reuso de matriz de outro PDF, nem forçar reparse
+por um campo cosmético), se o cache pode ser reaproveitado. A casca guarda
+o CacheMatrizes em st.session_state e chama a rota cacheada a cada rerun —
+inclusive o rerun disparado por clique em st.download_button (comportamento
+padrão do Streamlit, on_click="rerun") — sem nunca reprocessar o PDF fora
+de uma mudança real de conteúdo/envelope. Lógica de domínio zero na casca.
 """
 
 from __future__ import annotations
 
+import hashlib
+from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 from typing import Any, Sequence
 
-from agente_medico.motor.tipos import EnvelopeConfirmado, MatrizGHE
+from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
+from agente_medico.adaptadores.transcritor_offline import TranscritorCardOffline, TranscritorGHEOffline
+from agente_medico.motor.protocolo import carregar
+from agente_medico.motor.tipos import EnvelopeConfirmado, MatrizGHE, Pendencia
 from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
     DocumentoMatriz,
@@ -22,7 +37,16 @@ from agente_medico.superficie.documento_matriz import (
     renderizar_html,
 )
 
-__all__ = ["gerar_documento", "montar_envelope", "pagina_matriz"]
+__all__ = [
+    "CacheMatrizes",
+    "calcular_chave_cache",
+    "deve_reprocessar",
+    "executar_rota_determinista",
+    "executar_rota_determinista_cacheada",
+    "gerar_documento",
+    "montar_envelope",
+    "pagina_matriz",
+]
 
 
 def montar_envelope(validade_iso: str, assinatura: bool) -> EnvelopeConfirmado:
@@ -44,26 +68,121 @@ def gerar_documento(
     return doc, renderizar_html(doc)
 
 
+def _rodar_parse_deterministico(
+    caminho_pdf: Path, envelope: EnvelopeConfirmado
+) -> tuple[tuple[MatrizGHE, ...] | None, dict[str, Any], tuple[Pendencia, ...]]:
+    protocolo = carregar(Path(__file__).resolve().parent.parent / "protocolo")
+    resultado, pendencias = processar_arquivo_pgr(
+        caminho_pdf,
+        protocolo,
+        TranscritorGHEOffline(),
+        TranscritorCardOffline(),
+        envelope,
+    )
+    matrizes = tuple(resultado.matrizes) if resultado is not None else None
+    return matrizes, protocolo.vocabulario.exames, pendencias
+
+
+def executar_rota_determinista(
+    caminho_pdf: Path,
+    envelope: EnvelopeConfirmado,
+    cabecalho: CabecalhoDocumento,
+    rodape: RodapeDocumento,
+) -> tuple[DocumentoMatriz | None, str | None, tuple[Pendencia, ...]]:
+    """Carrega o protocolo, roda processar_arquivo_pgr pela rota
+    determinística (clientes-bomba offline, cliente LLM nunca invocado) e,
+    com Resultado não-None, gera o documento. Parse total falho devolve
+    (None, None, pendencias) — nunca inventa matriz (D-ARQ-22). Primitiva
+    sem cache — executar_rota_determinista_cacheada é a versão que a casca
+    usa de fato."""
+    matrizes, exames_vocab, pendencias = _rodar_parse_deterministico(caminho_pdf, envelope)
+    if matrizes is None:
+        return None, None, pendencias
+    doc, html = gerar_documento(matrizes, exames_vocab, cabecalho, rodape)
+    return doc, html, pendencias
+
+
+@dataclass(frozen=True)
+class CacheMatrizes:
+    """Resultado cacheado da parte CARA (processar_arquivo_pgr) da rota
+    determinística. `chave` vem de calcular_chave_cache — PDF + envelope,
+    nunca cabeçalho/rodapé."""
+
+    chave: str
+    matrizes: tuple[MatrizGHE, ...] | None
+    exames_vocab: dict[str, Any]
+    pendencias: tuple[Pendencia, ...]
+
+
+def calcular_chave_cache(conteudo_pdf: bytes, envelope: EnvelopeConfirmado) -> str:
+    """Chave de invalidação do cache: hash do CONTEÚDO do PDF (bytes reais,
+    não o nome do arquivo) + envelope. Cabeçalho/rodapé nunca entram — são
+    apresentação, não identidade do parse (ver docstring do módulo)."""
+    digest = hashlib.sha256(conteudo_pdf).hexdigest()
+    return f"{digest}:{envelope.validade.isoformat()}:{envelope.assinatura_engenheiro}"
+
+
+def deve_reprocessar(chave_atual: str, chave_em_cache: str | None) -> bool:
+    """True quando o cache (se existir) não corresponde ao PDF/envelope
+    atuais — processar_arquivo_pgr (caro) precisa rodar de novo. False
+    reaproveita o cache (mesmo PDF, mesmo envelope)."""
+    return chave_atual != chave_em_cache
+
+
+def executar_rota_determinista_cacheada(
+    caminho_pdf: Path,
+    conteudo_pdf: bytes,
+    envelope: EnvelopeConfirmado,
+    cabecalho: CabecalhoDocumento,
+    rodape: RodapeDocumento,
+    cache: CacheMatrizes | None,
+) -> tuple[DocumentoMatriz | None, str | None, tuple[Pendencia, ...], CacheMatrizes]:
+    """Cacheia o CARO (processar_arquivo_pgr, via deve_reprocessar sobre a
+    chave de calcular_chave_cache), regenera o BARATO (gerar_documento)
+    incondicionalmente — mesmo no cache-hit, cabeçalho/rodapé ATUAIS valem,
+    nunca os do momento em que o cache foi gravado. Devolve sempre o
+    CacheMatrizes vigente (novo, no miss; o mesmo, no hit) para a casca
+    persistir em st.session_state."""
+    chave_atual = calcular_chave_cache(conteudo_pdf, envelope)
+    if cache is None or deve_reprocessar(chave_atual, cache.chave):
+        matrizes, exames_vocab, pendencias = _rodar_parse_deterministico(caminho_pdf, envelope)
+        cache = CacheMatrizes(
+            chave=chave_atual,
+            matrizes=matrizes,
+            exames_vocab=exames_vocab,
+            pendencias=pendencias,
+        )
+
+    if cache.matrizes is None:
+        return None, None, cache.pendencias, cache
+    doc, html = gerar_documento(cache.matrizes, cache.exames_vocab, cabecalho, rodape)
+    return doc, html, cache.pendencias, cache
+
+
 def pagina_matriz() -> None:
     import tempfile
     from pathlib import Path
 
     import streamlit as st
 
-    from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
-    from agente_medico.adaptadores.transcritor_offline import (
-        TranscritorCardOffline,
-        TranscritorGHEOffline,
+    from agente_medico.superficie.documento_matriz import (
+        CabecalhoDocumento,
+        RodapeDocumento,
+        renderizar_docx,
     )
-    from agente_medico.motor.protocolo import carregar
-    from agente_medico.superficie.apresentacao_matriz import renderizar_matriz
-    from agente_medico.superficie.documento_matriz import renderizar_docx
+    from agente_medico.superficie.web_matriz import (
+        executar_rota_determinista_cacheada,
+        montar_envelope,
+    )
 
     st.title("Matriz de exames — rota determinística")
 
     arquivo = st.file_uploader("PDF do PGR", type="pdf")
     if arquivo is None:
+        st.session_state.pop("web_matriz_cache", None)
         return
+
+    conteudo_pdf = arquivo.getvalue()
 
     with st.form("cabecalho_rodape_envelope"):
         st.subheader("Cabeçalho")
@@ -85,7 +204,8 @@ def pagina_matriz() -> None:
 
         enviado = st.form_submit_button("Gerar matriz")
 
-    if not enviado:
+    cache = st.session_state.get("web_matriz_cache")
+    if not enviado and cache is None:
         return
 
     try:
@@ -110,43 +230,42 @@ def pagina_matriz() -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         caminho_pdf = Path(tmp) / arquivo.name
-        caminho_pdf.write_bytes(arquivo.getvalue())
+        caminho_pdf.write_bytes(conteudo_pdf)
 
         with st.spinner("Processando PGR — o parse do PDF pode levar alguns minutos..."):
-            protocolo = carregar(Path(__file__).resolve().parent.parent / "protocolo")
-            resultado, pendencias = processar_arquivo_pgr(
-                caminho_pdf,
-                protocolo,
-                TranscritorGHEOffline(),
-                TranscritorCardOffline(),
-                envelope,
+            doc, html, pendencias, cache = executar_rota_determinista_cacheada(
+                caminho_pdf, conteudo_pdf, envelope, cabecalho, rodape, cache
             )
 
-        if resultado is None:
-            st.error("Parse total falho — nenhuma matriz gerada (D-ARQ-22).")
-            for p in pendencias:
-                st.write(f"- `{p.tipo}`: {p.motivo}")
-            return
+        docx_bytes = None
+        if doc is not None:
+            destino_docx = Path(tmp) / "matriz.docx"
+            renderizar_docx(doc, destino_docx)
+            docx_bytes = destino_docx.read_bytes()
 
-        if pendencias:
-            st.subheader("Pendências")
-            for p in pendencias:
-                st.write(f"- `{p.tipo}`: {p.motivo}")
+    st.session_state["web_matriz_cache"] = cache
 
-        for matriz in resultado.matrizes:
-            st.markdown("\n".join(renderizar_matriz(matriz)))
+    if doc is None or html is None:
+        st.error("Parse total falho — nenhuma matriz gerada (D-ARQ-22).")
+        for p in pendencias:
+            st.write(f"- `{p.tipo}`: {p.motivo}")
+        return
 
-        doc, html = gerar_documento(
-            resultado.matrizes, protocolo.vocabulario.exames, cabecalho, rodape
-        )
+    if pendencias:
+        st.subheader("Pendências")
+        for p in pendencias:
+            st.write(f"- `{p.tipo}`: {p.motivo}")
 
-        st.download_button("Baixar HTML", html, file_name="matriz.html", mime="text/html")
+    for bloco in doc.blocos:
+        st.subheader(f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip())
+        for linha in bloco.linhas:
+            st.write(f"**{linha.cargo}**: {', '.join(linha.celulas)}")
 
-        destino_docx = Path(tmp) / "matriz.docx"
-        renderizar_docx(doc, destino_docx)
+    st.download_button("Baixar HTML", html, file_name="matriz.html", mime="text/html")
+    if docx_bytes is not None:
         st.download_button(
             "Baixar DOCX",
-            destino_docx.read_bytes(),
+            docx_bytes,
             file_name="matriz.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
