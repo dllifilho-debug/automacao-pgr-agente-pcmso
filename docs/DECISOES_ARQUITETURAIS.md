@@ -2918,6 +2918,59 @@ EMENDA 1 do Arquiteto resolveu ordem_exibicao e corrigiu a medição de contagem
 prompt original (41 linhas reais, não 37 — causa nomeada no parser do Arquiteto, não no Code).
 Detalhe em HISTORICO 003.EO.
 
+## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca
+emite documento sem conteúdo clínico
+
+**Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003.EQ). Não cria nem altera
+regra clínica.
+
+**Contexto — caso-âncora medido.** A fatia 1 do S3 (`superficie/web_matriz.py`) tratava
+apenas `resultado is None` como falha. O gate eliminatório de R-PGR-01 produz
+`Resultado(status="REJEITADO", matrizes=[])` (`orquestrador.py:42-51`) — que **não é
+None**. Consequência medida em dois ambientes independentes (sandbox do Code e host do
+Diovanni): a tela renderizou as 154 pendências de extração, ofereceu os dois downloads,
+e produziu `matriz.html` de **187 bytes** e `matriz.docx` com **zero `<w:tbl>`** — só
+cabeçalho e rodapé, incluindo nome e CRM da médica. Um documento assinável, sem uma
+única linha de exame e sem um único aviso.
+
+A informação existia e estava carimbada: o motor emitiu
+`Pendencia(tipo="assinatura_invalida", regra_origem="R-PGR-01")` com o motivo literal
+"PGR não assinado por engenheiro de segurança do trabalho (NR-18)". A superfície a
+descartou — iterava `pend_forma + pend_hidr` e nunca `resultado.pendencias_globais`.
+Quarta ocorrência da classe "o dado existe, o consumidor não lê" (`R-RX-01-sem` 003.EH,
+`R-GHE-02` 003.EP, `anexo_nr07` 003.AB, esta).
+
+**Decisão — 4 cláusulas.**
+
+1. **Status do `Resultado` é contrato de superfície, não detalhe interno.** Toda
+   superfície que emite artefato destinado a assinatura lê `resultado.status`.
+   `REJEITADO` é parada dura: nomeia o motivo de cada pendência bloqueante e não emite
+   documento nem oferece download.
+2. **`pendencias_globais` são renderizadas sempre, em bloco próprio, antes das
+   pendências de extração.** Materializa D-ARQ-08 ("pendências bloqueantes têm
+   prioridade visual") na superfície. O caso-âncora mostra por quê: 154 pendências de
+   vocabulário afogaram a única que decidia a emissão.
+3. **Guarda anti-documento-vazio, independente do gate.** Documento sem nenhuma
+   `LinhaCargo` não é oferecido para download, qualquer que seja o status. A guarda é
+   sobre o artefato, não sobre a causa — um caminho futuro que zere as linhas por outro
+   motivo cai nela também.
+4. **Estado rejeitado não entra em cache.** Cache de resultado caro não pode mascarar
+   `REJEITADO` num rerun subsequente.
+
+**Consequência.** Superfície é apresentação-pura (D-ARQ-54 P1), mas apresentação-pura
+não significa cega ao status: descartar o campo que decide se o artefato pode existir é
+lógica de domínio por omissão. A regra vale para `apresentacao_matriz.py`,
+`documento_matriz.py` e qualquer emissor futuro — verificar na próxima sessão que os
+tocar. `[A MEDIR — os outros emissores não foram auditados nesta sessão]`
+
+**Universalidade (D-ARQ-06).** Independe de setor: qualquer PGR reprovado em gate
+eliminatório, em qualquer ramo, produzia o mesmo artefato vazio.
+
+**Base.** Sessão 003.EQ, commit `4b0a541`. Testes 10a-10c em
+`agente_medico/tests/test_web_matriz.py`, cada um com reversão nomeada e confirmada
+vermelha. Achado originado da verificação manual do Diovanni — não da suíte, que
+permanecia 1059 verde com o defeito vivo.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -3085,3 +3138,4 @@ Detalhe em HISTORICO 003.EO.
 | v161 | 31/07/2026 | Sessão 003.EM (FECHAMENTO): **D-ARQ-72 CRIADA** — apresentação-de-saída da matriz (`renderizar_matriz`, `agente_medico/superficie/apresentacao_matriz.py`) é superfície própria, apresentação-pura herdando D-ARQ-54 P1 (lógica-de-domínio zero); extraída byte-idêntica de `scripts/medicao_pgr.py` (7 testes existentes inalterados); `Motivo.status_regra` populado de `regra.get("status")` fecha D-ARQ-22 Parte B no eixo que DH-003EI-01 faceta 2 registrava descumprido; ordem de leitura `INTERPRETADO`→`DERIVADO` materializa o bloco "inspecionar primeiro". Fecha faceta 2 de DH-003EI-01 (§11 PROTOCOLO); abre DH-003EM-01 (literal `_STATUS_INSPECIONAR_PRIMEIRO` sem teste computado, classe D-ARQ-67) e DH-003EM-02 (bloco nunca exercitado no nível `INTERPRETADO` no Fascino). Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EM. |
 | v162 | 01/08/2026 | Sessão 003.EO + EMENDA 1 (FECHAMENTO): **D-ARQ-73 CRIADA** — emissor de saída no formato do escritório (`agente_medico/superficie/documento_matriz.py`): `DocumentoMatriz` única + `renderizar_html`/`renderizar_docx`; expansão GHE→cargo ancorada em R-GHE-01/D-ARQ-21; ordem de exibição dos exames cravada como `ordem_exibicao` opcional em `exames.yaml` (decisão do Arquiteto na EMENDA 1, após medição achar ordem não-constante entre GHEs — bloqueador nomeado da fatia 0); cabeçalho/rodapé seam humano (DT-003EO-01); sanitização de controle (NUL) só na renderização (DH-003EG-01). `MatrizGHE` ganha `nome_ghe`/`cargos` aditivos (fatia 1). Medição fatia 4 contra Fascino real: tabela da EMENDA 1 confirmada exatamente (12/19 GHEs idênticos, 4 células de superemissão, 10 de subemissão); achados novos confirmados (RX 12M×24M em 14 GHEs, clínico 6M×12M em GHE-09/17 → DT-003EO-03); achado fora do previsto: `GHEPGR.cargos` chega como 1 string por GHE (D-ARQ-65 fatia 1, já documentado no parser) → DT-003EO-04. Grafia Glicemia/RX ficou indecisa (D-ARQ-06) → DT-003EO-02, yaml intocado. `docs/PLANO_V1.md` migrado da pasta do Cowork (pendência de versionamento do próprio arquivo). Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EO. |
 | v163 | 03/08/2026 | Sessão 003.EP fatias 0-4 (MEDIÇÃO + IMPLEMENTAÇÃO + FECHAMENTO): **D-ARQ-65 Cláusula 5 NOVA** — o bloco da família medida é um formulário de rótulos em 2 colunas fixas (rótulo esquerda/valor direita), não só a tabela de riscos já calibrada por bloco; `x0` idênticos bit-a-bit nos 19/19 blocos do Fascino (`58.499347642527084`/`279.2172167102426`), continuações do valor com desvio 0,0pt exato; critério de fim de célula é transição de banda, nunca o literal do próximo rótulo. Nota de aplicação: `_extrair_cargos_da_linha` passa a capturar overflow por banda (fatia 1) e separar nome/CBO por entrada (fatia 2, CBO descartado — precedente 003.DG-1, candidato de consumo futuro DT-003ED-01 faceta máquina pesada); correção de premissa da EMENDA 4 de 003.EO preservada (D-ARQ-06): delimitador e CBO-colado-ao-nome não eram dois problemas, é 1 código CBO-2002 partido pelo mesmo glifo-hífen (`\x00`≡`-`) já catalogado em `_PADRAO_TITULO_ANCORA`. Não abriu D-ARQ nova — extensão de recorte medido, molde D-ARQ-57 peça 1. Fecha **DT-003EO-04** (PROTOCOLO §11) nas duas facetas, evidência: gate nominal 0 divergências (41 nomes) + e2e real (41 `LinhaCargo`). Abre **DT-003EP-01** (R-GHE-02 inalcançável — `cargos_vocab.get(cargo)` sem resolver, 19→41 pendências medido), **DT-003EP-02** (dois caminhos de silêncio remanescentes no parser, não exercitados no Fascino) e **DH-003EP-01** (`_sanitizar` apaga glifo-hífen no documento assinado). Nota aditiva em DH-003EG-01 (bytes NUL do relatório 122→18, resíduo de outra origem). Não-regressão medida: linhas de exame 171→171, status por GHE idêntico nos 19/19. Suíte 1039→1048 passed, 6 skipped; `mypy --strict` 42 arquivos, limpo. Commits `aaa9eca`/`486d54d`/`7f19cf4`. Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EP. |
+| v164 | 04/08/2026 | Sessão 003.EQ: D-ARQ-74 nova |

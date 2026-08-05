@@ -67,7 +67,7 @@ se defenda. Duas exceções que não se defendem sozinhas e por isso são caminh
 |---|---|---|
 | **S1** | Regra psicossocial — `R-PSY-02` sucede `R-PSY-01` (DEPRECATED) | **prompt pronto:** `PROMPT_003EN_psicossocial.md` |
 | **S2** | Emissor Word + HTML no formato do escritório | **[ATUALIZADO — 003.EP] entregue** — emissores HTML e DOCX prontos e testados (D-ARQ-73); expansão GHE→cargo com os 41 cargos reais do Fascino, em produção (DT-003EO-04 fechada — ver §"S2 — o que falta"). Ressalva preservada, não é lacuna: cabeçalho/rodapé seguem seam humano por desenho (DT-003EO-01/D-ARQ-73 cl.5), resolvido no S3, não no S2 |
-| **S3** | App: upload PGR → envelope → processa → matriz na tela → download | não começou — **próximo da fila** |
+| **S3** | App: upload PGR → envelope → processa → matriz na tela → download | **[003.EQ] fatia 1 entregue** — `superficie/web_matriz.py`, rota determinística sem LLM, validada manualmente no host contra o Fascino real (19 GHEs, 41 cargos) e no caso de rejeição por R-PGR-01. Falta para o S3 completo: pré-preenchimento document-derived do envelope (plugar `preparar_envelope`, hoje 100% entrada do operador — paliativo sinalizado, D-ARQ-53 P2) e a rota LLM para famílias não cobertas pela rota determinística |
 | **S0** | Decisão de hospedagem | **não decidido — risco de prazo subestimado** |
 
 ### S2 — o que falta, nomeado
@@ -138,6 +138,15 @@ Community Cloud como plano C.
    Se for só interno, local pode resolver de vez.
 2. PGR de cliente pode ir para nuvem de terceiro? Se o SECONCI ou os contratos vedam,
    sobra servidor próprio — e o prazo do deploy dobra.
+
+**[ATUALIZADO — 04/08/2026, respostas do Diovanni]** As duas perguntas abertas estão
+respondidas: (1) uso interno apenas — engenharia valida ou elabora o PGR, a assessoria de
+saúde monta a matriz; construtoras não terão acesso ao app; (2) PGR de cliente pode ir para
+nuvem de terceiro. O resultado confirma a recomendação de adiar: "pode ir para nuvem" abre
+a opção, "uso interno sem construtoras" não cria a necessidade. Fato novo não considerado
+pelo plano original: o fluxo tem handoff entre duas equipes, e "rodar local na máquina do
+escritório" assumia um operador único — requisito a resolver no S3 completo, não em S0.
+`[A MEDIR — se engenharia e assessoria compartilham máquina/rede]`
 
 ---
 
