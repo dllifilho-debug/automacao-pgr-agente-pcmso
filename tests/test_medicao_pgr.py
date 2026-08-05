@@ -5,8 +5,19 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
+from agente_medico.adaptadores.transcritor_offline import TranscritorCardOffline, TranscritorGHEOffline
 from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Motivo, Pendencia, Resultado
 from scripts.medicao_pgr import _formatar_pendencia, _renderizar_relatorio
+from scripts.medicao_pgr import TranscritorCardOffline as TranscritorCardOfflineDoScript
+from scripts.medicao_pgr import TranscritorGHEOffline as TranscritorGHEOfflineDoScript
+
+
+def test_medicao_pgr_usa_transcritor_offline_do_pacote() -> None:
+    # Reversão que mata: reverter o import de scripts/medicao_pgr.py para uma
+    # definição local (classe redefinida ali) — a identidade deixaria de bater
+    # com a classe do pacote agente_medico.adaptadores.transcritor_offline.
+    assert TranscritorGHEOfflineDoScript is TranscritorGHEOffline
+    assert TranscritorCardOfflineDoScript is TranscritorCardOffline
 
 
 def _resultado_com_diagnostico() -> Resultado:
