@@ -2918,8 +2918,7 @@ EMENDA 1 do Arquiteto resolveu ordem_exibicao e corrigiu a medição de contagem
 prompt original (41 linhas reais, não 37 — causa nomeada no parser do Arquiteto, não no Code).
 Detalhe em HISTORICO 003.EO.
 
-## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca
-emite documento sem conteúdo clínico
+## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003.EQ). Não cria nem altera
 regra clínica.

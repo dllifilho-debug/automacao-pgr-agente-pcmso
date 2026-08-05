@@ -148,6 +148,34 @@ pelo plano original: o fluxo tem handoff entre duas equipes, e "rodar local na m
 escritório" assumia um operador único — requisito a resolver no S3 completo, não em S0.
 `[A MEDIR — se engenharia e assessoria compartilham máquina/rede]`
 
+**[REVERTIDO — 05/08/2026. A recomendação de adiar CAI; o parágrafo acima fica como
+registro, substituído em vigência por esta nota.]** Duas respostas novas do Diovanni:
+(3) rede compartilhada, máquinas individuais; (4) **instalação de software exige
+solicitação à TI**. O item (4) é o fato novo que reverte. A recomendação "rodar
+`streamlit run` local na máquina do escritório" assumia que instalar era trivial — no
+ambiente real é **um ticket de TI por máquina**, e o fluxo tem duas equipes. O custo da
+opção local nunca foi técnico; é organizacional, e esse eixo não havia sido medido. A
+decisão anterior estava correta para as premissas conhecidas e errada para as reais.
+
+**Recomendação nova: hospedar, em nuvem paga de piso ~2 GB** (Railway usage-based
+~$5-20/mês, ou Render 2 GB ~$25/mês — números do bloco original desta seção, não
+re-medidos). Elimina a barreira de instalação por inteiro: navegador, nada por máquina.
+Community Cloud segue descartado como principal pela medição de RAM já registrada.
+
+Alternativa considerada e **não** recomendada: servidor único na rede interna. Resolve a
+multiplicação de tickets e mantém o PGR na rede, mas ainda exige ticket, cria manutenção
+interna e não cobre acesso fora do escritório — que a resposta (2) já liberou para nuvem.
+
+**Requisito novo que a hospedagem cria e não existia no modo local: autenticação.** App
+exposto na internet com PGR de cliente (razão social, obra, cargos) não pode ser aberto.
+Mecanismo é decisão da fatia de deploy — conferir a documentação vigente do Streamlit
+antes de cravar, não presumir. `[A DECIDIR]`
+
+`[A MEDIR — pico real de RAM no ambiente-alvo; os ~450-500 MB são de sandbox Linux e o
+próprio bloco original marca o eixo tempo como indicativo]`
+`[A DECIDIR — "acesso em qualquer ambiente" = qualquer máquina do escritório, ou também
+fora dele? Se só dentro, o servidor interno volta a ser competitivo]`
+
 ---
 
 ## Cortes explícitos da V1 (paliativos, sinalizados)
