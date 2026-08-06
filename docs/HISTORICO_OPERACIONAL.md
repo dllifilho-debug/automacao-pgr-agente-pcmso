@@ -4427,7 +4427,18 @@ derivado da sessão é o `INDICE_DARQ`. Recorte nunca é zero (DH-003EG-03); rec
 suíte, e o prompt não finge que é.
 
 **Commits:** `0675272` (.gitignore), `0cb49c3` (D-ARQ-75), `7edd8c5` (PLANO_V1 S0), `8555c81`
-(índice regenerado), `<hash>` (HISTORICO).
+(índice regenerado). Bloco desta sessão em commit próprio (`33f687c`), mais a emenda que corrige
+esta linha — convenção de 003.EP/003.EQ: o bloco nomeia os commits de conteúdo, o commit que
+grava o bloco não se autonomeia.
+
+**Registro do erro (D-ARQ-06, causa no Arquiteto).** O prompt de 003.ER pediu cinco hashes,
+incluindo o do commit que grava este próprio bloco — valor estruturalmente incognoscível no
+momento da escrita, desviando da convenção que 003.EP e 003.EQ já praticavam. O Code parou e
+reportou o placeholder em vez de preencher com algo plausível: comportamento correto sob a
+cláusula de divergência. Ironia registrada porque é instrutiva: esta mesma sessão mediu que o
+`PAINEL_ESTADO.md` **não** comete essa falha (o campo Baseline grava a `main` de partida, e o
+merge da sessão N entra na tiragem N+1) e refutou a dívida que a memória do Arquiteto lhe
+atribuía — e então o Arquiteto a cometeu no HISTORICO.
 
 **Próxima:** 003.ES — implementação, três fatias na ordem `requirements-app.txt` → `st.login` +
 allowlist → deploy. Pendências abertas nesta sessão: nenhuma nova; `[A CONFIRMAR]` de D-ARQ-75
