@@ -4363,3 +4363,83 @@ Suíte: **1048 → 1062 passed, 6 skipped** (+14: 2 emenda 1, 3 emenda 2, 3 emen
 **Commits:** `1eb32af` (move transcritores offline), `380fe59` (app de matriz, fatia 1), `5a0d02e` (emenda 2 — casca afinada + cache), `4b0a541` (emenda 3 — gate eliminatório para na tela). Fechamento (docs) em commit próprio.
 
 Nenhuma R-* criada, alterada ou depreciada. Pendências abertas nesta sessão: DH-003EQ-01, DT-003EQ-01, DT-003EQ-02, DT-003EQ-03 — nenhuma bloqueante.
+
+## Sessão 003.ER — 05/08/2026 — ARQUITETURA → FECHAMENTO (D-ARQ-75 nova; S0 fecha; nenhum código de motor)
+
+Aberta a partir de `main 966ad76` (PR #281, merge de 003.EQ), branch `feat/003er-decisao-s0`.
+Objetivo: fechar os dois `[A DECIDIR]` e o `[A MEDIR]` do §S0 do `PLANO_V1` — o único item que
+separava o projeto da definição de pronto ("um técnico insere um PGR num site").
+
+**Gate de abertura declarado (D-ARQ-63):** PROTOCOLO v86 integral, ÍNDICE v164/74 integral,
+transversais D-ARQ-{06,09,22}, eixo superfície-e-deploy = D-ARQ-{40,48,54,65,72,73,74} integral
+(git objects @ `966ad76`).
+
+**Medição que reescreveu a decisão anterior.** `executar_rota_determinista` completo sobre o PGR
+Fascino: **128,5s, pico RSS 904 MB**, saída correta (19 GHEs, 41 cargos, HTML 16.768 bytes, 154
+pendências). `parsear_arquivo` isolado: 64,9s, 731 MB — a diferença é a segunda leitura do PDF
+(`extrair_texto_pgr`), declarada na nota 003.EA de D-ARQ-65. O registro de 05/08 extrapolava
+~450-500 MB e recomendava "piso ~2 GB"; o piso estava subdimensionado.
+
+**Correção de fila antes da decisão (registro do erro, D-ARQ-06).** A 1ª recomendação do
+Arquiteto nesta sessão foi DT-003EP-01 + DT-003EQ-02, com o argumento "`Soldador` sem fumos
+metálicos não se defende". Medido e **refutado**: não existe cargo `Soldador` no Fascino (0
+ocorrências de "solda" no relatório); dos 41 cargos, 9 casam `cargos.yaml` após
+`normalizar_termo` e **todos os 9 têm `riscos_implicitos: []`**. Efeito clínico de ligar o
+resolver a `cargos_vocab` no corpus medido: pendências R-GHE-02 41→32, **zero célula de exame**.
+DT-003EP-01 ganha nota corretiva e desce na fila. Achado lateral: a `base_normativa` de
+DT-003EQ-02 atribui o custo a R-BIO-03/R-CLI-03, que **não existem em `regras.yaml`** (só em
+docs); o efeito real de resolver `Maganês` vem de `is_ototoxico` → R-AUD-01/R-AUD-02, com
+audiometria demissional nova em GHE-17 `[A MEDIR — derivação, não execução]`.
+
+**Correção de fato sobre o PAINEL (registro do erro).** O Arquiteto afirmou que
+`PAINEL_ESTADO.md` promete um hash de merge estruturalmente incognoscível, 4ª recorrência.
+**Errado, medido nas 8 últimas tiragens:** o campo Baseline grava a `main` de partida, e o hash
+de merge da sessão N entra na tiragem N+1 (003.EQ→`9867e5f`, 003.EP→`d3de91e`,
+003.EO→`2b7efe4`, 003.EN→`a04986e`). O mecanismo funciona; não há dívida. A leitura do Diovanni
+("pode ser normal") estava certa.
+
+**Segunda passada crítica (a pedido do Diovanni) — 7 achados sobre a 1ª versão de D-ARQ-75,
+todos incorporados.** O mais grave: `.gitignore` não cobria `.streamlit/secrets.toml` e
+`.streamlit/config.toml` já é versionado — a fatia de auth criaria segredo OAuth em diretório
+rastreado. Virou a fatia 0. Os demais: varredura de dependências com `grep "^import"` cego a
+import indentado (classe DH-003EC-01(a); conjunto correto por coincidência); pin
+`streamlit>=1.35.0` não garante `st.login`; OIDC autentica mas não autoriza, logo allowlist é
+gate; cookie de identidade de 30 dias não-configurável; `st.spinner` já existe no código (a
+"barra de progresso" proposta era em parte redundante); preços da Render vindos de fonte
+secundária, rebaixados. Dois riscos levantados e **inocentados por medição**: `CacheMatrizes` em
+`session_state` = 72 KB; PDF do cliente não persiste (`TemporaryDirectory` como context
+manager).
+
+**PAINEL_ESTADO.md não re-tirado**, por regra: 003.ER não move nenhum dos três números (regras
+22/42 inalterado, porta de entrada inalterada, dívidas que travam produção inalteradas), não
+fecha marco e não é sessão META.
+
+`docs/DECISOES_ARQUITETURAIS.md` **v165 — D-ARQ-75 CRIADA**; `docs/PLANO_V1.md` §S0 FECHADO
+(registro anterior preservado, substituído em vigência); `docs/INDICE_DARQ.md` regenerado
+74→75; `.gitignore` +1 linha. `docs/PROTOCOLO_AGENTE_MEDICO.md` **intocado** — nenhuma R-*
+criada, alterada ou depreciada, nenhuma DT/DH nova.
+
+Suíte: **não re-medida nesta sessão.** O número herdado é **1062 passed, 6 skipped**, medido em
+003.EQ na árvore de `4b0a541` — citado com procedência, não re-afirmado como estado corrente.
+O que rodou aqui é o recorte de derivado (`tests/test_gerar_indice_darq.py`), justificado:
+sessão docs-only mais 1 linha de `.gitignore`, nenhum código de produção tocado, e o único
+derivado da sessão é o `INDICE_DARQ`. Recorte nunca é zero (DH-003EG-03); recorte também não é
+suíte, e o prompt não finge que é.
+
+**Commits:** `0675272` (.gitignore), `0cb49c3` (D-ARQ-75), `7edd8c5` (PLANO_V1 S0), `8555c81`
+(índice regenerado). Bloco desta sessão em commit próprio (`33f687c`), mais a emenda que corrige
+esta linha — convenção de 003.EP/003.EQ: o bloco nomeia os commits de conteúdo, o commit que
+grava o bloco não se autonomeia.
+
+**Registro do erro (D-ARQ-06, causa no Arquiteto).** O prompt de 003.ER pediu cinco hashes,
+incluindo o do commit que grava este próprio bloco — valor estruturalmente incognoscível no
+momento da escrita, desviando da convenção que 003.EP e 003.EQ já praticavam. O Code parou e
+reportou o placeholder em vez de preencher com algo plausível: comportamento correto sob a
+cláusula de divergência. Ironia registrada porque é instrutiva: esta mesma sessão mediu que o
+`PAINEL_ESTADO.md` **não** comete essa falha (o campo Baseline grava a `main` de partida, e o
+merge da sessão N entra na tiragem N+1) e refutou a dívida que a memória do Arquiteto lhe
+atribuía — e então o Arquiteto a cometeu no HISTORICO.
+
+**Próxima:** 003.ES — implementação, três fatias na ordem `requirements-app.txt` → `st.login` +
+allowlist → deploy. Pendências abertas nesta sessão: nenhuma nova; `[A CONFIRMAR]` de D-ARQ-75
+(versão de introdução de `st.login`; se `st.login` lê env var; scale-to-zero da Railway).

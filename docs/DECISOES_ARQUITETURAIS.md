@@ -2970,6 +2970,127 @@ eliminatório, em qualquer ramo, produzia o mesmo artefato vazio.
 vermelha. Achado originado da verificação manual do Diovanni — não da suíte, que
 permanecia 1059 verde com o defeito vivo.
 
+## D-ARQ-75 — Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas
+
+**Status:** DECISÃO DE ARQUITETURA
+
+Sessão 003.ER, sem código de motor. Fecha o §S0 do `docs/PLANO_V1.md`. Implementação é 003.ES,
+por fatias. (O marcador `**Status:**` fica sozinho na linha e sem ponto final de propósito: o
+gerador do índice trunca o status no primeiro `.`, e "DECISÃO DE ARQUITETURA (sessão 003" é
+como D-ARQ-72/73/74 aparecem hoje — evitável.)
+
+**Contexto — o que a medição derrubou.** O §S0 do `PLANO_V1` recomendava, desde 05/08/2026,
+"hospedar em nuvem paga de piso ~2 GB", com o pico de RAM marcado `[A MEDIR]` e estimado em
+~450-500 MB por extrapolação de sandbox. A medição direta do caminho de produção derruba as
+duas coisas.
+
+`executar_rota_determinista` completo sobre o PGR Fascino (10,4 MB, 119 páginas), saída correta
+(19 GHEs, 41 cargos, HTML de 16.768 bytes, 154 pendências): **128,5s, pico RSS 904 MB**.
+`parsear_arquivo` isolado: **64,9s, 731 MB** — a diferença é `extrair_texto_pgr` relendo o mesmo
+arquivo, segunda leitura declarada por construção na nota de aplicação 003.EA de D-ARQ-65.
+`[MEDIDO — 003.ER, sandbox Linux, 05/08/2026; tempo é indicativo (hardware difere), memória é
+mais transferível — mesma ressalva do bloco original do S0]`
+
+Consequência: 2 GB não é piso confortável, é o teto de **um** usuário — 904 MB de pico mais
+~150-250 MB de runtime Streamlit. E Python não devolve arena ao SO depois do pico, então o
+processo permanece com RSS alto mesmo ocioso.
+
+**Decisão — 4 cláusulas.**
+
+1. **Provedor cobrado por consumo, nunca por tier de RAM fixa.** Com pico medido de 904 MB num
+   documento de 10,4 MB, escolher um tier é apostar no maior PGR que ainda não chegou. Railway,
+   plano Hobby: RAM $10/GB/mês, CPU $20/vCPU/mês, subscrição $5/mês com $5 de uso incluído,
+   teto de 48 GB por serviço. `[DERIVADO — docs.railway.com/pricing/plans, conferido
+   05/08/2026]` Custo esperado ~$10-15/mês `[APROXIMADO — aritmética do Arquiteto sobre as
+   tarifas oficiais, conferir na primeira fatura]`. Render descartada pelo modelo, não pelo
+   preço; os valores de tier da Render `[APROXIMADO — não verificado em fonte primária]`.
+   Streamlit Community Cloud segue fora: 1 GB de limite. `[A CONFIRMAR — a página
+   `deployments/serverless` da Railway não foi lida; se houver scale-to-zero aplicável, o custo
+   cai. Não é pré-requisito.]`
+
+2. **Autenticação é gate de duas partes, e a segunda é código nosso.** `st.login()` com client
+   OIDC **do projeto**, não do tenant do cliente — usar o Workspace do cliente exigiria que a TI
+   dele criasse e autorizasse o OAuth client, que é a mesma barreira organizacional que reverteu
+   a recomendação local em 05/08. Três cláusulas subordinadas, todas obrigatórias:
+
+   - **(a) Allowlist é gate, não refinamento.** A doc oficial é explícita: *"OIDC supports
+     authentication, but not authorization"* `[DERIVADO —
+     docs.streamlit.io/develop/concepts/connections/authentication, conferido 05/08/2026]`. Com
+     provider Google e client próprio, **qualquer conta Google do mundo completa o login**. A
+     autorização é lista de e-mails no app. Sem ela o app está aberto.
+   - **(b) O gate roda antes de qualquer consumo.** Padrão da doc — `if not
+     st.user.is_logged_in: ...; st.stop()` — no topo de `pagina_matriz()`, **antes** do
+     `st.file_uploader`. Do contrário um não-autorizado dispara os 904 MB.
+   - **(c) Segredo nunca em arquivo versionado.** `.gitignore` cobre `.streamlit/secrets.toml`
+     desde 003.ER (fatia 0), antes de o arquivo existir. Os valores vivem em variáveis de
+     ambiente do provedor. `[A CONFIRMAR — a doc do `st.login` só documenta `secrets.toml`
+     como fonte; se ele não ler variável de ambiente, o entrypoint do container materializa o
+     arquivo em runtime a partir das env vars.]`
+
+   **Risco aceito e nomeado:** o cookie de identidade do Streamlit expira em **30 dias e não é
+   configurável** `[DERIVADO — mesma fonte]`. Mitigação existe (ler a expiração do provider em
+   `st.user` e chamar `st.logout()`); fica de fora da V1 por decisão do Diovanni, registrada,
+   não esquecida.
+
+3. **O deploy usa `requirements-app.txt` enxuto, não o `requirements.txt` da raiz.** Varredura de
+   `motor/` + `superficie/` + `adaptadores/`: os únicos terceiros importados são **`streamlit`,
+   `pdfplumber`, `PyYAML`, `python-docx`, `requests`**. Ficam fora `pandas`, `numpy`,
+   `opencv-python-headless`, `PyMuPDF`, `pytesseract`, `pdf2image`, `supabase`, `rapidfuzz` (o
+   Levenshtein é próprio, `resolvedor_termos.py:85`) e `google-generativeai` (os transcritores
+   Gemini falam HTTP direto via `requests`). O `requirements.txt` atual é do legado Streamlit;
+   subir com ele infla imagem e baseline de RAM sem servir a uma linha do app novo. **O pin
+   precisa de piso que garanta `st.login`** — `>=1.35.0` permite resolver para versão sem o
+   comando, e a falha apareceria só no deploy. `[A CONFIRMAR — a doc não declara a versão de
+   introdução de `st.login`; conferir no changelog antes de cravar o número. Medido: o host do
+   Diovanni roda 1.56.0, DH-003EQ-01.]`
+
+   **Correção de método, registrada (D-ARQ-06).** A primeira varredura do Arquiteto usou
+   `grep "^import"` — cego a import indentado, e `web_matriz.py:186` importa `streamlit` dentro
+   de `pagina_matriz()`. O conjunto de cinco sobreviveu à correção do instrumento, mas por
+   coincidência: uma dependência lazy exótica teria passado e quebrado só em produção. Classe
+   DH-003EC-01(a) — instrumento verde sobre buraco.
+
+4. **128s é entrega, com o feedback que já existe.** `web_matriz.py` já tem
+   `st.spinner("Processando PGR — o parse do PDF pode levar alguns minutos...")` em volta da
+   chamada cara `[MEDIDO — 003.ER, leitura de disco]`. O que não existe é progresso incremental,
+   e para um parse opaco de 128s o spinner pode bastar. A **leitura única do PDF** (corta a
+   segunda passada, ~metade do tempo e provável queda do pico) é dívida nomeada com fatia
+   própria e medida, **depois** do deploy — irmã de DH-003EC-02.
+
+**Medições que inocentaram riscos levantados (registradas para não voltarem como hipótese).**
+`CacheMatrizes` em `st.session_state` serializa em **72 KB** (matrizes 44 KB, vocabulário
+7,6 KB, pendências 19,5 KB) — footprint por sessão é ruído, não risco de RAM. O PDF do cliente
+**não** fica em disco: `pagina_matriz()` usa `tempfile.TemporaryDirectory()` como context
+manager, e o `renderizar_docx` acontece dentro dele. `[MEDIDO — 003.ER]`
+
+**Universalidade (D-ARQ-06).** Hospedagem e autenticação independem de setor — construção civil,
+indústria química e saúde sobem o mesmo PDF na mesma tela, sob o mesmo gate.
+
+**Fronteiras (não confundir).**
+
+* **D-ARQ-09 / D-ARQ-48** — preservadas: a auth é borda de I/O na casca, em `superficie/`. O
+  invariante de `test_pureza_motor.py` (nenhum módulo de `motor/` importa `streamlit`) segue
+  intacto, e o núcleo puro por seam continua sem ver a autenticação.
+* **D-ARQ-54 P1** — apresentação-pura preservada: a allowlist é controle de acesso, não juízo de
+  domínio. Nenhuma regra clínica se move para a superfície.
+* **D-ARQ-74** — intacta. A guarda anti-documento-vazio segue valendo, e o `[A MEDIR]` dela
+  (auditar `apresentacao_matriz.py` e `documento_matriz.py`) continua aberto, não é desta
+  decisão.
+* **D-ARQ-65** — a segunda leitura do PDF é propriedade declarada da nota 003.EA, não defeito
+  novo; esta decisão a mede e a adia, não a revoga.
+* Não toca motor, protocolo clínico nem vocabulário. **Nenhuma R-* criada ou alterada.**
+
+**Base.** Sessão 003.ER (05/08/2026), ARQUITETURA. Gate de abertura cumprido e declarado.
+Origem: os dois `[A DECIDIR]` do §S0 do `PLANO_V1` (escopo de acesso; mecanismo de auth) e o
+`[A MEDIR]` de RAM. Respostas do Diovanni: acesso **também fora do escritório**; **não vincular
+ao tenant corporativo**; **deploy agora**, leitura única depois. Correção de premissa registrada:
+o Diovanni justificou o não-vínculo por "tem que funcionar em qualquer lugar" — `st.login`
+autentica a pessoa, não a rede, e funcionaria de qualquer lugar com tenant corporativo; a razão
+que sustenta a decisão é a dependência de TI de terceiro, não a mobilidade. Segunda passada
+crítica (a pedido do Diovanni) produziu sete achados sobre a primeira versão desta decisão,
+todos incorporados acima — o mais grave, a ausência de `.streamlit/secrets.toml` no `.gitignore`,
+virou a fatia 0 e pré-requisito da fatia de auth.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -3138,3 +3259,4 @@ permanecia 1059 verde com o defeito vivo.
 | v162 | 01/08/2026 | Sessão 003.EO + EMENDA 1 (FECHAMENTO): **D-ARQ-73 CRIADA** — emissor de saída no formato do escritório (`agente_medico/superficie/documento_matriz.py`): `DocumentoMatriz` única + `renderizar_html`/`renderizar_docx`; expansão GHE→cargo ancorada em R-GHE-01/D-ARQ-21; ordem de exibição dos exames cravada como `ordem_exibicao` opcional em `exames.yaml` (decisão do Arquiteto na EMENDA 1, após medição achar ordem não-constante entre GHEs — bloqueador nomeado da fatia 0); cabeçalho/rodapé seam humano (DT-003EO-01); sanitização de controle (NUL) só na renderização (DH-003EG-01). `MatrizGHE` ganha `nome_ghe`/`cargos` aditivos (fatia 1). Medição fatia 4 contra Fascino real: tabela da EMENDA 1 confirmada exatamente (12/19 GHEs idênticos, 4 células de superemissão, 10 de subemissão); achados novos confirmados (RX 12M×24M em 14 GHEs, clínico 6M×12M em GHE-09/17 → DT-003EO-03); achado fora do previsto: `GHEPGR.cargos` chega como 1 string por GHE (D-ARQ-65 fatia 1, já documentado no parser) → DT-003EO-04. Grafia Glicemia/RX ficou indecisa (D-ARQ-06) → DT-003EO-02, yaml intocado. `docs/PLANO_V1.md` migrado da pasta do Cowork (pendência de versionamento do próprio arquivo). Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EO. |
 | v163 | 03/08/2026 | Sessão 003.EP fatias 0-4 (MEDIÇÃO + IMPLEMENTAÇÃO + FECHAMENTO): **D-ARQ-65 Cláusula 5 NOVA** — o bloco da família medida é um formulário de rótulos em 2 colunas fixas (rótulo esquerda/valor direita), não só a tabela de riscos já calibrada por bloco; `x0` idênticos bit-a-bit nos 19/19 blocos do Fascino (`58.499347642527084`/`279.2172167102426`), continuações do valor com desvio 0,0pt exato; critério de fim de célula é transição de banda, nunca o literal do próximo rótulo. Nota de aplicação: `_extrair_cargos_da_linha` passa a capturar overflow por banda (fatia 1) e separar nome/CBO por entrada (fatia 2, CBO descartado — precedente 003.DG-1, candidato de consumo futuro DT-003ED-01 faceta máquina pesada); correção de premissa da EMENDA 4 de 003.EO preservada (D-ARQ-06): delimitador e CBO-colado-ao-nome não eram dois problemas, é 1 código CBO-2002 partido pelo mesmo glifo-hífen (`\x00`≡`-`) já catalogado em `_PADRAO_TITULO_ANCORA`. Não abriu D-ARQ nova — extensão de recorte medido, molde D-ARQ-57 peça 1. Fecha **DT-003EO-04** (PROTOCOLO §11) nas duas facetas, evidência: gate nominal 0 divergências (41 nomes) + e2e real (41 `LinhaCargo`). Abre **DT-003EP-01** (R-GHE-02 inalcançável — `cargos_vocab.get(cargo)` sem resolver, 19→41 pendências medido), **DT-003EP-02** (dois caminhos de silêncio remanescentes no parser, não exercitados no Fascino) e **DH-003EP-01** (`_sanitizar` apaga glifo-hífen no documento assinado). Nota aditiva em DH-003EG-01 (bytes NUL do relatório 122→18, resíduo de outra origem). Não-regressão medida: linhas de exame 171→171, status por GHE idêntico nos 19/19. Suíte 1039→1048 passed, 6 skipped; `mypy --strict` 42 arquivos, limpo. Commits `aaa9eca`/`486d54d`/`7f19cf4`. Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EP. |
 | v164 | 04/08/2026 | Sessão 003.EQ: D-ARQ-74 nova |
+| v165 | 05/08/2026 | Sessão 003.ER (ARQUITETURA): **D-ARQ-75 CRIADA** — fecha o §S0 do `PLANO_V1` (hospedagem + autenticação). Provedor por consumo, não por tier (Railway Hobby; RAM $10/GB/mês, teto 48 GB/serviço, `[DERIVADO — docs.railway.com/pricing/plans]`) porque o pico medido do e2e determinístico do Fascino é **904 MB / 128,5s**, contra ~450-500 MB extrapolados no registro anterior — 2 GB deixa de ser piso e vira teto de um usuário. Autenticação `st.login()` com client OIDC do projeto + **allowlist própria obrigatória** (OIDC autentica, não autoriza — `[DERIVADO — docs.streamlit.io/.../authentication]`), gate antes do `file_uploader`, segredo fora do git. Cookie de identidade de 30 dias não-configurável = risco aceito e nomeado. `requirements-app.txt` enxuto: 5 terceiros medidos (streamlit, pdfplumber, PyYAML, python-docx, requests) contra os 14 do `requirements.txt` do legado; pin do Streamlit precisa de piso que garanta `st.login`. Leitura única do PDF (2ª passada de `extrair_texto_pgr`, ~metade do tempo) adiada para fatia própria medida. Correção de método registrada: a 1ª varredura de dependências usou `grep "^import"`, cego a import indentado (classe DH-003EC-01(a)). Riscos inocentados por medição: cache em `session_state` = 72 KB; PDF do cliente não persiste em disco (`TemporaryDirectory`). Nenhuma R-* criada ou alterada; motor, protocolo e vocabulário intocados. Implementação é 003.ES. Detalhe em HISTORICO 003.ER. |

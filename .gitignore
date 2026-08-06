@@ -27,6 +27,7 @@ relatorios/
 
 # Segredos locais (chaves de API, nunca commitar — 003.DR)
 .env.local
+.streamlit/secrets.toml
 
 # Sondas/medições locais (uso único, 003.BH)
 /medir_*.py
