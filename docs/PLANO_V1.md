@@ -67,7 +67,7 @@ se defenda. Duas exceções que não se defendem sozinhas e por isso são caminh
 |---|---|---|
 | **S1** | Regra psicossocial — `R-PSY-02` sucede `R-PSY-01` (DEPRECATED) | **prompt pronto:** `PROMPT_003EN_psicossocial.md` |
 | **S2** | Emissor Word + HTML no formato do escritório | **[ATUALIZADO — 003.EP] entregue** — emissores HTML e DOCX prontos e testados (D-ARQ-73); expansão GHE→cargo com os 41 cargos reais do Fascino, em produção (DT-003EO-04 fechada — ver §"S2 — o que falta"). Ressalva preservada, não é lacuna: cabeçalho/rodapé seguem seam humano por desenho (DT-003EO-01/D-ARQ-73 cl.5), resolvido no S3, não no S2 |
-| **S3** | App: upload PGR → envelope → processa → matriz na tela → download | não começou — **próximo da fila** |
+| **S3** | App: upload PGR → envelope → processa → matriz na tela → download | **[003.EQ] fatia 1 entregue** — `superficie/web_matriz.py`, rota determinística sem LLM, validada manualmente no host contra o Fascino real (19 GHEs, 41 cargos) e no caso de rejeição por R-PGR-01. Falta para o S3 completo: pré-preenchimento document-derived do envelope (plugar `preparar_envelope`, hoje 100% entrada do operador — paliativo sinalizado, D-ARQ-53 P2) e a rota LLM para famílias não cobertas pela rota determinística |
 | **S0** | Decisão de hospedagem | **não decidido — risco de prazo subestimado** |
 
 ### S2 — o que falta, nomeado
@@ -138,6 +138,43 @@ Community Cloud como plano C.
    Se for só interno, local pode resolver de vez.
 2. PGR de cliente pode ir para nuvem de terceiro? Se o SECONCI ou os contratos vedam,
    sobra servidor próprio — e o prazo do deploy dobra.
+
+**[ATUALIZADO — 04/08/2026, respostas do Diovanni]** As duas perguntas abertas estão
+respondidas: (1) uso interno apenas — engenharia valida ou elabora o PGR, a assessoria de
+saúde monta a matriz; construtoras não terão acesso ao app; (2) PGR de cliente pode ir para
+nuvem de terceiro. O resultado confirma a recomendação de adiar: "pode ir para nuvem" abre
+a opção, "uso interno sem construtoras" não cria a necessidade. Fato novo não considerado
+pelo plano original: o fluxo tem handoff entre duas equipes, e "rodar local na máquina do
+escritório" assumia um operador único — requisito a resolver no S3 completo, não em S0.
+`[A MEDIR — se engenharia e assessoria compartilham máquina/rede]`
+
+**[REVERTIDO — 05/08/2026. A recomendação de adiar CAI; o parágrafo acima fica como
+registro, substituído em vigência por esta nota.]** Duas respostas novas do Diovanni:
+(3) rede compartilhada, máquinas individuais; (4) **instalação de software exige
+solicitação à TI**. O item (4) é o fato novo que reverte. A recomendação "rodar
+`streamlit run` local na máquina do escritório" assumia que instalar era trivial — no
+ambiente real é **um ticket de TI por máquina**, e o fluxo tem duas equipes. O custo da
+opção local nunca foi técnico; é organizacional, e esse eixo não havia sido medido. A
+decisão anterior estava correta para as premissas conhecidas e errada para as reais.
+
+**Recomendação nova: hospedar, em nuvem paga de piso ~2 GB** (Railway usage-based
+~$5-20/mês, ou Render 2 GB ~$25/mês — números do bloco original desta seção, não
+re-medidos). Elimina a barreira de instalação por inteiro: navegador, nada por máquina.
+Community Cloud segue descartado como principal pela medição de RAM já registrada.
+
+Alternativa considerada e **não** recomendada: servidor único na rede interna. Resolve a
+multiplicação de tickets e mantém o PGR na rede, mas ainda exige ticket, cria manutenção
+interna e não cobre acesso fora do escritório — que a resposta (2) já liberou para nuvem.
+
+**Requisito novo que a hospedagem cria e não existia no modo local: autenticação.** App
+exposto na internet com PGR de cliente (razão social, obra, cargos) não pode ser aberto.
+Mecanismo é decisão da fatia de deploy — conferir a documentação vigente do Streamlit
+antes de cravar, não presumir. `[A DECIDIR]`
+
+`[A MEDIR — pico real de RAM no ambiente-alvo; os ~450-500 MB são de sandbox Linux e o
+próprio bloco original marca o eixo tempo como indicativo]`
+`[A DECIDIR — "acesso em qualquer ambiente" = qualquer máquina do escritório, ou também
+fora dele? Se só dentro, o servidor interno volta a ser competitivo]`
 
 ---
 

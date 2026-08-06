@@ -33,13 +33,13 @@ from datetime import date
 from pathlib import Path
 
 from agente_medico.adaptadores.orquestracao_pgr import preparar_envelope, processar_arquivo_pgr
-from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.adaptadores.transcritor_gemini_topo import TranscritorGeminiTopo
+from agente_medico.adaptadores.transcritor_offline import TranscritorCardOffline, TranscritorGHEOffline
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao
-from agente_medico.motor.tipos import GHEVerbatim, Pendencia, Resultado
+from agente_medico.motor.tipos import Pendencia, Resultado
 from agente_medico.motor.transcritor_card import TranscritorCard
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
 from agente_medico.superficie.apresentacao_matriz import renderizar_matriz
@@ -51,24 +51,6 @@ def _exigir_chave() -> None:
     if not os.environ.get("CHAVE_API_GOOGLE"):
         print("STOP-and-report: variável de ambiente CHAVE_API_GOOGLE ausente.", file=sys.stderr)
         sys.exit(1)
-
-
-class TranscritorGHEOffline:
-    """Rodada OFFLINE (D-ARQ-65): recusa nomeada, nunca mock — se a rota
-    determinística for recusada, o fallback LLM cai aqui e vira pendência
-    bloqueante transcricao_indisponivel_pgr no relatório."""
-
-    def transcrever(self, bloco: str) -> GHEVerbatim:
-        raise TranscricaoIndisponivel("rodada offline: cliente LLM indisponível por design")
-
-
-class TranscritorCardOffline:
-    """Rodada OFFLINE (D-ARQ-65): recusa nomeada, nunca mock — se a rota
-    determinística for recusada, o fallback LLM cai aqui e vira pendência
-    bloqueante transcricao_indisponivel_pgr no relatório."""
-
-    def transcrever(self, card: str, titulo: str) -> GHEVerbatim:
-        raise TranscricaoIndisponivel("rodada offline: cliente LLM indisponível por design")
 
 
 def _hash_commit() -> str:
