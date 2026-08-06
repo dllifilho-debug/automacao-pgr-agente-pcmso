@@ -68,7 +68,7 @@ se defenda. Duas exceções que não se defendem sozinhas e por isso são caminh
 | **S1** | Regra psicossocial — `R-PSY-02` sucede `R-PSY-01` (DEPRECATED) | **prompt pronto:** `PROMPT_003EN_psicossocial.md` |
 | **S2** | Emissor Word + HTML no formato do escritório | **[ATUALIZADO — 003.EP] entregue** — emissores HTML e DOCX prontos e testados (D-ARQ-73); expansão GHE→cargo com os 41 cargos reais do Fascino, em produção (DT-003EO-04 fechada — ver §"S2 — o que falta"). Ressalva preservada, não é lacuna: cabeçalho/rodapé seguem seam humano por desenho (DT-003EO-01/D-ARQ-73 cl.5), resolvido no S3, não no S2 |
 | **S3** | App: upload PGR → envelope → processa → matriz na tela → download | **[003.EQ] fatia 1 entregue** — `superficie/web_matriz.py`, rota determinística sem LLM, validada manualmente no host contra o Fascino real (19 GHEs, 41 cargos) e no caso de rejeição por R-PGR-01. Falta para o S3 completo: pré-preenchimento document-derived do envelope (plugar `preparar_envelope`, hoje 100% entrada do operador — paliativo sinalizado, D-ARQ-53 P2) e a rota LLM para famílias não cobertas pela rota determinística |
-| **S0** | Decisão de hospedagem | **não decidido — risco de prazo subestimado** |
+| **S0** | Decisão de hospedagem | **[003.ER] DECIDIDO por D-ARQ-75** — Railway Hobby (consumo, não tier; pico medido 904 MB derruba o piso de 2 GB), `st.login()` OIDC com client próprio + allowlist obrigatória, `requirements-app.txt` enxuto. Implementação em 003.ES |
 
 ### S2 — o que falta, nomeado
 
@@ -175,6 +175,25 @@ antes de cravar, não presumir. `[A DECIDIR]`
 próprio bloco original marca o eixo tempo como indicativo]`
 `[A DECIDIR — "acesso em qualquer ambiente" = qualquer máquina do escritório, ou também
 fora dele? Se só dentro, o servidor interno volta a ser competitivo]`
+
+**[FECHADO — 003.ER, 05/08/2026 por D-ARQ-75. Os dois `[A DECIDIR]` e o `[A MEDIR]` de RAM
+acima estão resolvidos; o "piso ~2 GB" da recomendação anterior fica como registro,
+substituído em vigência por esta nota.]**
+
+- **`[A DECIDIR]` escopo de acesso — RESOLVIDO:** inclui fora do escritório (resposta do
+  Diovanni, 05/08). Servidor interno sai de vez; nuvem pública com autenticação é o caminho.
+- **`[A MEDIR]` pico de RAM — MEDIDO:** `executar_rota_determinista` completo sobre o Fascino
+  (10,4 MB, 119 págs) → **128,5s, pico RSS 904 MB**; `parsear_arquivo` isolado → 64,9s,
+  731 MB. `[MEDIDO — 003.ER, sandbox Linux; tempo indicativo, memória transferível]` O piso de
+  ~2 GB estava subdimensionado: 904 MB + runtime Streamlit ≈ teto de um usuário.
+- **Provedor:** Railway Hobby — cobrança por consumo (RAM $10/GB/mês, teto 48 GB/serviço), não
+  por tier fixo. ~$10-15/mês `[APROXIMADO]`.
+- **`[A DECIDIR]` mecanismo de autenticação — RESOLVIDO:** `st.login()` com client OIDC do
+  projeto (não do tenant do cliente) + allowlist de e-mails no app. OIDC autentica, não
+  autoriza — a allowlist é obrigatória.
+
+Ver **D-ARQ-75** para o corpo da decisão, as cláusulas subordinadas de auth e os
+`[A CONFIRMAR]` remanescentes.
 
 ---
 
