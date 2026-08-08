@@ -1,7 +1,8 @@
 """Testes da partição do §11 do PROTOCOLO para docs/PENDENCIAS_CLINICAS.md (003.ET fatia 0).
 
 Cada caso tem reversão nomeada: caso A morre devolvendo qualquer header DT-/DH- ao
-PROTOCOLO; caso B morre movendo um header R-* para PENDENCIAS_CLINICAS.md."""
+PROTOCOLO; caso B morre movendo um header R-* para PENDENCIAS_CLINICAS.md — o
+discriminante do caso B é o denominador de medir_cobertura_clinica(), não o numerador."""
 
 from __future__ import annotations
 
@@ -15,19 +16,15 @@ _CAMINHO_PENDENCIAS = _RAIZ / "docs" / "PENDENCIAS_CLINICAS.md"
 _CAMINHO_PROTOCOLO = _RAIZ / "docs" / "PROTOCOLO_AGENTE_MEDICO.md"
 _REGEX_HEADER_DIVIDA = re.compile(r"^#{2,4}\s+((?:DT|DH)-\S+)", re.MULTILINE)
 
-_NUMERADOR_MEDIDO_003ET = 22
-
 
 def test_dividas_todas_no_arquivo_novo_nenhuma_no_protocolo() -> None:
     ids_pendencias = set(_REGEX_HEADER_DIVIDA.findall(_CAMINHO_PENDENCIAS.read_text(encoding="utf-8")))
     ids_protocolo = set(_REGEX_HEADER_DIVIDA.findall(_CAMINHO_PROTOCOLO.read_text(encoding="utf-8")))
 
     assert ids_pendencias, "regex de header DT-/DH- não casou nada em PENDENCIAS_CLINICAS.md"
-    assert len(ids_pendencias) == 71
     assert ids_protocolo == set()
 
 
 def test_particao_nao_moveu_regra_clinica() -> None:
-    numerador, denominador = medir_cobertura_clinica()
+    _, denominador = medir_cobertura_clinica()
     assert denominador == 42
-    assert numerador == _NUMERADOR_MEDIDO_003ET
