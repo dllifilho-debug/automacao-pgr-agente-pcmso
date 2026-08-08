@@ -39,7 +39,14 @@ de memória — ler do disco.
 
 ## Comandos padrão
 
-- `python -m pytest` / `python -m mypy --strict <pasta>` — nunca `pytest`/`mypy` direto
+- `python -m pytest` / `python -m mypy --strict` — nunca `pytest`/`mypy` direto
+- **Alvo canônico do mypy, literal** — não usar `<pasta>` genérico:
+  `python -m mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py`
+  Referência medida em 003.ES (08/08/2026): limpo, **45 arquivos** — sobe quando entra módulo novo
+  em `motor/` ou `superficie/`, então é referência, não gabarito eterno.
+  **`agente_medico/` inteiro NÃO é o alvo:** puxa a pasta de testes e 47 erros pré-existentes que
+  nenhum gate olha. Erro do Arquiteto 2×, mesmo diagnóstico (003.EC e 003.ES) — o alvo fica escrito
+  aqui justamente para não depender de memória.
 - Suíte completa: `python -m pytest agente_medico/tests/ tests/` (motor novo + legada)
 - Medição de suíte nunca concorrente com escrita — árvore parada, ou o número não tem
   proveniência (precedente: 003.EF)
