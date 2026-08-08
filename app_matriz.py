@@ -13,6 +13,11 @@ mas não autoriza — com client próprio, qualquer conta Google do mundo
 completa o login, então a allowlist é o gate real. Roda ANTES de
 pagina_matriz() porque o parse do PGR custa ~904 MB de pico (medição 003.ER)
 e não pode ser disparado por não-autorizado.
+
+`st.user` devolve `str | bool | TokensProxy | None` para qualquer atributo
+(streamlit 1.56.0, `user_info.py`) — sem tipo próprio para `is_logged_in`
+nem `.get("email")`. A normalização estrita para `bool`/`str | None`
+acontece aqui, na fronteira de I/O, antes do núcleo puro de autorizacao.py.
 """
 
 import os
@@ -26,9 +31,13 @@ from agente_medico.superficie.autorizacao import (
 )
 from agente_medico.superficie.web_matriz import pagina_matriz
 
+_logado = st.user.is_logged_in is True
+_email_bruto = st.user.get("email")
+_email = _email_bruto if isinstance(_email_bruto, str) else None
+
 _decisao = decidir_acesso(
-    st.user.is_logged_in,
-    st.user.get("email"),
+    _logado,
+    _email,
     carregar_allowlist(os.environ.get("PCMSO_ALLOWLIST")),
 )
 
