@@ -1,7 +1,8 @@
 # Regras de método — projeto Agente Médico PCMSO
 
 Fonte de verdade, em ordem: (1) git log/status reais, (2) docs vivos em `docs/`
-(PROTOCOLO_AGENTE_MEDICO.md, DECISOES_ARQUITETURAIS.md, HISTORICO_OPERACIONAL.md),
+(PROTOCOLO_AGENTE_MEDICO.md, DECISOES_ARQUITETURAIS.md, HISTORICO_OPERACIONAL.md,
+PENDENCIAS_CLINICAS.md),
 (3) qualquer cache. Nunca afirmar número de sessão, D-ARQ, hash ou contagem de testes
 de memória — ler do disco.
 
