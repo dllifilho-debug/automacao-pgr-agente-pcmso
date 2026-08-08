@@ -195,6 +195,14 @@ substituído em vigência por esta nota.]**
 Ver **D-ARQ-75** para o corpo da decisão, as cláusulas subordinadas de auth e os
 `[A CONFIRMAR]` remanescentes.
 
+**[IMPLEMENTAÇÃO — 003.ES, 08/08/2026.]** Fatias 1 e 2 de D-ARQ-75 entregues:
+`requirements-app.txt` medido por AST (5 terceiros) com teste que o guarda; entrypoint
+`app_matriz.py` na raiz (lacuna que D-ARQ-75 não previa — `streamlit run` insere no `sys.path`
+o diretório do script, não a raiz); gate de login + allowlist antes do parse, com a decisão em
+núcleo puro (D-ARQ-76). Fatia 3 (deploy) não executada — vira 003.ET, por ter metade em ação
+manual com credencial real e por depender de dois fatos da Railway ainda não medidos (injeção de
+`PORT`; se o builder detecta `requirements-app.txt` em vez do `requirements.txt` do legado).
+
 ---
 
 ## Cortes explícitos da V1 (paliativos, sinalizados)

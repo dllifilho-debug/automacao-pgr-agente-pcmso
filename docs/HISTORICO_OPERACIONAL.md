@@ -4443,3 +4443,68 @@ atribuía — e então o Arquiteto a cometeu no HISTORICO.
 **Próxima:** 003.ES — implementação, três fatias na ordem `requirements-app.txt` → `st.login` +
 allowlist → deploy. Pendências abertas nesta sessão: nenhuma nova; `[A CONFIRMAR]` de D-ARQ-75
 (versão de introdução de `st.login`; se `st.login` lê env var; scale-to-zero da Railway).
+
+## Sessão 003.ES — 08/08/2026 — IMPLEMENTAÇÃO (fatias 1 e 2 de D-ARQ-75; D-ARQ-76 nova; fatia 3 adiada para 003.ET)
+
+Aberta a partir de `main 52b876a` (PR #282, merge de 003.ER). Fatia 1 partiu daí e mergeou em
+`1d0b56d` via PR #283; fatia 2 partiu de `1d0b56d` e mergeou em `3446d08` via PR #284.
+
+**Fatia 1 — empacotamento** (branch `feat/003es-empacotamento`, commits `cc530c6`/`3b2db8c`, PR
+#283). `requirements-app.txt` com 5 terceiros medidos por varredura AST de `motor/`+
+`superficie/`+`adaptadores/` (50 arquivos): `streamlit`, `pdfplumber`, `PyYAML`, `python-docx`,
+`requests` — confirma D-ARQ-75 cláusula 3 por instrumento que enxerga import indentado. Piso
+`streamlit>=1.42.0` com teste próprio. Entrypoint `app_matriz.py` na raiz: lacuna não prevista por
+D-ARQ-75 — `streamlit run` insere no `sys.path` o diretório do script, e o app só funcionava por
+`python -m` inserir o cwd. Suíte 1062 → 1066, 6 skipped.
+
+**Fatia 2 — auth** (branch `feat/003es-auth`, commits `6f5cf7c`/`d166eef`/`8567ddc`, PR #284, merge
+`3446d08`). Ver D-ARQ-76. Suíte 1066 → 1074 passed, 6 skipped, medida com árvore parada em
+`8567ddc`; `mypy --strict agente_medico/motor agente_medico/superficie
+agente_medico/tests/invariantes.py app_matriz.py` limpo, 45 arquivos.
+
+Dois bloqueadores reportados pelo Code e resolvidos pelo Arquiteto, no procedimento previsto. (1)
+Sonda de harness: `at.secrets["auth"]` não faz `st.user.is_logged_in` existir — motivou o gate sair
+de `pagina_matriz()` para o entrypoint. (2) `mypy --strict`: `UserInfoProxy` devolve
+`str | bool | TokensProxy | None` — motivou a normalização estrita na fronteira. Em nenhum dos dois
+o Code improvisou; nos dois a decisão coube ao Arquiteto, como manda o protocolo.
+
+**Registro de erro do Arquiteto (D-ARQ-06), 2ª ocorrência da mesma classe.** O alvo de `mypy` do
+prompt da fatia 1 (`agente_medico/` inteiro) não é o canônico do projeto — puxa a pasta de testes e
+traz 47 erros pré-existentes de ruído. Precedente literal já registrado no HISTORICO: "Alvo de
+mypy do prompt do Arquiteto estava errado (pasta de testes inteira em vez de motor +
+invariantes.py), gerando 46 erros de ruído." A emenda corrigiu o alvo, e o comando canônico passa a
+incluir `app_matriz.py` — o entrypoint é código de produção e ficava fora do gate de tipos por
+acidente de localização. Referência a partir daqui: 45 arquivos.
+
+**Segundo registro de erro (D-ARQ-06).** Na mesma emenda, o Arquiteto cravou "43 arquivos" como
+gabarito bloqueante para o comando canônico — número vindo da memória do Cowork, sem lastro no
+HISTORICO, que só registrava 34 para a forma anterior do comando. A medição confirmou 43, mas o
+método estava errado: acerto por coincidência não valida afirmar número não medido. A instrução foi
+corrigida para `[A MEDIR]` antes de o Code recebê-la.
+
+**Terceiro registro (D-ARQ-06), pego em revisão própria.** O teste do caminho B da emenda 1 nasceria
+verde e vazio: ele filtra imports por prefixo `agente_medico`, e a reversão que o Arquiteto nomeou
+trocava o import por um que deixa de casar o filtro — lista vazia, laço não roda, verde. Mesma
+classe medida 5× em 003.EK. Corrigido com guarda anti-vazio antes de entregar; o caminho B acabou
+não sendo usado (sonda 2 deu positivo), mas o defeito era real.
+
+**Nota sobre a reversão 2 de `test_autorizacao.py`:** derrubou dois testes, e está certo —
+`decidir_acesso` compõe `esta_autorizado` em vez de reimplementar o pertencimento. Não é
+discriminante quebrado; a prova é que as reversões 6 e 7, específicas de `decidir_acesso`, caíram
+isoladas.
+
+**`PAINEL_ESTADO.md` não re-tirado.** Nenhum dos três números se moveu: nenhuma `R-*` criada,
+alterada ou depreciada (22/42 inalterado); a porta de entrada não muda (a sessão é acesso/
+empacotamento); as três dívidas travantes seguem `DT-003L-01`, `DT-003M-02(A)` e `DT-FDS-02`.
+Decisão declarada conforme passo 5 do ritual.
+
+**Docs:** `DECISOES_ARQUITETURAIS.md` v166 (D-ARQ-76 CRIADA + nota de aplicação em D-ARQ-75);
+`INDICE_DARQ.md` regenerado 75 → 76; `PROTOCOLO_AGENTE_MEDICO.md` v87 — §11 ganha DH-003ES-01, sem
+nenhuma regra clínica criada, alterada ou depreciada; `PLANO_V1.md` §S0 com nota de progresso.
+
+**Pendências abertas nesta sessão:** DH-003ES-01. Herdadas e não tocadas: todas as demais.
+
+**Próxima:** 003.ET — deploy. Pré-requisitos de medição antes do prompt: se a Railway injeta
+`PORT`, e se o builder detecta `requirements-app.txt` em vez do `requirements.txt` do legado.
+Metade da fatia é ação manual com credencial real (OAuth client no Google Cloud, projeto Railway,
+variáveis), o que pede roteiro operacional além de prompt de código.
