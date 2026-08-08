@@ -3091,6 +3091,106 @@ crítica (a pedido do Diovanni) produziu sete achados sobre a primeira versão d
 todos incorporados acima — o mais grave, a ausência de `.streamlit/secrets.toml` no `.gitignore`,
 virou a fatia 0 e pré-requisito da fatia de auth.
 
+**Nota de aplicação — 003.ES.** Os três `[A CONFIRMAR]` desta decisão estão resolvidos, e a
+cláusula 2(b) foi superada em parte por D-ARQ-76 (o gate mora no entrypoint, não em
+`pagina_matriz()`; razão medida lá).
+
+* Versão de introdução de `st.login` — CONFIRMADA: 1.42.0. `[DERIVADO —
+  docs.streamlit.io/develop/quick-reference/release-notes/2025, conferido 08/08/2026]` O pin de
+  `requirements-app.txt` é `streamlit>=1.42.0,<2.0.0`, guardado por teste próprio
+  (`test_piso_de_streamlit_garante_st_login`) — sem ele, rebaixar o piso não deixaria nada
+  vermelho e a quebra apareceria só no deploy.
+* `st.login` e variável de ambiente — RESOLVIDO pelo lado negativo. A doc de secrets documenta o
+  fluxo `secrets.toml` → variáveis de ambiente (segredos de nível raiz viram env vars), nunca o
+  contrário, e acessar segredo sem o arquivo levanta `FileNotFoundError` `[DERIVADO —
+  docs.streamlit.io/develop/concepts/connections/secrets-management, conferido 08/08/2026]`. Não
+  há caminho documentado de env var → `[auth]`. O materializador de `secrets.toml` no entrypoint
+  do container deixa de ser plano B e vira o caminho da fatia de deploy. Ressalva honesta: a doc
+  não afirma que env var não funciona; ausência de documentação não é prova de ausência de
+  suporte. Projetar contra o documentado é a escolha.
+* Scale-to-zero da Railway — CONFIRMADO que existe. Serviço dorme após 10 min sem tráfego
+  outbound (inbound não conta), sem cobrança de compute enquanto dorme; habilitado em
+  Settings → Deploy → Serverless `[DERIVADO — docs.railway.com/reference/app-sleeping, conferido
+  08/08/2026]`. Um app que só responde a upload não emite outbound e deve dormir bem.
+* Achado que a fatia 3 herda: o `secrets.toml` per-project é descoberto em `$CWD/.streamlit/`,
+  onde `$CWD` é a pasta de onde o Streamlit foi executado — o mesmo vale para o `config.toml` já
+  versionado (tema, `maxUploadSize = 50`). O start command precisa rodar com CWD na raiz do repo.
+
+## D-ARQ-76 — O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir
+
+**Status:** DECISÃO DE ARQUITETURA
+
+Sessão 003.ES, fatias 1 e 2. Nasce da implementação de D-ARQ-75 e supersede em parte a cláusula
+2(b) daquela decisão. Nenhuma regra `R-*` criada, alterada ou depreciada.
+
+**Contexto — o que a medição derrubou.** D-ARQ-75 cláusula 2(b) prescrevia o gate "no topo de
+`pagina_matriz()`, antes do `st.file_uploader`". Duas medições da 003.ES tornaram a letra
+impraticável e a intenção alcançável por outro caminho.
+
+Medição 1 (sonda de harness). `st.user.is_logged_in` não existe quando a autenticação não está
+configurada — "For a locally running app, this attribute is only available when authentication
+(`st.login()`) is configured in `secrets.toml`. Otherwise, it does not exist"
+`[DERIVADO — docs.streamlit.io/develop/api-reference/user/st.user, conferido 08/08/2026]`.
+Injetar `at.secrets["auth"]` no `AppTest` não faz o atributo passar a existir: o `AttributeError`
+é idêntico com e sem a injeção `[MEDIDO — 003.ES, streamlit 1.56.0]`. Leitura: o bloco `[auth]` é
+consumido na subida do servidor, e `AppTest` não sobe servidor. Não há caminho de injeção de
+identidade pelo harness — os atributos expostos são `secrets`, `session_state` e `query_params`.
+Consequência: com o gate dentro de `pagina_matriz()`, os quatro testes de casca de
+`test_web_matriz.py` (entregues verdes em 003.EQ) parariam no login sem conserto disponível.
+
+Medição 2 (tipo na fronteira). `UserInfoProxy` tipa `__getattr__`/`.get()` como
+`str | bool | TokensProxy | None`, sem propriedade tipada para `is_logged_in`
+`[MEDIDO — 003.ES, `streamlit/user_info.py`, 1.56.0]`. `st.user.is_logged_in` nunca chega como
+`bool`, nem `st.user.get("email")` como `str | None`.
+
+**Decisão — 4 cláusulas.**
+
+1. **O gate roda no entrypoint da raiz, não na página.** `app_matriz.py` decide o acesso antes de
+   chamar `pagina_matriz()`. A intenção de D-ARQ-75 2(b) — nada consome os 904 MB do parse antes
+   do gate — fica preservada: o entrypoint é o único caminho de produção desde a fatia 1 desta
+   mesma sessão. O que muda é o lugar, não a garantia. Custo aceito e nomeado: superfície web
+   futura precisa chamar o gate explicitamente; a proteção não é mais por construção da página.
+2. **A decisão de acesso é núcleo puro, com três desfechos explícitos.**
+   `superficie/autorizacao.py`: `GateAcesso` (`PEDIR_LOGIN`/`NEGAR`/`LIBERAR`),
+   `carregar_allowlist`, `esta_autorizado`, `decidir_acesso`. Nenhuma delas importa `streamlit`
+   nem lê `os.environ` — `decidir_acesso` recebe `esta_logado: bool`. É isso que torna a decisão
+   testável sem harness, e é a razão de a lógica ter saído da casca: a parte alcançável por teste
+   passou a ser a parte que decide. Molde de `web_matriz.py` (núcleo puro + casca fina),
+   D-ARQ-54 P1.
+3. **A fronteira normaliza estritamente, e é fail-closed.** A casca converte antes de chamar o
+   núcleo: `st.user.is_logged_in is True` (não `bool(...)`) e `isinstance(bruto, str)` para o
+   e-mail. Qualquer valor que não seja o literal `True` é não-logado; o que não for `str` vira
+   `None`, que a allowlist já nega. `cast` e `# type: ignore` foram rejeitados — mentem para o
+   verificador exatamente na fronteira de segurança, que é onde ele deve incomodar. Mudar a
+   assinatura de `decidir_acesso` também foi rejeitado: o núcleo puro não absorve o desleixo de
+   tipo de biblioteca externa. Ganho não previsto: a fronteira passou a ser fail-closed por
+   construção, não por confiança no provedor.
+4. **A allowlist vem de variável de ambiente, não de `st.secrets`.** `PCMSO_ALLOWLIST`, e-mails
+   separados por vírgula, lida por `os.environ`. A allowlist é código nosso e não deve depender
+   do materializador de segredo do provedor (fatia 3). Lacuna consciente: nenhum teste crava o
+   nome da variável — trocá-lo não deixa nada vermelho. Aceita porque o modo de falha é
+   fail-closed e imediatamente visível: variável errada = allowlist vazia = ninguém entra,
+   inclusive quem testa. Não é app aberto por engano.
+
+**Universalidade (D-ARQ-06).** Acesso e identidade independem de setor — construção civil,
+indústria química e saúde entram pelo mesmo gate, com a mesma allowlist.
+
+**Fronteiras (não confundir).**
+
+* D-ARQ-75 cláusula 2(b) — superada em parte por esta decisão, apenas quanto ao lugar do gate.
+  As cláusulas 2(a) (allowlist obrigatória, OIDC autentica mas não autoriza) e 2(c) (segredo fora
+  do git) seguem íntegras, assim como as cláusulas 1, 3 e 4 de D-ARQ-75.
+* D-ARQ-09 / D-ARQ-48 — preservadas: a auth é borda de I/O na casca. O invariante de
+  `test_pureza_motor.py` segue intacto e `superficie/autorizacao.py` não importa `streamlit`.
+* D-ARQ-54 P1 — preservada: a allowlist é controle de acesso, não juízo de domínio. Nenhuma regra
+  clínica se move para a superfície.
+* D-ARQ-74 — intacta. A guarda anti-documento-vazio segue valendo, a jusante do gate.
+* Não toca motor, protocolo clínico nem vocabulário.
+
+**Base.** Sessão 003.ES (08/08/2026), IMPLEMENTAÇÃO. Duas sondas com bloqueador reportado pelo
+Code e resolvido pelo Arquiteto, no procedimento previsto. Suíte 1066 → 1074 passed, 6 skipped;
+`mypy --strict` limpo, 45 arquivos.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -3260,3 +3360,4 @@ virou a fatia 0 e pré-requisito da fatia de auth.
 | v163 | 03/08/2026 | Sessão 003.EP fatias 0-4 (MEDIÇÃO + IMPLEMENTAÇÃO + FECHAMENTO): **D-ARQ-65 Cláusula 5 NOVA** — o bloco da família medida é um formulário de rótulos em 2 colunas fixas (rótulo esquerda/valor direita), não só a tabela de riscos já calibrada por bloco; `x0` idênticos bit-a-bit nos 19/19 blocos do Fascino (`58.499347642527084`/`279.2172167102426`), continuações do valor com desvio 0,0pt exato; critério de fim de célula é transição de banda, nunca o literal do próximo rótulo. Nota de aplicação: `_extrair_cargos_da_linha` passa a capturar overflow por banda (fatia 1) e separar nome/CBO por entrada (fatia 2, CBO descartado — precedente 003.DG-1, candidato de consumo futuro DT-003ED-01 faceta máquina pesada); correção de premissa da EMENDA 4 de 003.EO preservada (D-ARQ-06): delimitador e CBO-colado-ao-nome não eram dois problemas, é 1 código CBO-2002 partido pelo mesmo glifo-hífen (`\x00`≡`-`) já catalogado em `_PADRAO_TITULO_ANCORA`. Não abriu D-ARQ nova — extensão de recorte medido, molde D-ARQ-57 peça 1. Fecha **DT-003EO-04** (PROTOCOLO §11) nas duas facetas, evidência: gate nominal 0 divergências (41 nomes) + e2e real (41 `LinhaCargo`). Abre **DT-003EP-01** (R-GHE-02 inalcançável — `cargos_vocab.get(cargo)` sem resolver, 19→41 pendências medido), **DT-003EP-02** (dois caminhos de silêncio remanescentes no parser, não exercitados no Fascino) e **DH-003EP-01** (`_sanitizar` apaga glifo-hífen no documento assinado). Nota aditiva em DH-003EG-01 (bytes NUL do relatório 122→18, resíduo de outra origem). Não-regressão medida: linhas de exame 171→171, status por GHE idêntico nos 19/19. Suíte 1039→1048 passed, 6 skipped; `mypy --strict` 42 arquivos, limpo. Commits `aaa9eca`/`486d54d`/`7f19cf4`. Nenhuma R-* criada, alterada ou depreciada. Detalhe em HISTORICO 003.EP. |
 | v164 | 04/08/2026 | Sessão 003.EQ: D-ARQ-74 nova |
 | v165 | 05/08/2026 | Sessão 003.ER (ARQUITETURA): **D-ARQ-75 CRIADA** — fecha o §S0 do `PLANO_V1` (hospedagem + autenticação). Provedor por consumo, não por tier (Railway Hobby; RAM $10/GB/mês, teto 48 GB/serviço, `[DERIVADO — docs.railway.com/pricing/plans]`) porque o pico medido do e2e determinístico do Fascino é **904 MB / 128,5s**, contra ~450-500 MB extrapolados no registro anterior — 2 GB deixa de ser piso e vira teto de um usuário. Autenticação `st.login()` com client OIDC do projeto + **allowlist própria obrigatória** (OIDC autentica, não autoriza — `[DERIVADO — docs.streamlit.io/.../authentication]`), gate antes do `file_uploader`, segredo fora do git. Cookie de identidade de 30 dias não-configurável = risco aceito e nomeado. `requirements-app.txt` enxuto: 5 terceiros medidos (streamlit, pdfplumber, PyYAML, python-docx, requests) contra os 14 do `requirements.txt` do legado; pin do Streamlit precisa de piso que garanta `st.login`. Leitura única do PDF (2ª passada de `extrair_texto_pgr`, ~metade do tempo) adiada para fatia própria medida. Correção de método registrada: a 1ª varredura de dependências usou `grep "^import"`, cego a import indentado (classe DH-003EC-01(a)). Riscos inocentados por medição: cache em `session_state` = 72 KB; PDF do cliente não persiste em disco (`TemporaryDirectory`). Nenhuma R-* criada ou alterada; motor, protocolo e vocabulário intocados. Implementação é 003.ES. Detalhe em HISTORICO 003.ER. |
+| v166 | 08/08/2026 | Sessão 003.ES fatias 1-2 (IMPLEMENTAÇÃO): **D-ARQ-76 CRIADA** — o gate de acesso mora no entrypoint (`app_matriz.py`), não em `pagina_matriz()`, **superando em parte D-ARQ-75 cláusula 2(b)**; a decisão de acesso é núcleo puro com três desfechos (`GateAcesso` PEDIR_LOGIN/NEGAR/LIBERAR em `superficie/autorizacao.py`, sem importar streamlit nem ler `os.environ`); a fronteira normaliza estritamente (`is True`+`isinstance`), fail-closed por construção; allowlist por env var `PCMSO_ALLOWLIST`, não por `st.secrets`. Razões medidas: `at.secrets["auth"]` não faz `st.user.is_logged_in` existir no `AppTest` (`AttributeError` idêntico com e sem injeção — o bloco `[auth]` é consumido na subida do servidor), e `UserInfoProxy` tipa `getattr`/`.get()` como `str | bool | TokensProxy | None`, nunca `bool`/`str | None`. `cast` e `# type: ignore` rejeitados por mentirem ao verificador na fronteira de segurança. Nota de aplicação em **D-ARQ-75**: os três `[A CONFIRMAR]` fechados — `st.login` nasce no 1.42.0; env var resolvido pelo lado negativo (a doc documenta `secrets.toml`→env, nunca o contrário); Railway Serverless existe e dorme por ausência de *outbound*. Fatia 1: `requirements-app.txt` (5 terceiros por AST) + entrypoint na raiz (lacuna não prevista por D-ARQ-75). Suíte 1062→**1074 passed, 6 skipped**; `mypy --strict` limpo, **45 arquivos** (comando canônico passa a incluir `app_matriz.py`). Nenhuma R-* criada, alterada ou depreciada. Fatia 3 (deploy) adiada para 003.ET. Detalhe em HISTORICO 003.ES. |
