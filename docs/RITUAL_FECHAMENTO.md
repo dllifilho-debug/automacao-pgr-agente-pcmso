@@ -8,9 +8,9 @@ DH-003EG-03 entrou. Origem: emenda 003.EG, `CLAUDE.md` seção "Verificação".
 1. Conferir a última linha do changelog de `docs/PROTOCOLO_AGENTE_MEDICO.md` e de
    `docs/DECISOES_ARQUITETURAIS.md` contra o que a sessão espera encontrar. Divergência é
    bloqueador — parar e reportar, nunca ajustar para bater.
-2. Gravar as pendências novas no §11 do PROTOCOLO, respeitando a convenção `DH-*` (higiene de
-   instrumento/método) / `DT-*` (dívida técnica ou de conhecimento). ID novo nunca reinventa ID
-   existente.
+2. Gravar as pendências novas em `docs/PENDENCIAS_CLINICAS.md`, respeitando a convenção `DH-*`
+   (higiene de instrumento/método) / `DT-*` (dívida técnica ou de conhecimento). ID novo nunca
+   reinventa ID existente.
 3. Gravar DECISOES (nota de aplicação em D-ARQ existente, ou D-ARQ nova). Se este passo tocou
    `docs/DECISOES_ARQUITETURAIS.md`, regenerar `docs/INDICE_DARQ.md`
    (`python -m scripts.gerar_indice_darq`) antes de commitar — passo obrigatório, não
