@@ -1,0 +1,14 @@
+matrizes_originais/
+fds_originais/
+entrevistas/
+relatorios/
+docs/
+tests/
+agente_medico/tests/
+modules/
+refatoracao/
+.git/
+__pycache__/
+**/__pycache__/
+*.pyc
+.streamlit/secrets.toml
