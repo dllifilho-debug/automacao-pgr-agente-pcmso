@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Optional
 
-import pdfplumber
+from agente_medico.motor.io_pdf import paginas_liberadas
 
 
 def extrair_tabelas_fds(caminho: Path) -> list[list[list[Optional[str]]]]:
@@ -31,9 +31,8 @@ def extrair_tabelas_fds(caminho: Path) -> list[list[list[Optional[str]]]]:
     fds_originais/; D-ARQ-43 Parte 1 (parse-PDF é camada de texto, sem OCR).]
     """
     tabelas: list[list[list[Optional[str]]]] = []
-    with pdfplumber.open(caminho) as pdf:
-        for page in pdf.pages:
-            tabelas.extend(page.extract_tables())
+    for page in paginas_liberadas(caminho):
+        tabelas.extend(page.extract_tables())
     return tabelas
 
 
@@ -124,6 +123,5 @@ def extrair_texto_fds(caminho: Path) -> Optional[str]:
     devolve o TEXTO VERBATIM da região de composição de um PDF de FDS, entrada
     de transcrever_fds (D-ARQ-47 cláusula 1, fatia futura). Sem LLM aqui.
     """
-    with pdfplumber.open(caminho) as pdf:
-        paginas = [page.extract_text() or "" for page in pdf.pages]
+    paginas = [page.extract_text() or "" for page in paginas_liberadas(caminho)]
     return _recortar_composicao(paginas)
