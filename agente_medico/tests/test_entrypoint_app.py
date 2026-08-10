@@ -43,3 +43,19 @@ def test_is_logged_in_nao_booleano_e_tratado_como_nao_logado(monkeypatch: pytest
 
     assert not at.exception, f"exceções: {at.exception}"
     assert any(b.label == "Entrar com Google" for b in at.button)
+
+
+def test_provedor_nao_configurado_para_com_mensagem_em_vez_de_estourar(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("PCMSO_ALLOWLIST", raising=False)
+    # dict puro: .get("email") funciona, .is_logged_in levanta AttributeError —
+    # exatamente o estado de um deploy sem o bloco [auth].
+    monkeypatch.setattr(streamlit, "user", {})
+    caminho = str(Path(__file__).resolve().parents[2] / "app_matriz.py")
+    at = AppTest.from_file(caminho, default_timeout=30)
+    at.run()
+
+    assert not at.exception, f"exceções: {at.exception}"
+    assert any(t.value == "Aplicativo mal configurado" for t in at.title)
+    assert not any(b.label == "Entrar com Google" for b in at.button)
