@@ -1,30 +1,18 @@
-# ── Interface ───────────────────────────────────────────────────────────────
-streamlit>=1.35.0,<2.0.0
+# Dependências do app novo (agente_medico/). É o arquivo que o builder do
+# Streamlit Community Cloud consome (único nome reconhecido na raiz) e o que o
+# Dockerfile instala — D-ARQ-78. O do legado vive em requirements-legado.txt.
+#
+# Conjunto medido por varredura AST de agente_medico/{motor,superficie,adaptadores}
+# (003.ES; a varredura por grep de D-ARQ-75 era cega a import indentado).
+# Guardado por agente_medico/tests/test_requirements_app.py — não editar à mão
+# sem rodar esse teste.
 
-# ── PDF / Dados ──────────────────────────────────────────────────────────────
-pdfplumber>=0.10.0
-PyMuPDF>=1.23.0
-pandas>=2.0.0
-
-# ── OCR (fallback para PDFs assinados/digitalizados) ─────────────────────────
-pytesseract>=0.3.10
-pdf2image>=1.17.0
-opencv-python-headless>=4.8.0
-numpy>=1.24.0
-
-# ── Documentacao ─────────────────────────────────────────────────────────────
-python-docx>=1.1.0
-
-# ── Banco de dados ────────────────────────────────────────────────────────────
-supabase>=2.0.0
-requests>=2.31.0
-
-# ── Fuzzy matching (Passo 2) ──────────────────────────────────────────────────
-rapidfuzz>=3.6.0
-
-# ── Motor de inferência ───────────────────────────────────────────────────────
+# Piso 1.42.0 = versão que introduz st.login (fatia 2 de 003.ES).
+# Fonte: docs.streamlit.io/develop/quick-reference/release-notes/2025
+streamlit>=1.42.0,<2.0.0
+# Piso 0.11.9 = versão medida no host onde Page.flush_cache/Page.close foram
+# confirmados presentes (003.ET fatia 2).
+pdfplumber>=0.11.9
 PyYAML>=6.0
-
-# ── IA Gemini (fallback extracao PGR) ────────────────────────────────────────
-google-generativeai>=0.5.0
-PyMuPDF
+python-docx>=1.1.0
+requests>=2.31.0

@@ -18,6 +18,10 @@ e não pode ser disparado por não-autorizado.
 (streamlit 1.56.0, `user_info.py`) — sem tipo próprio para `is_logged_in`
 nem `.get("email")`. A normalização estrita para `bool`/`str | None`
 acontece aqui, na fronteira de I/O, antes do núcleo puro de autorizacao.py.
+
+Sem o bloco `[auth]` em secrets, `st.user.is_logged_in` nem existe — o ramo
+`_identidade_do_provedor() is None` distingue esse caso ("mal configurado")
+de "configurado mas não logado", e para com mensagem em vez de estourar.
 """
 
 import os
@@ -31,9 +35,33 @@ from agente_medico.superficie.autorizacao import (
 )
 from agente_medico.superficie.web_matriz import pagina_matriz
 
-_logado = st.user.is_logged_in is True
-_email_bruto = st.user.get("email")
-_email = _email_bruto if isinstance(_email_bruto, str) else None
+
+def _identidade_do_provedor() -> tuple[bool, str | None] | None:
+    """None = provedor de identidade não configurado (bloco `[auth]` ausente).
+
+    `st.user.is_logged_in` não existe sem `[auth]` (medição 1 de D-ARQ-76); sem
+    este ramo o script estoura AttributeError, e o Community Cloud força
+    showErrorDetails=false — erro em produção sem causa visível.
+    """
+    try:
+        logado = st.user.is_logged_in is True
+        email_bruto = st.user.get("email")
+    except AttributeError:
+        return None
+    return logado, email_bruto if isinstance(email_bruto, str) else None
+
+
+_identidade = _identidade_do_provedor()
+
+if _identidade is None:
+    st.title("Aplicativo mal configurado")
+    st.write(
+        "O provedor de identidade não está configurado (bloco `[auth]` ausente "
+        "em secrets). O acesso está bloqueado."
+    )
+    st.stop()
+
+_logado, _email = _identidade
 
 _decisao = decidir_acesso(
     _logado,

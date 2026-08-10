@@ -29,13 +29,13 @@ def _tokens_por_linha(texto: str) -> list[list[str]]:
     return [linha.split() for linha in texto.splitlines()]
 
 
-def test_dockerfile_instala_requirements_app_nao_o_legado() -> None:
+def test_dockerfile_instala_o_requirements_do_app_nao_o_do_legado() -> None:
     texto = _DOCKERFILE.read_text(encoding="utf-8")
     assert texto.strip(), "Dockerfile vazio"
 
     linhas = _tokens_por_linha(texto)
-    assert any("requirements-app.txt" in tokens for tokens in linhas)
-    assert not any("requirements.txt" in tokens for tokens in linhas)
+    assert any("requirements.txt" in tokens for tokens in linhas)
+    assert not any("requirements-legado.txt" in tokens for tokens in linhas)
 
 
 def test_toml_gerado_tem_as_cinco_chaves_do_bloco_auth() -> None:
