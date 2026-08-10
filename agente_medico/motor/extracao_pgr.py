@@ -5,8 +5,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Literal
 
-import pdfplumber
-
+from agente_medico.motor.io_pdf import paginas_liberadas
 from agente_medico.motor.tipos import Pendencia
 
 # D-ARQ-57 peça 4 fatia 4d: rota de roteamento devolvida por avaliar_estrutura
@@ -45,8 +44,7 @@ def extrair_texto_pgr(caminho: Path) -> list[str]:
     [DERIVADO — pdfplumber.extract_text puro; medição 003.BK sobre
     matrizes_originais/PGR VIVERDE V02 - 03.02.25.pdf, D-ARQ-50.]
     """
-    with pdfplumber.open(caminho) as pdf:
-        return [page.extract_text() or "" for page in pdf.pages]
+    return [page.extract_text() or "" for page in paginas_liberadas(caminho)]
 
 
 def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:

@@ -109,3 +109,17 @@ def test_piso_de_streamlit_garante_st_login() -> None:
     trecho = linha.split(">=", 1)[1].split(",", 1)[0].strip()
     piso = tuple(int(parte) for parte in trecho.split("."))
     assert piso == (1, 42, 0), f"piso de streamlit é {piso}, esperado (1, 42, 0)"
+
+
+def test_piso_de_pdfplumber_garante_close_e_flush_cache() -> None:
+    # Diferente do piso de streamlit (1.42.0 é a versão exata que introduz
+    # st.login — snapshot com significado normativo), 0.11.9 é só a versão
+    # medida no host onde Page.close/Page.flush_cache foram confirmados
+    # presentes (003.ET fatia 2). Não há razão para travar o piso exato:
+    # >= mantém a garantia que importa (ninguém baixa o pin abaixo da versão
+    # confirmada) sem quebrar se o piso subir no futuro.
+    declaradas = _distribuicoes_declaradas()
+    linha = declaradas[_normalizar("pdfplumber")]
+    trecho = linha.split(">=", 1)[1].split(",", 1)[0].strip()
+    piso = tuple(int(parte) for parte in trecho.split("."))
+    assert piso >= (0, 11, 9), f"piso de pdfplumber é {piso}, esperado >= (0, 11, 9)"

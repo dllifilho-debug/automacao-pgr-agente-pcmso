@@ -5,9 +5,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import NamedTuple, Optional
 
-import pdfplumber
-
 from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe
+from agente_medico.motor.io_pdf import paginas_liberadas
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 
 # [DERIVADO — D-ARQ-65 fatia 1; molde D-ARQ-49/50 (verbatim tipado) +
@@ -388,12 +387,11 @@ def parsear_arquivo(caminho: Path) -> tuple[GHEVerbatim, ...]:
     """Wrapper de I/O (D-ARQ-09): único ponto do módulo que toca disco.
     pdfplumber.extract_words -> PalavraPDF -> parsear_paginas (núcleo
     puro)."""
-    with pdfplumber.open(caminho) as pdf:
-        paginas = [
-            tuple(
-                PalavraPDF(text=w["text"], x0=w["x0"], top=w["top"])
-                for w in page.extract_words()
-            )
-            for page in pdf.pages
-        ]
+    paginas = [
+        tuple(
+            PalavraPDF(text=w["text"], x0=w["x0"], top=w["top"])
+            for w in page.extract_words()
+        )
+        for page in paginas_liberadas(caminho)
+    ]
     return parsear_paginas(paginas)
