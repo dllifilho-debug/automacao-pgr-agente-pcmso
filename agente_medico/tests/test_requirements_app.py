@@ -58,7 +58,7 @@ def _terceiros_importados() -> set[str]:
 
 
 def _distribuicoes_declaradas() -> dict[str, str]:
-    caminho = Path(__file__).resolve().parents[2] / "requirements-app.txt"
+    caminho = Path(__file__).resolve().parents[2] / "requirements.txt"
     declaradas: dict[str, str] = {}
     for linha in caminho.read_text(encoding="utf-8").splitlines():
         linha = linha.strip()

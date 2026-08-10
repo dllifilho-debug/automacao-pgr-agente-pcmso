@@ -2,8 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements-app.txt .
-RUN pip install --no-cache-dir -r requirements-app.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app_matriz.py .
 COPY agente_medico/ ./agente_medico/
