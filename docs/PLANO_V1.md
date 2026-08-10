@@ -148,6 +148,27 @@ pelo plano original: o fluxo tem handoff entre duas equipes, e "rodar local na m
 escritório" assumia um operador único — requisito a resolver no S3 completo, não em S0.
 `[A MEDIR — se engenharia e assessoria compartilham máquina/rede]`
 
+**[ATUALIZADO — 10/08/2026, nota de progresso 003.ET] §S0 NÃO fecha — o destino do deploy
+reabriu.** As fatias de empacotamento, acesso, build e memória foram entregues (D-ARQ-76,
+D-ARQ-77, nota de aplicação em D-ARQ-75) — mecanismo de deploy pronto, `Dockerfile` +
+`entrypoint.sh` + materializador de segredo, gate de acesso no núcleo puro. O que reabriu é a
+**escolha de provedor**: a premissa de "provedor pago por consumo" (D-ARQ-75 cláusula 1) caiu
+com a medição da fatia 2 — o pico de RAM do e2e do Fascino não é 904 MB, é cache de página do
+pdfplumber nunca liberado; corrigido, o app roda na faixa de 250-350 MB somando o runtime do
+Streamlit, dentro do teto de qualquer tier gratuito plausível. **Requisito declarado pelo
+Diovanni no curso de 003.ET: custo zero.** A decisão original de provedor pago nunca teve essa
+restrição checada com ele antes de ser arquitetada — a pergunta não foi feita em 003.ER.
+
+Opções na mesa para a decisão de sessão própria: **Streamlit Community Cloud** (limite de 1 GB,
+1 app privado por conta gratuita `[DERIVADO — docs.streamlit.io, conferido 09/08/2026]`),
+**Google Cloud Run** (free tier permanente, consome o `Dockerfile` já pronto desta sessão) e
+**Railway** (~$5/mês de assinatura, a escolha original de D-ARQ-75, agora sem a urgência do
+pico de RAM que a motivou). `[A CONFIRMAR]` que decide o Community Cloud: ele instala
+dependências a partir de `requirements.txt` na raiz — que é o do legado, não o
+`requirements-app.txt` do app novo — e não se sabe se a plataforma permite apontar outro
+arquivo. Sem Dockerfile para contornar (o builder do Community Cloud não é o Railpack/Railway
+de D-ARQ-77), isso pode ser eliminatório para essa opção especificamente.
+
 **[REVERTIDO — 05/08/2026. A recomendação de adiar CAI; o parágrafo acima fica como
 registro, substituído em vigência por esta nota.]** Duas respostas novas do Diovanni:
 (3) rede compartilhada, máquinas individuais; (4) **instalação de software exige
