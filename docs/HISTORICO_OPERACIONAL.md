@@ -4508,3 +4508,85 @@ nenhuma regra clínica criada, alterada ou depreciada; `PLANO_V1.md` §S0 com no
 `PORT`, e se o builder detecta `requirements-app.txt` em vez do `requirements.txt` do legado.
 Metade da fatia é ação manual com credencial real (OAuth client no Google Cloud, projeto Railway,
 variáveis), o que pede roteiro operacional além de prompt de código.
+
+## Sessão 003.ET — 08-10/08/2026 — IMPLEMENTAÇÃO (3 fatias + fechamento)
+
+Aberta a partir de `main 88b1d64` (PR #285, merge de 003.ES-fechamento), branch
+`feat/003et-particao-protocolo` para a fatia 0. A sessão atravessou três dias corridos:
+fatia 0 em 08/08/2026, fatias 1 e 2 em 09/08/2026, fechamento em 10/08/2026.
+
+**Fatia 0 — partição do §11** (branch `feat/003et-particao-protocolo`, commits `8ac3001`
+(extração), `cffe005` (consumidores), `69059c2`/`913814a`/`edfb44c` (testes + emendas), merge
+`3fdee0e`, PR #287, 08/08/2026). `docs/PENDENCIAS_CLINICAS.md` criado com os 71 headers de dívida
+técnica (`DT-`/`DH-`) do §11; `docs/PROTOCOLO_AGENTE_MEDICO.md` cai de **274.752 para 113.007
+caracteres**; numeração duplicada `## 11.` corrigida para `## 12.`; consumidores de método
+atualizados (skill `/kickoff` item 5, `RITUAL_FECHAMENTO` passo 2, `CLAUDE.md` da raiz). Motivo:
+o nível 1 do gate de abertura de D-ARQ-63 tinha estourado o próprio orçamento — a decisão o
+dimensionara em "PROTOCOLO ~169 mil bytes" e ele estava ~69% acima. Emenda: o discriminante
+`== 71` do teste de partição foi trocado por um piso (`denominador >= 42` de
+`medir_cobertura_clinica`, mais a ausência de header `R-*` no arquivo novo) — congelar 71 travaria
+o teste na primeira dívida nova legítima.
+
+**Fatia 1 — mecanismo de build e segredo** (branch `feat/003et-deploy`, commits `29ca5c6`
+(Dockerfile), `376c266` (materializador), `b873f67` (testes), merge `a7c1acc`, PR #288,
+09/08/2026). `Dockerfile`, `.dockerignore`, `entrypoint.sh`,
+`agente_medico/superficie/materializar_secrets.py`, `tests/test_deploy_artefatos.py`. Ver
+D-ARQ-77.
+
+**Fatia 2 — memória** (branch `feat/003et-memoria-pdfplumber`, commits `11fc36e` (wrappers de
+I/O), `eeb626f` (teste), `3b8be29` (emenda Viverde), `32be7d0` (piso vira invariante), merge
+`8b98b75`, PR #289, 09/08/2026). `agente_medico/motor/io_pdf.py` (`paginas_liberadas`) aplicado
+nos 4 wrappers de I/O do pdfplumber (2× em `extracao_fds.py`, 1× em `extracao_pgr.py`, 1× em
+`parser_familia_consciente.py`); piso de `pdfplumber` sobe para `>=0.11.9` com guarda; teste de
+liberação por ordem de chamada (não contagem — ver bloqueador 1 abaixo). Ver nota de aplicação
+em D-ARQ-75.
+
+**Quatro bloqueadores reportados pelo Code, todos no procedimento previsto** — dois por defeito
+da especificação do Arquiteto, dois por limitação de ambiente:
+
+1. *(spec)* Caso A da fatia 2 pedia `chamadas de close == n_páginas`. Inalcançável:
+   `PDF.close()` no `with`-exit refecha todas as páginas, então qualquer implementação correta
+   dispara 2× por página. Discriminante trocado de **contagem** para **ordem** (existe uma
+   chamada de `close` antes da extração da última página).
+2. *(spec)* O prompt da fatia 2 mandava chamar `flush_cache()` e o teste espionava
+   `flush_cache` — o método que entrega 398 MB em vez dos 88 MB de `close()`. Corrigido para
+   `close` antes de o Code receber a instrução final.
+3. *(ambiente)* Host Windows sem `resource` e sem `psutil`. Resolvido autorizando `psutil` só
+   para medição, fora de `requirements-app.txt` e não commitado.
+4. *(ambiente/spec)* Fixture não versionada — o e2e do Fascino em teste novo apontava para um
+   PDF ausente do repositório com comentário afirmando o contrário. Corrigido para o Viverde
+   (tracked) no caso que permitia a troca, nomeado como dívida no caso que não permitia
+   (Fascino exige o PDF específico) — ver DH-003ET-01.
+
+**Dois erros do Arquiteto na fatia 1, pegos na revisão antes de o prompt sair (D-ARQ-06).** O
+primeiro rascunho da fatia 1 incluía um teste que executaria o `entrypoint.sh` via shell — o
+host de CI é Windows/PowerShell, sem bash, e o teste seria pulado por `skipif`, cobertura zero
+sem sinalizar defeito (classe DH-003ES-01). Trocado por `test_deploy_artefatos.py` em Python
+puro, sobre o núcleo (`gerar_toml_auth`) e a ordem textual das linhas do `entrypoint.sh`. O
+segundo: a contagem de `mypy --strict` prevista no prompt era 45 (herdada de 003.ES), sem
+contar que `motor/io_pdf.py` (módulo novo da fatia 2) a levaria a 46 — corrigido para `[A
+MEDIR]` antes de o Code receber a instrução.
+
+**`PAINEL_ESTADO.md` não re-tirado.** Nenhum dos três números se moveu: nenhuma `R-*` criada,
+alterada ou depreciada (painel de regras inalterado); a porta de entrada não muda (sessão de
+infraestrutura e higiene de doc); as três dívidas travantes seguem `DT-003L-01`,
+`DT-003M-02(A)` e `DT-FDS-02`. Decisão declarada conforme passo 5 do ritual.
+
+**Docs (fechamento, 10/08/2026):** `DECISOES_ARQUITETURAIS.md` v167 — **D-ARQ-77 CRIADA**
+(mecanismo de build é o Dockerfile, segredo materializado antes do servidor) + nota de aplicação
+em **D-ARQ-75** (premissa dos 904 MB refutada por medição — cache de página do pdfplumber nunca
+liberado, não propriedade do documento); `INDICE_DARQ.md` regenerado 76 → 77;
+`PENDENCIAS_CLINICAS.md` ganha **DH-003ET-01** (fixtures de PDF não versionadas, 71 → 72
+headers); `PROTOCOLO_AGENTE_MEDICO.md` v88 (registra a partição do §11 da fatia 0, nenhuma regra
+clínica tocada); `PLANO_V1.md` §S0 reaberto — a base de "provedor pago por consumo" caiu,
+decisão de destino do deploy fica para sessão própria, com o requisito de custo zero do Diovanni
+em mãos.
+
+**Números finais** `[MEDIDO — 003.ET fechamento, 10/08/2026, árvore parada]`: suíte
+**1085 passed, 6 skipped**; `mypy --strict` não roda nesta fatia (nenhum `.py` tocado no
+fechamento; a última medição de código é a da fatia 2, 47 arquivos = 46 herdados de 003.ES + 1
+`motor/io_pdf.py`).
+
+**Próxima:** decisão de destino do deploy (`docs/PLANO_V1.md` §S0), com o número de RAM
+corrigido e o requisito de custo zero em mãos — Google Cloud Run e Streamlit Community Cloud
+entram na comparação ao lado da Railway.
