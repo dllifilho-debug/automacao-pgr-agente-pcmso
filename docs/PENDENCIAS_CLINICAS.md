@@ -1273,3 +1273,24 @@ medido (sonda 2) e a lacuna é só não ter sido exercitada ainda.
 
 **Status:** ABERTA — não-bloqueante. A decisão em si está coberta por unidade e é fail-closed;
 falta cobrir a tradução casca→ação nos dois ramos que `test_entrypoint_app.py` ainda não toca.
+
+### DH-003ET-01 — fixtures de PDF não versionadas `[ABERTA — higiene de instrumento]`
+
+**Origem:** 003.ET fatia 2, emenda.
+
+**Situação.** `matrizes_originais/` tem **12 PDFs tracked**, e nem o
+`pgr_Cjr Engenharia Ltda (M Construtora).pdf` nem o PGR Fascino (`PGR - CONSCIENTE CONSTRUTORA E
+INCORPORADORA SPE 0030 - FASCINO (15.07.26).pdf`) estão entre eles — os dois só existem no host do
+Diovanni. Consequência: `agente_medico/tests/test_documento_matriz.py` (e2e Fascino),
+`agente_medico/tests/test_parser_familia_consciente.py` e o caso Fascino de
+`test_liberacao_cache_pdf.py` dependem de arquivos ausentes em clone limpo — em clone limpo eles
+skipam em silêncio, e a suíte segue verde com menos cobertura do que o número sugere. Classe
+DH-003ES-01 (lacuna de cobertura silenciosa).
+
+**Origem do achado.** Nasceu na emenda da fatia 2, quando um teste novo apontava para uma fixture
+não versionada com comentário afirmando o contrário; corrigido para o Viverde (tracked) no caso
+que permitia a troca, e nomeado como dívida no caso que não permitia (Fascino exige um PDF
+específico, não substituível).
+
+**Status:** ABERTA — não-bloqueante. Resolução (versionar as fixtures, trocar por PDFs
+sintéticos, ou marcar explicitamente a suíte como condicionada) é sessão própria.

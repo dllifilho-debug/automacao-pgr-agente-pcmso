@@ -3116,6 +3116,31 @@ cláusula 2(b) foi superada em parte por D-ARQ-76 (o gate mora no entrypoint, n�
   onde `$CWD` é a pasta de onde o Streamlit foi executado — o mesmo vale para o `config.toml` já
   versionado (tema, `maxUploadSize = 50`). O start command precisa rodar com CWD na raiz do repo.
 
+**Nota de aplicação — 003.ET. A premissa dos 904 MB (cláusula 1) foi refutada por medição.** O
+pico não é propriedade do documento nem do pipeline — é **cache de página do pdfplumber nunca
+liberado**. Com `Page.close()` chamado por página (helper `paginas_liberadas`,
+`motor/io_pdf.py`), o e2e do Fascino cai de **859 MB para 103 MB** (sandbox Linux) e de
+**674,3 MB para 114,8 MB** (host Windows, `psutil.Process().memory_info().peak_wset`), com saída
+idêntica nos dois ambientes (`PRELIMINAR`, 19 matrizes, 154 pendências).
+`[MEDIDO — 003.ET fatia 2, 09/08/2026]`
+
+Medição adicional que muda o desenho de quem for corrigir isso em outro lugar: `flush_cache()`
+sozinho deixa **398 MB**; `close()` sozinho entrega **88 MB**; chamar os dois equivale a `close()`
+sozinho. Um teste que espionasse só `flush_cache` ficaria verde sobre a implementação errada.
+
+**Consequência.** O descarte do Streamlit Community Cloud (limite de 1 GB) e a estimativa de
+~$10-15/mês da cláusula 1 pendiam do número de 904 MB. Com o app na faixa de 250-350 MB somando o
+runtime do Streamlit, hospedagem gratuita volta à mesa. A cláusula 1 **não é revogada nesta
+sessão** — o destino do deploy é decisão de sessão própria, com o número medido em mãos (nota em
+`docs/PLANO_V1.md` §S0).
+
+**Erro de método registrado (D-ARQ-06).** 003.ER mediu o sintoma (pico de RAM) e concluiu sobre o
+provedor sem investigar a causa; o Arquiteto leu essa decisão integralmente no gate de abertura de
+003.ET e repetiu a conclusão sem questioná-la. A pergunta que faltava — "por que consome isso?" —
+custou dois comandos de medição, e foi disparada por uma pergunta do Diovanni sobre custo, não por
+revisão do Arquiteto. Regra derivada: número de consumo que vai fundamentar decisão de
+arquitetura exige a pergunta pela causa antes de virar premissa.
+
 ## D-ARQ-76 — O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir
 
 **Status:** DECISÃO DE ARQUITETURA
@@ -3190,6 +3215,80 @@ indústria química e saúde entram pelo mesmo gate, com a mesma allowlist.
 **Base.** Sessão 003.ES (08/08/2026), IMPLEMENTAÇÃO. Duas sondas com bloqueador reportado pelo
 Code e resolvido pelo Arquiteto, no procedimento previsto. Suíte 1066 → 1074 passed, 6 skipped;
 `mypy --strict` limpo, 45 arquivos.
+
+## D-ARQ-77 — Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor
+
+**Status:** DECISÃO DE ARQUITETURA
+
+Sessão 003.ET, fatia 1. Implementa o mecanismo de deploy adiado por D-ARQ-75/76. Nenhuma regra
+`R-*` criada, alterada ou depreciada.
+
+**Contexto.** D-ARQ-75/76 decidiram provedor, autenticação e o lugar do gate; nenhuma das duas
+decidiu como o build efetivamente empacota e sobe o app. O repositório tem, na raiz, `app.py` e
+`requirements.txt` do legado — o app Streamlit anterior ao app novo (`app_matriz.py`,
+`requirements-app.txt`). Sem mecanismo declarado, a detecção automática do builder decide por
+convenção, e a convenção favorece o legado.
+
+**Decisão — 4 cláusulas.**
+
+1. **Dockerfile decide o build, não a detecção do builder.** O builder vigente da Railway é o
+   **Railpack** (não Nixpacks) `[DERIVADO — docs.railway.com/builds/build-configuration,
+   conferido 08-09/08/2026]`. Ele detecta Python por `main.py`/`app.py`/`start.py`/… ou por
+   `requirements.txt`/`pyproject.toml`/`Pipfile`, instala com `requirements.txt` via pip, e
+   escolhe o start command pelo primeiro arquivo da mesma lista `[DERIVADO —
+   railpack.com/languages/python, conferido 08-09/08/2026]`. Com `app.py` e `requirements.txt`
+   do legado na raiz, um deploy sem Dockerfile instalaria as 14 dependências do legado e subiria
+   o app legado — dois erros silenciosos, com o serviço reportando saudável. `Dockerfile` na raiz
+   (nome exato, D maiúsculo) é detectado e usado, e passa a decidir o build no lugar da detecção
+   `[DERIVADO — docs.railway.com/builds/dockerfiles]`. `agente_medico/`, `app_matriz.py` e
+   `.streamlit/` são copiados explicitamente; o legado nunca entra na imagem.
+
+2. **O materializador de segredo é start command de shell, antes do `streamlit run`.**
+   `app_matriz.py` lê `st.user.is_logged_in` na primeira linha executável do gate (D-ARQ-76), e o
+   atributo só existe com o bloco `[auth]` configurado — consumido na subida do servidor (medição
+   1 de D-ARQ-76). Materializar o segredo em Python dentro do próprio app chegaria tarde demais:
+   o `AttributeError` já teria acontecido. A forma escolhida é núcleo puro
+   (`gerar_toml_auth` em `agente_medico/superficie/materializar_secrets.py`, sem I/O, lê o
+   `Mapping` que a casca fornece) mais uma casca fina lendo `os.environ` e escrevendo
+   `.streamlit/secrets.toml`, chamada por um `entrypoint.sh` de três linhas antes do
+   `exec streamlit run` — mesmo molde de D-ARQ-76 cláusula 2 (núcleo puro + casca fina), e também
+   porque a suíte deste projeto roda em host Windows, onde um teste que exercitasse o shell em si
+   seria pulado por `skipif` (classe DH-003ES-01); `test_deploy_artefatos.py` cobre o núcleo puro
+   e a ordem textual das linhas do `entrypoint.sh`, nunca a execução do shell.
+
+3. **`PCMSO_ALLOWLIST` não entra no `secrets.toml`.** Preserva D-ARQ-76 cláusula 4 — a allowlist
+   é código nosso, lida direto de `os.environ`, sem depender do materializador de segredo do
+   provedor de identidade.
+
+4. **O `requirements.txt` do legado permanece.** O legado é território "não tocar" (D-ARQ-09/48
+   preservadas fora de `motor/`); a coexistência dos dois `requirements*.txt` na raiz deixa de
+   importar no momento em que o Dockerfile, não a detecção, decide qual deles o build usa.
+
+**Razão que sustenta a decisão, e é o ponto.** O builder da Railway trocou de Nixpacks para
+Railpack entre a escrita de D-ARQ-75 (05/08/2026) e a implementação desta fatia (08/08/2026).
+Apoiar a cláusula 3 de D-ARQ-75 (deploy do app novo) numa heurística de detecção de builder que
+muda sem aviso é, na infraestrutura, o mesmo erro que D-ARQ-65 cláusula 2 rejeitou na extração:
+caminho crítico refém de comportamento de terceiro não travado por contrato.
+
+**Universalidade (D-ARQ-06).** O mecanismo de build independe de setor — qualquer PGR de
+qualquer cliente sobe pelo mesmo Dockerfile, pelo mesmo entrypoint.
+
+**Fronteiras (não confundir).**
+
+* D-ARQ-09 / D-ARQ-48 — preservadas: nada desta decisão entra em `motor/`; o Dockerfile copia
+  `agente_medico/` inteiro, mas o que decide o que roda continua sendo o entrypoint da aplicação.
+* D-ARQ-54 P1 — preservada: `materializar_secrets.py` não julga domínio clínico.
+* D-ARQ-74 — intacta a jusante; a guarda anti-documento-vazio não muda com o mecanismo de build.
+* D-ARQ-76 — intacta; esta decisão materializa a cláusula 3 de D-ARQ-75 (segredo fora do git,
+  valores em variável de ambiente do provedor), não a supersede.
+
+**Lacuna nomeada.** `.dockerignore` exclui `matrizes_originais/` (~32 MB de documentos de
+cliente, medido em disco via `git ls-files`) do build context — sem essa exclusão, esses
+documentos subiriam ao builder sem necessidade nenhuma de estarem lá.
+
+**Base.** Sessão 003.ET, fatia 1 (09/08/2026), IMPLEMENTAÇÃO. `Dockerfile`, `.dockerignore`,
+`entrypoint.sh`, `agente_medico/superficie/materializar_secrets.py`,
+`tests/test_deploy_artefatos.py`. PR #288.
 
 ## Histórico de revisões
 
@@ -3361,3 +3460,4 @@ Code e resolvido pelo Arquiteto, no procedimento previsto. Suíte 1066 → 1074 
 | v164 | 04/08/2026 | Sessão 003.EQ: D-ARQ-74 nova |
 | v165 | 05/08/2026 | Sessão 003.ER (ARQUITETURA): **D-ARQ-75 CRIADA** — fecha o §S0 do `PLANO_V1` (hospedagem + autenticação). Provedor por consumo, não por tier (Railway Hobby; RAM $10/GB/mês, teto 48 GB/serviço, `[DERIVADO — docs.railway.com/pricing/plans]`) porque o pico medido do e2e determinístico do Fascino é **904 MB / 128,5s**, contra ~450-500 MB extrapolados no registro anterior — 2 GB deixa de ser piso e vira teto de um usuário. Autenticação `st.login()` com client OIDC do projeto + **allowlist própria obrigatória** (OIDC autentica, não autoriza — `[DERIVADO — docs.streamlit.io/.../authentication]`), gate antes do `file_uploader`, segredo fora do git. Cookie de identidade de 30 dias não-configurável = risco aceito e nomeado. `requirements-app.txt` enxuto: 5 terceiros medidos (streamlit, pdfplumber, PyYAML, python-docx, requests) contra os 14 do `requirements.txt` do legado; pin do Streamlit precisa de piso que garanta `st.login`. Leitura única do PDF (2ª passada de `extrair_texto_pgr`, ~metade do tempo) adiada para fatia própria medida. Correção de método registrada: a 1ª varredura de dependências usou `grep "^import"`, cego a import indentado (classe DH-003EC-01(a)). Riscos inocentados por medição: cache em `session_state` = 72 KB; PDF do cliente não persiste em disco (`TemporaryDirectory`). Nenhuma R-* criada ou alterada; motor, protocolo e vocabulário intocados. Implementação é 003.ES. Detalhe em HISTORICO 003.ER. |
 | v166 | 08/08/2026 | Sessão 003.ES fatias 1-2 (IMPLEMENTAÇÃO): **D-ARQ-76 CRIADA** — o gate de acesso mora no entrypoint (`app_matriz.py`), não em `pagina_matriz()`, **superando em parte D-ARQ-75 cláusula 2(b)**; a decisão de acesso é núcleo puro com três desfechos (`GateAcesso` PEDIR_LOGIN/NEGAR/LIBERAR em `superficie/autorizacao.py`, sem importar streamlit nem ler `os.environ`); a fronteira normaliza estritamente (`is True`+`isinstance`), fail-closed por construção; allowlist por env var `PCMSO_ALLOWLIST`, não por `st.secrets`. Razões medidas: `at.secrets["auth"]` não faz `st.user.is_logged_in` existir no `AppTest` (`AttributeError` idêntico com e sem injeção — o bloco `[auth]` é consumido na subida do servidor), e `UserInfoProxy` tipa `getattr`/`.get()` como `str | bool | TokensProxy | None`, nunca `bool`/`str | None`. `cast` e `# type: ignore` rejeitados por mentirem ao verificador na fronteira de segurança. Nota de aplicação em **D-ARQ-75**: os três `[A CONFIRMAR]` fechados — `st.login` nasce no 1.42.0; env var resolvido pelo lado negativo (a doc documenta `secrets.toml`→env, nunca o contrário); Railway Serverless existe e dorme por ausência de *outbound*. Fatia 1: `requirements-app.txt` (5 terceiros por AST) + entrypoint na raiz (lacuna não prevista por D-ARQ-75). Suíte 1062→**1074 passed, 6 skipped**; `mypy --strict` limpo, **45 arquivos** (comando canônico passa a incluir `app_matriz.py`). Nenhuma R-* criada, alterada ou depreciada. Fatia 3 (deploy) adiada para 003.ET. Detalhe em HISTORICO 003.ES. |
+| v167 | 10/08/2026 | Sessão 003.ET fatias 1-2 + fechamento (08-10/08/2026): **D-ARQ-77 CRIADA** — mecanismo de build é o Dockerfile, não a detecção do builder (Railway trocou Nixpacks→Railpack entre D-ARQ-75 e a implementação); segredo materializado por shell no entrypoint antes do `streamlit run`, núcleo puro `gerar_toml_auth` + casca em `materializar_secrets.py`; `requirements.txt` do legado permanece, agora inofensivo. Nota de aplicação em **D-ARQ-75** (mesma ID): a premissa dos 904 MB (cláusula 1) refutada por medição — pico é cache de página do pdfplumber nunca liberado, não propriedade do documento; `Page.close()` por página derruba o e2e do Fascino de 859→103 MB (sandbox) e 674,3→114,8 MB (host Windows), saída idêntica; `flush_cache()` sozinho só chega a 398 MB, `close()` sozinho a 88 MB. Destino do deploy **reaberto** — a base de "provedor pago por consumo" caiu, hospedagem gratuita volta à mesa, decisão em sessão própria (`docs/PLANO_V1.md` §S0). Erro de método registrado (D-ARQ-06): 003.ER mediu sintoma e concluiu sobre provedor sem perguntar a causa; o Arquiteto repetiu a conclusão no gate de abertura de 003.ET sem questionar, até a pergunta do Diovanni sobre custo forçar a investigação. **DH-003ET-01 ABERTA** (`docs/PENDENCIAS_CLINICAS.md`) — fixtures de PDF (Fascino, Cjr Engenharia) não versionadas, testes que dependem delas skipam em silêncio em clone limpo. Nenhuma R-* criada, alterada ou depreciada. PROTOCOLO v88 (registra a partição do §11 da fatia 0). Suíte 1085 passed, 6 skipped (inalterada — sessão docs-only); `mypy --strict` não roda (nenhum `.py` tocado nesta fatia). Commits/PRs das fatias: #287 (fatia 0, partição §11), #288 (fatia 1, deploy), #289 (fatia 2, memória). Detalhe em HISTORICO 003.ET. |

@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v166 · 76 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v167 · 77 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -82,5 +82,6 @@ Fonte: DECISOES_ARQUITETURAIS.md v166 · 76 decisões
 | D-ARQ-72 | Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo` | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003 | 2810 | 2928 |
 | D-ARQ-73 | Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003 | 2835 | 6207 |
 | D-ARQ-74 | Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 2921 | 3033 |
-| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 2973 | 10311 |
-| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3119 | 5109 |
+| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 2973 | 12120 |
+| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3144 | 5109 |
+| D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3219 | 4842 |
