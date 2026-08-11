@@ -3290,6 +3290,113 @@ documentos subiriam ao builder sem necessidade nenhuma de estarem lá.
 `entrypoint.sh`, `agente_medico/superficie/materializar_secrets.py`,
 `tests/test_deploy_artefatos.py`. PR #288.
 
+## D-ARQ-78 — Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva
+
+**Status:** DECISÃO DE ARQUITETURA
+
+Sessão 003.EU, fatias 1-2. Fecha o §S0 do `docs/PLANO_V1.md`, reaberto pela nota 003.ET.
+Nenhuma regra `R-*` criada, alterada ou depreciada.
+
+**Contexto — o requisito que não tinha sido perguntado.** D-ARQ-75 escolheu provedor pago por
+consumo com a premissa de 904 MB de pico. A nota 003.ET refutou a premissa (103-115 MB com
+`Page.close()` por página) e registrou o requisito que o Diovanni declarou no curso da sessão e
+que **nunca foi checado com ele em 003.ER: custo zero**. Confirmado nesta sessão como **literal**
+— $0,00, sem conta de faturamento.
+
+**Decisão — 4 cláusulas.**
+
+1. **O alvo é o Streamlit Community Cloud; Cloud Run fica como fallback, não como primário.**
+   Railway sai por assinatura fixa de $5/mês, que colide com o requisito. Cloud Run sai do topo
+   por medição, não por preconceito: *"A Cloud Run instance that has any open WebSocket connection
+   is considered active, so CPU is allocated and the service is billed as instance-based billing"*
+   `[DERIVADO — cloud.google.com/run/docs/triggering/websockets, conferido 10/08/2026]`. Vale
+   então o free tier instance-based — 240.000 vCPU-s e 450.000 GiB-s/mês
+   `[DERIVADO — cloud.google.com/run/pricing, us-central1]` —, que a 1 vCPU são **66,7 h/mês** de
+   instância viva. Uma aba do Streamlit aberta 8h/dia × 22 dias custa ≈ **$7,45/mês**
+   `[APROXIMADO — aritmética do Arquiteto sobre as tarifas oficiais]`. O Community Cloud é a única
+   opção estruturalmente $0. **O `Dockerfile`, `entrypoint.sh` e `materializar_secrets.py` de
+   D-ARQ-77 não são descartados:** ficam dormentes e são o que torna o fallback para Cloud Run
+   grátis de implementar se o Community Cloud furar em RAM ou no limite de apps.
+
+2. **O nome do arquivo de dependências é contrato da plataforma, não preferência nossa.** O
+   Community Cloud usa o **primeiro arquivo reconhecido** que encontra, procurando no diretório do
+   entrypoint e depois na raiz; os nomes reconhecidos são `uv.lock`, `Pipfile`, `environment.yml`,
+   `requirements.txt`, `pyproject.toml`
+   `[DERIVADO — docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies,
+   conferido 10/08/2026]`. `requirements-app.txt` **não é reconhecido** e não há como apontar outro
+   arquivo — com `app_matriz.py` na raiz, um deploy instalaria as 14 dependências do legado.
+   Solução: **renomear, nunca duplicar** — o app assume `requirements.txt`, o legado vira
+   `requirements-legado.txt`. Duplicar criaria duas listas vivas (Docker lê uma, Community Cloud
+   lê a outra) que divergem em silêncio: erro silencioso plausível de D-ARQ-22.
+   **Efeito não previsto, e é ganho:** com o `requirements.txt` da raiz sendo o do app, a detecção
+   automática de builder passa a acertar por padrão — o renomeio **remove a causa-raiz** que
+   motivou D-ARQ-77 cláusula 1, em vez de contorná-la.
+
+3. **O gate próprio permanece, e a razão agora é medida.** A tentação era descartá-lo: o app
+   privado do Community Cloud já traz login e lista de e-mails nativos. A doc desfaz a aparência —
+   *"They can also pass these permissions to others by inviting more viewers"*
+   `[DERIVADO — docs.streamlit.io/deploy/streamlit-community-cloud/share-your-app, conferido
+   10/08/2026]`. **A allowlist nativa é transitiva:** quem entra pode abrir para terceiros. Para
+   app com PGR de cliente, ela não é gate. `PCMSO_ALLOWLIST` é a única lista que um viewer não
+   estende. Segunda razão, independente: o toggle "Make this app public" é um clique no menu Share.
+   D-ARQ-76 cláusula 4 sobrevive **sem tocar código**: *"the root-level secrets are also accessible
+   as environment variables"*, com exemplo literal `os.environ[...]`
+   `[DERIVADO — docs.streamlit.io/develop/concepts/connections/secrets-management, conferido
+   10/08/2026]` — a chave colada em nível raiz do TOML chega em `os.environ`.
+
+4. **A ordem de configuração é rígida, e a rigidez vem de código nosso.** `app_matriz.py` lê
+   `st.user.is_logged_in` na primeira linha executável, e o atributo não existe sem `[auth]`
+   (medição 1 de D-ARQ-76); o Community Cloud força `showErrorDetails = false`
+   `[DERIVADO — docs.streamlit.io/deploy/streamlit-community-cloud/status]`. Deploy sem os
+   segredos colados = tela de erro sem causa visível. A fatia 1 troca o `AttributeError` por
+   mensagem explícita (`_identidade_do_provedor`), mas **não dispensa a ordem**: escolher o
+   subdomínio → criar o OAuth client do Google com `redirect_uri` = `<URL do app>/oauth2callback`
+   → colar o TOML (`[auth]` + `PCMSO_ALLOWLIST` em nível raiz) em *Advanced settings* → só então
+   deploy. **Não existe "subir primeiro, autenticar depois".** Pré-requisito operacional
+   independente: *"You are only allowed one private app at a time"* `[DERIVADO — mesma fonte da
+   cláusula 3]` — o legado Seconci precisa liberar a vaga.
+
+**Universalidade (D-ARQ-06).** Hospedagem, identidade e mecanismo de build independem de setor —
+construção civil, indústria química e saúde sobem o mesmo PDF na mesma tela, sob o mesmo gate.
+
+**Fronteiras (não confundir).**
+
+* **D-ARQ-77 cláusula 4** — **superada**: o `requirements.txt` do legado não permanece com esse
+  nome. A cláusula 1 (Dockerfile decide o build) segue íntegra, e sua causa-raiz foi removida pela
+  cláusula 2 desta decisão, não a própria cláusula.
+* **D-ARQ-76** — intacta, e a cláusula 4 ganha confirmação documental que ela não tinha.
+* **D-ARQ-75** — cláusula 1 (provedor por consumo) **revogada** por esta decisão; as cláusulas
+  2(a), 2(c) e 3 seguem íntegras. A 2(b) já havia sido superada por D-ARQ-76.
+* **D-ARQ-09 / D-ARQ-48** — preservadas: nada desta decisão entra em `motor/`. O invariante de
+  `test_pureza_motor.py` segue intacto.
+* **D-ARQ-54 P1 / D-ARQ-74** — preservadas. Nenhuma regra clínica se move para a superfície.
+
+**`[A CONFIRMAR]` remanescentes, nomeados para não sumirem.**
+
+* **Limite de RAM do Community Cloud** — não localizado em cinco páginas oficiais lidas nesta
+  sessão. Não afirmar que não existe (ver erro de método abaixo). Com pico medido em 103-115 MB,
+  o risco é baixo; o primeiro deploy é a medição.
+* **Se o subdomínio é escolhível antes do primeiro boot.** Se não for, há circularidade com o
+  `redirect_uri`, e a saída é um deploy descartável que ocupa temporariamente a vaga única.
+
+**Dois erros de método do Arquiteto, registrados (D-ARQ-06).**
+
+1. *Ausência de evidência tratada como evidência de ausência.* Li a página `status` inteira, não
+   achei "1 app privado", e afirmei que o número de D-ARQ-75/§S0 estava sem proveniência. Está na
+   doc, em página irmã (`share-your-app`). Quase enfraqueci uma restrição real que é pré-requisito
+   duro de deploy. Regra derivada: "não localizei em X" nunca vira "não tem proveniência" sem
+   varrer as páginas irmãs da mesma seção.
+2. *Número envelhecido cravado como gabarito bloqueante.* O prompt da fatia 1 cravou `mypy = 45
+   arquivos`, valor de 003.ES (`88b1d64`). O real é **47**: 003.ET criou `motor/io_pdf.py` e
+   `superficie/materializar_secrets.py` e seu fechamento não re-mediu ("nenhum `.py` tocado"). O
+   `CLAUDE.md` da raiz **já advertia** que o número sobe com módulo novo, e o Arquiteto o leu no
+   gate e cravou assim mesmo. O Code parou e reportou, no procedimento previsto; a referência foi
+   corrigida em `8fd6039`. Terceira ocorrência da classe.
+
+**Base.** Sessão 003.EU (10/08/2026), ARQUITETURA + IMPLEMENTAÇÃO (fatia 1). Gate de abertura
+cumprido e declarado. Fatia 1: PR #291, merge `0d222c1`, commits `da1ebd2`/`5b1eb7d`/`8fd6039`;
+suíte 1085→**1086 passed, 6 skipped**; `mypy --strict` limpo, **47 arquivos**.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -3461,3 +3568,4 @@ documentos subiriam ao builder sem necessidade nenhuma de estarem lá.
 | v165 | 05/08/2026 | Sessão 003.ER (ARQUITETURA): **D-ARQ-75 CRIADA** — fecha o §S0 do `PLANO_V1` (hospedagem + autenticação). Provedor por consumo, não por tier (Railway Hobby; RAM $10/GB/mês, teto 48 GB/serviço, `[DERIVADO — docs.railway.com/pricing/plans]`) porque o pico medido do e2e determinístico do Fascino é **904 MB / 128,5s**, contra ~450-500 MB extrapolados no registro anterior — 2 GB deixa de ser piso e vira teto de um usuário. Autenticação `st.login()` com client OIDC do projeto + **allowlist própria obrigatória** (OIDC autentica, não autoriza — `[DERIVADO — docs.streamlit.io/.../authentication]`), gate antes do `file_uploader`, segredo fora do git. Cookie de identidade de 30 dias não-configurável = risco aceito e nomeado. `requirements-app.txt` enxuto: 5 terceiros medidos (streamlit, pdfplumber, PyYAML, python-docx, requests) contra os 14 do `requirements.txt` do legado; pin do Streamlit precisa de piso que garanta `st.login`. Leitura única do PDF (2ª passada de `extrair_texto_pgr`, ~metade do tempo) adiada para fatia própria medida. Correção de método registrada: a 1ª varredura de dependências usou `grep "^import"`, cego a import indentado (classe DH-003EC-01(a)). Riscos inocentados por medição: cache em `session_state` = 72 KB; PDF do cliente não persiste em disco (`TemporaryDirectory`). Nenhuma R-* criada ou alterada; motor, protocolo e vocabulário intocados. Implementação é 003.ES. Detalhe em HISTORICO 003.ER. |
 | v166 | 08/08/2026 | Sessão 003.ES fatias 1-2 (IMPLEMENTAÇÃO): **D-ARQ-76 CRIADA** — o gate de acesso mora no entrypoint (`app_matriz.py`), não em `pagina_matriz()`, **superando em parte D-ARQ-75 cláusula 2(b)**; a decisão de acesso é núcleo puro com três desfechos (`GateAcesso` PEDIR_LOGIN/NEGAR/LIBERAR em `superficie/autorizacao.py`, sem importar streamlit nem ler `os.environ`); a fronteira normaliza estritamente (`is True`+`isinstance`), fail-closed por construção; allowlist por env var `PCMSO_ALLOWLIST`, não por `st.secrets`. Razões medidas: `at.secrets["auth"]` não faz `st.user.is_logged_in` existir no `AppTest` (`AttributeError` idêntico com e sem injeção — o bloco `[auth]` é consumido na subida do servidor), e `UserInfoProxy` tipa `getattr`/`.get()` como `str | bool | TokensProxy | None`, nunca `bool`/`str | None`. `cast` e `# type: ignore` rejeitados por mentirem ao verificador na fronteira de segurança. Nota de aplicação em **D-ARQ-75**: os três `[A CONFIRMAR]` fechados — `st.login` nasce no 1.42.0; env var resolvido pelo lado negativo (a doc documenta `secrets.toml`→env, nunca o contrário); Railway Serverless existe e dorme por ausência de *outbound*. Fatia 1: `requirements-app.txt` (5 terceiros por AST) + entrypoint na raiz (lacuna não prevista por D-ARQ-75). Suíte 1062→**1074 passed, 6 skipped**; `mypy --strict` limpo, **45 arquivos** (comando canônico passa a incluir `app_matriz.py`). Nenhuma R-* criada, alterada ou depreciada. Fatia 3 (deploy) adiada para 003.ET. Detalhe em HISTORICO 003.ES. |
 | v167 | 10/08/2026 | Sessão 003.ET fatias 1-2 + fechamento (08-10/08/2026): **D-ARQ-77 CRIADA** — mecanismo de build é o Dockerfile, não a detecção do builder (Railway trocou Nixpacks→Railpack entre D-ARQ-75 e a implementação); segredo materializado por shell no entrypoint antes do `streamlit run`, núcleo puro `gerar_toml_auth` + casca em `materializar_secrets.py`; `requirements.txt` do legado permanece, agora inofensivo. Nota de aplicação em **D-ARQ-75** (mesma ID): a premissa dos 904 MB (cláusula 1) refutada por medição — pico é cache de página do pdfplumber nunca liberado, não propriedade do documento; `Page.close()` por página derruba o e2e do Fascino de 859→103 MB (sandbox) e 674,3→114,8 MB (host Windows), saída idêntica; `flush_cache()` sozinho só chega a 398 MB, `close()` sozinho a 88 MB. Destino do deploy **reaberto** — a base de "provedor pago por consumo" caiu, hospedagem gratuita volta à mesa, decisão em sessão própria (`docs/PLANO_V1.md` §S0). Erro de método registrado (D-ARQ-06): 003.ER mediu sintoma e concluiu sobre provedor sem perguntar a causa; o Arquiteto repetiu a conclusão no gate de abertura de 003.ET sem questionar, até a pergunta do Diovanni sobre custo forçar a investigação. **DH-003ET-01 ABERTA** (`docs/PENDENCIAS_CLINICAS.md`) — fixtures de PDF (Fascino, Cjr Engenharia) não versionadas, testes que dependem delas skipam em silêncio em clone limpo. Nenhuma R-* criada, alterada ou depreciada. PROTOCOLO v88 (registra a partição do §11 da fatia 0). Suíte 1085 passed, 6 skipped (inalterada — sessão docs-only); `mypy --strict` não roda (nenhum `.py` tocado nesta fatia). Commits/PRs das fatias: #287 (fatia 0, partição §11), #288 (fatia 1, deploy), #289 (fatia 2, memória). Detalhe em HISTORICO 003.ET. |
+| v168 | 10/08/2026 | Sessão 003.EU (ARQUITETURA + IMPLEMENTAÇÃO): **D-ARQ-78 CRIADA** — destino do deploy é o Streamlit Community Cloud, por requisito de custo zero **literal** confirmado com o Diovanni (nunca perguntado em 003.ER). Railway sai por assinatura fixa; Cloud Run sai do topo por medição — WebSocket aberto força *instance-based billing* (free tier 240k vCPU-s/mês = 66,7 h a 1 vCPU; aba aberta 8h/dia × 22 dias ≈ $7,45/mês `[APROXIMADO]`) — e **fica como fallback**, que é o que preserva o valor do `Dockerfile` de D-ARQ-77. O nome do arquivo de dependências vira contrato da plataforma (5 nomes reconhecidos, `requirements-app.txt` invisível): **renomear, nunca duplicar** — o app assume `requirements.txt`, legado vira `requirements-legado.txt`; efeito não previsto é que isso **remove a causa-raiz** de D-ARQ-77 cl.1. O gate próprio **permanece** por razão medida: a allowlist nativa de viewers é **transitiva** (*"They can also pass these permissions to others by inviting more viewers"*), e `PCMSO_ALLOWLIST` sobrevive sem tocar código (segredo de nível raiz vira env var, exemplo literal na doc). Ordem de configuração rígida (subdomínio → OAuth client → TOML → deploy), porque sem `[auth]` o entrypoint estourava `AttributeError` e o Community Cloud força `showErrorDetails=false`. **D-ARQ-75 cláusula 1 revogada**; **D-ARQ-77 cláusula 4 superada**. `[A CONFIRMAR]`: limite de RAM (não localizado em 5 páginas oficiais) e se o subdomínio é escolhível antes do 1º boot. Dois erros de método do Arquiteto registrados: ausência de evidência tratada como evidência de ausência ("1 app privado" existe, em página irmã), e `mypy = 45` cravado como gabarito bloqueante quando o real era 47 (003.ET criou 2 módulos e não re-mediu) — o Code parou e reportou, no procedimento previsto. **DH-003EU-01** e **DH-003EU-02** ABERTAS. Nenhuma R-* criada, alterada ou depreciada; PROTOCOLO intocado. Suíte 1085→1086 passed, 6 skipped; `mypy --strict` limpo, 47 arquivos. Detalhe em HISTORICO 003.EU. |
