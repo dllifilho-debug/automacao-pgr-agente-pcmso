@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v167 · 77 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v168 · 78 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -85,3 +85,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v167 · 77 decisões
 | D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 2973 | 12120 |
 | D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3144 | 5109 |
 | D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3219 | 4842 |
+| D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3293 | 7609 |

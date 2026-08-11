@@ -1294,3 +1294,33 @@ específico, não substituível).
 
 **Status:** ABERTA — não-bloqueante. Resolução (versionar as fixtures, trocar por PDFs
 sintéticos, ou marcar explicitamente a suíte como condicionada) é sessão própria.
+
+### DH-003EU-01 — o legado perdeu o nome canônico do seu arquivo de dependências `[ABERTA — higiene de ambiente, duas facetas]`
+
+Consequência aceita de D-ARQ-78 cláusula 2, registrada para não ser redescoberta como defeito.
+
+**(a) `.devcontainer/devcontainer.json`** roda `[ -f requirements.txt ] && pip3 install --user -r
+requirements.txt` e passa a instalar as 5 deps do app novo, não as 14 do legado. Efeito **não
+medido** — ninguém verificou se o devcontainer é usado por alguém hoje. Não tocado na fatia 1 por
+decisão do Arquiteto: mexer sem medir troca uma incerteza por outra.
+
+**(b) O legado ficou órfão.** Quem rodar `pip install -r requirements.txt` na raiz esperando servir
+`app.py` instala o conjunto errado, e o legado quebra por falta de `pandas`/`supabase`. **Falha
+ruidosa, não silenciosa** — lado certo do trade, e o inverso exato do risco que D-ARQ-77 cl.1
+combatia. Conserto, se um dia for preciso: apontar o consumidor do legado para
+`requirements-legado.txt`.
+
+Não-bloqueante: nenhum caminho de produção do app novo passa por qualquer das duas facetas.
+
+### DH-003EU-02 — `test_dockerfile_instala_o_requirements_do_app_nao_o_do_legado` promete mais do que discrimina `[ABERTA — higiene de instrumento]`
+
+Após D-ARQ-78 cl.2, a asserção `not any("requirements-legado.txt" in tokens ...)` só fica vermelha
+se alguém escrever `COPY requirements-legado.txt` no `Dockerfile` — cenário que ninguém produz por
+acidente. O teste discrimina algo real, mas de probabilidade desprezível.
+
+**O invariante que importa está coberto, em outro arquivo:** se o `requirements.txt` da raiz voltar
+a ser o do legado, `test_nada_declarado_a_mais_do_que_o_importado`
+(`agente_medico/tests/test_requirements_app.py`) fica vermelho na hora, porque `pandas`, `supabase`
+e `opencv-python-headless` apareceriam declarados sem serem importados. **Não há lacuna de
+cobertura — há um nome de teste que promete mais do que o corpo entrega.** Origem: redação do
+Arquiteto no prompt da fatia 1, não do Code.
