@@ -68,7 +68,7 @@ se defenda. Duas exceções que não se defendem sozinhas e por isso são caminh
 | **S1** | Regra psicossocial — `R-PSY-02` sucede `R-PSY-01` (DEPRECATED) | **prompt pronto:** `PROMPT_003EN_psicossocial.md` |
 | **S2** | Emissor Word + HTML no formato do escritório | **[ATUALIZADO — 003.EP] entregue** — emissores HTML e DOCX prontos e testados (D-ARQ-73); expansão GHE→cargo com os 41 cargos reais do Fascino, em produção (DT-003EO-04 fechada — ver §"S2 — o que falta"). Ressalva preservada, não é lacuna: cabeçalho/rodapé seguem seam humano por desenho (DT-003EO-01/D-ARQ-73 cl.5), resolvido no S3, não no S2 |
 | **S3** | App: upload PGR → envelope → processa → matriz na tela → download | **[003.EQ] fatia 1 entregue** — `superficie/web_matriz.py`, rota determinística sem LLM, validada manualmente no host contra o Fascino real (19 GHEs, 41 cargos) e no caso de rejeição por R-PGR-01. Falta para o S3 completo: pré-preenchimento document-derived do envelope (plugar `preparar_envelope`, hoje 100% entrada do operador — paliativo sinalizado, D-ARQ-53 P2) e a rota LLM para famílias não cobertas pela rota determinística |
-| **S0** | Decisão de hospedagem | **[003.ER] DECIDIDO por D-ARQ-75** — Railway Hobby (consumo, não tier; pico medido 904 MB derruba o piso de 2 GB), `st.login()` OIDC com client próprio + allowlist obrigatória, `requirements-app.txt` enxuto. Implementação em 003.ES |
+| **S0** | Decisão de hospedagem | **[003.ER] DECIDIDO por D-ARQ-75** — Railway Hobby (consumo, não tier; pico medido 904 MB derruba o piso de 2 GB), `st.login()` OIDC com client próprio + allowlist obrigatória, `requirements-app.txt` enxuto. Implementação em 003.ES **[003.EU] FECHADO por D-ARQ-78** — Community Cloud (custo zero literal); Railway e Cloud Run descartados como primário, Cloud Run mantido como fallback. |
 
 ### S2 — o que falta, nomeado
 
@@ -223,6 +223,18 @@ o diretório do script, não a raiz); gate de login + allowlist antes do parse, 
 núcleo puro (D-ARQ-76). Fatia 3 (deploy) não executada — vira 003.ET, por ter metade em ação
 manual com credencial real e por depender de dois fatos da Railway ainda não medidos (injeção de
 `PORT`; se o builder detecta `requirements-app.txt` em vez do `requirements.txt` do legado).
+
+**[FECHADO — 003.EU, 10/08/2026 por D-ARQ-78.]** Destino decidido: **Streamlit Community Cloud**,
+por requisito de custo zero **literal** ($0,00, sem conta de faturamento) confirmado com o
+Diovanni. Railway sai (assinatura fixa de $5/mês). Cloud Run sai como primário por medição —
+WebSocket aberto força *instance-based billing*, ≈ $7,45/mês com uma aba aberta em jornada de
+escritório `[APROXIMADO]` — e **permanece como fallback**, consumindo o `Dockerfile` de D-ARQ-77
+sem retrabalho. O `[A CONFIRMAR]` eliminatório da nota 003.ET está **confirmado e contornado**: o
+Community Cloud só reconhece 5 nomes de arquivo de dependências, `requirements-app.txt` não é um
+deles, e a saída é renomear (fatia 1, PR #291), não duplicar. Seguem abertos dois
+`[A CONFIRMAR]` nomeados em D-ARQ-78: limite de RAM e se o subdomínio é escolhível antes do
+primeiro boot. **A tabela de sequência acima passa a marcar S0 como decidido por D-ARQ-78, não
+por D-ARQ-75.**
 
 ---
 
