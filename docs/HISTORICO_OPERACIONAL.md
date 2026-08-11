@@ -4590,3 +4590,71 @@ fechamento; a última medição de código é a da fatia 2, 47 arquivos = 46 her
 **Próxima:** decisão de destino do deploy (`docs/PLANO_V1.md` §S0), com o número de RAM
 corrigido e o requisito de custo zero em mãos — Google Cloud Run e Streamlit Community Cloud
 entram na comparação ao lado da Railway.
+
+## Sessão 003.EU — 10/08/2026 — ARQUITETURA + IMPLEMENTAÇÃO (2 fatias)
+
+Aberta a partir de `main 6d3c723` (PR #290, merge de 003.ET-fechamento). Decide o `[A CONFIRMAR]`
+eliminatório deixado pela nota 003.ET (nome do arquivo de dependências do Community Cloud) e fecha
+o §S0 do `docs/PLANO_V1.md`, reaberto pela mesma nota.
+
+**Fatia 1 — implementação** (branch `feat/003eu-requirements-raiz-e-gate-legivel`, commits
+`da1ebd2`, `5b1eb7d`, `8fd6039`, merge `0d222c1`, PR #291). Três mudanças:
+
+1. `da1ebd2` — renomeio de dependências: `requirements-app.txt` (5 deps do app) vira
+   `requirements.txt` na raiz; o legado (14 deps) vira `requirements-legado.txt`. `Dockerfile`
+   ajustado para `COPY requirements.txt`; `tests/test_deploy_artefatos.py` e
+   `agente_medico/tests/test_requirements_app.py` apontados para os novos nomes.
+2. `5b1eb7d` — `app_matriz.py` ganha `_identidade_do_provedor()`: sem o bloco `[auth]` em
+   secrets, `st.user.is_logged_in` não existe e o acesso direto estourava `AttributeError` puro,
+   sem causa visível no Community Cloud (`showErrorDetails=false` forçado pela plataforma). A
+   função captura o `AttributeError` e distingue "provedor não configurado" de "configurado mas
+   não logado" — no primeiro caso, para com `st.title("Aplicativo mal configurado")` e mensagem
+   explícita antes de tocar o núcleo de autorização.
+3. `8fd6039` — `CLAUDE.md` da raiz: alvo canônico do `mypy --strict` passa de 45 para 47
+   arquivos (ver bloqueador abaixo).
+
+**Bloqueador reportado pelo Code, resolvido pelo Arquiteto — causa nomeada.** O prompt da fatia 1
+cravou `mypy = 45 arquivos` (valor de 003.ES, commit `88b1d64`). Medição real sobre `6d3c723`
+antes de qualquer edição: **47**. Causa: 003.ET criou dois módulos (`motor/io_pdf.py`,
+`superficie/materializar_secrets.py`) e seu fechamento não re-mediu o `mypy` porque "nenhum `.py`
+foi tocado" naquela fatia — o número ficou parado na referência de 003.ES enquanto o código
+andava. O `CLAUDE.md` já advertia que o alvo "não é gabarito eterno" e sobe com módulo novo; o
+Arquiteto leu o aviso no próprio gate de abertura e cravou o número antigo assim mesmo. Terceira
+ocorrência da classe (divergência entre valor esperado no prompt e medição real). O Code parou e
+reportou, no procedimento previsto; a referência foi corrigida em `8fd6039` (commit 3 acima).
+
+**Varredura inversa do teste novo** (`test_provedor_nao_configurado_para_com_mensagem_em_vez_de_estourar`,
+`agente_medico/tests/test_entrypoint_app.py`). Reversão nomeada: remover o `try/except
+AttributeError` de `_identidade_do_provedor()` e voltar ao acesso direto
+(`st.user.is_logged_in is True`). Essa reversão mata exatamente o teste novo (a chamada estoura
+`AttributeError` em vez de produzir o título "Aplicativo mal configurado"); os outros dois testes
+do arquivo (`test_entrypoint_sem_login_para_no_gate`,
+`test_is_logged_in_nao_booleano_e_tratado_como_nao_logado`) seguem verdes — nenhum dos dois passa
+por `_identidade_do_provedor` retornando `None`, então a reversão não os toca. Discriminante
+confirmado.
+
+**Fatia 2 — docs** (branch `docs/003eu-fechamento`). `DECISOES_ARQUITETURAIS.md` v168 —
+**D-ARQ-78 CRIADA** (destino do deploy é o Streamlit Community Cloud, por requisito de custo zero
+literal; nome do arquivo de dependências é contrato da plataforma; gate próprio permanece porque a
+allowlist nativa de viewers é transitiva); `INDICE_DARQ.md` regenerado 77 → 78;
+`PENDENCIAS_CLINICAS.md` ganha **DH-003EU-01** (legado perdeu o nome canônico do arquivo de
+dependências — devcontainer não medido, consumidor do legado fica órfão com falha ruidosa) e
+**DH-003EU-02** (`test_dockerfile_instala_o_requirements_do_app_nao_o_do_legado` discrimina um
+cenário de probabilidade desprezível; o invariante que importa já está coberto por
+`test_nada_declarado_a_mais_do_que_o_importado`), 72 → 74 headers; `PLANO_V1.md` §S0 fecha —
+Community Cloud decidido, Railway e Cloud Run descartados como primário (Cloud Run mantido como
+fallback), tabela de sequência atualizada.
+
+**`PAINEL_ESTADO.md` não re-tirado.** Nenhum dos três números se move: nenhuma `R-*` criada,
+alterada ou depreciada; a porta de entrada não muda (nada subiu à plataforma ainda, fatia 2 é
+docs-only); as três dívidas travantes seguem `DT-003L-01`, `DT-003M-02(A)`, `DT-FDS-02`.
+
+**Números finais** `[MEDIDO — 10/08/2026, árvore parada]`: suíte **1086 passed, 6 skipped**
+(inalterada na fatia 2 — docs-only, `test_gerar_indice_darq.py` 6/6 verde); `mypy --strict` limpo,
+**47 arquivos** (medido na fatia 1, sobre o comando canônico do `CLAUDE.md`; não roda na fatia 2 —
+nenhum `.py` tocado).
+
+**Próxima:** execução do deploy — roteiro operacional com credencial real, metade fora do Code:
+liberar a vaga do app privado (legado Seconci), destravar o `repo` scope do GitHub, criar o OAuth
+client do Google, colar o TOML em *Advanced settings*, deploy, e medir a RAM real na plataforma
+para fechar o primeiro `[A CONFIRMAR]` de D-ARQ-78.
