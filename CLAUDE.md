@@ -42,12 +42,11 @@ de memória — ler do disco.
 
 - `python -m pytest` / `python -m mypy --strict` — nunca `pytest`/`mypy` direto
 - **Alvo canônico do mypy, literal** — não usar `<pasta>` genérico:
-  `python -m mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py`
-  Referência medida em 003.EU (10/08/2026) sobre `6d3c723`: limpo, **47
-  arquivos**. Subiu de 45 (003.ES) porque 003.ET criou `motor/io_pdf.py` e
-  `superficie/materializar_secrets.py`, e o fechamento de 003.ET não re-mediu
-  (nenhum `.py` tocado). É referência, não gabarito eterno: prompt que cravar
-  esse número como bloqueador tem de medi-lo na sessão corrente.
+  `python -m mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py app_matriz_local.py`
+  Referência medida em 003.EV (11/08/2026): limpo, **48 arquivos**. Subiu de
+  47 (003.EU) porque 003.EV criou `app_matriz_local.py` (entrypoint de
+  desenvolvimento sem gate). É referência, não gabarito eterno: prompt que
+  cravar esse número como bloqueador tem de medi-lo na sessão corrente.
   **`agente_medico/` inteiro NÃO é o alvo:** puxa a pasta de testes e 47 erros pré-existentes que
   nenhum gate olha. Erro do Arquiteto 2×, mesmo diagnóstico (003.EC e 003.ES) — o alvo fica escrito
   aqui justamente para não depender de memória.
