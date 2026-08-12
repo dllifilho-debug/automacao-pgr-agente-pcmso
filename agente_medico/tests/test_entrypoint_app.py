@@ -31,7 +31,7 @@ def test_entrypoint_sem_login_para_no_gate(monkeypatch: pytest.MonkeyPatch) -> N
 
     assert not at.exception, f"exceções: {at.exception}"
     assert any(b.label == "Entrar com Google" for b in at.button)
-    assert not any(t.value == "Matriz de exames — rota determinística" for t in at.title)
+    assert not any(t.value == "Matriz de Exames — PCMSO" for t in at.title)
 
 
 def test_is_logged_in_nao_booleano_e_tratado_como_nao_logado(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -59,3 +59,16 @@ def test_provedor_nao_configurado_para_com_mensagem_em_vez_de_estourar(
     assert not at.exception, f"exceções: {at.exception}"
     assert any(t.value == "Aplicativo mal configurado" for t in at.title)
     assert not any(b.label == "Entrar com Google" for b in at.button)
+
+
+def test_entrypoint_local_roda_sem_gate(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PCMSO_ALLOWLIST", raising=False)
+    monkeypatch.setattr(streamlit, "user", {})
+    caminho = str(Path(__file__).resolve().parents[2] / "app_matriz_local.py")
+    at = AppTest.from_file(caminho, default_timeout=30)
+    at.run()
+
+    assert not at.exception, f"exceções: {at.exception}"
+    assert any(t.value == "Matriz de Exames — PCMSO" for t in at.title)
+    assert not any(b.label == "Entrar com Google" for b in at.button)
+    assert not any(t.value == "Aplicativo mal configurado" for t in at.title)
