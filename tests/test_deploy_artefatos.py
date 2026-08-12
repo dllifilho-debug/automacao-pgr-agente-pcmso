@@ -76,6 +76,12 @@ def test_valor_com_aspas_duplas_nao_produz_toml_quebrado() -> None:
         gerar_toml_auth(valores)
 
 
+def test_entrypoint_de_producao_nao_usa_o_entrypoint_local() -> None:
+    texto = _ENTRYPOINT.read_text(encoding="utf-8")
+    assert "app_matriz.py" in texto
+    assert "app_matriz_local.py" not in texto
+
+
 def test_entrypoint_materializa_segredo_antes_do_streamlit_run() -> None:
     linhas = _ENTRYPOINT.read_text(encoding="utf-8").splitlines()
 
