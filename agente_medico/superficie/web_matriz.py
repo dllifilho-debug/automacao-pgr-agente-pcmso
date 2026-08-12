@@ -199,7 +199,7 @@ def pagina_matriz() -> None:
         montar_envelope,
     )
 
-    st.title("Matriz de exames — rota determinística")
+    st.title("Matriz de Exames — PCMSO")
 
     arquivo = st.file_uploader("PDF do PGR", type="pdf")
     if arquivo is None:
@@ -209,7 +209,7 @@ def pagina_matriz() -> None:
     conteudo_pdf = arquivo.getvalue()
 
     with st.form("cabecalho_rodape_envelope"):
-        st.subheader("Cabeçalho")
+        st.subheader("Identificação do documento")
         empresa = st.text_input("Empresa")
         obra = st.text_input("Obra")
         tipo_documento = st.text_input("Tipo de documento")
@@ -217,12 +217,12 @@ def pagina_matriz() -> None:
         medico_coordenador = st.text_input("Médico coordenador")
         crm = st.text_input("CRM")
 
-        st.subheader("Rodapé")
+        st.subheader("Responsáveis")
         responsavel_preenchimento = st.text_input("Responsável pelo preenchimento")
         medico_validador = st.text_input("Médica validadora")
         data_pgr = st.text_input("Data do PGR")
 
-        st.subheader("Envelope")
+        st.subheader("Dados do PGR")
         validade = st.text_input("Validade do PGR (AAAA-MM-DD)")
         assinatura = st.checkbox("Assinado por engenheiro de segurança")
 
@@ -295,12 +295,12 @@ def pagina_matriz() -> None:
     # na tela, em bloco próprio, ANTES das pendências de extração/hidratação
     # — senão as centenas de vocabulario_ausente afogam a única que importa.
     if cache.pendencias_globais:
-        st.subheader("Pendências globais")
+        st.subheader("Pendências (itens a confirmar)")
         for p in cache.pendencias_globais:
             st.write(f"- `{p.tipo}` ({p.regra_origem}): {p.motivo}")
 
     if pendencias:
-        st.subheader("Pendências")
+        st.subheader("Pendências (itens a confirmar)")
         for p in pendencias:
             st.write(f"- `{p.tipo}`: {p.motivo}")
 

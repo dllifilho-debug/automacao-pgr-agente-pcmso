@@ -35,6 +35,12 @@ from agente_medico.superficie.autorizacao import (
 )
 from agente_medico.superficie.web_matriz import pagina_matriz
 
+st.set_page_config(
+    page_title="Matriz de Exames — PCMSO",
+    page_icon="🩺",
+    layout="wide",
+)
+
 
 def _identidade_do_provedor() -> tuple[bool, str | None] | None:
     """None = provedor de identidade não configurado (bloco `[auth]` ausente).
