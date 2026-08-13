@@ -26,9 +26,11 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
-from agente_medico.adaptadores.transcritor_offline import TranscritorCardOffline, TranscritorGHEOffline
+from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
+from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.protocolo import carregar
-from agente_medico.motor.tipos import EnvelopeConfirmado, MatrizGHE, Pendencia
+from agente_medico.motor.tipos import EnvelopeConfirmado, GHEVerbatim, MatrizGHE, Pendencia
+from agente_medico.motor.transcritor_pgr import TranscritorGHE
 from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
     DocumentoMatriz,
@@ -68,6 +70,20 @@ def gerar_documento(
     return doc, renderizar_html(doc)
 
 
+@dataclass
+class _TranscritorContado:
+    """Envolve um TranscritorGHE contando invocações — a casca precisa saber
+    quantos blocos foram lidos por IA para exibir na tela (003.EW). Não altera
+    comportamento: delega e propaga exceção."""
+
+    interno: TranscritorGHE
+    chamadas: int = 0
+
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        self.chamadas += 1
+        return self.interno.transcrever(bloco)
+
+
 def _rodar_parse_deterministico(
     caminho_pdf: Path, envelope: EnvelopeConfirmado
 ) -> tuple[
@@ -76,25 +92,35 @@ def _rodar_parse_deterministico(
     tuple[Pendencia, ...],
     str | None,
     tuple[Pendencia, ...],
+    int,
 ]:
     """Devolve, além de matrizes/exames_vocab/pendencias (extração+hidratação),
     resultado.status e resultado.pendencias_globais — sem esses dois campos a
     casca não consegue distinguir um gate eliminatório (R-PGR-01/R-PGR-06,
     Resultado(status="REJEITADO", matrizes=[])) de um parse legitimamente
     vazio (achado 003.EQ emenda 3: `matrizes=[]` não é None, então esse ramo
-    passava reto pelo guard `doc is None`)."""
+    passava reto pelo guard `doc is None`). Sexto campo: quantos blocos GHE
+    foram lidos por IA (003.EW) — 0 quando a rota determinística cobriu tudo."""
     protocolo = carregar(Path(__file__).resolve().parent.parent / "protocolo")
+    contador = _TranscritorContado(interno=TranscritorGeminiGHE())
     resultado, pendencias = processar_arquivo_pgr(
         caminho_pdf,
         protocolo,
-        TranscritorGHEOffline(),
-        TranscritorCardOffline(),
+        contador,
+        TranscritorGeminiCard(),
         envelope,
     )
     matrizes = tuple(resultado.matrizes) if resultado is not None else None
     status = resultado.status if resultado is not None else None
     pendencias_globais = tuple(resultado.pendencias_globais) if resultado is not None else ()
-    return matrizes, protocolo.vocabulario.exames, pendencias, status, pendencias_globais
+    return (
+        matrizes,
+        protocolo.vocabulario.exames,
+        pendencias,
+        status,
+        pendencias_globais,
+        contador.chamadas,
+    )
 
 
 def executar_rota_determinista(
@@ -103,14 +129,16 @@ def executar_rota_determinista(
     cabecalho: CabecalhoDocumento,
     rodape: RodapeDocumento,
 ) -> tuple[DocumentoMatriz | None, str | None, tuple[Pendencia, ...]]:
-    """Carrega o protocolo, roda processar_arquivo_pgr pela rota
-    determinística (clientes-bomba offline, cliente LLM nunca invocado) e,
-    com Resultado não-None, gera o documento. Parse total falho devolve
+    """Carrega o protocolo e roda processar_arquivo_pgr com os clientes reais
+    (D-ARQ-65 fatia 2, roteamento determinístico-primeiro): a rota por
+    coordenadas é tentada antes, e o cliente LLM só é invocado quando a
+    família não é reconhecida (FamiliaNaoReconhecida ou contagem divergente).
+    Com Resultado não-None, gera o documento. Parse total falho devolve
     (None, None, pendencias) — nunca inventa matriz (D-ARQ-22). Primitiva
     sem cache — executar_rota_determinista_cacheada é a versão que a casca
     usa de fato."""
-    matrizes, exames_vocab, pendencias, _status, _pendencias_globais = _rodar_parse_deterministico(
-        caminho_pdf, envelope
+    matrizes, exames_vocab, pendencias, _status, _pendencias_globais, _chamadas_ia = (
+        _rodar_parse_deterministico(caminho_pdf, envelope)
     )
     if matrizes is None:
         return None, None, pendencias
@@ -124,7 +152,9 @@ class CacheMatrizes:
     determinística. `chave` vem de calcular_chave_cache — PDF + envelope,
     nunca cabeçalho/rodapé. `status`/`pendencias_globais` espelham
     Resultado — a casca usa `status == "REJEITADO"` para parar duro
-    (003.EQ emenda 3, elo A)."""
+    (003.EQ emenda 3, elo A). `chamadas_ia` (003.EW, campo aditivo) é quantos
+    blocos GHE foram lidos por IA — não entra em calcular_chave_cache: é
+    resultado do parse, não identidade dele."""
 
     chave: str
     matrizes: tuple[MatrizGHE, ...] | None
@@ -132,6 +162,7 @@ class CacheMatrizes:
     pendencias: tuple[Pendencia, ...]
     status: str | None
     pendencias_globais: tuple[Pendencia, ...]
+    chamadas_ia: int
 
 
 def calcular_chave_cache(conteudo_pdf: bytes, envelope: EnvelopeConfirmado) -> str:
@@ -165,8 +196,8 @@ def executar_rota_determinista_cacheada(
     persistir em st.session_state."""
     chave_atual = calcular_chave_cache(conteudo_pdf, envelope)
     if cache is None or deve_reprocessar(chave_atual, cache.chave):
-        matrizes, exames_vocab, pendencias, status, pendencias_globais = _rodar_parse_deterministico(
-            caminho_pdf, envelope
+        matrizes, exames_vocab, pendencias, status, pendencias_globais, chamadas_ia = (
+            _rodar_parse_deterministico(caminho_pdf, envelope)
         )
         cache = CacheMatrizes(
             chave=chave_atual,
@@ -175,6 +206,7 @@ def executar_rota_determinista_cacheada(
             pendencias=pendencias,
             status=status,
             pendencias_globais=pendencias_globais,
+            chamadas_ia=chamadas_ia,
         )
 
     if cache.matrizes is None:
@@ -314,6 +346,18 @@ def pagina_matriz() -> None:
             "Nenhum download oferecido (D-ARQ-22)."
         )
         return
+
+    # Aviso de procedência (003.EW, D-ARQ-22 revisão de saída): a matriz muda
+    # de proveniência quando algum bloco veio da rota LLM (família não
+    # reconhecida pela rota determinística) — o operador precisa saber antes
+    # de levar o documento para assinatura. Zero chamadas é o caminho normal
+    # e não merece ruído na tela.
+    if cache.chamadas_ia > 0:
+        st.info(
+            f"{cache.chamadas_ia} bloco(s) lido(s) por IA — layout não "
+            "reconhecido pela rota determinística. Confira a matriz com "
+            "atenção redobrada."
+        )
 
     for bloco in doc.blocos:
         st.subheader(f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip())

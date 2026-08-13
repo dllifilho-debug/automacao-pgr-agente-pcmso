@@ -246,10 +246,14 @@ def test_payload_usa_temperature_zero() -> None:
 # fechamento em vez de fixture inventada aqui.
 # ---------------------------------------------------------------------------
 
-requer_api = pytest.mark.skipif(
-    not os.environ.get("CHAVE_API_GOOGLE"),
-    reason="CHAVE_API_GOOGLE ausente — teste ao vivo do transcritor Gemini indisponível",
-)
+def requer_api(fn):
+    """Ao vivo: pula sem chave (skipif) E declara-se isento da blindagem
+    de rede do conftest.py (marcador ao_vivo, 003.EW)."""
+    fn = pytest.mark.ao_vivo(fn)
+    return pytest.mark.skipif(
+        not os.environ.get("CHAVE_API_GOOGLE"),
+        reason="CHAVE_API_GOOGLE ausente — teste ao vivo do transcritor Gemini indisponível",
+    )(fn)
 
 _PASTA = Path("fds_originais")
 _CASOS = {

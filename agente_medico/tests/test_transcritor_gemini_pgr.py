@@ -174,10 +174,14 @@ def test_prompt_enviado_contem_o_texto_do_bloco() -> None:
 # + requer_pdfs de test_transcritor_pgr.py.
 # ---------------------------------------------------------------------------
 
-requer_api = pytest.mark.skipif(
-    not os.environ.get("CHAVE_API_GOOGLE"),
-    reason="CHAVE_API_GOOGLE ausente — teste ao vivo do transcritor Gemini-GHE indisponível",
-)
+def requer_api(fn):
+    """Ao vivo: pula sem chave (skipif) E declara-se isento da blindagem
+    de rede do conftest.py (marcador ao_vivo, 003.EW)."""
+    fn = pytest.mark.ao_vivo(fn)
+    return pytest.mark.skipif(
+        not os.environ.get("CHAVE_API_GOOGLE"),
+        reason="CHAVE_API_GOOGLE ausente — teste ao vivo do transcritor Gemini-GHE indisponível",
+    )(fn)
 
 _CAMINHO_PGR = Path("matrizes_originais/PGR VIVERDE V02 - 03.02.25.pdf")
 requer_pdfs = pytest.mark.skipif(
