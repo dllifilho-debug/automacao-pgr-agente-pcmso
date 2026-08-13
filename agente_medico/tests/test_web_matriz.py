@@ -11,9 +11,11 @@ from typing import Any
 import pytest
 from streamlit.testing.v1 import AppTest
 
+from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.tipos import (
     EnvelopeConfirmado,
     ExameEmitido,
+    GHEVerbatim,
     MatrizGHE,
     Momento,
     Pendencia,
@@ -21,6 +23,7 @@ from agente_medico.motor.tipos import (
 )
 from agente_medico.superficie.documento_matriz import CabecalhoDocumento, LinhaCargo, RodapeDocumento
 from agente_medico.superficie.web_matriz import (
+    _TranscritorContado,
     deve_reprocessar,
     executar_rota_determinista,
     executar_rota_determinista_cacheada,
@@ -387,3 +390,65 @@ def test_documento_sem_linha_cargo_nao_e_oferecido_para_download(
     assert not at.exception
     assert at.error
     assert chamadas_download == []
+
+
+# ---------------------------------------------------------------------------
+# 003.EW — _TranscritorContado (contador de blocos lidos por IA) + aviso de
+# procedência na tela.
+# ---------------------------------------------------------------------------
+
+
+class _TranscritorFalso:
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        return GHEVerbatim(nome="GHE Falso", cargos=("Cargo Falso",), riscos=())
+
+
+class _TranscritorQueLevanta:
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        raise TranscricaoIndisponivel("CHAVE_API_GOOGLE ausente")
+
+
+def test_transcritor_contado_conta_cada_invocacao() -> None:
+    # Reversão que mata: remover `self.chamadas += 1` do wrapper.
+    contado = _TranscritorContado(interno=_TranscritorFalso())
+    assert contado.chamadas == 0
+    contado.transcrever("bloco 1")
+    contado.transcrever("bloco 2")
+    assert contado.chamadas == 2
+
+
+def test_transcritor_contado_propaga_transcricao_indisponivel() -> None:
+    # Reversão que mata: envolver o `return` num try/except que devolve
+    # GHEVerbatim vazio — é o que impede o wrapper de virar um mascarador de
+    # falha.
+    contado = _TranscritorContado(interno=_TranscritorQueLevanta())
+    with pytest.raises(TranscricaoIndisponivel):
+        contado.transcrever("bloco")
+    assert contado.chamadas == 1
+
+
+def test_zero_chamadas_ia_nao_mostra_aviso_de_procedencia(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: trocar `if cache.chamadas_ia > 0` por `>= 0` na
+    # casca — a mensagem "lido(s) por IA" passaria a aparecer sempre, mesmo
+    # com a rota determinística cobrindo 100% dos blocos.
+    exame = ExameEmitido(exame="exame_clinico", periodicidade_meses=12, momentos={Momento.ADM})
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=("Cargo Teste",))
+    resultado = Resultado(status="OK", matrizes=[matriz])
+
+    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
+        return resultado, ()
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
+    )
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+
+    assert not at.exception
+    assert not at.info
+    textos = [el.value for el in at.markdown]
+    assert not any("lido(s) por IA" in t for t in textos)

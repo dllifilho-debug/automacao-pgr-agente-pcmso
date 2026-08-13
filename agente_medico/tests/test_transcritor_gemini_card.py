@@ -158,10 +158,14 @@ def test_prompt_enviado_contem_o_card_e_o_titulo() -> None:
 # test_transcritor_gemini.py + requer_pdfs de test_transcritor_pgr.py.
 # ---------------------------------------------------------------------------
 
-requer_api = pytest.mark.skipif(
-    not os.environ.get("CHAVE_API_GOOGLE"),
-    reason="CHAVE_API_GOOGLE ausente — teste ao vivo do transcritor Gemini-card indisponível",
-)
+def requer_api(fn):
+    """Ao vivo: pula sem chave (skipif) E declara-se isento da blindagem
+    de rede do conftest.py (marcador ao_vivo, 003.EW)."""
+    fn = pytest.mark.ao_vivo(fn)
+    return pytest.mark.skipif(
+        not os.environ.get("CHAVE_API_GOOGLE"),
+        reason="CHAVE_API_GOOGLE ausente — teste ao vivo do transcritor Gemini-card indisponível",
+    )(fn)
 
 _CAMINHO_UFGD = Path("matrizes_originais/PGR_EBSERH_UFGD_v7.pdf")
 _CAMINHO_HUMAP = Path("matrizes_originais/PGR_EBSERH_HUMAP.pdf")
