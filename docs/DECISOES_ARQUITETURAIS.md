@@ -3397,6 +3397,149 @@ construção civil, indústria química e saúde sobem o mesmo PDF na mesma tela
 cumprido e declarado. Fatia 1: PR #291, merge `0d222c1`, commits `da1ebd2`/`5b1eb7d`/`8fd6039`;
 suíte 1085→**1086 passed, 6 skipped**; `mypy --strict` limpo, **47 arquivos**.
 
+## D-ARQ-79 — Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção
+
+**Status:** DECISÃO DE ARQUITETURA
+
+Sessão 003.EV, fatia 1 (PR #293, merge `75255e8`). Nenhuma regra `R-*` tocada.
+
+**Contexto.** D-ARQ-76 pôs o gate de acesso no entrypoint, e D-ARQ-78 cl.4 mediu a consequência:
+sem o bloco `[auth]`, `app_matriz.py` para em "Aplicativo mal configurado". Correto em produção e
+inviável na máquina do operador, que é onde a matriz é gerada para validação clínica — exigir
+OAuth do Google para rodar `streamlit run` localmente é barreira sem contrapartida.
+
+**Decisão — 3 cláusulas.**
+
+1. **Existe um segundo entrypoint, `app_matriz_local.py`, sem gate.** Chama `pagina_matriz()`
+   direto. É a porta de desenvolvimento, e o fato de ela não ter autenticação é o ponto dela.
+2. **A separação é travada por teste, não por disciplina.**
+   `test_entrypoint_de_producao_nao_usa_o_entrypoint_local` crava que o `entrypoint.sh` do
+   container aponta para `app_matriz.py` e nunca para o local. Sem esse teste, a porta sem
+   autenticação chegaria à internet por um descuido de uma linha.
+3. **A identidade visual mora nos entrypoints, não na página.** `st.set_page_config` tem de ser o
+   primeiro comando Streamlit da página, e o gate chama `st.title` antes de `pagina_matriz()` —
+   dentro da página, quebraria com `StreamlitAPIException` no caminho do gate.
+
+**Universalidade (D-ARQ-06).** Independe de setor.
+
+**Fronteiras.** D-ARQ-76 intacta — o gate de produção não muda. D-ARQ-77 intacta — o `Dockerfile`
+copia e executa o entrypoint de produção. Não toca motor, protocolo nem vocabulário.
+
+**Base.** 003.EV fatia 1. Suíte 1086→1088 passed, 6 skipped; `mypy --strict` limpo, **48
+arquivos** (sobe de 47 por `app_matriz_local.py` entrar no alvo canônico).
+
+## D-ARQ-80 — No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote
+
+**Status:** DECISÃO DE ARQUITETURA
+
+Sessão 003.EW, fatias 1-2. Nenhuma regra `R-*` tocada.
+
+**Contexto — os números que obrigam a decisão.** Medidos no painel do nível gratuito e em rodada
+real contra o PGR TOCTAO, 11-12/08/2026:
+
+* Limites por modelo, nível gratuito: **RPM 5 · TPM 250.000 · RPD 20**
+  `[MEDIDO — aistudio.google.com/rate-limit, projeto do Diovanni, 12/08/2026]`
+* TOCTAO: 106 páginas, **18 blocos GHE**, ~27.000 tokens no documento inteiro
+* Desenho anterior: **uma requisição por bloco** = 18 de 20 requisições diárias num único
+  documento, transportando 11% de uma janela de contexto
+* Cascata anterior, medida modelo a modelo: `gemini-2.5-flash` **HTTP 429**; `gemini-2.5-pro`
+  **HTTP 404 — "no longer available to new users"**; `gemini-2.0-flash-001` e `gemini-2.0-flash`
+  **não existem mais**; `gemini-flash-latest` **HTTP 200 / finishReason STOP**, JSON correto, 13,3s
+* Custo de raciocínio no maior bloco: prompt 5.704 · **thinking 2.917** · resposta 268 — o
+  raciocínio consome **11×** a saída útil
+
+**Decisão — 4 cláusulas.**
+
+1. **A unidade de invocação é o lote, não o bloco.** `TranscritorGHEEmLote` (protocolo aditivo em
+   `motor/transcritor_pgr.py`) e `_BLOCOS_POR_LOTE = 6`: três requisições por documento em vez de
+   dezoito. **6 e não 18** porque uma resposta única concentra risco — uma falha custaria o
+   documento inteiro e a requisição do mesmo jeito. Descer para uma chamada (20 documentos/dia)
+   exige medir antes que a resposta única sai íntegra.
+2. **Alinhamento é contrato duro, com dupla guarda.** A saída do lote tem o mesmo comprimento e a
+   mesma ordem da entrada; faltante vira `GHEVerbatim` vazio, que `gate_forma_ghe` reprova como
+   pendência bloqueante. `transcrever_ghes` ainda confere o comprimento e levanta. Redundante de
+   propósito: um lote curto desalinharia bloco e conteúdo, e cada GHE receberia os riscos do
+   vizinho — matriz plausível e errada, o pior modo de falha deste sistema (D-ARQ-22).
+3. **Cascata com alias `-latest` à frente, versão fixa só como reserva.** Três dos quatro modelos
+   cravados morreram. Mesma classe que D-ARQ-77 nomeou: caminho crítico refém de terceiro sem
+   contrato.
+4. **Falha de cascata carrega o motivo por modelo.** O `except Exception: continue` anterior
+   apagava a causa; descobrir que eram 429, 404 e dois inexistentes exigiu um script paralelo
+   fora do repositório. Diagnóstico que depende de instrumento improvisado não é diagnóstico.
+
+5. **Mecanismo entregue não é efeito entregue, e a suíte fica verde nos dois casos.** Esta sessão
+   produziu o mesmo defeito **duas vezes**, com origens independentes: a rota LLM estava pronta no
+   motor desde D-ARQ-65 e inerte porque a superfície injetava o cliente-bomba; e a transcrição em
+   lote nasceu completa na fatia 2 e inerte porque o `_TranscritorContado` da fatia 1 interceptava
+   o *duck-typing* de `transcrever_ghes` sem expor `transcrever_lote`. Nos dois casos, todos os
+   testes passavam — porque cada um exercitava uma peça, e nenhum media o caminho inteiro.
+   **Consequência:** fatia que liga um mecanismo ao caminho de produção exige um teste que meça o
+   caminho completo, não as peças. No caso do lote, o discriminante é contar invocações de
+   `_chamar_gemini` para um documento de N blocos e exigir `ceil(N/6)`, não `N`. Registrado como
+   candidato, não implementado nesta fatia.
+
+**Universalidade (D-ARQ-06).** A rota LLM é o que torna o sistema capaz de ler PGR de **qualquer
+emissor**, sem medir família por família — o caminho previsto por D-ARQ-65 e nunca ligado à
+superfície até 003.EW.
+
+**Fronteiras.** D-ARQ-09 preservada: o motor de decisão segue determinístico, o LLM só transcreve
+tabela a montante, e `gate_forma_ghe` valida antes da entrada. D-ARQ-65 preservada: a rota
+determinística é sempre tentada primeiro e, quando aceita, o cliente LLM nunca é invocado — no
+Fascino o consumo é zero. Não toca motor de inferência, protocolo nem vocabulário.
+
+**Travessia completa medida `[MEDIDO — 13/08/2026, rodada real no host do Diovanni]`.** O TOCTAO
+— emissor **nunca medido** pela rota determinística — atravessou pela rota LLM e produziu matriz
+assinável: **18 GHEs · 61 cargos · 79 linhas · 18.670 bytes de HTML · zero pendência dentro do
+documento**, com o aviso de procedência exibido (`18 bloco(s) lido(s) por IA`).
+
+**O lote entregou o efeito prometido: 3 requisições para 18 blocos** (`ceil(18/6)`), confirmadas no
+painel (`Gemini 3.7 Flash · RPD 3/20` — linha inexistente antes da rodada; `gemini-flash-latest`
+resolve para 3.7 Flash). TPM 20,65K de 250K — 8% do teto. Tempo total ~5 min
+`[APROXIMADO — estimativa do operador, não cronometrado]`.
+
+**Comparação com a rota determinística no MESMO documento** (sanity-check neutralizado
+experimentalmente pelo Arquiteto, 12/08): 18 blocos e 61 cargos nos dois, mas a determinística
+devolveu **3 riscos no documento inteiro** e cargos **truncados na primeira palavra composta**
+(`Auxiliar de`, `Engenheiro`), enquanto a rota LLM devolveu cargos íntegros
+(`Auxiliar de Engenharia`, `Engenheiro Civil`) e riscos resolvidos — com emissão de Espirometria,
+RX Tórax OIT, Acetona na urina e MEK na urina.
+
+**Achado clínico de convergência tripla, o mais forte da sessão.** No GHE-11 Hidráulica a rota LLM
+emitiu **Acetona na urina + Metil-etil-cetona (MEK) na urina** para Encanador, Meio Oficial e
+Servente. Três caminhos independentes apontam a mesma conduta: (1) a Dra. Carolini anotou à mão no
+gabarito do Fascino, ao lado de "Encanador", *"risco baixo no pgr para acetona e metiletilcetona"*;
+(2) no Fascino a rota determinística **recusou** `Metiletilcetona` pelo fuzzy (distância 2 de
+`metil_etil_cetona`, `DT-003EQ-02`); (3) no TOCTAO a rota LLM transcreveu e o motor emitiu o
+indicador biológico sozinho. Reforça a prioridade do alias medido sob D-ARQ-70.
+
+**Capacidade real no nível gratuito, medida no painel:** RPD por modelo — 2.5 Flash **20**,
+3.6 Flash **20**, 3.7 Flash **20**, **3.5 Flash Lite 500**. Com 3 requisições por documento e a
+cascata caindo para o Lite sob cota, a capacidade agregada é de **~186 PGRs/dia**
+`[APROXIMADO — aritmética do Arquiteto sobre os RPD do painel]`. O desenho anterior (1 requisição
+por bloco) dava **1 PGR/dia**.
+
+**`[A CONFIRMAR]`** — `thinkingBudget = 512` é estimativa do Arquiteto, não medição; e os dois
+achados clínicos replicados no TOCTAO (audiometria sem `DEM`; espirometria e RX sem a
+periodicidade impressa) confirmam `DT-003EW-01` e `DT-003EW-02` em **segundo documento**, o que
+descarta acaso de um gabarito só.
+
+**Dois erros de método do Arquiteto, registrados (D-ARQ-06).**
+
+1. *Listagem tratada como disponibilidade.* O primeiro diagnóstico reportou `gemini-2.5-pro` como
+   OK porque ele aparece em `GET /models`; a chamada real devolve 404. Aparecer no catálogo não é
+   poder usar — o único teste de disponibilidade é a chamada.
+2. *Fixture global especificado sem medir os dependentes.* O `conftest.py` de blindagem de rede
+   foi escrito como `autouse` sem verificar que existiam 6 testes `requer_api` dependentes da
+   chave; quebrou os seis. Corrigido com opt-out por marcador nomeado `ao_vivo`. O Code parou e
+   reportou, no procedimento previsto.
+
+**Base.** Sessão 003.EW, fatias 1-2 (11-12/08/2026). Fatia 1: PR #294, merge `66f3ecf`. Fatia 2:
+PR #295, merge `0136426` (inclui a emenda do wrapper — ver cláusula 5). Suíte
+1092→1097→**1099 passed, 6 skipped** (fatia 2, cascata+lote: +5 líquido, não os +6 previstos no
+prompt — o item de motivos acumulados reescreveu um teste pré-existente cuja mensagem genérica
+deixou de existir, em vez de duplicar cobertura ao lado dele; emenda do wrapper: +2); `mypy
+--strict` limpo, 48 arquivos.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -3569,3 +3712,5 @@ suíte 1085→**1086 passed, 6 skipped**; `mypy --strict` limpo, **47 arquivos**
 | v166 | 08/08/2026 | Sessão 003.ES fatias 1-2 (IMPLEMENTAÇÃO): **D-ARQ-76 CRIADA** — o gate de acesso mora no entrypoint (`app_matriz.py`), não em `pagina_matriz()`, **superando em parte D-ARQ-75 cláusula 2(b)**; a decisão de acesso é núcleo puro com três desfechos (`GateAcesso` PEDIR_LOGIN/NEGAR/LIBERAR em `superficie/autorizacao.py`, sem importar streamlit nem ler `os.environ`); a fronteira normaliza estritamente (`is True`+`isinstance`), fail-closed por construção; allowlist por env var `PCMSO_ALLOWLIST`, não por `st.secrets`. Razões medidas: `at.secrets["auth"]` não faz `st.user.is_logged_in` existir no `AppTest` (`AttributeError` idêntico com e sem injeção — o bloco `[auth]` é consumido na subida do servidor), e `UserInfoProxy` tipa `getattr`/`.get()` como `str | bool | TokensProxy | None`, nunca `bool`/`str | None`. `cast` e `# type: ignore` rejeitados por mentirem ao verificador na fronteira de segurança. Nota de aplicação em **D-ARQ-75**: os três `[A CONFIRMAR]` fechados — `st.login` nasce no 1.42.0; env var resolvido pelo lado negativo (a doc documenta `secrets.toml`→env, nunca o contrário); Railway Serverless existe e dorme por ausência de *outbound*. Fatia 1: `requirements-app.txt` (5 terceiros por AST) + entrypoint na raiz (lacuna não prevista por D-ARQ-75). Suíte 1062→**1074 passed, 6 skipped**; `mypy --strict` limpo, **45 arquivos** (comando canônico passa a incluir `app_matriz.py`). Nenhuma R-* criada, alterada ou depreciada. Fatia 3 (deploy) adiada para 003.ET. Detalhe em HISTORICO 003.ES. |
 | v167 | 10/08/2026 | Sessão 003.ET fatias 1-2 + fechamento (08-10/08/2026): **D-ARQ-77 CRIADA** — mecanismo de build é o Dockerfile, não a detecção do builder (Railway trocou Nixpacks→Railpack entre D-ARQ-75 e a implementação); segredo materializado por shell no entrypoint antes do `streamlit run`, núcleo puro `gerar_toml_auth` + casca em `materializar_secrets.py`; `requirements.txt` do legado permanece, agora inofensivo. Nota de aplicação em **D-ARQ-75** (mesma ID): a premissa dos 904 MB (cláusula 1) refutada por medição — pico é cache de página do pdfplumber nunca liberado, não propriedade do documento; `Page.close()` por página derruba o e2e do Fascino de 859→103 MB (sandbox) e 674,3→114,8 MB (host Windows), saída idêntica; `flush_cache()` sozinho só chega a 398 MB, `close()` sozinho a 88 MB. Destino do deploy **reaberto** — a base de "provedor pago por consumo" caiu, hospedagem gratuita volta à mesa, decisão em sessão própria (`docs/PLANO_V1.md` §S0). Erro de método registrado (D-ARQ-06): 003.ER mediu sintoma e concluiu sobre provedor sem perguntar a causa; o Arquiteto repetiu a conclusão no gate de abertura de 003.ET sem questionar, até a pergunta do Diovanni sobre custo forçar a investigação. **DH-003ET-01 ABERTA** (`docs/PENDENCIAS_CLINICAS.md`) — fixtures de PDF (Fascino, Cjr Engenharia) não versionadas, testes que dependem delas skipam em silêncio em clone limpo. Nenhuma R-* criada, alterada ou depreciada. PROTOCOLO v88 (registra a partição do §11 da fatia 0). Suíte 1085 passed, 6 skipped (inalterada — sessão docs-only); `mypy --strict` não roda (nenhum `.py` tocado nesta fatia). Commits/PRs das fatias: #287 (fatia 0, partição §11), #288 (fatia 1, deploy), #289 (fatia 2, memória). Detalhe em HISTORICO 003.ET. |
 | v168 | 10/08/2026 | Sessão 003.EU (ARQUITETURA + IMPLEMENTAÇÃO): **D-ARQ-78 CRIADA** — destino do deploy é o Streamlit Community Cloud, por requisito de custo zero **literal** confirmado com o Diovanni (nunca perguntado em 003.ER). Railway sai por assinatura fixa; Cloud Run sai do topo por medição — WebSocket aberto força *instance-based billing* (free tier 240k vCPU-s/mês = 66,7 h a 1 vCPU; aba aberta 8h/dia × 22 dias ≈ $7,45/mês `[APROXIMADO]`) — e **fica como fallback**, que é o que preserva o valor do `Dockerfile` de D-ARQ-77. O nome do arquivo de dependências vira contrato da plataforma (5 nomes reconhecidos, `requirements-app.txt` invisível): **renomear, nunca duplicar** — o app assume `requirements.txt`, legado vira `requirements-legado.txt`; efeito não previsto é que isso **remove a causa-raiz** de D-ARQ-77 cl.1. O gate próprio **permanece** por razão medida: a allowlist nativa de viewers é **transitiva** (*"They can also pass these permissions to others by inviting more viewers"*), e `PCMSO_ALLOWLIST` sobrevive sem tocar código (segredo de nível raiz vira env var, exemplo literal na doc). Ordem de configuração rígida (subdomínio → OAuth client → TOML → deploy), porque sem `[auth]` o entrypoint estourava `AttributeError` e o Community Cloud força `showErrorDetails=false`. **D-ARQ-75 cláusula 1 revogada**; **D-ARQ-77 cláusula 4 superada**. `[A CONFIRMAR]`: limite de RAM (não localizado em 5 páginas oficiais) e se o subdomínio é escolhível antes do 1º boot. Dois erros de método do Arquiteto registrados: ausência de evidência tratada como evidência de ausência ("1 app privado" existe, em página irmã), e `mypy = 45` cravado como gabarito bloqueante quando o real era 47 (003.ET criou 2 módulos e não re-mediu) — o Code parou e reportou, no procedimento previsto. **DH-003EU-01** e **DH-003EU-02** ABERTAS. Nenhuma R-* criada, alterada ou depreciada; PROTOCOLO intocado. Suíte 1085→1086 passed, 6 skipped; `mypy --strict` limpo, 47 arquivos. Detalhe em HISTORICO 003.EU. |
+| v169 | 11/08/2026 | Sessão 003.EV fatia 1 (IMPLEMENTAÇÃO): **D-ARQ-79 CRIADA** — entrypoint de desenvolvimento sem gate (`app_matriz_local.py`, chama `pagina_matriz()` direto) é porta deliberada para rodar a matriz na máquina do operador sem exigir OAuth do Google; a separação é travada por teste (`test_entrypoint_de_producao_nao_usa_o_entrypoint_local`), não por disciplina — sem ele, a porta sem autenticação chegaria à internet por um descuido de uma linha; identidade visual (`st.set_page_config`, título "Matriz de Exames — PCMSO") mora nos entrypoints, não na página, porque o gate chama `st.title` antes de `pagina_matriz()`. D-ARQ-76 e D-ARQ-77 intactas. Fechamento em docs desta sessão ficou em atraso duas sessões (falha de método do Arquiteto, registrada em HISTORICO 003.EW). Suíte 1086→1088 passed, 6 skipped; `mypy --strict` limpo, 48 arquivos (`app_matriz_local.py` entra no alvo canônico). PR #293, merge `75255e8`. Detalhe em HISTORICO 003.EV. |
+| v170 | 11-12/08/2026 | Sessão 003.EW fatias 1-2 (IMPLEMENTAÇÃO): **D-ARQ-80 CRIADA** — no nível gratuito o gargalo é requisição (RPD 20), não token (TPM 250k): a unidade de invocação do transcritor passa a ser o lote, não o bloco (`TranscritorGHEEmLote`, `_BLOCOS_POR_LOTE = 6` — três requisições por documento de 18 blocos em vez de dezoito); alinhamento bloco↔GHE é contrato duro com dupla guarda (`GHEVerbatim` vazio no faltante + `ValueError` de comprimento); cascata de modelos com aliases `-latest` à frente (três dos quatro modelos cravados haviam morrido: HTTP 429, HTTP 404, dois inexistentes) e motivo por modelo na exceção. Fatia 1 (PR #294, `66f3ecf`) ligou a rota LLM à superfície, inerte desde D-ARQ-65 por o cliente-bomba nunca ser trocado; fatia 2 (PR #295, `0136426`) entregou o lote no motor e no cliente Gemini, e uma emenda subsequente corrigiu o mesmo padrão de defeito pela segunda vez na sessão — `_TranscritorContado` (fatia 1) interceptava o *duck-typing* de `transcrever_ghes` por não expor `transcrever_lote`, deixando o lote inerte em produção mesmo pronto no cliente. Travessia real do TOCTAO (emissor nunca medido pela rota determinística): 18 GHEs, 61 cargos, zero pendência, 3 requisições confirmadas no painel `[MEDIDO — 13/08/2026]`. Achado clínico de convergência tripla (Acetona + MEK na urina, GHE-11 Hidráulica) entre a anotação manual da Dra. Carolini, a recusa fuzzy do Fascino e a transcrição do TOCTAO — abre DT-003EW-01/02/03. Suíte 1092→1097→1099 passed, 6 skipped (fatia 2 rendeu +5 líquido, não os +6 previstos — item de motivos acumulados reescreveu teste pré-existente; emenda do wrapper +2); `mypy --strict` limpo, 48 arquivos. Detalhe em HISTORICO 003.EW. |
