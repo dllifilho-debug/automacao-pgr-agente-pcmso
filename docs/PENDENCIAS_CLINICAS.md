@@ -1324,3 +1324,98 @@ a ser o do legado, `test_nada_declarado_a_mais_do_que_o_importado`
 e `opencv-python-headless` apareceriam declarados sem serem importados. **Não há lacuna de
 cobertura — há um nome de teste que promete mais do que o corpo entrega.** Origem: redação do
 Arquiteto no prompt da fatia 1, não do Code.
+
+### DT-003EW-01 — Audiometria sem demissional `[ABERTA — conduta]`
+
+**Origem:** 003.EW, comparação contra o gabarito real da Dra. Carolini
+(`MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc`, mesma obra do Fascino).
+
+**Situação.** O gabarito pede `Audiometria (ADM, PER, MRO, DEM)` — inclui o momento demissional. O
+motor emite audiometria sem `DEM` em ~35 dos 36 cargos comparados. É a divergência de maior alcance
+encontrada na sessão, e não estava registrada em nenhuma dívida aberta antes desta comparação.
+Replicada de forma independente no TOCTAO (segundo documento, emissor diferente) — descarta acaso
+de um gabarito só.
+
+**Prioridade.** Sobre `DT-003EW-02` e `DT-003EW-03` — é o item que muda o documento assinado em
+mais linhas.
+
+**Status:** ABERTA — decisão do Arquiteto sobre conduta clínica, fatia própria.
+
+### DT-003EW-02 — Periodicidade não impressa no documento `[ABERTA]`
+
+**Origem:** 003.EW, comparação contra o mesmo gabarito de `DT-003EW-01`.
+
+**Situação.** O gabarito escreve `Espirometria (ADM, PER 24 meses, ...)` e
+`RX de Tórax OIT (ADM, PER 12 meses, ...)` — o número da periodicidade impresso junto ao momento. O
+app imprime só `PER`, sem o número, em 27 cargos para cada exame. Duas causas possíveis, não
+distinguidas nesta sessão: a periodicidade calculada é diferente da esperada, ou a regra de
+formatação de saída não está sendo aplicada (`PLANO_V1` manda o RX sempre trazer o número). Medir
+antes de corrigir — as duas causas pedem correções diferentes. Irmã de `DT-003EC-01`, mesma classe
+de defeito de apresentação sobre valor correto (ou não) do motor.
+
+**Status:** ABERTA — medição pendente antes de qualquer correção.
+
+### DT-003EW-03 — Exames do gabarito ausentes na saída `[ABERTA]`
+
+**Origem:** 003.EW, comparação contra o mesmo gabarito de `DT-003EW-01`.
+
+**Situação.** Carboxihemoglobina ausente em 2 cargos do gabarito e Manganês no sangue ausente em 1.
+O caso do manganês liga-se a `DT-003EQ-02` (`Maganês`, grafia do documento, recusado pelo
+resolvedor fuzzy). **Achado convergente independente:** a Dra. Carolini anotou à mão, ao lado de
+"Encanador", *"risco baixo no pgr para acetona e metiletilcetona"* — e `Metiletilcetona` foi
+recusado pelo mesmo fuzzy na mesma rodada (distância 2 de `metil_etil_cetona`, que já tem regra e
+indicador biológico cadastrados). Duas rotas de evidência independentes (anotação manual da médica
+e transcrição real do TOCTAO) apontando o mesmo agente sob o mesmo obstáculo de vocabulário.
+
+**Status:** ABERTA — mesma decisão de dado de `DT-003EQ-02`, candidata a resolver junto.
+
+### DH-003EW-01 — Aviso de procedência de IA sem teste do caso positivo `[ABERTA — lacuna de cobertura]`
+
+**Origem:** 003.EW fatia 1, teste do aviso de procedência (`web_matriz.py`).
+
+**Situação.** O teste existente cobre só o caso `chamadas_ia == 0` (aviso ausente quando a rota
+determinística cobre tudo). Trocar a condição `if cache.chamadas_ia > 0` por `< 0`, ou apagar o
+bloco inteiro, não deixa nada vermelho — nenhum teste exercita o caminho em que o aviso **deveria**
+aparecer. É justamente o caminho que importa para a rastreabilidade clínica: a matriz veio (parcial
+ou totalmente) de transcrição por IA, e o operador precisa ver isso antes de levar o documento para
+assinatura (D-ARQ-22, revisão de saída).
+
+**Status:** ABERTA — não-bloqueante (o mecanismo funciona, medido ao vivo no TOCTAO; falta só a
+cobertura do caso positivo).
+
+### DH-003EW-02 — Família TOCTAO não medida `[ABERTA — cobertura de extração]`
+
+**Origem:** 003.EW, sanity-check da rota determinística neutralizado experimentalmente pelo
+Arquiteto (12/08/2026) contra o TOCTAO.
+
+**Situação.** Com o sanity-check neutralizado, o parser determinístico atravessa o TOCTAO e devolve
+18 blocos e 61 cargos — números plausíveis —, mas apenas **3 riscos em todo o documento**, e cargos
+truncados na primeira palavra composta (`Auxiliar de`, `Engenheiro`, em vez de `Auxiliar de
+Engenharia`, `Engenheiro Civil`). Geometria medida que explica a falha: o rótulo `GRUPO` está em
+`x0=57,0`, mas os dados dele estão em `75,0` — 18pt de desalinhamento, geometria inexistente no
+Fascino; a banda `FONTE` é instável entre páginas (178,8 · 179,4 · 183,9 · 185,6). **O
+sanity-check está correto ao recusar esta família** — sem ele, a matriz sairia com 18 GHEs e 61
+cargos e nenhum exame por exposição, com aparência plena de sucesso: o pior modo de falha do
+sistema (matriz plausível e errada), evitado por construção.
+`[MEDIDO — Arquiteto, 12/08/2026, sandbox Linux: 46,7s, pico 89 MB]`
+
+**Status:** ABERTA — cobertura de extração para uma família nova é sessão própria de medição
+(molde D-ARQ-65), não decisão de conduta clínica.
+
+### DH-003EW-03 — Arquivo de configuração gerado por PowerShell nasce com BOM `[ABERTA — higiene de ambiente]`
+
+**Origem:** 003.EW, materialização do `secrets.toml` na máquina do operador.
+
+**Situação.** `Add-Content -Encoding UTF8` (PowerShell 5.1) escreve BOM UTF-8 no início do arquivo.
+O parser `toml` (usado por `st.secrets`) carrega o arquivo sem levantar erro, mas a primeira chave
+vem com o BOM colado ao nome (`﻿CHAVE_API_GOOGLE`, caractere invisível antes do "C") — então
+`st.secrets.get("CHAVE_API_GOOGLE")` devolve vazio, e o app se comporta como se a chave estivesse
+ausente: falha silenciosa, sem exceção, sem mensagem. `tomli` (usado em teste) falha explicitamente
+sobre o mesmo arquivo, o que é como o problema foi encontrado. Aplica-se a qualquer
+`secrets.toml` de deploy gerado por PowerShell no bloco `[auth]` também, não só a
+`CHAVE_API_GOOGLE`. Solução medida:
+`[System.IO.File]::WriteAllText(caminho, conteudo, New-Object System.Text.UTF8Encoding($false))`
+— o `$false` desliga o BOM.
+
+**Status:** ABERTA — higiene de ambiente, não bloqueia nenhum caminho de produção (o `.toml` do
+deploy é materializado por `materializar_secrets.py`, não por PowerShell direto).
