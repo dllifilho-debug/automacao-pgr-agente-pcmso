@@ -93,17 +93,24 @@ def test_cascata_primeiro_modelo_falha_segundo_responde() -> None:
         resultado = cliente.transcrever("texto qualquer")
 
     assert len(chamadas) == 2
-    assert "gemini-2.5-flash" in chamadas[0]
-    assert "gemini-2.5-pro" in chamadas[1]
+    assert "gemini-flash-latest" in chamadas[0]
+    assert "gemini-2.5-flash" in chamadas[1]
     assert resultado[0].membros[0].cas == "1-2-3"
 
 
-def test_todos_os_modelos_falham_levanta_transcricao_indisponivel() -> None:
+def test_todos_os_modelos_falham_acumula_motivo_por_modelo_na_excecao() -> None:
+    # 003.EW Parte B / item 6 dos testes de fatia: reversão que mata: voltar
+    # à mensagem genérica "cascata Gemini sem resposta íntegra (200 + STOP)"
+    # sem os motivos por modelo — os nomes dos três modelos e o HTTP 500
+    # deixariam de aparecer na mensagem.
     with patch(_ALVO, return_value=Mock(status_code=500)):
         cliente = TranscritorGemini(chave="fake")
         with pytest.raises(TranscricaoIndisponivel) as exc:
             cliente.transcrever("texto qualquer")
-    assert exc.value.motivo == "cascata Gemini sem resposta íntegra (200 + STOP)"
+    assert "gemini-flash-latest" in exc.value.motivo
+    assert "gemini-2.5-flash" in exc.value.motivo
+    assert "gemini-flash-lite-latest" in exc.value.motivo
+    assert exc.value.motivo.count("HTTP 500") == 3
 
 
 def test_todos_os_modelos_max_tokens_levanta_transcricao_indisponivel() -> None:

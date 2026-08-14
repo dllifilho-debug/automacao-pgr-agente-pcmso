@@ -18,14 +18,29 @@ from agente_medico.motor.tipos import BlocoVerbatim, MembroVerbatim
 # reescrito aqui — não importado do legado, para não acoplar este adaptador
 # novo a um módulo em refatoração alheio à fatia (e1) de DT-003AS-01.
 
+# Cascata medida em 12/08/2026 (003.EW fatia 2, diagnostico_gemini2.py): a
+# lista anterior era de versões cravadas e três das quatro morreram — mesma
+# classe que D-ARQ-77 nomeou (caminho crítico refém de terceiro sem
+# contrato). gemini-2.5-flash -> HTTP 429 (cota diária estourada);
+# gemini-2.5-pro -> HTTP 404 ("no longer available to new users");
+# gemini-2.0-flash-001 e gemini-2.0-flash não existem mais. Aliases
+# "-latest" primeiro (resistem a deprecação de versão cravada);
+# gemini-2.5-flash mantido como segunda tentativa (cota própria, RPD
+# separado do alias); gemini-flash-lite-latest como degradação sob cota.
 _MODELOS: tuple[str, ...] = (
-    "models/gemini-2.5-flash",
-    "models/gemini-2.5-pro",
-    "models/gemini-2.0-flash-001",
-    "models/gemini-2.0-flash",
+    "models/gemini-flash-latest",       # alias estável; medido OK em 003.EW
+    "models/gemini-2.5-flash",          # versão fixa, cota própria (RPD separado)
+    "models/gemini-flash-lite-latest",  # degradação sob cota
 )
 
 _URL = "https://generativelanguage.googleapis.com/v1beta/{modelo}:generateContent?key={chave}"
+
+# [A MEDIR — 512 é o chute do Arquiteto, 003.EW. Medição de origem: no maior
+# bloco do TOCTAO, thinking consumiu 2.917 tokens contra 268 de resposta útil
+# (onze vezes). Se a taxa de finishReason != STOP subir, ou o JSON vier
+# malformado, o número está baixo demais — pare e reporte com o valor
+# observado, não ajuste sozinho.]
+_THINKING_BUDGET = 512
 
 _PROMPT = """Você é um especialista em Fichas de Dados de Segurança (FDS/FISPQ) conforme a ABNT NBR 14725.
 
@@ -96,33 +111,51 @@ def _obter_chave() -> str:
     return chave
 
 
-def _chamar_gemini(prompt: str, chave: str) -> str | None:
+def _chamar_gemini(prompt: str, chave: str) -> str:
     """Cascata de modelos: primeiro HTTP 200 com finishReason STOP vence, sem
     retry por modelo. Qualquer exceção de rede/timeout num modelo passa para
-    o próximo.
+    o próximo — mas o motivo (HTTP status, finishReason, ou tipo da exceção)
+    é acumulado por modelo (003.EW): antes, `except Exception: continue`
+    apagava a causa de cada falha, e diagnosticar a cota diária estourada
+    (12/08/2026) exigiu um script paralelo (diagnostico_gemini2.py) para
+    descobrir que eram HTTP 429, HTTP 404 e dois modelos inexistentes. Quando
+    todos falham, TranscricaoIndisponivel carrega os motivos concatenados —
+    nunca mais a mensagem genérica de antes.
 
     Sem teto de maxOutputTokens: com o teto (8192), o thinking do
     gemini-2.5-flash disputa o mesmo budget (medido thoughtsTokenCount até
     13231) e estoura antes do JSON de resposta — o corpo sai cortado
     (finishReason=MAX_TOKENS) em vez de completo. Sonda ao vivo confirmou
-    5/5 finishReason=STOP sem o teto (medição 003.BH)."""
+    5/5 finishReason=STOP sem o teto (medição 003.BH). thinkingConfig.
+    thinkingBudget (003.EW) é diferente: limita só o raciocínio, nunca a
+    resposta — o teto compartilhado que 003.BH removeu não volta."""
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0},
+        "generationConfig": {
+            "temperature": 0,
+            "thinkingConfig": {"thinkingBudget": _THINKING_BUDGET},
+        },
     }
+    motivos: list[str] = []
     for modelo in _MODELOS:
         try:
             r = requests.post(_URL.format(modelo=modelo, chave=chave), json=payload, timeout=120)
             if r.status_code != 200:
+                motivos.append(f"{modelo}: HTTP {r.status_code}")
                 continue
             corpo = r.json()
-            if corpo["candidates"][0].get("finishReason") != "STOP":
+            finish_reason = corpo["candidates"][0].get("finishReason")
+            if finish_reason != "STOP":
+                motivos.append(f"{modelo}: finishReason={finish_reason}")
                 continue
             resultado = corpo["candidates"][0]["content"]["parts"][0]["text"]
             return str(resultado)
-        except Exception:
+        except Exception as e:
+            motivos.append(f"{modelo}: {type(e).__name__}")
             continue
-    return None
+    raise TranscricaoIndisponivel(
+        "cascata Gemini sem resposta íntegra (200 + STOP) — " + "; ".join(motivos)
+    )
 
 
 def _limpar_json(texto: str) -> str:
