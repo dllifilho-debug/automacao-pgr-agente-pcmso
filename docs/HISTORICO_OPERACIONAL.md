@@ -4658,3 +4658,140 @@ nenhum `.py` tocado).
 liberar a vaga do app privado (legado Seconci), destravar o `repo` scope do GitHub, criar o OAuth
 client do Google, colar o TOML em *Advanced settings*, deploy, e medir a RAM real na plataforma
 para fechar o primeiro `[A CONFIRMAR]` de D-ARQ-78.
+
+## Sessão 003.EV — 11/08/2026 — IMPLEMENTAÇÃO (1 fatia)
+
+Aberta a partir de `main 66f3ecf` (PR #291, merge de 003.EU). Fecha o `[A CONFIRMAR]` de D-ARQ-76
+sobre rodar a matriz localmente sem OAuth.
+
+**Fatia 1 — implementação** (PR #293, merge `75255e8`). **D-ARQ-79 CRIADA** — entrypoint de
+desenvolvimento sem gate (`app_matriz_local.py`, chama `pagina_matriz()` direto), travado por
+`test_entrypoint_de_producao_nao_usa_o_entrypoint_local` para nunca chegar ao container de
+produção. Identidade visual da tela: `st.set_page_config` como primeiro comando Streamlit dos dois
+entrypoints (produção e local), título "Matriz de Exames — PCMSO", vocabulário revisado para a
+linguagem da médica (rótulos de formulário, mensagens de erro), `toolbarMode` ajustado. `mypy
+--strict` sobe de 47 para 48 arquivos — `app_matriz_local.py` entra no alvo canônico.
+
+**Resíduo cosmético nomeado, não corrigido nesta fatia.** As duas seções de pendências da tela
+ficaram com o mesmo texto de cabeçalho (`Pendências (itens a confirmar)`) tanto no bloco geral
+quanto dentro de cada GHE — erro de redação do Arquiteto na tabela do prompt de 003.EQ, herdado
+sem revisão até esta sessão notar. Não bloqueia leitura, mas confunde ao rolar a tela.
+
+**Números finais** `[MEDIDO — 11/08/2026, árvore parada]`: suíte 1086→**1088 passed, 6 skipped**;
+`mypy --strict` limpo, **48 arquivos**.
+
+**Fechamento em docs não feito nesta sessão** — corrigido em atraso na fatia de docs de 003.EW
+(ver bloco abaixo, "Por que este fechamento cobre duas sessões").
+
+**Próxima:** ligar a rota LLM à superfície para famílias não cobertas pela rota determinística —
+pendência nomeada desde a origem do §S3 do `PLANO_V1`.
+
+## Sessão 003.EW — 11-12/08/2026 — IMPLEMENTAÇÃO (2 fatias)
+
+Aberta a partir de `main 75255e8` (PR #293, merge de 003.EV). Liga a rota LLM prevista por D-ARQ-65
+à superfície, e resolve a inviabilidade de cota descoberta ao vivo no PGR TOCTAO.
+
+**Fatia 1 — injeção do transcritor real** (branch `feat/003ew-rota-llm-na-superficie`, commits
+`4bebe09`/`0a8dc38`, merge `66f3ecf`, PR #294). `_rodar_parse_deterministico`
+(`web_matriz.py`) troca os clientes-bomba offline pelos reais (`TranscritorGeminiGHE`,
+`TranscritorGeminiCard`) — a rota determinística continua tentada primeiro (D-ARQ-65), o cliente
+LLM só é invocado quando a família não é reconhecida. `_TranscritorContado` envolve o cliente GHE
+contando invocações; a tela mostra "N bloco(s) lido(s) por IA" acima da matriz quando o contador é
+maior que zero (silêncio quando é zero — caminho normal).
+
+**Bloqueador reportado pelo Code, resolvido pelo Arquiteto — causa nomeada.** O `conftest.py` de
+blindagem de rede (fixture `autouse` que remove `CHAVE_API_GOOGLE` de todo teste) foi escrito sem
+verificar que existiam 6 testes `requer_api` pré-existentes que dependiam da chave real para rodar
+ao vivo — com chave no ambiente, esses 6 passavam de "pulados" para "falham", porque o `skipif`
+avalia no collect (vê a chave) e o fixture agia no setup (remove a chave antes do corpo do teste
+rodar). Não era chamada de rede — era o oposto, a blindagem funcionando bem demais e quebrando um
+caso legítimo que ela não deveria tocar. Resolvido por opt-out explícito via marcador nomeado
+`ao_vivo`: os três arquivos que definem `requer_api` passam a aplicar dois marcadores (`skipif` +
+`ao_vivo`), e o fixture do `conftest.py` ignora testes marcados `ao_vivo`. O Code parou e reportou
+o achado antes de decidir sozinho, no procedimento previsto.
+
+**Verificação de blindagem, dupla rodada.** Depois da correção, a suíte foi rodada duas vezes com
+`-m "not ao_vivo"` — uma sem `CHAVE_API_GOOGLE` no ambiente, outra com uma chave falsa — e as
+contagens saíram idênticas (1092 passed, 6 deselected nas duas, duração comparável): prova por
+medição de que nenhuma chamada de rede real acontece, não suposição.
+
+**Números finais da fatia 1** `[MEDIDO — 12/08/2026, árvore parada]`: suíte 1088→**1092 passed, 6
+skipped** (+4: contador de blocos, aviso de procedência, blindagem de rede).
+
+**Fatia 2 — cascata e transcrição em lote** (branch `feat/003ew-lote-e-cascata`, commits
+`ecca933`/`9bbfc94`/`5d0264c`, merge `0136426`, PR #295). Motivada por medição real contra o
+TOCTAO (106 páginas, 18 blocos GHE): o desenho de uma requisição por bloco consumia 18 das 20
+requisições diárias do nível gratuito num único documento — cota estourada, e a cascata quebrada
+(`gemini-2.5-flash` HTTP 429, `gemini-2.5-pro` HTTP 404, dois modelos que não existem mais) chegou
+a 72 requisições numa rodada real.
+
+* `ecca933` — `_MODELOS` passa a aliases `-latest` primeiro (três dos quatro modelos cravados
+  haviam morrido); `_chamar_gemini` acumula um motivo por modelo (HTTP status, `finishReason`, ou
+  tipo de exceção) em vez de apagar a causa com `except Exception: continue` — quando todos falham,
+  `TranscricaoIndisponivel` carrega os motivos concatenados; `thinkingConfig.thinkingBudget = 512`
+  limita só o raciocínio (thinking consumia 11× a resposta útil no maior bloco do TOCTAO),
+  diferente do `maxOutputTokens` removido em 003.BH.
+* `9bbfc94` — `TranscritorGHEEmLote` (Protocol aditivo em `motor/transcritor_pgr.py`) e
+  `_BLOCOS_POR_LOTE = 6`: três requisições por documento de 18 blocos em vez de dezoito.
+  `transcrever_ghes` prefere o lote por duck-typing quando o cliente o oferece. Alinhamento é
+  contrato duro com dupla guarda — `GHEVerbatim` vazio no faltante (`_parsear_ghes_lote`) e
+  `ValueError` de comprimento em `transcrever_ghes`, cinto e suspensório contra desalinhamento
+  silencioso bloco↔GHE.
+
+**Três incidentes registrados nesta fatia, por decisão do Diovanni de não os apagar do histórico.**
+
+(a) **Previsão de `+6 testes` do prompt estava errada.** Dos 6 testes especificados, o item de
+"motivos acumulados chegam à exceção" foi implementado reescrevendo um teste pré-existente
+(`test_todos_os_modelos_falham_levanta_transcricao_indisponivel`) em vez de duplicar cobertura ao
+lado dele — a mensagem genérica que aquele teste verificava deixou de existir com a mudança de
+`_chamar_gemini`, então ele *tinha* que mudar de qualquer forma. Efeito líquido **+5**, não +6;
+contagem real da fatia **1097 passed**, aceita pelo Arquiteto sem inventar um sexto teste
+artificial só para bater o número — reversão confirmada por varredura inversa real (o Code editou
+o código de volta para a mensagem genérica, rodou o teste, viu falhar, restaurou). **3ª ocorrência
+da classe** "previsão de prompt não desconta teste reescrito" registrada no histórico do projeto.
+
+(b) **Emenda do wrapper — erro de especificação do Arquiteto, achado pelo Code na leitura do
+código, não pela suíte.** `_TranscritorContado` (criado na fatia 1) só implementava `transcrever()`
+— e por isso interceptava o *duck-typing* de `transcrever_ghes` na fatia 2: mesmo com
+`TranscritorGeminiGHE` já oferecendo `transcrever_lote`, o `getattr` no wrapper falhava, e o
+caminho de produção continuava caindo no unitário, uma requisição por bloco — o problema original
+que a fatia 2 existia para resolver não estava corrigido em produção, só no cliente isolado. Todos
+os testes das duas fatias passavam porque cada um exercitava uma peça, nenhum media o caminho
+inteiro (registrado como D-ARQ-80 cláusula 5, candidato de teste-de-caminho-completo para fatia
+futura). Corrigido em `5d0264c`: `_TranscritorContado.transcrever_lote` delega ao interno quando
+ele oferece o lote, cai no unitário quando não. Dois testes novos, ambos com reversão confirmada
+por varredura inversa real nesta sessão.
+
+(c) **Incidente do `git checkout --`.** No meio da fatia 2, o Code rodou `git checkout --
+agente_medico/adaptadores/transcritor_gemini.py` pretendendo desfazer só uma edição temporária de
+teste (reversão manual para verificar que um teste morria) — como nada da fatia estava commitado
+ainda naquela branch, o comando reverteu **todo** o trabalho real das Partes A/B/C no arquivo. O
+Code percebeu na hora, reconstruiu o arquivo a partir do que havia sido escrito, e revalidou com a
+suíte tocada e `mypy --strict` antes de seguir — sem que o Diovanni tivesse perguntado. Avaliado
+como incidente registrado, não defeito pendente: percebido, corrigido e reportado no mesmo turno.
+
+**Números finais da fatia 2, com a emenda** `[MEDIDO — 13/08/2026, árvore parada]`: suíte
+1092→1097→**1099 passed, 6 skipped**; `mypy --strict` limpo, **48 arquivos**; blindagem de rede
+(dupla rodada, `-m "not ao_vivo"`) idêntica com e sem `CHAVE_API_GOOGLE` — 1099 passed/6 deselected
+nas duas, repetida porque a emenda mudou a superfície. Commits `ecca933`, `9bbfc94`, `5d0264c`.
+
+**Medição de aceite da sessão** `[MEDIDO — 13/08/2026, host do Diovanni]`. O TOCTAO — emissor
+**nunca medido** pela rota determinística — atravessou pela rota LLM e produziu matriz assinável:
+**18 GHEs · 61 cargos · 79 linhas · zero pendência no documento**, com **3 requisições para 18
+blocos** confirmadas no painel da API (`ceil(18/6)`), tempo total ~5 min `[APROXIMADO]`. É a
+primeira vez que o sistema lê um PGR de emissor não medido de ponta a ponta.
+
+**Por que este fechamento cobre duas sessões.** `003.EV` (PR #293) e `003.EW` fatia 1 (PR #294)
+foram mergeadas em código sem fechamento em docs — o `DECISOES_ARQUITETURAIS.md`, o
+`PENDENCIAS_CLINICAS.md` e este `HISTORICO_OPERACIONAL.md` ficaram dois merges atrasados até esta
+fatia de fechamento. Falha de método do Arquiteto, registrada como tal — não é omissão do Code, que
+não recebeu prompt de fechamento nas duas sessões anteriores.
+
+**`PAINEL_ESTADO.md` não re-tirado.** Nenhum dos três números se move: nenhuma `R-*` criada,
+alterada ou depreciada nas duas sessões; a porta de entrada segue com o mesmo instrumento (rota LLM
+ligada é capacidade nova, não medição nova dos três números do painel); as três dívidas travantes
+seguem `DT-003L-01`, `DT-003M-02(A)`, `DT-FDS-02`.
+
+**Próxima:** `DT-003EW-01` — audiometria sem demissional, replicada em dois documentos
+independentes (gabarito Fascino da Dra. Carolini e saída real do TOCTAO). É o item aberto de maior
+alcance clínico desta sessão, e o único dos seis registrados que muda o documento assinado.
