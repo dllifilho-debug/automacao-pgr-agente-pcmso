@@ -86,6 +86,87 @@ def test_transcrever_ghes_lista_vazia_devolve_tupla_vazia() -> None:
     assert mock.blocos_recebidos == []
 
 
+# ---------------------------------------------------------------------------
+# 003.EW — transcrever_ghes prefere transcrever_lote (TranscritorGHEEmLote)
+# quando o cliente o oferece, por duck-typing.
+# ---------------------------------------------------------------------------
+
+
+class MockTranscritorGHEEmLote:
+    """Cliente duplo que oferece transcrever_lote (e também transcrever, para
+    provar que transcrever_ghes não cai no caminho unitário quando o lote
+    está disponível). resultado é fixo, um GHEVerbatim por bloco recebido."""
+
+    def __init__(self, resultado: tuple[GHEVerbatim, ...]) -> None:
+        self._resultado = resultado
+        self.lotes_recebidos: list[list[str]] = []
+        self.chamadas_unitarias = 0
+
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        self.chamadas_unitarias += 1
+        return _ghe(nome="nao deveria ser chamado")
+
+    def transcrever_lote(self, blocos: list[str]) -> tuple[GHEVerbatim, ...]:
+        self.lotes_recebidos.append(list(blocos))
+        return self._resultado
+
+
+class MockTranscritorGHESemLote:
+    """Cliente duplo SEM transcrever_lote — só o unitário de sempre."""
+
+    def __init__(self, resultado_por_bloco: dict[str, GHEVerbatim]) -> None:
+        self._resultado_por_bloco = resultado_por_bloco
+        self.blocos_recebidos: list[str] = []
+
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        self.blocos_recebidos.append(bloco)
+        return self._resultado_por_bloco[bloco]
+
+
+def test_transcrever_ghes_prefere_lote_quando_cliente_oferece() -> None:
+    # Reversão que mata: inverter a ordem em transcrever_ghes (iterar sempre
+    # bloco a bloco antes de checar transcrever_lote) deixa vermelho — o
+    # mock nunca chamaria transcrever_lote e chamaria transcrever em vez.
+    blocos = ["bloco 1", "bloco 2", "bloco 3"]
+    resultado = (_ghe(nome="Um"), _ghe(nome="Dois"), _ghe(nome="Tres"))
+    mock = MockTranscritorGHEEmLote(resultado=resultado)
+
+    saida = transcrever_ghes(blocos, mock)
+
+    assert saida == resultado
+    assert mock.lotes_recebidos == [blocos]
+    assert mock.chamadas_unitarias == 0
+
+
+def test_transcrever_ghes_sem_lote_mantem_caminho_unitario() -> None:
+    # Reversão que mata: remover o ramo `else` (o `return
+    # tuple(cliente.transcrever(bloco) for bloco in blocos)`) deixa
+    # vermelho — um cliente sem transcrever_lote não teria como ser servido.
+    bloco1, bloco2 = "bloco 1", "bloco 2"
+    resultado1, resultado2 = _ghe(nome="Um"), _ghe(nome="Dois")
+    mock = MockTranscritorGHESemLote({bloco1: resultado1, bloco2: resultado2})
+
+    saida = transcrever_ghes([bloco1, bloco2], mock)
+
+    assert saida == (resultado1, resultado2)
+    assert mock.blocos_recebidos == [bloco1, bloco2]
+
+
+def test_transcrever_ghes_alinhamento_quebrado_levanta_value_error() -> None:
+    # Reversão que mata: apagar a checagem de len (o `if len(resultado) !=
+    # len(blocos): raise ValueError(...)`) deixa vermelho — o alinhamento
+    # quebrado (2 GHEs para 3 blocos) passaria batido, desalinhando bloco e
+    # GHE a jusante.
+    blocos = ["bloco 1", "bloco 2", "bloco 3"]
+    mock = MockTranscritorGHEEmLote(resultado=(_ghe(nome="Um"), _ghe(nome="Dois")))
+
+    with pytest.raises(ValueError) as exc:
+        transcrever_ghes(blocos, mock)
+
+    assert "2" in str(exc.value)
+    assert "3" in str(exc.value)
+
+
 def test_gate_forma_ghe_aprova_ghe_valido() -> None:
     ghe = _ghe(riscos=(_risco(),))
     aprovados, pendencias = gate_forma_ghe([ghe])

@@ -29,15 +29,47 @@ class TranscritorGHE(Protocol):
     def transcrever(self, bloco: str) -> GHEVerbatim: ...
 
 
+class TranscritorGHEEmLote(Protocol):
+    """Cliente que transcreve VÁRIOS blocos numa invocação (003.EW).
+    Existe porque o nível gratuito limita requisições por dia (20), não
+    tokens (250k/min): 18 blocos num documento consumiam 90% da cota diária
+    transportando 11% de uma janela de contexto.
+
+    Contrato duro: a saída tem o MESMO comprimento e a MESMA ordem da
+    entrada. Faltante vira GHEVerbatim vazio — que gate_forma_ghe reprova
+    como pendência bloqueante —, nunca encurtamento silencioso da tupla,
+    que desalinharia bloco e GHE (classe D-ARQ-22).
+    """
+
+    def transcrever_lote(self, blocos: Sequence[str]) -> tuple[GHEVerbatim, ...]: ...
+
+
 def transcrever_ghes(
     blocos: Sequence[str], cliente: TranscritorGHE
 ) -> tuple[GHEVerbatim, ...]:
     """Ponto único de invocação do transcritor-LLM do lado-PGR (molde
     transcrever_fds, D-ARQ-47): o cliente entra por parâmetro tipado, nunca
     importado no módulo — testável com mock, sem bater em API/SDK real.
-    Delega bloco a bloco, na ordem, sem retry/telemetria nesta fatia. Saída
-    é CANDIDATA: a admissão fica para fatia futura (revisão a jusante).
+
+    Prefere transcrever_lote (TranscritorGHEEmLote, 003.EW) quando o cliente
+    o oferece — checado por duck-typing (getattr/callable), não isinstance:
+    o Protocol de lote é aditivo, um cliente pode implementar os dois.
+    Comprimento da saída != comprimento de blocos vira ValueError — cinto e
+    suspensório sobre o contrato duro do cliente de lote (o alinhamento
+    bloco<->GHE nunca pode quebrar em silêncio, classe D-ARQ-22). Sem
+    transcrever_lote, cai no caminho unitário de sempre: delega bloco a
+    bloco, na ordem, sem retry/telemetria. Saída é CANDIDATA: a admissão
+    fica para fatia futura (revisão a jusante).
     """
+    em_lote = getattr(cliente, "transcrever_lote", None)
+    if callable(em_lote):
+        resultado = tuple(em_lote(blocos))
+        if len(resultado) != len(blocos):
+            raise ValueError(
+                f"transcritor em lote devolveu {len(resultado)} GHEs para "
+                f"{len(blocos)} blocos — alinhamento quebrado"
+            )
+        return resultado
     return tuple(cliente.transcrever(bloco) for bloco in blocos)
 
 
