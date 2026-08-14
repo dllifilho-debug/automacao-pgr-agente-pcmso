@@ -4,6 +4,7 @@ carrega, junto, a reversão de código que deve deixá-lo vermelho."""
 from __future__ import annotations
 
 import ast
+from collections.abc import Sequence
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,7 @@ from agente_medico.motor.tipos import (
     Pendencia,
     Resultado,
 )
+from agente_medico.motor.transcritor_pgr import transcrever_ghes
 from agente_medico.superficie.documento_matriz import CabecalhoDocumento, LinhaCargo, RodapeDocumento
 from agente_medico.superficie.web_matriz import (
     _TranscritorContado,
@@ -425,6 +427,65 @@ def test_transcritor_contado_propaga_transcricao_indisponivel() -> None:
     with pytest.raises(TranscricaoIndisponivel):
         contado.transcrever("bloco")
     assert contado.chamadas == 1
+
+
+# ---------------------------------------------------------------------------
+# 003.EW emenda (Arquiteto) — _TranscritorContado.transcrever_lote: sem ele,
+# transcrever_ghes não enxerga o lote por duck-typing através do wrapper, e o
+# caminho de produção volta a uma requisição por bloco (o problema original
+# da fatia 2: 18 de 20 da cota diária).
+# ---------------------------------------------------------------------------
+
+
+class _TranscritorFalsoComLote:
+    """Duplo cujo interno OFERECE transcrever_lote — prova que o wrapper
+    delega ao lote em vez de cair no unitário quando o interno o tem."""
+
+    def __init__(self) -> None:
+        self.lotes_recebidos: list[list[str]] = []
+        self.chamadas_unitarias = 0
+
+    def transcrever(self, bloco: str) -> GHEVerbatim:
+        self.chamadas_unitarias += 1
+        return GHEVerbatim(nome="nao deveria ser chamado", cargos=(), riscos=())
+
+    def transcrever_lote(self, blocos: Sequence[str]) -> tuple[GHEVerbatim, ...]:
+        self.lotes_recebidos.append(list(blocos))
+        return tuple(GHEVerbatim(nome=f"GHE {i}", cargos=(), riscos=()) for i in range(len(blocos)))
+
+
+def test_transcritor_contado_delega_lote_quando_interno_o_tem() -> None:
+    # Reversão que mata: remover transcrever_lote do wrapper —
+    # transcrever_ghes deixa de enxergar o lote por duck-typing (getattr não
+    # encontra o método) e volta ao caminho unitário: o duplo interno
+    # registraria N chamadas unitárias em vez de UMA chamada em lote.
+    interno = _TranscritorFalsoComLote()
+    contado = _TranscritorContado(interno=interno)
+    blocos = ["bloco 1", "bloco 2", "bloco 3"]
+
+    resultado = transcrever_ghes(blocos, contado)
+
+    assert len(resultado) == 3
+    assert interno.lotes_recebidos == [blocos]
+    assert interno.chamadas_unitarias == 0
+    assert contado.chamadas == len(blocos)
+
+
+def test_transcritor_contado_cai_no_unitario_quando_interno_nao_tem_lote() -> None:
+    # Reversão que mata: remover o ramo de fallback (`return
+    # tuple(self.interno.transcrever(b) for b in blocos)`) — sem ele, o
+    # wrapper levanta TypeError/AttributeError ao tentar chamar
+    # transcrever_lote inexistente no interno (_TranscritorFalso só tem
+    # transcrever).
+    interno = _TranscritorFalso()
+    contado = _TranscritorContado(interno=interno)
+    blocos = ["bloco 1", "bloco 2"]
+
+    resultado = transcrever_ghes(blocos, contado)
+
+    esperado = GHEVerbatim(nome="GHE Falso", cargos=("Cargo Falso",), riscos=())
+    assert resultado == (esperado, esperado)
+    assert contado.chamadas == len(blocos)
 
 
 def test_zero_chamadas_ia_nao_mostra_aviso_de_procedencia(

@@ -11,6 +11,7 @@ import pytest
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.extracao_pgr import extrair_texto_pgr, recortar_blocos_ghe
+from agente_medico.motor.tipos import GHEVerbatim
 from agente_medico.motor.transcritor_pgr import gate_forma_ghe
 
 # _ALVO aponta para transcritor_gemini.requests.post (não
@@ -150,6 +151,58 @@ def test_sem_chave_nao_chama_http_e_levanta_transcricao_indisponivel() -> None:
             cliente.transcrever("texto qualquer")
     mock_post.assert_not_called()
     assert exc.value.motivo == "CHAVE_API_GOOGLE ausente"
+
+
+# ---------------------------------------------------------------------------
+# 003.EW — transcrever_lote: mesma cascata (_chamar_gemini mockado, sem
+# rede), fatiamento em _BLOCOS_POR_LOTE e preenchimento de faltante.
+# ---------------------------------------------------------------------------
+
+
+def test_transcrever_lote_faltante_vira_ghe_vazio_no_fim(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: remover o preenchimento (`while len(ghes) <
+    # quantidade: ghes.append(vazio)` em _parsear_ghes_lote) deixa vermelho —
+    # a tupla sairia curta (2 GHEs para 3 blocos), desalinhando bloco e GHE.
+    payload = [
+        {"nome": "Um", "cargos": [], "riscos": []},
+        {"nome": "Dois", "cargos": [], "riscos": []},
+    ]
+
+    def _chamar_falso(prompt: str, chave: str) -> str:
+        return json.dumps(payload)
+
+    monkeypatch.setattr(
+        "agente_medico.adaptadores.transcritor_gemini_pgr._chamar_gemini", _chamar_falso
+    )
+
+    cliente = TranscritorGeminiGHE(chave="fake")
+    resultado = cliente.transcrever_lote(["bloco 1", "bloco 2", "bloco 3"])
+
+    assert len(resultado) == 3
+    assert resultado[0].nome == "Um"
+    assert resultado[1].nome == "Dois"
+    assert resultado[2] == GHEVerbatim(nome="", cargos=(), riscos=())
+
+
+def test_transcrever_lote_respeita_blocos_por_lote(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: trocar o fatiamento por uma chamada única (chamar
+    # _chamar_gemini uma vez com todos os blocos) deixa vermelho — 13 blocos
+    # exigem 3 invocações (6+6+1), não 1.
+    chamadas: list[int] = []
+
+    def _chamar_falso(prompt: str, chave: str) -> str:
+        chamadas.append(1)
+        return json.dumps([{"nome": "X", "cargos": [], "riscos": []}] * 6)
+
+    monkeypatch.setattr(
+        "agente_medico.adaptadores.transcritor_gemini_pgr._chamar_gemini", _chamar_falso
+    )
+
+    cliente = TranscritorGeminiGHE(chave="fake")
+    resultado = cliente.transcrever_lote([f"bloco {i}" for i in range(13)])
+
+    assert len(chamadas) == 3
+    assert len(resultado) == 13
 
 
 def test_prompt_enviado_contem_o_texto_do_bloco() -> None:

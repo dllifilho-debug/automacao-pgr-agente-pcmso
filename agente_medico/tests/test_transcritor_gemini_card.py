@@ -95,12 +95,15 @@ def test_sem_chave_nao_chama_http_e_levanta_transcricao_indisponivel() -> None:
 
 
 def test_resposta_nao_integra_levanta_transcricao_indisponivel() -> None:
+    # 003.EW: _chamar_gemini agora acumula um motivo por modelo na mensagem
+    # (Parte B) — a mensagem deixa de ser um match exato e passa a começar
+    # com o mesmo prefixo de sempre.
     resp = Mock(status_code=503)
     with patch(_ALVO, return_value=resp):
         cliente = TranscritorGeminiCard(chave="fake")
         with pytest.raises(TranscricaoIndisponivel) as exc:
             cliente.transcrever("texto qualquer", "13.1 Advogado")
-    assert exc.value.motivo == "cascata Gemini sem resposta íntegra (200 + STOP)"
+    assert exc.value.motivo.startswith("cascata Gemini sem resposta íntegra (200 + STOP)")
 
 
 def test_json_invalido_levanta_transcricao_indisponivel() -> None:
