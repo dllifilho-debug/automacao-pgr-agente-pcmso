@@ -74,7 +74,14 @@ def gerar_documento(
 class _TranscritorContado:
     """Envolve um TranscritorGHE contando invocações — a casca precisa saber
     quantos blocos foram lidos por IA para exibir na tela (003.EW). Não altera
-    comportamento: delega e propaga exceção."""
+    comportamento: delega e propaga exceção.
+
+    transcrever_lote (003.EW emenda) é o que faz transcrever_ghes
+    (motor/transcritor_pgr.py) enxergar o lote por duck-typing através do
+    wrapper: sem este método, o wrapper intercepta o getattr e o caminho de
+    produção volta a uma requisição por bloco (o problema original da fatia
+    2 — 18 de 20 da cota diária). Conta BLOCOS ENVIADOS à IA, não
+    requisições HTTP — é o que a tela informa ao operador."""
 
     interno: TranscritorGHE
     chamadas: int = 0
@@ -82,6 +89,20 @@ class _TranscritorContado:
     def transcrever(self, bloco: str) -> GHEVerbatim:
         self.chamadas += 1
         return self.interno.transcrever(bloco)
+
+    def transcrever_lote(self, blocos: Sequence[str]) -> tuple[GHEVerbatim, ...]:
+        """Delega o lote quando o interno o oferece (TranscritorGeminiGHE) e
+        cai no unitário quando não (clientes offline e duplos de teste).
+        Conta BLOCOS ENVIADOS à IA — não requisições HTTP —, que é o que a
+        tela informa ao operador. Sem este método, transcrever_ghes não
+        enxerga o lote no wrapper e o caminho de produção volta a uma
+        requisição por bloco (003.EW: 18 de 20 da cota diária).
+        """
+        self.chamadas += len(blocos)
+        em_lote = getattr(self.interno, "transcrever_lote", None)
+        if callable(em_lote):
+            return tuple(em_lote(blocos))
+        return tuple(self.interno.transcrever(b) for b in blocos)
 
 
 def _rodar_parse_deterministico(
