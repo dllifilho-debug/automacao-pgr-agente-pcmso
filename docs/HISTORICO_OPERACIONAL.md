@@ -4939,3 +4939,114 @@ regenerado, cláusula fixa não disparada.
 **`PAINEL_ESTADO.md` — re-tiragem devida**, primeiro gatilho desde 003.EQ: `R-AUD-04` é regra
 nova, move o número de regras implementadas (22/42→23/43 pelo instrumento — denominador sobe
 também, R-AUD-04 é aditiva, não substitui nenhum ID existente).
+
+## Sessão 003.EY — 15/08/2026 — RECONCILIAÇÃO (fatia 0, medição)
+
+Aberta a partir de `main e2394b7` (PR #297, merge de 003.EX), branch
+`feat/003ey-medicao-cobertura-e-forma`.
+
+**Foco, e por que o escopo mudou em sessão.** A fatia 0 nasceu como medição da forma da
+periodicidade impressa (`DT-003EW-02`). Ao preparar o prompt, o Arquiteto encontrou
+`docs/PLANO_V1.md:258-259` — audiometria universal declarada **hipótese refutada** ("universal
+em 1 de 19 documentos; o Fascino é outlier") — em contradição direta com `R-AUD-04`
+(`quando: todo_trabalhador`, emissão incondicional), criada em 003.EX sobre matriz-precedente
+**n=2** sem citar essa linha. A fatia passou a responder duas perguntas na mesma varredura:
+cobertura de audiometria por gabarito (reconciliação) e forma da periodicidade impressa (insumo
+original).
+
+**Duas emendas, ambas por erro de medição do Arquiteto no prompt, ambas paradas corretamente
+pelo Code antes de gastar trabalho sobre escopo errado:**
+
+- **EMENDA 1** — o prompt descrevia o escopo como "arquivos cujo nome começa por `MATRIZ DE
+  EXAME`" mas o número que o acompanhava (26) vinha de outra medição: "contém `matriz`,
+  case-insensitive". Rodados os dois filtros lado a lado: prefixo estrito dá 25, "contém
+  matriz" dá 26 — diferença de um arquivo nomeado, `Matriz de Exames (Obra Nova) - CJR
+  ENGENHARIA LTDA.doc` (capitalização minúscula no nome, único fora do padrão). Decisão do
+  Arquiteto: o CJR entra — é gabarito legítimo, excluí-lo pela capitalização do nome de arquivo
+  é viés de amostragem, não critério. Escopo passou a ser **lista nominal fechada** (26
+  arquivos), a descrição textual do prompt original revogada. **Regra derivada:** escopo de
+  amostra sai por lista nominal; a contagem é derivada da lista, nunca o contrário.
+- **EMENDA 2** — o checkpoint bloqueante do prompt citava
+  `MATRIZ DE EXAMES (ATUALIZAÇÃO ) CONSCIENTE RESERVA 0028.doc` (nome da cópia **base**) com os
+  números da cópia **`(1)`** (44/44 com audiometria). Conferido contra
+  `docs/referencia/GABARITO_003EX_audiometria_dem.md`, versionado: a base é **43/44**
+  (SERRALHEIRO com célula de exames truncada — erro de edição no `.doc` de origem, não
+  artefato de parser), a `(1)` é a cópia de referência, **44/44**. **Regra derivada:**
+  checkpoint bloqueante cita o gabarito versionado, nunca o resumo dele em HISTORICO ou em
+  memória de sessão — par nome↔número transcrito de fonte secundária é candidato a falso
+  bloqueador e queima uma parada do Code.
+
+**Achado estrutural que quase distorceu a medição: mesclagem de células.** Documentos de tabela
+única com mais de 2 colunas físicas (ATZUM: 13; CJR: 3; RESERVA: 4) mesclam FUNÇÃO/EXAMES
+SOLICITADOS ao longo de várias colunas — `python-docx` repete o mesmo texto em cada coluna do
+span. A indexação fixa `celulas[0]`/`celulas[1]`, herdada de `medir_audiometria_dem.py`
+(003.EX) e correta só em tabelas de exatamente 2 colunas físicas, lia a própria mesclagem de
+FUNÇÃO como se fosse a coluna de exames nesses casos: **ATZUM media 0/47 audiometria antes da
+correção**. Corrigido com `_celulas_logicas` (colapsa células adjacentes de texto idêntico antes
+de indexar) — os três checkpoints (SPE 0030 41/41; RESERVA base 43/44; RESERVA `(1)` 44/44)
+seguiram exatos depois da correção.
+
+**Números medidos, árvore parada, conferidos contra `relatorios/003ey/cobertura_e_forma.md`
+(gitignored):**
+
+- Escopo: 26 arquivos `.doc`/`.docx` (lista nominal da EMENDA 1) → **23 obras canônicas**
+  (colapsando cópias da mesma obra+data, cópia de referência = mais completa). Conversão Word
+  COM: **26/26, 0 falhas**.
+- Cobertura de audiometria: **8/26 universais (bruto)**, **7/23 (canônico)**. Com piso de
+  `n_cargos ≥ 17`: **6/23** — sem o piso, o CJR entra universal com `n=1` e RICCO HETRIN `(1)`
+  com `n=5`, mesmo peso que um documento de 54 cargos.
+- Distribuição das frações não-universais (canônico, 16 obras): `0.200, 0.235, 0.417, 0.500,
+  0.512, 0.628, 0.654, 0.725, 0.726, 0.754, 0.842, 0.882, 0.912, 0.935, 0.969, 0.984` — larga,
+  não concentrada perto de 1.0.
+- Motivo documentado: **21 de 226 cargos** sem audiometria trazem, na própria célula, a
+  anotação `Ruído (abaixo do nível de ação)` — concentrados em 3 documentos: ENGESEG
+  ESTRUTURAL FILIAL 24.04.25 (6/6 dos sem-audiometria do documento), ENGESEG ESTRUTURAL FILIAL
+  21.11.24 (8/26), CMO VARANDAS BUENO (7/8).
+- Forma da periodicidade: `inline 3289 | sem_numero 3249 | grupo_separado 681 | sem_parentese
+  200 | anomala 4`. Regra de 003.EO (número só aparece quando periodicidade ≠12M, exceto RX
+  Tórax OIT): **confirma 4366, contraria 2853**.
+- Suíte **1108 → 1114 passed, 6 skipped** (+6). `mypy --strict` alvo canônico limpo, **48
+  arquivos**; script novo limpo.
+- Commits de conteúdo: `97c4369` (instrumento + testes), merge `2507440` (PR #298).
+
+**Leitura do Arquiteto sobre o resultado — registrada como leitura, não como decisão.** Os
+cargos sem audiometria são sistematicamente administrativo/comercial/TI — amostrados nos 4
+documentos de menor cobertura (DINAMICA, SECONCI, RICCO ESCRITÓRIO, PORTO JACARANDÁ):
+recepcionista, analista, assistente administrativo, telefonista, comprador, TI. O corte parece
+ser exposição, não cargo em si. A convergência n=2 de 003.EX (SPE 0030 + RESERVA 0028, ambos
+100% de cobertura) lida à luz de 23 obras é artefato de amostra, não regra geral — são
+justamente as duas matrizes onde a médica estendeu audiometria ao administrativo.
+
+**Hipótese de corte temporal levantada e refutada pelos dados.** Era a hipótese natural, pelo
+precedente do corte de vigência da NR-01 medido em psicossocial (003.EN). Não se sustenta aqui:
+2026 aparece dos dois lados — WVM (`20.07.26`) sai universal, DINAMICA (`07.01.26`) sai em
+0.200. Não há data que separe os dois grupos.
+
+**`docs/PAINEL_ESTADO.md` NÃO re-tirado nesta sessão** — nenhuma `R-*` foi tocada, nenhum dos
+três números do painel se moveu; a cadência de re-tiragem é por evento (merge que move número),
+e este merge não move nenhum. A próxima tiragem grava `e2394b7` e `2507440` na janela coberta.
+
+**Nenhum `D-ARQ` novo** — `docs/DECISOES_ARQUITETURAIS.md` não tocado, `INDICE_DARQ.md` não
+regenerado, cláusula fixa não disparada. O candidato registrado em 003.EX ("quando um
+precedente de corpus setorialmente enviesado autoriza universalizar") ganhou nesta sessão um
+caso com custo medido, mas abrir o D-ARQ exige sessão de ARQUITETURA com gate D-ARQ-63
+declarado — não cumprido aqui. Vai para 003.EZ, junto com a sucessão de `R-AUD-04`.
+
+**`DT-003EY-01` CRIADA** (ABERTA — bloqueante para o documento assinado) — o fundamento de
+`R-AUD-04` (matriz-precedente n=2) é refutado pela varredura de 23 obras (7/23 universais, 6/23
+com piso `n≥17`, distribuição larga). **`DH-003EY-01` CRIADA** (ABERTA — higiene de
+instrumento) — a mesclagem de células alcança `scripts/medir_audiometria_dem.py` (003.EX), não
+corrigido lá (os dois documentos medidos naquela sessão têm forma que não expõe o defeito).
+**`DH-003EY-02` CRIADA** (ABERTA — higiene de instrumento) — o binário `universal` sem piso de
+`n_cargos` trata `1/1` com o mesmo peso que `54/54`. Nota aditiva em `DT-003EG-01` (deixa de ser
+candidata não-bloqueante, passa a caminho crítico — o corpus nomeia o predicado que falta) e em
+`DT-003EW-02` (causa isolada: apresentação, não valor do motor; regra de forma de 003.EO
+contrariada em volume grande no corpus amplo). Detalhe completo em
+`docs/PENDENCIAS_CLINICAS.md`.
+
+**Verificação** `[MEDIDO — 15/08/2026, árvore parada]`: suíte **1108 → 1114 passed, 6 skipped**
+(+6, nenhum teste pré-existente mudou de status); `mypy --strict agente_medico/motor
+agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py app_matriz_local.py`
+delta-zero, **48 arquivos**; `mypy --strict scripts/medir_cobertura_e_forma.py` limpo.
+`docs/DECISOES_ARQUITETURAIS.md` não tocado — índice não regenerado, cláusula fixa não
+disparada.

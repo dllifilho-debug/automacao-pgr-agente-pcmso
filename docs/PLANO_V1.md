@@ -40,6 +40,15 @@ exportável em HTML e Word para a Dra. Carolini validar.
   fatia 0]** O número de meses só aparece quando a periodicidade é ≠ 12M — **exceto RX Tórax
   OIT, que sempre traz o número**, mesmo quando vale 12. Regra por exame, não constante solta;
   materializada como `ordem_exibicao`/formatação em `documento_matriz.py`.
+  **[PARCIALMENTE FALSO — 003.EY, DT-003EW-02]** A cláusula acima é falsa quanto à
+  formatação do número: só a `ordem_exibicao` foi materializada. A string `periodicidade` não
+  ocorre em `documento_matriz.py` (`git grep -c periodicidade -- agente_medico/superficie/documento_matriz.py`
+  = 0) — não existe caminho de código que monte o número, ele nunca é calculado nem descartado,
+  simplesmente não é impresso. Mecanismo declarado entregue, efeito ausente, suíte verde — mesma
+  classe de defeito medida 2× em 003.EW. Adicionalmente, a regra em si (número só quando ≠12M,
+  exceto RX Tórax OIT) é contrariada em 2853 de 7219 ocorrências no corpus amplo de 003.EY —
+  não sobrevive fora do par de gabaritos que a originou. Correção não decidida; ver
+  `DT-003EW-02`.
 - **A ingestão determinística do Fascino atravessa** — 19/19 GHEs, sem LLM (003.EB, D-ARQ-65).
 
 ## A alavanca de prazo
@@ -257,6 +266,16 @@ por D-ARQ-75.**
   (família `R-RX-01-*`). Exige medição própria cruzando com o risco do GHE.
 - **Audiometria universal** — hipótese levantada e **refutada** pela medição (universal em
   1 de 19 documentos; o Fascino é outlier). O motor está correto ao tratá-la como condicional.
+  **[CONFIRMADO COM PROVENIÊNCIA — 003.EY]** A direção estava certa e agora tem medição
+  rastreável: **7/23 obras canônicas universais** (6/23 com piso `n_cargos ≥ 17`), sobre 26
+  gabaritos `.doc`/`.docx` medidos em 003.EY (`docs/PENDENCIAS_CLINICAS.md#DT-003EY-01`,
+  `relatorios/003ey/cobertura_e_forma.md`). O "1 de 19" acima segue **sem proveniência
+  localizável** — grep em `docs/HISTORICO_OPERACIONAL.md` por `19 documentos`/`acervo de 19`/
+  `19 gabaritos`: zero ocorrências; a única varredura de 19 documentos registrada (003.EN) é
+  sobre psicossocial, não audiometria. O número vigente para qualquer decisão é o de 003.EY,
+  não este. Nota que se choca de frente com `R-AUD-04` (003.EX, `todo_trabalhador`, emissão
+  incondicional, apoiada em matriz-precedente n=2) — reconciliação e correção candidata em
+  `DT-003EY-01`, não decidida ainda.
 - **Gate mecânico contra medição concorrente.** 4ª ocorrência da classe em 6 sessões, com a
   lição já versionada em `CLAUDE.md` e reincidindo — inclusive dentro do fechamento cujo
   prompt a documentava. Documentar não previne; o controle é disciplina, não mecanismo.
