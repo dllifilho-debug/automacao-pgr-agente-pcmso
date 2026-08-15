@@ -4887,6 +4887,9 @@ números de integração):
   ser observável via ausência de `Momento.DEM` (R-AUD-04 funde `dem` em toda linha de
   audiometria, sempre); o invariante real que o teste protegia — `R-AUD-02` não dispara só por
   ototóxico isolado — passou a ser checado direto pela ausência de `R-AUD-02` nos motivos.
+  **Renomeado (EMENDA 3) para `test_execucao_ototoxico_via_agente_status_ok_sem_r_aud_02`** — o
+  nome antigo virou mentira depois da mudança de corpo (o cenário passou a ter demissional), e é
+  o nome que aparece no output do pytest, onde ninguém lê o comentário.
 - `test_pipeline_gates_emissao_consolidacao_atividade_critica` — audiometria também recebe o
   piso (R-AUD-04), quebrando o loop genérico que esperava `{ADM,PER,MR}` exato em todo exame de
   atividade crítica; audiometria ganhou checagem própria (`{ADM,PER,MR,DEM}`, motivos
@@ -4903,8 +4906,9 @@ suíte rodando na árvore principal — GHE a GHE, não só agregado):
 | Linhas de audiometria com `DEM` | 1/17 | 19/19 |
 | Status VÁLIDA/PARCIAL/BLOQUEADA | 3/15/1 | 3/15/1 (inalterado) |
 
-O "17/19" antes diverge do "16/19" herdado de `DT-003EG-01` — baseline sabidamente desatualizada
-(várias sessões se passaram); divergência esperada, reportada, não é bloqueador. GHE-06
+O "17/19" antes diverge do "16/19" herdado de `DT-003EG-01` — causa nomeável, não baseline cega:
+a diferença é GHE-12 (Betoneira), que passou a emitir audiometria em 003.EJ por `R-VIB-02`
+(aliases de D-ARQ-70 destravaram a perna mão-braço); 16+1=17, divergência explicada. GHE-06
 (Administração, BLOQUEADA) e GHE-19 (Vendas, VÁLIDA) são os dois únicos que ganham a linha de
 audiometria **nova** (antes zero) — exatamente os dois GHEs que a fatia 0 mediu como fora do
 pacote de atividade crítica. Status idêntico GHE a GHE nos 19, confirmando D-ARQ-66 cl.2 na

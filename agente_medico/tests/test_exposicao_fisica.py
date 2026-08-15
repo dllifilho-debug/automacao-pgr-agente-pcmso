@@ -389,13 +389,14 @@ def test_raud02_vibracao_generica_com_ruido_e_ototoxico_bloqueia() -> None:
     assert any(p.bloqueante and p.regra_origem == "R-AUD-02" for p in ctx.pendencias)
 
 
-def test_execucao_ototoxico_via_agente_status_ok_sem_demissional() -> None:
-    # R-AUD-04 (003.EX, piso incondicional todo_trabalhador) funde dem em
-    # TODA linha de audiometria, inclusive esta — "sem demissional" deixou de
-    # ser observável via ausência de Momento.DEM. O invariante real que este
+def test_execucao_ototoxico_via_agente_status_ok_sem_r_aud_02() -> None:
+    # EMENDA 3 (003.EX): renomeado de ..._sem_demissional — R-AUD-04 (piso
+    # incondicional todo_trabalhador) funde dem em TODA linha de audiometria,
+    # inclusive esta, então "sem demissional" parou de ser verdade e o nome
+    # antigo virava mentira no output do pytest. O invariante real que este
     # teste protege — R-AUD-02 (demissional condicionado a ruído/combinação)
-    # não dispara só por ototóxico isolado — passa a ser checado direto pela
-    # ausência de R-AUD-02 nos motivos, não pela ausência do momento.
+    # não dispara só por ototóxico isolado — é checado direto pela ausência
+    # de R-AUD-02 nos motivos, não pela ausência do momento DEM.
     pgr = _pgr_com_riscos("GHE-01", (
         RiscoPGR(tipo="quimico", agente="tolueno", quantificacao=None, severidade=None),
     ))
