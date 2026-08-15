@@ -273,12 +273,17 @@ def test_raud01_motorista_equipamento_pesado_emite_audiometria_adm_per_mr() -> N
 # ---------------------------------------------------------------------------
 
 def test_rvib02_vmb_sozinho_emite_audiometria() -> None:
+    # R-AUD-04 (003.EX, piso incondicional) também emite "audiometria" para
+    # todo_trabalhador — stage_5_emissao roda ANTES do dedup (stage_8), então
+    # agora existem duas entradas "audiometria" pré-consolidação, não uma só.
+    # next() pegaria a que vier primeiro em regras.yaml (R-AUD-04, listada
+    # antes de R-VIB-02); o teste busca em todas as entradas de audiometria,
+    # não só na primeira.
     ctx = _ctx("vibracao_mao_braco")
     proto = carregar(_PROTOCOLO_DIR)
     result = stage_5_emissao(ctx, proto)
-    assert any(e.exame == "audiometria" for e in result)
-    audio = next(e for e in result if e.exame == "audiometria")
-    assert any(m.regra_id == "R-VIB-02" for m in audio.motivos)
+    audios = [e for e in result if e.exame == "audiometria"]
+    assert any(m.regra_id == "R-VIB-02" for audio in audios for m in audio.motivos)
     assert ctx.pendencias == []
 
 
@@ -287,6 +292,10 @@ def test_rvib02_vmb_sozinho_emite_audiometria() -> None:
 # ---------------------------------------------------------------------------
 
 def test_execucao_dedup_audiometria_tres_motivos_sem_conflito() -> None:
+    # GHE-01 ganha um 4º motivo desde R-AUD-04 (003.EX, piso incondicional
+    # todo_trabalhador): R-PKG-ATIVCRIT (altura) + R-AUD-01 (ruído acima_acao,
+    # adm/per/MR) + R-AUD-02 (ruído acima_acao, dem) + R-AUD-04 (piso,
+    # adm/per/MR/dem) — os 4 se fundem na mesma linha "audiometria" via dedup.
     pgr = _pgr_com_riscos("GHE-01", (
         _risco_pgr("trabalho_altura"),
         _risco_pgr("ruido", _quant_acima_acao()),
@@ -303,7 +312,8 @@ def test_execucao_dedup_audiometria_tres_motivos_sem_conflito() -> None:
     assert "R-PKG-ATIVCRIT" in regras_motivos
     assert "R-AUD-01" in regras_motivos
     assert "R-AUD-02" in regras_motivos
-    assert len(regras_motivos) == 3
+    assert "R-AUD-04" in regras_motivos
+    assert len(regras_motivos) == 4
     audio_momentos = audio.momentos
     assert Momento.DEM in audio_momentos
 
@@ -380,6 +390,12 @@ def test_raud02_vibracao_generica_com_ruido_e_ototoxico_bloqueia() -> None:
 
 
 def test_execucao_ototoxico_via_agente_status_ok_sem_demissional() -> None:
+    # R-AUD-04 (003.EX, piso incondicional todo_trabalhador) funde dem em
+    # TODA linha de audiometria, inclusive esta — "sem demissional" deixou de
+    # ser observável via ausência de Momento.DEM. O invariante real que este
+    # teste protege — R-AUD-02 (demissional condicionado a ruído/combinação)
+    # não dispara só por ototóxico isolado — passa a ser checado direto pela
+    # ausência de R-AUD-02 nos motivos, não pela ausência do momento.
     pgr = _pgr_com_riscos("GHE-01", (
         RiscoPGR(tipo="quimico", agente="tolueno", quantificacao=None, severidade=None),
     ))
@@ -388,6 +404,8 @@ def test_execucao_ototoxico_via_agente_status_ok_sem_demissional() -> None:
     assert resultado.status == "OK"
     matriz = resultado.matrizes[0]
     audio = next(e for e in matriz.linhas if e.exame == "audiometria")
-    assert Momento.DEM not in audio.momentos
-    assert any(m.regra_id == "R-AUD-01" for m in audio.motivos)
+    regras_motivos = {m.regra_id for m in audio.motivos}
+    assert "R-AUD-01" in regras_motivos
+    assert "R-AUD-02" not in regras_motivos
+    assert Momento.DEM in audio.momentos  # via R-AUD-04, não via R-AUD-02
     assert all(p.tipo != "vocabulario_ausente" for p in matriz.pendencias)
