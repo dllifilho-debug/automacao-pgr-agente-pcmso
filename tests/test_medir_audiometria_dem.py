@@ -5,7 +5,12 @@ from __future__ import annotations
 
 from agente_medico.motor.tipos import Momento
 from agente_medico.superficie.documento_matriz import _ROTULO_MOMENTO
-from scripts.medir_audiometria_dem import parsear_momentos, rotulos_nao_reconhecidos
+from scripts.medir_audiometria_dem import (
+    RegistroCargo,
+    classificar_dem,
+    parsear_momentos,
+    rotulos_nao_reconhecidos,
+)
 
 
 def test_parsear_momentos_le_os_quatro() -> None:
@@ -34,3 +39,27 @@ def test_parsear_momentos_cobre_todo_par_da_inversao_computado_do_dado() -> None
     # _ROTULO_MOMENTO) por um dict literal redigitado no script, omitindo RET.
     for momento, rotulo in _ROTULO_MOMENTO.items():
         assert parsear_momentos(f"Audiometria ({rotulo})") == {momento}
+
+
+def test_classificar_dem_separa_indeterminado_de_sem_dem_confirmado() -> None:
+    # Reversão que mata: fazer a agregação somar célula com rótulo não
+    # reconhecido em sem_dem (indeterminado sempre vazio) — dobra a recusa
+    # do parser em adivinhar numa negação silenciosa na agregação.
+    limpo = RegistroCargo(
+        ghe="GHE-X",
+        cargo="Cargo Limpo",
+        tem_audiometria=True,
+        momentos_audiometria=frozenset({Momento.ADM, Momento.PER, Momento.MR}),
+        rotulos_nao_reconhecidos=frozenset(),
+    )
+    ambiguo = RegistroCargo(
+        ghe="GHE-Y",
+        cargo="Cargo Ambíguo",
+        tem_audiometria=True,
+        momentos_audiometria=frozenset({Momento.ADM, Momento.PER, Momento.MR}),
+        rotulos_nao_reconhecidos=frozenset({"DEM 12 meses"}),
+    )
+    com_dem, indeterminado, sem_dem = classificar_dem([limpo, ambiguo])
+    assert com_dem == []
+    assert indeterminado == [ambiguo]
+    assert sem_dem == [limpo]

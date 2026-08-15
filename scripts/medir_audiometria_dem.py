@@ -101,6 +101,7 @@ class RegistroCargo:
     cargo: str
     tem_audiometria: bool
     momentos_audiometria: frozenset[Momento]
+    rotulos_nao_reconhecidos: frozenset[str] = frozenset()
 
 
 def extrair_registros(caminho: Path) -> tuple[list[RegistroCargo], list[str]]:
@@ -128,8 +129,31 @@ def extrair_registros(caminho: Path) -> tuple[list[RegistroCargo], list[str]]:
                     f"[{ghe_atual}] {cargo}: rótulo(s) não reconhecido(s) "
                     f"{sorted(desconhecidos)} em {linha_audio!r}"
                 )
-            registros.append(RegistroCargo(ghe_atual, cargo, True, momentos))
+            registros.append(RegistroCargo(ghe_atual, cargo, True, momentos, desconhecidos))
     return registros, suspeitas
+
+
+def classificar_dem(
+    com_audio: list[RegistroCargo],
+) -> tuple[list[RegistroCargo], list[RegistroCargo], list[RegistroCargo]]:
+    """Separa cargos com linha de audiometria em três grupos, não dois.
+    Ausência de leitura não é negação de conduta: célula com rótulo não
+    reconhecido na própria linha de audiometria vai para `indeterminado`,
+    não para `sem_dem` — o parser recusou-se a adivinhar (D-ARQ-13 fora do
+    motor), e a agregação não pode reverter essa recusa silenciosamente.
+    """
+    com_dem = [r for r in com_audio if Momento.DEM in r.momentos_audiometria]
+    indeterminado = [
+        r
+        for r in com_audio
+        if Momento.DEM not in r.momentos_audiometria and r.rotulos_nao_reconhecidos
+    ]
+    sem_dem = [
+        r
+        for r in com_audio
+        if Momento.DEM not in r.momentos_audiometria and not r.rotulos_nao_reconhecidos
+    ]
+    return com_dem, indeterminado, sem_dem
 
 
 def _cargo_para_exibicao(cargo: str) -> str:
@@ -142,22 +166,26 @@ def _cargo_para_exibicao(cargo: str) -> str:
 
 def gerar_secao(nome_doc: str, registros: list[RegistroCargo], suspeitas: list[str]) -> str:
     com_audio = [r for r in registros if r.tem_audiometria]
-    com_dem = [r for r in com_audio if Momento.DEM in r.momentos_audiometria]
-    sem_dem = [r for r in com_audio if Momento.DEM not in r.momentos_audiometria]
+    com_dem, indeterminado, sem_dem = classificar_dem(com_audio)
     linhas = [
         f"## {nome_doc}",
         "",
         f"- total de cargos: {len(registros)}",
         f"- cargos com linha de audiometria: {len(com_audio)}",
         f"- com DEM: {len(com_dem)}",
-        f"- sem DEM: {len(sem_dem)}",
+        f"- indeterminado (rótulo não reconhecido na linha de audiometria): {len(indeterminado)}",
+        f"- sem DEM (forma limpa, confirmado): {len(sem_dem)}",
         "",
         "### Cargos com audiometria + DEM",
         "",
     ]
     linhas.extend(f"- [{r.ghe}] {_cargo_para_exibicao(r.cargo)}" for r in com_dem)
     linhas.append("")
-    linhas.append("### Cargos com audiometria SEM DEM")
+    linhas.append("### Cargos indeterminados (não contar como sem DEM)")
+    linhas.append("")
+    linhas.extend(f"- [{r.ghe}] {_cargo_para_exibicao(r.cargo)}" for r in indeterminado)
+    linhas.append("")
+    linhas.append("### Cargos com audiometria SEM DEM (forma limpa, confirmado)")
     linhas.append("")
     linhas.extend(f"- [{r.ghe}] {_cargo_para_exibicao(r.cargo)}" for r in sem_dem)
     linhas.append("")
