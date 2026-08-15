@@ -59,6 +59,21 @@ regras:
     base_normativa: "Protocolo Dra. Carolini R-AUD-02 — demissional de audiometria com ruido acima da acao OU combinacao ruido+ototoxico+vibracao (D-ARQ-13/16)"
     status: VALIDADO
 
+  - id: R-AUD-04
+    quando: todo_trabalhador
+    emite:
+      - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR, dem]}
+    base_normativa: "NR-07 Anexo II 4.1: 'na admissão; anualmente; na demissão'
+      [DERIVADO] crava 12M + adm + dem. O UNIVERSO da norma é o item 2 (acima do
+      nível de ação conforme o PGR); estender a todo trabalhador e incluir MRO é
+      [INTERPRETADO — revisão de saída], apoiado em matriz-precedente: Carolini
+      07/2026 (SPE 0030) 41/41 audiometria e 38/41 com DEM; Patrícia 04/2025
+      (RESERVA 0028) 44/44 audiometria, DEM confirmado 42, indeterminado 2 por
+      forma ambígua de célula, sem DEM confirmado ZERO. Duas médicas, dois
+      lados do corte NR-01 26/05/2026. LIMITE: ambos construção civil —
+      reinspecionar no 1º PGR de saúde ou química (D-ARQ-06)."
+    status: DERIVADO
+
   - id: R-VIB-02
     quando: vibracao_qualquer
     emite:

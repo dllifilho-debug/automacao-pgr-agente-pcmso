@@ -80,7 +80,17 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     assert "exame_clinico" in nomes
     assert {"avaliacao_psicossocial", "avaliacao_saude_mental"}.issubset(nomes)
 
-    _INCONDICIONAIS = {"exame_clinico", "avaliacao_psicossocial", "avaliacao_saude_mental"}
+    # audiometria também recebe o piso incondicional R-AUD-04 (003.EX,
+    # todo_trabalhador) — a linha funde R-PKG-ATIVCRIT (adm/per/MR) com
+    # R-AUD-04 (adm/per/MR/dem), então sai do loop genérico abaixo (que só
+    # cobre os 4 exames que R-AUD-04 não toca) e ganha checagem própria.
+    audiometria = next(e for e in exames_final if e.exame.strip().lower() == "audiometria")
+    assert audiometria.periodicidade_meses == 12
+    assert audiometria.momentos == {Momento.ADM, Momento.PER, Momento.MR, Momento.DEM}
+    regras_audiometria = {m.regra_id for m in audiometria.motivos}
+    assert {"R-PKG-ATIVCRIT", "R-AUD-04"}.issubset(regras_audiometria)
+
+    _INCONDICIONAIS = {"exame_clinico", "avaliacao_psicossocial", "avaliacao_saude_mental", "audiometria"}
     exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() not in _INCONDICIONAIS]
     for e in exames_ativcrit:
         assert e.periodicidade_meses == 12

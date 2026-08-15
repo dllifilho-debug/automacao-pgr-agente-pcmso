@@ -4795,3 +4795,147 @@ seguem `DT-003L-01`, `DT-003M-02(A)`, `DT-FDS-02`.
 **Próxima:** `DT-003EW-01` — audiometria sem demissional, replicada em dois documentos
 independentes (gabarito Fascino da Dra. Carolini e saída real do TOCTAO). É o item aberto de maior
 alcance clínico desta sessão, e o único dos seis registrados que muda o documento assinado.
+
+## Sessão 003.EX — 14-15/08/2026 — MEDIÇÃO + IMPLEMENTAÇÃO (2 fatias)
+
+Aberta a partir de `main 64b9b84` (PR #296, merge de 003.EW), branch
+`feat/003ex-medicao-audiometria-dem`. Responde a `DT-003EW-01`: a audiometria sai com `DEM` para
+quem não tem exposição a ruído, nos gabaritos humanos?
+
+**Fatia 0 — medição, sem código de produção** (commits `39e2caa`, `cad5987`, `70ad4a6`,
+`5b3f59f`). Instrumento `scripts/medir_audiometria_dem.py` mede os dois gabaritos (SPE 0030/Dra.
+Carolini, RESERVA 0028/Dra. Patrícia, cópia + revisão posterior) convertidos `.doc`→`.docx` via
+Word COM (`pywin32`, instalado nesta sessão — não presente no host antes). Reusa a inversão de
+`_ROTULO_MOMENTO` (D-ARQ-67), guardada por teste existente. 5 testes com reversão nomeada,
+varredura inversa 5/5 confirmada (4 na medição original + 1 na EMENDA 2, abaixo).
+
+**Corte que decide a sessão, medido nominalmente:** GHE-06 (Administração, SPE 0030) recebe DEM
+em 5/5 cargos; GHE-19 (Vendas) recebe DEM em 0/2. Nenhuma das duas hipóteses do prompt ("DEM
+acompanha o ruído" / "DEM é incondicional") explica os dois isoladamente — GHE-06 não tem risco
+de ruído resolvido, igual a GHE-19, e ainda assim recebe DEM.
+
+**EMENDA 1 do Arquiteto** (sonda LibreOffice→txt, não-oficial) apontou risco de a coluna FUNÇÃO
+do SPE 0030 ter anotação da médica "absorvendo" um cargo vizinho (GHE-16 Pintura), o que faria a
+contagem cair de 41 para 40 cargos. Verificado na estrutura real da tabela via Word COM (maior
+fidelidade): GHE-16 Pintura e GHE-06 Aprendiz Administrativo são, cada um, uma única linha de
+tabela — cargo e anotação na mesma célula, sem ambiguidade estrutural, sem absorção. **A
+contagem de 41 cargos já estava correta** — corrige a referência herdada de 003.EI (40 cargos,
+conversão LibreOffice→txt, "±1 por artefato de conversão"), e é corroborada por um teste
+pré-existente do próprio pacote, `test_pipeline_real_fascino_ate_documento_41_linhas_cargo`
+(`agente_medico/tests/test_documento_matriz.py`), que já cravava 41 linhas de cargo para o
+Fascino antes desta sessão. Ajuste cosmético: `\n` embutido no nome do cargo (anotação em
+parágrafo separado) vira `" / "` visível no relatório.
+
+**EMENDA 2 — terceira coluna `indeterminado`, defeito de agregação, não de parser** (commit
+`70ad4a6`). O parser e o reporte já estavam corretos — rótulos não reconhecidos (`'DEM 12
+meses'`, `'12 meses'`) saíam verbatim na seção "Rótulos não reconhecidos" desde a primeira
+medição. O defeito estava na agregação: só duas colunas (`com DEM`/`sem DEM`) colapsavam "não
+lido com confiança" em "confirmado negativo" — mesma classe de erro de D-ARQ-13, fora do motor.
+Corrigido: `classificar_dem` separa `com_dem`/`indeterminado`/`sem_dem` (este último só quando a
+forma é limpa). Efeito: nos dois RESERVA, `sem DEM confirmado` cai a **zero** — os únicos
+negativos que existiam eram forma ambígua (periodicidade colada ao rótulo, parêntese ausente),
+não conduta. A decisão de tratar `indeterminado` como DEM presente (para fins do precedente
+clínico) é humana, registrada em `docs/referencia/GABARITO_003EX_audiometria_dem.md` — o
+instrumento permanece neutro.
+
+**Medição nominal final, por documento:** SPE 0030 — 41 cargos, 41 com audiometria, 38 com DEM
+confirmado, 3 sem DEM confirmado (formas limpas: Operador de Grua, Recepcionista Demonstradora,
+Recepcionista Comercial — sem padrão comum, sem anotação documental que explique a exceção).
+RESERVA 0028 (cópia de referência, `(1)`) — 44 cargos, 44 com audiometria, 42 com DEM confirmado,
+2 indeterminados, 0 sem DEM confirmado. As duas cópias RESERVA divergem por dois achados
+independentes (não um só): SERRALHEIRO tem a célula de exames genuinamente truncada na cópia
+base (perde a linha de audiometria inteira, erro de edição, não artefato de parser) — a cópia
+`(1)` corrige, confirmando que é a revisão posterior; SUPERVISOR DE INSTALAÇÕES HIDRÁULICAS tem
+DEM limpo na base mas perde o parêntese de abertura (typo) na `(1)`. Detalhe nominal completo
+extraído para `docs/referencia/GABARITO_003EX_audiometria_dem.md` (versionado — `relatorios/`
+onde a medição bruta viveu é gitignored, segue o precedente de
+`docs/referencia/GABARITO_003DP_anexo11-12_iarc.md`).
+
+**Fatia 1 — `R-AUD-04` (branch `feat/003ex-medicao-audiometria-dem` sobre `5b3f59f`, mesma
+branch da fatia 0 por decisão do Arquiteto — gabarito e regra entram no mesmo PR, para o
+`docs/referencia` commitado na fatia 0 não ficar apontando para uma regra que ainda não existe).**
+
+**Conferência normativa** `[DERIVADO — NR-07 Anexo II itens 4.1 e 4.1.1, texto oficial MTE,
+conferido 14/08/2026]` — o anexo do ruído é o **II**, não o I. Item 4.1: *"O exame audiométrico
+deve ser realizado, no mínimo: a) na admissão; b) anualmente...; c) na demissão"* crava 12M +
+`adm`/`dem` sem "apenas quando", para quem está no universo do item 2 (acima do nível de ação
+conforme informado no PGR). Item 4.1.1 (validade de 120 dias) já é `R-AUD-03`, ganha o mesmo
+marcador de fonte nesta sessão (mesma ID, changelog).
+
+**`R-AUD-04` criada** (`regras.yaml`) — `quando: todo_trabalhador`, emite `audiometria` 12M em
+`[adm, per, MR, dem]`, `status: DERIVADO`. `MR`, não `MRO` (membro do enum vs. rótulo de
+apresentação); sem `RET` (o gabarito reserva `RET` ao Exame Clínico, já em `R-CLI-01`).
+`R-AUD-01`/`R-AUD-02` não tocadas — piso por baixo, molde `R-CLI-01`×`R-CLI-02`; `motivos.extend`
+em `consolidacao.py` preserva os motivos de todas as regras que dispararam na mesma linha.
+
+**4 testes novos, reversão nomeada, varredura inversa 4/4 confirmada** (`test_orquestrador.py`):
+GHE sem risco emite audiometria 12M; a linha contém `Momento.DEM`; GHE com atividade crítica tem
+uma linha de audiometria com os 4 momentos e ambos os motivos (`R-PKG-ATIVCRIT` e `R-AUD-04`) —
+exercita o caminho completo (regra + dedup), não a regra isolada, contra o modo de falha
+"mecanismo entregue ≠ efeito entregue" registrado 2× em 003.EW; GHE sem risco algum permanece
+BLOQUEADA, não sobe para PARCIAL (D-ARQ-66 cl.2).
+
+**4 quebras legítimas na suíte de integração, corrigidas com reporte nomeado (não silenciadas),
+exatamente como o prompt previu poderia acontecer** (precedente `R-CLI-01`, 963→967 mexendo em
+números de integração):
+- `test_rvib02_vmb_sozinho_emite_audiometria` — `stage_5_emissao` roda antes do dedup; agora há
+  duas entradas "audiometria" pré-consolidação (R-VIB-02 e R-AUD-04), e `next()` pegava a que vem
+  primeiro em `regras.yaml` (R-AUD-04). Corrigido para buscar em todas as entradas.
+- `test_execucao_dedup_audiometria_tres_motivos_sem_conflito` — GHE-01 (altura + ruído
+  acima_acao) ganha um 4º motivo (`R-AUD-04`) na mesma linha; `len(regras_motivos)` 3→4.
+- `test_execucao_ototoxico_via_agente_status_ok_sem_demissional` — "sem demissional" deixou de
+  ser observável via ausência de `Momento.DEM` (R-AUD-04 funde `dem` em toda linha de
+  audiometria, sempre); o invariante real que o teste protegia — `R-AUD-02` não dispara só por
+  ototóxico isolado — passou a ser checado direto pela ausência de `R-AUD-02` nos motivos.
+  **Renomeado (EMENDA 3) para `test_execucao_ototoxico_via_agente_status_ok_sem_r_aud_02`** — o
+  nome antigo virou mentira depois da mudança de corpo (o cenário passou a ter demissional), e é
+  o nome que aparece no output do pytest, onde ninguém lê o comentário.
+- `test_pipeline_gates_emissao_consolidacao_atividade_critica` — audiometria também recebe o
+  piso (R-AUD-04), quebrando o loop genérico que esperava `{ADM,PER,MR}` exato em todo exame de
+  atividade crítica; audiometria ganhou checagem própria (`{ADM,PER,MR,DEM}`, motivos
+  `{R-PKG-ATIVCRIT, R-AUD-04}` ⊆), saiu do loop genérico.
+
+**Efeito medido no Fascino** (`rodar-offline`, mesmo PDF/envelope de sessões anteriores;
+"antes" medido via `git worktree` isolado no commit pré-`R-AUD-04`, para não concorrer com a
+suíte rodando na árvore principal — GHE a GHE, não só agregado):
+
+| Métrica | Antes | Depois |
+|---|---|---|
+| GHEs com audiometria | 17/19 | 19/19 |
+| Linhas de exame (total) | 171 | 173 |
+| Linhas de audiometria com `DEM` | 1/17 | 19/19 |
+| Status VÁLIDA/PARCIAL/BLOQUEADA | 3/15/1 | 3/15/1 (inalterado) |
+
+O "17/19" antes diverge do "16/19" herdado de `DT-003EG-01` — causa nomeável, não baseline cega:
+a diferença é GHE-12 (Betoneira), que passou a emitir audiometria em 003.EJ por `R-VIB-02`
+(aliases de D-ARQ-70 destravaram a perna mão-braço); 16+1=17, divergência explicada. GHE-06
+(Administração, BLOQUEADA) e GHE-19 (Vendas, VÁLIDA) são os dois únicos que ganham a linha de
+audiometria **nova** (antes zero) — exatamente os dois GHEs que a fatia 0 mediu como fora do
+pacote de atividade crítica. Status idêntico GHE a GHE nos 19, confirmando D-ARQ-66 cl.2 na
+prática, não só na previsão.
+
+**Nenhum D-ARQ novo.** O contrato usado já existe: D-ARQ-66 (emissão incondicional), D-ARQ-22
+Parte A nível 2 (matriz-precedente), D-ARQ-06 (teste de universalidade). Abrir D-ARQ aqui seria
+redecidir os três. **Candidato registrado, não aberto:** "quando um precedente de corpus
+setorialmente enviesado autoriza universalizar" não está decidido em lugar nenhum — D-ARQ-22
+nível 2 diz "matriz validada como precedente" sem qualificar setor. Prematuro com n=1 caso (os
+dois gabaritos medidos são ambos construção civil); se a situação se repetir num setor diferente,
+vira D-ARQ.
+
+**`DT-003EW-01` FECHADA** por `R-AUD-04` — reenquadrada como terceira manifestação de
+`ruido_acima_acao = Ausente`, junto com `DT-003EG-01` e o caso GHE-16 de `D-ARQ-71`. Fechamento é
+da manifestação (saída sem `DEM`), não da raiz — `R-AUD-04` resolve a saída sem resolver por que
+`ruido_acima_acao` fica indeterminado quando o PGR cita ruído sem quantificar. `DT-003EG-01`
+segue ABERTA, nota aditiva (motivos concatenam, não substituem — não agravada nem fechada).
+`DH-003EX-01` CRIADA (ABERTA) — heurística de forma no extrator (`medir_audiometria_dem.py`)
+assume no máximo 2 grupos após "Audiometria", não testada contra 3.
+
+**Verificação** `[MEDIDO — 15/08/2026, árvore parada]`: suíte **1099→1104 (fatia 0)→1108 passed,
+6 skipped**; `mypy --strict agente_medico/motor agente_medico/superficie
+agente_medico/tests/invariantes.py app_matriz.py app_matriz_local.py` delta-zero, **48
+arquivos**. `docs/DECISOES_ARQUITETURAIS.md` não tocado (decisão de não abrir D-ARQ) — índice não
+regenerado, cláusula fixa não disparada.
+
+**`PAINEL_ESTADO.md` — re-tiragem devida**, primeiro gatilho desde 003.EQ: `R-AUD-04` é regra
+nova, move o número de regras implementadas (22/42→23/43 pelo instrumento — denominador sobe
+também, R-AUD-04 é aditiva, não substitui nenhum ID existente).

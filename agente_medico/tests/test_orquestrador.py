@@ -460,6 +460,76 @@ def test_rcli01_um_risco_determinado_mais_um_bloqueado_segue_parcial() -> None:
 
 
 # ---------------------------------------------------------------------------
+# R-AUD-04 — audiometria como piso universal, com demissional (003.EX fatia 1).
+# NR-07 Anexo II 4.1 crava 12M+adm+dem; universo estendido a todo trabalhador e
+# MR incluído são [INTERPRETADO], apoiados em matriz-precedente (003.EX fatia 0).
+# Usa o protocolo real porque R-AUD-04 é a regra sob teste, não um fixture
+# sintético — e porque o teste 3 precisa do dedup real com R-PKG-ATIVCRIT.
+# ---------------------------------------------------------------------------
+
+
+def test_raud04_emite_audiometria_12m_sem_risco() -> None:
+    # Reversão que mata: trocar quando: todo_trabalhador por um predicado
+    # condicional em R-AUD-04.
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=())
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    audiometria = next(ln for ln in matriz.linhas if ln.exame == "audiometria")
+    assert audiometria.periodicidade_meses == 12
+
+
+def test_raud04_linha_contem_dem() -> None:
+    # Reversão que mata: remover dem de momentos na entrada nova.
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=())
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    audiometria = next(ln for ln in matriz.linhas if ln.exame == "audiometria")
+    assert Momento.DEM in audiometria.momentos
+
+
+def test_raud04_dedup_com_ativcrit_uma_linha_quatro_momentos_dois_motivos() -> None:
+    # Reversão que mata: remover a entrada R-AUD-04 do regras.yaml — a linha
+    # perde dem e o segundo motivo. Exercita o caminho completo (regra nova +
+    # dedup de R-GHE-03/D-ARQ-39), não a regra isolada — sem isto, R-AUD-04
+    # pode estar correta e inerte na maioria dos GHEs do Fascino, onde
+    # R-PKG-ATIVCRIT já emite audiometria (modo de falha "mecanismo entregue
+    # ≠ efeito entregue", registrado 2× em 003.EW).
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=(_risco("trabalho_altura"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    audios = [ln for ln in matriz.linhas if ln.exame == "audiometria"]
+    assert len(audios) == 1
+    audio = audios[0]
+    assert audio.momentos == {Momento.ADM, Momento.PER, Momento.MR, Momento.DEM}
+    regras_motivos = {m.regra_id for m in audio.motivos}
+    assert "R-PKG-ATIVCRIT" in regras_motivos
+    assert "R-AUD-04" in regras_motivos
+
+
+def test_raud04_nao_promove_bloqueada_para_parcial() -> None:
+    # Reversão que mata: retirar "todo_trabalhador" de PRIMITIVOS_INCONDICIONAIS.
+    # Ruído sem quantificação bloqueia (ruido_acima_acao indeterminado); antes de
+    # R-AUD-04 esta GHE não tinha linha de audiometria nenhuma. Prova que a nova
+    # linha incondicional não sobe o status de BLOQUEADA para PARCIAL sozinha
+    # (D-ARQ-66 cl.2).
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=(_risco("ruido"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    nomes = {ln.exame for ln in matriz.linhas}
+    assert "audiometria" in nomes
+    assert linhas_de_risco(matriz.linhas) == []
+    assert matriz.status == "BLOQUEADA"
+
+
+# ---------------------------------------------------------------------------
 # R-PSY-02 — psicossocial incondicional (003.EN). Sucede R-PSY-01 (DEPRECATED,
 # condicionada). NR-01 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3. Usa o protocolo real
 # porque R-PSY-02 é a regra sob teste, não um fixture sintético.
