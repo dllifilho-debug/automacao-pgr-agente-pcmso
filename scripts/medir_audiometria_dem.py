@@ -132,6 +132,14 @@ def extrair_registros(caminho: Path) -> tuple[list[RegistroCargo], list[str]]:
     return registros, suspeitas
 
 
+def _cargo_para_exibicao(cargo: str) -> str:
+    # A coluna FUNÇÃO às vezes tem anotação da médica na mesma célula, em
+    # parágrafo separado (EMENDA 1, 003.EX) — cargo e anotação continuam um
+    # único registro; só o "\n" embutido precisa virar separador visível
+    # para não quebrar o item da lista em duas linhas no relatório.
+    return cargo.replace("\n", " / ")
+
+
 def gerar_secao(nome_doc: str, registros: list[RegistroCargo], suspeitas: list[str]) -> str:
     com_audio = [r for r in registros if r.tem_audiometria]
     com_dem = [r for r in com_audio if Momento.DEM in r.momentos_audiometria]
@@ -147,11 +155,11 @@ def gerar_secao(nome_doc: str, registros: list[RegistroCargo], suspeitas: list[s
         "### Cargos com audiometria + DEM",
         "",
     ]
-    linhas.extend(f"- [{r.ghe}] {r.cargo}" for r in com_dem)
+    linhas.extend(f"- [{r.ghe}] {_cargo_para_exibicao(r.cargo)}" for r in com_dem)
     linhas.append("")
     linhas.append("### Cargos com audiometria SEM DEM")
     linhas.append("")
-    linhas.extend(f"- [{r.ghe}] {r.cargo}" for r in sem_dem)
+    linhas.extend(f"- [{r.ghe}] {_cargo_para_exibicao(r.cargo)}" for r in sem_dem)
     linhas.append("")
     if suspeitas:
         linhas.append("### Rótulos não reconhecidos")
