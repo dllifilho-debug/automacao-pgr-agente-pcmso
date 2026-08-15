@@ -903,6 +903,14 @@ continua saindo pela regra errada. `DT-003EW-01` (irmã desta DT — mesma raiz
 `ruido_acima_acao = Ausente`) foi FECHADA em 003.EX, mas por resolver a **saída** (agora tem
 `DEM`), não a raiz. Esta DT segue sendo a que rastreia a raiz em si.
 
+**Nota aditiva (003.EY).** Deixa de ser candidata de investigação não-bloqueante e passa a
+**caminho crítico**: a varredura de 23 obras (`DT-003EY-01`) nomeia o predicado que falta aqui
+— NR-07 Anexo II item 2, `ruido_acima_acao` quando o PGR cita ruído sem quantificar — com
+evidência documental direta (21 de 226 cargos sem audiometria anotados `Ruído (abaixo do nível
+de ação)` pela própria médica). `DT-003EY-01` depende da resolução deste predicado para a
+correção candidata (ID nova sucedendo `R-AUD-04`). Não fecha aqui — a raiz continua
+indeterminada, só ganhou o nome do que falta.
+
 ### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[ABERTA — higiene de instrumento]`
 
 **Origem:** medição `003eg_fascino_rodar.md` (Fascino, commit `5a2d15b`).
@@ -1373,6 +1381,18 @@ de defeito de apresentação sobre valor correto (ou não) do motor.
 
 **Status:** ABERTA — medição pendente antes de qualquer correção.
 
+**Nota aditiva (003.EY).** Causa isolada `[MEDIDO — 003.EY]`: é apresentação, não valor do
+motor — `documento_matriz.py::_formatar_celula` monta `f"{nome_exibicao} ({momentos})"`, e a
+string `periodicidade` não ocorre no arquivo (`git grep -c periodicidade --
+agente_medico/superficie/documento_matriz.py` = 0). Das duas causas que esta DT nomeava, é a
+segunda — não há caminho de código que já calcule e descarte o número; ele nunca é montado.
+Registrar também: a regra de forma de 003.EO (número só aparece quando periodicidade ≠12M,
+exceto RX Tórax OIT, que sempre traz) é contrariada em **2853** ocorrências contra **4366**
+confirmações no corpus amplo de 003.EY (26 documentos, todos os exames) — sinal forte de que a
+regra não sobrevive fora do par Fascino/RESERVA que a originou, não número final: o agregado é
+por segmento de célula, e "contraria" só fica bem definido conhecendo a periodicidade real por
+exame (que esta DT ainda não resolveu). Refino pendente antes de implementar a formatação.
+
 ### DT-003EW-03 — Exames do gabarito ausentes na saída `[ABERTA]`
 
 **Origem:** 003.EW, comparação contra o mesmo gabarito de `DT-003EW-01`.
@@ -1461,3 +1481,83 @@ quando um quarto/terceiro grupo aparece com conteúdo não vazio, em vez de desc
 silenciosamente; teste com célula sintética de 3 grupos que falhe sem a checagem.
 
 **Status:** ABERTA. Não-bloqueante — instrumento de medição, não código de produção clínica.
+
+### DT-003EY-01 — Fundamento de `R-AUD-04` refutado pelo corpus `[ABERTA — bloqueante para o documento assinado]`
+
+**Origem:** 003.EY fatia 0, varredura de cobertura de audiometria sobre 23 obras canônicas
+(26 arquivos, lista nominal fechada em EMENDA 1 do prompt de sessão).
+
+**Situação.** `R-AUD-04` emite audiometria por `todo_trabalhador` (D-ARQ-66, piso incondicional)
+apoiada em matriz-precedente **n=2** (SPE 0030 + RESERVA 0028, ambos 100% de cobertura,
+criada em 003.EX). A varredura de 23 obras mede universalidade em **7/23** (6/23 com piso
+`n_cargos ≥ 17` — sem o piso, o CJR entra universal com `n=1` e RICCO HETRIN `(1)` com `n=5`,
+mesmo peso que um documento de 54 cargos), com distribuição de fração larga entre as
+não-universais (`0.200` a `0.984`) — **não** o padrão "40/41 por exceção pontual isolada" que
+sustentaria o piso universal mesmo fora do critério estrito. A convergência n=2 de 003.EX é
+artefato de amostra: SPE 0030 e RESERVA 0028 são justamente as duas matrizes onde a médica
+estendeu audiometria ao administrativo, não uma amostra representativa do acervo.
+
+**Consequência.** O motor superemite audiometria nos cargos administrativos de 16 das 23 obras
+medidas (as não-universais).
+
+**Predicado que o corpus indica.** NR-07 Anexo II item 2 — o universo do exame audiométrico é
+quem está **acima do nível de ação** conforme informado no PGR, não todo trabalhador. Evidência
+documental direta: a anotação `Ruído (abaixo do nível de ação)`, escrita pela própria médica, em
+**21 dos 226 cargos** sem audiometria — concentrada em 3 documentos (ENGESEG ESTRUTURAL FILIAL
+24.04.25, ENGESEG ESTRUTURAL FILIAL 21.11.24, CMO VARANDAS BUENO).
+
+**Ressalva obrigatória.** Ausência de anotação nos outros 205 cargos sem audiometria não é
+negação de exposição — ambíguo ≠ negativo. A leitura do predicado é candidata, não confirmada
+cargo a cargo.
+
+**Ligação.** Mesma raiz de `DT-003EG-01` (audiometria emitida pelo motivo errado quando a perna
+do ruído está bloqueada) — as duas dívidas rastreiam o mesmo predicado indeterminado
+(`ruido_acima_acao` quando o PGR cita ruído sem quantificar). São uma dívida só vista por dois
+ângulos: lá, o motivo impresso é enganoso; aqui, a emissão em si é a que está em questão.
+
+**Correção candidata.** ID nova com o predicado (`ruido_acima_acao` resolvido ou piso
+NR-07-Anexo-II-item-2), `R-AUD-04` `[DEPRECATED — sucedida por R-AUD-05]` com o corpo
+preservado (mudança de escopo de aplicação ⇒ ID nova, nunca remover a antiga).
+
+**Status:** ABERTA. Não decidida nesta sessão — exige gate D-ARQ-63 declarado (sessão de
+ARQUITETURA) e a decisão sobre PGR que cita ruído sem quantificar.
+
+### DH-003EY-01 — Indexação fixa de célula quebra em tabela com mesclagem `[ABERTA — higiene de instrumento]`
+
+**Origem:** 003.EY fatia 0, `scripts/medir_cobertura_e_forma.py`, ao medir ATZUM (13 colunas
+físicas).
+
+**Situação.** Documentos de tabela única com mais de 2 colunas físicas mesclam FUNÇÃO/EXAMES
+SOLICITADOS ao longo de várias colunas — `python-docx` repete o mesmo texto em cada coluna do
+span de mesclagem. A indexação fixa `celulas[0]`/`celulas[1]` — herdada de
+`scripts/medir_audiometria_dem.py` (003.EX) — lê a própria mesclagem de FUNÇÃO como se fosse a
+coluna de exames nesses casos: ATZUM (13 colunas) media **0/47** audiometria antes da correção.
+Corrigido em `medir_cobertura_e_forma.py` com `_celulas_logicas` (colapsa células adjacentes de
+texto idêntico antes de indexar).
+
+**Alcance.** `scripts/medir_audiometria_dem.py` (003.EX) **segue com a indexação fixa, não foi
+corrigido** — os dois documentos medidos naquela sessão (SPE 0030: 2 colunas físicas; RESERVA
+0028: 4 colunas, mas sem mesclagem que atinja a coluna de exames) têm forma que não expõe o
+defeito, então a medição de 003.EX permanece válida. O instrumento continua vulnerável se
+reusado em outra família de documento sem essa checagem.
+
+**Correção candidata.** Portar `_celulas_logicas` para `medir_audiometria_dem.py`.
+
+**Status:** ABERTA. Não-bloqueante para as medições já feitas (003.EX e 003.EY, ambas
+verificadas contra checkpoints); higiene de instrumento para reuso futuro.
+
+### DH-003EY-02 — Binário `universal` sem piso de `n_cargos` `[ABERTA — higiene de instrumento]`
+
+**Origem:** 003.EY fatia 0, agregação da Pergunta A (`fração == 1.0` ⇒ `universal`).
+
+**Situação.** `fração == 1.0` trata `1/1` (CJR ENGENHARIA, um único cargo no documento) e `5/5`
+(RICCO HETRIN `(1)`, adendo parcial de 5 cargos) como evidência do mesmo peso que `54/54`
+(CMO VARANDAS BUENO). Sem piso declarado, o binário infla a contagem de "documentos universais"
+com amostras pequenas demais para confirmar ou refutar universalidade.
+
+**Correção candidata.** Reportar sempre com piso declarado ao lado — nesta sessão, `n_cargos ≥
+17` muda o agregado de 7/23 para 6/23. Piso é escolha editorial, não medição; deve ficar
+explícito em qualquer citação do número.
+
+**Status:** ABERTA. Não-bloqueante — o instrumento já reporta a fração e o `n_cargos` por
+documento; falta só o agregado com piso como saída de primeira classe, hoje calculado à mão.
