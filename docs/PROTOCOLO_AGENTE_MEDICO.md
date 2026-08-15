@@ -269,8 +269,43 @@ Demissional **é executado** apenas quando:
 
 Para trabalho em altura, equip. pesada e espaço confinado **sem ruído**: faz adm/per/MR, **não faz** demissional.
 
-#### R-AUD-03 — Validade do demissional `[VALIDADO]`
+#### R-AUD-03 — Validade do demissional `[VALIDADO]` `[DERIVADO — NR-07 Anexo II item 4.1.1, texto oficial MTE conferido em 14/08/2026]`
 Audiometria realizada há **mais de 120 dias** → refazer no demissional.
+
+#### R-AUD-04 — Audiometria como piso universal, com demissional `[DERIVADO — matriz-precedente: Carolini 07/2026 (SPE 0030) + Patrícia 04/2025 (RESERVA 0028); periodicidade e momento demissional em NR-07 Anexo II 4.1]`
+Todo trabalhador recebe **audiometria, 12 meses, em `[adm, per, MRO, dem]`**, independentemente
+de risco declarado no PGR. Piso por baixo — não substitui nem depreca `R-AUD-01`/`R-AUD-02`;
+convive com elas (molde `R-CLI-01`×`R-CLI-02`), e a linha carrega os motivos de todas as regras
+que dispararam (dedup `R-GHE-03`/D-ARQ-39 concatena, não substitui).
+
+**Base normativa, em duas partes com forças diferentes.**
+*O que a norma crava* `[DERIVADO — NR-07 Anexo II itens 4.1 e 4.1.1, texto oficial MTE conferido
+em 14/08/2026]`: item 4.1 — *"O exame audiométrico deve ser realizado, no mínimo: a) na
+admissão; b) anualmente, tendo como referência o exame da alínea 'a' acima; c) na demissão."* —
+a periodicidade de 12M e a presença de `adm`/`dem` têm âncora literal.
+*O que a norma NÃO crava* `[INTERPRETADO — prioridade na revisão de saída]`: o **universo** — o
+item 2 do Anexo II delimita a obrigação a quem está "acima dos níveis de ação, conforme
+informado no PGR", e o **momento MRO**, que não aparece no item 4.1 e vem só do precedente.
+Estender a todo trabalhador é conduta **além** da norma — mais protetiva, nunca contrária, mas
+não derivada dela.
+
+**Medição que sustenta o precedente** `[MEDIDO — 003.EX, Word COM]`: audiometria em 41/41 (SPE
+0030) e 44/44 (RESERVA 0028); demissional confirmado em 38/41 (93%, Carolini) e 42/42 confirmados
++ 2 indeterminados por forma ambígua de célula (95–100%, Patrícia). Duas médicas, dois clientes,
+lados opostos do corte de vigência da NR-01 (26/05/2026) — e convergem. Detalhe nominal em
+`docs/referencia/GABARITO_003EX_audiometria_dem.md`.
+
+**Limitação de escopo, declarada.** Os dois documentos são construção civil, e o acervo inteiro
+é de construtoras — limitação estrutural da amostra, não de tamanho. Reinspecionar no primeiro
+PGR de hospital, indústria química ou setor administrativo puro; se a conduta não se sustentar,
+a regra ganha condição de escopo — ID nova, não emenda (D-ARQ-06).
+
+**Fronteiras.** `DT-003EG-01` (audiometria pelo motivo errado) não é agravada nem fechada por
+esta regra — motivos concatenam, não substituem; a causa (`ruido_acima_acao` resolvendo
+`Ausente`) continua intacta. `D-ARQ-68` intacto — esta regra não muda como ausência vira estado,
+emite por outro gatilho, ao lado. Veículo: `D-ARQ-66` (emissão incondicional, primitivo
+`todo_trabalhador`) — a linha incondicional não conta para o tri-estado (cl.2); GHE sem nenhum
+risco resolvido continua BLOQUEADA.
 
 ### 5.3 Espirometria
 
@@ -793,3 +828,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v86 | 04/08/2026 | Sessão 003.EQ (S3 fatia 1 + emendas 1-3, FECHAMENTO — docs): app de matriz da rota determinística entregue (`superficie/web_matriz.py`), validado no host real do Diovanni contra o Fascino (19 GHEs, 41 cargos) e no caso de rejeição por R-PGR-01. **D-ARQ-74 CRIADA** (DECISOES v164) — superfície que emite artefato assinável lê `resultado.status` e nunca emite documento sem conteúdo clínico; caso-âncora medido em dois ambientes (sandbox e host): `Resultado(status="REJEITADO", matrizes=[])` passava reto pelo guard `doc is None` (`matrizes=()` não é `None`), produzindo `matriz.html` de 187 bytes e `matriz.docx` com zero `<w:tbl>` — documento assinável sem uma linha de exame. **DH-003EQ-01 CRIADA** (§11) — preservação-em-download da casca sem cobertura automatizada, `AppTest` do Streamlit instalado não expõe `download_button`; contornado por teste de unidade sobre a decisão de reuso + passada manual (confirmada 04/08/2026). **DT-003EQ-01 CRIADA** (§11) — lixo de recorte/transcrição vazando como termo de agente, faceta de DT-003L-01. **DT-003EQ-02 CRIADA** (§11) — `Maganês`→`manganes` recusado pelo fuzzy (D-ARQ-64 funcionando como desenhado), custo clínico real medido, candidato a alias sob D-ARQ-70. **DT-003EQ-03 CRIADA** (§11) — status `PRELIMINAR` não é marcado no documento assinado, irmã de DT-003EO-01; fronteira explícita com D-ARQ-74 cl.1 (que cobre só `REJEITADO`). Nota aditiva em DH-003EP-01 (glifo-hífen confirmado na saída real, GHE-10) e em DT-003EO-04 (fechamento confirmado em produção real, 41 cargos/19 GHEs, 6 cargos antes perdidos presentes). Registro de caminho não-ocorrente: cargo com zero células, não medido no Fascino (todo cargo recebe os 3 incondicionais). Violação de método autodeclarada: uma rodada de suíte foi medida concorrente com mutação de arquivo durante varredura inversa — rodadas limpas posteriores confirmaram ausência de defeito real. Suíte 1048→**1062 passed, 6 skipped** (+14); `mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py` limpo, 43 arquivos. Nenhuma R-* criada, alterada ou depreciada. Commits `1eb32af`/`380fe59`/`5a0d02e`/`4b0a541`. Detalhe em HISTORICO 003.EQ. |
 | v87 | 08/08/2026 | Sessão 003.ES (IMPLEMENTAÇÃO, fatias 1-2): abre **DH-003ES-01** (§11) — ramos `NEGAR` e `LIBERAR` do gate de acesso sem cobertura de casca; os três desfechos têm teste de unidade, mas só `PEDIR_LOGIN` é exercitado pelo `AppTest`. Não-bloqueante e alcançável (a sonda 2 de 003.ES mediu que `monkeypatch` sobre `streamlit.user` chega ao script). **Nenhuma regra clínica criada, alterada ou depreciada** — decisão de arquitetura da sessão está em D-ARQ-76. Detalhe em HISTORICO 003.ES. |
 | v88 | 10/08/2026 | Sessão 003.ET fatia 0 (partição realizada 08/08/2026, linha de changelog registrada agora, 10/08/2026 — a fatia 0 fez a partição sem gravar linha de changelog, e esta v88 corrige o resíduo, omissão do prompt do Arquiteto, não do Code, D-ARQ-06): §11 (dívidas técnicas `DT-`/`DH-`) movido inteiro para `docs/PENDENCIAS_CLINICAS.md`; documento cai de **274.752 para 113.007 caracteres**; numeração duplicada `## 11.` corrigida para `## 12.`; consumidores de método atualizados (skill `/kickoff` item 5, `RITUAL_FECHAMENTO` passo 2, `CLAUDE.md` da raiz). **Nenhuma regra clínica tocada** — a versão sobe por mudança estrutural do documento, não de conteúdo. Detalhe em HISTORICO 003.ET. |
+| v89 | 15/08/2026 | Sessão 003.EX fatias 0-1 (MEDIÇÃO + IMPLEMENTAÇÃO): **R-AUD-04 CRIADA** (§5.2) — audiometria como piso universal, 12M `[adm, per, MR, dem]`, incondicional via `todo_trabalhador` (D-ARQ-66); base normativa NR-07 Anexo II 4.1 `[DERIVADO]` crava 12M+adm+dem, universo estendido a todo trabalhador e MRO incluído são `[INTERPRETADO]`, apoiados em matriz-precedente (fatia 0: SPE 0030 41/41 audiometria, 38/41 DEM confirmado; RESERVA 0028 44/44, 42/42 confirmado + 2 indeterminados). `R-AUD-01`/`R-AUD-02` **não tocadas** — piso por baixo, molde `R-CLI-01`×`R-CLI-02`; dedup concatena motivos, não substitui. **`R-AUD-03` ganha marcador de fonte** `[DERIVADO — NR-07 Anexo II item 4.1.1]` (mesma ID, changelog). **DT-003EW-01 FECHADA** (`PENDENCIAS_CLINICAS.md`) — reenquadrada como resolução de saída, não da raiz (`ruido_acima_acao = Ausente` continua intacta). **DT-003EG-01 segue ABERTA**, nota aditiva — não agravada nem fechada (motivos concatenam). **DH-003EX-01 CRIADA (ABERTA)** — heurística de forma no extrator do gabarito (`medir_audiometria_dem.py`) assume no máximo 2 grupos após "Audiometria", não testada contra 3. Efeito medido no Fascino (`rodar-offline`, mesmo PDF/envelope de sessões anteriores): GHEs com audiometria **17/19 → 19/19** (medição fresca desta sessão — diverge do "16/19" herdado de `DT-003EG-01`, baseline sabidamente desatualizada, sessões passaram desde então); GHE-06 (Administração) e GHE-19 (Vendas) ganham a linha nova (as duas únicas sem audiometria antes); linhas de exame **171 → 173** (+2, exatamente GHE-06/GHE-19); linhas de audiometria com `DEM` **1/17 → 19/19**; status **3 VÁLIDA / 15 PARCIAL / 1 BLOQUEADA inalterado, confirmado GHE a GHE** (não só no agregado) — bate exatamente com a previsão D-ARQ-66 cl.2. 4 testes novos com reversão nomeada, varredura inversa 4/4 confirmada (`test_orquestrador.py`). 4 quebras legítimas de teste de integração corrigidas com explicação nomeada (não silenciadas): `test_rvib02_vmb_sozinho_emite_audiometria` (pré-dedup, duas entradas "audiometria" agora, busca deixa de usar `next()` sozinho), `test_execucao_dedup_audiometria_tres_motivos_sem_conflito` (3→4 motivos), `test_execucao_ototoxico_via_agente_status_ok_sem_demissional` ("sem demissional" deixa de ser observável via ausência de `DEM`; invariante real — R-AUD-02 não dispara — checado direto), `test_pipeline_gates_emissao_consolidacao_atividade_critica` (audiometria sai do loop genérico de momentos, ganha checagem própria). Suíte **1104→1108 passed, 6 skipped**; `mypy --strict` delta-zero, **48 arquivos**. Detalhe em HISTORICO 003.EX. |

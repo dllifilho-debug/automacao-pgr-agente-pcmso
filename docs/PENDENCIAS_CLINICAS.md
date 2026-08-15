@@ -894,6 +894,15 @@ mostrava só que `audiometria` saiu, não por qual regra.
 
 **Nota aditiva (003.EK).** Segue ABERTA — nenhuma regra mudou de motivo. Mas o eixo ganhou instrumento: D-ARQ-71 (pendência `perna_ausente_absorvida`) e a 8ª coluna do relatório (DH-003EJ-01 faceta b) tornam a causa visível quando o motivo impresso não é o esperado — a mesma classe de lacuna que esta DT descreve agora aparece na saída em vez de exigir rerun in-process para diagnosticar. Não fecha esta DT: o motivo errado continua saindo, só passou a ser auditável sem instrumentação ad-hoc.
 
+**Nota aditiva (003.EX).** Segue ABERTA — `R-AUD-04` (piso universal, `todo_trabalhador`) não a
+fecha nem a agrava: os motivos são concatenados por `stage_8_consolidacao` (D-ARQ-39), não
+substituídos, então a linha de audiometria de um GHE com ruído mal-quantificado passa a carregar
+`R-PKG-ATIVCRIT`/`R-AUD-04` **e** continua sem `R-AUD-01`/`R-AUD-02` — o exame sai pelo motivo
+certo em mais casos (o piso cobre), mas onde `R-PKG-ATIVCRIT` já cobria antes, a audiometria
+continua saindo pela regra errada. `DT-003EW-01` (irmã desta DT — mesma raiz
+`ruido_acima_acao = Ausente`) foi FECHADA em 003.EX, mas por resolver a **saída** (agora tem
+`DEM`), não a raiz. Esta DT segue sendo a que rastreia a raiz em si.
+
 ### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[ABERTA — higiene de instrumento]`
 
 **Origem:** medição `003eg_fascino_rodar.md` (Fascino, commit `5a2d15b`).
@@ -1325,7 +1334,7 @@ e `opencv-python-headless` apareceriam declarados sem serem importados. **Não h
 cobertura — há um nome de teste que promete mais do que o corpo entrega.** Origem: redação do
 Arquiteto no prompt da fatia 1, não do Code.
 
-### DT-003EW-01 — Audiometria sem demissional `[ABERTA — conduta]`
+### DT-003EW-01 — Audiometria sem demissional `[FECHADA — R-AUD-04, 003.EX]`
 
 **Origem:** 003.EW, comparação contra o gabarito real da Dra. Carolini
 (`MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc`, mesma obra do Fascino).
@@ -1339,7 +1348,16 @@ de um gabarito só.
 **Prioridade.** Sobre `DT-003EW-02` e `DT-003EW-03` — é o item que muda o documento assinado em
 mais linhas.
 
-**Status:** ABERTA — decisão do Arquiteto sobre conduta clínica, fatia própria.
+**Reenquadramento (003.EX).** A leitura original tratava esta DT como divergência clínica
+independente. Medida a raiz: é a **terceira manifestação** de `ruido_acima_acao` resolvendo
+`Ausente` quando o PGR cita ruído sem quantificar — junto com `DT-003EG-01` (audiometria pelo
+motivo errado) e o caso GHE-16 de `D-ARQ-71`. `R-AUD-04` **resolve a saída** (audiometria com
+`DEM` sai para todo trabalhador, incondicional) **sem resolver a raiz** — `ruido_acima_acao`
+continua indeterminado nos mesmos PGRs, só deixou de ser a única via para `DEM` aparecer.
+
+**Status:** FECHADA em 003.EX por `R-AUD-04` (piso universal, `todo_trabalhador`, NR-07 Anexo II
+4.1 `[DERIVADO]` + matriz-precedente `[INTERPRETADO]` — ver `docs/referencia/GABARITO_003EX_audiometria_dem.md`). Fechamento é da manifestação (saída sem `DEM`), não da raiz (`ruido_acima_acao =
+Ausente`), que segue viva em `DT-003EG-01`.
 
 ### DT-003EW-02 — Periodicidade não impressa no documento `[ABERTA]`
 
@@ -1419,3 +1437,27 @@ sobre o mesmo arquivo, o que é como o problema foi encontrado. Aplica-se a qual
 
 **Status:** ABERTA — higiene de ambiente, não bloqueia nenhum caminho de produção (o `.toml` do
 deploy é materializado por `materializar_secrets.py`, não por PowerShell direto).
+
+### DH-003EX-01 — Heurística de forma no extrator do gabarito assume no máximo 2 grupos após "Audiometria" `[ABERTA — higiene de instrumento]`
+
+**Origem:** 003.EX fatia 0, `scripts/medir_audiometria_dem.py::_extrair_linha_audiometria`.
+
+**Situação.** O extrator captura até dois grupos entre parênteses após "Audiometria" — o bastante
+para cobrir as duas formas medidas no acervo: `Audiometria (ADM, PER, MRO, DEM)` (SPE 0030, um
+grupo) e `Audiometria (12 meses), (ADM, PER, MRO, DEM)` (RESERVA 0028, período + momentos, dois
+grupos). É suposição sobre a forma da célula, não estrutura garantida pelo `.docx` — uma célula
+com três grupos (ex.: período + faixa + momentos, ou dois exames colados sem separador com o
+segundo trazendo dois grupos) quebra em silêncio: o terceiro grupo em diante é ignorado sem
+aviso, e nada no instrumento testa esse caso. Forma 1 (período em grupo separado) é dominante nos
+RESERVA e inexistente no SPE 0030 — o próximo documento do acervo pode ter uma terceira variação
+não antecipada.
+
+**Impacto.** Não-bloqueante para a medição já feita (nenhuma ocorrência de 3+ grupos foi
+observada nos três documentos medidos em 003.EX — verificado, não assumido). Candidato a
+descoberta-surpresa se o instrumento for reusado em corpus maior sem essa checagem.
+
+**Correção candidata.** Reportar como rótulo não reconhecido — ou como forma anômala explícita —
+quando um quarto/terceiro grupo aparece com conteúdo não vazio, em vez de descartá-lo
+silenciosamente; teste com célula sintética de 3 grupos que falhe sem a checagem.
+
+**Status:** ABERTA. Não-bloqueante — instrumento de medição, não código de produção clínica.
