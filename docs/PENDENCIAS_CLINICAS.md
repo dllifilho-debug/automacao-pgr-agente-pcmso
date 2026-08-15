@@ -1510,6 +1510,18 @@ documental direta: a anotação `Ruído (abaixo do nível de ação)`, escrita p
 negação de exposição — ambíguo ≠ negativo. A leitura do predicado é candidata, não confirmada
 cargo a cargo.
 
+**Limite da amostra `[MEDIDO — 003.EY]`.** A refutação cobre **26 de 36 gabaritos-matriz
+identificáveis** no acervo. Ficam fora, nomeados: 5 `.pdf`, 4 `.rtf` e 1 `.xlsx` (formatos não
+extraídos nesta fatia), mais **11 PCMSO completos e 1 PGR** em `.doc`/`.docx` que podem conter
+matriz embutida e não foram inspecionados. Exclusão nomeada não é dado ausente, mas também não é
+cobertura: qualquer leitura de `7/23` como "o acervo" está errada.
+
+E o limite que nenhuma amostra maior dentro deste acervo corrige: **todas as 23 obras são
+construção civil.** É limitação estrutural do corpus, não de tamanho — a mesma que `R-AUD-04` já
+declarava na própria `base_normativa` ("LIMITE: ambos construção civil"). A regra sucessora nasce
+com ela; a diferença é que agora está medida e escrita, não herdada em silêncio. Reinspecionar no
+1º PGR de saúde ou química (D-ARQ-06).
+
 **Ligação.** Mesma raiz de `DT-003EG-01` (audiometria emitida pelo motivo errado quando a perna
 do ruído está bloqueada) — as duas dívidas rastreiam o mesmo predicado indeterminado
 (`ruido_acima_acao` quando o PGR cita ruído sem quantificar). São uma dívida só vista por dois
