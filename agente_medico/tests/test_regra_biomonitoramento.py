@@ -145,6 +145,12 @@ def test_regra_bio_04_grupo_sc_agente_unico(proto, agente: str, regra_id: str, e
 
 
 def test_sem_agente_nao_emite_biomonitoramento(proto) -> None:  # type: ignore[no-untyped-def]
+    # Desde D-ARQ-68 cl.5 (003.EZ), ruído sem quantificação não é mais "risco
+    # que nada emite" — R-AUD-01 presume e emite audiometria. O invariante sob
+    # teste aqui é específico de biomonitoramento (fallback R-BIO-04), então a
+    # checagem passa a ser pela ausência da família de regras, não pela
+    # ausência de qualquer linha de risco.
     ctx = _ctx_com_agente("ruido")
     emitidos = stage_5_emissao(ctx, proto)
-    assert linhas_de_risco(emitidos) == []
+    regras_disparadas = {m.regra_id for e in emitidos for m in e.motivos}
+    assert not any(r.startswith("R-BIO-04") for r in regras_disparadas)

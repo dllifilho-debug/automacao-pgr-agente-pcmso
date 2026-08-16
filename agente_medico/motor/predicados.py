@@ -402,6 +402,64 @@ def pernas_ausentes_absorvidas(
     return tuple(acc)
 
 
+def _coletar_pernas_ausentes(
+    expr: Any,
+    ctx: GHEContext,
+    protocolo: Any,
+    acc: list[tuple[str, Ausente]],
+    _visitados: frozenset[str] = frozenset(),
+) -> None:
+    if isinstance(expr, str):
+        # Armadilha nomeada (D-ARQ-68 cl.5): ao contrário de
+        # `_coletar_pernas_ausentes_absorvidas`, aqui o primitivo/composto
+        # string É avaliado e coletado por si — sem isto, `quando:` de string
+        # simples devolveria conjunto vazio mesmo quando o primitivo é Ausente.
+        valor = avaliar(expr, ctx, protocolo, _visitados)
+        if isinstance(valor, Ausente):
+            acc.append((expr, valor))
+        compostos: dict[str, Any] = protocolo.predicados_compostos
+        if expr in compostos and expr not in _visitados:
+            _coletar_pernas_ausentes(
+                compostos[expr], ctx, protocolo, acc, _visitados | {expr}
+            )
+        return
+    if not isinstance(expr, dict):
+        return
+    if "ou" in expr:
+        for filho in expr["ou"]:
+            # Diferença única frente a `_coletar_pernas_ausentes_absorvidas`:
+            # sem o gate `alguma_true` — toda perna Ausente é coletada, haja
+            # ou não perna True no mesmo `ou`. Filhos string são cobertos pela
+            # própria recursão (ramo acima); só sub-expressão (dict) precisa
+            # de avaliação própria aqui, para não coletar em duplicidade.
+            if isinstance(filho, dict):
+                valor = avaliar(filho, ctx, protocolo, _visitados)
+                if isinstance(valor, Ausente):
+                    acc.append((serializar_predicado(filho), valor))
+            _coletar_pernas_ausentes(filho, ctx, protocolo, acc, _visitados)
+    elif "e" in expr:
+        for filho in expr["e"]:
+            _coletar_pernas_ausentes(filho, ctx, protocolo, acc, _visitados)
+    elif "nao" in expr:
+        _coletar_pernas_ausentes(expr["nao"], ctx, protocolo, acc, _visitados)
+
+
+def pernas_ausentes(
+    expr: Any, ctx: GHEContext, protocolo: Any
+) -> tuple[tuple[str, Ausente], ...]:
+    """D-ARQ-68 cl.5: irmã de `pernas_ausentes_absorvidas`, mesma assinatura,
+    mesma ordem estável, mesma expansão de composto nomeado, mesma guarda de
+    ciclo. Diferença única no nó `ou`: sem o gate `alguma_true` — coleta toda
+    perna Ausente do `ou`, haja ou não perna True (aqui não há absorção a
+    detectar: o objetivo é enumerar TODO primitivo ausente que a regra
+    precisaria para decidir, para a presunção declarada de D-ARQ-68 cl.5
+    poder checar se cobre todos eles). `avaliar`/`avaliar_predicado`
+    intocados."""
+    acc: list[tuple[str, Ausente]] = []
+    _coletar_pernas_ausentes(expr, ctx, protocolo, acc)
+    return tuple(acc)
+
+
 def avaliar_predicado(nome: str, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:
     if nome in ctx.predicados:
         return ctx.predicados[nome]

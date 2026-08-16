@@ -14,6 +14,7 @@ from agente_medico.motor.predicados import (
     ResultadoPredicado,
     avaliar,
     avaliar_predicado,
+    pernas_ausentes,
     pernas_ausentes_absorvidas,
     primitivo,
 )
@@ -485,6 +486,44 @@ def test_pernas_ausentes_absorvidas_composto_sem_absorcao() -> None:
     proto = _protocolo_stub(compostos)
     ctx = _ctx("trabalho_altura")
     assert pernas_ausentes_absorvidas("c", ctx, proto) == ()
+
+
+# ---------------------------------------------------------------------------
+# pernas_ausentes — D-ARQ-68 cl.5: irmã de pernas_ausentes_absorvidas, sem o
+# gate alguma_true no `ou` (coleta toda perna Ausente, haja ou não True) e
+# com coleta do próprio primitivo/composto quando `expr` é string simples.
+# ---------------------------------------------------------------------------
+
+
+def test_pernas_ausentes_ou_sem_nenhuma_perna_true() -> None:
+    # Teste 1: reversão que mata — reintroduzir o gate alguma_true.
+    ctx = _ctx_ruido_sem_quant_e()
+    expr = {"ou": ["ruido_acima_acao", "espaco_confinado"]}
+    resultado = pernas_ausentes(expr, ctx, _p)
+    assert len(resultado) == 1
+    nome, ausente = resultado[0]
+    assert nome == "ruido_acima_acao"
+    assert isinstance(ausente, Ausente)
+
+
+def test_pernas_ausentes_string_simples_coleta_proprio_nome() -> None:
+    # Teste 2: reversão que mata — remover o ramo string-coleta (a armadilha de 2a).
+    ctx = _ctx_ruido_sem_quant_e()
+    resultado = pernas_ausentes("ruido_acima_acao", ctx, _p)
+    assert len(resultado) == 1
+    nome, ausente = resultado[0]
+    assert nome == "ruido_acima_acao"
+    assert isinstance(ausente, Ausente)
+
+
+def test_pernas_ausentes_desce_em_composto_nomeado_sem_true() -> None:
+    # Teste 3: reversão que mata — remover a expansão de predicados_compostos.
+    compostos = {"c": {"ou": ["ruido_acima_acao", "espaco_confinado"]}}
+    proto = _protocolo_stub(compostos)
+    ctx = _ctx_ruido_sem_quant_e()
+    resultado = pernas_ausentes("c", ctx, proto)
+    nomes = {nome for nome, _ in resultado}
+    assert "ruido_acima_acao" in nomes
 
 
 def test_todo_literal_de_agente_em_predicados_existe_no_vocabulario() -> None:

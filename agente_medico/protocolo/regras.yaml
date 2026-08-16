@@ -47,16 +47,33 @@ regras:
 
   - id: R-AUD-01
     quando: {ou: [ruido_acima_acao, motorista_equipamento_pesado, ototoxico]}
+    quando_ausente: {presumir_true: [ruido_acima_acao]}
     emite:
       - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR]}
-    base_normativa: "Protocolo Dra. Carolini R-AUD-01 — audiometria 12M adm/per/MR por gatilho (ruido acima acao, motorista equip. pesado ou ototoxico). Altura/confinado vem de R-PKG-ATIVCRIT; vibracao de R-VIB-02"
+    base_normativa: "Protocolo Dra. Carolini R-AUD-01 — audiometria 12M adm/per/MR
+      por gatilho (ruido acima acao, motorista equip. pesado ou ototoxico).
+      Altura/confinado vem de R-PKG-ATIVCRIT; vibracao de R-VIB-02. Perna do
+      ruído: [DERIVADO — NR-07 Anexo II itens 2 e 4.1 'a'/'b'; momento MR por
+      7.5.6 'd' + 7.5.7, a contrario 7.5.15]. Pernas motorista_equipamento_pesado
+      e ototoxico: [VALIDADO] — conduta da Dra. Carolini além do item 2, sem
+      âncora normativa própria. Silêncio do PGR sobre a quantificação do ruído
+      (NR-09 9.4.1/9.4.2, avaliação condicional) admite presunção protetiva
+      declarada em quando_ausente.presumir_true — regra sai marcada
+      [INTERPRETADO — prioridade na revisão de saída] nesse trecho (D-ARQ-68 cl.5)."
     status: VALIDADO
 
   - id: R-AUD-02
     quando: {ou: [ruido_acima_acao, {e: [ruido, ototoxico, vibracao_qualquer]}]}
+    quando_ausente: {presumir_true: [ruido_acima_acao]}
     emite:
       - {exame: audiometria, periodicidade_meses: 12, momentos: [dem]}
-    base_normativa: "Protocolo Dra. Carolini R-AUD-02 — demissional de audiometria com ruido acima da acao OU combinacao ruido+ototoxico+vibracao (D-ARQ-13/16)"
+    base_normativa: "Protocolo Dra. Carolini R-AUD-02 — demissional de audiometria
+      com ruido acima da acao OU combinacao ruido+ototoxico+vibracao (D-ARQ-13/16).
+      Perna do ruído: [DERIVADO — NR-07 Anexo II item 4.1 'c']. Perna
+      e(ruido, ototoxico, vibracao_qualquer): [VALIDADO] — sem âncora normativa.
+      Mesma presunção protetiva de R-AUD-01 sobre ruido_acima_acao, mesma marca
+      [INTERPRETADO — prioridade na revisão de saída] (D-ARQ-68 cl.5); a perna
+      'e' NÃO está na allowlist de presunção — ausência ali continua bloqueante."
     status: VALIDADO
 
   - id: R-AUD-04
@@ -71,8 +88,15 @@ regras:
       (RESERVA 0028) 44/44 audiometria, DEM confirmado 42, indeterminado 2 por
       forma ambígua de célula, sem DEM confirmado ZERO. Duas médicas, dois
       lados do corte NR-01 26/05/2026. LIMITE: ambos construção civil —
-      reinspecionar no 1º PGR de saúde ou química (D-ARQ-06)."
-    status: DERIVADO
+      reinspecionar no 1º PGR de saúde ou química (D-ARQ-06).
+      [DEPRECATED — fundamento refutado por DT-003EY-01, sem sucessora — D-ARQ-81]:
+      003.EY mediu 23 obras e refutou o precedente: universalidade em 7/23
+      (6/23 com piso n_cargos ≥ 17), distribuição larga entre as não-universais.
+      As duas matrizes-precedente de 003.EX eram justamente as duas em que a
+      médica estendeu ao administrativo — artefato de amostra, não convergência.
+      Momento DEM medido em 003.EZ passa a sair pela presunção de R-AUD-02
+      (D-ARQ-68 cl.5), não mais por este piso incondicional."
+    status: DEPRECATED
 
   - id: R-VIB-02
     quando: vibracao_qualquer

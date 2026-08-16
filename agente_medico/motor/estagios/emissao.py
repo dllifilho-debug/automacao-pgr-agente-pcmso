@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from typing import Any
+
 from agente_medico.motor.predicados import (
     ResultadoPredicado,
     avaliar,
+    pernas_ausentes,
     pernas_ausentes_absorvidas,
     serializar_predicado,
 )
@@ -28,6 +31,50 @@ def _converter_momento(raw: str, regra_id: str, exame: str) -> Momento:
     return _MOMENTOS[key]
 
 
+def _emitir_regra(
+    regra: dict[str, Any], ctx: GHEContext, protocolo: Protocolo, emitidos: list[ExameEmitido]
+) -> None:
+    for nome, ausente in pernas_ausentes_absorvidas(regra["quando"], ctx, protocolo):
+        ctx.pendencias.append(
+            Pendencia(
+                tipo="perna_ausente_absorvida",
+                destinatario="elaborador_pgr",
+                motivo=(
+                    f"Regra {regra['id']}: emitiu por outra perna do predicado, mas "
+                    f"'{nome}' não pôde ser avaliado — {ausente.mensagem}"
+                ),
+                bloqueante=False,
+                regra_origem=str(regra["id"]),
+                ghe_id=ctx.pgr_ghe.id,
+                exames_alvo=tuple(str(item["exame"]) for item in regra["emite"]),
+            )
+        )
+
+    predicado_str = serializar_predicado(regra["quando"])
+    motivo = Motivo(
+        regra_id=str(regra["id"]),
+        predicado=predicado_str,
+        risco_origem=None,
+        detalhe=f"Emitido por regra {regra['id']}",
+        status_regra=regra.get("status"),
+    )
+
+    for item in regra["emite"]:
+        momentos: set[Momento] = {
+            _converter_momento(str(m), str(regra["id"]), str(item["exame"]))
+            for m in item["momentos"]
+        }
+        emitidos.append(
+            ExameEmitido(
+                exame=str(item["exame"]),
+                periodicidade_meses=int(item["periodicidade_meses"]),
+                momentos=momentos,
+                motivos=[motivo],
+                periodicidade_apos_15a=item.get("periodicidade_apos_15a"),
+            )
+        )
+
+
 def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]:
     """
     Para cada regra em protocolo.regras:
@@ -36,6 +83,12 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
       3. Se False → não emite, sem pendência.
       4. Se Ausente:
           - Se regra tem `quando_ausente: false` → trata como False (não emite, sem pendência)
+          - Se regra tem `quando_ausente: {presumir_true: [primitivos]}` (D-ARQ-68 cl.5):
+            coletar pernas_ausentes(regra["quando"], ctx, protocolo); se o conjunto for
+            vazio ou tiver nome fora da lista → bloqueia como abaixo; se todo nome
+            coletado estiver na lista → emitir normalmente (mesmo caminho do ramo True)
+            e anexar Pendencia(tipo="predicado_ausente_presumido", bloqueante=False) por
+            primitivo presumido.
           - Caso contrário → adiciona Pendencia(bloqueante=True) ao ctx.pendencias e não emite
     Retorna lista de ExameEmitido na ordem em que foram emitidos.
     Não muta ctx exceto ctx.pendencias.
@@ -49,6 +102,33 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
             quando_ausente = regra.get("quando_ausente")
             if quando_ausente is False:
                 continue
+
+            if isinstance(quando_ausente, dict) and "presumir_true" in quando_ausente:
+                primitivos_presumidos = set(quando_ausente["presumir_true"])
+                faltantes = pernas_ausentes(regra["quando"], ctx, protocolo)
+                nomes_faltantes = {nome for nome, _ in faltantes}
+                if nomes_faltantes and nomes_faltantes <= primitivos_presumidos:
+                    _emitir_regra(regra, ctx, protocolo, emitidos)
+                    exames_alvo_presumido = tuple(
+                        str(item["exame"]) for item in regra["emite"]
+                    )
+                    for nome, ausente in faltantes:
+                        ctx.pendencias.append(
+                            Pendencia(
+                                tipo="predicado_ausente_presumido",
+                                destinatario="elaborador_pgr",
+                                motivo=(
+                                    f"Regra {regra['id']}: emitido sob presunção "
+                                    f"protetiva do primitivo '{nome}' — {ausente.mensagem}"
+                                ),
+                                bloqueante=False,
+                                regra_origem=str(regra["id"]),
+                                ghe_id=ctx.pgr_ghe.id,
+                                exames_alvo=exames_alvo_presumido,
+                            )
+                        )
+                    continue
+
             exames_alvo = tuple(str(item["exame"]) for item in regra["emite"])
             ctx.pendencias.append(
                 Pendencia(
@@ -69,44 +149,6 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
         if not resultado:
             continue
 
-        for nome, ausente in pernas_ausentes_absorvidas(regra["quando"], ctx, protocolo):
-            ctx.pendencias.append(
-                Pendencia(
-                    tipo="perna_ausente_absorvida",
-                    destinatario="elaborador_pgr",
-                    motivo=(
-                        f"Regra {regra['id']}: emitiu por outra perna do predicado, mas "
-                        f"'{nome}' não pôde ser avaliado — {ausente.mensagem}"
-                    ),
-                    bloqueante=False,
-                    regra_origem=str(regra["id"]),
-                    ghe_id=ctx.pgr_ghe.id,
-                    exames_alvo=tuple(str(item["exame"]) for item in regra["emite"]),
-                )
-            )
-
-        predicado_str = serializar_predicado(regra["quando"])
-        motivo = Motivo(
-            regra_id=str(regra["id"]),
-            predicado=predicado_str,
-            risco_origem=None,
-            detalhe=f"Emitido por regra {regra['id']}",
-            status_regra=regra.get("status"),
-        )
-
-        for item in regra["emite"]:
-            momentos: set[Momento] = {
-                _converter_momento(str(m), str(regra["id"]), str(item["exame"]))
-                for m in item["momentos"]
-            }
-            emitidos.append(
-                ExameEmitido(
-                    exame=str(item["exame"]),
-                    periodicidade_meses=int(item["periodicidade_meses"]),
-                    momentos=momentos,
-                    motivos=[motivo],
-                    periodicidade_apos_15a=item.get("periodicidade_apos_15a"),
-                )
-            )
+        _emitir_regra(regra, ctx, protocolo, emitidos)
 
     return emitidos
