@@ -8,6 +8,7 @@ from pathlib import Path
 from docx import Document
 
 from agente_medico.motor.tipos import Momento
+from scripts.medir_audiometria_dem import parsear_momentos, rotulos_nao_reconhecidos
 from scripts.medir_cobertura_e_forma import (
     FORMA_ANOMALA,
     FORMA_GRUPO_SEPARADO,
@@ -83,10 +84,11 @@ def test_numero_no_rotulo_do_momento_nao_vira_sem_numero() -> None:
     assert resultado.exame == "audiometria"
     assert resultado.meses == 12
     assert resultado.forma == FORMA_INLINE
-    # DEM com periodicidade colada não bate rótulo exato — fica fora de
-    # `momentos`, mesma classe de desvio de DT-003EW-02 (documentado, não
-    # escondido pelo instrumento).
-    assert Momento.DEM not in resultado.momentos
+    # Desde 003.EZ fatia 0b, parsear_momentos remove o sufixo de
+    # periodicidade colado ao rótulo antes do lookup exato — DEM passa a
+    # ser reconhecido aqui também (a extração de forma/meses, que já
+    # funcionava, é independente e não regride).
+    assert Momento.DEM in resultado.momentos
 
 
 def _construir_docx_sintetico(caminho: Path) -> None:
@@ -218,3 +220,38 @@ def test_relatorio_imprime_valor_do_piso_usado(tmp_path: Path) -> None:
     _construir_docx_sintetico(caminho)
     relatorio = gerar_relatorio([caminho], _MAPA_NOMES, piso=17)
     assert "N=17" in relatorio
+
+
+def _registro_completo_de_celula(celula: str) -> RegistroCargoCompleto:
+    return RegistroCargoCompleto(
+        ghe="GHE-X",
+        cargo="Cargo",
+        tem_audiometria=True,
+        momentos_audiometria=parsear_momentos(celula),
+        rotulos_nao_reconhecidos_audiometria=rotulos_nao_reconhecidos(celula),
+        formas=(),
+    )
+
+
+def test_periodicidade_colada_ao_dem_move_cargo_de_indeterminado_para_com_dem() -> None:
+    # Integração fatia 0b (003.EZ): cargo cujo único rótulo ilegível na
+    # fatia 0 era "DEM 12 meses" tem que migrar de indeterminado para
+    # com_dem depois do fix do parser. Reversão que mata: reverter a
+    # Entrega 1 (remoção de sufixo de periodicidade em parsear_momentos /
+    # rotulos_nao_reconhecidos) — o registro volta a cair em indeterminado.
+    registro = _registro_completo_de_celula("Audiometria (ADM, PER, MRO, DEM 12 meses)")
+    com_dem, sem_dem, indeterminado = classificar_momento_dem([registro])
+    assert com_dem == [registro]
+    assert sem_dem == []
+    assert indeterminado == []
+
+
+def test_periodicidade_colada_ao_mro_sem_dem_vai_para_sem_dem_nao_com_dem() -> None:
+    # Reversão que mata: fazer o strip de sufixo resolver qualquer rótulo
+    # colado a periodicidade para DEM (em vez do rótulo real que estava
+    # colado) — este cargo não tem DEM na célula e tem que cair em sem_dem.
+    registro = _registro_completo_de_celula("Audiometria (ADM, PER, MRO 12 meses)")
+    com_dem, sem_dem, indeterminado = classificar_momento_dem([registro])
+    assert com_dem == []
+    assert sem_dem == [registro]
+    assert indeterminado == []

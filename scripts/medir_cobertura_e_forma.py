@@ -18,9 +18,10 @@ Reuso obrigatório (D-ARQ-67), por import, nunca redigitado:
   declarado aqui por transparência): `_extrair_linha_audiometria` e
   `_PADRAO_GHE`, porque redigitá-los para rastrear GHE atual e isolar a
   linha de audiometria repetiria exatamente o código que D-ARQ-67 proíbe
-  duplicar; `_celulas_logicas` também, desde 003.EZ (DH-003EY-01) — a
-  definição migrou para `medir_audiometria_dem.py`, este módulo importa em
-  vez de manter cópia.
+  duplicar; `_celulas_logicas` também, desde 003.EZ fatia 0 (DH-003EY-01), e
+  `_PADRAO_MESES` desde 003.EZ fatia 0b — as duas definições migraram para
+  `medir_audiometria_dem.py` (módulo a montante, evita import circular),
+  este módulo importa em vez de manter cópia.
 
 Duas armadilhas medidas em 003.EX ao generalizar de "audiometria" para
 "qualquer exame" — nenhuma vira descarte silencioso (`DH-003EX-01`):
@@ -47,6 +48,7 @@ from docx import Document
 from agente_medico.motor.tipos import Momento
 from scripts.medir_audiometria_dem import (
     _PADRAO_GHE,
+    _PADRAO_MESES,
     _cargo_para_exibicao,
     _celulas_logicas,
     _extrair_linha_audiometria,
@@ -64,7 +66,6 @@ _CAMINHO_EXAMES_YAML = (
 )
 
 _PADRAO_GRUPO_PARENTESE = re.compile(r"\(([^)]*)\)")
-_PADRAO_MESES = re.compile(r"(\d+)\s*mes", re.IGNORECASE)
 _PADRAO_SETOR = re.compile(r"^SETOR\s*:?", re.IGNORECASE)
 
 

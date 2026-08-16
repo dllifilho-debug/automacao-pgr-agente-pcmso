@@ -52,6 +52,23 @@ _PADRAO_GHE = re.compile(r"^GHE\s*\d+")
 _PADRAO_GRUPO = re.compile(r"\(([^)]*)\)")
 _PADRAO_METADADO = re.compile(r"^(Empresa|Obra|M[eé]dico|SETOR|Data|Adendo)", re.IGNORECASE)
 _CABECALHOS_TABELA = {"FUNÇÃO", "EXAMES SOLICITADOS"}
+_PADRAO_MESES = re.compile(r"(\d+)\s*mes", re.IGNORECASE)
+
+
+def _remover_sufixo_periodicidade(rotulo: str) -> str:
+    """Remove um sufixo de periodicidade colado ao rótulo do momento (ex.:
+    "DEM 12 meses" -> "DEM", 003.EZ fatia 0b). Veto de resultado via lookup
+    exato depois, não filtro de candidato (D-ARQ-64): a remoção é
+    incondicional onde `_PADRAO_MESES` casa — inclusive quando o sufixo é o
+    token inteiro ("12 meses" -> ""), que então falha o lookup e permanece
+    não reconhecido, verbatim, em `rotulos_nao_reconhecidos`. Sem isso,
+    "DEM 12 meses" nunca bate `_ROTULO_PARA_MOMENTO` (lookup exato) e o
+    cargo cai em `indeterminado` mesmo tendo `DEM` escrito na célula.
+    """
+    match = _PADRAO_MESES.search(rotulo)
+    if match is None:
+        return rotulo
+    return rotulo[: match.start()].strip()
 
 
 def parsear_momentos(celula: str) -> frozenset[Momento]:
@@ -66,7 +83,8 @@ def parsear_momentos(celula: str) -> frozenset[Momento]:
         return frozenset()
     momentos: set[Momento] = set()
     for rotulo in grupos[-1].split(","):
-        momento = _ROTULO_PARA_MOMENTO.get(rotulo.strip())
+        candidato = _remover_sufixo_periodicidade(rotulo.strip())
+        momento = _ROTULO_PARA_MOMENTO.get(candidato)
         if momento is not None:
             momentos.add(momento)
     return frozenset(momentos)
@@ -74,17 +92,22 @@ def parsear_momentos(celula: str) -> frozenset[Momento]:
 
 def rotulos_nao_reconhecidos(celula: str) -> frozenset[str]:
     """Rótulos do último grupo entre parênteses que não batem com nenhum
-    `Momento` conhecido (via `_ROTULO_PARA_MOMENTO`) — reportados, não
-    engolidos em silêncio.
+    `Momento` conhecido (via `_ROTULO_PARA_MOMENTO`, após remoção de sufixo
+    de periodicidade) — reportados verbatim (com a periodicidade, se havia),
+    não engolidos em silêncio.
     """
     grupos = _PADRAO_GRUPO.findall(celula)
     if not grupos:
         return frozenset()
-    return frozenset(
-        rotulo.strip()
-        for rotulo in grupos[-1].split(",")
-        if rotulo.strip() and rotulo.strip() not in _ROTULO_PARA_MOMENTO
-    )
+    nao_reconhecidos: set[str] = set()
+    for rotulo in grupos[-1].split(","):
+        rotulo_stripped = rotulo.strip()
+        if not rotulo_stripped:
+            continue
+        candidato = _remover_sufixo_periodicidade(rotulo_stripped)
+        if candidato not in _ROTULO_PARA_MOMENTO:
+            nao_reconhecidos.add(rotulo_stripped)
+    return frozenset(nao_reconhecidos)
 
 
 _PADRAO_TRECHO_AUDIOMETRIA = re.compile(
