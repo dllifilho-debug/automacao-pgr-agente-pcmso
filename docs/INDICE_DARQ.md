@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v170 · 80 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v171 · 81 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -75,16 +75,17 @@ Fonte: DECISOES_ARQUITETURAIS.md v170 · 80 decisões
 | D-ARQ-65 | Extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo, não rotina |  | 2508 | 10051 |
 | D-ARQ-66 | Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas |  | 2644 | 2159 |
 | D-ARQ-67 | Literal de vocabulário em código é contrato verificado por teste computado do dado |  | 2683 | 1815 |
-| D-ARQ-68 | Silêncio documental mapeia para o ramo normativo de ausência quando a norma o define; sem esse ramo, D-ARQ-13 prevalece |  | 2713 | 3810 |
-| D-ARQ-69 | Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita |  | 2742 | 2395 |
-| D-ARQ-70 | Alias de corpus medido entra no vocabulário só ancorado em literal normativo, com fonte dupla e teste anti-FP |  | 2765 | 3464 |
-| D-ARQ-71 | Perna `Ausente` absorvida por `ou` verdadeiro gera pendência não-bloqueante anexada à linha; o tri-estado não se move |  | 2785 | 5506 |
-| D-ARQ-72 | Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo` | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003 | 2810 | 2928 |
-| D-ARQ-73 | Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003 | 2835 | 6207 |
-| D-ARQ-74 | Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 2921 | 3033 |
-| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 2973 | 12120 |
-| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3144 | 5109 |
-| D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3219 | 4842 |
-| D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3293 | 7609 |
-| D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3400 | 1691 |
-| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3431 | 7663 |
+| D-ARQ-68 | Silêncio documental mapeia para o ramo normativo de ausência quando a norma o define; sem esse ramo, D-ARQ-13 prevalece |  | 2713 | 6501 |
+| D-ARQ-69 | Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita |  | 2758 | 2395 |
+| D-ARQ-70 | Alias de corpus medido entra no vocabulário só ancorado em literal normativo, com fonte dupla e teste anti-FP |  | 2781 | 3464 |
+| D-ARQ-71 | Perna `Ausente` absorvida por `ou` verdadeiro gera pendência não-bloqueante anexada à linha; o tri-estado não se move |  | 2801 | 5506 |
+| D-ARQ-72 | Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo` | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003 | 2826 | 2928 |
+| D-ARQ-73 | Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003 | 2851 | 6207 |
+| D-ARQ-74 | Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 2937 | 3033 |
+| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 2989 | 12120 |
+| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3160 | 5109 |
+| D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3235 | 4842 |
+| D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3309 | 7609 |
+| D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3416 | 1691 |
+| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3447 | 7663 |
+| D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3559 | 2897 |
