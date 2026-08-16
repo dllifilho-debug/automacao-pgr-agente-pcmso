@@ -18,7 +18,9 @@ Reuso obrigatório (D-ARQ-67), por import, nunca redigitado:
   declarado aqui por transparência): `_extrair_linha_audiometria` e
   `_PADRAO_GHE`, porque redigitá-los para rastrear GHE atual e isolar a
   linha de audiometria repetiria exatamente o código que D-ARQ-67 proíbe
-  duplicar.
+  duplicar; `_celulas_logicas` também, desde 003.EZ (DH-003EY-01) — a
+  definição migrou para `medir_audiometria_dem.py`, este módulo importa em
+  vez de manter cópia.
 
 Duas armadilhas medidas em 003.EX ao generalizar de "audiometria" para
 "qualquer exame" — nenhuma vira descarte silencioso (`DH-003EX-01`):
@@ -46,6 +48,7 @@ from agente_medico.motor.tipos import Momento
 from scripts.medir_audiometria_dem import (
     _PADRAO_GHE,
     _cargo_para_exibicao,
+    _celulas_logicas,
     _extrair_linha_audiometria,
     _linha_e_cargo,
     parsear_momentos,
@@ -64,25 +67,6 @@ _PADRAO_GRUPO_PARENTESE = re.compile(r"\(([^)]*)\)")
 _PADRAO_MESES = re.compile(r"(\d+)\s*mes", re.IGNORECASE)
 _PADRAO_SETOR = re.compile(r"^SETOR\s*:?", re.IGNORECASE)
 
-
-def _celulas_logicas(cells: Any) -> list[str]:
-    """Colapsa células adjacentes com texto idêntico numa só — python-docx
-    repete o mesmo texto em cada célula de uma mesclagem horizontal (medido:
-    ATZUM tem 13 colunas físicas para uma tabela de 2 colunas lógicas,
-    FUNÇÃO mesclada em 0-3 e EXAMES SOLICITADOS em 4-9; indexação fixa
-    `celulas[0]`/`celulas[1]`, correta nos documentos de 2 colunas físicas,
-    lê a própria mesclagem de FUNÇÃO como se fosse a coluna de exames nesses
-    casos e zera a contagem de audiometria em silêncio). Não é heurística de
-    texto — mesclagem é estrutura da tabela, não conteúdo.
-    """
-    logicas: list[str] = []
-    anterior: str | None = None
-    for celula in cells:
-        texto = celula.text
-        if texto != anterior:
-            logicas.append(texto)
-            anterior = texto
-    return logicas
 
 FORMA_INLINE = "inline"
 FORMA_GRUPO_SEPARADO = "grupo_separado"

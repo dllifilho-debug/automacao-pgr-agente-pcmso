@@ -3,11 +3,16 @@ sobre células de gabarito isoladas à linha de Audiometria."""
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from docx import Document
+
 from agente_medico.motor.tipos import Momento
 from agente_medico.superficie.documento_matriz import _ROTULO_MOMENTO
 from scripts.medir_audiometria_dem import (
     RegistroCargo,
     classificar_dem,
+    extrair_registros,
     parsear_momentos,
     rotulos_nao_reconhecidos,
 )
@@ -63,3 +68,75 @@ def test_classificar_dem_separa_indeterminado_de_sem_dem_confirmado() -> None:
     assert com_dem == []
     assert indeterminado == [ambiguo]
     assert sem_dem == [limpo]
+
+
+def _construir_docx_duas_colunas(caminho: Path) -> None:
+    documento = Document()
+    tabela = documento.add_table(rows=0, cols=2)
+    linha_cabecalho = tabela.add_row().cells
+    linha_cabecalho[0].text = "FUNÇÃO"
+    linha_cabecalho[1].text = "EXAMES SOLICITADOS"
+    linha_cargo = tabela.add_row().cells
+    linha_cargo[0].text = "Cargo Simples"
+    linha_cargo[1].text = "Audiometria (ADM, PER, MRO, DEM)"
+    documento.save(str(caminho))
+
+
+def test_celulas_logicas_neutra_em_tabela_de_duas_colunas_sem_mesclagem(tmp_path: Path) -> None:
+    # Controle de neutralidade da Entrega 3 (003.EZ, DH-003EY-01): em tabela
+    # de 2 colunas físicas sem mesclagem, _celulas_logicas(linha.cells)
+    # devolve exatamente [texto_col0, texto_col1] — o mesmo resultado da
+    # indexação fixa celulas[0]/celulas[1] herdada de 003.EX. Nenhuma
+    # reversão isolada mata este teste; ele confirma que o port não muda o
+    # resultado nos documentos que já eram lidos corretamente (forma dos
+    # checkpoints SPE 0030 e RESERVA 0028).
+    caminho = tmp_path / "duas_colunas.docx"
+    _construir_docx_duas_colunas(caminho)
+    registros, _ = extrair_registros(caminho)
+    assert len(registros) == 1
+    assert registros[0].cargo == "Cargo Simples"
+    assert registros[0].tem_audiometria is True
+    assert registros[0].momentos_audiometria == {
+        Momento.ADM,
+        Momento.PER,
+        Momento.MR,
+        Momento.DEM,
+    }
+
+
+def _construir_docx_mesclado(caminho: Path) -> None:
+    # python-docx repete o texto da célula mesclada em cada coluna física do
+    # span — simulado aqui atribuindo o mesmo texto às colunas 0-1 (FUNÇÃO)
+    # e 2-3 (EXAMES SOLICITADOS), sem chamar .merge() (o efeito sobre
+    # .text é o mesmo que uma mesclagem real produziria na leitura).
+    documento = Document()
+    tabela = documento.add_table(rows=0, cols=4)
+    linha_cabecalho = tabela.add_row().cells
+    linha_cabecalho[0].text = "FUNÇÃO"
+    linha_cabecalho[1].text = "FUNÇÃO"
+    linha_cabecalho[2].text = "EXAMES SOLICITADOS"
+    linha_cabecalho[3].text = "EXAMES SOLICITADOS"
+    linha_cargo = tabela.add_row().cells
+    linha_cargo[0].text = "Cargo Mesclado"
+    linha_cargo[1].text = "Cargo Mesclado"
+    linha_cargo[2].text = "Audiometria (ADM, PER, MRO, DEM)"
+    linha_cargo[3].text = "Audiometria (ADM, PER, MRO, DEM)"
+    documento.save(str(caminho))
+
+
+def test_celulas_logicas_evita_zerar_audiometria_em_tabela_mesclada(tmp_path: Path) -> None:
+    # Reversão que mata: reverter o port de _celulas_logicas (voltar a
+    # indexação fixa celulas[0]/celulas[1]) — celulas[1] leria a própria
+    # mesclagem de FUNÇÃO em vez de EXAMES SOLICITADOS, e tem_audiometria
+    # cairia para False (reproduz o defeito medido no ATZUM, DH-003EY-01).
+    caminho = tmp_path / "mesclado.docx"
+    _construir_docx_mesclado(caminho)
+    registros, _ = extrair_registros(caminho)
+    assert len(registros) == 1
+    assert registros[0].tem_audiometria is True
+    assert registros[0].momentos_audiometria == {
+        Momento.ADM,
+        Momento.PER,
+        Momento.MR,
+        Momento.DEM,
+    }

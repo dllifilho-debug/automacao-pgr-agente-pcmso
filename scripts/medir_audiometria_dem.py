@@ -13,6 +13,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from docx import Document
 
@@ -22,6 +23,30 @@ from agente_medico.superficie.documento_matriz import _ROTULO_MOMENTO
 _ROTULO_PARA_MOMENTO: dict[str, Momento] = {
     rotulo: momento for momento, rotulo in _ROTULO_MOMENTO.items()
 }
+
+
+def _celulas_logicas(cells: Any) -> list[str]:
+    """Colapsa células adjacentes com texto idêntico numa só — python-docx
+    repete o mesmo texto em cada célula de uma mesclagem horizontal (medido:
+    ATZUM tem 13 colunas físicas para uma tabela de 2 colunas lógicas,
+    FUNÇÃO mesclada em 0-3 e EXAMES SOLICITADOS em 4-9; indexação fixa
+    `celulas[0]`/`celulas[1]`, correta nos documentos de 2 colunas físicas,
+    lê a própria mesclagem de FUNÇÃO como se fosse a coluna de exames nesses
+    casos e zera a contagem de audiometria em silêncio). Não é heurística de
+    texto — mesclagem é estrutura da tabela, não conteúdo. Portado de
+    `medir_cobertura_e_forma.py` (DH-003EY-01, 003.EZ) — este script (003.EX)
+    seguia com a indexação fixa e não expunha o defeito só porque os dois
+    documentos medidos naquela sessão não tinham mesclagem alcançando a
+    coluna de exames.
+    """
+    logicas: list[str] = []
+    anterior: str | None = None
+    for celula in cells:
+        texto = celula.text
+        if texto != anterior:
+            logicas.append(texto)
+            anterior = texto
+    return logicas
 
 _PADRAO_GHE = re.compile(r"^GHE\s*\d+")
 _PADRAO_GRUPO = re.compile(r"\(([^)]*)\)")
@@ -111,14 +136,14 @@ def extrair_registros(caminho: Path) -> tuple[list[RegistroCargo], list[str]]:
     ghe_atual = "(sem agrupamento GHE)"
     for tabela in documento.tables:
         for linha in tabela.rows:
-            celulas = linha.cells
-            cargo = celulas[0].text.strip()
+            celulas_logicas = _celulas_logicas(linha.cells)
+            cargo = celulas_logicas[0].strip() if celulas_logicas else ""
             if _PADRAO_GHE.match(cargo):
                 ghe_atual = re.sub(r"\s+", " ", cargo)
                 continue
-            if not _linha_e_cargo(cargo) or len(celulas) < 2:
+            if not _linha_e_cargo(cargo) or len(celulas_logicas) < 2:
                 continue
-            linha_audio = _extrair_linha_audiometria(celulas[1].text)
+            linha_audio = _extrair_linha_audiometria(celulas_logicas[1])
             if linha_audio is None:
                 registros.append(RegistroCargo(ghe_atual, cargo, False, frozenset()))
                 continue
