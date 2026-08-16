@@ -871,7 +871,7 @@ D-ARQ-15, não limpeza. Registrado para não virar descoberta-surpresa (classe d
 código inalcançável verde na suíte). Fecha quando (a) um call-site futuro voltar a levantá-la, ou (b) uma sessão
 ARQUITETURA decidir que D-ARQ-15 não precisa mais do veículo.
 
-### DT-003EG-01 — Audiometria emitida pelo motivo errado quando a perna do ruído está bloqueada `[ABERTA]`
+### DT-003EG-01 — Audiometria emitida pelo motivo errado quando a perna do ruído está bloqueada `[FECHADA — D-ARQ-68 cl.5, 003.EZ]`
 
 **Origem:** medição `003eg_fascino_rodar.md` (Fascino, 19 GHEs, commit `5a2d15b`), habilitada
 pela Entrega 3 de 003.EG — o motivo por linha só ficou visível no relatório a partir desta sessão.
@@ -910,6 +910,18 @@ evidência documental direta (21 de 226 cargos sem audiometria anotados `Ruído 
 de ação)` pela própria médica). `DT-003EY-01` depende da resolução deste predicado para a
 correção candidata (ID nova sucedendo `R-AUD-04`). Não fecha aqui — a raiz continua
 indeterminada, só ganhou o nome do que falta.
+
+**FECHADA em 003.EZ, medição confirmada contra o Fascino (`rodar-offline`,
+`relatorios/003ez_fascino_rodar.md`).** `D-ARQ-68` cl.5 resolve a raiz que esta DT rastreava
+desde a origem: `ruido_acima_acao` deixa de ser um beco sem saída bloqueante e passa a admitir
+presunção protetiva declarada (`R-AUD-01`/`R-AUD-02`, `quando_ausente: {presumir_true:
+[ruido_acima_acao]}`). Medido, **18/19 GHEs** com ruído sem quantificação **carregam `R-AUD-01`
+e/ou `R-AUD-02` nos motivos da linha `audiometria`** — não mais só `R-PKG-ATIVCRIT` — ao lado da
+pendência não-bloqueante `predicado_ausente_presumido` que nomeia o primitivo presumido (32
+ocorrências no corpus, 16 GHEs × 2 regras). O único GHE sem audiometria (GHE-19, Vendas) não tem
+nenhum risco que a justifique — comportamento correto, não regressão. Exame certo, razão certa: a
+linha agora aponta para a exposição que clinicamente a justifica, com o sinal de que o dado é
+presumido — não medido — visível na pendência e no piso `PARCIAL` da matriz (nunca `VÁLIDA`).
 
 ### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[ABERTA — higiene de instrumento]`
 
@@ -1367,6 +1379,19 @@ continua indeterminado nos mesmos PGRs, só deixou de ser a única via para `DEM
 4.1 `[DERIVADO]` + matriz-precedente `[INTERPRETADO]` — ver `docs/referencia/GABARITO_003EX_audiometria_dem.md`). Fechamento é da manifestação (saída sem `DEM`), não da raiz (`ruido_acima_acao =
 Ausente`), que segue viva em `DT-003EG-01`.
 
+**Nota aditiva (003.EZ) — reabertura e fechamento no mesmo movimento, não silenciados.**
+`R-AUD-04`, o mecanismo que fechava esta DT, foi `[DEPRECATED — fundamento refutado por
+DT-003EY-01, sem sucessora]` (`D-ARQ-81`). Isso **reabriria** esta DT — o `DEM` incondicional que
+a fechava deixa de existir — não fosse `D-ARQ-68` cl.5 fechá-la de novo por um caminho diferente
+na mesma sessão: `R-AUD-02` passa a declarar `quando_ausente: {presumir_true:
+[ruido_acima_acao]}`, e o `DEM` volta a sair, agora pela **presunção protetiva** sobre o
+predicado que `DT-003EG-01` e `DT-003EY-01` nomeiam como a raiz — não mais pelo piso
+incondicional. Efeito líquido: o `DEM` continua saindo (fechamento mantido), mas a linha carrega
+pendência não-bloqueante nomeando o primitivo presumido, e a matriz cai para `PARCIAL` em vez de
+`VÁLIDA` — a raiz (`ruido_acima_acao = Ausente`) fica **visível** em vez de absorvida pelo piso.
+`DT-003EG-01` é a que rastreia se a raiz em si (o motivo impresso na linha) também se resolve —
+ver nota aditiva ali.
+
 ### DT-003EW-02 — Periodicidade não impressa no documento `[ABERTA]`
 
 **Origem:** 003.EW, comparação contra o mesmo gabarito de `DT-003EW-01`.
@@ -1392,6 +1417,16 @@ confirmações no corpus amplo de 003.EY (26 documentos, todos os exames) — si
 regra não sobrevive fora do par Fascino/RESERVA que a originou, não número final: o agregado é
 por segmento de célula, e "contraria" só fica bem definido conhecendo a periodicidade real por
 exame (que esta DT ainda não resolveu). Refino pendente antes de implementar a formatação.
+
+**Nota aditiva (003.EZ).** Esta DT tem duas facetas que a nota de 003.EY não distinguia por
+nome: **leitura** (o instrumento de medição, `medir_audiometria_dem.py`/`parsear_momentos`,
+precisa separar a periodicidade colada ao rótulo do momento — ex. `"DEM 12 meses"` — para medir
+corretamente) e **escrita** (o app de produção, `documento_matriz.py`, precisa *imprimir* o
+número junto ao momento no documento assinado). A faceta de **leitura** foi **RESOLVIDA** na
+fatia 0b desta sessão (`parsear_momentos` passa a separar periodicidade colada ao rótulo,
+commit `6f2e9f0`) — instrumento de medição, não o app. A faceta de **escrita** (o que esta DT
+mede desde a origem: `documento_matriz.py::_formatar_celula` nunca monta o número) **segue
+ABERTA** — nenhum código de produção foi tocado nesta sessão.
 
 ### DT-003EW-03 — Exames do gabarito ausentes na saída `[ABERTA]`
 
@@ -1482,7 +1517,7 @@ silenciosamente; teste com célula sintética de 3 grupos que falhe sem a checag
 
 **Status:** ABERTA. Não-bloqueante — instrumento de medição, não código de produção clínica.
 
-### DT-003EY-01 — Fundamento de `R-AUD-04` refutado pelo corpus `[ABERTA — bloqueante para o documento assinado]`
+### DT-003EY-01 — Fundamento de `R-AUD-04` refutado pelo corpus `[FECHADA — D-ARQ-81/D-ARQ-68 cl.5, 003.EZ]`
 
 **Origem:** 003.EY fatia 0, varredura de cobertura de audiometria sobre 23 obras canônicas
 (26 arquivos, lista nominal fechada em EMENDA 1 do prompt de sessão).
@@ -1531,10 +1566,22 @@ do ruído está bloqueada) — as duas dívidas rastreiam o mesmo predicado inde
 NR-07-Anexo-II-item-2), `R-AUD-04` `[DEPRECATED — sucedida por R-AUD-05]` com o corpo
 preservado (mudança de escopo de aplicação ⇒ ID nova, nunca remover a antiga).
 
-**Status:** ABERTA. Não decidida nesta sessão — exige gate D-ARQ-63 declarado (sessão de
-ARQUITETURA) e a decisão sobre PGR que cita ruído sem quantificar.
+**Status:** FECHADA em 003.EZ, por duas decisões que endereçam as duas metades do problema.
+`D-ARQ-81` qualifica o nível 2 de `D-ARQ-22`: precedente de corpus enviesado (aqui, setorial —
+todas as 23 obras são construção civil) não amplia universo que a norma já define; refuta
+formalmente o fundamento de `R-AUD-04`, que sai `[DEPRECATED — fundamento refutado por
+DT-003EY-01, sem sucessora]` — **sem sucessora**, porque não há conduta nova a herdar, há
+conduta a retirar (cl.2). O predicado que o corpus indicava (NR-07 Anexo II item 2,
+`ruido_acima_acao`) não vira nova regra incondicional — `D-ARQ-68` cl.5 resolve pelo lado
+oposto: quando o PGR está silencioso sobre a quantificação do ruído, e a NR-09 (9.4.1/9.4.2) não
+obriga a resposta, o motor declara presunção protetiva por primitivo (`R-AUD-01`/`R-AUD-02`,
+`quando_ausente: {presumir_true: [ruido_acima_acao]}`) em vez de universalizar por
+`todo_trabalhador`. A ressalva "ambíguo ≠ negativo" desta DT é exatamente por que a correção
+final não é uma regra incondicional nova — é presunção auditável, com pendência não-bloqueante e
+piso `PARCIAL` (nunca `VÁLIDA`), preservando o sinal que a leitura cargo-a-cargo ainda não
+confirma.
 
-### DH-003EY-01 — Indexação fixa de célula quebra em tabela com mesclagem `[ABERTA — higiene de instrumento]`
+### DH-003EY-01 — Indexação fixa de célula quebra em tabela com mesclagem `[FECHADA — 003.EZ fatia 0]`
 
 **Origem:** 003.EY fatia 0, `scripts/medir_cobertura_e_forma.py`, ao medir ATZUM (13 colunas
 físicas).
@@ -1555,10 +1602,11 @@ reusado em outra família de documento sem essa checagem.
 
 **Correção candidata.** Portar `_celulas_logicas` para `medir_audiometria_dem.py`.
 
-**Status:** ABERTA. Não-bloqueante para as medições já feitas (003.EX e 003.EY, ambas
-verificadas contra checkpoints); higiene de instrumento para reuso futuro.
+**Status:** FECHADA em 003.EZ fatia 0 (commit `598c19c`) — `_celulas_logicas` migrou para
+`medir_audiometria_dem.py`; `medir_cobertura_e_forma.py` passa a importar em vez de manter
+cópia própria (D-ARQ-67). Checkpoints de 003.EX reverificados intactos.
 
-### DH-003EY-02 — Binário `universal` sem piso de `n_cargos` `[ABERTA — higiene de instrumento]`
+### DH-003EY-02 — Binário `universal` sem piso de `n_cargos` `[FECHADA — 003.EZ fatia 0]`
 
 **Origem:** 003.EY fatia 0, agregação da Pergunta A (`fração == 1.0` ⇒ `universal`).
 
@@ -1571,5 +1619,6 @@ com amostras pequenas demais para confirmar ou refutar universalidade.
 17` muda o agregado de 7/23 para 6/23. Piso é escolha editorial, não medição; deve ficar
 explícito em qualquer citação do número.
 
-**Status:** ABERTA. Não-bloqueante — o instrumento já reporta a fração e o `n_cargos` por
-documento; falta só o agregado com piso como saída de primeira classe, hoje calculado à mão.
+**Status:** FECHADA em 003.EZ fatia 0 (commit `dfff654`) — agregado de universalidade passa a
+sair sempre com o piso declarado ao lado (`universais_bruto` e `universais_com_piso(N)`, N como
+parâmetro), saída de primeira classe do instrumento, não mais cálculo à mão.
