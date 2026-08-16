@@ -196,6 +196,35 @@ def test_quando_ausente_false_nao_bloqueia() -> None:
     assert not any(p.bloqueante for p in resultado.matrizes[0].pendencias)
 
 
+# ---------------------------------------------------------------------------
+# quando_ausente: {presumir_true: [...]} (D-ARQ-68 cl.5) — presunção protetiva
+# sai de BLOQUEADA (linha determinada) mas nunca alcança VÁLIDA.
+# ---------------------------------------------------------------------------
+
+
+def test_presumir_true_sai_de_bloqueada_com_linha_de_risco() -> None:
+    # Teste 10: reversão que mata — remover presumir_true da regra (volta ao
+    # ramo Ausente simples, bloqueante, sem linha nenhuma).
+    ghe = _ghe(riscos=(_risco("ruido"),))
+    pgr = _pgr(ghes=(ghe,))
+    protocolo = _protocolo_ausente(quando_ausente={"presumir_true": ["ruido_acima_acao"]})
+    resultado = executar(pgr, protocolo, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.status != "BLOQUEADA"
+    assert len(linhas_de_risco(matriz.linhas)) >= 1
+
+
+def test_presumir_true_nunca_sai_valida_mesmo_sem_outro_bloqueio() -> None:
+    # Teste 11: reversão que mata — remover a guarda de 2c (orquestrador),
+    # deixando `not tem_bloqueio` sozinho decidir VÁLIDA.
+    ghe = _ghe(riscos=(_risco("ruido"),))
+    pgr = _pgr(ghes=(ghe,))
+    protocolo = _protocolo_ausente(quando_ausente={"presumir_true": ["ruido_acima_acao"]})
+    resultado = executar(pgr, protocolo, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.status == "PARCIAL"
+
+
 def test_dois_ghes_um_bloqueia() -> None:
     ghe1 = _ghe(ghe_id="GHE-01", riscos=(_risco("trabalho_altura"),))
     ghe2 = _ghe(ghe_id="GHE-02", riscos=(_risco("ruido"),))
@@ -394,8 +423,13 @@ def test_rcli01_emite_tambem_em_ghe_com_risco() -> None:
 def test_rcli01_unico_risco_bloqueado_com_clinico_presente_fecha_bloqueada() -> None:
     # (c) fatia 2 (003.EC): a linha do clínico nunca falta, mas ela sozinha não
     # basta para tirar o GHE de BLOQUEADA quando o único risco não determinou nada.
+    # Usa vibração genérica (não ruído): desde D-ARQ-68 cl.5 (003.EZ), ruído
+    # sem quantificação deixou de bloquear puro — R-AUD-01/02 presumem e emitem
+    # (ver test_raud01_raud02_presuncao_promove_bloqueada_para_parcial_com_linha_de_risco).
+    # Vibração genérica não tem quando_ausente.presumir_true declarado e segue
+    # bloqueando puro — preserva o invariante original deste teste (c).
     proto = carregar(_PROTOCOLO_DIR)
-    ghe = _ghe(riscos=(_risco("ruido"),))
+    ghe = _ghe(riscos=(_risco("vibracao"),))
     pgr = _pgr(ghes=(ghe,))
     resultado = executar(pgr, proto, hoje=HOJE)
     matriz = resultado.matrizes[0]
@@ -468,56 +502,21 @@ def test_rcli01_um_risco_determinado_mais_um_bloqueado_segue_parcial() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_raud04_emite_audiometria_12m_sem_risco() -> None:
-    # Reversão que mata: trocar quando: todo_trabalhador por um predicado
-    # condicional em R-AUD-04.
-    proto = carregar(_PROTOCOLO_DIR)
-    ghe = _ghe(riscos=())
-    pgr = _pgr(ghes=(ghe,))
-    resultado = executar(pgr, proto, hoje=HOJE)
-    matriz = resultado.matrizes[0]
-    audiometria = next(ln for ln in matriz.linhas if ln.exame == "audiometria")
-    assert audiometria.periodicidade_meses == 12
+# R-AUD-04 foi DEPRECATED em 003.EZ (D-ARQ-81 — fundamento refutado por
+# DT-003EY-01: universalidade medida em 7/23 obras, não convergência). Os três
+# testes que cravavam o piso incondicional (audiometria sem risco, DEM via
+# R-AUD-04, dedup com R-PKG-ATIVCRIT+R-AUD-04) morrem por desenho — a conduta
+# que eles protegiam foi retirada, não sucedida. O quarto inverte: ver abaixo.
 
 
-def test_raud04_linha_contem_dem() -> None:
-    # Reversão que mata: remover dem de momentos na entrada nova.
-    proto = carregar(_PROTOCOLO_DIR)
-    ghe = _ghe(riscos=())
-    pgr = _pgr(ghes=(ghe,))
-    resultado = executar(pgr, proto, hoje=HOJE)
-    matriz = resultado.matrizes[0]
-    audiometria = next(ln for ln in matriz.linhas if ln.exame == "audiometria")
-    assert Momento.DEM in audiometria.momentos
-
-
-def test_raud04_dedup_com_ativcrit_uma_linha_quatro_momentos_dois_motivos() -> None:
-    # Reversão que mata: remover a entrada R-AUD-04 do regras.yaml — a linha
-    # perde dem e o segundo motivo. Exercita o caminho completo (regra nova +
-    # dedup de R-GHE-03/D-ARQ-39), não a regra isolada — sem isto, R-AUD-04
-    # pode estar correta e inerte na maioria dos GHEs do Fascino, onde
-    # R-PKG-ATIVCRIT já emite audiometria (modo de falha "mecanismo entregue
-    # ≠ efeito entregue", registrado 2× em 003.EW).
-    proto = carregar(_PROTOCOLO_DIR)
-    ghe = _ghe(riscos=(_risco("trabalho_altura"),))
-    pgr = _pgr(ghes=(ghe,))
-    resultado = executar(pgr, proto, hoje=HOJE)
-    matriz = resultado.matrizes[0]
-    audios = [ln for ln in matriz.linhas if ln.exame == "audiometria"]
-    assert len(audios) == 1
-    audio = audios[0]
-    assert audio.momentos == {Momento.ADM, Momento.PER, Momento.MR, Momento.DEM}
-    regras_motivos = {m.regra_id for m in audio.motivos}
-    assert "R-PKG-ATIVCRIT" in regras_motivos
-    assert "R-AUD-04" in regras_motivos
-
-
-def test_raud04_nao_promove_bloqueada_para_parcial() -> None:
-    # Reversão que mata: retirar "todo_trabalhador" de PRIMITIVOS_INCONDICIONAIS.
-    # Ruído sem quantificação bloqueia (ruido_acima_acao indeterminado); antes de
-    # R-AUD-04 esta GHE não tinha linha de audiometria nenhuma. Prova que a nova
-    # linha incondicional não sobe o status de BLOQUEADA para PARCIAL sozinha
-    # (D-ARQ-66 cl.2).
+def test_raud01_raud02_presuncao_promove_bloqueada_para_parcial_com_linha_de_risco() -> None:
+    # Sucede test_raud04_nao_promove_bloqueada_para_parcial (003.EX/003.EZ).
+    # Sob D-ARQ-68 cl.5, ruído sem quantificação deixou de bloquear R-AUD-01/02
+    # — a presunção protetiva declarada em quando_ausente.presumir_true emite
+    # audiometria (adm/per/MR/dem) com pendência não-bloqueante. As duas
+    # asserções do teste antigo (linhas_de_risco == [] e status == "BLOQUEADA")
+    # viram o contrário: reversão que mata — remover presumir_true de R-AUD-01
+    # e R-AUD-02 no regras.yaml.
     proto = carregar(_PROTOCOLO_DIR)
     ghe = _ghe(riscos=(_risco("ruido"),))
     pgr = _pgr(ghes=(ghe,))
@@ -525,8 +524,13 @@ def test_raud04_nao_promove_bloqueada_para_parcial() -> None:
     matriz = resultado.matrizes[0]
     nomes = {ln.exame for ln in matriz.linhas}
     assert "audiometria" in nomes
-    assert linhas_de_risco(matriz.linhas) == []
-    assert matriz.status == "BLOQUEADA"
+    assert linhas_de_risco(matriz.linhas) != []
+    assert matriz.status == "PARCIAL"
+    assert any(
+        p.tipo == "predicado_ausente_presumido"
+        for ln in matriz.linhas
+        for p in ln.pendencias_anexadas
+    ) or any(p.tipo == "predicado_ausente_presumido" for p in matriz.pendencias)
 
 
 # ---------------------------------------------------------------------------

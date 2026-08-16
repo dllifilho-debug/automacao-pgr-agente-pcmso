@@ -2714,12 +2714,32 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 
 **Contexto.** R-RX-01 roteia RX de tórax OIT pelo Quadro 1 do Anexo III da NR-07, que parte as empresas em dois ramos exaustivos — com medições quantitativas periódicas (4 faixas por LSC/LEO) e sem avaliações quantitativas (adm + 24M, 12M após 15 anos). O motor tratava a ausência de `quantificacao` como `Ausente` bloqueante, criando um terceiro estado que a norma não tem. Efeito medido no Fascino (003.EG): 14 GHEs com sílica resolvida, 70 pendências `predicado_ausente`, zero linhas de RX — a regra mais sensível do protocolo silenciada por um estado inventado pelo motor.
 
-**Decisão — 4 cláusulas.**
+**Decisão — 5 cláusulas.**
 
 1. Quando a norma aplicável define ramo explícito e exaustivo para "sem avaliação / sem medição", a ausência do dado no documento mapeia para esse ramo — o motor emite a conduta do ramo, não pendência bloqueante. A norma já decidiu o que fazer sob ausência; bloquear é substituir a decisão dela por silêncio.
 2. Sem esse ramo, D-ARQ-13 prevalece: ausência → `Ausente` → pendência bloqueante. A condicional é o que impede esta decisão de virar afrouxamento geral do tri-estado.
 3. Afirmação incompleta não é silêncio. Dado parcialmente afirmado que não roteia (`valor` sem `pct_quartzo`/`fracao`; flags contraditórias) permanece bloqueante mesmo quando a norma tem ramo de ausência — ali o documento declara pertencer ao ramo "com medições", e escolher faixa inventaria número (D-ARQ-08/22).
 4. A ponte "documento silencioso ⇒ estado sem avaliação" é `[INTERPRETADO]` e vai marcada na regra que a usa: a norma fala do estado do mundo (a empresa), o motor lê o documento. Onde a divergência importar, o sinal de confirmação é o remédio — não o bloqueio.
+5. **Delegação normativa a documento que a norma não obriga a responder.** Quando a norma **delega o predicado a um documento** que o motor lê (*"conforme informado no PGR"*, NR-07 Anexo II item 2) **e** a norma que rege esse documento **não obriga a resposta** (NR-09 9.4.1/9.4.2 — avaliação quantitativa *"quando aplicáveis"* / *"quando necessária"*), o silêncio não é defeito do documento, e a cl.2 não se aplica sem qualificação. A regra pode declarar a presunção **por primitivo nomeado**, com quatro exigências cumulativas:
+
+   a) a presunção é **na direção protetiva** — presume-se dentro do universo da obrigação, nunca fora dele;
+   b) a presunção é **declarada no dado** (`regras.yaml`), por primitivo, nunca inferida em código nem aplicada a "qualquer ausência da regra";
+   c) a emissão carrega **pendência não-bloqueante** nomeando o primitivo presumido e o dado que falta, e a regra sai marcada `[INTERPRETADO — prioridade na revisão de saída]`;
+   d) **matriz com linha emitida sob presunção não pode ser `VÁLIDA`** — o piso é `PARCIAL`.
+
+   A alínea (d) separa esta decisão de `D-ARQ-71` cl.3, e a distinção é material. Lá o tri-estado não se move porque a conduta foi determinada por uma perna `True` independente — a lacuna era de visibilidade. Aqui a conduta **repousa inteiramente sobre a presunção**: sem ela não haveria linha. Deixar sair `VÁLIDA` produziria documento assinável, sem ressalva no nível da matriz, sustentado por dado que ninguém mediu — o erro silencioso plausível de `D-ARQ-22`, no ponto onde a revisão de saída mais precisa do sinal.
+
+   A **cl.3 permanece e vence**: afirmação incompleta não é silêncio. `pct_LT` ou `relacao_LT` parcialmente afirmados seguem bloqueando. A presunção só alcança o estado em que o documento **nada diz** sobre o nível.
+
+   **Fronteira com a cl.1:** lá a norma decide o que fazer sob ausência e o motor obedece; aqui a norma **não decide**, e o motor declara presunção auditável. Estados distintos, tipos de pendência distintos.
+
+   **Universalidade (D-ARQ-06).** Expressa sobre a forma da norma (delegação a documento + não-obrigatoriedade da resposta), não sobre agente nem setor.
+
+   **Nota ao contra-exemplo da cl.2 (003.EZ).** O corpo desta decisão cita o ruído como contra-exemplo vivo da cl.2 (*"Sílica destrava, ruído não"*). Continua correto quanto ao que 003.EH mediu — NR-15 Anexo 1 e NHO-01 não definem faixa default para ruído sem medição. O que faltava era a NR-09 9.4.2: a avaliação quantitativa é condicional, logo o PGR silencioso pode estar em conformidade, e o encaminhamento "corrigir o PGR" (R-PGR-05) não existe. A cl.5 endereça esse estado; a cl.2 segue valendo onde a norma **exige** a resposta.
+
+   **Fronteira com D-ARQ-71, medida `[MEDIDO — 003.EZ, Fascino]`.** As 32 pendências `predicado_ausente_presumido` são **16 GHEs × 2 regras**, não 17 — e 17 GHEs declaram ruído sem quantificação. O 17º é o **GHE-16**: ali `vibracao_qualquer` resolve `True`, o `ou` curto-circuita, a regra **não** chega ao ramo `Ausente`, e a lacuna do ruído sai como `perna_ausente_absorvida` (D-ARQ-71 cl.2). As duas decisões particionam limpo: **perna absorvida** quando existe perna `True` independente, **presunção** quando não existe.
+
+   Consequência que a revisão de saída precisa conhecer: **dois GHEs com a mesma lacuna documental recebem selos diferentes** — `PARCIAL` pela alínea (d) desta cláusula quando nada mais dispara, `VÁLIDA` pela cl.3 de D-ARQ-71 quando algo mais dispara. É desenho dos dois lados (lá a conduta está determinada por perna independente; aqui repousa na presunção), não inconsistência — mas é sutil, e por isso está escrito.
 
 **Caso-âncora:** R-RX-01 / Quadro 1 (003.EH, commit `7dd68e6`). Contra-exemplo vivo e medido — a cláusula 2 não é teórica: ruído. `R-AUD-01`/`R-AUD-02` dependem de `ruido_acima_acao`, que devolve `Ausente` quando o PGR cita ruído sem quantificação. NR-15 Anexo 1 e NHO-01 não definem faixa default para ruído sem medição — logo o ramo 2 se aplica e o bloqueio permanece. Medido na mesma rodada `37cdda6`: as 4 pendências `predicado_ausente` restantes são todas `R-AUD-01`/`R-AUD-02` (GHE-06 e GHE-12), inalteradas. Sílica destrava, ruído não, pela diferença entre as normas — que é exatamente o que a decisão prevê.
 
@@ -3540,6 +3560,50 @@ prompt — o item de motivos acumulados reescreveu um teste pré-existente cuja 
 deixou de existir, em vez de duplicar cobertura ao lado dele; emenda do wrapper: +2); `mypy
 --strict` limpo, 48 arquivos.
 
+## D-ARQ-81 — Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida
+
+**Contexto.** `R-AUD-04` foi criada em 003.EX sobre matriz-precedente `n=2` concordante
+(D-ARQ-22 Parte A nível 2), universalizando audiometria para todo trabalhador. 003.EY mediu
+23 obras e refutou o fundamento: universalidade em **7/23** (6/23 com piso `n_cargos ≥ 17`),
+distribuição larga entre as não-universais. As duas matrizes de 003.EX eram justamente as
+duas em que a médica estendeu ao administrativo — **artefato de amostra, não convergência**.
+`D-ARQ-22` nível 2 diz "matriz validada como precedente" sem qualificar setor, tamanho nem
+dispersão.
+
+**Cláusula 1 — qualificação do nível 2 de D-ARQ-22.** Matriz-precedente só resolve incerteza
+quando: (a) o corpus tem dispersão declarada entre clientes **e** setores, e o viés que ele
+não cobre é nomeado na regra; (b) a amostra é a **população identificável**, não a fatia
+conveniente — recorte por formato de arquivo ou disponibilidade entra na regra como limite
+medido; (c) **quando a norma define o universo da obrigação, o precedente não autoriza
+ampliá-lo** — pode confirmar conduta dentro do universo, não redesenhá-lo. Precedente que
+amplia universo normativo é `[INTERPRETADO]` nível 4, nunca `[DERIVADO]` nível 2.
+
+A alínea (c) é a que teria barrado `R-AUD-04`: o item 2 do Anexo II **define** o universo, e o
+precedente foi usado para estendê-lo. `R-PSY-02` passa no mesmo teste e continua de pé — a
+NR-01 obriga inventariar o FRPRT para todo trabalhador e **não define universo restrito de
+exame**; ali o precedente preencheu vazio normativo, não contrariou recorte.
+
+**Cláusula 2 — `DEPRECATED por refutação` é estado distinto de `DEPRECATED por sucessão`.**
+Regra cujo **fundamento** foi refutado por medição posterior não tem sucessora por definição:
+não há conduta nova a prescrever, há conduta a retirar. Marcação:
+`[DEPRECATED — fundamento refutado por <ID da dívida>, sem sucessora]`, corpo integralmente
+preservado, com a medição que refutou citada no próprio bloco. Nunca remover a ID — a
+auditoria do PCMSO precisa explicar por que a matriz de ontem trazia a linha e a de hoje não.
+Distingue-se de `R-ESP-01→R-ESP-02`, `R-PSY-01→R-PSY-02` e `R-BIO-02→R-BIO-04`, todas
+sucessões com regra viva do outro lado.
+
+**Consequência.** Toda regra nascida de matriz-precedente declara, no corpo, a dispersão do
+corpus e o viés que não cobre. `R-AUD-04` já declarava ("ambos construção civil") e ainda
+assim passou, porque declarar não era condição de nada. A cl.1 (c) torna a declaração
+operante.
+
+**Universalidade (D-ARQ-06).** Regra sobre uso de evidência, não sobre agente. Vale para
+qualquer eixo cujo corpus seja de um setor só — que é o estado do acervo inteiro.
+
+**Base.** Sessão 003.EZ. Origem: `DT-003EY-01`. Candidato registrado e não aberto em 003.EX
+("quando um precedente de corpus setorialmente enviesado autoriza universalizar"), aberto aqui
+porque a situação repetiu com custo medido — condição escrita lá.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -3714,3 +3778,5 @@ deixou de existir, em vez de duplicar cobertura ao lado dele; emenda do wrapper:
 | v168 | 10/08/2026 | Sessão 003.EU (ARQUITETURA + IMPLEMENTAÇÃO): **D-ARQ-78 CRIADA** — destino do deploy é o Streamlit Community Cloud, por requisito de custo zero **literal** confirmado com o Diovanni (nunca perguntado em 003.ER). Railway sai por assinatura fixa; Cloud Run sai do topo por medição — WebSocket aberto força *instance-based billing* (free tier 240k vCPU-s/mês = 66,7 h a 1 vCPU; aba aberta 8h/dia × 22 dias ≈ $7,45/mês `[APROXIMADO]`) — e **fica como fallback**, que é o que preserva o valor do `Dockerfile` de D-ARQ-77. O nome do arquivo de dependências vira contrato da plataforma (5 nomes reconhecidos, `requirements-app.txt` invisível): **renomear, nunca duplicar** — o app assume `requirements.txt`, legado vira `requirements-legado.txt`; efeito não previsto é que isso **remove a causa-raiz** de D-ARQ-77 cl.1. O gate próprio **permanece** por razão medida: a allowlist nativa de viewers é **transitiva** (*"They can also pass these permissions to others by inviting more viewers"*), e `PCMSO_ALLOWLIST` sobrevive sem tocar código (segredo de nível raiz vira env var, exemplo literal na doc). Ordem de configuração rígida (subdomínio → OAuth client → TOML → deploy), porque sem `[auth]` o entrypoint estourava `AttributeError` e o Community Cloud força `showErrorDetails=false`. **D-ARQ-75 cláusula 1 revogada**; **D-ARQ-77 cláusula 4 superada**. `[A CONFIRMAR]`: limite de RAM (não localizado em 5 páginas oficiais) e se o subdomínio é escolhível antes do 1º boot. Dois erros de método do Arquiteto registrados: ausência de evidência tratada como evidência de ausência ("1 app privado" existe, em página irmã), e `mypy = 45` cravado como gabarito bloqueante quando o real era 47 (003.ET criou 2 módulos e não re-mediu) — o Code parou e reportou, no procedimento previsto. **DH-003EU-01** e **DH-003EU-02** ABERTAS. Nenhuma R-* criada, alterada ou depreciada; PROTOCOLO intocado. Suíte 1085→1086 passed, 6 skipped; `mypy --strict` limpo, 47 arquivos. Detalhe em HISTORICO 003.EU. |
 | v169 | 11/08/2026 | Sessão 003.EV fatia 1 (IMPLEMENTAÇÃO): **D-ARQ-79 CRIADA** — entrypoint de desenvolvimento sem gate (`app_matriz_local.py`, chama `pagina_matriz()` direto) é porta deliberada para rodar a matriz na máquina do operador sem exigir OAuth do Google; a separação é travada por teste (`test_entrypoint_de_producao_nao_usa_o_entrypoint_local`), não por disciplina — sem ele, a porta sem autenticação chegaria à internet por um descuido de uma linha; identidade visual (`st.set_page_config`, título "Matriz de Exames — PCMSO") mora nos entrypoints, não na página, porque o gate chama `st.title` antes de `pagina_matriz()`. D-ARQ-76 e D-ARQ-77 intactas. Fechamento em docs desta sessão ficou em atraso duas sessões (falha de método do Arquiteto, registrada em HISTORICO 003.EW). Suíte 1086→1088 passed, 6 skipped; `mypy --strict` limpo, 48 arquivos (`app_matriz_local.py` entra no alvo canônico). PR #293, merge `75255e8`. Detalhe em HISTORICO 003.EV. |
 | v170 | 11-12/08/2026 | Sessão 003.EW fatias 1-2 (IMPLEMENTAÇÃO): **D-ARQ-80 CRIADA** — no nível gratuito o gargalo é requisição (RPD 20), não token (TPM 250k): a unidade de invocação do transcritor passa a ser o lote, não o bloco (`TranscritorGHEEmLote`, `_BLOCOS_POR_LOTE = 6` — três requisições por documento de 18 blocos em vez de dezoito); alinhamento bloco↔GHE é contrato duro com dupla guarda (`GHEVerbatim` vazio no faltante + `ValueError` de comprimento); cascata de modelos com aliases `-latest` à frente (três dos quatro modelos cravados haviam morrido: HTTP 429, HTTP 404, dois inexistentes) e motivo por modelo na exceção. Fatia 1 (PR #294, `66f3ecf`) ligou a rota LLM à superfície, inerte desde D-ARQ-65 por o cliente-bomba nunca ser trocado; fatia 2 (PR #295, `0136426`) entregou o lote no motor e no cliente Gemini, e uma emenda subsequente corrigiu o mesmo padrão de defeito pela segunda vez na sessão — `_TranscritorContado` (fatia 1) interceptava o *duck-typing* de `transcrever_ghes` por não expor `transcrever_lote`, deixando o lote inerte em produção mesmo pronto no cliente. Travessia real do TOCTAO (emissor nunca medido pela rota determinística): 18 GHEs, 61 cargos, zero pendência, 3 requisições confirmadas no painel `[MEDIDO — 13/08/2026]`. Achado clínico de convergência tripla (Acetona + MEK na urina, GHE-11 Hidráulica) entre a anotação manual da Dra. Carolini, a recusa fuzzy do Fascino e a transcrição do TOCTAO — abre DT-003EW-01/02/03. Suíte 1092→1097→1099 passed, 6 skipped (fatia 2 rendeu +5 líquido, não os +6 previstos — item de motivos acumulados reescreveu teste pré-existente; emenda do wrapper +2); `mypy --strict` limpo, 48 arquivos. Detalhe em HISTORICO 003.EW. |
+| v171 | 16/08/2026 | Sessão 003.EZ fatia 1 (ARQUITETURA): **D-ARQ-68 cláusula 5 NOVA** — delegação normativa a documento que a norma não obriga a responder (NR-09 9.4.1/9.4.2, avaliação quantitativa condicional): presunção protetiva declarada por primitivo nomeado em `regras.yaml`, nunca inferida em código, com quatro exigências cumulativas (direção protetiva; declaração no dado; pendência não-bloqueante `[INTERPRETADO — prioridade na revisão de saída]`; piso `PARCIAL`, nunca `VÁLIDA`). Nota ao contra-exemplo do ruído na cl.2: a leitura de 003.EH estava correta para o texto que tinha (NR-15 Anexo 1/NHO-01 sem faixa default) e incompleta quanto à NR-09 9.4.2 — o PGR silencioso pode estar em conformidade. **D-ARQ-81 CRIADA** — qualificação do nível 2 de D-ARQ-22: matriz-precedente não amplia universo que a norma já define (só confirma conduta dentro dele); `DEPRECATED por refutação` (sem sucessora) é estado distinto de `DEPRECATED por sucessão`. Refuta o fundamento de `R-AUD-04` (universalidade medida em 7/23 obras, `DT-003EY-01`), que sai `[DEPRECATED — fundamento refutado por DT-003EY-01, sem sucessora]` na fatia 2. Nenhuma R-* alterada nesta fatia (docs-only). Índice D-ARQ regenerado, **81 decisões**. Detalhe em HISTORICO 003.EZ. |
+| v172 | 16/08/2026 | Sessão 003.EZ fatia 1, EMENDA 1 (docs — correção de número e registro): dois números commitados errados corrigidos nas **duas** cópias (`PENDENCIAS_CLINICAS.md`/`PROTOCOLO_AGENTE_MEDICO.md` v90) — GHEs com ruído sem quantificação carregando `R-AUD-01`/`R-AUD-02` nos motivos: **17/17** (o denominador anterior confundia GHEs com linha de audiometria com GHEs que declaram ruído — são conjuntos diferentes); linhas de exame: **173 → 172 (−1)** contra `main` em `7c7ec10` com `R-AUD-04` ativa (o número anterior comparava contra a baseline pré-`R-AUD-04` de 003.EH, predecessor errado). **D-ARQ-68 cl.5** ganha nota de fronteira medida com D-ARQ-71: as 32 pendências `predicado_ausente_presumido` são 16 GHEs × 2 regras, não 17 — o 17º (GHE-16) resolve por `perna_ausente_absorvida` (D-ARQ-71 cl.2, `vibracao_qualquer` curto-circuita o `ou` antes do ramo `Ausente`), registrando que dois GHEs com a mesma lacuna documental recebem selos diferentes (`PARCIAL` vs `VÁLIDA`) por desenho, não inconsistência. **DT-003EZ-01 CRIADA (ABERTA)** em `PENDENCIAS_CLINICAS.md` — matriz sem nenhuma linha derivada de risco (GHE-19) sai `VÁLIDA` porque `orquestrador.executar` testa `not tem_bloqueio` antes de `linhas_com_risco`; lacuna de desenho da própria D-ARQ-66 cl.2 (protege a fronteira PARCIAL/BLOQUEADA, não a de VÁLIDA), exposta por esta fatia, não introduzida por ela; não-bloqueante para o merge (a conduta emitida está correta, o selo é que erra). Nenhuma R-* nem motor tocados. Números de suíte de motor não remedidos (`1137 passed, 6 skipped`, medido em `010abbe`, continua valendo). Índice D-ARQ regenerado, **81 decisões**, fonte **v172**. Detalhe em HISTORICO 003.EZ. |

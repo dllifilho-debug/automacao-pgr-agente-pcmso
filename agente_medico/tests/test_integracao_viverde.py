@@ -88,32 +88,43 @@ def test_integracao_viverde_pnos_roteia_sem_achatar() -> None:
             f"(R-RX-01-pnos-sem), got {ln.periodicidade_meses}"
         )
 
-    # --- Adm-03: bloqueante por ruído aguardando medição (não por PNOS quebrado) ---
+    # --- Adm-03: ruído sem quantificação aguardando medição (não PNOS quebrado) ---
     # Fatia 3 (D-ARQ-31 cláusula 3): a pendência do ruído tem âncora 'audiometria',
     # que é emitida → anexa à linha, não fica solta na matriz. Asserção mira a linha.
+    # Desde D-ARQ-68 cl.5 (003.EZ), ruído sem quantificação não bloqueia mais R-AUD-01/
+    # R-AUD-02 — a presunção protetiva emite audiometria e anexa pendência
+    # NÃO-bloqueante (tipo predicado_ausente_presumido) à mesma linha; a matriz cai
+    # para PARCIAL (nunca VÁLIDA), preservando o "PRELIMINAR" no resultado global.
     m_adm03 = _matriz("Adm-03")
+    assert m_adm03.status == "PARCIAL", (
+        f"Adm-03: esperado PARCIAL sob presunção protetiva de ruído, got {m_adm03.status!r}"
+    )
     anexadas_adm03 = [
         p
         for ln in m_adm03.linhas
         if ln.exame == "audiometria"
         for p in ln.pendencias_anexadas
-        if p.bloqueante
+        if p.tipo == "predicado_ausente_presumido"
     ]
     assert len(anexadas_adm03) >= 1, (
-        "Adm-03: linha audiometria deveria carregar ≥1 pendência bloqueante anexada "
-        "(ruído sem quantificação)"
+        "Adm-03: linha audiometria deveria carregar ≥1 pendência "
+        "predicado_ausente_presumido anexada (ruído sem quantificação)"
+    )
+    assert all(not p.bloqueante for p in anexadas_adm03), (
+        "Adm-03: pendência de presunção protetiva nunca é bloqueante (D-ARQ-68 cl.5)"
     )
     assert any(
-        "Ruído" in p.motivo or "ruido" in p.motivo.lower()
+        "ruido_acima_acao" in p.motivo or "ruído" in p.motivo.lower()
         for p in anexadas_adm03
     ), (
-        f"Adm-03: bloqueio anexado deveria referenciar ruído/quantificação, "
+        f"Adm-03: presunção anexada deveria referenciar ruído/quantificação, "
         f"motivos: {[p.motivo for p in anexadas_adm03]}"
     )
     # espelho do Acab-05: a pendência do ruído NÃO resta solta na matriz (moveu p/ linha)
     soltas_ruido_adm03 = [
         p for p in m_adm03.pendencias
-        if p.bloqueante and ("ruído" in p.motivo.lower() or "ruido" in p.motivo.lower())
+        if p.tipo == "predicado_ausente_presumido"
+        and ("ruído" in p.motivo.lower() or "ruido" in p.motivo.lower())
     ]
     assert soltas_ruido_adm03 == [], (
         f"Adm-03: pendência de ruído não deveria restar solta na matriz: "

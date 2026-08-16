@@ -175,6 +175,69 @@ def test_quando_ausente_false_silencia_pendencia() -> None:
     assert ctx.pendencias == []
 
 
+# ---------------------------------------------------------------------------
+# quando_ausente: {presumir_true: [...]} (D-ARQ-68 cl.5) — presunção protetiva
+# declarada por primitivo nomeado.
+# ---------------------------------------------------------------------------
+
+
+def test_presumir_true_emite_e_pendencia_nao_bloqueante_nomeia_primitivo() -> None:
+    # Teste 6: a linha emite e carrega Pendencia(tipo="predicado_ausente_presumido",
+    # bloqueante=False) nomeando o primitivo presumido.
+    ctx = _ctx_ruido_sem_quantificacao()
+    proto = _protocolo_ausente(quando_ausente={"presumir_true": ["ruido_acima_acao"]})
+    result = stage_5_emissao(ctx, proto)
+    assert len(result) == 1
+    assert len(ctx.pendencias) == 1
+    p = ctx.pendencias[0]
+    assert p.tipo == "predicado_ausente_presumido"
+    assert p.bloqueante is False
+    assert p.regra_origem == "R-TESTE-AUSENTE"
+    assert p.ghe_id == "GHE-01"
+    assert "ruido_acima_acao" in p.motivo
+
+
+def test_presumir_true_com_pernas_ausentes_vazio_bloqueia(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Teste 8: conjunto vazio de pernas_ausentes não presume no escuro — bloqueia
+    # como o ramo Ausente de sempre. Reversão que mata: presumir quando o
+    # conjunto é vazio (remover a checagem `if nomes_faltantes and ...`).
+    import agente_medico.motor.estagios.emissao as emissao_mod
+
+    monkeypatch.setattr(emissao_mod, "pernas_ausentes", lambda expr, ctx, protocolo: ())
+    ctx = _ctx_ruido_sem_quantificacao()
+    proto = _protocolo_ausente(quando_ausente={"presumir_true": ["ruido_acima_acao"]})
+    result = stage_5_emissao(ctx, proto)
+    assert result == []
+    assert len(ctx.pendencias) == 1
+    p = ctx.pendencias[0]
+    assert p.tipo == "predicado_ausente"
+    assert p.bloqueante is True
+
+
+def test_afirmacao_incompleta_silica_sem_fracao_continua_bloqueando() -> None:
+    # Teste 9 (cl.3 permanece e vence): sílica com valor e pct_quartzo afirmados
+    # mas fração ausente é afirmação incompleta, não silêncio — R-RX-01-adm não
+    # declara presumir_true, então segue bloqueando como sempre (D-ARQ-68 cl.2/3
+    # intactas; a presunção de cl.5 não se estende a regras sem a declaração).
+    protocolo = carregar(_PROTOCOLO_DIR)
+    q = Quantificacao(
+        valor=1.0,
+        unidade="mg/m3",
+        relacao_LT=None,
+        pct_LT=None,
+        apenas_qualitativa=False,
+        pct_quartzo=5.0,
+        fracao=None,
+    )
+    risco = Risco(agente="silica", fonte="pgr", detalhe=None, quantificacao=q, tipo_ibe=None)
+    ctx = GHEContext(pgr_ghe=_ghe(), riscos=[risco])
+    stage_5_emissao(ctx, protocolo)
+    pendencias_rx = [p for p in ctx.pendencias if p.regra_origem == "R-RX-01-adm"]
+    assert len(pendencias_rx) == 1
+    assert pendencias_rx[0].tipo == "predicado_ausente"
+    assert pendencias_rx[0].bloqueante is True
+
+
 def test_predicado_desconhecido_propaga_excecao() -> None:
     ctx = GHEContext(pgr_ghe=_ghe(), riscos=[])
     proto = Protocolo(

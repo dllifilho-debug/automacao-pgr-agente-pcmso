@@ -100,6 +100,18 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
             tem_anexada = any(p.bloqueante for ln in linhas for p in ln.pendencias_anexadas)
             tem_bloqueio = bool(bloqueantes_restantes) or tem_anexada
             pendencias_matriz = nao_bloqueantes_restantes + bloqueantes_restantes
+            # D-ARQ-68 cl.5 alínea (d): matriz com linha emitida sob presunção
+            # protetiva não pode sair VÁLIDA — sem a presunção não haveria linha,
+            # e VÁLIDA sem ressalva no nível da matriz esconderia exatamente o
+            # dado que ninguém mediu. Vale tanto anexada à linha quanto no nível
+            # da matriz.
+            tem_presumida = any(
+                p.tipo == "predicado_ausente_presumido" for p in pendencias_matriz
+            ) or any(
+                p.tipo == "predicado_ausente_presumido"
+                for ln in linhas
+                for p in ln.pendencias_anexadas
+            )
             # R-CLI-01 (piso universal) emite sempre — linhas nunca fica vazia.
             # Tri-estado computa só sobre linhas com origem em risco, excluindo
             # as emitidas por regra incondicional (D-ARQ-31 fatia 2, 003.EC).
@@ -107,7 +119,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 ln for ln in linhas
                 if any(m.predicado not in PRIMITIVOS_INCONDICIONAIS for m in ln.motivos)
             ]
-            if not tem_bloqueio:
+            if not tem_bloqueio and not tem_presumida:
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
                     linhas=linhas,

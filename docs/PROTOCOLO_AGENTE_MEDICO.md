@@ -253,6 +253,18 @@ Partição disjunta e exaustiva sobre o NEN:
 
 **Implementação (003.CC).** Materializada em `motor/classificacao_ruido.py` (`classificar_ruido`), aplicada em `hidratar_ghe` pós-resolução (slug "ruido", EXATA/FUZZY). Cobertura por faixa exigida: cumprida (15 testes, incl. bordas 80/85 e âncoras Viverde 78,8/89,6). Commit `9500c2a`, PR #179. R-RUIDO-01 passa de "escrita" a "implementada" (regra com teste que falha sem ela). DT-003CB-01 segue ABERTA (documentada no docstring do classificador).
 
+**Changelog (003.EZ) — `[INCERTO]` de 003.CB FECHADO.** O item literal do nível de ação é a
+**NR-09 9.6.1 alínea "c"** (*"como nível de ação para o agente físico ruído, a metade da
+dose"*) — disposição **transitória**: *"Enquanto não forem estabelecidos os Anexos a esta
+Norma..."*, com a definição de dose em **9.6.1.2**. A NR-09 vigente incorpora a **Portaria MTE
+nº 105, de 29/01/2026**; tem Anexo I (Vibração) e Anexo III (Calor), e **nenhum Anexo de
+Ruído**. Os limiares 80/85 dB(A) e a partição de `relacao_LT` acima ficam **inalterados** — a
+mudança é só de proveniência normativa do nível de ação, que era `[INCERTO]` e passa a
+`[DERIVADO — NR-09 9.6.1 "c" c/c 9.6.1.2, disposição transitória]`. Registro para a revisão de
+saída: o nível de ação de ruído é hoje **transitório** por desenho da própria norma — publicado
+um Anexo de Ruído específico, esta regra reabre para conferir se ele redefine o nível de ação
+ou a partição.
+
 #### R-AUD-01 — Indicações para 12M (adm/per/MR) `[VALIDADO]`
 Audiometria **12 meses** em **adm/per/MR** quando houver pelo menos uma das condições:
 - Ruído (qualquer nível, mesmo abaixo do nível de ação, **se combinado** com outras condições abaixo)
@@ -262,6 +274,16 @@ Audiometria **12 meses** em **adm/per/MR** quando houver pelo menos uma das cond
 - Exposição a ototóxicos
 - Exposição a vibração (corpo inteiro ou mãos-braços)
 
+**Changelog (003.EZ), mesma ID.** A perna do ruído ganha âncora normativa:
+`[DERIVADO — NR-07 Anexo II itens 2 e 4.1 "a"/"b"; momento MR por 7.5.6 "d" + 7.5.7, a contrario
+7.5.15]`. As pernas `motorista_equipamento_pesado` e `ototoxico` seguem `[VALIDADO]` **sem**
+âncora normativa própria — conduta da Dra. Carolini além do item 2, agora escrita como tal.
+**Silêncio do PGR sobre a quantificação do ruído** (NR-09 9.4.1/9.4.2, avaliação quantitativa
+condicional) passa a admitir presunção protetiva declarada por primitivo
+(`quando_ausente: {presumir_true: [ruido_acima_acao]}`, D-ARQ-68 cl.5): a linha emite com
+pendência não-bloqueante nomeando o primitivo presumido, e esse trecho da regra fica
+`[INTERPRETADO — prioridade na revisão de saída]`.
+
 #### R-AUD-02 — Audiometria no demissional `[VALIDADO]`
 Demissional **é executado** apenas quando:
 - **Ruído acima do nível de ação**, OU
@@ -269,10 +291,33 @@ Demissional **é executado** apenas quando:
 
 Para trabalho em altura, equip. pesada e espaço confinado **sem ruído**: faz adm/per/MR, **não faz** demissional.
 
+**Changelog (003.EZ), mesma ID.** O demissional sob ruído acima do nível de ação ganha âncora
+`[DERIVADO — NR-07 Anexo II item 4.1 "c"]`. A perna `e(ruido, ototoxico, vibracao_qualquer)`
+segue `[VALIDADO]` sem âncora. Mesma presunção protetiva de R-AUD-01 sobre `ruido_acima_acao`,
+mesma marca `[INTERPRETADO — prioridade na revisão de saída]` (D-ARQ-68 cl.5) — a perna `e`
+**não** está na allowlist de presunção: ausência ali (ex.: vibração não-qualificada) continua
+bloqueante, mesmo com ruído presumido.
+
 #### R-AUD-03 — Validade do demissional `[VALIDADO]` `[DERIVADO — NR-07 Anexo II item 4.1.1, texto oficial MTE conferido em 14/08/2026]`
 Audiometria realizada há **mais de 120 dias** → refazer no demissional.
 
-#### R-AUD-04 — Audiometria como piso universal, com demissional `[DERIVADO — matriz-precedente: Carolini 07/2026 (SPE 0030) + Patrícia 04/2025 (RESERVA 0028); periodicidade e momento demissional em NR-07 Anexo II 4.1]`
+#### R-AUD-04 — Audiometria como piso universal, com demissional `[DEPRECATED — fundamento refutado por DT-003EY-01, sem sucessora — D-ARQ-81]`
+
+> **Redação original preservada para rastreabilidade (não remover — auditoria histórica do
+> PCMSO):** `[DERIVADO — matriz-precedente: Carolini 07/2026 (SPE 0030) + Patrícia 04/2025
+> (RESERVA 0028); periodicidade e momento demissional em NR-07 Anexo II 4.1]`
+
+**Por que caiu (003.EZ, D-ARQ-81).** O fundamento era matriz-precedente `n=2` concordante
+(D-ARQ-22 Parte A nível 2). 003.EY mediu **23 obras** e refutou: universalidade em **7/23**
+(6/23 com piso `n_cargos ≥ 17`), distribuição larga entre as não-universais. As duas matrizes de
+003.EX eram justamente as duas em que a médica estendeu ao administrativo — artefato de
+amostra, não convergência. `D-ARQ-81` cl.1 (c) fecha a lacuna que permitiu isto: quando a norma
+já **define** o universo (item 2 do Anexo II), precedente não autoriza ampliá-lo — só confirma
+conduta dentro dele. **Sem sucessora**: o momento `DEM` que esta regra cravava incondicional
+passa a sair pela **presunção protetiva de R-AUD-02** (D-ARQ-68 cl.5, medido em 003.EZ) quando o
+PGR está silencioso sobre a quantificação do ruído — não há conduta nova a herdar, há conduta a
+retirar.
+
 Todo trabalhador recebe **audiometria, 12 meses, em `[adm, per, MRO, dem]`**, independentemente
 de risco declarado no PGR. Piso por baixo — não substitui nem depreca `R-AUD-01`/`R-AUD-02`;
 convive com elas (molde `R-CLI-01`×`R-CLI-02`), e a linha carrega os motivos de todas as regras
@@ -829,3 +874,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v87 | 08/08/2026 | Sessão 003.ES (IMPLEMENTAÇÃO, fatias 1-2): abre **DH-003ES-01** (§11) — ramos `NEGAR` e `LIBERAR` do gate de acesso sem cobertura de casca; os três desfechos têm teste de unidade, mas só `PEDIR_LOGIN` é exercitado pelo `AppTest`. Não-bloqueante e alcançável (a sonda 2 de 003.ES mediu que `monkeypatch` sobre `streamlit.user` chega ao script). **Nenhuma regra clínica criada, alterada ou depreciada** — decisão de arquitetura da sessão está em D-ARQ-76. Detalhe em HISTORICO 003.ES. |
 | v88 | 10/08/2026 | Sessão 003.ET fatia 0 (partição realizada 08/08/2026, linha de changelog registrada agora, 10/08/2026 — a fatia 0 fez a partição sem gravar linha de changelog, e esta v88 corrige o resíduo, omissão do prompt do Arquiteto, não do Code, D-ARQ-06): §11 (dívidas técnicas `DT-`/`DH-`) movido inteiro para `docs/PENDENCIAS_CLINICAS.md`; documento cai de **274.752 para 113.007 caracteres**; numeração duplicada `## 11.` corrigida para `## 12.`; consumidores de método atualizados (skill `/kickoff` item 5, `RITUAL_FECHAMENTO` passo 2, `CLAUDE.md` da raiz). **Nenhuma regra clínica tocada** — a versão sobe por mudança estrutural do documento, não de conteúdo. Detalhe em HISTORICO 003.ET. |
 | v89 | 15/08/2026 | Sessão 003.EX fatias 0-1 (MEDIÇÃO + IMPLEMENTAÇÃO): **R-AUD-04 CRIADA** (§5.2) — audiometria como piso universal, 12M `[adm, per, MR, dem]`, incondicional via `todo_trabalhador` (D-ARQ-66); base normativa NR-07 Anexo II 4.1 `[DERIVADO]` crava 12M+adm+dem, universo estendido a todo trabalhador e MRO incluído são `[INTERPRETADO]`, apoiados em matriz-precedente (fatia 0: SPE 0030 41/41 audiometria, 38/41 DEM confirmado; RESERVA 0028 44/44, 42/42 confirmado + 2 indeterminados). `R-AUD-01`/`R-AUD-02` **não tocadas** — piso por baixo, molde `R-CLI-01`×`R-CLI-02`; dedup concatena motivos, não substitui. **`R-AUD-03` ganha marcador de fonte** `[DERIVADO — NR-07 Anexo II item 4.1.1]` (mesma ID, changelog). **DT-003EW-01 FECHADA** (`PENDENCIAS_CLINICAS.md`) — reenquadrada como resolução de saída, não da raiz (`ruido_acima_acao = Ausente` continua intacta). **DT-003EG-01 segue ABERTA**, nota aditiva — não agravada nem fechada (motivos concatenam). **DH-003EX-01 CRIADA (ABERTA)** — heurística de forma no extrator do gabarito (`medir_audiometria_dem.py`) assume no máximo 2 grupos após "Audiometria", não testada contra 3. Efeito medido no Fascino (`rodar-offline`, mesmo PDF/envelope de sessões anteriores): GHEs com audiometria **17/19 → 19/19** (medição fresca desta sessão — diverge do "16/19" herdado de `DT-003EG-01`; causa nomeável, não baseline cega: a diferença é GHE-12/Betoneira, que passou a emitir audiometria em 003.EJ por `R-VIB-02` — aliases de D-ARQ-70 destravaram a perna mão-braço; 16+1=17, divergência explicada); GHE-06 (Administração) e GHE-19 (Vendas) ganham a linha nova nesta sessão (as duas únicas sem audiometria antes de `R-AUD-04`); linhas de exame **171 → 173** (+2, exatamente GHE-06/GHE-19); linhas de audiometria com `DEM` **1/17 → 19/19**; status **3 VÁLIDA / 15 PARCIAL / 1 BLOQUEADA inalterado, confirmado GHE a GHE** (não só no agregado) — bate exatamente com a previsão D-ARQ-66 cl.2. 4 testes novos com reversão nomeada, varredura inversa 4/4 confirmada (`test_orquestrador.py`). 4 quebras legítimas de teste de integração corrigidas com explicação nomeada (não silenciadas): `test_rvib02_vmb_sozinho_emite_audiometria` (pré-dedup, duas entradas "audiometria" agora, busca deixa de usar `next()` sozinho), `test_execucao_dedup_audiometria_tres_motivos_sem_conflito` (3→4 motivos), `test_execucao_ototoxico_via_agente_status_ok_sem_r_aud_02` (renomeado — "sem demissional" deixou de ser observável via ausência de `DEM`; invariante real que o nome agora descreve — R-AUD-02 não dispara por ototóxico isolado — checado direto), `test_pipeline_gates_emissao_consolidacao_atividade_critica` (audiometria sai do loop genérico de momentos, ganha checagem própria). Suíte **1104→1108 passed, 6 skipped**; `mypy --strict` delta-zero, **48 arquivos**. Detalhe em HISTORICO 003.EX. |
+| v90 | 16/08/2026 | Sessão 003.EZ fatia 1 (ARQUITETURA + IMPLEMENTAÇÃO): **R-AUD-04 DEPRECATED** (§5.2) — fundamento refutado por `DT-003EY-01`/D-ARQ-81: 003.EY mediu 23 obras, universalidade em 7/23 (6/23 com piso `n_cargos ≥ 17`); as duas matrizes-precedente de 003.EX eram artefato de amostra, não convergência. Sem sucessora — o momento `DEM` que o piso cravava incondicional passa a sair pela presunção protetiva de `R-AUD-02` (D-ARQ-68 cl.5) quando o PGR está silencioso sobre a quantificação do ruído. **`R-AUD-01`/`R-AUD-02`**, changelog de mesma ID: perna do ruído ganha âncora `[DERIVADO — NR-07 Anexo II itens 2 e 4.1 "a"/"b"/"c"; momento MR por 7.5.6 "d" + 7.5.7, a contrario 7.5.15]`; pernas `motorista_equipamento_pesado`/`ototoxico`/`e(ruido, ototoxico, vibracao_qualquer)` seguem `[VALIDADO]` sem âncora; silêncio do PGR sobre a quantificação do ruído (NR-09 9.4.1/9.4.2, avaliação condicional) admite presunção protetiva declarada por primitivo (`quando_ausente: {presumir_true: [ruido_acima_acao]}`), regra marcada `[INTERPRETADO — prioridade na revisão de saída]` nesse trecho; a perna `e` de R-AUD-02 **não** entra na allowlist — ausência ali continua bloqueante. **`R-RUIDO-01`**, changelog de mesma ID: `[INCERTO]` de 003.CB **FECHADO** — nível de ação é **NR-09 9.6.1 "c"** (disposição transitória, definição em 9.6.1.2); a NR-09 vigente (Portaria MTE 105/29-01-2026) não tem Anexo de Ruído; limiares 80/85 dB(A) inalterados, nível de ação registrado como transitório (reabre com Anexo próprio). Motor: `predicados.pernas_ausentes` (irmã de `pernas_ausentes_absorvidas`, sem gate `alguma_true` no `ou`, coleta primitivo/composto string por si); `emissao.stage_5_emissao` aceita `quando_ausente: {presumir_true: [...]}` (emite + `Pendencia(tipo="predicado_ausente_presumido", bloqueante=False)` por primitivo presumido, ou bloqueia se algum nome ficar fora da lista ou o conjunto vier vazio); `orquestrador.executar` ganha guarda: matriz com pendência `predicado_ausente_presumido` (anexada ou solta) nunca sai `VÁLIDA`, cai para `PARCIAL`. 14 testes novos com reversão nomeada, varredura inversa 14/14 confirmada. Quebras legítimas corrigidas com explicação nomeada (não silenciadas), 8 previstas + 4 adicionais medidos na reconferência em `7c7ec10` (mesma classe — ruído sem quantificação deixou de ser "risco que nada determina"): `test_orquestrador.py::test_raud04_*` (3, morrem por desenho — R-AUD-04 retirado, não sucedido) e `test_raud04_nao_promove_bloqueada_para_parcial` (inverte, renomeado); `test_orquestrador.py::test_rcli01_unico_risco_bloqueado_com_clinico_presente_fecha_bloqueada` (troca ruído por vibração genérica, preserva o invariante original); `test_exposicao_fisica.py::test_raud01_ruido_sem_quantificacao_gera_pendencia_bloqueante` (renomeado, inverte), `test_execucao_dedup_audiometria_tres_motivos_sem_conflito` (4→3 motivos), `test_execucao_ototoxico_via_agente_status_ok_sem_r_aud_02` (renomeado de volta a `..._sem_demissional`), `test_rvib02_vmb_sozinho_emite_audiometria` (reverte para `next()` único); `test_integracao_002c.py::test_pipeline_gates_emissao_consolidacao_atividade_critica` (audiometria volta ao loop genérico); `test_regra_biomonitoramento.py::test_sem_agente_nao_emite_biomonitoramento` (checagem por família `R-BIO-04*`, não por linhas de risco genéricas); `test_integracao_viverde.py::test_integracao_viverde_pnos_roteia_sem_achatar` (Adm-03: pendência `predicado_ausente_presumido` não-bloqueante anexada à linha, matriz `PARCIAL`, em vez de pendência bloqueante). **Medição Fascino** (`rodar-offline`, árvore parada, `relatorios/003ez_fascino_rodar.md`, commit `d218556`): **17 GHEs declaram `ruido`, todos com `ruido_acima_acao = AUSENTE`**, e os **17** passam a carregar `R-AUD-01`/`R-AUD-02` na coluna de motivos da linha de audiometria — contra **1** na baseline 003.EX (fecha `DT-003EG-01` — raiz, não só manifestação). Os 2 GHEs restantes não declaram ruído: GHE-14 recebe audiometria por atividade crítica (sem `DEM`, correto) e GHE-19 não recebe audiometria. **17/18** linhas de audiometria com `DEM` (a exceção é GHE-14); pendências `predicado_ausente_presumido` **32** (16 GHEs × 2 regras — o 17º GHE com ruído, GHE-16, resolve por `perna_ausente_absorvida`/D-ARQ-71 cl.2, nota de fronteira em D-ARQ-68 cl.5); status **3 VÁLIDA / 16 PARCIAL / 0 BLOQUEADA** (de 3/15/1 na baseline 003.EX — o GHE antes BLOQUEADA moveu para PARCIAL sob presunção); linhas de exame **173 → 172 (−1)** contra `main` em `7c7ec10` (com `R-AUD-04` ativa) — decomposto: −2 (GHE-06 e GHE-19 perdem a linha que `R-AUD-04` emitia incondicionalmente) +1 (GHE-06 a reganha, agora derivada de risco, por `R-AUD-01`/`R-AUD-02` sob presunção); contra a baseline pré-`R-AUD-04` (171, 003.EH) o saldo é +1, pela mesma linha de GHE-06. Suíte **1137 passed, 6 skipped** (árvore parada); `mypy --strict` limpo, **48 arquivos** (alvo canônico, delta-zero). Detalhe em HISTORICO 003.EZ. |
