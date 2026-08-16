@@ -915,13 +915,17 @@ indeterminada, só ganhou o nome do que falta.
 `relatorios/003ez_fascino_rodar.md`).** `D-ARQ-68` cl.5 resolve a raiz que esta DT rastreava
 desde a origem: `ruido_acima_acao` deixa de ser um beco sem saída bloqueante e passa a admitir
 presunção protetiva declarada (`R-AUD-01`/`R-AUD-02`, `quando_ausente: {presumir_true:
-[ruido_acima_acao]}`). Medido, **18/19 GHEs** com ruído sem quantificação **carregam `R-AUD-01`
-e/ou `R-AUD-02` nos motivos da linha `audiometria`** — não mais só `R-PKG-ATIVCRIT` — ao lado da
-pendência não-bloqueante `predicado_ausente_presumido` que nomeia o primitivo presumido (32
-ocorrências no corpus, 16 GHEs × 2 regras). O único GHE sem audiometria (GHE-19, Vendas) não tem
-nenhum risco que a justifique — comportamento correto, não regressão. Exame certo, razão certa: a
-linha agora aponta para a exposição que clinicamente a justifica, com o sinal de que o dado é
-presumido — não medido — visível na pendência e no piso `PARCIAL` da matriz (nunca `VÁLIDA`).
+[ruido_acima_acao]}`). Medido: **17 GHEs do Fascino declaram `ruido`, todos com
+`ruido_acima_acao = AUSENTE`**, e os **17** passam a carregar `R-AUD-01`/`R-AUD-02` na coluna de
+motivos da linha de audiometria — contra **1** na baseline 003.EX (exatamente a métrica de que
+esta DT reclamava, "`R-AUD-01` aparece em apenas 1"). Os 2 GHEs restantes não declaram ruído:
+GHE-14 recebe audiometria por atividade crítica (sem `DEM`, correto — `R-AUD-02` não dispara sem
+ruído) e GHE-19 não recebe audiometria — nenhum risco que a justifique, comportamento correto,
+não regressão. Exame certo, razão certa: a linha agora aponta para a exposição que clinicamente
+a justifica, com o sinal de que o dado é presumido — não medido — visível na pendência
+`predicado_ausente_presumido` (32 ocorrências no corpus, 16 GHEs × 2 regras — o 17º GHE com
+ruído, GHE-16, resolve por `perna_ausente_absorvida`, D-ARQ-71 cl.2; ver nota de fronteira em
+D-ARQ-68 cl.5) e no piso `PARCIAL` da matriz (nunca `VÁLIDA`).
 
 ### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[ABERTA — higiene de instrumento]`
 
@@ -1622,3 +1626,35 @@ explícito em qualquer citação do número.
 **Status:** FECHADA em 003.EZ fatia 0 (commit `dfff654`) — agregado de universalidade passa a
 sair sempre com o piso declarado ao lado (`universais_bruto` e `universais_com_piso(N)`, N como
 parâmetro), saída de primeira classe do instrumento, não mais cálculo à mão.
+
+### DT-003EZ-01 — Matriz sem nenhuma linha derivada de risco sai `VÁLIDA` `[ABERTA]`
+
+**Origem:** medição 003.EZ fatia 1 (`relatorios/003ez_fascino_rodar.md`), GHE-19 (Vendas).
+
+**Situação.** GHE-19 tem `riscos_resolvidos: (nenhum)` e todos os predicados `False` exceto
+`todo_trabalhador`. Não tem pendência alguma, logo `tem_bloqueio` é falso, e
+`orquestrador.executar` testa `if not tem_bloqueio → VÁLIDA` **antes** de olhar
+`linhas_com_risco` — o GHE sai `VÁLIDA` com **zero** linhas determinadas por risco, carregando
+só os incondicionais `R-CLI-01` e `R-PSY-02` `[VERIFICADO — orquestrador.py:110-141]`.
+
+**Alcance da D-ARQ-66 cl.2.** A cláusula foi escrita para impedir que a linha incondicional
+promovesse `BLOQUEADA → PARCIAL`, e faz isso: `linhas_com_risco` exclui motivos incondicionais.
+Mas ela só é consultada no ramo `elif`, **depois** de `VÁLIDA`. Protege a fronteira
+`PARCIAL`/`BLOQUEADA` e **não** a fronteira de `VÁLIDA`. É lacuna de desenho da própria cl.2,
+não regressão desta sessão.
+
+**Não introduzida em 003.EZ, exposta por ela** `[VERIFICADO — relatorios/003ex_fascino_rodar_DEPOIS.md, GHE-19 já VÁLIDA]`. O que muda: com `R-AUD-04` ativa, GHE-19 ao menos carregava a
+linha de audiometria; agora é matriz assinável, selada `VÁLIDA`, sem uma única linha determinada
+por risco.
+
+**Por que importa.** `VÁLIDA` significa, para a revisão de saída, "todo risco determinou sua
+conduta". Aqui nenhum determinou. E `riscos_resolvidos: (nenhum)` é ambíguo entre "o PGR não
+declara risco para este GHE" e "nada resolveu" — que D-ARQ-13 existe justamente para não
+confundir. `D-ARQ-74` não pega: ele barra só `REJEITADO`.
+
+**Correção candidata (não decidida).** Quarto estado, ou `VÁLIDA` condicionada a
+`linhas_com_risco` não-vazia. Ambas mudam o contrato do tri-estado (D-ARQ-31) — decisão de
+arquitetura própria, não conserto de fatia.
+
+**Status:** ABERTA. Não-bloqueante para o merge desta sessão: a conduta emitida está correta, o
+que está errado é o selo.
