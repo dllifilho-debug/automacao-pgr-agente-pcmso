@@ -18,7 +18,10 @@ Reuso obrigatório (D-ARQ-67), por import, nunca redigitado:
   declarado aqui por transparência): `_extrair_linha_audiometria` e
   `_PADRAO_GHE`, porque redigitá-los para rastrear GHE atual e isolar a
   linha de audiometria repetiria exatamente o código que D-ARQ-67 proíbe
-  duplicar.
+  duplicar; `_celulas_logicas` também, desde 003.EZ fatia 0 (DH-003EY-01), e
+  `_PADRAO_MESES` desde 003.EZ fatia 0b — as duas definições migraram para
+  `medir_audiometria_dem.py` (módulo a montante, evita import circular),
+  este módulo importa em vez de manter cópia.
 
 Duas armadilhas medidas em 003.EX ao generalizar de "audiometria" para
 "qualquer exame" — nenhuma vira descarte silencioso (`DH-003EX-01`):
@@ -45,7 +48,9 @@ from docx import Document
 from agente_medico.motor.tipos import Momento
 from scripts.medir_audiometria_dem import (
     _PADRAO_GHE,
+    _PADRAO_MESES,
     _cargo_para_exibicao,
+    _celulas_logicas,
     _extrair_linha_audiometria,
     _linha_e_cargo,
     parsear_momentos,
@@ -61,28 +66,8 @@ _CAMINHO_EXAMES_YAML = (
 )
 
 _PADRAO_GRUPO_PARENTESE = re.compile(r"\(([^)]*)\)")
-_PADRAO_MESES = re.compile(r"(\d+)\s*mes", re.IGNORECASE)
 _PADRAO_SETOR = re.compile(r"^SETOR\s*:?", re.IGNORECASE)
 
-
-def _celulas_logicas(cells: Any) -> list[str]:
-    """Colapsa células adjacentes com texto idêntico numa só — python-docx
-    repete o mesmo texto em cada célula de uma mesclagem horizontal (medido:
-    ATZUM tem 13 colunas físicas para uma tabela de 2 colunas lógicas,
-    FUNÇÃO mesclada em 0-3 e EXAMES SOLICITADOS em 4-9; indexação fixa
-    `celulas[0]`/`celulas[1]`, correta nos documentos de 2 colunas físicas,
-    lê a própria mesclagem de FUNÇÃO como se fosse a coluna de exames nesses
-    casos e zera a contagem de audiometria em silêncio). Não é heurística de
-    texto — mesclagem é estrutura da tabela, não conteúdo.
-    """
-    logicas: list[str] = []
-    anterior: str | None = None
-    for celula in cells:
-        texto = celula.text
-        if texto != anterior:
-            logicas.append(texto)
-            anterior = texto
-    return logicas
 
 FORMA_INLINE = "inline"
 FORMA_GRUPO_SEPARADO = "grupo_separado"
@@ -307,6 +292,87 @@ def medir_cobertura(nome_doc: str, registros: list[RegistroCargoCompleto]) -> Co
     )
 
 
+def classificar_momento_dem(
+    registros: list[RegistroCargoCompleto],
+) -> tuple[list[RegistroCargoCompleto], list[RegistroCargoCompleto], list[RegistroCargoCompleto]]:
+    """Separa os cargos com audiometria em três baldes, nunca dois — mesma
+    regra de `scripts.medir_audiometria_dem.classificar_dem`, adaptada ao
+    campo `rotulos_nao_reconhecidos_audiometria` de `RegistroCargoCompleto`
+    (nome de atributo diferente do `RegistroCargo` de origem, por isso não é
+    diretamente importável sob D-ARQ-67). Célula com rótulo não reconhecido
+    na própria linha de audiometria não é negativa — é ilegível, e ilegível
+    tem balde próprio (`indeterminado`), nunca cai em `sem_dem` por omissão
+    (D-ARQ-13 aplicado fora do motor: ausência de leitura não é negação de
+    conduta — achado nomeado em 003.EX/003.EY, generalizado aqui). A
+    presença de `DEM` vence a ambiguidade do resto da célula: um cargo com
+    `DEM` e um rótulo não reconhecido no mesmo grupo cai em `com_dem`, não em
+    `indeterminado`.
+    """
+    com_audio = [r for r in registros if r.tem_audiometria]
+    com_dem = [r for r in com_audio if Momento.DEM in r.momentos_audiometria]
+    sem_dem = [
+        r
+        for r in com_audio
+        if Momento.DEM not in r.momentos_audiometria
+        and not r.rotulos_nao_reconhecidos_audiometria
+    ]
+    indeterminado = [
+        r
+        for r in com_audio
+        if Momento.DEM not in r.momentos_audiometria and r.rotulos_nao_reconhecidos_audiometria
+    ]
+    return com_dem, sem_dem, indeterminado
+
+
+@dataclass(frozen=True)
+class MomentoDemDocumento:
+    nome_doc: str
+    n_com_dem: int
+    n_sem_dem: int
+    n_indeterminado: int
+    cargos_indeterminados: tuple[str, ...]
+
+
+def medir_momento_dem(
+    nome_doc: str, registros: list[RegistroCargoCompleto]
+) -> MomentoDemDocumento:
+    com_dem, sem_dem, indeterminado = classificar_momento_dem(registros)
+    return MomentoDemDocumento(
+        nome_doc=nome_doc,
+        n_com_dem=len(com_dem),
+        n_sem_dem=len(sem_dem),
+        n_indeterminado=len(indeterminado),
+        cargos_indeterminados=tuple(
+            f"[{r.ghe}] {_cargo_para_exibicao(r.cargo)}" for r in indeterminado
+        ),
+    )
+
+
+@dataclass(frozen=True)
+class AgregadoUniversalidade:
+    total: int
+    piso: int
+    universais_bruto: int
+    universais_com_piso: int
+
+
+def agregar_universalidade(
+    coberturas: dict[str, CoberturaDocumento], piso: int
+) -> AgregadoUniversalidade:
+    """Piso é escolha editorial, não medição (`DH-003EY-02`) — sai sempre
+    declarado ao lado do agregado, nunca calculado à mão a partir da tabela
+    bruta.
+    """
+    universais = [c for c in coberturas.values() if c.universal]
+    com_piso = [c for c in universais if c.n_cargos >= piso]
+    return AgregadoUniversalidade(
+        total=len(coberturas),
+        piso=piso,
+        universais_bruto=len(universais),
+        universais_com_piso=len(com_piso),
+    )
+
+
 _RX_TORAX_SLUG = "rx_torax_oit"
 
 
@@ -399,8 +465,9 @@ def selecionar_canonico(coberturas: dict[str, CoberturaDocumento]) -> list[Colap
     return resultado
 
 
-def gerar_relatorio(caminhos: list[Path], mapa_nomes: dict[str, str]) -> str:
+def gerar_relatorio(caminhos: list[Path], mapa_nomes: dict[str, str], piso: int = 17) -> str:
     coberturas: dict[str, CoberturaDocumento] = {}
+    momentos_por_doc: dict[str, MomentoDemDocumento] = {}
     todas_formas: dict[str, list[FormaPeriodicidade]] = {}
     todas_suspeitas: dict[str, list[str]] = {}
     anomalias: list[tuple[str, str, FormaPeriodicidade]] = []
@@ -408,6 +475,7 @@ def gerar_relatorio(caminhos: list[Path], mapa_nomes: dict[str, str]) -> str:
     for caminho in caminhos:
         registros, suspeitas = extrair_registros_completos(caminho, mapa_nomes)
         coberturas[caminho.name] = medir_cobertura(caminho.name, registros)
+        momentos_por_doc[caminho.name] = medir_momento_dem(caminho.name, registros)
         formas_doc: list[FormaPeriodicidade] = []
         for r in registros:
             for f in r.formas:
@@ -434,9 +502,13 @@ def gerar_relatorio(caminhos: list[Path], mapa_nomes: dict[str, str]) -> str:
         linhas.append(
             f"| {nome} | {cov.n_cargos} | {cov.n_com_audiometria} | {cov.fracao:.4f} | {cov.universal} |"
         )
-    n_universal_bruto = sum(1 for c in coberturas.values() if c.universal)
+    agregado_bruto = agregar_universalidade(coberturas, piso)
     linhas.append("")
-    linhas.append(f"**Agregado bruto:** {n_universal_bruto}/{len(coberturas)} documentos universais (fração == 1.0).")
+    linhas.append(
+        f"**Agregado bruto:** {agregado_bruto.universais_bruto}/{agregado_bruto.total} documentos "
+        f"universais (fração == 1.0). Com piso `n_cargos >= N={agregado_bruto.piso}`: "
+        f"{agregado_bruto.universais_com_piso}/{agregado_bruto.total}."
+    )
     linhas.append("")
     fracoes_nao_universais = sorted(c.fracao for c in coberturas.values() if not c.universal)
     linhas.append(f"Distribuição das frações dos não-universais: {[f'{f:.3f}' for f in fracoes_nao_universais]}")
@@ -456,10 +528,13 @@ def gerar_relatorio(caminhos: list[Path], mapa_nomes: dict[str, str]) -> str:
         linhas.append(f"| {c.chave} | {len(c.membros)} | {c.canonico} | {c.status} |")
     linhas.append("")
 
-    n_universal_canonico = sum(1 for nome in canonicos if coberturas[nome].universal)
+    coberturas_canonico = {nome: coberturas[nome] for nome in canonicos}
+    agregado_canonico = agregar_universalidade(coberturas_canonico, piso)
     linhas.append(
-        f"**Agregado canônico:** {n_universal_canonico}/{len(canonicos)} obras distintas universais "
-        f"(colapsando {len(coberturas)} arquivos em {len(canonicos)} obras)."
+        f"**Agregado canônico:** {agregado_canonico.universais_bruto}/{agregado_canonico.total} obras "
+        f"distintas universais (colapsando {len(coberturas)} arquivos em {len(canonicos)} obras). "
+        f"Com piso `n_cargos >= N={agregado_canonico.piso}`: "
+        f"{agregado_canonico.universais_com_piso}/{agregado_canonico.total}."
     )
     linhas.append("")
     fracoes_canonico_nao_universal = sorted(
@@ -478,6 +553,68 @@ def gerar_relatorio(caminhos: list[Path], mapa_nomes: dict[str, str]) -> str:
             continue
         linhas.append(f"**{nome}** ({cov.n_com_audiometria}/{cov.n_cargos}):")
         linhas.extend(f"- {c}" for c in cov.cargos_sem_audiometria)
+        linhas.append("")
+
+    linhas.append("## Bloco D — momento DEM na audiometria (003.EZ)")
+    linhas.append("")
+    linhas.append(
+        "Nos cargos que **recebem** audiometria, três baldes (nunca dois): `com_dem` "
+        "(`Momento.DEM` presente), `sem_dem` (DEM ausente e sem rótulo não reconhecido, forma "
+        "limpa confirmada), `indeterminado` (rótulo não reconhecido no grupo de momentos — "
+        "ilegível, não é negativo). Recorte separado entre obras não-universais e universais "
+        "para contrastar com a convergência n=2 de 003.EX (SPE 0030 e RESERVA 0028, ambas "
+        "universais)."
+    )
+    linhas.append("")
+
+    def _tabela_momento_dem(nomes: list[str]) -> tuple[list[str], tuple[int, int, int]]:
+        linhas_tabela = ["| Obra (canônico) | fração | n_com_audiometria | com_dem | sem_dem | indeterminado |", "|---|---|---|---|---|---|"]
+        soma_com_dem = soma_sem_dem = soma_indeterminado = 0
+        for nome in sorted(nomes):
+            cov = coberturas[nome]
+            mom = momentos_por_doc[nome]
+            linhas_tabela.append(
+                f"| {nome} | {cov.fracao:.4f} | {cov.n_com_audiometria} | {mom.n_com_dem} | "
+                f"{mom.n_sem_dem} | {mom.n_indeterminado} |"
+            )
+            soma_com_dem += mom.n_com_dem
+            soma_sem_dem += mom.n_sem_dem
+            soma_indeterminado += mom.n_indeterminado
+        return linhas_tabela, (soma_com_dem, soma_sem_dem, soma_indeterminado)
+
+    canonicos_nao_universais = [nome for nome in canonicos if not coberturas[nome].universal]
+    canonicos_universais = [nome for nome in canonicos if coberturas[nome].universal]
+
+    linhas.append("### Obras não-universais (fração < 1.0), denominador canônico")
+    linhas.append("")
+    tabela_nao_universal, (cd_nu, sd_nu, ind_nu) = _tabela_momento_dem(canonicos_nao_universais)
+    linhas.extend(tabela_nao_universal)
+    linhas.append("")
+    linhas.append(
+        f"**Agregado não-universais:** com_dem={cd_nu}, sem_dem={sd_nu}, indeterminado={ind_nu} "
+        f"(total com audiometria: {cd_nu + sd_nu + ind_nu})."
+    )
+    linhas.append("")
+
+    linhas.append("### Obras universais (fração == 1.0), denominador canônico — contraste com 003.EX")
+    linhas.append("")
+    tabela_universal, (cd_u, sd_u, ind_u) = _tabela_momento_dem(canonicos_universais)
+    linhas.extend(tabela_universal)
+    linhas.append("")
+    linhas.append(
+        f"**Agregado universais:** com_dem={cd_u}, sem_dem={sd_u}, indeterminado={ind_u} "
+        f"(total com audiometria: {cd_u + sd_u + ind_u})."
+    )
+    linhas.append("")
+
+    linhas.append("### Cargos indeterminados, por obra não-universal (nominal)")
+    linhas.append("")
+    for nome in sorted(canonicos_nao_universais):
+        mom = momentos_por_doc[nome]
+        if not mom.cargos_indeterminados:
+            continue
+        linhas.append(f"**{nome}**:")
+        linhas.extend(f"- {c}" for c in mom.cargos_indeterminados)
         linhas.append("")
 
     linhas.append("## Bloco B — forma da periodicidade")
@@ -581,10 +718,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("docx", nargs="+", type=Path)
     parser.add_argument("--saida", type=Path, required=True)
+    parser.add_argument(
+        "--piso",
+        type=int,
+        default=17,
+        help="Piso editorial de n_cargos para o agregado 'universal com piso' (DH-003EY-02).",
+    )
     args = parser.parse_args()
 
     mapa_nomes = carregar_mapa_nome_para_slug()
-    conteudo = gerar_relatorio(args.docx, mapa_nomes)
+    conteudo = gerar_relatorio(args.docx, mapa_nomes, piso=args.piso)
 
     args.saida.parent.mkdir(parents=True, exist_ok=True)
     args.saida.write_text(conteudo, encoding="utf-8")

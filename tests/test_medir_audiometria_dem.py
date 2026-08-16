@@ -3,11 +3,16 @@ sobre células de gabarito isoladas à linha de Audiometria."""
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from docx import Document
+
 from agente_medico.motor.tipos import Momento
 from agente_medico.superficie.documento_matriz import _ROTULO_MOMENTO
 from scripts.medir_audiometria_dem import (
     RegistroCargo,
     classificar_dem,
+    extrair_registros,
     parsear_momentos,
     rotulos_nao_reconhecidos,
 )
@@ -41,6 +46,62 @@ def test_parsear_momentos_cobre_todo_par_da_inversao_computado_do_dado() -> None
         assert parsear_momentos(f"Audiometria ({rotulo})") == {momento}
 
 
+def test_periodicidade_colada_ao_dem_e_reconhecida() -> None:
+    # Reversão que mata: remover a remoção de sufixo de periodicidade
+    # (voltar ao lookup exato direto sobre o token bruto) — "DEM 12 meses"
+    # nunca bate _ROTULO_PARA_MOMENTO, DEM some do resultado.
+    resultado = parsear_momentos("Audiometria (ADM, PER, MRO, DEM 12 meses)")
+    assert Momento.DEM in resultado
+    assert Momento.MR in resultado
+
+
+def test_periodicidade_colada_ao_dem_nao_fica_como_nao_reconhecido() -> None:
+    # Reversão que mata: manter o token original ("DEM 12 meses") na lista
+    # de não reconhecidos mesmo depois de resolvê-lo com sucesso — duplica o
+    # cargo em com_dem e indeterminado na agregação.
+    celula = "Audiometria (ADM, PER, MRO, DEM 12 meses)"
+    assert rotulos_nao_reconhecidos(celula) == frozenset()
+
+
+def test_token_so_periodicidade_fica_vazio_apos_strip_e_nao_reconhecido() -> None:
+    # Reversão que mata: fazer o token vazio pós-strip ("" depois de remover
+    # "12 meses" inteiro) resolver para algum momento por engano (ex.: usar
+    # .get(candidato, Momento.ALGO) com default em vez de None).
+    celula = "Audiometria (ADM, 12 meses)"
+    assert parsear_momentos(celula) == {Momento.ADM}
+    assert rotulos_nao_reconhecidos(celula) == {"12 meses"}
+
+
+def test_rotulos_sem_sufixo_de_meses_seguem_nao_reconhecidos() -> None:
+    # Reversão que mata: trocar a remoção de sufixo por casamento de prefixo
+    # ou fuzzy — "P" e "Mud" (sem número/"mes") não deveriam resolver de
+    # jeito nenhum, mas um prefix-match faria "P" casar com nada aqui, o
+    # risco real é um fuzzy match inventar acerto para rótulos curtos.
+    celula = "Audiometria (P, Mud)"
+    assert parsear_momentos(celula) == frozenset()
+    assert rotulos_nao_reconhecidos(celula) == {"P", "Mud"}
+
+
+def test_demissional_nao_confundido_com_dem_por_correspondencia_parcial() -> None:
+    # Anti-falso-positivo (D-ARQ-70): "DEMISSIONAL" não tem sufixo de
+    # periodicidade e não é "DEM" — lookup exato deve rejeitá-lo. Reversão
+    # que mata: qualquer forma de correspondência parcial (startswith,
+    # substring) que trate "DEMISSIONAL" como contendo "DEM".
+    celula = "Audiometria (ADM, DEMISSIONAL)"
+    assert Momento.DEM not in parsear_momentos(celula)
+    assert rotulos_nao_reconhecidos(celula) == {"DEMISSIONAL"}
+
+
+def test_lookup_de_rotulo_permanece_case_sensitive_apos_strip_de_sufixo() -> None:
+    # Reversão que mata: tornar o lookup de rótulo case-insensitive (ex.:
+    # normalizar .upper() antes do .get()) — resolveria "Per" (CJR, outro
+    # vocabulário) como PER, mudança de vocabulário disfarçada de correção
+    # de forma da periodicidade colada.
+    celula = "Audiometria (ADM, Per 12 meses)"
+    assert Momento.PER not in parsear_momentos(celula)
+    assert rotulos_nao_reconhecidos(celula) == {"Per 12 meses"}
+
+
 def test_classificar_dem_separa_indeterminado_de_sem_dem_confirmado() -> None:
     # Reversão que mata: fazer a agregação somar célula com rótulo não
     # reconhecido em sem_dem (indeterminado sempre vazio) — dobra a recusa
@@ -63,3 +124,75 @@ def test_classificar_dem_separa_indeterminado_de_sem_dem_confirmado() -> None:
     assert com_dem == []
     assert indeterminado == [ambiguo]
     assert sem_dem == [limpo]
+
+
+def _construir_docx_duas_colunas(caminho: Path) -> None:
+    documento = Document()
+    tabela = documento.add_table(rows=0, cols=2)
+    linha_cabecalho = tabela.add_row().cells
+    linha_cabecalho[0].text = "FUNÇÃO"
+    linha_cabecalho[1].text = "EXAMES SOLICITADOS"
+    linha_cargo = tabela.add_row().cells
+    linha_cargo[0].text = "Cargo Simples"
+    linha_cargo[1].text = "Audiometria (ADM, PER, MRO, DEM)"
+    documento.save(str(caminho))
+
+
+def test_celulas_logicas_neutra_em_tabela_de_duas_colunas_sem_mesclagem(tmp_path: Path) -> None:
+    # Controle de neutralidade da Entrega 3 (003.EZ, DH-003EY-01): em tabela
+    # de 2 colunas físicas sem mesclagem, _celulas_logicas(linha.cells)
+    # devolve exatamente [texto_col0, texto_col1] — o mesmo resultado da
+    # indexação fixa celulas[0]/celulas[1] herdada de 003.EX. Nenhuma
+    # reversão isolada mata este teste; ele confirma que o port não muda o
+    # resultado nos documentos que já eram lidos corretamente (forma dos
+    # checkpoints SPE 0030 e RESERVA 0028).
+    caminho = tmp_path / "duas_colunas.docx"
+    _construir_docx_duas_colunas(caminho)
+    registros, _ = extrair_registros(caminho)
+    assert len(registros) == 1
+    assert registros[0].cargo == "Cargo Simples"
+    assert registros[0].tem_audiometria is True
+    assert registros[0].momentos_audiometria == {
+        Momento.ADM,
+        Momento.PER,
+        Momento.MR,
+        Momento.DEM,
+    }
+
+
+def _construir_docx_mesclado(caminho: Path) -> None:
+    # python-docx repete o texto da célula mesclada em cada coluna física do
+    # span — simulado aqui atribuindo o mesmo texto às colunas 0-1 (FUNÇÃO)
+    # e 2-3 (EXAMES SOLICITADOS), sem chamar .merge() (o efeito sobre
+    # .text é o mesmo que uma mesclagem real produziria na leitura).
+    documento = Document()
+    tabela = documento.add_table(rows=0, cols=4)
+    linha_cabecalho = tabela.add_row().cells
+    linha_cabecalho[0].text = "FUNÇÃO"
+    linha_cabecalho[1].text = "FUNÇÃO"
+    linha_cabecalho[2].text = "EXAMES SOLICITADOS"
+    linha_cabecalho[3].text = "EXAMES SOLICITADOS"
+    linha_cargo = tabela.add_row().cells
+    linha_cargo[0].text = "Cargo Mesclado"
+    linha_cargo[1].text = "Cargo Mesclado"
+    linha_cargo[2].text = "Audiometria (ADM, PER, MRO, DEM)"
+    linha_cargo[3].text = "Audiometria (ADM, PER, MRO, DEM)"
+    documento.save(str(caminho))
+
+
+def test_celulas_logicas_evita_zerar_audiometria_em_tabela_mesclada(tmp_path: Path) -> None:
+    # Reversão que mata: reverter o port de _celulas_logicas (voltar a
+    # indexação fixa celulas[0]/celulas[1]) — celulas[1] leria a própria
+    # mesclagem de FUNÇÃO em vez de EXAMES SOLICITADOS, e tem_audiometria
+    # cairia para False (reproduz o defeito medido no ATZUM, DH-003EY-01).
+    caminho = tmp_path / "mesclado.docx"
+    _construir_docx_mesclado(caminho)
+    registros, _ = extrair_registros(caminho)
+    assert len(registros) == 1
+    assert registros[0].tem_audiometria is True
+    assert registros[0].momentos_audiometria == {
+        Momento.ADM,
+        Momento.PER,
+        Momento.MR,
+        Momento.DEM,
+    }

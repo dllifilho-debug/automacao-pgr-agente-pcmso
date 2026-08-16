@@ -13,6 +13,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from docx import Document
 
@@ -23,10 +24,51 @@ _ROTULO_PARA_MOMENTO: dict[str, Momento] = {
     rotulo: momento for momento, rotulo in _ROTULO_MOMENTO.items()
 }
 
+
+def _celulas_logicas(cells: Any) -> list[str]:
+    """Colapsa células adjacentes com texto idêntico numa só — python-docx
+    repete o mesmo texto em cada célula de uma mesclagem horizontal (medido:
+    ATZUM tem 13 colunas físicas para uma tabela de 2 colunas lógicas,
+    FUNÇÃO mesclada em 0-3 e EXAMES SOLICITADOS em 4-9; indexação fixa
+    `celulas[0]`/`celulas[1]`, correta nos documentos de 2 colunas físicas,
+    lê a própria mesclagem de FUNÇÃO como se fosse a coluna de exames nesses
+    casos e zera a contagem de audiometria em silêncio). Não é heurística de
+    texto — mesclagem é estrutura da tabela, não conteúdo. Portado de
+    `medir_cobertura_e_forma.py` (DH-003EY-01, 003.EZ) — este script (003.EX)
+    seguia com a indexação fixa e não expunha o defeito só porque os dois
+    documentos medidos naquela sessão não tinham mesclagem alcançando a
+    coluna de exames.
+    """
+    logicas: list[str] = []
+    anterior: str | None = None
+    for celula in cells:
+        texto = celula.text
+        if texto != anterior:
+            logicas.append(texto)
+            anterior = texto
+    return logicas
+
 _PADRAO_GHE = re.compile(r"^GHE\s*\d+")
 _PADRAO_GRUPO = re.compile(r"\(([^)]*)\)")
 _PADRAO_METADADO = re.compile(r"^(Empresa|Obra|M[eé]dico|SETOR|Data|Adendo)", re.IGNORECASE)
 _CABECALHOS_TABELA = {"FUNÇÃO", "EXAMES SOLICITADOS"}
+_PADRAO_MESES = re.compile(r"(\d+)\s*mes", re.IGNORECASE)
+
+
+def _remover_sufixo_periodicidade(rotulo: str) -> str:
+    """Remove um sufixo de periodicidade colado ao rótulo do momento (ex.:
+    "DEM 12 meses" -> "DEM", 003.EZ fatia 0b). Veto de resultado via lookup
+    exato depois, não filtro de candidato (D-ARQ-64): a remoção é
+    incondicional onde `_PADRAO_MESES` casa — inclusive quando o sufixo é o
+    token inteiro ("12 meses" -> ""), que então falha o lookup e permanece
+    não reconhecido, verbatim, em `rotulos_nao_reconhecidos`. Sem isso,
+    "DEM 12 meses" nunca bate `_ROTULO_PARA_MOMENTO` (lookup exato) e o
+    cargo cai em `indeterminado` mesmo tendo `DEM` escrito na célula.
+    """
+    match = _PADRAO_MESES.search(rotulo)
+    if match is None:
+        return rotulo
+    return rotulo[: match.start()].strip()
 
 
 def parsear_momentos(celula: str) -> frozenset[Momento]:
@@ -41,7 +83,8 @@ def parsear_momentos(celula: str) -> frozenset[Momento]:
         return frozenset()
     momentos: set[Momento] = set()
     for rotulo in grupos[-1].split(","):
-        momento = _ROTULO_PARA_MOMENTO.get(rotulo.strip())
+        candidato = _remover_sufixo_periodicidade(rotulo.strip())
+        momento = _ROTULO_PARA_MOMENTO.get(candidato)
         if momento is not None:
             momentos.add(momento)
     return frozenset(momentos)
@@ -49,17 +92,22 @@ def parsear_momentos(celula: str) -> frozenset[Momento]:
 
 def rotulos_nao_reconhecidos(celula: str) -> frozenset[str]:
     """Rótulos do último grupo entre parênteses que não batem com nenhum
-    `Momento` conhecido (via `_ROTULO_PARA_MOMENTO`) — reportados, não
-    engolidos em silêncio.
+    `Momento` conhecido (via `_ROTULO_PARA_MOMENTO`, após remoção de sufixo
+    de periodicidade) — reportados verbatim (com a periodicidade, se havia),
+    não engolidos em silêncio.
     """
     grupos = _PADRAO_GRUPO.findall(celula)
     if not grupos:
         return frozenset()
-    return frozenset(
-        rotulo.strip()
-        for rotulo in grupos[-1].split(",")
-        if rotulo.strip() and rotulo.strip() not in _ROTULO_PARA_MOMENTO
-    )
+    nao_reconhecidos: set[str] = set()
+    for rotulo in grupos[-1].split(","):
+        rotulo_stripped = rotulo.strip()
+        if not rotulo_stripped:
+            continue
+        candidato = _remover_sufixo_periodicidade(rotulo_stripped)
+        if candidato not in _ROTULO_PARA_MOMENTO:
+            nao_reconhecidos.add(rotulo_stripped)
+    return frozenset(nao_reconhecidos)
 
 
 _PADRAO_TRECHO_AUDIOMETRIA = re.compile(
@@ -111,14 +159,14 @@ def extrair_registros(caminho: Path) -> tuple[list[RegistroCargo], list[str]]:
     ghe_atual = "(sem agrupamento GHE)"
     for tabela in documento.tables:
         for linha in tabela.rows:
-            celulas = linha.cells
-            cargo = celulas[0].text.strip()
+            celulas_logicas = _celulas_logicas(linha.cells)
+            cargo = celulas_logicas[0].strip() if celulas_logicas else ""
             if _PADRAO_GHE.match(cargo):
                 ghe_atual = re.sub(r"\s+", " ", cargo)
                 continue
-            if not _linha_e_cargo(cargo) or len(celulas) < 2:
+            if not _linha_e_cargo(cargo) or len(celulas_logicas) < 2:
                 continue
-            linha_audio = _extrair_linha_audiometria(celulas[1].text)
+            linha_audio = _extrair_linha_audiometria(celulas_logicas[1])
             if linha_audio is None:
                 registros.append(RegistroCargo(ghe_atual, cargo, False, frozenset()))
                 continue
