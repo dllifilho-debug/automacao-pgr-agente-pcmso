@@ -13,8 +13,13 @@ from scripts.medir_cobertura_e_forma import (
     FORMA_GRUPO_SEPARADO,
     FORMA_INLINE,
     FORMA_SEM_NUMERO,
+    CoberturaDocumento,
+    RegistroCargoCompleto,
+    agregar_universalidade,
+    classificar_momento_dem,
     extrair_forma_periodicidade,
     extrair_registros_completos,
+    gerar_relatorio,
     medir_cobertura,
 )
 
@@ -120,3 +125,96 @@ def test_n_cargos_conta_linhas_de_cargo_nao_celulas_da_coluna_funcao(tmp_path: P
     assert cobertura.n_com_audiometria == 3
     assert cobertura.fracao == 0.75
     assert cobertura.universal is False
+
+
+def _registro_completo(
+    cargo: str,
+    momentos: frozenset[Momento],
+    rotulos_nao_reconhecidos: frozenset[str] = frozenset(),
+    tem_audiometria: bool = True,
+) -> RegistroCargoCompleto:
+    return RegistroCargoCompleto(
+        ghe="GHE-X",
+        cargo=cargo,
+        tem_audiometria=tem_audiometria,
+        momentos_audiometria=momentos,
+        rotulos_nao_reconhecidos_audiometria=rotulos_nao_reconhecidos,
+        formas=(),
+    )
+
+
+def test_momento_dem_rotulo_nao_reconhecido_cai_em_indeterminado_nao_em_sem_dem() -> None:
+    # Reversão que mata: fazer o balde sem_dem ser "tudo que não tem DEM" —
+    # o registro ambíguo passaria a entrar em sem_dem além de (ou em vez de)
+    # indeterminado, quebrando a recusa em adivinhar (D-ARQ-13 fora do motor).
+    ambiguo = _registro_completo(
+        "Cargo Ambíguo",
+        frozenset({Momento.ADM, Momento.PER, Momento.MR}),
+        frozenset({"DEM 12 meses"}),
+    )
+    com_dem, sem_dem, indeterminado = classificar_momento_dem([ambiguo])
+    assert com_dem == []
+    assert sem_dem == []
+    assert indeterminado == [ambiguo]
+
+
+def test_momento_dem_presente_vence_ambiguidade_do_resto_da_celula() -> None:
+    # Reversão que mata: inverter a precedência, checando rótulos não
+    # reconhecidos antes de DEM — mandaria este registro para indeterminado
+    # mesmo com DEM presente e legível.
+    misto = _registro_completo(
+        "Cargo Misto",
+        frozenset({Momento.DEM}),
+        frozenset({"XPTO"}),
+    )
+    com_dem, sem_dem, indeterminado = classificar_momento_dem([misto])
+    assert com_dem == [misto]
+    assert sem_dem == []
+    assert indeterminado == []
+
+
+def test_momento_dem_baldes_particionam_sem_sobra_nem_sobreposicao() -> None:
+    # Reversão que mata: permitir que um registro caia em dois baldes (ex.:
+    # remover o "not" da condição de sem_dem, deixando-a independente da
+    # condição de indeterminado) — a soma dos três baldes passaria a exceder
+    # n_com_audiometria.
+    registros = [
+        _registro_completo("Com DEM", frozenset({Momento.DEM})),
+        _registro_completo("Sem DEM limpo", frozenset({Momento.ADM})),
+        _registro_completo("Indeterminado", frozenset(), frozenset({"XPTO"})),
+        _registro_completo("Com DEM e rótulo ambíguo", frozenset({Momento.DEM}), frozenset({"XPTO"})),
+        _registro_completo("Sem audiometria", frozenset(), frozenset(), tem_audiometria=False),
+    ]
+    com_audio = [r for r in registros if r.tem_audiometria]
+    com_dem, sem_dem, indeterminado = classificar_momento_dem(registros)
+    todos = com_dem + sem_dem + indeterminado
+    assert len(todos) == len(com_audio)
+    assert {id(r) for r in todos} == {id(r) for r in com_audio}
+
+
+def test_agregado_universalidade_com_piso_distinto_do_bruto() -> None:
+    # Reversão que mata: fixar o piso em 0 (ou remover o parâmetro) — o
+    # documento pequeno passaria a contar como universal também com piso,
+    # igualando universais_com_piso a universais_bruto.
+    coberturas = {
+        "grande.docx": CoberturaDocumento(
+            nome_doc="grande.docx", n_cargos=20, n_com_audiometria=20, cargos_sem_audiometria=()
+        ),
+        "pequeno.docx": CoberturaDocumento(
+            nome_doc="pequeno.docx", n_cargos=5, n_com_audiometria=5, cargos_sem_audiometria=()
+        ),
+    }
+    agregado = agregar_universalidade(coberturas, piso=17)
+    assert agregado.universais_bruto == 2
+    assert agregado.universais_com_piso == 1
+    assert agregado.universais_com_piso != agregado.universais_bruto
+
+
+def test_relatorio_imprime_valor_do_piso_usado(tmp_path: Path) -> None:
+    # Reversão que mata: imprimir o agregado sem o piso (remover o trecho
+    # "N={piso}" das linhas de agregado bruto/canônico) — o piso usado
+    # deixaria de ser rastreável no artefato.
+    caminho = tmp_path / "sintetico.docx"
+    _construir_docx_sintetico(caminho)
+    relatorio = gerar_relatorio([caminho], _MAPA_NOMES, piso=17)
+    assert "N=17" in relatorio
