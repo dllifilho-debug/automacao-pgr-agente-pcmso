@@ -5050,3 +5050,108 @@ agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py app_ma
 delta-zero, **48 arquivos**; `mypy --strict scripts/medir_cobertura_e_forma.py` limpo.
 `docs/DECISOES_ARQUITETURAIS.md` não tocado — índice não regenerado, cláusula fixa não
 disparada.
+
+## Sessão 003.EZ — 16/08/2026 — ARQUITETURA → CONHECIMENTO → FECHAMENTO (fatias 0, 0b, 1 + EMENDA 1; D-ARQ-68 cl.5 + D-ARQ-81; R-AUD-04 deprecated)
+
+**Foco.** Sucessão de `R-AUD-04` após `DT-003EY-01` refutar seu fundamento. Modo ARQUITETURA →
+CONHECIMENTO, com gate D-ARQ-63 declarado na abertura.
+
+**Fatias e PRs.** Fatia 0 e 0b em PR **#300** (merge `7c7ec10`), commits `598c19c`, `dfff654`,
+`6f2e9f0`. Fatia 1 e EMENDA 1 em PR **#301** (merge `a8bb4d1`), commits `d218556`, `2fbc41f`,
+`010abbe`, `e74daa3`, `256c113`.
+
+**Conferência normativa (D-ARQ-69), texto oficial MTE lido em 15/08/2026.**
+- NR-07: última alteração é a Portaria MTP 567/2022 — norma estável. Anexo II itens 2, 4.1 e
+  4.1.1 confirmados. **Novo:** momento MRO ancorado em 7.5.6 "d" + 7.5.7, *a contrario* 7.5.15
+  (a norma isenta nominalmente o Quadro 1 do Anexo I e não isenta a audiometria).
+- NR-09: a vigente incorpora a **Portaria MTE nº 105, de 29/01/2026**, que o projeto não
+  conhecia. Nível de ação de ruído é **9.6.1 alínea "c"** — **disposição transitória**; a NR-09
+  tem Anexo I (Vibração) e Anexo III (Calor) e **nenhum Anexo de Ruído**. **9.4.1/9.4.2 tornam a
+  avaliação quantitativa condicional** — logo PGR que cita ruído sem quantificar pode estar em
+  conformidade, e "corrigir o PGR" (R-PGR-05) não é desfecho disponível. Isso é o que decidiu a
+  sessão. Fecha o `[INCERTO]` aberto em `R-RUIDO-01` desde 003.CB.
+- **Assimetria registrada como lição:** conferir a norma citada não dispensa conferir a norma
+  que ela invoca. A NR-07 estava estável; a NR-09 mudou em janeiro/2026.
+
+**Medição do momento `DEM` (fatias 0 e 0b), 23 obras canônicas.**
+Não-universais **476 / 59 / 20** (com_dem / sem_dem / indeterminado); universais
+**246 / 5 / 2**. Razão sobre legíveis: **476/535 = 89,0%** e **246/251 = 98,0%**. Base de
+evidência **786 cargos legíveis**, contra os 2 documentos que sustentavam `R-AUD-04`.
+Os 59 `sem_dem` são agrupados por cliente — ENGESEG (4 documentos) responde por 31; ENGESEG +
+TOCTAO + SECONCI, por 52. Hipótese nomeada e **não confirmada cargo a cargo**: cargos abaixo do
+nível de ação recebem audiometria por outro gatilho, e `R-AUD-02` já prescreve esses gatilhos
+sem demissional — confirmar exigiria cruzar cada cargo com o inventário do PGR, e o instrumento
+lê matriz, não PGR.
+
+**Medição Fascino (fatia 1).** 17 GHEs declaram `ruido`, **todos** com
+`ruido_acima_acao = AUSENTE`; os 17 passam a carregar `R-AUD-01`/`R-AUD-02` na coluna de motivos
+da linha de audiometria, **contra 1 na baseline 003.EX** — que é a métrica de que
+`DT-003EG-01` reclamava. 17 das 18 linhas de audiometria com `DEM`. 32 pendências
+`predicado_ausente_presumido` (16 GHEs × 2 regras; o 17º, GHE-16, resolve por
+`perna_ausente_absorvida`/D-ARQ-71). Status **3 VÁLIDA / 16 PARCIAL / 0 BLOQUEADA** (de 3/15/1).
+Linhas de exame **173 → 172 (−1)** contra `main`@`7c7ec10`.
+
+**Números de verificação, com a árvore em que foram medidos.** Suíte completa **1137 passed,
+6 skipped** medida em `010abbe`, árvore parada. `mypy --strict` alvo canônico limpo, **48
+arquivos**. Recorte `tests/` na EMENDA 1: **211 passed**.
+
+**Re-tiragem do PAINEL: DISPARADA.** `R-AUD-04` sai do numerador e do denominador — o
+instrumento ignora header cuja linha contém `DEPRECATED` (`_ids_ativos_protocolo`). Regras
+**23/43 → 22/42** pelo instrumento (52%), **22/43 → 21/42** pela intenção do painel.
+Vocabulário/CAS **50/79**, inalterado. Previsão do prompt de fechamento (22/42) confirmada
+pela medição, não copiada (`python -m scripts.medir_painel`). Suíte **1137 passed, 6 skipped**
+remedida nesta sessão com `--suite` sobre `a8bb4d1`, árvore parada — mesmo número de `010abbe`,
+agora com proveniência de fechamento. `mypy --strict` alvo canônico limpo, **48 arquivos**.
+
+**Regras e decisões.** `R-AUD-04` → `[DEPRECATED — fundamento refutado por DT-003EY-01, sem
+sucessora]`, corpo preservado. **Nenhuma R-* nova** — decisão explícita contra a correção
+candidata de `DT-003EY-01`, que previa `R-AUD-05`: `R-AUD-01` × `R-AUD-02` já expressam o
+universo do item 2, e mudar como a ausência vira estado é camada de motor, mesma ID (precedente
+`R-RX-01`/003.EH). `R-AUD-01`, `R-AUD-02` e `R-RUIDO-01` ganham âncora normativa por changelog
+de mesma ID. **D-ARQ-68 cláusula 5** e **D-ARQ-81** criadas.
+
+### Lições de método (a parte que não se recupera do git)
+
+1. **Agregado que passa não dispensa a distribuição.** A fatia 0 mediu `393/53/109`, razão
+   88,1% — quase o valor final. O que denunciou o defeito não foi o percentual, foi a
+   **concentração por documento**: três documentos apareciam 100% indeterminados e eram 100%
+   com `DEM`. Médica nenhuma escreve 47 de 47 células de forma ambígua; documento inteiro
+   ilegível é sempre forma, nunca conduta.
+2. **A correção não moveu o número, moveu a confiança.** 88,1% → 89,0%; indeterminados
+   206 → 22. A razão estava certa por acidente, e não havia como saber disso antes de explicar
+   a massa ilegível. Corolário: "o número não mudou" não é evidência de que a medição estava boa.
+3. **Menção ao ID ≠ motivo emitido.** A primeira contagem do Arquiteto ("17 antes, 17 depois")
+   contava blocos de GHE que **mencionavam** `R-AUD-01` — incluindo pendência bloqueada. A
+   contagem correta é na **coluna de motivos da linha** — 1 → 17. Mesma classe de DH-003EC-01(b).
+4. **Número corrigido varre TODAS as cópias.** `18/19` estava em dois arquivos. 2ª ocorrência
+   da classe registrada em 003.EX.
+5. **Baseline sem nome inverte o sinal.** "linhas de exame 171 → 172 (+1)" comparava com a
+   baseline pré-`R-AUD-04`; contra o predecessor real o efeito é **173 → 172 (−1)**. A fatia
+   retira uma linha; a frase dizia que acrescentava.
+6. **A passada de verificação sobre o próprio prompt do Arquiteto pagou 3 vezes**, todas
+   detectadas por leitura e nenhuma por execução: import circular (`_PADRAO_MESES` no módulo
+   que importa), bloqueador falso (`sem_dem` **pode** aumentar quando `MRO 12 meses` resolve) e
+   número trocado (SPE 0030 tem zero células ambíguas, não uma). Duas delas teriam queimado uma
+   rodada do Code.
+
+   **4ª ocorrência (FECHAMENTO, 003.EZ) — a mais instrutiva das quatro, porque o erro foi do
+   Arquiteto e o mecanismo estava certo.** O prompt de fechamento previu que regenerar o índice
+   seria no-op numa correção só de rótulo, e transformou a previsão em bloqueador. O Code parou
+   e reportou, corretamente. A previsão estava errada: o carimbo `Fonte:` do índice deriva da
+   tabela de revisões por spec (`gerar_indice_darq.py`, docstring), embora a tabela seja
+   excluída do **conteúdo** do índice. O Arquiteto raciocinou a partir do texto de D-ARQ-63 em
+   vez de ler o gerador. Registro adicional, contra dívida imaginária:
+   `test_indice_em_disco_nao_divergiu` cobre o carimbo (compara o arquivo inteiro) — passou
+   apenas porque a regeneração precedeu a rodada. O guarda funcionou; o que falhou foi a
+   previsão.
+7. **Bloqueador escrito no prompt pegou o próprio corretor:** ao redigir a nota da EMENDA 1, o
+   Code reintroduziu a string `18/19` e o `git grep` bloqueante do prompt o flagrou.
+8. **Regra que morre não é regra sucedida** — `DEPRECATED por refutação` (D-ARQ-81 cl.2) é
+   estado novo no projeto; as três depreciações anteriores tinham sucessora viva.
+
+**Fechamento (Passo 3 do ritual).** Changelog v171 corrigido — dizia que `R-AUD-04` saiu
+`DEPRECATED` "na fatia 2"; a sessão teve fatias 0, 0b e 1, nunca uma fatia 2. A depreciação
+ocorreu no **Commit 2 da fatia 1** (`2fbc41f`). Correção de rótulo, não de número nem de fato.
+Linha **v173** acrescentada em `DECISOES_ARQUITETURAIS.md` registrando a correção e o
+encerramento da sessão. `INDICE_DARQ.md` regenerado — mudou (carimbo `Fonte:` v172 → v173, ver
+lição 6, 4ª ocorrência); contagem de decisões intacta em 81.
