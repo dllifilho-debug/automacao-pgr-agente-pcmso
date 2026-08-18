@@ -5155,3 +5155,163 @@ ocorreu no **Commit 2 da fatia 1** (`2fbc41f`). Correção de rótulo, não de n
 Linha **v173** acrescentada em `DECISOES_ARQUITETURAIS.md` registrando a correção e o
 encerramento da sessão. `INDICE_DARQ.md` regenerado — mudou (carimbo `Fonte:` v172 → v173, ver
 lição 6, 4ª ocorrência); contagem de decisões intacta em 81.
+
+## Sessão 003.FA — 18/08/2026 — ARQUITETURA → dado + teste → FECHAMENTO (fatias 1-2; dois aliases sob D-ARQ-70; D-ARQ-82 especificada e descartada)
+
+**Foco.** `DT-003EZ-01` — matriz sem nenhuma linha derivada de risco sai `VÁLIDA` — tratada
+junto com a nota de fronteira `D-ARQ-68` cl.5(d) × `D-ARQ-71` cl.3 da EMENDA 1 de 003.EZ, como
+uma família só: quando a ausência de evidência deixa de virar estado. Modo ARQUITETURA, gate
+`D-ARQ-63` declarado na abertura.
+
+**Gate declarado.** PROTOCOLO v90 integral, ÍNDICE v173 integral, transversais
+`D-ARQ-{06,09,22}`, eixo silêncio→selo = `D-ARQ-{13,31,66,68,71,81}` integral, git objects @
+`e6ac5e3`. **O eixo estava incompleto** — ver lição 1.
+
+**Fatias e PRs.** Fatia 1 em PR **#303** (merge `19816c8`), commit `5aff4ff`. Fatia 2 (este
+fechamento) em PR próprio.
+
+**Medição de abertura (fatia 0, sem commit — instrumento sobre `relatorios/003ez_fascino_rodar.md`,
+gitignored, evidência de disco não versionada, classe DH-003EG-02).**
+
+- **154 ocorrências** de termo de risco declarado não resolvido, **56 distintas**, em **19/19
+  GHEs**. Nenhum GHE do Fascino resolve todos os riscos que declara. Todas as pendências de
+  termo são **não-bloqueantes** — logo a resolução incompleta **nunca move o tri-estado**.
+- **3 GHEs saem `VÁLIDA`**: GHE-14, GHE-16 e GHE-19. Os 16 restantes são `PARCIAL` por presunção
+  ou bloqueio de outra origem, nunca pela resolução incompleta.
+- **55 de 79 slugs de `agentes.yaml` não têm chave `termos:`** (24 têm). Os químicos não
+  precisam — resolvem por CAS. Os físicos, ergonômicos e de acidente só resolvem por
+  coincidência ortográfica com o próprio slug, porque `construir_indice_termos` sempre indexa o
+  slug como forma. Generaliza a nota 003.EJ de `R-VIB-02`.
+- `motorista_equipamento_pesado` **não tem `termos:`** — os 0/19 medidos em 003.ED são
+  inalcançabilidade em produção, não ausência de caso no acervo. Causa medida para a faceta
+  máquina pesada de `DT-003ED-01`, que estava atribuída a grafia com preposição.
+- `disparador_clinico`: **`false` em 10 slugs, `true` em 0, ausente em 69**, com zero
+  consumidores em runtime. Instância já catalogada da classe campo-sem-consumidor
+  (`DECISOES:2629`, `PENDENCIAS:1048`, `HISTORICO:1082`); esta sessão mediu, não descobriu.
+
+**Decomposição do resíduo — o achado que pautou tudo.** As 154 ocorrências não são uma
+população só:
+
+| classe | ocorr. | % |
+|---|---|---|
+| composição química de FDS / lixo de recorte | 47 | 30,5% |
+| termo sem slug no vocabulário | 38 | 24,7% |
+| alias barato (slug existe, sem conduta) | 31 | 20,1% |
+| slug com conduta, regime estrito | 18 | 11,7% |
+| fração sem agente — `R-PGR-05`, **não deve** resolver | 16 | 10,4% |
+| dívida própria / recusa fuzzy deliberada | 4 | 2,6% |
+
+**12,9% do resíduo são acertos do motor, não lacunas** — `Poeira respirável` não resolver é
+`R-PGR-05` funcionando; `Silício` não virar sílica é `D-ARQ-64` funcionando. Consequência
+direta para `DT-003EZ-01`: um selo que seja função de "termo não resolvido" contabiliza acerto
+como falha, para sempre, em qualquer PGR. A discriminação tem de vir do **tipo da pendência**,
+não da contagem — e parte já existe (`fuzzy_recusado` é tipo próprio). Isso **desfaz** a
+dependência que a própria sessão havia montado: a decisão do selo não precisa esperar
+re-medição pós-alias.
+
+**Conferência normativa (D-ARQ-69), texto oficial MTE lido em 18/08/2026.**
+
+- NR-07: **7.5.12** confirmado em três leituras do PDF oficial com prompts distintos, uma delas
+  adversária (oferecendo a saída "não aparece"). Alínea "b": *"houver exposições ocupacionais
+  acima dos níveis de ação determinados na NR-09 **ou se a classificação de riscos do PGR
+  indicar**"*. Essa segunda perna impede afirmar que risco ergonômico ou de acidente "não gera
+  exame" — a norma admite que o PGR indique. Os cinco Anexos confirmados; **nenhum** cobre
+  ergonômico ou acidente. Correção de leitura registrada: o título do Anexo III é *"Controle
+  radiológico e espirométrico da exposição a agentes químicos"* — mais amplo que "poeira
+  mineral", que foi paráfrase da primeira leitura desta sessão.
+- NR-17 (Portaria MTP 4.219/2022): 17.4.3 "a" *"posturas extremas ou nocivas…"*, "c" *"uso
+  excessivo de força muscular"*, "d" *"frequência de movimentos dos membros superiores ou
+  inferiores"*; 17.5 *"levantamento, transporte e descarga"*. Base dos dois aliases da fatia 1.
+- **A página oficial não é o texto oficial** — a página da NR-7 no portal do MTE lista
+  alterações só até a Portaria SEPRT 8.873/2021 e omite a MTP 567/2022 e a SEPRT 1.295/2021,
+  ambas presentes no cabeçalho do PDF que ela própria serve. Gravado como nota de aplicação
+  003.FA em `D-ARQ-69`.
+
+**Entrega da fatia 1.** `postura_inadequada` recebe `termos: ["Postural"]` (19 ocorrências
+medidas; literal NR-17 17.4.3 "a"); `esforco_fisico` recebe
+`termos: ["Levantamento e Transporte Manual de cargas"]` (12 ocorrências; literal NR-17 17.5,
+atribuição ao slug marcada `[INTERPRETADO — prioridade na revisão de saída]`, porque a NR-17
+trata levantamento em capítulo próprio e o vocabulário não tem slug de levantamento de cargas —
+não criar slug sem consumidor, precedente 003.DG-1). Fonte dupla no comentário do YAML,
+conforme `D-ARQ-70` cl.1 (i)/(iii). Quatro testes com reversão nomeada, dois deles anti-FP
+contra vizinho da família ergonômica (requisito (iv)); varredura inversa 4/4 confirmada
+teste a teste, com o colateral esperado registrado (a reversão que move o alias mata também o
+teste de resolução positiva).
+
+**Recorte declarado — por que só 2 dos 56 termos.** `Poeira respirável` (14x) e
+`Poeiras Respiráveis/Metálicas` (2x) **não devem** resolver (`R-PGR-05`); `Silício`/`Silicatos`
+são recusa deliberada (`D-ARQ-64`, anti-FP de 003.DW); `Máquinas e equipamentos` (11x),
+`Choque elétrico`, `Maganês` e `Radiação não ionizante` tocam slugs **com conduta** e ficam no
+regime estrito de `D-ARQ-70`; `Arranjo físico inadequado` (18x), `Piso irregular ou em desnível`
+(19x) e `Trabalho á Quente` **não têm slug**; ~47 ocorrências são componentes de composição de
+FDS, cluster `D-ARQ-35`/`DT-003M-02`, concentradas no GHE-16.
+
+**Sobre `Máquinas e equipamentos`, medido e não agido.** Ocorre em 11 GHEs; **10 já têm
+`atividade_critica = True`** por `trabalho_altura`, onde resolver o termo mudaria o motivo e
+nenhuma linha (classe `DT-003EG-01`). O 11º é **GHE-12 (Betoneira)**, com `atividade_critica =
+False` — único ponto do acervo onde o termo poderia mudar conduta. Não agido: decidir se
+betoneira é "operação de máquina pesada" é julgamento clínico, e o protocolo já carrega essa
+ressalva `[INTERPRETADO]` na nota 003.ED de `R-PKG-ATIVCRIT`. Fica na faceta aberta de
+`DT-003ED-01`.
+
+**Números de verificação (fatia 1, medidos na sessão, árvore parada).** Índice de termos
+**112 → 114** formas, **zero colisão**; pares fuzzy **inalterados** (4 pares, gabarito de
+`test_vigia_pares_fuzzy_chaves_longas`); índice D-ARQ **81 decisões inalterado**, carimbo
+`Fonte:` **v173 → v174**, `chars` de `D-ARQ-69` **2395 → 3755** (a nota) com `D-ARQ-70` intacto
+em 3464; suíte **1137 → 1141 passed, 6 skipped** (+4, exatamente os testes novos), 24min24s;
+`mypy` não aplicável — nenhum `.py` de produção tocado.
+
+**Decisão criada e descartada — `D-ARQ-82`.** Foi especificada por inteiro (critério de entrada
+de alias como função da consequência clínica do slug, lido de `disparador_clinico`), com prompt
+cirúrgico pronto, e **descartada na verificação** antes de qualquer commit. Motivo: gatilho
+falso. `D-ARQ-70` cl.1 (ii) não exige que o alias **seja** o literal normativo — exige que
+**contenha o núcleo semântico** dele ou seja sua redução direta, o que já admite os dois aliases
+desta sessão. O que restava da decisão eram três aplicações de decisões existentes
+(`D-ARQ-13`, `D-ARQ-67`) sem disparador próprio. Registrado por rastreabilidade, no precedente
+de `D-ARQ-59` (gatilho falso reconhecido antes de virar código). Numeração `D-ARQ-82` **não foi
+consumida** e segue livre.
+
+**Painel (passo 5 do ritual) — avaliado, não re-tirado.** Nenhum dos três números clínicos se
+moveu: regras **22/42** (nenhuma R-* criada, alterada ou depreciada), vocabulário/CAS **50/79**
+(a fatia adicionou `termos:`, não CAS nem slug), dívidas que travam produção **3**
+(`DT-003FA-01` é não-bloqueante). Por `PAINEL_ESTADO.md`, merge que não move número não dispara
+re-tiragem — registrado aqui para que a próxima sessão não leia o baseline defasado
+(`main a8bb4d1`) como esquecimento.
+
+**Lições de método.**
+
+1. **O gate declarado omitiu a decisão que a sessão ia modificar.** O eixo nomeado foi
+   `{13,31,66,68,71,81}`; a sessão escreveu uma decisão que altera **`D-ARQ-70`**, conhecendo-a
+   só pelo título do índice. `D-ARQ-82` só existiu porque o corpo de `D-ARQ-70` não foi lido —
+   é o risco residual que `D-ARQ-63` nomeia ("eixo mal escolhido faz a sessão pular um D-ARQ
+   relevante"), materializado. **Correção de método:** ao nomear o eixo do nível 2, incluir toda
+   D-ARQ que a sessão pretende **alterar ou condicionar**, não apenas as que pretende aplicar.
+2. **Confirmar texto oficial contra espelho de terceiro não é verificação.** O literal do
+   7.5.12 foi checado contra um site comercial de legislação antes de ser refeito só em fonte
+   oficial. Espelho não-oficial pode estar desatualizado e não tem autoridade; a redundância
+   correta é outra leitura do mesmo texto oficial, de preferência adversária.
+3. **A página oficial não é o texto oficial** — gravado em `D-ARQ-69`.
+4. **O alvo aparente não era o alvo.** O diagnóstico mudou duas vezes sob medição: GHE-19
+   (parecia o caso grave; é o mais defensável — seus termos não resolvidos são ergonômicos e de
+   acidente, que não geram exame) → GHE-16 (`VÁLIDA` carregando **13** químicos de composição não
+   resolvidos, contados um a um) → decomposição por classe. Medir antes de decidir salvou a sessão de corrigir o
+   selo pelo critério errado.
+5. **Prompt que crava número novo tem de listar o teste que o guarda.** A spec da fatia 1
+   cravou "índice de termos 112 → 114" e não listou `test_indice_real_tem_112_entradas`, canário
+   hardcoded que quebra exatamente nessa mudança. O Code atualizou e reportou como divergência,
+   em vez de silenciar — comportamento correto; a falha foi de spec do Arquiteto.
+6. **Declarar sessão encerrada não encerra sessão.** O merge da fatia 1 fechou a entrega; o
+   ritual de 7 passos seguiu aberto por três passos. Encerramento é ato do Arquiteto sobre os
+   docs vivos, não consequência do merge.
+
+**Nota de continuidade.** O `INDICE_DARQ.md` volta a mudar apenas pelo carimbo `Fonte:`
+(v174 → v175), sem mover contagem nem `chars` — **5ª ocorrência** da lição que o bloco 003.EZ
+registrou como 4ª. O padrão é estável e esperado em todo fechamento docs-only que acrescenta
+linha de changelog; deixou de ser achado.
+
+**Fila para a próxima sessão.** A decisão do selo de `DT-003EZ-01`, agora madura e sem depender
+de re-medição: a fronteira `VÁLIDA` se decide pela **tipagem da pendência** — o motor precisa
+declarar *por que* não resolveu, em vez de despejar tudo em `vocabulario_ausente`.
+`fuzzy_recusado` já é tipo próprio; o caso `R-PGR-05` (fração sem agente, 16 ocorrências
+medidas) precisa do mesmo tratamento, sob pena de o motor contar um acerto como lacuna.
+Abertas nesta sessão: `DT-003FA-01`.
