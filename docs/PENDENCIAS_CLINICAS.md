@@ -1658,3 +1658,33 @@ arquitetura própria, não conserto de fatia.
 
 **Status:** ABERTA. Não-bloqueante para o merge desta sessão: a conduta emitida está correta, o
 que está errado é o selo.
+
+### DT-003FA-01 — Base de `D-ARQ-70` cita a NR-09 por portaria superada `[ABERTA — não-bloqueante]`
+
+**Origem:** sessão 003.FA, ao ler `D-ARQ-70` integral na verificação do prompt da fatia 1.
+
+**Situação.** A **Base** de `D-ARQ-70` registra: *"Literal da NR-09 Anexo I conferido no PDF
+oficial (gov.br/trabalho-e-emprego, `nr-09-atualizada-2026.pdf`, **Portaria MTP 426/2021**)"*.
+O nome do arquivo é de 2026 e a portaria citada é de 2021 — superada pela **Portaria MTE n.º
+105, de 29/01/2026**, achado da 003.EZ. Quando aquela sessão descobriu a mudança da NR-09, o
+corpo de `D-ARQ-70` não foi reconciliado; a proveniência ficou apontando para a redação
+anterior.
+
+**O que está e o que não está em risco.** O alias ancorado ali é `VMB`/`VCI`
+(`vibracao_mao_braco`, `vibracao_corpo_inteiro`), sob `D-ARQ-70` cl.5 — sigla que é literal do
+Anexo I da NR-09. A 003.EZ mediu que a NR-09 vigente **tem** Anexo I (Vibração), logo a
+expectativa é que o conteúdo sobreviva e o defeito seja de **rótulo de proveniência**. Isso é
+expectativa, não medição: ninguém releu o Anexo I vigente atrás das siglas. Enquanto não for
+relido, a âncora de `D-ARQ-70` cl.5 está `[INCERTO — conferir VMB/VCI no Anexo I da NR-09
+vigente, Portaria MTE 105/2026, texto oficial MTE]`.
+
+**O que a resolução exige.** Reler o Anexo I da NR-09 vigente no texto oficial do MTE,
+confirmar (ou não) que `VMB` e `VCI` seguem literais da norma, e corrigir a Base de `D-ARQ-70`
+para a portaria vigente. Se as siglas não sobreviverem, o caso deixa de ser rótulo e vira
+revisão de alias — aí com efeito de conduta, porque `vibracao_mao_braco` alcança `R-VIB-02` e
+`R-AUD-01`.
+
+**Classe.** Mesma de `D-ARQ-69` e da nota 003.FA anexada a ela: proveniência normativa que
+envelhece em silêncio porque nada no repositório vigia a citação depois de escrita.
+
+**Status:** ABERTA, não-bloqueante. Não trava produção nem a fila da 003.FA.
