@@ -27,8 +27,8 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_112_entradas(indice_real: IndiceTermos) -> None:
-    assert len(indice_real.slug_por_forma) == 112
+def test_indice_real_tem_114_entradas(indice_real: IndiceTermos) -> None:
+    assert len(indice_real.slug_por_forma) == 114
 
 
 # ---------------------------------------------------------------------------
@@ -160,6 +160,46 @@ def test_vibracao_generica_continua_resolvendo_slug_generico(indice_real: Indice
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == "vibracao"
     assert resolucao.pendencia is None
+
+
+# ---------------------------------------------------------------------------
+# resolver_termo — aliases ergonômicos (003.FA, D-ARQ-70 cl.1)
+# ---------------------------------------------------------------------------
+
+def test_postural_resolve_exata_para_postura_inadequada(indice_real: IndiceTermos) -> None:
+    resolucao = resolver_termo("Postural", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "postura_inadequada"
+    assert resolucao.pendencia is None
+
+
+def test_postural_nao_resolve_para_vizinhos_da_familia_ergonomica(
+    indice_real: IndiceTermos,
+) -> None:
+    # anti-FP D-ARQ-70 cl.1.iv: "Postural" não pode escorregar para os slugs
+    # vizinhos da mesma família ergonômica.
+    resolucao = resolver_termo("Postural", indice_real)
+    assert resolucao.slug != "esforco_fisico"
+    assert resolucao.slug != "movimento_repetitivo"
+
+
+def test_levantamento_manual_resolve_exata_para_esforco_fisico(
+    indice_real: IndiceTermos,
+) -> None:
+    resolucao = resolver_termo("Levantamento e Transporte Manual de cargas", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "esforco_fisico"
+    assert resolucao.pendencia is None
+
+
+def test_levantamento_manual_nao_resolve_para_vizinhos_da_familia_ergonomica(
+    indice_real: IndiceTermos,
+) -> None:
+    # anti-FP D-ARQ-70 cl.1.iv: "Levantamento e Transporte Manual de cargas"
+    # não pode escorregar para os slugs vizinhos da mesma família ergonômica.
+    resolucao = resolver_termo("Levantamento e Transporte Manual de cargas", indice_real)
+    assert resolucao.slug != "postura_inadequada"
+    assert resolucao.slug != "movimento_repetitivo"
 
 
 # ---------------------------------------------------------------------------

@@ -288,6 +288,16 @@ agentes:
     protocolos_especiais: []
     disparador_clinico: false
     fuzzy_permitido: true
+    # D-ARQ-70 cl.1: (i) medido em relatorios/003ez_fascino_rodar.md — "Levantamento e
+    # Transporte Manual de cargas", 12 ocorrências; (iii) fonte dupla — literal NR-17 item
+    # 17.5, "levantamento, transporte e descarga" (Portaria MTP 4.219/2022, texto oficial MTE
+    # conferido em 18/08/2026).
+    # [INTERPRETADO — prioridade na revisão de saída] A atribuição ao slug `esforco_fisico` é
+    # a mais frouxa das duas desta fatia: a NR-17 trata levantamento/transporte em capítulo
+    # próprio (17.5), distinto de "uso excessivo de força muscular" (17.4.3 "c"), e o
+    # vocabulário não tem slug de levantamento de cargas. Decisão do Arquiteto: não criar slug
+    # sem consumidor (precedente 003.DG-1). Inspecionar se algum PGR futuro distinguir os dois.
+    termos: ["Levantamento e Transporte Manual de cargas"]
   movimento_repetitivo:
     tipo_ibe: null
     cas: null
@@ -304,6 +314,12 @@ agentes:
     protocolos_especiais: []
     disparador_clinico: false
     fuzzy_permitido: true
+    # D-ARQ-70 cl.1: (i) medido em relatorios/003ez_fascino_rodar.md — "Postural", 19
+    # ocorrências em 19 GHEs do PGR Fascino; (iii) fonte dupla — literal NR-17 item 17.4.3
+    # alínea "a", "posturas extremas ou nocivas do tronco, do pescoço, da cabeça, dos membros
+    # superiores e/ou dos membros inferiores" (Portaria MTP 4.219/2022, texto oficial MTE
+    # conferido em 18/08/2026).
+    termos: ["Postural"]
   dermatite_contato:
     tipo_ibe: null
     cas: null
