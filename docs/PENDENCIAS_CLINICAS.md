@@ -1742,3 +1742,60 @@ Gauntlet. Para o papel de **conferidor** isso não importa, porque a saída é f
 comando.
 
 **Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+
+### DH-003FB-02 — Leitura do repo pelo mount do Cowork deixa `.git/index.lock` órfão que trava o Code `[ABERTA — higiene de ambiente]`
+
+**Origem:** sessão 003.FB, entrega A. O Code abriu a sessão encontrando `.git/index.lock`
+e o removeu por conta própria, reportando "stale, safe to remove" — tecnicamente correto
+(0 bytes, sem processo git vivo), mas é decisão que o método reserva ao Arquiteto:
+bloqueador se reporta, não se resolve.
+
+**Causa, que não é do repo.** O lock foi criado pelo **Arquiteto**, não pelo Code: o
+`git status` executado pelo Cowork sobre a pasta montada emite
+`warning: unable to unlink .git/index.lock: Operation not permitted` — o git do mount cria
+o lock e não consegue removê-lo, por permissão do sistema de arquivos montado. O resíduo
+fica para quem abrir o repo em seguida no host.
+
+**Consequência.** Toda sessão de Code aberta logo depois de uma leitura do Arquiteto pode
+encontrar um lock órfão e ser empurrada a decidir sozinha sobre ele. O incentivo é para o
+Code normalizar a remoção — e um lock **não**-órfão (processo git real em curso) removido
+por hábito corrompe o índice.
+
+**O que a resolução exige.** Decidir a regra: ou o Arquiteto limpa o lock ao final de cada
+leitura, ou o `CLAUDE.md` do repo (público Code) passa a instruir explicitamente
+"lock órfão: reportar, nunca remover", ou a leitura do Arquiteto deixa de usar comandos que
+tomam o lock (`git status` toma; `git show`/`git log` não). A terceira é a mais barata e a
+única que ataca a causa. Ver [[cowork-mount-regras]].
+
+**Status:** ABERTA, não-bloqueante. Ambiente, não motor. Nenhuma R-* tocada.
+
+### DH-003FB-03 — O `PAINEL_ESTADO.md` se declara "vivo" mas seu baseline envelhece por desenho `[ABERTA — higiene de instrumento]`
+
+**Origem:** sessão 003.FB, passo 5 do ritual.
+
+**Situação.** O painel abre com *"Painel vivo, não foto datada. Mostra o estado corrente
+medido de disco (git), não estimativa"*, e sua regra de cadência re-tira **apenas** quando um
+dos três números clínicos se move, um marco fecha, ou a sessão é META. As duas afirmações
+convivem mal: o bloco **Baseline** carrega hash, contagem de suíte e versões de doc, que
+mudam a cada sessão **independentemente** dos três números.
+
+**Medido em 003.FB.** O painel declara `main a8bb4d1 · 1137 passed, 6 skipped · PROTOCOLO
+v90 · DECISOES v173`. O estado real é `main a48836d · 1147 passed, 6 skipped · PROTOCOLO
+v90 · DECISOES v177` — **três sessões de defasagem** (003.FA, 003.FB entregas A e B), com a
+contagem de suíte errada em 10 testes. Cada defasagem foi individualmente correta pela regra;
+o efeito acumulado não é.
+
+**Por que importa.** Quem lê o painel para saber "onde estamos" lê 1137 como corrente. É erro
+silencioso plausível — classe `D-ARQ-22` — no documento cuja única função é ser a leitura
+rápida do estado. A 003.FA já registrou a defasagem no fechamento para que a sessão seguinte
+não a lesse como esquecimento; 003.FB a registra de novo, maior. O padrão indica desenho, não
+descuido.
+
+**Correção candidata (não decidida).** Separar o que envelhece do que não envelhece: os
+**três números** seguem re-tirados por evento (regra atual, intacta), e o **Baseline** —
+hash, suíte, versões — passa a ser atualizado em todo fechamento, custo marginal ~zero porque
+o ritual já mede tudo isso no passo 6. Alternativa: derivar o Baseline por script, como
+`INDICE_DARQ.md`, e proibir edição à mão. A segunda é mais fiel à doutrina anti-cache do
+projeto e mais cara.
+
+**Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
