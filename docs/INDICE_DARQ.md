@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v175 · 81 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v176 · 82 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -89,3 +89,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v175 · 81 decisões
 | D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3437 | 1691 |
 | D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3468 | 7663 |
 | D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3580 | 2897 |
+| D-ARQ-82 | O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz |  | 3624 | 10748 |
