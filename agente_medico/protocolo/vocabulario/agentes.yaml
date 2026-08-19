@@ -591,3 +591,19 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+
+# D-ARQ-83 — termos reconhecidos que NOMEIAM FRAÇÃO/MEDIDA sem identificar substância.
+# Entram no vocabulário para NÃO resolver: nunca viram slug (cl.2), e produzem
+# Pendencia(tipo="fracao_sem_agente", destinatario="elaborador_pgr", regra_origem="R-PGR-05").
+# Base normativa: NR-07 Anexo III — Quadro 1 trata de "poeira CONTENDO sílica, asbesto ou
+# carvão mineral" e Quadro 2 mede "poeira respirável": a fração é o que se mede, o agente
+# é o que a poeira contém; termo só-fração não roteia entre os Quadros (R-PGR-05, nota 003.EJ).
+fracoes_sem_agente:
+  # [DERIVADO — NR-07 Anexo III Quadro 2, coluna literal]
+  # Medido: 14 ocorrências em 14 GHEs distintos — PGR CONSCIENTE SPE 0030 FASCINO (15.07.26)
+  - "Poeira respirável"
+  # [INTERPRETADO — prioridade na revisão de saída] "Metálicas" qualifica agente-CLASSE, não
+  # fração; segue sem substância identificável e sem rotear por nenhum dos dois Quadros, mas a
+  # atribuição é leitura do Arquiteto (precedente: esforco_fisico, 003.FA).
+  # Medido: 2 ocorrências — mesmo documento.
+  - "Poeiras Respiráveis/Metálicas"
