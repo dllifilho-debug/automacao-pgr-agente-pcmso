@@ -1656,6 +1656,16 @@ confundir. `D-ARQ-74` não pega: ele barra só `REJEITADO`.
 `linhas_com_risco` não-vazia. Ambas mudam o contrato do tri-estado (D-ARQ-31) — decisão de
 arquitetura própria, não conserto de fatia.
 
+**Emendas de fato (003.FB)** `[MEDIDO — relatorios/003ez_fascino_rodar.md]`. Duas afirmações
+desta DT estavam imprecisas e ficam corrigidas aqui, sem alterar a conclusão: (i) *"Não tem
+pendência alguma"* é falso — GHE-19 carrega duas pendências `vocabulario_ausente` de
+`R-GHE-02` (cargos sem `riscos_implicitos`); o que não há é pendência **bloqueante**, e essas
+pendências ocorrem em 19/19 GHEs (41 no total, uma por cargo, artefato de `DT-003EP-01`), logo
+não discriminam nada. (ii) A ambiguidade de `riscos_resolvidos: (nenhum)` que esta DT nomeia
+está **resolvida no caso medido, no braço ruim**: GHE-19 declara três termos de risco
+(`Postural`, `Piso irregular ou em desnível` e um recorte espúrio de `DT-003EQ-01`) e nenhum
+resolveu. Resolvida em desenho por `D-ARQ-82`; segue ABERTA até a implementação (003.FC).
+
 **Status:** ABERTA. Não-bloqueante para o merge desta sessão: a conduta emitida está correta, o
 que está errado é o selo.
 
@@ -1688,3 +1698,47 @@ revisão de alias — aí com efeito de conduta, porque `vibracao_mao_braco` alc
 envelhece em silêncio porque nada no repositório vigia a citação depois de escrita.
 
 **Status:** ABERTA, não-bloqueante. Não trava produção nem a fila da 003.FA.
+
+### DH-003FB-01 — Detecção de erro factual do Arquiteto depende inteiramente do Diovanni `[ABERTA — higiene de método]`
+
+**Origem:** sessão 003.FB, ao revisar o próprio método após duas correções factuais dentro da
+mesma sessão.
+
+**Situação.** O modo de falha dominante e catalogado do projeto é de **conferência** (afirmação
+factual × fonte primária), não de julgamento: gate pulado em 003.DP, gate de 003.FA omitindo a
+própria `D-ARQ-70` que a sessão ia alterar, a classe "leio a forma, não a prova" com 11+
+ocorrências, parser ad-hoc do Arquiteto produzindo gabarito errado, mecanismo-sem-efeito 2× em
+003.EW. Em 003.FB houve mais duas: uma fatia de re-medição proposta sem poder de decidir entre
+desenhos, e a afirmação de que o orquestrador "não pode ter o dado" quando `RiscoPGR(agente=None)`
+já viaja no `GHEPGR`. Em todos os casos quem detectou foi o Diovanni ou uma leitura de código
+posterior — nunca a suíte, nunca o ritual.
+
+**Proposta a decidir em sessão META própria.** Conferidor factual por subagente, rodando dentro
+da sessão do Arquiteto sobre todo artefato que **crava fato** (D-ARQ, prompt cirúrgico, número do
+painel, spec de dado), com três condições: (1) **não emite veredito** — emite achados com arquivo,
+âncora e o comando que reproduz, porque "conferido, está ok" é declaração não-auditável da mesma
+classe que a `003.DQ` combate, agravada por a ferramenta devolver só a mensagem final do
+subagente e nunca o transcript; (2) **prompt fixo e versionado no repo**, genérico, jamais
+apontando o que conferir — prompt ajustável por sessão deixa o builder desviar do próprio ponto
+cego; (3) o **Crítico não muda**: sessão nova, artefato + barra, `003.DQ` intocada — ele apenas
+passa a receber artefato já limpo de erro factual e gasta a sessão nos três itens da barra.
+
+**Discordância registrada, para não se perder.** **Nenhum gate novo.** O gargalo do projeto não é
+falta de crítica — são 62 pendências abertas, 3 travando produção, 53/79 slugs sem `termos:` e
+divergência medida contra o gabarito humano (003.EW). O ganho pretendido é tirar conferência do
+Diovanni, não somar cerimônia; se isto virar um quarto passo de ritual com declaração própria,
+terá piorado o projeto.
+
+**Fronteira com `DT-003DX-02`.** O prompt fixo do conferidor é conteúdo do público **Arquiteto**,
+que é exatamente a metade ainda não resolvida daquela DT (o público Code já mora em `CLAUDE.md`
+versionado). Seria a primeira regra do público Arquiteto a entrar no git.
+
+**Limite de isolamento medido em 003.FB.** Subagente **não** herda o contexto conversacional do
+builder — isso é estrutural. Mas alcança as mesmas fontes laterais (memória de projeto do Cowork,
+project knowledge, `relatorios/`, prompts da pasta do Cowork), não há tipo de agente com perfil
+"sem memória, sem projeto", e o toolset não é removível por chamada. Para o papel de **Crítico** o
+isolamento é, portanto, **apenas instrução** — motivo pelo qual a proposta NÃO substitui o
+Gauntlet. Para o papel de **conferidor** isso não importa, porque a saída é falsificável por
+comando.
+
+**Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.

@@ -3621,6 +3621,158 @@ qualquer eixo cujo corpus seja de um setor só — que é o estado do acervo int
 ("quando um precedente de corpus setorialmente enviesado autoriza universalizar"), aberto aqui
 porque a situação repetiu com custo medido — condição escrita lá.
 
+## D-ARQ-82 — O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz
+
+**Contexto.** `DT-003EZ-01` registrou que uma matriz sem nenhuma linha derivada de risco sai
+`VÁLIDA`. A causa mecânica é que `orquestrador.executar` testa `if not tem_bloqueio and not
+tem_presumida` **antes** de olhar `linhas_com_risco`: a cláusula 2 de `D-ARQ-66` protege a
+fronteira `PARCIAL`/`BLOQUEADA` e **não** a fronteira de `VÁLIDA`. Lacuna de desenho da própria
+cl.2, não regressão.
+
+O caso-âncora **não é** o GHE-19 da DT. É o **GHE-16** `[MEDIDO — Fascino,
+relatorios/003ez_fascino_rodar.md @ d218556; contagem REVERIFICADA termo a termo em 003.FB]`:
+carrega **19 termos não resolvidos, dos quais 13 são componentes químicos de composição** (o
+restante: 1 fração — `Poeira respirável`, causa-acerto — e 5 ergonômicos/de acidente), e ainda
+assim sai `VÁLIDA`. Uma matriz assinável, selada como "todo risco determinou sua conduta", cujo
+PGR declara agentes que o motor não identificou.
+
+Entre esses 13 está **`Metiletilcetona`** — grafia que não resolve, embora o slug
+`metil_etil_cetona` exista no vocabulário e resolva no GHE-10 do mesmo documento. É lacuna de
+`termos:`, não agente desconhecido, e o agente tem **conduta devida**: `R-BIO-04` Quadro 1/EE,
+biomonitoramento 6M no periódico. Ou seja, o selo `VÁLIDA` hoje cobre uma matriz à qual falta um
+biomonitoramento exigido pelo Anexo I da NR-07. O dano não é hipotético. É o erro silencioso plausível de
+`D-ARQ-22` no ponto onde a revisão de saída mais precisa do sinal. GHE-19 (3 termos declarados,
+nenhum resolvido) é o caso secundário, e a redação de `DT-003EZ-01` o descrevia com duas
+imprecisões factuais — ver "Correções de fato", abaixo.
+
+**O que impede a solução ingênua.** Condicionar o selo a "existe termo não resolvido" é
+inadmissível: 003.FA decompôs as 154 ocorrências de termo não resolvido do Fascino e mediu que
+**12,9% são ACERTOS do motor** — `Poeira respirável` não resolver é `R-PGR-05` funcionando;
+`Silício` não virar sílica é `D-ARQ-64` funcionando. Um selo por contagem contaria acerto como
+falha, permanentemente e por desenho.
+
+**O que faltava para a solução correta.** A discriminação tem de vir do **tipo** da
+não-resolução — mas o discriminante não está disponível no ponto do selo. `hidratacao.py`
+mantém a invariante *"agente=None sempre pareado com exatamente 1 pendência"* (`D-ARQ-51` seam
+3, com `assert`), e ainda assim o par viaja **partido entre dois canais**: o `RiscoPGR` entra no
+`PGR` e chega ao orquestrador; a `Pendencia` que carrega o tipo sai pelo retorno-tupla de
+`processar_arquivo_pgr` e nunca entra no `Resultado` `[VERIFICADO — leitura de
+adaptadores/orquestracao_pgr.py e motor/hidratacao.py, 07476ed]`.
+
+---
+
+**Decisão — 6 cláusulas.**
+
+1. **`VÁLIDA` exige ausência de lacuna, não ausência de pendência.** Para todo `RiscoPGR` do GHE
+   com `agente is None`, a causa da não-resolução tem de ser uma **causa-acerto**. Havendo ao
+   menos uma causa-lacuna, a matriz não pode ser `VÁLIDA`. GHE que não declara risco algum
+   satisfaz a cláusula vacuamente e segue `VÁLIDA` — ver cl.6.
+
+2. **A causa é tipada no dado, e a lista de acertos é fechada e declarada.** Cada causa-acerto
+   entra nomeando a decisão ou regra que a torna acerto: `fuzzy_recusado` (`D-ARQ-64` cl.4) e
+   fração-declarada-sem-agente (`R-PGR-05`, nota de aplicação 003.EJ). **Ausência de causa
+   registrada é lacuna** — o default é protetivo, e tipo novo entra na lista de acertos só por
+   decisão explícita, nunca por omissão de quem o criou.
+
+3. **A causa viaja com o risco, não apenas com a pendência.** `RiscoPGR` passa a carregar a
+   causa da não-resolução, preenchida no ramo `NAO_RESOLVIDO` de `hidratar_ghe`, onde a
+   `Resolucao` já a conhece e hoje a descarta. A duplicação com a `Pendencia` do outro canal é
+   declarada e vigiada por invariante de pareamento 1:1, teste computado do dado no molde de
+   `D-ARQ-67` cl.3 — cache não vigiado diverge. Campo e consumidor entram na **mesma fatia**
+   (precedente 003.DG-1); `RiscoPGR` já carrega um campo morto (`tipo: str`, sempre `""`, zero
+   consumidores em produção `[VERIFICADO — git grep em todo o pacote, 07476ed]`) e não ganha um
+   segundo. Reusar esse campo em vez de criar outro foi avaliado e rejeitado: `tipo` denota a
+   natureza do risco, não a causa da não-resolução, e há teste cravando o contrato atual
+   (`test_hidratacao.py:222`, `assert all(r.tipo == "" for r in ghe_pgr.riscos)`).
+
+4. **Slug resolvido sem regra consumidora é contribuição DETERMINADA, não lacuna.** Não rebaixa
+   o selo. Um slug que resolve e não dispara exame é a norma não prescrevendo exame para aquele
+   agente — `postura_inadequada` e `esforco_fisico` (003.FA) são o caso. Consequência explícita:
+   **não** se cria teste "todo slug tem consumidor a jusante"; ele nasceria vermelho em massa e o
+   comportamento que ele acusaria é o correto e majoritário. Isto é a direção **oposta** de
+   `D-ARQ-67` (literal em código apontando para slug inexistente), não sua aplicação — não
+   confundir as duas.
+
+5. **A fronteira `PARCIAL`/`BLOQUEADA` mantém o eixo de `D-ARQ-31` cl.1 e estende o conjunto de
+   causas.** O eixo declarado lá é a **determinação da contribuição** ("todas determinaram" /
+   "algumas determinaram" / "nenhuma contribuição pôde ser determinada"); os exemplos entre
+   parênteses citam bloqueio ("único risco do GHE bloqueado; ou bloqueio estrutural Stage 3")
+   porque, em 003.A, bloqueio era a única forma conhecida de não-determinação. Esta decisão
+   acrescenta uma segunda forma — **termo não resolvido por lacuna** —, preservando o eixo.
+   Logo: lacuna com alguma linha determinada por risco → `PARCIAL`; lacuna com
+   `linhas_com_risco` vazia → `BLOQUEADA`. Nenhum estado novo é criado; o que se estende é o
+   conjunto de causas de não-determinação, e isso está declarado, não deduzido em silêncio.
+
+6. **Quarto estado avaliado e rejeitado.** Um estado próprio para "GHE sem risco declarado"
+   custaria o contrato de `D-ARQ-31` cl.1 e todos os seus consumidores para descrever um caso em
+   que `VÁLIDA` já é verdadeira: a conduta emitida (incondicionais de `R-CLI-01`/`R-PSY-02`) está
+   completa, nada ficou indeterminado, e `riscos_resolvidos: (nenhum)` está impresso ao lado na
+   saída (`D-ARQ-22` Parte B, nota 003.EG). O que tornava GHE-19 escandaloso não é ter zero risco
+   resolvido — é ter risco **declarado** que não resolveu, e a cl.1 pega isso.
+
+---
+
+**Risco assumido, declarado: saturação do selo.** A previsão é que os **3 GHEs `VÁLIDA` do
+Fascino caiam para 0** — GHE-16 e GHE-14 para `PARCIAL`, GHE-19 para `BLOQUEADA`. Um selo que
+nunca acende `VÁLIDA` perde poder discriminante, que é exatamente a crítica que `D-ARQ-66` cl.2 e
+`D-ARQ-71` cl.3 fizeram à diluição de sinal. Aceito, por dois motivos: (a) o retrato é
+**verdadeiro** — **53 de 79** slugs de `agentes.yaml` não têm `termos:` `[MEDIDO — parse YAML de
+`agentes.yaml`, 07476ed, 003.FB]`, e o selo passa a
+medir a distância real até a matriz assinável, subindo conforme o vocabulário cresce; (b) a
+alternativa — restringir a cl.1 às lacunas "com efeito clínico" — é inexequível, porque o efeito
+de um termo que não resolveu é justamente o que não se sabe. A previsão é `[A MEDIR — 003.FC]`:
+a medição disponível é de `d218556`, anterior aos aliases de 003.FA, que já resolvem `Postural`.
+
+**Correção de número herdado.** O valor "55 de 79 sem `termos:`" circula no projeto como estado
+corrente; ele é a medição de **abertura** de 003.FA. A própria entrega daquela sessão adicionou
+`termos:` a `postura_inadequada` e `esforco_fisico`, levando a **53**. Reconferido nos dois
+pontos da árvore `[MEDIDO — 003.FB: 07476ed~2 → 55; 07476ed → 53]`. Nenhuma conclusão desta
+decisão muda; o registro fica para que o número não seja recitado errado.
+
+**Correções de fato em `DT-003EZ-01`** (a DT permanece, com estas emendas): (i) *"Não tem
+pendência alguma"* é falso — GHE-19 tem duas pendências `vocabulario_ausente` de `R-GHE-02`
+(cargos sem `riscos_implicitos`); o que não há é pendência **bloqueante**, e essas duas ocorrem
+em 19/19 GHEs (41 ao todo, 1 por cargo, artefato de `DT-003EP-01`) — não discriminam nada. (ii) A
+ambiguidade de `riscos_resolvidos: (nenhum)` que a DT nomeia está **resolvida no caso medido, no
+braço ruim**: GHE-19 declara três termos de risco e nenhum resolveu. `[MEDIDO — 003.FB]`
+
+**Fronteiras (não confundir).**
+
+- **`D-ARQ-66` cl.2** — complementar, não revogada. Aquela impede que linha incondicional promova
+  `BLOQUEADA → PARCIAL`; esta impede que ausência de bloqueio promova a `VÁLIDA`. Mesma família,
+  fronteiras opostas do mesmo tri-estado.
+- **`D-ARQ-31`** — cl.2 (bloqueio por-risco), cl.3 (anexação pendência-à-linha) e a invariante
+  piso-sem-teto intocadas. Só a cl.1 é aplicada a um caso que ela já cobria pela letra.
+- **`D-ARQ-68` cl.5(d)** e **`D-ARQ-71` cl.3** — intocadas: seguem decidindo os seus casos
+  (presunção protetiva rebaixa; perna absorvida não rebaixa). Esta decisão não altera nenhum dos
+  dois, e a assimetria declarada entre eles permanece.
+- **`D-ARQ-13`/`D-ARQ-14`** — o tri-estado do predicado e o destino da pendência de vocabulário
+  não mudam. `vocabulario_ausente` segue não-bloqueante; o que muda é que **não-bloqueante deixa
+  de significar irrelevante para o selo**.
+- **`D-ARQ-64`** — a recusa de fuzzy segue exatamente como está; esta decisão apenas a nomeia
+  como causa-acerto na cl.2.
+- **`D-ARQ-51` seam 3** — a invariante 1:1 é preservada e passa a ser vigiada por teste; a cl.3
+  reúne o par, não o cria.
+- **`D-ARQ-09`** — pureza preservada: a causa entra pelo `PGR`, input do motor. `executar` não
+  muda de assinatura e não passa a ler pendências de outro canal.
+- **Nenhuma `R-*` criada, alterada ou depreciada.** Nenhuma conduta clínica emitida muda: as
+  mesmas linhas, com as mesmas periodicidades e momentos. Muda o **selo** da matriz.
+
+**Universalidade (`D-ARQ-06`).** Expressa sobre a forma — a causa da não-resolução de um termo —,
+não sobre agente, família de risco ou setor. Vale construção civil, indústria química e saúde
+igualmente; o GHE-16 que a motiva é químico, o GHE-19 é administrativo.
+
+**Dependência de dado, declarada.** A cl.2 nomeia a fração-declarada-sem-agente como
+causa-acerto, e esse tipo **não existe hoje** `[VERIFICADO — varredura de `tipo="` em
+`agente_medico/motor/`, 07476ed]`: `Poeira respirável` cai em `vocabulario_ausente`,
+indistinguível de lacuna. Implementar a cl.1 antes de o tipo existir derrubaria o selo por acerto
+do motor em **14 GHEs** (`Poeira respirável`, nota 003.EJ). A entrega de dado é **pré-requisito
+da implementação**, não posterior a ela.
+
+**Base.** Sessão 003.FB (19/08/2026). Resolve `DT-003EZ-01`. Decisão escrita e fechada nesta
+sessão; implementação em 003.FC (campo + consumidor na mesma fatia, cl.3), com efeito medido por
+GHE e varredura inversa.
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -3800,3 +3952,4 @@ porque a situação repetiu com custo medido — condição escrita lá.
 | v173 | 16/08/2026 | Sessão 003.EZ — FECHAMENTO (docs — correção de rótulo e encerramento): o changelog v171 dizia que `R-AUD-04` saiu `DEPRECATED` "na fatia 2" — a sessão teve fatias 0, 0b e 1, nunca uma fatia 2; a depreciação ocorreu no **Commit 2 da fatia 1** (`2fbc41f`). Corrigida a expressão em v171 (rótulo, não número nem fato). Sessão encerrada — ver bloco 003.EZ em HISTORICO_OPERACIONAL.md para o fechamento completo (fatias, PRs, conferência normativa D-ARQ-69, medições e lições de método). |
 | v174 | 18/08/2026 | Sessão 003.FA fatia 1 (dado + teste + docs): dois aliases `termos:` sob `D-ARQ-70` cl.1 — `postura_inadequada` recebe "Postural" (19 ocorrências medidas, literal NR-17 17.4.3 "a") e `esforco_fisico` recebe "Levantamento e Transporte Manual de cargas" (12 ocorrências, literal NR-17 17.5, atribuição ao slug marcada `[INTERPRETADO]`). Quatro testes com reversão nomeada, dois deles anti-FP contra vizinho da família ergonômica (requisito (iv) de `D-ARQ-70`). Índice de termos 112 → 114 formas, zero colisão. **Nota de aplicação 003.FA em `D-ARQ-69`** — a página oficial da NR-7 omite as Portarias MTP 567/2022 e SEPRT 1.295/2021 que o PDF por ela servido lista; conferir vigência pela página erra por duas portarias. Resíduo registrado: a Base de `D-ARQ-70` cita a NR-09 pela Portaria MTP 426/2021, superada pela MTE 105/2026 (achado 003.EZ), não reconciliado. Recorte declarado: dos 56 termos distintos não resolvidos medidos na abertura, só estes 2 entram — fração sem agente (`R-PGR-05`) e recusa fuzzy (`D-ARQ-64`) **não devem** resolver; slugs com conduta ficam no regime estrito; termos sem slug são fatia própria. **Nenhuma D-ARQ criada** — `D-ARQ-82` foi especificada e descartada como gatilho falso na verificação, por `D-ARQ-70` cl.1 (ii) já cobrir o caso. Nenhuma R-* criada, alterada ou depreciada; nenhum código de motor tocado. |
 | v175 | 18/08/2026 | Sessão 003.FA — FECHAMENTO (docs): passos 2, 4 e 5 do ritual, não executados no merge da fatia 1. **`DT-003FA-01` CRIADA (ABERTA, não-bloqueante)** — a Base de `D-ARQ-70` cita a NR-09 pela Portaria MTP 426/2021, superada pela MTE 105/2026 (achado 003.EZ, não reconciliado à época); a âncora de `D-ARQ-70` cl.5 (`VMB`/`VCI`) fica `[INCERTO]` até o Anexo I vigente ser relido. Bloco 003.FA gravado em `HISTORICO_OPERACIONAL.md` com a medição de abertura (154 ocorrências de termo não resolvido, 56 distintas, 19/19 GHEs; 55 de 79 slugs sem `termos:`; 3 GHEs `VÁLIDA`), a decomposição do resíduo em 6 classes e as 6 lições de método. **Painel avaliado e NÃO re-tirado** — nenhum dos três números clínicos se moveu (regras 22/42, vocabulário/CAS 50/79, dívidas 3). Registro de rastreabilidade: **`D-ARQ-82` foi especificada por inteiro e descartada antes de qualquer commit** — gatilho falso, `D-ARQ-70` cl.1 (ii) já cobre o caso ("conter o núcleo semântico do literal normativo ou sua redução direta"); a numeração 82 **não foi consumida**. Nenhuma R-* criada, alterada ou depreciada; nenhuma D-ARQ criada; nenhum código tocado. |
+| v176 | 19/08/2026 | Sessão 003.FB (ARQUITETURA, entrega A — decisão escrita, sem código): **`D-ARQ-82` CRIADA** — o selo `VÁLIDA` computa sobre a **causa** da não-resolução de um termo, nunca sobre a contagem; 6 cláusulas. cl.1 `VÁLIDA` exige ausência de **lacuna**, não de pendência; cl.2 causa-acerto é lista fechada e declarada (`fuzzy_recusado`/`D-ARQ-64` cl.4 e fração-sem-agente/`R-PGR-05` nota 003.EJ), ausência de causa registrada é lacuna (default protetivo); cl.3 a causa passa a viajar no `RiscoPGR`, com invariante de pareamento 1:1 vigiada por teste computado (molde `D-ARQ-67` cl.3), campo e consumidor na MESMA fatia (precedente 003.DG-1); cl.4 slug resolvido sem regra consumidora é contribuição DETERMINADA, e **não** se cria teste "todo slug tem consumidor" (direção oposta de `D-ARQ-67`); cl.5 mantém o eixo de `D-ARQ-31` cl.1 (determinação da contribuição) e **estende o conjunto de causas** de não-determinação, sem estado novo; cl.6 quarto estado avaliado e REJEITADO. Caso-âncora **GHE-16** `[MEDIDO — Fascino, 003ez_fascino_rodar.md @ d218556; reverificado termo a termo em 003.FB]`: 19 termos não resolvidos (13 químicos de composição, 1 fração, 5 ergonômicos/acidente) e ainda assim `VÁLIDA` — entre os 13, `Metiletilcetona`, cujo slug `metil_etil_cetona` existe e resolve no GHE-10 do mesmo documento, com conduta devida por `R-BIO-04` (Quadro 1/EE, 6M periódico). Risco de **saturação do selo** assumido e declarado no corpo (previsão `[A MEDIR — 003.FC]`: 3 `VÁLIDA` → 0). Correção de número herdado: slugs sem `termos:` são **53** de 79, não 55 — o 55 é a medição de abertura de 003.FA, cuja própria entrega levou a 53 `[MEDIDO — 003.FB, parse YAML em `07476ed~2` e `07476ed`]`. **Dependência de dado declarada:** a cl.2 nomeia a fração-sem-agente como causa-acerto e esse tipo de pendência NÃO existe hoje — implementar a cl.1 antes dele derrubaria o selo por acerto do motor em 14 GHEs. Nenhuma R-* tocada; PROTOCOLO segue v90. Implementação em 003.FC. Detalhe em HISTORICO 003.FB. |
