@@ -5315,3 +5315,119 @@ declarar *por que* não resolveu, em vez de despejar tudo em `vocabulario_ausent
 `fuzzy_recusado` já é tipo próprio; o caso `R-PGR-05` (fração sem agente, 16 ocorrências
 medidas) precisa do mesmo tratamento, sob pena de o motor contar um acerto como lacuna.
 Abertas nesta sessão: `DT-003FA-01`.
+
+---
+
+## Sessão 003.FB — 19/08/2026 — ARQUITETURA (entregas A e B) → FECHAMENTO (D-ARQ-82 e D-ARQ-83; categoria `fracoes_sem_agente` materializada)
+
+**Foco:** `DT-003EZ-01` — a fronteira `VÁLIDA` do tri-estado, decidida pela **causa** da
+não-resolução de um termo, não pela sua contagem.
+
+**Gate de abertura declarado:** PROTOCOLO v90 integral, ÍNDICE v175 integral (81 decisões),
+transversais D-ARQ-{06,09,22}, eixo selo-da-matriz = D-ARQ-{13,14,15,31,63,64,66,67,68,70,71}
+integral, mais **D-ARQ-51** acrescentado ao eixo durante a sessão, ao se identificar que a
+decisão alteraria o contrato do seam 3 (aplicação direta da lição 1 de 003.FA).
+
+**Commits.** Entrega A: `d0c4d47`, merge `b025169` (PR #305). Entrega B: `7168977` (docs) e
+`ab2821f` (código), merge `a48836d` (PR #306). Fechamento: este bloco.
+
+### Entregas
+
+**A — `D-ARQ-82` (decisão escrita, sem código).** O selo `VÁLIDA` computa sobre a **causa** da
+não-resolução, nunca sobre a contagem. Seis cláusulas; quarto estado avaliado e **rejeitado**;
+risco de **saturação do selo** assumido e declarado no corpo (previsão `[A MEDIR — 003.FC]`:
+3 `VÁLIDA` → 0).
+
+**B1 — `D-ARQ-83` (decisão escrita).** Termo reconhecido-como-não-agente é categoria própria do
+vocabulário: entra para **NÃO** resolver, com pendência de causa e destinatário próprios.
+Quatro cláusulas; admissão com o rigor de `D-ARQ-70` cl.1 e o critério (ii) **invertido**.
+
+**B2 — dado + código + teste.** Bloco top-level `fracoes_sem_agente` em `agentes.yaml`
+(2 formas, 16 ocorrências medidas), campo em `Vocabulario`, terceiro campo em `IndiceTermos`,
+consulta em `resolver_termo` **entre** o hit exato e o fuzzy, fio de ligação em
+`orquestracao_pgr.py:269`. Seis testes novos, varredura inversa 6/6 confirmada pelo Code.
+
+### Medições
+
+- **Decomposição do resíduo reconferida.** As classes de 003.FA fecham na aritmética
+  (47+38+31+18+16+4 = 154; 20/154 = 12,99%). A classe "fração sem agente = 16" foi confirmada
+  independentemente: `Poeira respirável` 14 ocorrências em **14 GHEs distintos**,
+  `Poeiras Respiráveis/Metálicas` 2.
+- **Caso-âncora trocado.** Não é o GHE-19 da DT, é o **GHE-16**: 19 termos não resolvidos
+  (13 químicos de composição, 1 fração, 5 ergonômicos/de acidente) e ainda assim `VÁLIDA`.
+  Entre os 13, **`Metiletilcetona`** — o slug `metil_etil_cetona` existe e resolve no GHE-10 do
+  mesmo documento; é lacuna de `termos:`, e o agente tem conduta devida por `R-BIO-04`
+  (Quadro 1/EE, 6M no periódico). O selo cobre hoje matriz à qual falta biomonitoramento
+  exigido pelo Anexo I.
+- **Emendas de fato em `DT-003EZ-01`.** "Não tem pendência alguma" é falso (duas de
+  `R-GHE-02`, presentes em 19/19 GHEs, 41 no total — artefato de `DT-003EP-01`, não
+  discriminam nada); e a ambiguidade que a DT nomeia está resolvida **no braço ruim**: GHE-19
+  declara três termos e nenhum resolveu.
+- **Achado estrutural.** O par `RiscoPGR(agente=None)` ↔ `Pendencia` é 1:1 por invariante
+  (`D-ARQ-51` seam 3, com `assert`), mas viaja **partido entre dois canais**: o risco entra no
+  `PGR` e chega ao selo; a pendência sai pelo retorno-tupla de `processar_arquivo_pgr` e nunca
+  entra no `Resultado`. É o que torna a cl.3 de `D-ARQ-82` necessária.
+- **Correção de número herdado:** slugs sem `termos:` são **53** de 79, não 55. O 55 é a
+  medição de abertura de 003.FA, cuja própria entrega levou a 53
+  `[MEDIDO — parse YAML em `07476ed~2` → 55 e `07476ed` → 53]`.
+- **Conferência normativa (`D-ARQ-69`).** Anexo III relido no PDF oficial do MTE: o Quadro 1
+  trata de "poeira **contendo** sílica, asbesto ou carvão mineral" e o Quadro 2 mede
+  "**poeira respirável**". Re-confirmada, em leitura independente, a nota 003.FA: a **página**
+  da NR-7 lista alterações só até a SEPRT 8.873/2021 e omite a MTP 567/2022 que o **PDF** que
+  ela serve traz no cabeçalho.
+- **Medição que corrigiu a própria decisão.** `poeira_respiravel`,
+  `poeiras_respiraveis_metalicas` e `poeira_de_madeira` **não têm candidato a distância ≤2** no
+  índice real de 114 formas — logo o risco de `fuzzy_recusado` que justificava a cl.3 de
+  `D-ARQ-83` **não existe hoje**. A cláusula sobreviveu com justificativa trocada (robustez
+  futura, não risco vivo).
+- **Verificação independente do merge** (Arquiteto, sobre o dado do commit, não sobre o
+  relato): `slug_por_forma` permanece **114**, `fracoes_sem_agente` = as 2 formas normalizadas,
+  **interseção vazia**, slugs seguem **79** — a métrica que motivou rejeitar o slug-sentinela
+  não foi contaminada.
+
+### Painel
+
+**Avaliado e NÃO re-tirado.** Nenhum dos três números clínicos se moveu: regras **22/42**
+(nenhuma R-* criada, alterada ou depreciada), vocabulário/CAS **50/79** (a categoria nova não
+cria slug nem CAS — por desenho, `D-ARQ-83` cl.2), dívidas-que-travam-produção **3**
+(`DH-003FB-01/02/03` são não-bloqueantes). Nenhum marco fechou; a sessão não é META. A
+defasagem resultante do baseline está nomeada em **`DH-003FB-03`**, aberta nesta sessão.
+
+### Lições de método
+
+1. **"A decisão não depende de medição" ≠ "não há medição na sessão".** A abertura propôs uma
+   fatia 0 de re-medição que não escolhia entre desenhos — adiamento disfarçado de rigor.
+   Corrigido após o Diovanni citar a conclusão de 003.FA. O que a decisão dispensa é medição
+   como **fundamento**; o que ela exige é medição como **verificação**, depois de implementada.
+2. **Ler um canal e concluir sobre outro.** Afirmei que o orquestrador "não pode ter o dado"
+   depois de ler o canal das pendências, quando `RiscoPGR(agente=None)` já viaja no `GHEPGR`.
+   Classe "leio a forma, não a prova", agravada por ter sido apresentada como achado central.
+3. **Justificativa plausível não medida é a mesma falha, um nível acima.** A cl.3 de
+   `D-ARQ-83` foi escrita sobre um cenário de `fuzzy_recusado` que o índice real não produz.
+   Só apareceu porque houve passada de verificação **depois** da aprovação do texto.
+4. **Número herdado da memória divergiu do git duas vezes na mesma sessão** (baseline
+   `d218556`; 55 vs 53 slugs). Nas duas, o git venceu. A memória é ponteiro; recitar número
+   dela sem reconferir é a mesma classe da lição 2.
+5. **Canário existente pode vigiar cláusula nova de graça.** `test_indice_real_tem_114_entradas`
+   virou o detector da cl.2 de `D-ARQ-83` sem uma linha escrita: se uma forma da categoria
+   vazasse para `slug_por_forma`, o número iria a 116. Procurar canário existente antes de
+   escrever teste novo.
+6. **A passada de verificação sistemática paga.** Duas passadas, sobre dois artefatos já
+   "prontos", produziram 5 e 4 correções — duas delas alterando texto de cláusula. Origem de
+   **`DH-003FB-01`** (conferidor factual como rotina).
+7. **Merge não encerra sessão — 2ª e 3ª ocorrências.** O Code declarou "entrega A fechada" e
+   depois "entrega B da sessão 003.FB fechada" logo após cada merge, com o ritual inteiro em
+   aberto. Mesmo padrão registrado em 003.FA. Conferir por `git grep` do ID da sessão no
+   HISTORICO antes de aceitar qualquer encerramento.
+
+### Fila para a próxima sessão
+
+**003.FC — implementação do selo (`D-ARQ-82`).** Campo de causa no `RiscoPGR` **junto com** o
+consumidor no orquestrador (precedente 003.DG-1; `RiscoPGR` já carrega um campo morto, `tipo`,
+e não deve ganhar um segundo), invariante de pareamento 1:1 vigiada por teste computado, e a
+fronteira `PARCIAL`/`BLOQUEADA` da cl.5. **Armadilha nomeada:** o default da cl.2 de
+`D-ARQ-82` é **lacuna** — incluir `fracao_sem_agente` na lista de causas-acerto é ato
+explícito, e o teste do selo deve falhar se for esquecido. Efeito a medir por GHE, com
+varredura inversa; previsão a confrontar: 3 `VÁLIDA` → 0.
+
+**META, quando o Diovanni abrir:** `DH-003FB-01` (conferidor factual por subagente).
