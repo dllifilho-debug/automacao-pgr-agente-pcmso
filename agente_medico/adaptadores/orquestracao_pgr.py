@@ -266,7 +266,10 @@ def processar_arquivo_pgr(
         # todos os GHE reprovados no gate): sem verbatim para hidratar, não
         # inventa PGR (D-ARQ-22).
         return None, pend_forma
-    indice = construir_indice_termos(protocolo.vocabulario.agentes)
+    indice = construir_indice_termos(
+        protocolo.vocabulario.agentes,
+        fracoes_sem_agente=protocolo.vocabulario.fracoes_sem_agente,
+    )
     pgr, pend_hidr = hidratar_pgr(
         aprovados, indice, envelope.validade, envelope.assinatura_engenheiro
     )

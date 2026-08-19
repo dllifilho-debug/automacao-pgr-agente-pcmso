@@ -4,7 +4,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 from agente_medico.motor.tipos import Pendencia
 
@@ -42,14 +42,19 @@ class IndiceTermos:
     slug_por_forma é o mesmo índice forma->slug de sempre. fuzzy_permitido
     é o conjunto de slugs cujo campo agentes.yaml `fuzzy_permitido: true`
     autoriza devolver Confianca.FUZZY para esse slug — dado, não heurística
-    (D-ARQ-64).
+    (D-ARQ-64). fracoes_sem_agente (D-ARQ-83) são formas normalizadas que
+    nomeiam fração/medida sem identificar substância — NUNCA entram em
+    slug_por_forma (D-ARQ-83 cl.2).
     """
 
     slug_por_forma: dict[str, str]
     fuzzy_permitido: frozenset[str]
+    fracoes_sem_agente: frozenset[str]
 
 
-def construir_indice_termos(agentes_vocab: dict[str, Any]) -> IndiceTermos:
+def construir_indice_termos(
+    agentes_vocab: dict[str, Any], *, fracoes_sem_agente: Sequence[str] = ()
+) -> IndiceTermos:
     """Inverte o vocabulário de agentes: forma normalizada -> slug.
 
     O próprio slug é sempre uma entrada. Se a meta do slug tiver campo
@@ -60,6 +65,9 @@ def construir_indice_termos(agentes_vocab: dict[str, Any]) -> IndiceTermos:
     ValueError — dado malformado, classe D-ARQ-22.
     fuzzy_permitido (D-ARQ-64) é lido de meta["fuzzy_permitido"] is True —
     opt-in por slug, dado explícito no vocabulário, nunca inferido.
+    fracoes_sem_agente (D-ARQ-83) normaliza cada forma recebida; colisão
+    com slug_por_forma é erro (D-ARQ-83 cl.2) — dado malformado nunca passa
+    em silêncio.
     """
     indice: dict[str, str] = {}
     fuzzy_permitido: set[str] = set()
@@ -79,7 +87,22 @@ def construir_indice_termos(agentes_vocab: dict[str, Any]) -> IndiceTermos:
                     f"{indice[forma]!r} e {slug!r}"
                 )
             indice[forma] = slug
-    return IndiceTermos(slug_por_forma=indice, fuzzy_permitido=frozenset(fuzzy_permitido))
+
+    fracoes: set[str] = set()
+    for forma_bruta in fracoes_sem_agente:
+        forma = normalizar_termo(str(forma_bruta))
+        if forma in indice:
+            raise ValueError(
+                f"Colisão de fração-sem-agente com termo do vocabulário: {forma_bruta!r} "
+                f"já aponta para o slug {indice[forma]!r}"
+            )
+        fracoes.add(forma)
+
+    return IndiceTermos(
+        slug_por_forma=indice,
+        fuzzy_permitido=frozenset(fuzzy_permitido),
+        fracoes_sem_agente=frozenset(fracoes),
+    )
 
 
 def _levenshtein(a: str, b: str) -> int:
@@ -124,15 +147,22 @@ def resolver_termo(termo: str, indice: IndiceTermos) -> ResolucaoTermo:
     contra o índice termo->slug.
 
     1. Hit exato na forma normalizada -> EXATA.
-    2. Sem hit: Levenshtein contra todas as chaves do índice; entre as chaves
-       com dist <= 2, toma a(s) de distância mínima. Se essas apontarem para
-       um único slug -> candidato a FUZZY (sinal de baixa-confiança de
-       D-ARQ-50 P2; nunca aceito como certeza — roteamento p/ revisão é do
-       consumidor futuro). Piso bilateral (DT-003DM-01): forma com
-       <= PISO_FUZZY chars não participa do fuzzy, nem como termo de busca
-       nem como chave candidata — resolve só pela via exata do passo 1.
+    2. Sem hit: forma reconhecida como fração-sem-agente (D-ARQ-83) ->
+       NAO_RESOLVIDO com Pendencia fracao_sem_agente/elaborador_pgr/R-PGR-05.
+       Roda ANTES do fuzzy (D-ARQ-83 cl.3): a forma nunca está em
+       slug_por_forma (cl.2), então não compete com o passo 1, mas precisa
+       ser decidida antes do passo 3 para não sair como fuzzy_recusado por
+       coincidência futura de vizinhança.
+    3. Sem hit nem fração: Levenshtein contra todas as chaves do índice;
+       entre as chaves com dist <= 2, toma a(s) de distância mínima. Se
+       essas apontarem para um único slug -> candidato a FUZZY (sinal de
+       baixa-confiança de D-ARQ-50 P2; nunca aceito como certeza —
+       roteamento p/ revisão é do consumidor futuro). Piso bilateral
+       (DT-003DM-01): forma com <= PISO_FUZZY chars não participa do fuzzy,
+       nem como termo de busca nem como chave candidata — resolve só pela
+       via exata do passo 1.
        Se não houver candidato, ou os candidatos de distância mínima
-       apontarem para 2+ slugs distintos (empate) -> passo 3: escolher um
+       apontarem para 2+ slugs distintos (empate) -> passo 4: escolher um
        slug arbitrariamente seria escolha silenciosa (classe D-ARQ-22).
        D-ARQ-64: o veto de allowlist roda SÓ DEPOIS de eleito o vencedor —
        nunca filtrando candidatos durante a busca de menor distância (fazer
@@ -140,13 +170,28 @@ def resolver_termo(termo: str, indice: IndiceTermos) -> ResolucaoTermo:
        candidato mais distante como falso-positivo). Se o vencedor não está
        em indice.fuzzy_permitido -> NAO_RESOLVIDO com Pendencia
        fuzzy_recusado nomeando o termo, o slug vencedor e a distância.
-    3. NAO_RESOLVIDO + Pendencia(vocabulario_ausente, D-ARQ-14), não-bloqueante.
+    4. NAO_RESOLVIDO + Pendencia(vocabulario_ausente, D-ARQ-14), não-bloqueante.
     """
     forma = normalizar_termo(termo)
 
     slug_exato = indice.slug_por_forma.get(forma)
     if slug_exato is not None:
         return ResolucaoTermo(termo=termo, slug=slug_exato, confianca=Confianca.EXATA, pendencia=None)
+
+    if forma in indice.fracoes_sem_agente:
+        pendencia_fracao = Pendencia(
+            tipo="fracao_sem_agente",
+            destinatario="elaborador_pgr",
+            motivo=(
+                f"termo '{termo}' declara fração/medida sem identificar a substância — "
+                "solicitar FDS e falar com o elaborador do PGR (R-PGR-05)"
+            ),
+            bloqueante=False,
+            regra_origem="R-PGR-05",
+        )
+        return ResolucaoTermo(
+            termo=termo, slug=None, confianca=Confianca.NAO_RESOLVIDO, pendencia=pendencia_fracao
+        )
 
     menor_dist: Optional[int] = None
     slugs_na_menor_dist: set[str] = set()

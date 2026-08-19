@@ -20,7 +20,9 @@ PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 @pytest.fixture(scope="module")
 def indice_real() -> IndiceTermos:
     p = carregar(PROTOCOLO_DIR)
-    return construir_indice_termos(p.vocabulario.agentes)
+    return construir_indice_termos(
+        p.vocabulario.agentes, fracoes_sem_agente=p.vocabulario.fracoes_sem_agente
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -427,3 +429,69 @@ def test_allowlist_disjunta_dos_canais_de_criticidade(indice_real: IndiceTermos)
     assert uniao, "canais de criticidade vazios — teste degenerou"
     assert indice_real.fuzzy_permitido, "allowlist vazia — teste degenerou"
     assert indice_real.fuzzy_permitido & uniao == set()
+
+
+# ---------------------------------------------------------------------------
+# resolver_termo — fração-sem-agente (D-ARQ-83)
+# ---------------------------------------------------------------------------
+
+def test_poeira_respiravel_nao_resolve_com_pendencia_fracao_sem_agente(
+    indice_real: IndiceTermos,
+) -> None:
+    # Reverte para: sem a cl.3 (consulta antes do fuzzy), devolveria
+    # vocabulario_ausente / protocolo / D-ARQ-50.
+    resolucao = resolver_termo("Poeira respirável", indice_real)
+    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
+    assert resolucao.slug is None
+    assert resolucao.pendencia is not None
+    assert resolucao.pendencia.tipo == "fracao_sem_agente"
+    assert resolucao.pendencia.destinatario == "elaborador_pgr"
+    assert resolucao.pendencia.regra_origem == "R-PGR-05"
+    assert resolucao.pendencia.bloqueante is False
+
+
+def test_poeiras_respiraveis_metalicas_nao_resolve_com_pendencia_fracao_sem_agente(
+    indice_real: IndiceTermos,
+) -> None:
+    # Reverte para: sem a cl.3, devolveria vocabulario_ausente / protocolo / D-ARQ-50.
+    resolucao = resolver_termo("Poeiras Respiráveis/Metálicas", indice_real)
+    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
+    assert resolucao.slug is None
+    assert resolucao.pendencia is not None
+    assert resolucao.pendencia.tipo == "fracao_sem_agente"
+    assert resolucao.pendencia.destinatario == "elaborador_pgr"
+    assert resolucao.pendencia.regra_origem == "R-PGR-05"
+
+
+def test_poeira_de_madeira_anti_fp_segue_vocabulario_ausente(indice_real: IndiceTermos) -> None:
+    # anti-FP D-ARQ-83 cl.4(iv): madeira é o agente, o termo não entra na
+    # categoria. Reverte para: categoria virar balde de tudo que começa com
+    # "poeira".
+    resolucao = resolver_termo("Poeira de madeira", indice_real)
+    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
+    assert resolucao.slug is None
+    assert resolucao.pendencia is not None
+    assert resolucao.pendencia.tipo == "vocabulario_ausente"
+
+
+def test_fracoes_sem_agente_nunca_entram_no_indice_de_slugs(indice_real: IndiceTermos) -> None:
+    # D-ARQ-83 cl.2, computado do dado real. Reverte para: a forma resolveria
+    # e D-ARQ-82 cl.1 devolveria VÁLIDA.
+    assert indice_real.fracoes_sem_agente, "fracoes_sem_agente vazio — teste degenerou"
+    assert indice_real.fracoes_sem_agente.isdisjoint(indice_real.slug_por_forma.keys())
+
+
+def test_fracoes_sem_agente_alcancavel_pelo_caminho_de_producao() -> None:
+    # Mesma chamada de orquestracao_pgr.py:269. Reverte para: campo populado
+    # no YAML mas nunca passado ao construtor (classe D-ARQ-67/campo morto).
+    p = carregar(PROTOCOLO_DIR)
+    indice = construir_indice_termos(
+        p.vocabulario.agentes, fracoes_sem_agente=p.vocabulario.fracoes_sem_agente
+    )
+    assert indice.fracoes_sem_agente
+
+
+def test_fracao_sem_agente_colidindo_com_slug_levanta_value_error() -> None:
+    vocab_sintetico = {"poeira_de_ferro": {}}
+    with pytest.raises(ValueError, match="Colisão"):
+        construir_indice_termos(vocab_sintetico, fracoes_sem_agente=["Poeira de ferro"])

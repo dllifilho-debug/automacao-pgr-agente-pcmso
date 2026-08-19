@@ -13,6 +13,7 @@ class Vocabulario:
     cargos: dict[str, Any]
     exames: dict[str, Any]
     epis: dict[str, Any]
+    fracoes_sem_agente: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -44,11 +45,13 @@ def carregar(diretorio: Path | str) -> Protocolo:
     if not vocab_dir.exists():
         raise FileNotFoundError(f"Diretório vocabulario ausente: {vocab_dir}")
 
+    agentes_yaml = _load_yaml(vocab_dir / "agentes.yaml")
     vocabulario = Vocabulario(
-        agentes=_exigir_chave(_load_yaml(vocab_dir / "agentes.yaml"), "agentes", vocab_dir / "agentes.yaml") or {},
+        agentes=_exigir_chave(agentes_yaml, "agentes", vocab_dir / "agentes.yaml") or {},
         cargos=_exigir_chave(_load_yaml(vocab_dir / "cargos.yaml"), "cargos", vocab_dir / "cargos.yaml") or {},
         exames=_exigir_chave(_load_yaml(vocab_dir / "exames.yaml"), "exames", vocab_dir / "exames.yaml") or {},
         epis=_exigir_chave(_load_yaml(vocab_dir / "epis.yaml"), "epis", vocab_dir / "epis.yaml") or {},
+        fracoes_sem_agente=tuple(agentes_yaml.get("fracoes_sem_agente") or ()),
     )
 
     pred_path = raiz / "predicados_compostos.yaml"
