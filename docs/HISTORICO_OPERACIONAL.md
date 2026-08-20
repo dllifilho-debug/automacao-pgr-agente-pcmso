@@ -5420,6 +5420,25 @@ defasagem resultante do baseline está nomeada em **`DH-003FB-03`**, aberta nest
    aberto. Mesmo padrão registrado em 003.FA. Conferir por `git grep` do ID da sessão no
    HISTORICO antes de aceitar qualquer encerramento.
 
+### Gate de fechamento
+
+**Gate de fechamento: CRÍTICO aprovou** — `D-ARQ-82`, julgada em sessão nova de Claude Code,
+a frio, em 20/08/2026 `[git objects @ 720d81a]`. Gate de abertura declarado pelo Crítico:
+PROTOCOLO v90 integral, ÍNDICE v178/83 decisões integral, transversais D-ARQ-{06,09,22}, eixo
+derivado das fronteiras do próprio artefato = D-ARQ-{13,14,31,51,64,66,67,68,71} integral. Bloco
+desta sessão no HISTORICO **não** lido, por instrução. Os três testes da barra de ARQUITETURA
+executados: universalidade PASSA (instanciados casos de indústria química e de saúde), caso local
+PASSA (removido o âncora GHE-16/Fascino, a prescrição segue determinada), registrabilidade PASSA
+com conferência por amostragem de duas fronteiras citadas (`D-ARQ-66` cl.2 e `D-ARQ-51` seam 3)
+contra o texto real — ambas batem com o que `D-ARQ-82` afirma delas.
+
+**`D-ARQ-83` NÃO foi julgada** — o Gauntlet dela segue aberto. Não confundir o veredito acima com
+aprovação da sessão inteira.
+
+Ressalva de procedência, declarada: o prompt do Crítico foi redigido pelo Arquiteto, que é o
+builder do artefato julgado. A barra é do Diovanni e o eixo é derivado do próprio artefato, o que
+estreita o vetor de viés, mas não o elimina. Registrado para que o veredito seja lido pelo que é.
+
 ### Fila para a próxima sessão
 
 **003.FC — implementação do selo (`D-ARQ-82`).** Campo de causa no `RiscoPGR` **junto com** o
