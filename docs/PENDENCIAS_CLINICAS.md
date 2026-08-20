@@ -1741,6 +1741,39 @@ isolamento é, portanto, **apenas instrução** — motivo pelo qual a proposta 
 Gauntlet. Para o papel de **conferidor** isso não importa, porque a saída é falsificável por
 comando.
 
+**Instrumento entregue e testado com gabarito (003.FB, 20/08/2026).** As duas skills existem e
+estão versionadas: `.claude/skills/conferir/` (conferidor factual) e `.claude/skills/critico/`
+(Gauntlet). A **decisão de cadência — quando cada uma é obrigatória — segue ABERTA** e é o objeto
+desta dívida: instrumento entregue não é regra adotada, e instituir gate novo por baixo do pano
+seria o oposto do que esta DT propõe. Precedente da separação: `D-ARQ-63` peça 1 (gerador de
+índice entregue, decisão registrada junto).
+
+Resultado medido dos três testes `[MEDIDO — 003.FB, gabarito fechado antes da execução]`:
+
+- **`/conferir`, artefato com 6 defeitos plantados (4 reais de 003.FB + 2 fabricados): 5 pegos.**
+  Além do gabarito, achou um defeito não plantado e não percebido pelo Arquiteto — literal de
+  `Pendencia` omitindo o campo obrigatório `motivo`. Na âncora de linha foi além do previsto
+  (identificou que a linha citada era o *título* do bloco, não seu fim, e que os dois pontos de
+  inserção do artefato não coincidiam entre si).
+- **O defeito que escapou foi uma contagem de uso citada de passagem**, fora do tema central do
+  artefato, enquanto todas as contagens do tema central foram pegas. Causa de desenho
+  identificada: a regra original mandava **não** listar os `CONFERE`, o que tornava impossível
+  distinguir "afirmação conferida" de "afirmação nunca extraída". Corrigido antes do commit — a
+  skill passa a exigir inventário de 100% das afirmações com status de uma palavra, detalhando só
+  `DIVERGE`/`NÃO VERIFICÁVEL`, e a recontar toda contagem inclusive as incidentais.
+- **`/critico`, artefato deliberadamente ruim: REJEITA**, com gate declarado e eixo derivado
+  corretamente vazio (o artefato não citava D-ARQ alguma — registrado como gap). O maior gap que
+  apontou foi **melhor que o do gabarito**: em vez da não-universalidade (o defeito óbvio, que
+  também identificou), nomeou que presumir `silica` para fração não identificada contradiz a nota
+  003.EJ de `R-PGR-05`, quebra `test_termos_silicato_e_poeira_nao_resolvem_para_silica` — teste
+  existente no repo — e reabre por fiat de ARQUITETURA uma pendência que o protocolo mantém aberta
+  para CONHECIMENTO (`DT-002I-01`).
+- **`/critico` sobre `D-ARQ-82` real: APROVA** — ver "Gate de fechamento" no bloco 003.FB do
+  HISTORICO.
+- **Terceira correção, comum às duas:** no teste, o Code redirecionou saída para arquivo, percebeu
+  e desfez. `allowed-tools` não barra `>` dentro de comando permitido; a proibição de escrever e
+  redirecionar passou a constar no corpo das duas skills.
+
 **Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
 
 ### DH-003FB-02 — Leitura do repo pelo mount do Cowork deixa `.git/index.lock` órfão que trava o Code `[ABERTA — higiene de ambiente]`
