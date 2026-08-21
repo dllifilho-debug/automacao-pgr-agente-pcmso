@@ -3674,6 +3674,10 @@ adaptadores/orquestracao_pgr.py e motor/hidratacao.py, 07476ed]`.
    registrada é lacuna** — o default é protetivo, e tipo novo entra na lista de acertos só por
    decisão explícita, nunca por omissão de quem o criou.
 
+   > **[EMENDADA em 003.FC — `fuzzy_recusado` NÃO é mais causa-acerto. Redação
+   > original acima preservada para rastreabilidade (não remover — auditoria
+   > histórica do PCMSO); a redação vigente está em "Emenda 003.FC", abaixo.]**
+
 3. **A causa viaja com o risco, não apenas com a pendência.** `RiscoPGR` passa a carregar a
    causa da não-resolução, preenchida no ramo `NAO_RESOLVIDO` de `hidratar_ghe`, onde a
    `Resolucao` já a conhece e hoje a descarta. A duplicação com a `Pendencia` do outro canal é
@@ -3731,11 +3735,13 @@ com conduta devida. Distinguir os dois é precisamente o que a recusa declara n�
 fazer, e a cl.2 já manda ler o indecidível de forma protetiva ("ausência de causa
 registrada é lacuna — o default é protetivo").
 
-**A cl.2 passa a ler:** a lista fechada de causas-acerto é **`fracao_sem_agente`**
-(`R-PGR-05`, nota de aplicação 003.EJ, via `D-ARQ-83`). **`fuzzy_recusado` é lacuna** — a
-recusa de `D-ARQ-64` é acerto de *resolução*, não evidência de que nenhuma conduta é
-devida. O remédio para `fuzzy_recusado` recorrente é admitir a grafia em `termos:` sob
-`D-ARQ-70`, nunca selar a matriz.
+**Redação vigente da cl.2** — a original fica preservada acima com marca de emenda
+(molde `R-AUD-04`/`R-ESP-01`: texto antigo nunca some, rastreabilidade histórica): a
+lista fechada de causas-acerto é **`fracao_sem_agente`** (`R-PGR-05`, nota de aplicação
+003.EJ, via `D-ARQ-83`). **`fuzzy_recusado` é lacuna** — a recusa de `D-ARQ-64` é acerto
+de *resolução*, não evidência de que nenhuma conduta é devida. O remédio para
+`fuzzy_recusado` recorrente é admitir a grafia em `termos:` sob `D-ARQ-70`, nunca selar
+a matriz.
 
 **Efeito medido: nulo no Fascino** `[MEDIDO — 003.FC]`. GHE-14 e GHE-19 têm zero
 `fuzzy_recusado`; GHE-16 cai a `PARCIAL` pelas outras 15 lacunas com ou sem a emenda. A

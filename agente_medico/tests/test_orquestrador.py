@@ -7,17 +7,34 @@ from typing import Any
 import pytest
 
 from agente_medico.motor.estagios.consolidacao import ConflitoProtocolo
+from agente_medico.motor.hidratacao import hidratar_ghe
 from agente_medico.motor.orquestrador import executar
 from agente_medico.motor.protocolo import Protocolo, Vocabulario, carregar
+from agente_medico.motor.resolvedor_termos import (
+    Confianca,
+    IndiceTermos,
+    construir_indice_termos,
+    resolver_termo,
+)
 from agente_medico.motor.tipos import (
     GHEPGR,
+    GHEVerbatim,
     Momento,
     PGR,
     RiscoPGR,
+    RiscoVerbatim,
 )
 from agente_medico.tests.invariantes import linhas_de_risco
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
+
+
+@pytest.fixture(scope="module")
+def indice_real() -> IndiceTermos:
+    p = carregar(_PROTOCOLO_DIR)
+    return construir_indice_termos(
+        p.vocabulario.agentes, fracoes_sem_agente=p.vocabulario.fracoes_sem_agente
+    )
 
 HOJE = date(2026, 5, 21)
 
@@ -711,3 +728,37 @@ def test_ghe_com_unico_termo_fuzzy_recusado_nao_sai_valida() -> None:
     matriz = resultado.matrizes[0]
     assert matriz.status != "VÁLIDA"
     assert matriz.status == "BLOQUEADA"
+
+
+def test_metiletilcetona_grafia_nua_recusa_fuzzy_e_ghe_nao_sai_valida(
+    indice_real: IndiceTermos,
+) -> None:
+    # T7 (003.FC) — caso-âncora real da Emenda 003.FC, contra o índice real de
+    # agentes.yaml, não um RiscoPGR fabricado. `agentes.yaml:186` tem
+    # "Metiletilcetona (MEK)" como alias EXATO de metil_etil_cetona, mas essa
+    # forma normaliza para "metiletilcetona_mek" — distinta de "metiletilcetona"
+    # (grafia nua, sem "(MEK)"). O alias não cobre a grafia nua: ela recusa por
+    # fuzzy (distância 2, slug fora de fuzzy_permitido), exatamente o caso que
+    # a Emenda 003.FC nomeia. Reversão que mata — devolver "fuzzy_recusado" ao
+    # frozenset CAUSAS_ACERTO_NAO_RESOLUCAO em orquestrador.py.
+    resolucao = resolver_termo("Metiletilcetona", indice_real)
+    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
+    assert resolucao.slug is None
+    assert resolucao.pendencia is not None
+    assert resolucao.pendencia.tipo == "fuzzy_recusado"
+    assert resolucao.pendencia.regra_origem == "D-ARQ-64"
+    assert "metil_etil_cetona" in resolucao.pendencia.motivo
+    assert "2" in resolucao.pendencia.motivo
+
+    ghe_verbatim = GHEVerbatim(
+        nome="Teste",
+        cargos=(),
+        riscos=(RiscoVerbatim(agente="Metiletilcetona", quantificacao="", fonte_geradora=""),),
+    )
+    ghe_pgr, _ = hidratar_ghe(ghe_verbatim, indice_real, posicao=1)
+    assert ghe_pgr.riscos[0].agente is None
+    assert ghe_pgr.riscos[0].causa_nao_resolucao == "fuzzy_recusado"
+
+    pgr = _pgr(ghes=(ghe_pgr,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+    assert resultado.matrizes[0].status != "VÁLIDA"
