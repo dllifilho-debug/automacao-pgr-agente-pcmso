@@ -5433,7 +5433,7 @@ com conferência por amostragem de duas fronteiras citadas (`D-ARQ-66` cl.2 e `D
 contra o texto real — ambas batem com o que `D-ARQ-82` afirma delas.
 
 **`D-ARQ-83` NÃO foi julgada** — o Gauntlet dela segue aberto. Não confundir o veredito acima com
-aprovação da sessão inteira.
+aprovação da sessão inteira. **[SUPERADO em 20/08/2026 — `D-ARQ-83` foi julgada e APROVADA; ver o registro adiante nesta mesma seção. Texto original preservado por rastreabilidade, não corrigido em silêncio.]**
 
 Ressalva de procedência, declarada: o prompt do Crítico foi redigido pelo Arquiteto, que é o
 builder do artefato julgado. A barra é do Diovanni e o eixo é derivado do próprio artefato, o que
