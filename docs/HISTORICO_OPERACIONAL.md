@@ -5473,3 +5473,135 @@ explícito, e o teste do selo deve falhar se for esquecido. Efeito a medir por G
 varredura inversa; previsão a confrontar: 3 `VÁLIDA` → 0.
 
 **META, quando o Diovanni abrir:** `DH-003FB-01` (conferidor factual por subagente).
+
+## Sessão 003.FC — 21/08/2026 — FECHAMENTO (docs)
+
+**Foco:** `DT-003EZ-01` — implementação do selo de `D-ARQ-82` (a fila que 003.FB deixou).
+
+**Gate de abertura declarado pelo Arquiteto:** PROTOCOLO v90 integral, ÍNDICE v179 integral
+(83 decisões), transversais D-ARQ-{06,09,22}, eixo selo-da-matriz =
+D-ARQ-{13,14,15,31,51,63,64,66,67,68,70,71,82,83} integral (git objects @ `fc0b468`).
+
+**Commits.** `61a5278` (emenda cl.2), `9072823` (campo+consumidor+T1–T6), `f995f7d` (marca
+in-place na cl.2 + redação vigente + T7), `d2f0247` (changelog v181), + este.
+
+### Entregas
+
+- **Selo implementado:** `RiscoPGR.causa_nao_resolucao` (cl.3, campo e consumidor na mesma
+  fatia, precedente 003.DG-1); `CAUSAS_ACERTO_NAO_RESOLUCAO` no orquestrador; conjunto
+  `not tem_lacuna` no gate de `VÁLIDA`. A cl.5 saiu de graça — a ramificação existente
+  (`elif linhas_com_risco` → PARCIAL, `else` → BLOQUEADA) já a satisfazia.
+- **EMENDA 003.FC a `D-ARQ-82` cl.2:** `fuzzy_recusado` sai das causas-acerto. Nasceu de
+  medição, não de releitura: `Metiletilcetona` — o termo que o Contexto da própria decisão
+  nomeia como "lacuna de `termos:` com conduta devida (`R-BIO-04` Quadro 1/EE)" — sai do
+  resolver como `fuzzy_recusado`, que a cl.2 classificava como ACERTO. A decisão
+  classificava como acerto do motor o caso de dano que a justificou. Causa estrutural:
+  `fuzzy_recusado` é estado composto que o motor não parte (`Silício`→`silica` é acerto;
+  `Metiletilcetona`→`metil_etil_cetona` é lacuna real), e a própria cl.2 manda ler o
+  indecidível de forma protetiva. Efeito no Fascino: NULO — a emenda é de princípio, e o
+  momento é antes de o selo entrar em `main`.
+
+### Medição — tabela ANTES/DEPOIS dos 19 GHEs
+
+Versionar aqui é mitigação declarada de `DH-003EG-02` (`relatorios/` fora do git deixava
+13 de 28 afirmações da emenda irreproduzíveis na sessão seguinte):
+
+| GHE | ANTES | DEPOIS |
+|---|---|---|
+| 01–13, 15, 17, 18 | PARCIAL | PARCIAL (inalterado) |
+| 14 | VÁLIDA | PARCIAL |
+| 16 | VÁLIDA | PARCIAL |
+| 19 | VÁLIDA | BLOQUEADA |
+
+Decomposição por-GHE (medida na fatia 0, sobre `fc0b468`):
+
+- **GHE-14:** 3 termos não resolvidos, todos `vocabulario_ausente` (lacunas); 3 slugs
+  resolvidos; 5 linhas de risco (`R-PKG-ATIVCRIT`) → PARCIAL.
+- **GHE-16:** 17 termos não resolvidos — 13 químicos (12 `vocabulario_ausente` +
+  `Metiletilcetona` em `fuzzy_recusado`), 1 fração (`Poeira respirável`,
+  `fracao_sem_agente`, ACERTO), 3 ergonômicos/de acidente; 11 slugs resolvidos; 8 linhas
+  de risco → PARCIAL. **Correção de fato:** `D-ARQ-82` registrava 19 termos; são 17 — os
+  2 de diferença são `postura_inadequada` e `esforco_fisico`, resolvidos pelos aliases de
+  003.FA (19 − 2 = 17). Sob a cl.2 emendada, 16 dos 17 são lacuna.
+- **GHE-19:** 2 termos não resolvidos, ambos `vocabulario_ausente`; 1 slug resolvido
+  (`postura_inadequada`); `linhas_com_risco` VAZIA (as 3 linhas são incondicionais) →
+  BLOQUEADA. **Correção de fato:** `D-ARQ-82` afirmava "declara três termos e nenhum
+  resolveu" — um resolve. Desfecho inalterado. Um dos 2 termos é lixo de extração de PDF
+  (faceta de `DT-003EQ-01`): o selo passa a torná-lo visível, o que é o comportamento
+  desejado.
+
+Invariante confirmado: SÓ os GHEs que estavam VÁLIDA se moveram. `Resultado.status`
+permanece PRELIMINAR nos dois lados. Previsão do Arquiteto (3 → 0, identidade dos três,
+zero quebras na suíte, não-movimento dos demais): 4 de 4 bateram.
+
+### Testes
+
+7 novos (T1–T7), cada um com reversão nomeada e varredura inversa **executada** (patch →
+vermelho → restaura → verde), não só comentada. T1 é computado do dado real (corpus =
+formas de `fracoes_sem_agente` + formas de `slug_por_forma` + termo-lixo). T7 usa a
+grafia nua `"Metiletilcetona"` contra o índice real, distinta do alias EXATO
+`"Metiletilcetona (MEK)"` (`agentes.yaml:186`), que normaliza para forma diferente. Suíte
+1147 → 1154 passed, 6 skipped. `mypy --strict` limpo, 48 arquivos.
+
+### Conferência factual
+
+`/conferir` sobre a Emenda 003.FC, @ `9072823`: 28 afirmações extraídas — 14 CONFERE,
+1 DIVERGE, 13 NÃO VERIFICÁVEL. O DIVERGE era material: a emenda afirmava "a cl.2 passa a
+ler" sem que o texto da cl.2 tivesse sido editado, deixando a cláusula impressa dizendo o
+oposto da emenda no mesmo corpo de decisão — a emenda que corrigiu uma contradição interna
+introduziu outra. Corrigido em `f995f7d` (marca in-place + "Redação vigente da cl.2",
+molde `R-AUD-04`/`R-ESP-01`). Um dos NÃO VERIFICÁVEL foi convertido em teste (T7) em vez de
+em medição.
+
+### Lições de método
+
+1. O `/conferir` pegou um erro do Arquiteto que duas passadas de revisão do próprio
+   Arquiteto não pegaram. O instrumento existia desde 003.FB e não foi invocado sobre
+   `D-ARQ-82` — cadência aberta (`DH-003FB-01`). Instrumento entregue e não chamado não
+   protege.
+2. O Gauntlet aprovou `D-ARQ-82` a frio, em sessão nova, e NÃO pegou a contradição da
+   cl.2. Não podia: ela só aparece confrontando o corpo da decisão com a saída real do
+   resolver, e a barra de ARQUITETURA não tem cláusula de coerência interna. Candidato a
+   4º item da barra: "nenhuma cláusula contradiz um fato afirmado no corpo da própria
+   decisão".
+3. A previsão herdada de `D-ARQ-82` estava certa no número (3 → 0) e SEM evidência para 1
+   dos 3 casos (GHE-14 aparecia na previsão sem medição citada). A conferência por-GHE
+   pedida antes da fatia 1 fechou a lacuna. Acerto com lastro parcial não é método
+   validado.
+4. A passada de verificação do Arquiteto sobre o próprio prompt cirúrgico pegou um
+   BLOQUEADOR (a fatia 0 era inexecutável: `rodar-offline` exige 3 argumentos e nenhum dos
+   dois insumos está no git). Verificar o prompt antes de emitir teve retorno medido.
+5. Dois erros do Arquiteto numa sessão, ambos achados por instrumento, nenhum por
+   leitura. O eixo de `DH-003FB-01` aponta para o Arquiteto, não para o Code.
+6. `relatorios/` fora do git (`DH-003EG-02`) deixou 13 de 28 afirmações da emenda
+   irreproduzíveis. Mitigação adotada: os números por-GHE passam a ser versionados neste
+   bloco. Não fecha a DH; reduz o dano desta sessão.
+
+### Gate de fechamento
+
+**Gate de fechamento: CRÍTICO aprovou** — `D-ARQ-82` (barra ARQUITETURA), sessão nova a
+frio, git objects @ `d2f0247`.
+
+**Gate de fechamento: CRÍTICO aprovou** — diff `9072823`+`f995f7d` (barra IMPLEMENTAÇÃO),
+sessão nova a frio, git objects @ `f995f7d`.
+
+**Ressalva de procedência:** builder, especificação e prompt vieram do Arquiteto nas duas.
+
+**Ressalva de barra:** o veredito de IMPLEMENTAÇÃO reportou os três testes de ARQUITETURA
+(defeito de template da skill, `DH-003FC-04-a`). Os quatro itens de IMPLEMENTAÇÃO ficam
+evidenciados AQUI, não a reboque do selo:
+
+1. teste que falha sem a regra — 7 reversões executadas pelo builder, releitura
+   independente confirmada no veredito de ARQUITETURA;
+2. ID e fonte normativa em comentário — `D-ARQ-82` cl.1/2/3, `D-ARQ-83` cl.3, `D-ARQ-64`
+   cl.4, `D-ARQ-51` seam 3, `D-ARQ-22`, `R-PGR-05`, `R-BIO-04`;
+3. nenhuma ID removida — nada depreciado; redação original da cl.2 preservada com marca
+   de emenda;
+4. suíte verde — 1154 passed, 6 skipped; `mypy --strict` limpo, 48 arquivos, em `f995f7d`.
+
+### Fila para a próxima sessão
+
+**META:** `DH-003FB-01` (conferidor factual por subagente, segue aberta) e
+`DH-003FC-04` (três defeitos estruturais de `/critico` medidos nesta sessão — barra de
+IMPLEMENTAÇÃO sem slots no template, item 4 não-testável pelo `allowed-tools`, `git diff`
+fora do `allowed-tools`).

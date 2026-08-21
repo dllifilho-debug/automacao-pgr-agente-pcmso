@@ -1627,7 +1627,7 @@ explícito em qualquer citação do número.
 sair sempre com o piso declarado ao lado (`universais_bruto` e `universais_com_piso(N)`, N como
 parâmetro), saída de primeira classe do instrumento, não mais cálculo à mão.
 
-### DT-003EZ-01 — Matriz sem nenhuma linha derivada de risco sai `VÁLIDA` `[ABERTA]`
+### DT-003EZ-01 — Matriz sem nenhuma linha derivada de risco sai `VÁLIDA` `[FECHADA — 003.FC]`
 
 **Origem:** medição 003.EZ fatia 1 (`relatorios/003ez_fascino_rodar.md`), GHE-19 (Vendas).
 
@@ -1666,8 +1666,14 @@ está **resolvida no caso medido, no braço ruim**: GHE-19 declara três termos 
 (`Postural`, `Piso irregular ou em desnível` e um recorte espúrio de `DT-003EQ-01`) e nenhum
 resolveu. Resolvida em desenho por `D-ARQ-82`; segue ABERTA até a implementação (003.FC).
 
-**Status:** ABERTA. Não-bloqueante para o merge desta sessão: a conduta emitida está correta, o
-que está errado é o selo.
+**Resolução (003.FC).** Selo de `D-ARQ-82` implementado: `RiscoPGR.causa_nao_resolucao`
+(cl.3), `CAUSAS_ACERTO_NAO_RESOLUCAO` fechada no orquestrador (cl.2, emendada nesta
+sessão) e o conjunto `not tem_lacuna` no gate de `VÁLIDA` (cl.1). Medido no Fascino:
+**3 VÁLIDA → 0** (GHE-14 e GHE-16 → PARCIAL, GHE-19 → BLOQUEADA), com o invariante
+confirmado de que nenhum GHE fora de {14,16,19} se moveu.
+
+**Status:** FECHADA em 003.FC. A conduta emitida sempre esteve correta; o que estava
+errado era o selo — corrigido pela implementação acima.
 
 ### DT-003FA-01 — Base de `D-ARQ-70` cita a NR-09 por portaria superada `[ABERTA — não-bloqueante]`
 
@@ -1832,3 +1838,89 @@ o ritual já mede tudo isso no passo 6. Alternativa: derivar o Baseline por scri
 projeto e mais cara.
 
 **Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
+
+### DH-003FC-01 — Leitura do repo pelo mount do Cowork não tem caminho de limpeza para objeto materializado dentro da árvore `[FECHADA — 003.FC]`
+
+**Origem:** sessão 003.FC, abertura. Irmã de `DH-003FB-02`.
+
+**Situação.** Materializar um git object dentro do repo (`git show > arquivo`) cria um
+untracked que o mount não consegue apagar — delete negado por permissão do sistema de
+arquivos montado, mesma classe de restrição de `DH-003FB-02`. O resíduo (4 arquivos
+`.gate_tmp_*.md`) foi removido manualmente pelo Diovanni na abertura desta sessão.
+
+**Regra adotada.** O Arquiteto lê por `git show` para stdout, nunca redirecionado para
+dentro do repo. Se precisar persistir conteúdo lido, o destino é fora da árvore montada.
+
+**Status:** FECHADA em 003.FC — regra adotada e registrada. Ambiente, não motor. Nenhuma
+R-* tocada.
+
+### DH-003FC-02 — Relatório de `rodar-offline` particiona pendência de nível-cargo e de nível-termo em listas que não coincidem `[ABERTA — não-bloqueante]`
+
+**Origem:** sessão 003.FC, medição de abertura do Fascino.
+
+**Situação.** O bloco `### GHE` do relatório de `rodar-offline` lista só pendências de
+nível-cargo (`R-GHE-02`); as de nível-termo (`vocabulario_ausente`, `fuzzy_recusado`,
+`fracao_sem_agente`) aparecem só na seção `## Pendências` global, e as duas listas não
+coincidem. É o "par partido entre dois canais" que `D-ARQ-82` cl.3 descreve no Contexto —
+a cl.3 reúne o par no **motor** (a causa passa a viajar no `RiscoPGR`), não no
+**relatório**. Conferência por-GHE exige cruzar as duas listas à mão.
+
+**Status:** ABERTA, não-bloqueante. Achado independente da sessão de Code que implementou
+o selo — instrumento, não motor. Nenhuma R-* tocada.
+
+### DH-003FC-03 — H1 do PROTOCOLO defasado 88 versões contra a tabela de revisões `[FECHADA — 003.FC]`
+
+**Origem:** sessão 003.FC. Exposto por um Crítico que declarou `PROTOCOLO v2` na linha de
+gate de um julgamento de IMPLEMENTAÇÃO — leitura fiel de um título errado (o H1 dizia "v2"
+enquanto a tabela de revisões estava em v90).
+
+**Causa.** Título com número é cache que diverge do conteúdo — mesma doutrina de
+`D-ARQ-63` peça 1 (o índice derivado existe justamente para não confiar em cache dentro do
+próprio documento).
+
+**Status:** FECHADA em 003.FC — número removido do H1 de `PROTOCOLO_AGENTE_MEDICO.md`
+(ver PROTOCOLO v91); a versão passa a viver só na tabela. Nenhuma R-* tocada.
+
+### DH-003FC-04 — Três defeitos estruturais da skill `/critico`, medidos ao julgar D-ARQ-82 `[ABERTA — para META]`
+
+**Origem:** sessão 003.FC, gate de fechamento (dois vereditos do Gauntlet sobre D-ARQ-82:
+a decisão de ARQUITETURA e o diff de IMPLEMENTAÇÃO).
+
+**Situação — três facetas.**
+
+(a) O bloco `Saída` da skill tem slots fixos para os três testes de ARQUITETURA
+(`universalidade | caso local | registrabilidade`) e nenhum para os quatro itens da barra
+de IMPLEMENTAÇÃO — o veredito de IMPL desta sessão reportou a barra errada por seguir o
+template ao pé da letra.
+
+(b) O item 4 da barra de IMPLEMENTAÇÃO ("suíte de referência roda verde") não é testável
+pelo `allowed-tools` da skill (sem acesso a rodar a suíte); em vez de disparar a regra
+"dúvida rejeita" da própria skill, o item simplesmente não foi avaliado.
+
+(c) `git diff` está fora do `allowed-tools` da skill, o que obriga a nomear o artefato
+multi-commit por hash em vez de por diff direto.
+
+**Consequência.** Nenhum dos três invalidou o julgamento desta sessão — os quatro itens de
+IMPLEMENTAÇÃO ficam evidenciados no bloco 003.FC do HISTORICO, à parte do veredito da
+skill —, mas os três reaparecem em toda sessão de IMPLEMENTAÇÃO futura que use `/critico`.
+
+**Status:** ABERTA, para sessão META. Instrumento, não motor nem regra clínica.
+
+### DH-003FC-05 — `.claude/worktrees/romantic-margulis-dcccad` trackeado como GITLINK sem `.gitmodules` `[ABERTA — não-bloqueante, herdada]`
+
+**Origem:** sessão 003.FC, achado lateral ao conferir o estado da árvore.
+
+**Situação.** `.claude/worktrees/romantic-margulis-dcccad` está trackeado como GITLINK
+(modo `160000`, entrada de submódulo) sem `.gitmodules` correspondente — submódulo
+pendurado; um `git clone` do repositório produz um diretório vazio nesse caminho.
+Introduzido em `e50d75e`, já presente em `main` — herdado, não desta sessão.
+
+**Por que o `.gitignore` não protege.** `.gitignore` já cobre o padrão
+(`.claude/*` + `!.claude/skills/`), mas ignore não alcança caminho **já trackeado** — mesma
+classe do `.pyc` já descrita em `CLAUDE.md`.
+
+**Correção candidata.** `git rm --cached` em commit próprio, **fora** desta branch (que já
+foi julgada pelo Crítico).
+
+**Status:** ABERTA, não-bloqueante. Nesta sessão apenas registrada — `.claude/` não foi
+tocado. Nenhuma R-* tocada.
