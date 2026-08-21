@@ -5439,6 +5439,29 @@ Ressalva de procedência, declarada: o prompt do Crítico foi redigido pelo Arqu
 builder do artefato julgado. A barra é do Diovanni e o eixo é derivado do próprio artefato, o que
 estreita o vetor de viés, mas não o elimina. Registrado para que o veredito seja lido pelo que é.
 
+**Gate de fechamento: CRÍTICO aprovou** — `D-ARQ-83`, julgada em sessão nova, a frio,
+em 20/08/2026 `[git objects @ 1a08df6]`, já com a skill `/critico` versionada. Gate de
+abertura declarado: PROTOCOLO integral, ÍNDICE v179/83 decisões integral, transversais
+D-ARQ-{06,09,22}, eixo derivado das fronteiras do artefato = D-ARQ-{70,64,14,12,82} +
+`R-PGR-05` integral. Testes: universalidade PASSA — três casos concretos instanciados
+(servente de obra com poeira respirável sem substância nomeada, caso real do Fascino;
+operador de moinho com poeira genérica de matéria-prima em pó; equipe de manutenção
+hospitalar reportando particulado metálico não identificado), o mecanismo roda idêntico
+nos três porque a categoria é amarrada à forma do termo, não a agente, GHE ou setor;
+caso local PASSA — removida a âncora, as quatro cláusulas seguem inteiramente
+especificadas, a âncora é semente de dado e não conteúdo da decisão; registrabilidade
+PASSA — **as seis** fronteiras citadas conferidas contra o texto real, todas batem, e a
+implementação já mesclada (`resolvedor_termos.py`, bloco `fracoes_sem_agente`,
+`test_poeira_de_madeira_anti_fp_segue_vocabulario_ausente`) corresponde termo a termo
+às quatro cláusulas.
+
+**Estado do Gauntlet da 003.FB: as duas decisões julgadas e aprovadas.** Primeira leitura
+do sinal de saúde de `/critico`: duas aprovações consecutivas, ambas sobre artefatos que
+haviam passado por dupla passada de verificação factual. n=2 não diz nada sobre leniência —
+o sinal só se lê em série, e uma sequência longa sem rejeição é sintoma a investigar, não
+conquista. Contra-evidência já registrada no mesmo ciclo: no teste com artefato-isca a
+skill rejeitou, nomeando gap melhor que o do gabarito.
+
 ### Fila para a próxima sessão
 
 **003.FC — implementação do selo (`D-ARQ-82`).** Campo de causa no `RiscoPGR` **junto com** o
