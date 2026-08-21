@@ -3712,6 +3712,58 @@ adaptadores/orquestracao_pgr.py e motor/hidratacao.py, 07476ed]`.
 
 ---
 
+**Emenda 003.FC — `fuzzy_recusado` sai da lista de causas-acerto da cl.2.**
+
+Ao implementar o selo, a medição de abertura do Fascino `[MEDIDO — 003.FC, fc0b468,
+relatorios/003fc_fascino_rodar_ANTES.md]` mostrou que `Metiletilcetona` — o termo que o
+Contexto desta decisão nomeia como *"lacuna de `termos:`, não agente desconhecido, e o
+agente tem conduta devida: `R-BIO-04` Quadro 1/EE"* — sai do resolver como
+**`fuzzy_recusado`** (aproximaria de `metil_etil_cetona`, distância 2, slug fora da
+allowlist). Pela cl.2 como escrita, esse tipo era causa-acerto: a decisão classificava
+como acerto do motor exatamente o caso de dano que a justificou. Um GHE cujos únicos
+termos não resolvidos fossem esse e a fração sairia `VÁLIDA` cobrindo biomonitoramento
+exigido pelo Anexo I da NR-07.
+
+Causa estrutural: `fuzzy_recusado` é estado **composto** e o motor não o parte.
+`Silício`→`silica` é acerto — o termo não é aquele agente. `Metiletilcetona`→
+`metil_etil_cetona` é recusa correta de resolução **sobre** uma lacuna real de `termos:`,
+com conduta devida. Distinguir os dois é precisamente o que a recusa declara não saber
+fazer, e a cl.2 já manda ler o indecidível de forma protetiva ("ausência de causa
+registrada é lacuna — o default é protetivo").
+
+**A cl.2 passa a ler:** a lista fechada de causas-acerto é **`fracao_sem_agente`**
+(`R-PGR-05`, nota de aplicação 003.EJ, via `D-ARQ-83`). **`fuzzy_recusado` é lacuna** — a
+recusa de `D-ARQ-64` é acerto de *resolução*, não evidência de que nenhuma conduta é
+devida. O remédio para `fuzzy_recusado` recorrente é admitir a grafia em `termos:` sob
+`D-ARQ-70`, nunca selar a matriz.
+
+**Efeito medido: nulo no Fascino** `[MEDIDO — 003.FC]`. GHE-14 e GHE-19 têm zero
+`fuzzy_recusado`; GHE-16 cai a `PARCIAL` pelas outras 15 lacunas com ou sem a emenda. A
+previsão `3 VÁLIDA → 0` não muda. A emenda é de princípio, e o momento é antes de o selo
+entrar em `main`.
+
+**Fronteira com `D-ARQ-83` cl.3 — muda de caráter, não é revogada.** Aquela cláusula fixa
+a ordem fração-antes-do-fuzzy alegando, entre outras razões, que a inversão faria a cl.2
+desta decisão "classificar acerto sob a decisão errada". Com esta emenda a inversão passa
+a classificar um **acerto como lacuna** — erro na direção protetiva. A ordem da cl.3
+continua valendo pela razão que sobrevive: causa e **destinatário** corretos
+(`elaborador_pgr` vs `extracao`), que é o que `R-PGR-05` prescreve. O argumento de
+segurança do selo cai; o de correção de encaminhamento fica.
+
+**Correção de fato no caso-âncora** `[MEDIDO — 003.FC, fc0b468]`: GHE-16 tem **17**
+termos não resolvidos, não 19 — 13 químicos (12 `vocabulario_ausente` + `Metiletilcetona`
+em `fuzzy_recusado`), 1 fração, 3 ergonômicos/de acidente. Os 2 de diferença são
+`postura_inadequada` e `esforco_fisico`, resolvidos pelos aliases de 003.FA e presentes em
+`riscos_resolvidos` do GHE-16 — a aritmética fecha (19 − 2 = 17). Sob a cl.2 emendada,
+**16 dos 17** são lacuna.
+
+**Correção de fato na seção "Correções de fato em `DT-003EZ-01`"** `[MEDIDO — 003.FC]`: o
+item (ii) afirma que GHE-19 "declara três termos de risco e nenhum resolveu". **Um
+resolve** — `postura_inadequada`. O desfecho não muda (a linha não é emitida,
+`linhas_com_risco` segue vazia → `BLOQUEADA` pela cl.5), mas o fato vai corrigido.
+
+---
+
 **Risco assumido, declarado: saturação do selo.** A previsão é que os **3 GHEs `VÁLIDA` do
 Fascino caiam para 0** — GHE-16 e GHE-14 para `PARCIAL`, GHE-19 para `BLOQUEADA`. Um selo que
 nunca acende `VÁLIDA` perde poder discriminante, que é exatamente a crítica que `D-ARQ-66` cl.2 e
@@ -4003,3 +4055,4 @@ A conduta clínica já está prescrita e não muda: `R-PGR-05` manda solicitar F
 | v177 | 19/08/2026 | Sessão 003.FB entrega B1 (ARQUITETURA — decisão escrita): **`D-ARQ-83` CRIADA** — termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para **NÃO** resolver, com pendência de causa e destinatário próprios. Materializa a causa-acerto que `D-ARQ-82` cl.2 nomeia e sem a qual a implementação do selo derrubaria 14 GHEs por acerto do motor. cl.1 categoria tipada em bloco top-level de `agentes.yaml` (rejeitados: slug-sentinela dentro de `agentes:`, que poria não-agente no balde de agentes contra `D-ARQ-12` e contaminaria a métrica de 79 slugs; e 5º YAML, que exigiria emendar `D-ARQ-12` sem ganho) — custo medido: 1 chamador em produção + 8 usos em teste; cl.2 a forma **nunca** entra em `slug_por_forma`, requisito de segurança travado por teste computado do dado (sem isso o termo resolveria, viraria contribuição determinada e `D-ARQ-82` cl.1 devolveria `VÁLIDA`); cl.3 consulta **depois** do hit exato e **antes** do fuzzy, com `Pendencia(tipo="fracao_sem_agente", destinatario="elaborador_pgr", regra_origem="R-PGR-05")` — ordem fixada por robustez e **não** por risco vivo: medido que `poeira_respiravel`, `poeiras_respiraveis_metalicas` e `poeira_de_madeira` não têm candidato a distância ≤2 no índice real de 114 formas `[MEDIDO — 003.FB, Levenshtein computado em 07476ed]`, logo a inversão não erraria hoje, mas passaria a errar em silêncio quando um slug novo entrasse no raio; cl.4 admissão com o rigor de `D-ARQ-70` cl.1 e o critério (ii) **invertido** (o termo entra por NÃO identificar agente). Âncora `[DERIVADO — NR-07 Anexo III Quadros 1 e 2, texto oficial MTE, releitura independente em 003.FB]`: a norma trata "poeira **contendo** `<substância>`" e mede "**poeira respirável**". Tiragem inicial 2 formas / 16 ocorrências (`Poeira respirável` 14 GHEs `[DERIVADO]`; `Poeiras Respiráveis/Metálicas` 2 `[INTERPRETADO]`), anti-FP `Poeira de madeira`. Frações granulométricas **não** enumeradas — "inalável"/"torácica" sem literal na NR-07 e sem ocorrência no corpus; NHO 08 consultada e não usada como âncora `[INCERTO]`. Nenhuma R-* criada, alterada ou depreciada; `R-PGR-05` com ID e semântica intactas; PROTOCOLO segue v90. Detalhe em HISTORICO 003.FB. |
 | v178 | 19/08/2026 | Sessão 003.FB — FECHAMENTO (docs): passos 2, 4 e 5 do ritual. **`DH-003FB-02` CRIADA** (ABERTA, não-bloqueante) — leitura do repo pelo mount do Cowork deixa `.git/index.lock` órfão (o `git status` do mount toma o lock e não consegue removê-lo, por permissão), que a sessão seguinte de Code encontra e é empurrada a resolver sozinha; causa é do Arquiteto, não do repo. **`DH-003FB-03` CRIADA** (ABERTA, não-bloqueante) — o `PAINEL_ESTADO.md` se declara "vivo, não foto datada" mas sua regra de re-tiragem por-número-clínico deixa o bloco **Baseline** (hash, suíte, versões) envelhecer por desenho: medido em 003.FB, o painel diz `a8bb4d1 · 1137 passed · DECISOES v173` contra o real `a48836d · 1147 passed · DECISOES v177`, três sessões de defasagem e 10 testes de erro na contagem; correção candidata é separar Baseline (todo fechamento) dos três números (por evento). Painel **avaliado e NÃO re-tirado** — nenhum dos três números clínicos se moveu (regras 22/42 inalterado: nenhuma R-* tocada; vocabulário/CAS 50/79 inalterado: a categoria nova não cria slug nem CAS; dívidas-que-travam-produção 3 inalterado), nenhum marco fechou, sessão não é META. Suíte **1147 passed, 6 skipped**, medida em `a48836d`. PROTOCOLO segue **v90**. Detalhe em HISTORICO 003.FB. |
 | v179 | 20/08/2026 | Sessão 003.FB — instrumento de método (docs + skills, sem tocar motor nem protocolo): duas skills versionadas em `.claude/skills/` — **`/conferir`** (conferidor factual: extrai toda afirmação factual de um artefato e confere contra o repo, com inventário de 100% das afirmações, achados com âncora e comando que reproduz, e **sem emitir veredito** — selo não-auditável é a classe que a `003.DQ` combate) e **`/critico`** (Gauntlet: julga a frio contra a barra do modo, com gate declarado, **eixo derivado das fronteiras do próprio artefato** em vez de escolhido pelo builder, e proibição de corrigir ou reescrever). Ambas testadas com gabarito fechado antes da execução: `/conferir` pegou 5 de 6 defeitos plantados e achou 1 não plantado; `/critico` rejeitou o artefato-isca nomeando gap melhor que o do gabarito, e aprovou `D-ARQ-82` real. Três correções nasceram do teste (inventário obrigatório; recontar contagem incidental; proibição de escrever/redirecionar saída). Nota registrada em `DH-003FB-01` com os números; **a decisão de cadência — quando cada skill é obrigatória — segue ABERTA**, para sessão META: instrumento entregue não é regra adotada. **`Gate de fechamento: CRÍTICO aprovou`** gravado no bloco 003.FB para `D-ARQ-82`; **`D-ARQ-83` segue sem julgamento**. Nenhuma R-* criada, alterada ou depreciada; PROTOCOLO segue v90. Detalhe em HISTORICO 003.FB. |
+| v180 | 21/08/2026 | Sessão 003.FC, passo 1 (ARQUITETURA — emenda, docs-only): **Emenda 003.FC em `D-ARQ-82`** — `fuzzy_recusado` sai da lista de causas-acerto da cl.2. Medição de abertura do Fascino `[MEDIDO — 003.FC, fc0b468, relatorios/003fc_fascino_rodar_ANTES.md]` achou `Metiletilcetona` (o termo com conduta devida `R-BIO-04` que motiva `D-ARQ-82`) saindo do resolver como `fuzzy_recusado`, não como lacuna — pela cl.2 original isso era causa-acerto, classificando como acerto do motor exatamente o caso de dano que justificou a decisão. Causa estrutural: `fuzzy_recusado` é estado composto (recusa de resolução **sobre** possível lacuna real de `termos:`) que o motor não parte; a cl.2 já manda ler o indecidível de forma protetiva. Cl.2 emendada: única causa-acerto fechada é `fracao_sem_agente` (`R-PGR-05`, via `D-ARQ-83`); `fuzzy_recusado` é lacuna, remédio é admitir a grafia sob `D-ARQ-70`. Fronteira com `D-ARQ-83` cl.3 muda de caráter (argumento de segurança do selo cai, o de destinatário correto fica) mas a ordem fração-antes-do-fuzzy não é revogada. Duas correções de fato no caso-âncora: GHE-16 tem **17** termos não resolvidos, não 19 (os 2 de diferença resolvem pelos aliases de 003.FA); e GHE-19 tem **um** risco resolvido (`postura_inadequada`), não zero — o desfecho (`BLOQUEADA`, `linhas_com_risco` vazia) não muda. Efeito medido no Fascino: nulo (GHE-14/GHE-19 têm zero `fuzzy_recusado`; GHE-16 já cai a `PARCIAL` pelas outras 15 lacunas); previsão `3 VÁLIDA → 0` intacta. Nenhuma R-* criada, alterada ou depreciada; PROTOCOLO segue v90. Índice D-ARQ regenerado. Implementação segue em 003.FC (mesma sessão, entrega separada). |
