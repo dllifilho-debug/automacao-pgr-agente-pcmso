@@ -46,6 +46,12 @@ def _risco(agente: str) -> RiscoPGR:
     return RiscoPGR(tipo="fisico", agente=agente, quantificacao=None, severidade=None)
 
 
+def _risco_nao_resolvido(causa: str) -> RiscoPGR:
+    return RiscoPGR(
+        tipo="", agente=None, quantificacao=None, severidade=None, causa_nao_resolucao=causa
+    )
+
+
 def _vocab() -> Vocabulario:
     return Vocabulario(agentes={}, cargos={}, exames={}, epis={})
 
@@ -631,3 +637,77 @@ def test_matriz_bloqueada_tambem_carrega_cargos(monkeypatch: pytest.MonkeyPatch)
     assert matriz.status == "BLOQUEADA"
     assert matriz.nome_ghe == "Armação"
     assert matriz.cargos == ("Armador",)
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-82 — o selo VÁLIDA computa sobre a CAUSA da não-resolução de um termo,
+# nunca sobre sua contagem. cl.1 exige ausência de LACUNA; cl.2 (emendada em
+# 003.FC) fecha a lista de causas-acerto em fracao_sem_agente só.
+# ---------------------------------------------------------------------------
+
+
+def test_ghe_valida_com_unico_termo_nao_resolvido_por_fracao_sem_agente() -> None:
+    # T2 (003.FC): reversão que mata — remover "fracao_sem_agente" do
+    # frozenset CAUSAS_ACERTO_NAO_RESOLUCAO em orquestrador.py. É o teste que
+    # D-ARQ-83 (Consequência) exige que exista.
+    ghe = _ghe(riscos=(_risco_nao_resolvido("fracao_sem_agente"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+    assert resultado.matrizes[0].status == "VÁLIDA"
+
+
+def test_ghe_com_termo_lacuna_e_linha_de_risco_sai_parcial_nao_valida() -> None:
+    # T3 (003.FC), cl.1: risco resolvido (trabalho_altura -> 5 linhas via
+    # R-PKG-ATIVCRIT) + termo não resolvido por LACUNA (vocabulario_ausente)
+    # na mesma GHE. Reversão que mata — remover `and not tem_lacuna` do gate
+    # de VÁLIDA em orquestrador.py: sem ela este GHE sairia VÁLIDA (o
+    # tem_bloqueio/tem_presumida antigos não veem essa lacuna).
+    ghe = _ghe(
+        riscos=(_risco("trabalho_altura"), _risco_nao_resolvido("vocabulario_ausente"))
+    )
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert len(matriz.linhas) == 5
+    assert matriz.status == "PARCIAL"
+
+
+def test_ghe_so_com_termo_lacuna_sem_linha_de_risco_sai_bloqueada() -> None:
+    # T4 (003.FC), cl.5 braço BLOQUEADA: termo declarado, não resolvido por
+    # LACUNA, nenhuma linha de risco determinada (a regra do protocolo
+    # sintético não dispara sem um risco resolvido). Reversão que mata —
+    # mesma do T3: remover `and not tem_lacuna` faria este GHE sair VÁLIDA
+    # em vez de BLOQUEADA (tem_bloqueio e tem_presumida são ambos False aqui).
+    ghe = _ghe(riscos=(_risco_nao_resolvido("vocabulario_ausente"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.linhas == []
+    assert matriz.status == "BLOQUEADA"
+
+
+def test_ghe_sem_risco_declarado_segue_valida_vacuamente() -> None:
+    # T5 (003.FC), cl.6: GHE sem risco algum satisfaz a cláusula 1
+    # vacuamente. Reversão que mata — trocar
+    # `tem_lacuna = any(... for r in ghe.riscos if r.agente is None)` por
+    # `tem_lacuna = not ghe.riscos or any(...)`, tratando ausência de risco
+    # como lacuna em vez de vacuidade.
+    ghe = _ghe(riscos=())
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.status == "VÁLIDA"
+
+
+def test_ghe_com_unico_termo_fuzzy_recusado_nao_sai_valida() -> None:
+    # T6 (003.FC) — emenda 003.FC travada por teste: fuzzy_recusado é LACUNA,
+    # não causa-acerto, desde a emenda que a medição de abertura do Fascino
+    # forçou (caso Metiletilcetona -> R-BIO-04, conduta devida perdida se
+    # este tipo voltasse a ser causa-acerto). Reversão que mata — devolver
+    # "fuzzy_recusado" ao frozenset CAUSAS_ACERTO_NAO_RESOLUCAO.
+    ghe = _ghe(riscos=(_risco_nao_resolvido("fuzzy_recusado"),))
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, _protocolo_ativcrit(), hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    assert matriz.status != "VÁLIDA"
+    assert matriz.status == "BLOQUEADA"
