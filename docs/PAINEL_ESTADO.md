@@ -7,12 +7,16 @@
 > (3) no mínimo 1× por sessão META. Merge que não move número não dispara re-tiragem.
 > A re-tiragem é passo do ritual de fechamento já existente (mesmo gate de disco — custo marginal ~zero).
 > O `HISTORICO_OPERACIONAL.md` acumula os snapshots; este painel mostra só o presente.
+>
+> **Duas cadências (`D-ARQ-85`):** o que está acima vale para os **três números clínicos**. O bloco
+> **Baseline** — hash, contagem de suíte, versões de doc — é re-tirado em **todo fechamento que
+> produza commit**, porque envelhece por commit e não por evento clínico.
 
 ---
 
 **Tiragem corrente:** 003.EZ · 16/08/2026
-**Baseline:** branch `feat/003fc-selo-causa` sobre `main fc0b468` · 1154 passed, 6 skipped · PROTOCOLO v90→v91 · DECISOES v179→v182
-**[PALIATIVO — 003.FC: só o bloco Baseline foi re-tirado, à mão, fora da cadência por-evento do painel. Consequência declarada: `Tiragem corrente` segue 003.EZ · 16/08/2026 (os três números clínicos não se moveram) enquanto o Baseline já reflete 003.FC — Baseline e números clínicos passam a andar em relógios diferentes, que é exatamente o defeito que `DH-003FB-03` nomeia. Os parágrafos de tiragem abaixo ("Instrumento oficial nesta tiragem", "Nota de escopo desta tiragem") são registro histórico de 003.EZ e NÃO são atualizados por re-tiragem parcial — reescrevê-los falsificaria o que aquela sessão mediu. NÃO corrige a regra de re-tiragem; `DH-003FB-03` segue ABERTA.]**
+**Baseline:** branch `feat/003fd-cadencia-metodo` sobre `main 6421286` · **1154 passed, 6 skipped** *(medido em `f995f7d`, sessão 003.FC — esta sessão é docs-only e não re-mediu)* · PROTOCOLO v91 · DECISOES v182→v183
+**Três números clínicos avaliados, não re-tirados nesta tiragem** — sessão 003.FD é META (docs + skills, não toca motor, vocabulário nem dívidas de produção); nenhum dos três se moveu. Baseline re-tirado sob `D-ARQ-85` cl.1.
 
 ---
 
