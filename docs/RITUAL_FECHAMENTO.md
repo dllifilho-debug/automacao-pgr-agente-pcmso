@@ -17,11 +17,21 @@ DH-003EG-03 entrou. Origem: emenda 003.EG, `CLAUDE.md` seção "Verificação".
    condicional a "sessão é docs-only".
 4. Gravar o bloco da sessão no `docs/HISTORICO_OPERACIONAL.md`: foco, commits, número da
    suíte (com a árvore/commit em que foi medida), pendências na íntegra, lições de método.
-5. Avaliar re-tiragem do `docs/PAINEL_ESTADO.md`: só se um dos 3 números clínicos se moveu, um
-   marco fechou, ou a sessão é META. Declarar a decisão explicitamente no HISTORICO, mesmo
-   quando for "não re-tirar".
+5. Re-tirar o `docs/PAINEL_ESTADO.md` em **duas cadências distintas** (`D-ARQ-85`):
+   - **Bloco Baseline** — re-tirado em TODO fechamento que produza commit: hash, contagem de
+     suíte com o commit em que foi medida, e versões de `PROTOCOLO`/`DECISOES`. Sessão que não
+     mediu a suíte grava a contagem herdada **com o commit de origem visível**, nunca como corrente.
+   - **Os três números clínicos** — regra intacta: só se um deles se moveu, um marco fechou, ou a
+     sessão é META. Declarar a decisão explicitamente no HISTORICO, mesmo quando for "não re-tirar".
+   - Parágrafos de tiragem ("Instrumento oficial nesta tiragem", "Nota de escopo desta tiragem") são
+     registro histórico e **não** são reescritos por re-tiragem de Baseline.
 6. Rodar o subconjunto de testes que cobre os derivados tocados por esta sessão; suíte
    completa (`python -m pytest agente_medico/tests/ tests/`) se a sessão tocou código. Nenhum
    prompt dispensa este passo — recorte nunca é zero.
 7. Commit por doc/arquivo, nominal (`git add` de cada arquivo, nunca `git add .`). Push só com
    autorização explícita do turno.
+8. Antes de emitir qualquer artefato que crave fato (prompt cirúrgico, corpo de D-ARQ, bloco de
+   sessão do HISTORICO, re-tiragem do painel, spec de dado): rodar `/conferir` sobre ele
+   (`D-ARQ-84` cl.1). `DIVERGE` material é bloqueador — corrigir e re-conferir antes de emitir
+   (cl.3). Não há declaração de gate para este passo, por desenho (cl.2): a evidência é o
+   relatório, referenciado no bloco da sessão.

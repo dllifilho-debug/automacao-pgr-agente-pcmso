@@ -5616,3 +5616,97 @@ evidenciados AQUI, não a reboque do selo:
 `DH-003FC-04` (três defeitos estruturais de `/critico` medidos nesta sessão — barra de
 IMPLEMENTAÇÃO sem slots no template, item 4 não-testável pelo `allowed-tools`, `git diff`
 fora do `allowed-tools`).
+
+## Sessão 003.FD — 22/08/2026 — META
+
+**Foco:** cadência dos instrumentos de método — decidir quando `/conferir` e `/critico` são
+obrigatórios (`DH-003FB-01`), corrigir os três defeitos estruturais de `/critico` medidos em
+003.FC (`DH-003FC-04`), e separar as duas cadências de re-tiragem do `PAINEL_ESTADO.md`
+(`DH-003FB-03`).
+
+**Gate de abertura declarado pelo Arquiteto:** PROTOCOLO v91 — corpo integral §1–§12 +
+tabela de revisões v86–v91 (v1–v85 da tabela declaradas FORA: diário histórico, massa que
+`DT-003DX-01` frente (c) já nomeia); ÍNDICE v183→ lido integral em v182 (83 decisões);
+transversais D-ARQ-{06,09,22} integrais; eixo método = D-ARQ-{26,27,30,32,62,63} integral +
+`DT-003DX-02` (git objects @ `6421286`).
+
+**Commits.** `cc9136e` (D-ARQ-84 + D-ARQ-85 + PENDENCIAS + índice regenerado), `9b42940`
+(três correções em `/critico` + duas classes novas em `/conferir`), `5b84733`
+(`RITUAL_FECHAMENTO.md` passos 5 e 8), `0c3ad6b` (`PAINEL_ESTADO.md`, Baseline sob
+`D-ARQ-85`), + este.
+
+### Entregas
+
+- **`D-ARQ-84` CRIADA** — `/conferir` obrigatório sobre artefato que crava fato (lista
+  fechada de 5 tipos: prompt cirúrgico, corpo de D-ARQ nova/emenda, bloco de sessão do
+  HISTORICO, re-tiragem do painel, spec de dado), **sem declaração ritual nova** — a
+  evidência é o próprio relatório falsificável, não um selo (`D-ARQ-22`). `DIVERGE`
+  material bloqueia a emissão; `NÃO VERIFICÁVEL` converte-se em teste quando o objeto é
+  comportamento do motor, não em medição avulsa. `/critico` inalterado quanto à cadência
+  (`003.DQ` intocada). Coerência interna do artefato entra como classe de erro do
+  conferidor (classe 11), **não** como 4º item da barra de ARQUITETURA — decisão contra a
+  própria medição de 003.FC, onde o Gauntlet leu `D-ARQ-82` inteira a frio e não pegou a
+  contradição da cl.2.
+- **`D-ARQ-85` CRIADA** — Baseline e três números clínicos do painel passam a ter cadências
+  distintas: Baseline (hash, suíte, versões de doc) re-tirado em todo fechamento com
+  commit; três números clínicos por evento, regra intacta. Hash e versões derivados do
+  repo em `scripts/medir_painel.py` (fatia futura, `DT-003FD-01`); contagem de suíte segue
+  entrada de medição, carimbada com o commit em que foi medida. Declarado explicitamente:
+  hash não é testável por não-divergência (muda a cada commit) e contagem de suíte não é
+  testável sem recursão — a derivação integral do Baseline por script, candidata de
+  `DH-003FB-03`, é impossível pelas duas razões, não só cara.
+- **`/critico` corrigido (`DH-003FC-04`), três facetas:** (a) bloco `Saída` ganha linha de
+  testes por modo (ARQUITETURA/CONHECIMENTO vs. IMPLEMENTAÇÃO), com instrução de emitir só
+  a do modo julgado; (b) item 4 da barra de IMPLEMENTAÇÃO passa de teste do Crítico a
+  evidência registrada pelo builder (contagem + commit + comando canônico), que o Crítico
+  verifica sem re-executar — alteração de barra **autorizada pelo Diovanni nesta sessão**;
+  (c) `Bash(git diff *)` entra no `allowed-tools`, Regra zero passa a admitir
+  `git diff <base>..<topo>` para artefato multi-commit e ganha exceção nominal para ler a
+  linha de registro de suíte do bloco de sessão (sem abrir o resto do raciocínio do
+  builder).
+- **`/conferir` ganha duas classes de erro:** classe 10 (contagem de `grep -c` tratada
+  como lista de sítios editáveis, mesmo dentro de registro histórico — medida em 003.FC,
+  `6895958`/emenda `9bc875d`) e classe 11 (cláusula que contradiz o corpo do próprio
+  artefato — medida em 003.FC, a contradição da cl.2 de `D-ARQ-82`).
+- **`docs/RITUAL_FECHAMENTO.md`** — passo 5 reescrito nas duas cadências de `D-ARQ-85`;
+  passo 8 novo (`/conferir` obrigatório antes de emitir artefato que crava fato).
+- **`docs/PAINEL_ESTADO.md`** — nota `[PALIATIVO — 003.FC]` removida; Baseline re-tirado
+  à mão sob `D-ARQ-85` cl.1 (branch `feat/003fd-cadencia-metodo` sobre `main 6421286`,
+  suíte herdada de `f995f7d` com commit de origem visível, PROTOCOLO v91,
+  DECISOES v182→v183); três números clínicos avaliados e **não** re-tirados — nenhum se
+  moveu, sessão não toca motor/vocabulário/dívidas de produção; bloco de cadência do topo
+  ganha nota das duas cadências distintas.
+
+### Pendências
+
+- `DH-003FB-01` **FECHADA** — cadência decidida em `D-ARQ-84`.
+- `DH-003FC-04` **FECHADA** — três facetas corrigidas na skill (ver Entregas).
+- `DH-003FB-03` **PARCIALMENTE RESOLVIDA** — regra decidida em `D-ARQ-85`; instrumento
+  aberto em `DT-003FD-01`.
+- `DT-003FD-01` **NOVA**, ABERTA, não-bloqueante — instrumento do Baseline
+  (`scripts/medir_painel.py` não lê versões de doc nem compõe a linha do Baseline).
+- `DT-003FD-02` **NOVA**, ABERTA, não-bloqueante — o registro de suíte que a barra nova
+  exige mora onde a Regra zero do Crítico proíbe ler; resolvido por exceção nominal
+  **declarada como paliativo** nesta sessão.
+- `DH-003FD-01` **NOVA**, ABERTA, não-bloqueante — a barra de ARQUITETURA não tem forma
+  aplicável a decisão META; três correções candidatas registradas, nenhuma decidida.
+
+### Nenhuma `R-*` criada, alterada ou depreciada. PROTOCOLO segue v91.
+
+### Verificação — recorte, tree parada
+
+Sessão não tocou `agente_medico/`, `scripts/` nem `app_matriz*.py` — nenhum código de
+motor. Recorte após o último commit de docs, árvore parada (precedente `003.EF`):
+`python -m pytest tests/test_gerar_indice_darq.py tests/test_particao_pendencias.py`
+— verde, 8 passed (6 de `test_gerar_indice_darq.py` + 2 de `test_particao_pendencias.py`).
+`mypy` não se aplica — nenhum `.py` alterado.
+
+### Gate de fechamento
+
+Gate de fechamento: `[A PREENCHER PELO ARQUITETO APÓS O GAUNTLET]`
+
+### Fila para a próxima sessão
+
+**META:** `DT-003FD-01` (instrumento do Baseline), `DT-003FD-02` (registro de suíte fora
+do bloco de sessão, correção estrutural candidata: linha `suíte: N passed, M skipped` na
+mensagem do commit) e `DH-003FD-01` (modo META na barra de ARQUITETURA).
