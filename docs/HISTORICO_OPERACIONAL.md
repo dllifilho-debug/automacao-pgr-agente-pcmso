@@ -5703,7 +5703,37 @@ motor. Recorte após o último commit de docs, árvore parada (precedente `003.E
 
 ### Gate de fechamento
 
-Gate de fechamento: `[A PREENCHER PELO ARQUITETO APÓS O GAUNTLET]`
+**Gate de fechamento: CRÍTICO aprovou** — `D-ARQ-85` (barra ARQUITETURA), sessão nova a frio,
+git objects @ `4ccc31b`. Registrabilidade conferida por amostragem de três fronteiras
+(`D-ARQ-63` peça 1, `D-ARQ-32`, `D-ARQ-22`), e o claim de atrito específico
+(`test_main_sem_flag_suite_imprime_5_linhas_no_formato_esperado`) verificado no arquivo real.
+
+**Gate de fechamento: CRÍTICO rejeitou** — gap: a fronteira `DT-003DX-02` de `D-ARQ-84` afirma
+ineditismo de versionamento do público Arquiteto que `D-ARQ-26` (`/kickoff`, sob git desde
+`0dd0449`, sessão 002.U), citada na mesma seção do artefato, contradiz. Corrigido pela
+**EMENDA 003.FD-E** (DECISOES v184); rejulgamento em sessão nova, com o artefato atualizado.
+
+**Ressalva de procedência — o Gauntlet correu DEPOIS do merge.** O PR #311 foi mergeado
+(`4ccc31b`) com o bloco desta sessão declarando `[A PREENCHER PELO ARQUITETO APÓS O GAUNTLET]`.
+Pela regra da 003.DQ o ciclo não estava fechado no instante do merge, e `main` carregou o
+não-fechamento até esta emenda. Registrado como fato da sessão, não normalizado.
+
+**Lição de método — previsão do Arquiteto sobre o próprio Gauntlet: ERRADA, e errada a favor do
+artefato.** O Arquiteto previu, antes do julgamento, que `D-ARQ-84` seria rejeitada pelo **item 1**
+(universalidade), por `DH-003FD-01` — a barra não ter forma aplicável a decisão META. O Crítico
+**passou** no item 1 e rejeitou pelo **item 3** (registrabilidade), por um defeito factual que o
+Arquiteto não antecipou e que a própria passada de verificação do prompt não pegou: aquela
+verificação conferiu os 12 literais de **edição** e **não** extraiu as afirmações do **corpo** das
+decisões novas — extração não-exaustiva, sem a declaração de recorte que a skill `/conferir` exige
+nesse caso. O erro que `D-ARQ-84` institui conferência para pegar estava dentro de `D-ARQ-84`.
+
+**Evidência medida para `DH-003FD-01`, que segue ABERTA.** O item 1 não bloqueou, mas também não
+foi realmente exercido: o Crítico instanciou "indústria química" como *uma D-ARQ sobre agente
+químico* e "saúde" como *uma D-ARQ sobre regra hospitalar* — objetos sobre os quais a regra de
+método opera, não setores em que a regra mudaria de resposta. Uma regra de método passa nesse teste
+por construção, o que o torna vazio para decisão META. Observação registrada **a favor do rigor e
+contra o próprio artefato**: o `PASSA` beneficiou `D-ARQ-84`, e ainda assim não conta como teste
+cumprido. Reforça a correção candidata (1) daquela dívida — modo META próprio na barra.
 
 ### Fila para a próxima sessão
 
