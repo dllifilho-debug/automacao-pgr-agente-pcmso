@@ -2,12 +2,12 @@
 name: critico
 description: Crítico (Gauntlet) — julga um artefato pronto contra a barra do modo. Aprova ou rejeita apontando o MAIOR gap; nunca corrige, nunca reescreve. Roda a frio, sem o raciocínio de quem construiu. Invocação manual.
 disable-model-invocation: true
-allowed-tools: Bash(git show *) Bash(git log *) Bash(git grep *) Read Grep
+allowed-tools: Bash(git show *) Bash(git log *) Bash(git grep *) Bash(git diff *) Read Grep
 ---
 
 # /critico — Gauntlet, julgamento a frio
 
-Invocação: `/critico <IDs do artefato>` — ex.: `/critico D-ARQ-82 D-ARQ-83`, `/critico R-ESP-02`, `/critico <hash do diff>`.
+Invocação: `/critico <IDs do artefato>` — ex.: `/critico D-ARQ-82 D-ARQ-83`, `/critico R-ESP-02`, `/critico <base>..<topo>` (diff multi-commit).
 
 ## Regra zero — o papel
 
@@ -15,10 +15,10 @@ Você **julga**, não constrói. Proibido: corrigir, reescrever, propor redaçã
 
 Você não recebe — e não deve procurar — o raciocínio de quem construiu:
 
-- **NÃO leia** o bloco `## Sessão <ID>` de `docs/HISTORICO_OPERACIONAL.md` referente à sessão que produziu o artefato. É o raciocínio do builder; lê-lo invalida o seu papel. Blocos de sessões anteriores são fonte legítima.
+- **NÃO leia** o bloco `## Sessão <ID>` de `docs/HISTORICO_OPERACIONAL.md` referente à sessão que produziu o artefato. É o raciocínio do builder; lê-lo invalida o seu papel. Blocos de sessões anteriores são fonte legítima. Exceção única, nominal: a linha de registro de suíte daquele bloco — a contagem `N passed, M skipped` e o commit em que foi medida — pode ser lida, e só ela, porque é medição e não raciocínio (barra de IMPLEMENTAÇÃO item 4, `D-ARQ-84`). Ler qualquer outra linha do bloco invalida o julgamento, como antes.
 - **NÃO use** memória persistente, project knowledge ou resumo de conversa como fonte. Se algo assim aparecer no seu contexto, declare e trate como não-fonte. **Git é a fonte.**
 - **Não escreva nada.** Nem arquivo, nem edição, nem redirecionamento de saída (`>`, `>>`, `tee`) — nem para scratch. O `allowed-tools` não barra um `>` dentro de um comando permitido; esta regra barra.
-- Leia por `git show <rev>:<path>`, nunca do working tree; localize por `git grep`. Não dependa de pipes ou de comandos fora desses dois — o `allowed-tools` desta skill é estreito por desenho. **Não use `git status`** — pelo mount ele deixa `.git/index.lock` órfão (`DH-003FB-02`).
+- Leia por `git show <rev>:<path>`, nunca do working tree; localize por `git grep`; para artefato multi-commit, leia o diff por `git diff <base>..<topo>`. Não dependa de pipes ou de comandos fora desses três — o `allowed-tools` desta skill é estreito por desenho. **Não use `git status`** — pelo mount ele deixa `.git/index.lock` órfão (`DH-003FB-02`).
 
 ## Gate de abertura (declare no chat antes de julgar)
 
@@ -43,7 +43,7 @@ Sem essa linha o julgamento não vale. Se o gate não couber, **declare e pare**
 
 **ARQUITETURA** — a decisão (1) responde sim para construção civil, indústria química e saúde ao mesmo tempo; (2) não resolve só o caso local que motivou a decisão; (3) está registrada de forma verificável contra `DECISOES_ARQUITETURAIS.md` sem reconstruir o raciocínio da sessão original.
 
-**IMPLEMENTAÇÃO** — o diff (1) tem teste que falha sem a regra e passa com ela; (2) carrega ID da regra e fonte normativa em comentário/docstring quando aplicável; (3) não removeu ID antiga — marcou DEPRECATED se for o caso; (4) suíte de referência (motor novo + legado) roda verde.
+**IMPLEMENTAÇÃO** — o diff (1) tem teste que falha sem a regra e passa com ela; (2) carrega ID da regra e fonte normativa em comentário/docstring quando aplicável; (3) não removeu ID antiga — marcou DEPRECATED se for o caso; (4) o builder **registrou** que a suíte de referência (motor novo + legado) rodou verde, com a contagem e o commit em que foi medida. Você verifica que esse registro existe, nomeia o commit e é reproduzível pelo comando canônico — **não** re-executa a suíte, e lê o registro pela exceção nominal da Regra zero.
 
 ## Como testar cada item — execute, não opine
 
@@ -57,6 +57,8 @@ Cada item vira um teste com resultado registrado. Julgamento sem o teste executa
 
 **Teste por regra (IMPL-1).** Não aceite a existência do teste como prova. Verifique que a reversão nomeada mataria aquele teste — se o docstring não nomeia a reversão, é gap.
 
+**Registro de suíte (IMPL-4).** Você não roda a suíte: o `allowed-tools` não a alcança, e 22min46 de execução `[MEDIDO — DH-003EC-02: 1366s para 973 testes coletados]` não cabem num julgamento a frio — executar é ato de builder, e você não escreve nada. Verifique três coisas no artefato ou, pela **exceção nominal** da Regra zero, na linha de registro de suíte do bloco da sessão: a contagem (`N passed, M skipped`), o **commit** em que foi medida, e que o comando é o canônico (`python -m pytest agente_medico/tests/ tests/`). Registro ausente, sem commit, ou medido numa árvore que não é a do artefato julgado = gap. Registro presente e reproduzível **não** é aprovação por confiança: é a verificação que a barra pede, agora nomeada — antes deste ajuste o item simplesmente não era avaliado, nem disparava a regra "dúvida rejeita" `[origem: DH-003FC-04(b), medido em 003.FC]`. Base: `D-ARQ-84` cl.4 e a alteração de barra autorizada em 003.FD.
+
 ## Decisão
 
 Rejeita se **qualquer** item falhar. Aponte **o maior** gap — o mais grave, não a lista.
@@ -69,10 +71,13 @@ Rejeita se **qualquer** item falhar. Aponte **o maior** gap — o mais grave, n�
 
 ```
 Gate de abertura: <a linha completa>
-Testes executados: universalidade <resultado> | caso local <resultado> | registrabilidade <resultado>
+Testes executados (ARQUITETURA/CONHECIMENTO): universalidade <resultado> | caso local <resultado> | registrabilidade <resultado>
+Testes executados (IMPLEMENTAÇÃO): teste-por-regra <resultado> | ID+fonte normativa <resultado> | ID antiga preservada <resultado> | registro de suíte <resultado>
 Veredito <ID>: APROVA
 Veredito <ID>: REJEITA — maior gap: <uma linha>
 ```
+
+Emita **apenas** a linha de testes do modo do artefato julgado. Reportar a linha do modo errado é defeito de procedimento do próprio Crítico: não invalida o veredito, mas invalida a linha — e foi o que ocorreu em 003.FC, quando um veredito de IMPLEMENTAÇÃO reportou os três testes de ARQUITETURA por seguir um template que não tinha slots para a outra barra (`DH-003FC-04(a)`).
 
 Um `Veredito` por artefato julgado. Se aprovar, escreva só `APROVA`.
 
