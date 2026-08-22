@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from agente_medico.motor.hidratacao import hidratar_ghe
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.resolvedor_termos import (
     PISO_FUZZY,
@@ -13,6 +14,7 @@ from agente_medico.motor.resolvedor_termos import (
     construir_indice_termos,
     resolver_termo,
 )
+from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 
 PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 
@@ -379,6 +381,19 @@ def test_metanoll_recusa_metanol_e_nunca_resolve_etanol(indice_real: IndiceTermo
     assert resolucao.pendencia.tipo == "fuzzy_recusado"
     assert "metanol" in resolucao.pendencia.motivo
     assert "etanol" not in resolucao.pendencia.motivo.replace("metanol", "")
+
+    # D-ARQ-82 cl.3 (003.FC): a hidratação grava a causa real da não-resolução
+    # no risco — aqui "fuzzy_recusado", não um tipo qualquer. O que muda com a
+    # emenda 003.FC é como o selo CLASSIFICA essa causa (deixa de ser
+    # causa-acerto), não o que a hidratação escreve no campo.
+    ghe = GHEVerbatim(
+        nome="Teste",
+        cargos=(),
+        riscos=(RiscoVerbatim(agente="metanoll", quantificacao="", fonte_geradora=""),),
+    )
+    ghe_pgr, _ = hidratar_ghe(ghe, indice_real, posicao=1)
+    assert ghe_pgr.riscos[0].agente is None
+    assert ghe_pgr.riscos[0].causa_nao_resolucao == "fuzzy_recusado"
 
 
 def test_allowlist_disjunta_dos_canais_de_criticidade(indice_real: IndiceTermos) -> None:

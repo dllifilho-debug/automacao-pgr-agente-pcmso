@@ -26,6 +26,10 @@ class RiscoPGR:
     agente: Optional[str]
     quantificacao: Optional[Quantificacao]
     severidade: Optional[str]
+    # D-ARQ-82 cl.3: causa da não-resolução do termo (tipo da Pendencia), viaja com o
+    # risco para o selo VÁLIDA discriminar acerto do motor de lacuna real. None quando
+    # agente resolveu (agente is not None).
+    causa_nao_resolucao: Optional[str] = None
 
 
 @dataclass(frozen=True)

@@ -25,6 +25,14 @@ from agente_medico.motor.tipos import (
 )
 
 
+# D-ARQ-82 cl.2 (emendada em 003.FC): lista FECHADA de causas-acerto. O default
+# é LACUNA — tipo novo entra aqui só por decisão explícita, nunca por omissão de
+# quem o criou. fracao_sem_agente: R-PGR-05 (nota 003.EJ), via D-ARQ-83 cl.3.
+# fuzzy_recusado NÃO entra: a recusa de D-ARQ-64 é acerto de RESOLUÇÃO, não
+# evidência de que nenhuma conduta é devida (caso Metiletilcetona → R-BIO-04).
+CAUSAS_ACERTO_NAO_RESOLUCAO = frozenset({"fracao_sem_agente"})
+
+
 def _serializar_valor_predicado(v: bool | Ausente) -> str:
     if isinstance(v, Ausente):
         return f"AUSENTE: {v.mensagem}"
@@ -59,6 +67,14 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
         exames: list[ExameEmitido] = stage_5_emissao(ctx, protocolo)
         # Stage 6 (regime) encaixará aqui
         riscos_resolvidos, predicados_avaliados = _diagnostico(ctx)
+        # D-ARQ-82 cl.1: VÁLIDA exige ausência de LACUNA, não de pendência. Sobre
+        # ghe.riscos (RiscoPGR bruto, não ctx.riscos promovido) — a causa viaja com
+        # o risco (cl.3). Default protetivo: causa fora do frozenset (inclusive None)
+        # é lacuna.
+        tem_lacuna = any(
+            r.causa_nao_resolucao not in CAUSAS_ACERTO_NAO_RESOLUCAO
+            for r in ghe.riscos if r.agente is None
+        )
 
         # D-ARQ-31 fatia 2: consolidação roda SEMPRE (inclusive sob pendência
         # bloqueante) para distinguir PARCIAL (linhas determináveis presentes)
@@ -119,7 +135,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 ln for ln in linhas
                 if any(m.predicado not in PRIMITIVOS_INCONDICIONAIS for m in ln.motivos)
             ]
-            if not tem_bloqueio and not tem_presumida:
+            if not tem_bloqueio and not tem_presumida and not tem_lacuna:
                 matriz = MatrizGHE(
                     ghe_id=ghe.id,
                     linhas=linhas,

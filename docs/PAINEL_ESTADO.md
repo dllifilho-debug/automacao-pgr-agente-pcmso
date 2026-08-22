@@ -11,7 +11,8 @@
 ---
 
 **Tiragem corrente:** 003.EZ · 16/08/2026
-**Baseline:** main `a8bb4d1` (PR #301 — merge de 003.EZ fatia 1 + EMENDA 1) · 1137 passed, 6 skipped · PROTOCOLO v89→v90 (R-AUD-04 `[DEPRECATED — fundamento refutado por DT-003EY-01, sem sucessora]` em §5.2, corpo preservado) · DECISOES v170→v173 (D-ARQ-68 cláusula 5 + D-ARQ-81 criadas em v171; v172 correção de número; v173 correção de rótulo + fechamento da sessão)
+**Baseline:** branch `feat/003fc-selo-causa` sobre `main fc0b468` · 1154 passed, 6 skipped · PROTOCOLO v90→v91 · DECISOES v179→v182
+**[PALIATIVO — 003.FC: só o bloco Baseline foi re-tirado, à mão, fora da cadência por-evento do painel. Consequência declarada: `Tiragem corrente` segue 003.EZ · 16/08/2026 (os três números clínicos não se moveram) enquanto o Baseline já reflete 003.FC — Baseline e números clínicos passam a andar em relógios diferentes, que é exatamente o defeito que `DH-003FB-03` nomeia. Os parágrafos de tiragem abaixo ("Instrumento oficial nesta tiragem", "Nota de escopo desta tiragem") são registro histórico de 003.EZ e NÃO são atualizados por re-tiragem parcial — reescrevê-los falsificaria o que aquela sessão mediu. NÃO corrige a regra de re-tiragem; `DH-003FB-03` segue ABERTA.]**
 
 ---
 

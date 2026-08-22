@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from datetime import date
 from pathlib import Path
 
@@ -19,6 +20,17 @@ PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
 def indice_real() -> IndiceTermos:
     p = carregar(PROTOCOLO_DIR)
     return construir_indice_termos(p.vocabulario.agentes)
+
+
+@pytest.fixture(scope="module")
+def indice_real_com_fracoes() -> IndiceTermos:
+    # D-ARQ-82 cl.3 / D-ARQ-83: distinto de `indice_real` acima (que não passa
+    # fracoes_sem_agente) porque T1 precisa da causa fracao_sem_agente real no
+    # corpus — sem ela, "Poeira respirável" cairia em vocabulario_ausente.
+    p = carregar(PROTOCOLO_DIR)
+    return construir_indice_termos(
+        p.vocabulario.agentes, fracoes_sem_agente=p.vocabulario.fracoes_sem_agente
+    )
 
 
 def _ghe_verbatim(*, riscos: tuple[RiscoVerbatim, ...]) -> GHEVerbatim:
@@ -307,3 +319,73 @@ def test_hidratar_pgr_e2e_sintetico_processar_pgr(indice_real: IndiceTermos) -> 
 
     assert resultado.matrizes[0].ghe_id == "GHE-01"
     assert len(resultado.matrizes) == 1
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-82 cl.3 — causa_nao_resolucao pareia 1:1 com o tipo da Pendencia do
+# termo não resolvido, computado do índice real (não digitado).
+# ---------------------------------------------------------------------------
+
+
+def test_causa_nao_resolucao_pareia_com_tipo_da_pendencia_no_corpus_real(
+    indice_real_com_fracoes: IndiceTermos,
+) -> None:
+    # T1 (003.FC): reversão que mata — em hidratacao.py, trocar
+    # `causa_nao_resolucao=resolucao.pendencia.tipo` por um valor fixo (ex.:
+    # "vocabulario_ausente") faz o Counter da esquerda parar de bater com o
+    # da direita para as formas de fracoes_sem_agente (que esperam
+    # "fracao_sem_agente") e para o termo-lixo (que espera
+    # "vocabulario_ausente" mesmo, mas por coincidência só nesse caso —
+    # trocar por "fracao_sem_agente" no lugar do fixo já denuncia a troca).
+    #
+    # Corpus computado do índice, nunca digitado: toda forma de
+    # fracoes_sem_agente (espera causa fracao_sem_agente), toda forma de
+    # slug_por_forma (resolve EXATA, agente is not None, causa None) e 1
+    # termo-lixo fixo (espera vocabulario_ausente — não existe no índice
+    # real nem tem vizinho fuzzy a distância <=2, checado abaixo).
+    termo_lixo = "zzz_termo_garantidamente_ausente_do_vocabulario_zzz"
+    assert termo_lixo not in indice_real_com_fracoes.slug_por_forma
+    assert termo_lixo not in indice_real_com_fracoes.fracoes_sem_agente
+
+    formas = (
+        list(indice_real_com_fracoes.fracoes_sem_agente)
+        + list(indice_real_com_fracoes.slug_por_forma.keys())
+        + [termo_lixo]
+    )
+    ghe = _ghe_verbatim(
+        riscos=tuple(
+            RiscoVerbatim(agente=forma, quantificacao="", fonte_geradora="") for forma in formas
+        )
+    )
+    ghe_pgr, pendencias = hidratar_ghe(ghe, indice_real_com_fracoes, posicao=1)
+
+    causas_dos_riscos_nao_resolvidos = Counter(
+        r.causa_nao_resolucao for r in ghe_pgr.riscos if r.agente is None
+    )
+    # ARMADILHA: filtro por tipo obrigatório — quantificacao_nao_parseada e
+    # resolucao_fuzzy saem na mesma lista de pendências e não pareiam com
+    # agente=None (um risco pode gerar 2 pendências: agente=None +
+    # quantificação ilegível). Sem o filtro, o teste nasce vermelho pela
+    # razão errada.
+    tipos_das_pendencias_de_termo = Counter(
+        p.tipo
+        for p in pendencias
+        if p.tipo in {"vocabulario_ausente", "fuzzy_recusado", "fracao_sem_agente"}
+    )
+    assert causas_dos_riscos_nao_resolvidos == tipos_das_pendencias_de_termo
+
+    # confirma que o corpus de fato exercitou fracao_sem_agente e
+    # vocabulario_ausente (corpus computado não é vazio nem degenerado).
+    assert causas_dos_riscos_nao_resolvidos["fracao_sem_agente"] == len(
+        indice_real_com_fracoes.fracoes_sem_agente
+    )
+    assert causas_dos_riscos_nao_resolvidos["vocabulario_ausente"] >= 1
+
+    # invariante de pareamento 1:1 (D-ARQ-51 seam 3), sobre o mesmo corpus.
+    riscos_none = [r for r in ghe_pgr.riscos if r.agente is None]
+    assert len(riscos_none) == sum(tipos_das_pendencias_de_termo.values())
+
+    # toda forma de slug_por_forma resolve EXATA: agente is not None, causa None.
+    for risco in ghe_pgr.riscos:
+        if risco.agente is not None:
+            assert risco.causa_nao_resolucao is None
