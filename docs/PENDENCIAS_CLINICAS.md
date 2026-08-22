@@ -1705,7 +1705,7 @@ envelhece em silêncio porque nada no repositório vigia a citação depois de e
 
 **Status:** ABERTA, não-bloqueante. Não trava produção nem a fila da 003.FA.
 
-### DH-003FB-01 — Detecção de erro factual do Arquiteto depende inteiramente do Diovanni `[ABERTA — higiene de método]`
+### DH-003FB-01 — Detecção de erro factual do Arquiteto depende inteiramente do Diovanni `[FECHADA — 003.FD]`
 
 **Origem:** sessão 003.FB, ao revisar o próprio método após duas correções factuais dentro da
 mesma sessão.
@@ -1780,7 +1780,9 @@ Resultado medido dos três testes `[MEDIDO — 003.FB, gabarito fechado antes da
   e desfez. `allowed-tools` não barra `>` dentro de comando permitido; a proibição de escrever e
   redirecionar passou a constar no corpo das duas skills.
 
-**Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+**Resolução (003.FD).** Cadência decidida em `D-ARQ-84`: `/conferir` obrigatório sobre artefato que crava fato (lista fechada de 5 tipos), **sem declaração ritual nova** — a evidência é o relatório falsificável, não um selo; `/critico` inalterado. A discordância registrada acima ("nenhum gate novo") é a razão da cl.2, não uma ressalva vencida por ela. O que a decisão **não** resolve: o isolamento do subagente segue sendo instrução, não estrutura — motivo pelo qual o conferidor não substitui o Gauntlet.
+
+**Status:** FECHADA em 003.FD. Método, não motor. Nenhuma R-* tocada.
 
 ### DH-003FB-02 — Leitura do repo pelo mount do Cowork deixa `.git/index.lock` órfão que trava o Code `[ABERTA — higiene de ambiente]`
 
@@ -1808,7 +1810,7 @@ tomam o lock (`git status` toma; `git show`/`git log` não). A terceira é a mai
 
 **Status:** ABERTA, não-bloqueante. Ambiente, não motor. Nenhuma R-* tocada.
 
-### DH-003FB-03 — O `PAINEL_ESTADO.md` se declara "vivo" mas seu baseline envelhece por desenho `[ABERTA — higiene de instrumento]`
+### DH-003FB-03 — O `PAINEL_ESTADO.md` se declara "vivo" mas seu baseline envelhece por desenho `[PARCIALMENTE RESOLVIDA — 003.FD; instrumento em DT-003FD-01]`
 
 **Origem:** sessão 003.FB, passo 5 do ritual.
 
@@ -1837,7 +1839,9 @@ o ritual já mede tudo isso no passo 6. Alternativa: derivar o Baseline por scri
 `INDICE_DARQ.md`, e proibir edição à mão. A segunda é mais fiel à doutrina anti-cache do
 projeto e mais cara.
 
-**Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
+**Resolução parcial (003.FD).** A **regra** foi decidida em `D-ARQ-85`: duas cadências no mesmo documento (Baseline em todo fechamento com commit; três números clínicos por evento, regra intacta), com a assimetria de testabilidade declarada — hash não é testável por não-divergência (muda a cada commit) e contagem de suíte não é testável sem recursão. Isso **descarta** a segunda correção candidata registrada acima ("derivar o Baseline por script, proibindo edição à mão") como impossível na forma integral, e não como cara. O **instrumento** — `scripts/medir_painel.py` emitindo a linha pronta e o teste das versões de doc — segue ABERTO em `DT-003FD-01`.
+
+**Status:** PARCIALMENTE RESOLVIDA (003.FD); instrumento em `DT-003FD-01`. Instrumento, não motor. Nenhuma R-* tocada.
 
 ### DH-003FC-01 — Leitura do repo pelo mount do Cowork não tem caminho de limpeza para objeto materializado dentro da árvore `[FECHADA — 003.FC]`
 
@@ -1881,7 +1885,7 @@ próprio documento).
 **Status:** FECHADA em 003.FC — número removido do H1 de `PROTOCOLO_AGENTE_MEDICO.md`
 (ver PROTOCOLO v91); a versão passa a viver só na tabela. Nenhuma R-* tocada.
 
-### DH-003FC-04 — Três defeitos estruturais da skill `/critico`, medidos ao julgar D-ARQ-82 `[ABERTA — para META]`
+### DH-003FC-04 — Três defeitos estruturais da skill `/critico`, medidos ao julgar D-ARQ-82 `[FECHADA — 003.FD]`
 
 **Origem:** sessão 003.FC, gate de fechamento (dois vereditos do Gauntlet sobre D-ARQ-82:
 a decisão de ARQUITETURA e o diff de IMPLEMENTAÇÃO).
@@ -1904,7 +1908,13 @@ multi-commit por hash em vez de por diff direto.
 IMPLEMENTAÇÃO ficam evidenciados no bloco 003.FC do HISTORICO, à parte do veredito da
 skill —, mas os três reaparecem em toda sessão de IMPLEMENTAÇÃO futura que use `/critico`.
 
-**Status:** ABERTA, para sessão META. Instrumento, não motor nem regra clínica.
+**Resolução (003.FD).** As três facetas corrigidas na skill: (a) o bloco `Saída` ganha linha de testes por modo, com instrução de emitir só a do modo julgado; (b) o item 4 da barra de IMPLEMENTAÇÃO passa de teste do Crítico a **evidência registrada pelo builder** (contagem + commit + comando canônico), verificada sem re-execução — alteração de barra autorizada pelo Diovanni em 003.FD, registrada em `D-ARQ-84` cl.4 e no changelog v183; (c) `Bash(git diff *)` entra no `allowed-tools`, e a Regra zero passa a admitir `git diff <base>..<topo>` para artefato multi-commit.
+
+**Paliativo embutido na faceta (b), sinalizado:** a exceção nominal que permite ao Crítico ler a linha de registro de suíte dentro de um bloco que ele foi instruído a não abrir resolve a contradição sem resolver a estrutura — ver `DT-003FD-02`.
+
+**Ressalva de sincronização.** A barra vive em **dois** sítios: `.claude/skills/critico/SKILL.md` (versionado) e as instruções do projeto Cowork (fora do git). Esta sessão altera o primeiro; o segundo é edição do Diovanni, fora do alcance do Code. É a mesma exposição que `DT-003DX-02` descreve, agora com um sítio a mais — registrada ali, não como dívida nova.
+
+**Status:** FECHADA em 003.FD. Instrumento, não motor nem regra clínica.
 
 ### DH-003FC-05 — `.claude/worktrees/romantic-margulis-dcccad` trackeado como GITLINK sem `.gitmodules` `[ABERTA — não-bloqueante, herdada]`
 
@@ -1924,3 +1934,39 @@ foi julgada pelo Crítico).
 
 **Status:** ABERTA, não-bloqueante. Nesta sessão apenas registrada — `.claude/` não foi
 tocado. Nenhuma R-* tocada.
+
+### DT-003FD-01 — Instrumento do Baseline do painel não existe; a cl.1 de D-ARQ-85 roda à mão `[ABERTA — higiene de instrumento]`
+
+**Origem:** sessão 003.FD, ao decidir `D-ARQ-85`.
+
+**Situação.** A cl.1 institui re-tiragem do Baseline em todo fechamento com commit; a cl.2 diz de onde cada parte sai. O instrumento que emite a linha pronta não existe: `scripts/medir_painel.py` já mede hash (`_baseline()`), suíte (`medir_suite()`, sob `--suite`) e sincronia do índice, mas **não** lê as versões de `PROTOCOLO`/`DECISOES` e **não** compõe a linha do Baseline `[MEDIDO — 003.FD, leitura de scripts/medir_painel.py @ 6421286]`.
+
+**O que a resolução exige (fatia própria).** (a) função que lê a última linha `| vN |` da tabela de revisões de cada doc vivo — o padrão já existe em `scripts/gerar_indice_darq.py` (`_REGEX_VERSAO`), a reusar em vez de reescrever; (b) composição da linha do Baseline no formato do painel, com a contagem de suíte carimbada pelo commit em que foi medida; (c) teste de não-divergência **restrito às versões de doc** — nunca ao hash, nunca à contagem (cl.3); (d) atualizar `test_main_sem_flag_suite_imprime_5_linhas_no_formato_esperado`, que quebra por contrato ao acrescentar linha à saída de `main()`.
+
+**Reversão nomeada, para quando a fatia for especificada.** O teste de (c) fica vermelho se a função de (a) passar a ler a **primeira** linha `| vN |` da tabela em vez da última. Registrado desde já porque `CLAUDE.md` exige que todo teste novo nomeie a reversão que o mata, e essa é a reversão de **código**; editar o painel à mão também o deixa vermelho, mas isso é reversão de **dado** e não satisfaz a regra sozinha.
+
+**Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
+
+### DT-003FD-02 — O registro de suíte que a barra de IMPLEMENTAÇÃO exige mora onde o Crítico está proibido de ler `[ABERTA — higiene de instrumento]`
+
+**Origem:** sessão 003.FD, passada de verificação do próprio prompt — não da execução.
+
+**Situação.** A barra de IMPLEMENTAÇÃO passa a exigir que o Crítico **verifique** o registro da suíte (contagem + commit). O único lugar onde esse registro hoje existe é o bloco `## Sessão <ID>` do `HISTORICO_OPERACIONAL.md` — que a Regra zero da skill `/critico` **proíbe** ler, por ser o raciocínio do builder. A barra nova, na primeira redação deste prompt, mandava ler exatamente o que a Regra zero da mesma skill proíbe: contradição interna do instrumento, da classe 11 que esta própria sessão está criando.
+
+**Paliativo adotado em 003.FD, sinalizado como tal.** Exceção nominal e mínima na Regra zero: só a linha do registro de suíte pode ser lida daquele bloco, por ser medição e não raciocínio. **Isto é paliativo:** resolve a contradição, não resolve o fato de o isolamento do Crítico continuar dependendo de o agente obedecer a uma exceção de uma linha dentro do documento que ele foi instruído a não abrir.
+
+**Correção estrutural candidata (não decidida).** Mover o registro para fora do bloco de sessão: todo commit que fecha fatia de implementação carrega, na **mensagem do commit**, a linha `suíte: N passed, M skipped`. Fica legível por `git log`, que já está no `allowed-tools`, sem abrir o HISTORICO. Custo: muda o protocolo do Code (`CLAUDE.md` da raiz), fora do escopo autorizado nesta sessão. Medido contra o caso real: a mensagem de `f995f7d` — a árvore em que 003.FC mediu 1154 passed — **não** carrega a contagem `[MEDIDO — 003.FD, git log @ 6421286]`.
+
+**Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
+
+### DH-003FD-01 — A barra de ARQUITETURA não tem forma aplicável a decisão META `[ABERTA — higiene de método]`
+
+**Origem:** sessão 003.FD, ao redigir `D-ARQ-84` e `D-ARQ-85` e perceber que o Gauntlet não teria como julgá-las pela barra vigente.
+
+**Situação.** O item 1 da barra de ARQUITETURA é o teste dos três setores — "responde sim para construção civil, indústria química e saúde ao mesmo tempo" —, e a skill `/critico` o operacionaliza mandando **instanciar um caso concreto em cada setor**, com a instrução explícita de que não conseguir construir o caso de química ou de saúde **é** o gap. Decisão META não tem setor: `D-ARQ-32`, `D-ARQ-63`, `D-ARQ-84` e `D-ARQ-85` são regras sobre como o projeto trabalha, não sobre o que o motor faz com um PGR. Pela letra da barra somada à regra "dúvida rejeita", toda decisão META seria rejeitada pelo item 1 — e as decisões META já existentes foram registradas sem que isso aparecesse. Quatro delas declaram-se META no próprio corpo e foram lidas integralmente nesta sessão (`D-ARQ-26`, `D-ARQ-30`, `D-ARQ-32`, `D-ARQ-63`); a varredura exaustiva do documento **não** foi feita, e a contagem total de decisões META em `DECISOES` fica `[A MEDIR]` — não é o número que sustenta esta pendência, e cravá-lo sem medir seria a classe 1 do `/conferir`.
+
+**Por que não foi resolvido nesta sessão.** Alterar a barra de ARQUITETURA é decisão do Diovanni, e o que ele autorizou em 003.FD foi a alteração do item 4 da barra de **IMPLEMENTAÇÃO**. Ampliar por conta própria seria decisão silenciosa — a classe que `D-ARQ-22` combate.
+
+**Correções candidatas (nenhuma decidida).** (1) A barra ganha modo META próprio, com itens que testem o que uma decisão de processo deve satisfazer (aplica-se sem o contexto da sessão que a produziu; não depende de quem a escreveu; tem consequência observável). (2) O item 1 passa a ler "universal quanto ao seu objeto": para decisão de produto, os três setores; para decisão de método, os quatro modos de sessão. (3) Decisão META sai do escopo do Gauntlet — **não recomendada** pelo Arquiteto: `D-ARQ-84` é precisamente uma decisão META, e retirar do julgamento a classe de decisão que governa o julgamento é o pior lugar para abrir exceção.
+
+**Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
