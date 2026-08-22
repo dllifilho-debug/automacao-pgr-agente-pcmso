@@ -1737,7 +1737,7 @@ terá piorado o projeto.
 
 **Fronteira com `DT-003DX-02`.** O prompt fixo do conferidor é conteúdo do público **Arquiteto**,
 que é exatamente a metade ainda não resolvida daquela DT (o público Code já mora em `CLAUDE.md`
-versionado). Seria a primeira regra do público Arquiteto a entrar no git.
+versionado). [CORRIGIDO — 003.FD-E: a redação original desta linha dizia "Seria a primeira regra do público Arquiteto a entrar no git". Falso — `/kickoff` (D-ARQ-26) está sob git desde 0dd0449, sessão 002.U. O que era inédito não é a presença desse público no git, e sim a entrada da REGRA DE CADÊNCIA ao lado do instrumento, o que D-ARQ-84 fez. Erro achado pelo Gauntlet ao julgar D-ARQ-84, que havia herdado esta afirmação sem conferir.]
 
 **Limite de isolamento medido em 003.FB.** Subagente **não** herda o contexto conversacional do
 builder — isso é estrutural. Mas alcança as mesmas fontes laterais (memória de projeto do Cowork,
