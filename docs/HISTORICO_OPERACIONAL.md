@@ -5576,6 +5576,17 @@ em medição.
 6. `relatorios/` fora do git (`DH-003EG-02`) deixou 13 de 28 afirmações da emenda
    irreproduzíveis. Mitigação adotada: os números por-GHE passam a ser versionados neste
    bloco. Não fecha a DH; reduz o dano desta sessão.
+7. **Contagem de ocorrências não é lista de sítios editáveis.** O Arquiteto mandou
+   atualizar as 3 ocorrências de "1137 passed" no `PAINEL_ESTADO.md` e deu como
+   verificação `git grep -c "1137 passed" == 0` — mas duas das três eram registro
+   histórico da tiragem 003.EZ, não estado corrente. O resultado foi falsificar o que
+   aquela sessão mediu, com a checagem de completude carimbando o erro como concluído.
+   Regra adotada: em documento que mistura estado corrente e registro histórico, o
+   critério de edição é a SEMÂNTICA do sítio, nunca a contagem do literal; e
+   verificação por `grep -c` só vale onde todas as ocorrências pertencem à mesma
+   classe. Erro do Arquiteto, pego na passada de verificação do próprio Arquiteto sobre
+   o commit de fechamento — antes do PR. Candidato a 10ª classe de erro da skill
+   `/conferir`.
 
 ### Gate de fechamento
 
