@@ -5708,10 +5708,32 @@ git objects @ `4ccc31b`. Registrabilidade conferida por amostragem de três fron
 (`D-ARQ-63` peça 1, `D-ARQ-32`, `D-ARQ-22`), e o claim de atrito específico
 (`test_main_sem_flag_suite_imprime_5_linhas_no_formato_esperado`) verificado no arquivo real.
 
-**Gate de fechamento: CRÍTICO rejeitou** — gap: a fronteira `DT-003DX-02` de `D-ARQ-84` afirma
-ineditismo de versionamento do público Arquiteto que `D-ARQ-26` (`/kickoff`, sob git desde
-`0dd0449`, sessão 002.U), citada na mesma seção do artefato, contradiz. Corrigido pela
-**EMENDA 003.FD-E** (DECISOES v184); rejulgamento em sessão nova, com o artefato atualizado.
+**Gate de fechamento: CRÍTICO rejeitou** (1ª rodada, @ `4ccc31b`) — gap: a fronteira `DT-003DX-02`
+de `D-ARQ-84` afirmava ineditismo de versionamento do público Arquiteto que `D-ARQ-26`
+(`/kickoff`, sob git desde `0dd0449`, 002.U), citada na mesma seção, contradiz. Corrigido pela
+**EMENDA 003.FD-E** (DECISOES v184).
+
+**Gate de fechamento: CRÍTICO rejeitou** (2ª rodada, @ `c765863`) — gap: a cl.4 afirmava
+*"Permanece o gate de fechamento instituído por `003.DQ`"*; `003.DQ` instituiu o gate de
+**abertura**. Mesma classe de erro (2 — afirmação falsa sobre o que outra decisão diz), em ponto
+distinto do mesmo artefato. Corrigido pela **EMENDA 003.FD-E2** (DECISOES v185), que também abriu
+`DT-003FD-03` — a causa: **o gate de fechamento não tem âncora versionada em D-ARQ alguma**, e a
+cl.4 atribuiu a `003.DQ` uma paternidade que ela não tem porque não havia outra a citar.
+
+**Lição de método — a 1ª emenda violou a cl.3 da decisão que ela própria emendava.** A cl.3 de
+`D-ARQ-84` manda *"corrigir e re-conferir antes de emitir"*. A emenda `003.FD-E` corrigiu só o gap
+apontado e **não** re-conferiu o artefato inteiro; o defeito da cl.4 já estava lá e sobreviveu. A
+regra do Gauntlet ("builder corrige só esse gap") governa o **escopo da correção**, não dispensa a
+**re-conferência do artefato**: são obrigações distintas, e tratá-las como uma só custou uma rodada
+inteira de julgamento e um PR. Antes da 2ª emenda a varredura completa foi feita — 28 afirmações
+extraídas do corpo de `D-ARQ-84`, **27 CONFERE / 1 DIVERGE**, nenhuma outra falsa —, e ela expôs
+ainda um defeito de estrutura da 1ª emenda (a nota `Correção 003.FD-E` partia a lista de Fronteiras
+ao meio, deixando o último bullet órfão), corrigido junto.
+
+**Sinal de saúde do Gauntlet nesta sessão.** Duas rejeições consecutivas sobre o mesmo artefato,
+ambas materiais, ambas achadas a frio, nenhuma antecipada pelo Arquiteto — e `D-ARQ-85` aprovada de
+primeira, o que descarta rejeição por cota. O instrumento está fazendo o trabalho que a `003.FC`
+registrou como faltante (naquela sessão o Gauntlet aprovou `D-ARQ-82` sem ver a contradição da cl.2).
 
 **Ressalva de procedência — o Gauntlet correu DEPOIS do merge.** O PR #311 foi mergeado
 (`4ccc31b`) com o bloco desta sessão declarando `[A PREENCHER PELO ARQUITETO APÓS O GAUNTLET]`.
