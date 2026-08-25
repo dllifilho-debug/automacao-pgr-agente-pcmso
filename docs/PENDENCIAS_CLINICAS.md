@@ -1945,6 +1945,8 @@ tocado. Nenhuma R-* tocada.
 
 **Reversão nomeada, para quando a fatia for especificada.** O teste de (c) fica vermelho se a função de (a) passar a ler a **primeira** linha `| vN |` da tabela em vez da última. Registrado desde já porque `CLAUDE.md` exige que todo teste novo nomeie a reversão que o mata, e essa é a reversão de **código**; editar o painel à mão também o deixa vermelho, mas isso é reversão de **dado** e não satisfaz a regra sozinha.
 
+**Faceta descoberta em 003.FD, ao aplicar a regra três vezes.** A cl.1 de `D-ARQ-85` manda re-tirar o Baseline em todo fechamento que produza commit; a prática medida em 003.ER manda gravar a `main` **de partida** da sessão, com o hash de merge entrando na tiragem seguinte. As duas convivem no caso normal, mas colidem quando uma sessão produz **vários** fechamentos com commit — três, nesta (fechamento + duas emendas) —, e a resposta correta foi "não tocar" nas três, pela regra da 003.ER. O instrumento desta DT precisa resolver isso explicitamente: **re-tirar o Baseline não é função de "houve commit", e sim de "a sessão fechou"**. Sem esse critério no script, ele reescreveria o campo a cada emenda, que é o oposto do que a 003.ER mediu.
+
 **Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
 
 ### DT-003FD-02 — O registro de suíte que a barra de IMPLEMENTAÇÃO exige mora onde o Crítico está proibido de ler `[ABERTA — higiene de instrumento]`
@@ -1969,6 +1971,12 @@ tocado. Nenhuma R-* tocada.
 
 **Correções candidatas (nenhuma decidida).** (1) A barra ganha modo META próprio, com itens que testem o que uma decisão de processo deve satisfazer (aplica-se sem o contexto da sessão que a produziu; não depende de quem a escreveu; tem consequência observável). (2) O item 1 passa a ler "universal quanto ao seu objeto": para decisão de produto, os três setores; para decisão de método, os quatro modos de sessão. (3) Decisão META sai do escopo do Gauntlet — **não recomendada** pelo Arquiteto: `D-ARQ-84` é precisamente uma decisão META, e retirar do julgamento a classe de decisão que governa o julgamento é o pior lugar para abrir exceção.
 
+**Confirmação independente (003.FD, 3ª rodada do Gauntlet).** O Crítico, a frio e sem acesso a esta
+dívida, declarou no próprio veredito que o artefato é META, que **a skill não tem barra para esse
+modo**, e que o tratou como ARQUITETURA por eliminação — nomeando os mesmos precedentes que esta
+dívida cita. Contorno improvisado por quem julga, duas vezes seguidas (1ª e 3ª rodadas), é o
+sintoma que a correção candidata (1) — modo META próprio na barra — endereça.
+
 **Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
 
 ### DT-003FD-03 — O gate de fechamento não tem âncora versionada em nenhuma D-ARQ `[ABERTA — higiene de método]`
@@ -1986,3 +1994,19 @@ tocado. Nenhuma R-* tocada.
 **Fronteira com `DT-003DX-02`.** Aquela DT nomeia o problema geral (regra de método fora do git, resíduo Arquiteto ABERTO). Esta é a faceta específica e mais grave: não é uma regra qualquer, é a que julga todas as outras. Não duplica — instancia.
 
 **Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+
+### DH-003FD-02 — A proibição de escrever, nas skills de método, não é enforçável pelo `allowed-tools` `[ABERTA — higiene de instrumento]`
+
+**Origem:** sessão 003.FD, 3ª rodada do Gauntlet. **Segunda ocorrência medida da mesma classe.**
+
+**Situação.** A Regra zero de `/conferir` e `/critico` proíbe escrever qualquer coisa — *"nem arquivo, nem edição, nem redirecionamento de saída (`>`, `>>`, `tee`) — nem para scratch"*. A proibição é **textual**: o `allowed-tools` autoriza `Bash(git show *)`, e um `>` dentro de um comando autorizado não é barrado por ele. Na 3ª rodada o Crítico gravou `/tmp/darq_full.txt` por redirecionamento, percebeu, removeu o arquivo antes de ler conteúdo a partir dele, refez o julgamento só com `git show`/`git grep` e **reportou**.
+
+**Por que é dívida e não descuido.** A primeira ocorrência foi em 003.FB, durante o teste com gabarito das duas skills — e foi **justamente por causa dela** que a proibição passou a constar no corpo das duas (`DH-003FB-01`, "Terceira correção, comum às duas"). A proibição existe há uma sessão e foi violada com ela impressa no documento que o agente estava seguindo. Instrução textual contra um comportamento que o mecanismo permite não é controle — é aviso.
+
+**Agravante específico do ambiente.** Um arquivo materializado dentro da árvore montada não é removível pelo mount (`DH-003FC-01`, `DH-003FB-02`). Aqui o destino foi `/tmp`, fora da árvore, e por isso a remoção funcionou. A mesma violação apontando para dentro do repo teria deixado resíduo que o Arquiteto precisa limpar à mão.
+
+**Correções candidatas (nenhuma decidida).** (1) Estreitar o `allowed-tools` para formas de comando sem redirecionamento, se a sintaxe de permissão suportar — **`[A MEDIR]`**, não se sabe se suporta. (2) Manter a proibição textual e acrescentar às duas skills a instrução de **declarar a violação no relatório** quando ocorrer — codifica o que este Crítico fez espontaneamente e certo, transformando um deslize silenciável em achado. (3) Aceitar como risco residual declarado, dado que a auto-correção funcionou nas duas ocorrências. O Arquiteto recomenda **(2)** como piso, independente de (1) ser viável: é barato, e o valor da 3ª rodada veio de o agente ter reportado, não de não ter errado.
+
+**Não invalida o veredito da 3ª rodada.** O arquivo foi removido antes de qualquer leitura de conteúdo e o julgamento foi refeito por leitura direta; a saída é falsificável pelos comandos que ela cita.
+
+**Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
