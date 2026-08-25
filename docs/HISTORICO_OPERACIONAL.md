@@ -5757,6 +5757,27 @@ por construção, o que o torna vazio para decisão META. Observação registrad
 contra o próprio artefato**: o `PASSA` beneficiou `D-ARQ-84`, e ainda assim não conta como teste
 cumprido. Reforça a correção candidata (1) daquela dívida — modo META próprio na barra.
 
+**Gate de fechamento: CRÍTICO aprovou** — `D-ARQ-84` (3ª rodada, @ `e98c192`), sessão nova a frio.
+Universalidade, caso local e registrabilidade PASSA. A registrabilidade foi conferida por
+amostragem contra o git real (`D-ARQ-63`, `D-ARQ-26`, `D-ARQ-32`) e, de forma **independente**, a
+nota `[MEDIDO]` de procedência da cl.4: o Crítico repetiu o `git grep -i "gate de fechamento"` por
+conta própria, @ `c765863` e @ `HEAD`, e confirmou que nenhuma outra cláusula institui o gate —
+exatamente o que a nota afirma. Também verificou que o precedente citado na cl.3 existe em
+`agente_medico/tests/test_orquestrador.py`, com o comentário `# T7 (003.FC)` — verificação que o
+Arquiteto **não** havia feito em nenhuma das suas passadas.
+
+**Ciclo de `D-ARQ-84`: três rodadas, duas rejeições, uma aprovação.** `D-ARQ-85` aprovada de
+primeira, sem emenda. Custo real do erro factual: dois PRs de emenda (#312, #313) e três sessões
+de Gauntlet. Custo que ele teria tido se a conferência exaustiva do corpo tivesse sido feita **antes**
+da 1ª emissão: uma passada de skill.
+
+**Confirmação independente de `DH-003FD-01`.** O Crítico da 3ª rodada, sem acesso à dívida nem ao
+raciocínio do builder, abriu o veredito com uma *nota de modo*: o artefato é `DECISÃO DE MÉTODO
+(META)` e a skill **não tem barra para esse modo**; tratou-o como ARQUITETURA por ser "o único dos
+três modos compatível", citando `D-ARQ-26`, `D-ARQ-30`, `D-ARQ-32` e `D-ARQ-63` como precedentes de
+META numeradas como D-ARQ. A dívida deixa de ser diagnóstico do builder sobre si mesmo e passa a ter
+confirmação a frio, por quem foi obrigado a contorná-la para julgar.
+
 ### Fila para a próxima sessão
 
 **META:** `DT-003FD-01` (instrumento do Baseline), `DT-003FD-02` (registro de suíte fora
