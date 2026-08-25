@@ -1970,3 +1970,19 @@ tocado. Nenhuma R-* tocada.
 **Correções candidatas (nenhuma decidida).** (1) A barra ganha modo META próprio, com itens que testem o que uma decisão de processo deve satisfazer (aplica-se sem o contexto da sessão que a produziu; não depende de quem a escreveu; tem consequência observável). (2) O item 1 passa a ler "universal quanto ao seu objeto": para decisão de produto, os três setores; para decisão de método, os quatro modos de sessão. (3) Decisão META sai do escopo do Gauntlet — **não recomendada** pelo Arquiteto: `D-ARQ-84` é precisamente uma decisão META, e retirar do julgamento a classe de decisão que governa o julgamento é o pior lugar para abrir exceção.
 
 **Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+
+### DT-003FD-03 — O gate de fechamento não tem âncora versionada em nenhuma D-ARQ `[ABERTA — higiene de método]`
+
+**Origem:** sessão 003.FD, 2ª rejeição do Gauntlet sobre `D-ARQ-84`. Não é o gap apontado — é a **causa** dele.
+
+**Situação.** `git grep -i "gate de fechamento"` em `docs/DECISOES_ARQUITETURAIS.md` @ `c765863` não devolve cláusula instituidora: o texto normativo do Gauntlet — sessão nova, artefato + barra do modo, declaração obrigatória, "rejeição aponta o maior gap", "builder e Crítico nunca são a mesma sessão" — vive **só** nas instruções do projeto Cowork, fora do git. O gate de **abertura** tem âncora (`003.DQ`, ampliada por `D-ARQ-63`); o de **fechamento** não tem nenhuma.
+
+**Como o defeito se manifestou.** O Arquiteto, ao redigir a cl.4 de `D-ARQ-84`, atribuiu a paternidade do gate de fechamento a `003.DQ` — a única decisão de método sobre gates que existe no git. A atribuição errada não foi descuido isolado: foi a busca por uma âncora versionada onde não há nenhuma. Erro achado pelo Crítico, a frio, na 2ª rodada.
+
+**Por que importa mais do que a correção pontual.** É a regra que governa o julgamento de **todo** artefato do projeto — a que decide se uma decisão entra no protocolo — e é a única peça central de método sem histórico, diff ou PR. Pode divergir em silêncio entre o que o Cowork mostra ao Arquiteto e o que a skill `/critico` versionada executa; a alteração do item 4 da barra em 003.FD **já criou essa divergência**, porque o sítio versionado foi editado e o do Cowork depende de edição manual do Diovanni.
+
+**O que a resolução exige (sessão própria).** D-ARQ que institua o gate de fechamento no git, com o texto da barra por modo, a regra de sessão-nova e a forma da declaração — reduzindo as instruções do Cowork a ponteiro, exatamente como `003.EG` fez para o público Code em `CLAUDE.md`. É a metade Arquiteto de `DT-003DX-02`, agora com um caso medido em vez de risco hipotético.
+
+**Fronteira com `DT-003DX-02`.** Aquela DT nomeia o problema geral (regra de método fora do git, resíduo Arquiteto ABERTO). Esta é a faceta específica e mais grave: não é uma regra qualquer, é a que julga todas as outras. Não duplica — instancia.
+
+**Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
