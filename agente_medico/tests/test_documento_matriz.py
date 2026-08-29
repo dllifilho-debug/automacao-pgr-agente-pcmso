@@ -146,10 +146,14 @@ def test_celula_usa_nome_exibicao_do_vocabulario() -> None:
     assert "exame_clinico" not in celula
 
 
-# ---------------------------------------------------------------------------
-# DT-003EW-02 — periodicidade impressa na célula (regra medida 28/08/2026,
-# 6 gabaritos assinados, 547 ocorrências; ver PROMPT_003FE_periodicidade.md).
-# ---------------------------------------------------------------------------
+# DT-003EW-02 — periodicidade impressa na celula. Regra de 003.EO, medida
+# contra o acervo em 29/08/2026 (28 documentos, instrumento
+# scripts/medir_cobertura_e_forma.py): 2896 confirmam / 122 contrariam nos
+# 10 documentos de 2026, contra 1323/1681 nos de 2025. E a convencao
+# corrente do escritorio, nao invariante do acervo historico — o app emite
+# documento novo, logo emite a convencao corrente.
+# Medicao, corte por documento e ressalvas em
+# docs/referencia/MEDICAO_003FE_regra_forma_periodicidade.md.
 
 
 def test_periodicidade_diferente_de_12_meses_imprime_o_numero() -> None:

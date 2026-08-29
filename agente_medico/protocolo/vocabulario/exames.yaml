@@ -75,7 +75,7 @@ exames:
     categoria: imagem
     fonte_matriz: "SÍLICA / ASBESTO / POEIRAS"
     ordem_exibicao: 12
-    periodicidade_sempre_visivel: true   # medido 28/08: único exame que imprime o número a 12M
+    periodicidade_sempre_visivel: true   # unico exame que imprime o numero a 12M — ver docs/referencia/MEDICAO_003FE_regra_forma_periodicidade.md
 
   espirometria:
     nome_exibicao: "Espirometria"
