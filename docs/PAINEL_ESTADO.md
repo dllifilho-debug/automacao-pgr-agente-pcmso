@@ -15,8 +15,8 @@
 ---
 
 **Tiragem corrente:** 003.EZ · 16/08/2026
-**Baseline:** branch `feat/003fd-cadencia-metodo` sobre `main 6421286` · **1154 passed, 6 skipped** *(medido em `f995f7d`, sessão 003.FC — esta sessão é docs-only e não re-mediu)* · PROTOCOLO v91 · DECISOES v182→v183
-**Três números clínicos avaliados, não re-tirados nesta tiragem** — sessão 003.FD é META (docs + skills, não toca motor, vocabulário nem dívidas de produção); nenhum dos três se moveu. Baseline re-tirado sob `D-ARQ-85` cl.1.
+**Baseline:** branch `fix/003fe-periodicidade-celula` sobre `main 5b4958b` · **1160 passed, 6 skipped** *(medido em `4fa18bd`, sessão 003.FE)* · PROTOCOLO v91 · DECISOES v186
+**Três números clínicos avaliados, não re-tirados nesta tiragem** — 003.FE é IMPLEMENTAÇÃO de apresentação: nenhuma R-* criada, alterada ou depreciada; vocabulário/CAS intocado; as 3 dívidas que travam produção seguem as mesmas. Nenhum dos três se moveu. Decisão declarada sob `D-ARQ-85` cl.1.
 
 ---
 
