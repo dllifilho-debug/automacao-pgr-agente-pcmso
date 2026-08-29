@@ -5783,3 +5783,91 @@ confirmação a frio, por quem foi obrigado a contorná-la para julgar.
 **META:** `DT-003FD-01` (instrumento do Baseline), `DT-003FD-02` (registro de suíte fora
 do bloco de sessão, correção estrutural candidata: linha `suíte: N passed, M skipped` na
 mensagem do commit) e `DH-003FD-01` (modo META na barra de ARQUITETURA).
+
+## Sessão 003.FE — 28-29/08/2026 — IMPLEMENTAÇÃO
+
+Aberta a partir de `main 5b4958b` (PR #314, merge de 003.FD), branch
+`fix/003fe-periodicidade-celula`. Fecha a faceta de **escrita** de `DT-003EW-02`: a matriz
+emitida não imprimia a periodicidade, e sem ela o documento não é assinável.
+
+**Entrega.** `documento_matriz.py::_formatar_celula`/`_formatar_momentos` passam a imprimir o
+número de meses grudado ao momento `PER` quando `periodicidade_meses != 12`, com exceção única
+para `rx_torax_oit`, que sempre imprime — exceção no dado (`periodicidade_sempre_visivel` em
+`exames.yaml`), nunca literal no emissor (`D-ARQ-07`). 6 testes novos, cada um com a reversão
+nomeada; varredura inversa 6/6.
+
+**A regra não foi derivada — foi medida no acervo.** 6 gabaritos assinados deram a forma; a
+remedição contra 28 documentos deu a validade: **4281 confirmam / 1805 contrariam** no agregado,
+mas por ano do documento **2026 = 2896/122 (4,0% de contradição)** e **2025 = 1323/1681 (55,9%)**.
+A regra é a **convenção corrente do escritório**, não invariante do acervo histórico — e o app
+emite documento novo. Detalhe em `docs/referencia/MEDICAO_003FE_regra_forma_periodicidade.md`.
+
+**Primeira medição externa do projeto.** O app rodou local (`app_matriz_local.py`) sobre o PGR
+Fascino e a saída foi comparada com a matriz assinada da mesma obra (Dra. Carolini, CRM-GO
+14.864): **353 de 364 células reproduzidas = 97,0%**, 32 de 40 funções com conjunto de exames
+idêntico. As 11 células faltantes concentram-se em **Armador e Serralheiro** (`R-PKG-ARMADOR` e
+`R-PKG-SOLD` não disparam sem `fumos_metalicos` no inventário — divergência já prevista por
+`R-GHE-05`). As 4 sobrando são biomonitoramento que a médica não pediu, e ela escreveu a razão à
+mão na célula: *"Incluir no word do PCMSO, risco baixo no PGR para acetona e metiletilcetona"* —
+regra clínica ainda não formalizada. Em `docs/referencia/MEDICAO_FASCINO_vs_GABARITO.md`.
+
+**Segunda e terceira medições externas — e o gargalo ficou nomeado.** O app rodou local sobre
+mais três PGRs. **Ricco Administração atravessou: 41 de 45 células = 91,1%**, 11 de 12 funções
+com conjunto idêntico, **zero exame emitido a mais**; as 4 faltantes são o pacote de atividade
+crítica numa única função. **Sinduscon e T65 não atravessaram** — `segmentacao_implausivel`
+(0 blocos em 59 páginas) e `familia_nao_medida`. A causa é uma só e está medida: o extrator
+localiza bloco por `DADOS GERAIS`, presente **só** no PGR que atravessou, e o repo tem **uma
+única família de parser**. O T65 traz 16 blocos ancorados em `GHE 01`..`GHE 16`, estrutura mais
+simples que a da família existente, que o motor não enxerga. **O gargalo não é a decisão
+clínica — é a porta de entrada**, exatamente o que o painel declara desde `DT-003L-01`, agora com
+número em documento real. Em `docs/referencia/MEDICAO_003FE_RICCO_e_parses.md`.
+
+**Instrumento: Word COM deixou de ser necessário.** `soffice --convert-to docx` + `python-docx`
+reproduz a medição Word COM registrada em `GABARITO_003EX_audiometria_dem.md` — 3 de 3 documentos
+idênticos na cobertura de audiometria; a única divergência (1 cargo) é atribuível a `6f2e9f0`,
+não à conversão. Medição sobre o acervo passa a rodar no ambiente do Arquiteto.
+Em `docs/referencia/VALIDACAO_LIBREOFFICE_vs_WORDCOM.md`.
+
+**Ciclo do Gauntlet: 2 rodadas — 1 rejeição, 1 aprovação.** A rejeição foi de **procedência**: o
+comentário do teste fundava a regra num arquivo nunca commitado, enquanto a própria
+`DT-003EW-02` registrava no git contradição da mesma regra e dizia *"refino pendente antes de
+implementar a formatação"*. Corrigido pelo prompt #2 (4 fatias). Na 2ª rodada o Crítico verificou
+por `git diff-tree` que as árvores de `15dec76` e `deed9f6` são idênticas, leu `8c82512` linha a
+linha, e conferiu **alcançabilidade em produção** (`web_matriz.py:139` passa
+`protocolo.vocabulario.exames` verbatim) — três verificações que o Arquiteto não fizera.
+
+**Commits:** `deed9f6` (fix), `15dec76` (registro de suíte), `84fd483` (medições), `8c82512`
+(procedência), `5d24f8e` (DT reconciliada), `4fa18bd` (passo 9 do ritual). Merge `c6bd7e0`,
+PR #315.
+
+**Verificação:** suíte **1160 passed, 6 skipped** (`python -m pytest agente_medico/tests/ tests/`,
+1444.52s, medida em `4fa18bd`); `mypy --strict agente_medico/superficie` limpo, 11 arquivos
+(medido em `deed9f6`; fatias seguintes só tocaram comentário e markdown).
+
+**Dívida paga sem sessão META:** `DT-003FD-02` (registro de suíte morava onde a Regra zero do
+Crítico proíbe ler) — `15dec76` é a primeira materialização da correção estrutural que aquela DT
+nomeava: a contagem na mensagem do commit. O paliativo da exceção nominal pode sair.
+
+**Pendências.** `DT-003EW-02` faceta de escrita IMPLEMENTADA, segue ABERTA pelos 4% residuais de
+2026 (122 ocorrências não investigadas nominalmente). Novas: `DH-003FE-01` (acervo parcialmente
+versionado — **DISPENSADA**, decisão do Diovanni), `DH-003FE-02` (branches remotas órfãs de maio),
+`DT-003FE-01` (família 2 do parser, âncora `GHE NN` — insumo medido) e `DT-003FE-02` (psicossocial
+sem periódico no gabarito Ricco, `A VALIDAR`). Convenção nova: estado `DISPENSADA` no vocabulário de pendências.
+
+**Lições de método.**
+- **Janela de leitura tratada como fim de bloco, 12ª ocorrência da classe "leio a forma, não a
+  prova" — e a mais cara até agora.** O Arquiteto leu `DT-003EW-02` com `grep -A18` e não viu que
+  o bloco continuava: duas telas abaixo estavam a contradição medida em 003.EY e a frase *"refino
+  pendente antes de implementar a formatação"*. Custou um PR rejeitado e um prompt cirúrgico
+  inteiro. **O gate de abertura da sessão não cobria a DT que era o eixo do artefato** — mesma
+  falha de 003.FA, agora sobre `PENDENCIAS_CLINICAS.md` em vez de `DECISOES`.
+- **Comando entregue sem poder ser testado falha.** Três comandos PowerShell do Arquiteto
+  quebraram em sequência (wildcard não expandido; `python-docx` não lê `.doc`; Word COM com
+  `Visible=false` travou em diálogo invisível e deixou processo zumbi de ~4000 CPU-segundos).
+  Tudo que o Arquiteto rodou no próprio ambiente funcionou. **Regra derivada: trabalho de medição
+  roda onde pode ser verificado antes de ser entregue.**
+- **Contagem par não prova balanceamento.** Na conferência do prompt #2, duas crases órfãs se
+  compensavam e o contador dava par. O defeito só apareceu ao casar os pares. Mesma classe.
+- **Preocupação com dado pessoal travou o projeto duas vezes** (LGPD do acervo, depois CPF no
+  git). Nos dois casos a medição mostrou risco baixo e a cautela custou fluxo. Registrado a
+  pedido do Diovanni.

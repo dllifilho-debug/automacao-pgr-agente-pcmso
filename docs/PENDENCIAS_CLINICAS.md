@@ -11,6 +11,13 @@ O documento-mãe é `docs/PROTOCOLO_AGENTE_MEDICO.md`.
 
 Itens identificados durante a implementação do motor que precisam de validação clínica em sessões CONHECIMENTO futuras com a Dra. Carolini.
 
+> **Estado `DISPENSADA` (convenção, 003.FE).** Dívida pode sair da lista por decisão, não só
+> por pagamento. `[DISPENSADA — <motivo>]` marca item medido, real, e deliberadamente não
+> endereçado; exige motivo escrito e não reabre sem fato novo. Motivo da convenção: em 29/08/2026
+> a lista tinha 73 headers abertos contra 26 fechados, e nenhum estado permitia encerrar item que
+> ninguém vai pagar — backlog monotônico por desenho. Não é D-ARQ: é convenção de vocabulário
+> deste documento, promovível se virar padrão.
+
 ### DT-D3-02 — Granularidade de `fumos_metalicos` `[A VALIDAR]`
 
 **Origem:** Sessão 002.D3 (19/05/2026), durante a implementação do Stage 2.
@@ -2038,3 +2045,56 @@ sintoma que a correção candidata (1) — modo META próprio na barra — ender
 **Não invalida o veredito da 3ª rodada.** O arquivo foi removido antes de qualquer leitura de conteúdo e o julgamento foi refeito por leitura direta; a saída é falsificável pelos comandos que ela cita.
 
 **Status:** ABERTA, não-bloqueante. Instrumento, não motor. Nenhuma R-* tocada.
+
+### DH-003FE-01 — Acervo parcialmente versionado sob `.gitignore` que o proíbe `[DISPENSADA — decisão do Diovanni, 29/08/2026]`
+
+**Medido (29/08/2026).** `.gitignore` linha 22-23 diz *"Dados sensíveis de clientes (matrizes
+reais, não commitar)"* e ignora `matrizes_originais/`. Mas `git ls-files matrizes_originais/`
+devolve **17 arquivos versionados** — `.gitignore` não afeta arquivo já rastreado. Dos 17, **um**
+carrega dado pessoal: `PGR VIVERDE V02 - 03.02.25.pdf`, com **17 CPFs** no log de assinatura
+digital (4 pessoas nominalmente identificadas da CMO Construtora, com e-mail e IP). Os outros 16
+foram varridos: zero ocorrência.
+
+**Por que DISPENSADA.** Repositório privado, sem exposição conhecida; o dado é log de assinatura
+de documento que já é assinado; e o campo não é usado nem será — o motor lê inventário de risco e
+GHE, nada mais. Limpar exigiria reescrever o histórico de 1132 commits com PRs mergeados, custo
+desproporcional ao risco. **Decisão explícita do Diovanni em 29/08/2026**, registrada para não ser
+redescoberta e re-litigada a cada varredura.
+
+**Reabre se:** o repositório deixar de ser privado, ou o acervo passar a conter dado de
+trabalhador (hoje não contém — medido: matriz de exames tem 0 ocorrências de CPF).
+
+### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[ABERTA — higiene de ambiente, não-bloqueante]`
+
+**Medido (29/08/2026, primeira aplicação do passo 9 do ritual).** Restam no remoto
+`origin/claude/eloquent-mcnulty-e0cdc2` (`43a61bf`, 07/05/2026) e
+`origin/claude/quizzical-rhodes-e3ae5f` (`d7cf602`, 06/05/2026) — **não mergeadas em `main`**,
+de ~4 meses atrás, anteriores ao passo 9. Não são candidatas a `git branch -d` justamente por
+não estarem mergeadas: podem carregar commit único, ou ser lixo de sessão abandonada.
+
+**O que a resolução exige.** Inspecionar `git log main..origin/claude/<nome>` em cada uma e
+decidir: descartar (`push origin --delete`) ou recuperar o que houver. Não-bloqueante; o passo 9
+impede que o caso se repita daqui pra frente, mas não varre o passivo.
+
+### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[ABERTA — insumo medido, não-bloqueante]`
+
+**Medido (29/08/2026).** `extracao_pgr.py` localiza bloco por `DADOS GERAIS` + título `N.N`, e
+existe **uma única família** no repo (`parser_familia_consciente.py`). Dos 4 PGRs varridos,
+`DADOS GERAIS` aparece **só no Ricco ADM** (o único que atravessou). O `PGR - ALT T65 2024.2026`
+tem **16 blocos ancorados em `GHE 01`..`GHE 16`**, cada um com cargo, atividade e perigos
+nomeados — âncora mais simples que a da família existente.
+
+**O que a resolução exige.** Medir a forma da âncora no extrator do motor (`pdfplumber`, não
+`pdftotext` — os dois discordaram nesta medição), escrever a família 2 e medir o acerto contra a
+matriz assinada do T65, que já está no acervo (par 8 do pareamento). Detalhe em
+`docs/referencia/MEDICAO_003FE_RICCO_e_parses.md`. Faceta de `DT-003L-01`.
+
+### DT-003FE-02 — Avaliação Psicossocial sem periódico no gabarito Ricco `[A VALIDAR — divergência clínica]`
+
+**Medido (29/08/2026).** No par Ricco Administração, `Avaliação Psicossocial` sai `(ADM, MRO)` na
+matriz assinada e `(ADM, MRO, PER)` na saída do motor, em **11 de 12 cargos**. `R-PSY-02`
+prescreve `adm/per/MR` incondicional, derivado da medição de corpus de 003.AH/003.EO.
+
+**Não é defeito de parser** — o motor aplica a regra escrita; o gabarito diverge dela. Ou a regra
+está larga demais, ou este documento é exceção. Exige contraste com os demais gabaritos
+pós-26/05/2026 antes de tocar `R-PSY-02`; **não alterar a regra com n=1**.
