@@ -102,14 +102,24 @@ def _chave_ordem_exame(slug: str, exames_vocab: dict[str, Any]) -> tuple[int, in
     return (1, 0, slug)
 
 
-def _formatar_momentos(exame: ExameEmitido) -> str:
+def _formatar_momentos(exame: ExameEmitido, mostrar_periodicidade: bool) -> str:
     presentes = [m for m in _ORDEM_MOMENTOS if m in exame.momentos]
-    return ", ".join(_ROTULO_MOMENTO[m] for m in presentes)
+    partes = []
+    for m in presentes:
+        rotulo = _ROTULO_MOMENTO[m]
+        if m is Momento.PER and mostrar_periodicidade:
+            rotulo = f"{rotulo} {exame.periodicidade_meses} meses"
+        partes.append(rotulo)
+    return ", ".join(partes)
 
 
 def _formatar_celula(exame: ExameEmitido, exames_vocab: dict[str, Any]) -> str:
-    nome_exibicao = exames_vocab.get(exame.exame, {}).get("nome_exibicao", exame.exame)
-    return _sanitizar(f"{nome_exibicao} ({_formatar_momentos(exame)})")
+    entrada = exames_vocab.get(exame.exame, {})
+    nome_exibicao = entrada.get("nome_exibicao", exame.exame)
+    mostrar = exame.periodicidade_meses != 12 or bool(
+        entrada.get("periodicidade_sempre_visivel", False)
+    )
+    return _sanitizar(f"{nome_exibicao} ({_formatar_momentos(exame, mostrar)})")
 
 
 def _celulas_da_matriz(

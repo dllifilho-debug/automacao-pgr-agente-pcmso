@@ -1408,7 +1408,9 @@ formatação de saída não está sendo aplicada (`PLANO_V1` manda o RX sempre t
 antes de corrigir — as duas causas pedem correções diferentes. Irmã de `DT-003EC-01`, mesma classe
 de defeito de apresentação sobre valor correto (ou não) do motor.
 
-**Status:** ABERTA — medição pendente antes de qualquer correção.
+**Status:** ABERTA — faceta de leitura RESOLVIDA (003.EZ); faceta de escrita IMPLEMENTADA em
+003.FE apos o refino que esta DT exigia (ver nota aditiva 003.FE abaixo). Segue ABERTA pelos
+4% residuais de 2026, nao investigados nominalmente.
 
 **Nota aditiva (003.EY).** Causa isolada `[MEDIDO — 003.EY]`: é apresentação, não valor do
 motor — `documento_matriz.py::_formatar_celula` monta `f"{nome_exibicao} ({momentos})"`, e a
@@ -1431,6 +1433,32 @@ fatia 0b desta sessão (`parsear_momentos` passa a separar periodicidade colada 
 commit `6f2e9f0`) — instrumento de medição, não o app. A faceta de **escrita** (o que esta DT
 mede desde a origem: `documento_matriz.py::_formatar_celula` nunca monta o número) **segue
 ABERTA** — nenhum código de produção foi tocado nesta sessão.
+
+**Nota aditiva (003.FE) — o refino exigido foi feito; a regra e da convencao corrente.**
+`[MEDIDO — 29/08/2026, 28 documentos MATRIZ* de matrizes_originais/, instrumento scripts/medir_cobertura_e_forma.py com a correcao 6f2e9f0 aplicada]`
+
+A nota de 003.EY registrava 2853 contradicoes contra 4366 confirmacoes e concluia que a regra
+"nao sobrevive fora do par Fascino/RESERVA que a originou". A remedicao devolve **4281 confirmam
+/ 1805 contrariam** — e o agregado enganava, porque a contradicao **nao esta distribuida**.
+Por ano do documento:
+
+| Ano | Docs | Confirma | Contraria | % contra |
+|---|---|---|---|---|
+| 2026 | 10 | 2896 | 122 | **4,0%** |
+| 2025 | 11 | 1323 | 1681 | **55,9%** |
+
+O bucket 2025 inclui os dois CONSCIENTE RESERVA 0028, reatribuidos de "sem data no nome" para
+04/2025 pela tabela de docs/referencia/GABARITO_003EX_audiometria_dem.md.
+
+A regra de 003.EO descreve a **convencao corrente do escritorio**, nao uma invariante do acervo
+historico. As contradicoes de 2025 sao a forma antiga — 542 ocorrencias de `grupo_separado`
+no corpus, do tipo "Audiometria (12 meses), (ADM, PER...)". Como o emissor produz documento
+**novo**, reproduzir a convencao abandonada nao e requisito, e a implementacao de `deed9f6`
+esta correta para o que o app deve emitir.
+
+**Nao fecha esta DT:** os 4% residuais de 2026 (122 ocorrencias) nao foram investigados
+nominalmente `[INTERPRETADO — prioridade na revisao de saida]`. Corte por documento e ressalvas
+em docs/referencia/MEDICAO_003FE_regra_forma_periodicidade.md.
 
 ### DT-003EW-03 — Exames do gabarito ausentes na saída `[ABERTA]`
 

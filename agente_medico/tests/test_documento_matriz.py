@@ -39,8 +39,14 @@ def _rodape() -> RodapeDocumento:
     )
 
 
-def _exame(slug: str, periodicidade: int = 12) -> ExameEmitido:
-    return ExameEmitido(exame=slug, periodicidade_meses=periodicidade, momentos={Momento.ADM})
+def _exame(
+    slug: str, periodicidade: int = 12, momentos: set[Momento] | None = None
+) -> ExameEmitido:
+    return ExameEmitido(
+        exame=slug,
+        periodicidade_meses=periodicidade,
+        momentos=momentos if momentos is not None else {Momento.ADM},
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -138,6 +144,130 @@ def test_celula_usa_nome_exibicao_do_vocabulario() -> None:
     celula = doc.blocos[0].linhas[0].celulas[0]
     assert "Exame Clínico" in celula
     assert "exame_clinico" not in celula
+
+
+# DT-003EW-02 — periodicidade impressa na celula. Regra de 003.EO, medida
+# contra o acervo em 29/08/2026 (28 documentos, instrumento
+# scripts/medir_cobertura_e_forma.py): 2896 confirmam / 122 contrariam nos
+# 10 documentos de 2026, contra 1323/1681 nos de 2025. E a convencao
+# corrente do escritorio, nao invariante do acervo historico — o app emite
+# documento novo, logo emite a convencao corrente.
+# Medicao, corte por documento e ressalvas em
+# docs/referencia/MEDICAO_003FE_regra_forma_periodicidade.md.
+
+
+def test_periodicidade_diferente_de_12_meses_imprime_o_numero() -> None:
+    # Reversão que mata: `mostrar` fixo em False (nunca imprime o número).
+    vocab = {"espirometria": {"nome_exibicao": "Espirometria"}}
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        linhas=[
+            _exame(
+                "espirometria",
+                periodicidade=24,
+                momentos={Momento.ADM, Momento.PER, Momento.MR, Momento.DEM},
+            )
+        ],
+        cargos=("Cargo",),
+    )
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    celula = doc.blocos[0].linhas[0].celulas[0]
+    assert celula == "Espirometria (ADM, PER 24 meses, MRO, DEM)"
+
+
+def test_periodicidade_de_12_meses_nao_imprime_o_numero() -> None:
+    # Reversão que mata: `mostrar` fixo em True (sempre imprime o número).
+    vocab = {"audiometria": {"nome_exibicao": "Audiometria"}}
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        linhas=[
+            _exame(
+                "audiometria",
+                periodicidade=12,
+                momentos={Momento.ADM, Momento.PER, Momento.MR, Momento.DEM},
+            )
+        ],
+        cargos=("Cargo",),
+    )
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    celula = doc.blocos[0].linhas[0].celulas[0]
+    assert celula == "Audiometria (ADM, PER, MRO, DEM)"
+
+
+def test_rx_torax_oit_imprime_periodicidade_mesmo_a_12_meses() -> None:
+    # Reversão que mata: remover o termo `or bool(entrada.get(
+    # "periodicidade_sempre_visivel", False))` de `_formatar_celula` — sem ele a
+    # exceção não existe e rx_torax_oit a 12M sai sem número. (Apagar o campo do
+    # YAML mata o teste 6, não este: aqui o vocabulário é literal.)
+    vocab = {"rx_torax_oit": {"nome_exibicao": "RX Tórax OIT", "periodicidade_sempre_visivel": True}}
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        linhas=[
+            _exame(
+                "rx_torax_oit",
+                periodicidade=12,
+                momentos={Momento.ADM, Momento.PER, Momento.MR, Momento.DEM},
+            )
+        ],
+        cargos=("Cargo",),
+    )
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    celula = doc.blocos[0].linhas[0].celulas[0]
+    assert celula == "RX Tórax OIT (ADM, PER 12 meses, MRO, DEM)"
+
+
+def test_exame_clinico_semestral_imprime_seis_meses() -> None:
+    # Reversão que mata: trocar `!= 12` por `> 12` — 6 é menor que 12, ficaria
+    # mudo justo no caso que a regra existe para cobrir.
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico"}}
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        linhas=[
+            _exame(
+                "exame_clinico",
+                periodicidade=6,
+                momentos={Momento.ADM, Momento.PER, Momento.MR, Momento.RT, Momento.DEM},
+            )
+        ],
+        cargos=("Cargo",),
+    )
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    celula = doc.blocos[0].linhas[0].celulas[0]
+    assert celula == "Exame Clínico (ADM, PER 6 meses, MRO, RET, DEM)"
+
+
+def test_numero_so_gruda_no_momento_per() -> None:
+    # Reversão que mata: grudar o número no primeiro momento presente em vez
+    # de especificamente no PER — aqui não há PER, então nenhum número sai.
+    vocab = {"rx_coluna_lombo_sacra": {"nome_exibicao": "RX Coluna Lombo-Sacra"}}
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        linhas=[
+            _exame(
+                "rx_coluna_lombo_sacra",
+                periodicidade=24,
+                momentos={Momento.ADM, Momento.MR},
+            )
+        ],
+        cargos=("Cargo",),
+    )
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    celula = doc.blocos[0].linhas[0].celulas[0]
+    assert celula == "RX Coluna Lombo-Sacra (ADM, MRO)"
+
+
+def test_periodicidade_sempre_visivel_e_exatamente_rx_torax_oit() -> None:
+    # Reversão que mata: acrescentar o campo em outro exame do vocabulário
+    # real sem medir a exceção — computado sobre o YAML de produção (D-ARQ-67).
+    from agente_medico.motor.protocolo import carregar
+
+    protocolo = carregar(Path(__file__).parent.parent / "protocolo")
+    marcados = {
+        slug
+        for slug, entrada in protocolo.vocabulario.exames.items()
+        if entrada.get("periodicidade_sempre_visivel")
+    }
+    assert marcados == {"rx_torax_oit"}
 
 
 def test_html_escapa_conteudo_de_dado() -> None:
