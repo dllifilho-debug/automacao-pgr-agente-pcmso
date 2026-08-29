@@ -35,3 +35,10 @@ DH-003EG-03 entrou. Origem: emenda 003.EG, `CLAUDE.md` seção "Verificação".
    (`D-ARQ-84` cl.1). `DIVERGE` material é bloqueador — corrigir e re-conferir antes de emitir
    (cl.3). Não há declaração de gate para este passo, por desenho (cl.2): a evidência é o
    relatório, referenciado no bloco da sessão.
+9. Depois do merge em `main`, varrer branch orfa: `git branch --merged main` (e a listagem
+   remota equivalente). Toda branch ja mergeada, local e remota, e apagada com `git branch -d`
+   (minusculo — recusa apagar o que nao esta mergeado; `-D` nunca, sem decisao explicita) e
+   `git push origin --delete`. Apagar remoto conta como escrita no remoto: exige a mesma
+   autorizacao explicita do passo 7. Motivo medido: em 003.FD a branch
+   `fix/003fd-emenda-gauntlet` sobreviveu ao merge e so foi encontrada em 003.FE, uma sessao
+   depois — segunda ocorrencia da mesma classe, e nenhum passo do ritual a varria.
