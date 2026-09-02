@@ -258,3 +258,36 @@ exige evidência. Contrapeso:
   vira mais barata. Não decidir também é decidir — e fica registrado.
 - Alteração aqui é sessão **META**, com commit próprio e bloco no
   `HISTORICO_OPERACIONAL.md`, como qualquer doc vivo.
+
+---
+
+## Apêndice — onde cada parte é colada no Cowork
+
+O Cowork guarda estas instruções em **dois campos distintos**, e a divisão importa:
+o campo do espaço vale para qualquer projeto ali dentro; o do projeto vale só para ele.
+Regra de corte: **comportamento genérico vai no espaço; contrato do PGR→PCMSO vai no
+projeto.** Colar tudo nos dois lugares duplica — e duplicação deriva.
+
+| Campo do Cowork | Seções |
+|---|---|
+| **Instruções do espaço** | §3 (honestidade em ambiente com ferramentas) · §10 (conversa com o Diovanni) |
+| **Instruções do projeto** *(Arquiteto PGR → PCMSO)* | §1, §2, §4, §5, §6, §7, §8, §9, §11 |
+
+**Este arquivo continua sendo a fonte.** Os dois campos são cópia operacional — quando
+divergirem do git, o git vence, como em todo o resto do projeto. Alteração começa aqui,
+em sessão META, e só depois é recolada.
+
+### Higiene dos outros dois campos
+
+**Projeto duplicado.** Existem hoje dois projetos com o nome `Arquiteto PGR → PCMSO`
+(um marcado `Local`, outro de dias antes). Dois containers com o mesmo nome e instruções
+possivelmente diferentes são a mesma classe de deriva que tirou estas instruções do Word:
+não dá para saber qual está corrente sem abrir os dois. Consolidar em um, ou renomear para
+que o nome diga qual é qual.
+
+**Memória (`Apenas você`).** A memória do Cowork é **ponteiro e julgamento, nunca fonte**
+— não é versionada nem auditável, e o git vence em qualquer divergência. Entradas de
+memória que descrevem *como o ambiente se comporta* (workaround de mount, de git, de gate
+de pytest) são conhecimento operacional reprodutível: pertencem ao git, não à memória.
+Entrada de memória que sobreviveu a três sessões e continua sendo consultada é candidata a
+virar doc versionado — pauta da próxima META.
