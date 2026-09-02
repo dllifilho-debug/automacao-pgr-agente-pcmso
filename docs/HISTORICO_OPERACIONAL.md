@@ -5871,3 +5871,136 @@ sem periódico no gabarito Ricco, `A VALIDAR`). Convenção nova: estado `DISPEN
 - **Preocupação com dado pessoal travou o projeto duas vezes** (LGPD do acervo, depois CPF no
   git). Nos dois casos a medição mostrou risco baixo e a cautela custou fluxo. Registrado a
   pedido do Diovanni.
+
+---
+
+## Sessão 003.FF — 29/08-01/09/2026 — abriu IMPLEMENTAÇÃO, fechou sem código
+
+**A sessão abriu como IMPLEMENTAÇÃO e não produziu uma linha de código do motor. Isso é o
+resultado, não uma falha.** O recorte declarado na abertura tinha duas fatias — (A) medir a
+âncora `GHE NN` no `pdfplumber` e escrever a família 2; (B) rodar o T65 e medir contra o
+gabarito. O passo 0 falsificou a premissa de (A) antes de qualquer prompt para o Code, e (B) —
+executada — mostrou que (A) não é o maior movimento. Aberta de `main c9db9cc` (PR #316).
+
+**Quem ler este bloco depois: 003.FF não implementou a família 2 do parser, e a fila que 003.FE
+deixou está reordenada.**
+
+### Passo 0 — `DT-003FE-01` crava quatro afirmações falsas
+
+Medido no `pdfplumber` do motor, read-only: `DADOS GERAIS` não é âncora de bloco GHE (só é lido
+em `_recuperar_titulo_do_vao`, da rota **card**); `eh_cabecalho_ghe` casa **16/16** as âncoras do
+T65 e `avaliar_estrutura` devolve `("ghe", None)`; a forma 3 de `_RECONHECEDORES_GHE` cita "ALT
+T65" nominalmente desde `D-ARQ-57` peça 1; e `familia_nao_medida` é **não-bloqueante** — o que
+barrou o T65 em 003.FE foi o HTTP 503, que o próprio `MEDICAO_003FE_RICCO_e_parses.md` registra
+como "ruído a descontar", mas a `DT` herdou o outro diagnóstico. A ressalva de instrumento
+daquela medição ("medir no `pdfplumber`, não no `pdftotext`") estava certa e foi o que pegou.
+
+Gargalo real: `_parsear_bloco` recusa 16/16 por cabeçalho `GRUPO/PERIGO/FONTE/AGRAVO` ausente —
+família de **conteúdo** (`D-ARQ-65` fatia 1), não âncora de recorte. `DT-003FF-01` reenquadra;
+`DT-003FE-01` marcada in-place, redação original preservada.
+
+### O T65 atravessou pela rota LLM, sem parser novo
+
+`medicao_pgr ida` + `rodar` @ `c9db9cc`, cascata Gemini de pé: **16/16 GHEs, zero pendência
+bloqueante**, 13 `PARCIAL` / 3 `BLOQUEADA`. `familia_nao_medida` apareceu como esperado.
+Confirma empiricamente a leitura de código do passo 0.
+
+### Par 5 do acervo — T65 × gabarito Dra. Patrícia: **213 de 440 células = 48,4%**
+
+8 de 56 linhas com conjunto idêntico; 6 células sobrando (`acetona_urina` 3, `mek_urina` 3, GHE-11
+— mesma classe do Fascino). Contraste: **Fascino 97,0%**, **Ricco ADM 91,1%**, **T65 48,4%**.
+Faltantes: `acuidade_visual` 46, `hemograma` 43, `ecg` 43, `glicemia` 43, `rx_torax_oit` 26,
+`espirometria` 26. **`audiometria`: zero faltante.**
+
+**A causa não é o parser nem regra clínica ausente.** O gabarito separa limpo: GHE-03/04
+(administrativos) só o base; GHE-01/02/12/13 o pacote de atividade crítica sem poeira; GHE-08
+(Central de Argamassa) poeira **sem** altura. Corresponde exatamente a `R-PKG-ATIVCRIT` e ao
+pacote de poeira — **as regras do motor estão certas**, e `DT-003EB-01` não explica este
+documento. O que falha é termo→slug: `trabalho_altura` tem **um** termo (`"Trabalho em Altura"`)
+e o T65 escreve `"Queda em altura"` (13×) → 175 células; `silica` tem 6 termos nus e o T65
+escreve `"Sílica Livre - Poeira respirável"` em 3 grafias → 52 células.
+
+Em `docs/referencia/MEDICAO_003FF_gargalo_T65.md` e `MEDICAO_003FF_par_T65.md`.
+
+### `R-PGR-07` — a observação do Diovanni fecha o `[A VALIDAR]` e generaliza
+
+"Queda em altura" e "Trabalho em altura" são **sinônimos** usados por engenheiros; não há padrão
+de nomenclatura. Cruzando os 98 termos não resolvidos contra `agentes.yaml`: **57 ocorrências
+(58%) correspondem a 9 slugs que já existem** — o vocabulário não carecia dos conceitos, carecia
+das formas. No mesmo documento `postura_inadequada` aparece em **6 formas**. E `esforco_fisico`
+**já tem alias** (`"Levantamento e Transporte Manual de cargas"`) que falha só pelo sufixo do
+T65 (`"… ou volumes"`). `fuzzy_permitido` está ligado em 7 dos 9 slugs e não alcança:
+`resolver_termo` compara **string inteira** com Levenshtein ≤ 2 — cobre typo, não sinônimo, e
+está correto por desenho.
+
+Proposta redigida em `docs/referencia/PROPOSTA_003FF_R-PGR-07.md`, **não inserida no PROTOCOLO**
+— aguarda o Crítico. ID verificado contra o git: `R-PGR-01`..`06` existem, `R-PGR-07` livre.
+PROTOCOLO segue **v91** até o julgamento.
+
+### Achado colateral — o RT do T65 está fora do topo
+
+A `credencial` da ida saiu vazia porque `recortar_topo` vai até a linha anterior à 1ª âncora GHE
+(pág. 11) e o RT do T65 (Weder Morais Silva, CREA 1020541245D-GO) está na **pág. 46, a última**.
+Deixada vazia de propósito na volta: preencher à mão mascararia o defeito. `DT-003FF-03`.
+
+### Pendências
+
+Novas: `DT-003FF-01` (reenquadramento de `DT-003FE-01`), `DT-003FF-02` (mapeamento
+coluna→`RiscoVerbatim`, bloqueia a família 2), `DH-003FF-01` (escopo da `Decisão 003.DG-3`),
+`DT-003FF-03` (RT fora do topo), `DT-003FF-04` (`vocabulario_ausente` que suprime exame é
+não-bloqueante — 175 células medidas). Reenquadrada: `DT-003FE-01`.
+
+### Nenhuma `R-*` criada, alterada ou depreciada nesta sessão. PROTOCOLO segue v91; DECISOES segue v186.
+
+`R-PGR-07` está **proposta**, não inserida.
+
+### Verificação
+
+**Suíte não re-medida** — sessão sem código; herda **1160 passed, 6 skipped** de `4fa18bd`
+(003.FE). `mypy` não re-rodado, pelo mesmo motivo. As medições são read-only sobre o motor em
+`c9db9cc` e não alteram comportamento. Instrumentos: `pdfplumber 0.11.10` na VM do Cowork
+(medição estática) e `medicao_pgr` no host do Diovanni (rodada ao vivo, a VM não tem egress para
+`generativelanguage.googleapis.com`).
+
+### Erros do Arquiteto nesta sessão, corrigidos antes de publicar
+
+1. **"Cabeçalho rotacionado" e "2 de 16 blocos"** — as duas falsas, na 1ª passada da medição de
+   anatomia. `extract_words()` devolve **zero** palavras não-upright; e o "2 de 16" era artefato
+   de exigir a palavra `Origem` na mesma linha agrupada (`Origem do`/`Risco` quebram em linhas
+   físicas distintas, Δtop ~4,8pt). Com o núcleo correto: **16/16**. Pegos pela 2ª passada, que
+   o Diovanni pediu antes de decidir.
+2. **"`altura` ausente do vocabulário"** — falso. Procurei o nome do **predicado**
+   (`predicados.py:42`) em vez do slug do **agente** (`trabalho_altura`, que existe). O defeito
+   real é cobertura de termo.
+3. **"A chave vem de `.streamlit/secrets.toml`, não precisa exportar"** — vale para o app
+   Streamlit; o harness `medicao_pgr.py` lê `os.environ`. Dois caminhos tratados como um.
+4. **Prompt cirúrgico quase emitido sobre decisão registrada** — a fatia "invariante
+   anti-silêncio no `gate_forma_ghe`" teria quebrado
+   `test_composicao_card_todo_na_sem_riscos_aprova_no_gate`, que trava a `Decisão 003.DG-3`. A
+   verificação antes de emitir pegou; virou `DH-003FF-01`.
+
+**Classe recorrente confirmada de novo:** os quatro nasceram de ler a forma e não a prova —
+inferir rotação do visual, inferir cobertura do nome do predicado, inferir caminho de
+configuração pela vizinhança de arquivo, inferir que um comportamento sem invariante é defeito
+sem procurar a decisão que o instituiu.
+
+### Gate de fechamento
+
+`[A PREENCHER — CRÍTICO não rodou]`
+
+### Fila para a próxima sessão
+
+Recomendação do Arquiteto, com a razão medida: **cobertura de termo primeiro** (dado, ganho
+quantificado — 9 slugs cobrem 58% do resíduo do T65, e 2 deles valem 227 células; reversível,
+auditável, e produz o corpus de formas reais). **Matching depois** (arquitetura: trocar
+comparação de string inteira por algo que aguente prefixo, sufixo e ordem, mantendo
+`fuzzy_permitido` opt-in e pendência em vez de slug silencioso) — calibrado contra o corpus que
+a fatia de dado produz, não contra um documento, pelo precedente "n=2 divergente desqualifica
+calibração". **Família 2 por último** (`DT-003FF-01`), e só depois de `DT-003FF-02`.
+
+Declarado como paliativo: popular `termos:` resolve o acervo conhecido e **não fecha por
+enumeração** — é exatamente o que `R-PGR-07` cl.2 e cl.3 explicam.
+
+**Não recomendado:** dar o vocabulário ao LLM para ele escolher o slug. Fecha a sinonímia e
+reabre `D-ARQ-41`/`D-ARQ-50` P2 ("LLM NUNCA emite slug"), fronteira que existe porque escolha de
+identidade silenciosa é a classe de erro mais cara deste pipeline.
