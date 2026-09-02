@@ -6004,3 +6004,76 @@ enumeração** — é exatamente o que `R-PGR-07` cl.2 e cl.3 explicam.
 **Não recomendado:** dar o vocabulário ao LLM para ele escolher o slug. Fecha a sinonímia e
 reabre `D-ARQ-41`/`D-ARQ-50` P2 ("LLM NUNCA emite slug"), fronteira que existe porque escolha de
 identidade silenciosa é a classe de erro mais cara deste pipeline.
+
+## Sessão 003.FG — 02/09/2026 — META
+
+**Numeração `[CORRIGIDA de 003.FF para 003.FG — colisão medida]`.** A derivação por git dava `FF` e
+foi ratificada no turno; o Arquiteto, rodando contra o working tree da máquina do Diovanni,
+mediu que **já existia** um bloco `## Sessão 003.FF — 29/08-01/09/2026` com `DT-003FF-01..04` e
+`DH-003FF-01`, **não commitado**. Sessão mais nova cede: esta vira `003.FG` e `DT-003FG-01`;
+nenhum ID daquela se move. Derivação original preservada abaixo porque continua correta para o
+que era observável do container. Base da derivação — último bloco em `main` é 003.FE (28-29/08/2026, PRs
+#315/#316); nenhum commit em `main` entre 30/08 e 02/09 além dos desta sessão; nenhuma branch
+remota reivindicando número intermediário; PR #317 é o merge imediatamente seguinte ao #316. A
+sequência 003.EJ→003.FE tem 21 de 22 blocos (só falta `EL`), então "próxima letra" tem lastro
+medido, e não só convenção.
+
+**Foco.** Duas perguntas do Diovanni: (1) o Cowork como Arquiteto ainda se justifica ao lado do
+Claude Code? (2) as instruções permanentes do Arquiteto limitaram o modelo? Sessão inteira rodou
+no Claude Code, sem Arquiteto — o que é, por si, parte da resposta.
+
+**Entrega 1 — instruções do Arquiteto versionadas e reescritas.** `docs/INSTRUCOES_ARQUITETO.md`
+novo. Viviam num `.docx` fora do repositório, contra a regra que o projeto aplica a todo o resto,
+e já tinham derivado: o `.docx` mandava `python -m mypy --strict <pasta>`, exatamente a forma que
+o `CLAUDE.md` proíbe por escrito depois de custar 003.EC e 003.ES. Commits `cba02c0`, `5c4f088`;
+merge `e8ca311`, PR #317.
+
+Mudanças de conteúdo: **§2 proporcionalidade** (tamanho `P`/`M`/`G` declarado, ritual escala,
+regra que custa mais do que previne é suspensa **com o custo declarado aqui**); **§3 honestidade**
+reescrita para ambiente com ferramentas (verificável agora → mede; ressalva onde a medição era
+possível é trabalho não feito com aparência de prudência); **§7** o Arquiteto entrega contrato +
+discriminante + fronteira, não implementação, e o protocolo operacional deixa de ser replicado
+(fonte única em `CLAUDE.md`/`RITUAL_FECHAMENTO.md`); **§8** separa gate que mede de gate que se
+declara — a evidência de abertura passa a ser citar o que só quem leu sabe; **§11** toda regra
+nova nasce com origem medida e teste de morte, e META revisa suspensas e regras sem incidente há
+20+ sessões. §9 (regra clínica) ficou integral e **fora** da escala de §2.
+
+**Diagnóstico que sustentou a reescrita, medido de disco:** 90 commits `docs*` contra 48
+`feat`/`fix`/`refactor` nos últimos 200; 6.236 linhas de motor+superfície contra ~14.000 de docs
+vivos. As instruções governavam forma, não julgamento — e sem árbitro entre ritual e objetivo, o
+ritual vence por omissão, por ser a única coisa escrita que se pode conferir.
+
+**Duas checagens NÃO cortadas, por falta de medição:** Crítico obrigatório em `IMPLEMENTAÇÃO`, e
+"uma fatia por sessão do Code" (003.ET rodou três fatias e o fechamento sem incidente registrado —
+observação, não medição). Ambas com teste de morte escrito, na pauta da próxima META.
+
+**Entrega 2 — passo 9 do ritual e varredura do passivo.** `claude/cowork-architect-feedback-oryupu`
+apagada local; a remota o GitHub já tinha apagado no merge. O `--prune` revelou as duas branches de
+`DH-003FE-02`, e a inspeção que aquela DH pedia foi feita: nada a recuperar, descarte decidido.
+`DT-003FG-01` ABERTA para preservar a única ideia que morreria junto. **`DH-003FE-02` fica
+`DECIDIDA`, não `FECHADA`**: `git push origin --delete` das duas dá **HTTP 403** no container —
+escopo de credencial, não proxy (`recentRelayFailures: []`) e não rede (a mesma credencial criou
+branch e empurrou commits no mesmo turno). Execução manual do Diovanni. **Bloqueador reportado,
+não contornado** — o texto da DH chegou a afirmar o delete antes da tentativa e foi corrigido
+contra a medição, não o contrário.
+
+**Verificação:** `python -m pytest tests/test_gerar_indice_darq.py` — **6 passed** (medido em
+`cba02c0`, árvore parada). Sessão docs-only; `DECISOES_ARQUITETURAIS.md` intocado, `INDICE_DARQ.md`
+não regenerado por não haver o que regenerar.
+
+**Lições de método.**
+- **`git log main..<branch>` não distingue divergência de história desconexa.** Deu 297 e 293
+  commits nas duas branches; `git merge-base` retornava vazio. O número sugeria passivo grande a
+  triar; o fato era que não havia relação nenhuma com `main`. Classe nova: **contagem que assume
+  ancestral comum sem verificar que existe.**
+- **Fim de linha inflou o diff em 340×.** Bruto: 217 arquivos, 67.028 deleções. Com
+  `--ignore-cr-at-eol --ignore-all-space`: 11 arquivos, ~197 linhas. Sem a normalização, a
+  varredura teria concluído "passivo enorme, triar depois" — que é como o passivo sobreviveu
+  4 meses.
+- **Linhagem abandonada pode ser regressão, não reserva.** A branch pareava `serralheiro` /
+  `Cromo hexavalente` com `Carboxihemoglobina no Sangue`; `main` já grava `Cromo na Urina`. E havia
+  `test_serralheiro_tem_carboxihemoglobina` **fixando o erro**. Recuperar por reflexo teria
+  reintroduzido a regressão com teste protegendo-a.
+- **Instrução não versionada envelhece sem aviso.** O alvo errado do mypy sobreviveu no `.docx`
+  depois de duas sessões terem pago por ele no `CLAUDE.md`. Nenhum gate olhava para lá porque o
+  arquivo não estava no repositório.

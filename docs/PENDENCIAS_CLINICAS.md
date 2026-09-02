@@ -2064,7 +2064,7 @@ redescoberta e re-litigada a cada varredura.
 **Reabre se:** o repositório deixar de ser privado, ou o acervo passar a conter dado de
 trabalhador (hoje não contém — medido: matriz de exames tem 0 ocorrências de CPF).
 
-### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[ABERTA — higiene de ambiente, não-bloqueante]`
+### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[DECIDIDA em 02/09/2026 — descarte; execução BLOQUEADA por permissão]`
 
 **Medido (29/08/2026, primeira aplicação do passo 9 do ritual).** Restam no remoto
 `origin/claude/eloquent-mcnulty-e0cdc2` (`43a61bf`, 07/05/2026) e
@@ -2075,6 +2075,49 @@ não estarem mergeadas: podem carregar commit único, ou ser lixo de sessão aba
 **O que a resolução exige.** Inspecionar `git log main..origin/claude/<nome>` em cada uma e
 decidir: descartar (`push origin --delete`) ou recuperar o que houver. Não-bloqueante; o passo 9
 impede que o caso se repita daqui pra frente, mas não varre o passivo.
+
+**Resolução (02/09/2026).** Inspeção feita, com correção de método: `git log main..<branch>` dava
+297 e 293 commits, número enganoso — `git merge-base` retorna **vazio** nas duas. As branches não
+divergiram de `main`: têm **história desconexa**. Raiz comum entre elas é `6e98990`
+*"Add files via upload"* (03/04/2026); `main` tem três raízes, nenhuma delas. É a linha de
+desenvolvimento anterior à reconstrução do repositório — conteúdo migrado, história não.
+
+`quizzical` está contida em `eloquent` exceto por `tests/test_integracao_camada0.py`.
+
+**Diff de conteúdo.** O bruto (217 arquivos, 67.028 deleções) é ruído de fim de linha: a linhagem
+antiga é CRLF, `main` é LF. Com `--ignore-cr-at-eol --ignore-all-space` sobram **11 arquivos e
+~197 linhas**. Em todo arquivo compartilhado `main` está à frente — `modules/agente_medico_ia.py`
+dá **+6/−94** a favor de `main`, que tem `_CARGOS_ADMIN_TOKENS`, `_ALIASES_EXAME` e
+`_validacao_universal(..., is_admin=)`; as 6 linhas "únicas" da branch são a assinatura antiga da
+mesma função. As +53 de `utils/ia_client.py` são `print("[GEMINI DEBUG] ...", flush=True)`.
+
+**A linhagem antiga é regressão clínica, não reserva.** Em `modules/modulo_pcmso.py`,
+`NOTAS_RISCO_QUIMICO` pareia `serralheiro` / `Cromo hexavalente` com
+`"Carboxihemoglobina no Sangue"`; `main` grava `"Cromo na Urina"`. Carboxihemoglobina é o IBE de
+monóxido de carbono, não de Cr(VI) — `[CONFERIR NR-07 Anexo I Quadro 1, texto vigente em
+gov.br/MTE]`, embora o veredito não dependa da norma: `main` já grava o valor correto. Pior, a
+`quizzical` carrega `test_serralheiro_tem_carboxihemoglobina`, que **fixa o erro** — restaurar
+aquele dado reintroduziria a regressão com teste protegendo-a.
+
+**Único conteúdo ausente de `main`:** a heurística `_suspeitar_distribuicao_incorreta` (28 linhas
++ 3 testes), preservada como `DT-003FG-01`; `logo.png` (marca Seconci-GO, 146 KB — `main` não tem
+imagem nenhuma); e `testar_pcmso.py` (harness manual, superado pelas CLIs de `superficie/`).
+
+**Execução bloqueada.** Descarte decidido pelo Diovanni em 02/09/2026, mas
+`git push origin --delete` das duas retorna **HTTP 403** no container da sessão remota. Não é o
+proxy (`/__agentproxy/status` com `recentRelayFailures: []`) nem falta de rede: a mesma credencial
+criou branch e empurrou commits no mesmo turno. É escopo de credencial — o container empurra ref,
+não apaga ref. O GitHub MCP desta sessão também não expõe delete de branch (tem `create_branch`,
+não o inverso). Fica para execução manual do Diovanni:
+
+```
+git push origin --delete claude/eloquent-mcnulty-e0cdc2
+git push origin --delete claude/quizzical-rhodes-e3ae5f
+```
+
+Estado no fechamento: as duas seguem no remoto, em `43a61bf` (07/05/2026) e `d7cf602`
+(06/05/2026). Nada local a apagar — nunca existiram como branch local. A decisão está registrada
+e a única ideia recuperável já está em `DT-003FG-01`, então o delete não perde mais nada.
 
 ### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[REENQUADRADA — 003.FF; ver DT-003FF-01]`
 
@@ -2214,3 +2257,31 @@ de risco).
 **O que a resolução exige.** Distinguir `vocabulario_ausente` que só perde granularidade de
 `vocabulario_ausente` que suprime exame — o segundo é decidível: o predicado que ficou `False`
 por termo não resolvido é rastreável. Nomeada por `R-PGR-07` (003.FF), que expõe sem resolver.
+
+### DT-003FG-01 — Detector de distribuição suspeita de cargos por GHE `[ABERTA — ideia medida, não-bloqueante]`
+
+**Origem.** `modules/modulo_pcmso.py` em `origin/claude/eloquent-mcnulty-e0cdc2`, commit `43a61bf`
+(07/05/2026), na linhagem de história desconexa varrida por `DH-003FE-02`. Confirmado ausente de
+`main` (`git grep` vazio). Registrado aqui **antes** de a branch ser apagada, para a ideia não
+morrer com o código.
+
+**O que era.** `_suspeitar_distribuicao_incorreta(dados_ghe) -> bool`, 28 linhas, com dois
+critérios sobre a saída do distribuidor de cargos:
+
+- **(a)** algum GHE com **≥ 10 cargos** — sinal de fallback que despejou tudo num balde;
+- **(b)** **> 30% dos GHEs** com listas de cargos idênticas entre si — sinal de cópia em massa.
+
+Verdadeiro em qualquer um dos dois. No `app.py` daquela linhagem, o disparo somava-se a
+"GHE sem cargo real" para acionar a re-extração via LLM. Tinha 3 testes
+(`tests/test_camada0_app.py`): muitos cargos, cargos repetidos, distribuição normal.
+
+**Por que não é port.** O código é do **motor legado** (`modules/`), que o `CLAUDE.md` marca como
+não-tocar, e depende do `app.py` antigo. Além disso não é regra clínica: é detector de qualidade
+de parse. O que vale é o **critério**, não a implementação.
+
+**O que a resolução exige.** Decidir se o motor novo precisa de um discriminante equivalente —
+hoje ele bloqueia nomeado por ausência (`DT-003DK-01`, anti-supressão), mas **não tem sinal para
+distribuição presente e implausível**: um parse que atribui todos os cargos ao mesmo GHE atravessa
+sem pendência. Se entrar, entra medido contra o acervo pareado (qual o maior nº de cargos por GHE
+observado num gabarito assinado? qual a taxa real de GHEs com lista idêntica?), não com os
+limiares 10 e 30% herdados, que não têm proveniência conhecida. Faceta de `DT-003L-01`.
