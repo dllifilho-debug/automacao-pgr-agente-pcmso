@@ -2076,7 +2076,9 @@ não estarem mergeadas: podem carregar commit único, ou ser lixo de sessão aba
 decidir: descartar (`push origin --delete`) ou recuperar o que houver. Não-bloqueante; o passo 9
 impede que o caso se repita daqui pra frente, mas não varre o passivo.
 
-### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[ABERTA — insumo medido, não-bloqueante]`
+### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[REENQUADRADA — 003.FF; ver DT-003FF-01]`
+
+> **Reenquadrada em 003.FF (31/08/2026).** A medição no `pdfplumber` do motor falsificou quatro afirmações da redação abaixo — a âncora do T65 **já é reconhecida** (16/16). Redação original preservada para rastreabilidade; o diagnóstico correto está em `DT-003FF-01`.
 
 **Medido (29/08/2026).** `extracao_pgr.py` localiza bloco por `DADOS GERAIS` + título `N.N`, e
 existe **uma única família** no repo (`parser_familia_consciente.py`). Dos 4 PGRs varridos,
@@ -2098,3 +2100,117 @@ prescreve `adm/per/MR` incondicional, derivado da medição de corpus de 003.AH/
 **Não é defeito de parser** — o motor aplica a regra escrita; o gabarito diverge dela. Ou a regra
 está larga demais, ou este documento é exceção. Exige contraste com os demais gabaritos
 pós-26/05/2026 antes de tocar `R-PSY-02`; **não alterar a regra com n=1**.
+
+### DT-003FF-01 — Reenquadramento de `DT-003FE-01`: o gargalo do T65 é a família de conteúdo `[ABERTA — insumo medido, não-bloqueante]`
+
+**Medido (29-31/08/2026, `pdfplumber` do motor, `main c9db9cc`).** Quatro afirmações de
+`DT-003FE-01` divergem do medido:
+
+1. "`extracao_pgr.py` localiza bloco por `DADOS GERAIS`" — `DADOS GERAIS` só é lido em
+   `_recuperar_titulo_do_vao`, da rota **card** (EBSERH). Não participa do roteamento GHE.
+2. "o motor não enxerga os 16 blocos do T65" — `eh_cabecalho_ghe` casa **16/16**
+   (`INVENTÁRIO DE RISCO GHE NN`); `avaliar_estrutura` devolve `("ghe", None)`.
+3. "família que ninguém escreveu" (âncora) — a forma 3 de `_RECONHECEDORES_GHE` cita
+   **"ALT T65"** nominalmente desde `D-ARQ-57` peça 1.
+4. "`familia_nao_medida` impediu o T65 de atravessar" — é **não-bloqueante**; o bloqueio de
+   003.FE foi o HTTP 503 da cascata Gemini. **Confirmado empiricamente em 003.FF:** com o
+   serviço de pé, o T65 atravessou pela rota LLM — 16/16 GHEs, zero pendência bloqueante, sem
+   uma linha de parser nova.
+
+**O gargalo real.** `parser_familia_consciente._parsear_bloco` recusa **16/16** blocos por
+cabeçalho `GRUPO/PERIGO/FONTE/AGRAVO` não localizado. É a família de **conteúdo do bloco**
+(`D-ARQ-65` fatia 1), não a âncora de recorte (`D-ARQ-57` peça 1, já resolvida para o T65).
+
+**O que a resolução exige.** Se a família 2 for escrita, o layout é tratável pela mesma técnica
+da família 1 (cabeçalho localizável em 16/16 pelo núcleo `{Perigo, Exposição, Medidas,
+controle}`; `Atividade/Setor:` como nome do GHE; `Funções Envolvidas` como cargos). O que não
+transporta: **22,9% dos tokens de grupo têm typo na fonte** (`Ergnômico` 14, `Fisíco` 11, de 109)
+e `Ergnômico` não sobrevive a normalização NFD+upper; o T65 **tem quantificação em 16/16 blocos**
+onde a família 1 declara família qualitativa; e o mapeamento de coluna é `DT-003FF-02`.
+
+**Prioridade rebaixada em 003.FF.** A medição do par (48,4%) mostrou que a família 2 **não é o
+maior movimento**: escrita e com o mapeamento resolvido, o T65 seguiria perto de 48%, porque os
+termos entregues continuariam sem casar no vocabulário (`R-PGR-07`). Detalhe em
+`docs/referencia/MEDICAO_003FF_gargalo_T65.md` e `MEDICAO_003FF_par_T65.md`.
+
+### DT-003FF-02 — Mapeamento coluna→`RiscoVerbatim` em família sem coluna de agente nomeado `[ABERTA — decisão de arquitetura]`
+
+**Medido (29-31/08/2026).** As colunas do T65 não mapeiam 1:1 nas da família 1:
+
+| Família 1 (Consciente/Fascino) | Família 2 (T65) |
+|---|---|
+| `PERIGO / ASPECTO` = **agente nomeado** (`Ruido`, `Destilados de Petróleo`) | `Perigo` = **descrição de perigo** (`Queda em altura`, `Postura incorreta de trabalho`) |
+| `FONTE` | `Origem do Risco` |
+| `AGRAVO` | `Risco` (possíveis lesões ou agravos) |
+| — | `Exposição` (Habitual/Eventual), probabilidade / severidade / grau |
+
+`RiscoVerbatim.agente` alimenta o resolvedor de termos. **No T65 não existe coluna de agente
+nomeado.** Mapear `Perigo` → `agente` entrega ao resolvedor uma frase descritiva — que foi
+exatamente o que a rota LLM fez em 003.FF, produzindo 45 termos descritivos não resolvidos.
+
+**Origem no prompt, não só no documento.** `_PROMPT_GHE` (`transcritor_gemini_pgr.py`) é
+calibrado para a família Fascino — crava a âncora `"SETOR/FUNÇÃO ..."` (que o T65 não tem) e
+manda ignorar o cabeçalho `"Cód. Atividades Perigo Exposição Fonte geradora..."` (que é do
+Fascino). Sua **regra 3c** manda transcrever o próprio texto do perigo como `agente` quando não
+há quantificação: no Fascino é exceção, no T65 é a regra geral.
+
+**O que a resolução exige.** Decidir o que ocupa `agente` quando a família não nomeia agente —
+e se o prompt de transcrição deve ser por família. Bloqueia a escrita da família 2
+(`DT-003FF-01`). Não bloqueia a cobertura de termo.
+
+### DH-003FF-01 — Escopo da `Decisão 003.DG-3`: "zero riscos aprova" foi medida na rota card `[ABERTA — higiene de decisão]`
+
+**Medido (29/08/2026).** `gate_forma_ghe` aprova GHE com zero riscos: a condição é
+`all(risco.agente.strip() != "" for risco in ghe.riscos)`, e `all()` sobre sequência vazia é
+`True`; basta `nome` não-vazio.
+
+**Não é defeito.** É decisão deliberada — `DECISOES_ARQUITETURAIS.md` l. 2053: *"card todo-`N/A`
+→ `riscos=()` → gate APROVA … num cargo administrativo, GHE sem risco ocupacional é forma
+clinicamente legítima"*, travada por
+`test_transcritor_card.py::test_composicao_card_todo_na_sem_riscos_aprova_no_gate`.
+
+**O que fica aberto.** A decisão foi medida sobre a rota **card** (EBSERH, cargo administrativo)
+e é aplicada globalmente a `gate_forma_ghe`. Na rota **ghe**, `GHE14` do T65 (Portaria) tem 2
+riscos reais grafados `Ergnômico` — com repertório de lista fechada sairia vazio e **aprovado**,
+em silêncio. A decisão está certa no escopo medido e larga fora dele.
+
+**O que a resolução exige.** Reabrir com escopo por rota é decisão de ARQUITETURA:
+`GHEVerbatim` não carrega o texto do bloco (só `nome`/`cargos`/`riscos`), então o invariante
+teria de morar em `preparar_ghes` ou no parser da família. Lastro contra falso-positivo já
+medido: Fascino pela rota determinística, 19/19 blocos, distribuição
+`[8,8,8,9,10,5,22,13,11,19,12,21,10,6,11,28,21,12,3]`, **mínimo 3, zero blocos vazios**.
+
+### DT-003FF-03 — RT fora do span do recorte de topo `[ABERTA — não-bloqueante]`
+
+**Medido (31/08/2026).** `medicao_pgr ida` sobre o T65 devolveu `credencial` com
+`responsavel_tecnico`, `titulo_rt` e `registro_profissional` todos `""`. O RT existe e está
+completo — **página 46, a última**: *"elaborado pelo Coordenador de Segurança do trabalho Weder
+Morais Silva sob o número de registro 1020541245D-GO … Engenheiro de segurança do trabalho —
+CREA: 1020541245D-GO — Responsável pela elaboração e implementação do documento."*
+
+`recortar_topo` (`D-ARQ-53`) devolve da 1ª linha do documento até a linha **anterior à 1ª âncora
+GHE** — no T65 isso termina na página 11. **O recorte de topo assume que o RT vive antes do
+primeiro GHE**, e o T65 falsifica a premissa.
+
+**O que a resolução exige.** Mesma classe do título-de-card do EBSERH, resolvida em `003.DH` por
+`recuperar_titulos_cargo` — recuperar do vão sem reabrir o recorte. Aqui o vão é a **cauda** do
+documento, não o preâmbulo. Não bloqueia: `R-PGR-01` (assinatura por engenheiro) é confirmada
+pelo seam humano, não pela transcrição.
+
+### DT-003FF-04 — `vocabulario_ausente` que suprime exame é não-bloqueante `[ABERTA — decisão de direção segura]`
+
+**Medido (31/08/2026, par T65).** `"Queda em altura"` (13 ocorrências) não resolveu para
+`trabalho_altura`; o predicado `altura` ficou `False` em todos os 16 GHEs; `R-PKG-ATIVCRIT` não
+disparou; **175 células de exame do gabarito assinado não foram emitidas** — acuidade visual,
+hemograma, glicemia e ECG. A pendência `vocabulario_ausente` que acompanha a omissão é
+**não-bloqueante**: o documento segue emitível com o exame faltando.
+
+**A questão.** Termo não resolvido que alimenta predicado de pacote remove exame do documento
+final sem bloquear a emissão. Ou a pendência bloqueia nesse caminho, ou a direção segura do
+projeto aceita a omissão — **hoje aceita por omissão, não por decisão**. Tensão explícita com
+`D-ARQ-31/35` (anti-supressão) e com `R-PGR-07` cl.1 (divergência de nomenclatura não é ausência
+de risco).
+
+**O que a resolução exige.** Distinguir `vocabulario_ausente` que só perde granularidade de
+`vocabulario_ausente` que suprime exame — o segundo é decidível: o predicado que ficou `False`
+por termo não resolvido é rastreável. Nomeada por `R-PGR-07` (003.FF), que expõe sem resolver.
