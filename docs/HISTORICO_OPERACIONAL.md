@@ -5872,10 +5872,14 @@ sem periódico no gabarito Ricco, `A VALIDAR`). Convenção nova: estado `DISPEN
   git). Nos dois casos a medição mostrou risco baixo e a cautela custou fluxo. Registrado a
   pedido do Diovanni.
 
-## Sessão 003.FF — 02/09/2026 — META
+## Sessão 003.FG — 02/09/2026 — META
 
-**Numeração `[CONFIRMADA pelo Diovanni, 02/09/2026]`.** Não veio de kickoff: foi derivada do git
-e ratificada no turno. Base da derivação — último bloco em `main` é 003.FE (28-29/08/2026, PRs
+**Numeração `[CORRIGIDA de 003.FF para 003.FG — colisão medida]`.** A derivação por git dava `FF` e
+foi ratificada no turno; o Arquiteto, rodando contra o working tree da máquina do Diovanni,
+mediu que **já existia** um bloco `## Sessão 003.FF — 29/08-01/09/2026` com `DT-003FF-01..04` e
+`DH-003FF-01`, **não commitado**. Sessão mais nova cede: esta vira `003.FG` e `DT-003FG-01`;
+nenhum ID daquela se move. Derivação original preservada abaixo porque continua correta para o
+que era observável do container. Base da derivação — último bloco em `main` é 003.FE (28-29/08/2026, PRs
 #315/#316); nenhum commit em `main` entre 30/08 e 02/09 além dos desta sessão; nenhuma branch
 remota reivindicando número intermediário; PR #317 é o merge imediatamente seguinte ao #316. A
 sequência 003.EJ→003.FE tem 21 de 22 blocos (só falta `EL`), então "próxima letra" tem lastro
@@ -5913,7 +5917,7 @@ observação, não medição). Ambas com teste de morte escrito, na pauta da pr�
 **Entrega 2 — passo 9 do ritual e varredura do passivo.** `claude/cowork-architect-feedback-oryupu`
 apagada local; a remota o GitHub já tinha apagado no merge. O `--prune` revelou as duas branches de
 `DH-003FE-02`, e a inspeção que aquela DH pedia foi feita: nada a recuperar, descarte decidido.
-`DT-003FF-01` ABERTA para preservar a única ideia que morreria junto. **`DH-003FE-02` fica
+`DT-003FG-01` ABERTA para preservar a única ideia que morreria junto. **`DH-003FE-02` fica
 `DECIDIDA`, não `FECHADA`**: `git push origin --delete` das duas dá **HTTP 403** no container —
 escopo de credencial, não proxy (`recentRelayFailures: []`) e não rede (a mesma credencial criou
 branch e empurrou commits no mesmo turno). Execução manual do Diovanni. **Bloqueador reportado,

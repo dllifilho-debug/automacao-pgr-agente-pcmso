@@ -2100,7 +2100,7 @@ gov.br/MTE]`, embora o veredito não dependa da norma: `main` já grava o valor 
 aquele dado reintroduziria a regressão com teste protegendo-a.
 
 **Único conteúdo ausente de `main`:** a heurística `_suspeitar_distribuicao_incorreta` (28 linhas
-+ 3 testes), preservada como `DT-003FF-01`; `logo.png` (marca Seconci-GO, 146 KB — `main` não tem
++ 3 testes), preservada como `DT-003FG-01`; `logo.png` (marca Seconci-GO, 146 KB — `main` não tem
 imagem nenhuma); e `testar_pcmso.py` (harness manual, superado pelas CLIs de `superficie/`).
 **Execução bloqueada.** Descarte decidido pelo Diovanni em 02/09/2026, mas
 `git push origin --delete` das duas retorna **HTTP 403** no container da sessão remota. Não é o
@@ -2116,7 +2116,7 @@ git push origin --delete claude/quizzical-rhodes-e3ae5f
 
 Estado no fechamento: as duas seguem no remoto, em `43a61bf` (07/05/2026) e `d7cf602`
 (06/05/2026). Nada local a apagar — nunca existiram como branch local. A decisão está registrada
-e a única ideia recuperável já está em `DT-003FF-01`, então o delete não perde mais nada.
+e a única ideia recuperável já está em `DT-003FG-01`, então o delete não perde mais nada.
 
 ### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[ABERTA — insumo medido, não-bloqueante]`
 
@@ -2141,7 +2141,7 @@ prescreve `adm/per/MR` incondicional, derivado da medição de corpus de 003.AH/
 está larga demais, ou este documento é exceção. Exige contraste com os demais gabaritos
 pós-26/05/2026 antes de tocar `R-PSY-02`; **não alterar a regra com n=1**.
 
-### DT-003FF-01 — Detector de distribuição suspeita de cargos por GHE `[ABERTA — ideia medida, não-bloqueante]`
+### DT-003FG-01 — Detector de distribuição suspeita de cargos por GHE `[ABERTA — ideia medida, não-bloqueante]`
 
 **Origem.** `modules/modulo_pcmso.py` em `origin/claude/eloquent-mcnulty-e0cdc2`, commit `43a61bf`
 (07/05/2026), na linhagem de história desconexa varrida por `DH-003FE-02`. Confirmado ausente de

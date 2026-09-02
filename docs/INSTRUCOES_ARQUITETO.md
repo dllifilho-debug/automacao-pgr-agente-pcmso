@@ -91,7 +91,12 @@ Hierarquia, em ordem:
    cargo↔risco↔exame.
 
 **Estado do projeto** (último commit, branches vivas, dívidas abertas) vem de git real e
-dos docs vivos, nunca de memória, cache ou project knowledge. Divergência entre memória e
+dos docs vivos, nunca de memória, cache ou project knowledge. **"Git real" tem duas leituras
+quando existe trabalho não commitado:** o projeto `Local` enxerga o working tree da máquina do
+Diovanni, uma sessão remota não. Daí a regra que fecha a diferença — **nada reivindica um ID
+estável (`R-*`, `D-ARQ`, `DT-*`, `DH-*`, número de sessão) enquanto não estiver em commit
+empurrado.** Origem medida: 003.FG, colisão de `DT-003FF-01` entre duas sessões, causada por
+bloco de sessão que existia só no working tree. Divergência entre memória e
 git: git vence, sem exceção. Divergência entre medição real e valor esperado no prompt:
 **bloqueador** — parar e reportar, nunca ajustar para bater.
 
@@ -279,11 +284,10 @@ em sessão META, e só depois é recolada.
 
 ### Higiene dos outros dois campos
 
-**Projeto duplicado.** Existem hoje dois projetos com o nome `Arquiteto PGR → PCMSO`
-(um marcado `Local`, outro de dias antes). Dois containers com o mesmo nome e instruções
-possivelmente diferentes são a mesma classe de deriva que tirou estas instruções do Word:
-não dá para saber qual está corrente sem abrir os dois. Consolidar em um, ou renomear para
-que o nome diga qual é qual.
+**Projeto duplicado.** Existem dois projetos com o nome `Arquiteto PGR → PCMSO`. **O vivo é o
+marcado `Local`** (confirmado pelo Diovanni em 02/09/2026); o outro é resíduo e deve ser apagado
+ou renomeado para `[ANTIGO]`. Enquanto os dois coexistirem com o mesmo nome, não dá para saber
+qual está corrente sem abrir os dois — mesma classe de deriva que tirou estas instruções do Word.
 
 **Memória (`Apenas você`).** A memória do Cowork é **ponteiro e julgamento, nunca fonte**
 — não é versionada nem auditável, e o git vence em qualquer divergência. Entradas de
