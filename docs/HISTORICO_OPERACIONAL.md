@@ -5874,9 +5874,12 @@ sem periódico no gabarito Ricco, `A VALIDAR`). Convenção nova: estado `DISPEN
 
 ## Sessão 003.FF — 02/09/2026 — META
 
-**Numeração `[DERIVADA, não declarada em kickoff]`.** Última sessão em disco é 003.FE; este bloco
-assume a sucessora pela sequência do git log. Corrigir antes do merge se o kickoff disser outra
-coisa — os IDs `DT-003FF-*` mudam junto.
+**Numeração `[CONFIRMADA pelo Diovanni, 02/09/2026]`.** Não veio de kickoff: foi derivada do git
+e ratificada no turno. Base da derivação — último bloco em `main` é 003.FE (28-29/08/2026, PRs
+#315/#316); nenhum commit em `main` entre 30/08 e 02/09 além dos desta sessão; nenhuma branch
+remota reivindicando número intermediário; PR #317 é o merge imediatamente seguinte ao #316. A
+sequência 003.EJ→003.FE tem 21 de 22 blocos (só falta `EL`), então "próxima letra" tem lastro
+medido, e não só convenção.
 
 **Foco.** Duas perguntas do Diovanni: (1) o Cowork como Arquiteto ainda se justifica ao lado do
 Claude Code? (2) as instruções permanentes do Arquiteto limitaram o modelo? Sessão inteira rodou
