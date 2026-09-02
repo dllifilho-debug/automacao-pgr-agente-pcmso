@@ -2064,7 +2064,7 @@ redescoberta e re-litigada a cada varredura.
 **Reabre se:** o repositório deixar de ser privado, ou o acervo passar a conter dado de
 trabalhador (hoje não contém — medido: matriz de exames tem 0 ocorrências de CPF).
 
-### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[DECIDIDA em 02/09/2026 — descarte; execução BLOQUEADA por permissão]`
+### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[FECHADA em 02/09/2026 — descarte executado]`
 
 **Medido (29/08/2026, primeira aplicação do passo 9 do ritual).** Restam no remoto
 `origin/claude/eloquent-mcnulty-e0cdc2` (`43a61bf`, 07/05/2026) e
@@ -2118,6 +2118,14 @@ git push origin --delete claude/quizzical-rhodes-e3ae5f
 Estado no fechamento: as duas seguem no remoto, em `43a61bf` (07/05/2026) e `d7cf602`
 (06/05/2026). Nada local a apagar — nunca existiram como branch local. A decisão está registrada
 e a única ideia recuperável já está em `DT-003FG-01`, então o delete não perde mais nada.
+
+**Execução concluída (02/09/2026).** O 403 era escopo da credencial do container, não do
+Diovanni: rodado no Claude Code local, `git push origin --delete` das duas teve sucesso.
+Confirmado por `git ls-remote origin` a partir do container — nenhuma referência às duas branches
+no remoto. Commits únicos nomeados antes do delete: `eloquent-mcnulty-e0cdc2` carregava 2
+(`c21e1ab` logging, `43a61bf` debug print swap), `quizzical-rhodes-e3ae5f` carregava 1 (`d7cf602`,
+sessão5 — validação e2e + bugfixes), consistente com a medição anterior desta DH (`quizzical`
+contida em `eloquent` exceto por `tests/test_integracao_camada0.py`).
 
 ### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[REENQUADRADA — 003.FF; ver DT-003FF-01]`
 
