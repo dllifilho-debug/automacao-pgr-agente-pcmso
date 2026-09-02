@@ -2064,7 +2064,7 @@ redescoberta e re-litigada a cada varredura.
 **Reabre se:** o repositório deixar de ser privado, ou o acervo passar a conter dado de
 trabalhador (hoje não contém — medido: matriz de exames tem 0 ocorrências de CPF).
 
-### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[FECHADA em 02/09/2026 — passivo varrido, nada a recuperar]`
+### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[DECIDIDA em 02/09/2026 — descarte; execução BLOQUEADA por permissão]`
 
 **Medido (29/08/2026, primeira aplicação do passo 9 do ritual).** Restam no remoto
 `origin/claude/eloquent-mcnulty-e0cdc2` (`43a61bf`, 07/05/2026) e
@@ -2102,8 +2102,21 @@ aquele dado reintroduziria a regressão com teste protegendo-a.
 **Único conteúdo ausente de `main`:** a heurística `_suspeitar_distribuicao_incorreta` (28 linhas
 + 3 testes), preservada como `DT-003FF-01`; `logo.png` (marca Seconci-GO, 146 KB — `main` não tem
 imagem nenhuma); e `testar_pcmso.py` (harness manual, superado pelas CLIs de `superficie/`).
-Ambas as branches apagadas em 02/09/2026 com `-D` + `push origin --delete`, por decisão do
-Diovanni no turno.
+**Execução bloqueada.** Descarte decidido pelo Diovanni em 02/09/2026, mas
+`git push origin --delete` das duas retorna **HTTP 403** no container da sessão remota. Não é o
+proxy (`/__agentproxy/status` com `recentRelayFailures: []`) nem falta de rede: a mesma credencial
+criou branch e empurrou commits no mesmo turno. É escopo de credencial — o container empurra ref,
+não apaga ref. O GitHub MCP desta sessão também não expõe delete de branch (tem `create_branch`,
+não o inverso). Fica para execução manual do Diovanni:
+
+```
+git push origin --delete claude/eloquent-mcnulty-e0cdc2
+git push origin --delete claude/quizzical-rhodes-e3ae5f
+```
+
+Estado no fechamento: as duas seguem no remoto, em `43a61bf` (07/05/2026) e `d7cf602`
+(06/05/2026). Nada local a apagar — nunca existiram como branch local. A decisão está registrada
+e a única ideia recuperável já está em `DT-003FF-01`, então o delete não perde mais nada.
 
 ### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[ABERTA — insumo medido, não-bloqueante]`
 

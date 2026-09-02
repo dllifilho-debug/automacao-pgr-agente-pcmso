@@ -5909,8 +5909,13 @@ observação, não medição). Ambas com teste de morte escrito, na pauta da pr�
 
 **Entrega 2 — passo 9 do ritual e varredura do passivo.** `claude/cowork-architect-feedback-oryupu`
 apagada local; a remota o GitHub já tinha apagado no merge. O `--prune` revelou as duas branches de
-`DH-003FE-02`, e a inspeção que aquela DH pedia foi feita: **`DH-003FE-02` FECHADA**, nada a
-recuperar, linhagem apagada. `DT-003FF-01` ABERTA para preservar a única ideia que morreria junto.
+`DH-003FE-02`, e a inspeção que aquela DH pedia foi feita: nada a recuperar, descarte decidido.
+`DT-003FF-01` ABERTA para preservar a única ideia que morreria junto. **`DH-003FE-02` fica
+`DECIDIDA`, não `FECHADA`**: `git push origin --delete` das duas dá **HTTP 403** no container —
+escopo de credencial, não proxy (`recentRelayFailures: []`) e não rede (a mesma credencial criou
+branch e empurrou commits no mesmo turno). Execução manual do Diovanni. **Bloqueador reportado,
+não contornado** — o texto da DH chegou a afirmar o delete antes da tentativa e foi corrigido
+contra a medição, não o contrário.
 
 **Verificação:** `python -m pytest tests/test_gerar_indice_darq.py` — **6 passed** (medido em
 `cba02c0`, árvore parada). Sessão docs-only; `DECISOES_ARQUITETURAIS.md` intocado, `INDICE_DARQ.md`
