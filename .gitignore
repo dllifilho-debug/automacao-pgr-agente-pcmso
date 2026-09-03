@@ -19,10 +19,26 @@ data/cargos_desconhecidos.json
 **/*_diff.txt
 suite*.txt
 
-# Dados sensíveis de clientes (matrizes reais, não commitar)
-matrizes_originais/
+# matrizes_originais/ NÃO é ignorado — decisão do Diovanni, 003.FH.
+#
+# A linha anterior dizia "Dados sensíveis de clientes (matrizes reais, não commitar)".
+# Estava errada em duas frentes, ambas medidas em 003.FH:
+#   (a) o conteúdo não é dado pessoal SENSÍVEL (LGPD art. 5º II) — a matriz prescreve
+#       exame por GHE/cargo, não por trabalhador identificado; dado de saúde individual
+#       mora em ASO/prontuário, que não estão aqui. Há dado pessoal COMUM (art. 5º I):
+#       nome/CRM da médica, nome/registro do RT, nome de quem preencheu — repositório
+#       privado, base legal própria, risco baixo;
+#   (b) 17 arquivos já estavam rastreados apesar do ignore (git só ignora não-rastreado),
+#       então a regra escrita e a prática divergiam há meses. Meio-caminho é a única
+#       opção errada: o acervo entrou pela metade e os 4 PGRs que os testes abrem
+#       ficaram de fora — 8 testes vermelhos e três gabaritos irreprodutíveis fora da
+#       máquina do Diovanni (DH-003FH-02).
+#
+# O acervo é GABARITO (D-ARQ-18: onde existe par PGR→matriz assinada, a matriz manda).
+# Gabarito que não reproduz não é gabarito. Por isso entra inteiro e versionado.
 
 # Relatórios de medição real (dados de cliente, não commitar — 003.DR)
+# Este segue ignorado: é SAÍDA de rodada, não gabarito, e nenhum teste depende dele.
 relatorios/
 
 # Segredos locais (chaves de API, nunca commitar — 003.DR)
