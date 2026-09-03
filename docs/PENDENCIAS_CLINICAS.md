@@ -2293,3 +2293,97 @@ distribuição presente e implausível**: um parse que atribui todos os cargos a
 sem pendência. Se entrar, entra medido contra o acervo pareado (qual o maior nº de cargos por GHE
 observado num gabarito assinado? qual a taxa real de GHEs com lista idêntica?), não com os
 limiares 10 e 30% herdados, que não têm proveniência conhecida. Faceta de `DT-003L-01`.
+
+### DH-003FH-01 — `D-ARQ-84` cl.1(c) não foi aplicada a três blocos de sessão consecutivos `[ABERTA — higiene de método]`
+
+**Origem:** sessão 003.FH, conferência dos blocos 003.FE/FF/FG do `HISTORICO_OPERACIONAL.md`.
+
+**Medido.** `D-ARQ-84` cl.1 — aprovada em 003.FD (22/08/2026, 3ª rodada do Gauntlet) — obriga
+`/conferir` sobre **"(c) bloco de sessão do `HISTORICO_OPERACIONAL.md`"**, antes de o artefato ser
+gravado em doc vivo. Os blocos **003.FE, 003.FF e 003.FG** foram redigidos depois dessa aprovação.
+Os três carregam divergência: **118 afirmações extraídas, 91 CONFERE, 10 DIVERGE, 17 NÃO
+VERIFICÁVEL** (@ `eb94b06`).
+
+Não é regra ausente nem regra nova a criar: é regra **aprovada, versionada e não aplicada**, três
+vezes seguidas, ao artefato que ela nomeia por extenso. O `RITUAL_FECHAMENTO.md` passo 8 já a
+replica. A lacuna é de execução, não de texto.
+
+**As 10 divergências, por classe do `/conferir`:**
+- classe 1 (número herdado citado como corrente): 3 — âncora e duração da suíte de 003.FE; `48`
+  commits de código em 003.FG.
+- classe 4 (âncora que envelheceu): 2 — `DH-003FE-02` declarada `DECIDIDA` depois de fechada;
+  branch do PR #317 declarada apagada antes do PR #318 sair dela.
+- classe 6 (nome/símbolo que não existe): 2 — "forma 3 de `_RECONHECEDORES_GHE`" (a tupla tem 2
+  entradas; a numeração está na docstring de `eh_cabecalho_ghe`); "`DADOS GERAIS` só é lido em
+  `_recuperar_titulo_do_vao`" (a função casa `_PADRAO_TITULO_CARGO`, não aquela string).
+- classe 3 (citação não transcrita): 1 — "CREA 1020541245D-GO" onde o verbatim diz "número de
+  registro", contra a convenção de D-ARQ-53 P2 ("credencial crua sem assumir CREA").
+- outras 2: `DT-003FD-02` declarada paga com header `[ABERTA]`; `test_serralheiro_tem_carboxihemoglobina`
+  atribuído à branch órfã quando está em `main` desde o PR #271.
+
+**Teste de morte desta DH:** uma sessão fechar com bloco conferido e o relatório do `/conferir`
+referenciado no próprio bloco, sem DIVERGE material. Se três fechamentos seguidos fizerem isso, a
+DH fecha por comportamento, não por decisão.
+
+**Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+
+### DH-003FH-02 — Os três gabaritos que sustentam os números de 003.FE/FF não são reproduzíveis a partir do repositório `[ABERTA — higiene de método]`
+
+**Origem:** sessão 003.FH, ao medir a suíte no container.
+
+**Medido @ `eb94b06`.** `matrizes_originais/` tem **17 arquivos rastreados** apesar de a pasta estar
+no `.gitignore:23` (git ignora só o não-rastreado). Quatro PGRs que os testes e as medições abrem
+**não** estão entre os 17:
+
+| PGR | quem depende |
+|---|---|
+| `PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf` | 2 testes vermelhos; medição 91,1% (003.FE) |
+| `pgr_Cjr Engenharia Ltda (M Construtora).pdf` | 6 testes vermelhos |
+| `PGR - CONSCIENTE … SPE 0030 - FASCINO (15.07.26).pdf` | skips; medição 97,0% (003.FE) |
+| `PGR - ALT T65 2024.2026.pdf` | medição 48,4% e as 24 formas do resíduo (003.FF) |
+
+**Consequência.** A suíte no container dá **1137 passed, 8 failed, 21 skipped** contra os
+`1160 passed, 6 skipped` herdados — **1166 coletados nos dois casos**, logo nenhum teste foi criado
+ou perdido; o que muda é quantos conseguem rodar. E os três percentuais que 003.FE/FF publicam como
+resultado principal (Fascino 97,0%, Ricco 91,1%, T65 48,4%) **só são re-mediveis na máquina do
+Diovanni**. Gabarito que não reproduz não é gabarito — é testemunho.
+
+**Não é `DH-003FE-01`.** Aquela foi **DISPENSADA** por decisão do Diovanni em 29/08 sobre um eixo
+distinto: se versionar acervo com dado pessoal era aceitável. Esta é sobre **irreprodutibilidade de
+medição**, e a dispensa daquela não a cobre — a decisão de dispensar não foi tomada com este custo
+à vista. Também não é `DH-003ET-01` (fixtures de PDF não versionadas), que nomeia a classe mas não
+mede este efeito sobre os gabaritos publicados.
+
+**Achado colateral, dentro de `DH-003ET-01`:** a mesma ausência de PDF produz `skip` declarado em
+alguns testes e `FileNotFoundError` em outros. Inconsistência de instrumento, não de conduta
+clínica.
+
+**Caminho candidato, não decidido:** versionar os 4 PGRs faltantes (mesmo critério dos 17 que já
+entraram), ou publicar um extrato textual versionado por PGR suficiente para os testes, mantendo o
+PDF fora. A escolha é do Arquiteto — as duas têm custo de LGPD distinto.
+
+**Status:** ABERTA, não-bloqueante para o motor; **bloqueante para reprodução de gabarito**.
+
+### DT-003FH-01 — 19 das 24 formas do resíduo do T65 ficam sem alias por falta do documento `[ABERTA — insumo medido, não-bloqueante]`
+
+**Origem:** sessão 003.FH, fatia de dado de `R-PGR-07`.
+
+**Situação.** 003.FF mediu **57 de 98 ocorrências (58%) do resíduo do T65 correspondendo a 9 slugs
+já existentes**, em 24 termos distintos. Esta sessão populou **5 aliases** — os únicos cujo verbatim
+está transcrito em doc versionado (`MEDICAO_003FF_par_T65.md` §3/§4/§7). Os outros 19 não têm
+verbatim no repo e o PGR ALT T65 não está no acervo (`DH-003FH-02`), então não são re-mediveis aqui.
+
+**Cobertura entregue:** `trabalho_altura` e `silica` — os dois que 003.FF mede como respondendo por
+**227 das 227 células faltantes**. `esforco_fisico` e 2 das 6 formas de `postura_inadequada`.
+
+**Fora por decisão, não por falta de dado:** `"Choque Elétrico"` → `eletricidade` e
+`"Objetos cortantes e/ou perfurocortantes"` → `acidente_perfurocortante`. Nos dois o termo nomeia o
+**dano** ou o **objeto** e o slug nomeia o **agente**; atribuir é inferir agente por proximidade de
+texto, que `R-PGR-05`/`D-ARQ-14` mandam não fazer. Decisão do Arquiteto, não do Code.
+`"Queda de mesmo nível"` (14 ocorrências) não tem slug correspondente — não é `queda_de_materiais`
+nem `trabalho_altura`.
+
+**O que fecha esta DT:** o T65 (ou o extrato do seu resíduo) chegando ao repo, e uma passada que
+popule os 19 restantes com o mesmo critério de procedência.
+
+**Status:** ABERTA, não-bloqueante. Dado, não motor.
