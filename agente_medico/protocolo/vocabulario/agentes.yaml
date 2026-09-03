@@ -17,7 +17,17 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-PKG-ATIVCRIT, R-VIS-01, R-ECG-01]
-    termos: ["Trabalho em Altura"]  # NR-35 (título) e item 35.2.1
+    # R-PGR-07 (proposta 003.FF, ainda não inserida no PROTOCOLO): nomenclatura de perigo no PGR
+    # não é padronizada — o mesmo conceito aparece em formas distintas entre documentos.
+    # "Queda em altura" ≡ "Trabalho em altura": sinônimos de engenheiro, não typo — Levenshtein
+    # ≤2 sobre string inteira nunca os casaria (13 e 20 caracteres de distância).
+    # [DERIVADO — NR-35 item 35.2.1: "atividade executada acima de 2,00 m do nível inferior,
+    # onde haja risco de queda"; a norma define o perigo pela queda, o que sustenta as duas
+    # grafias apontarem ao mesmo agente. Fonte oficial: gov.br/MTE, NRs vigentes.]
+    # [MEDIDO — 003.FF, PGR ALT T65: "Queda em altura" 13 ocorrências, nenhuma resolvida;
+    # predicado `altura` False em 16/16 GHEs, R-PKG-ATIVCRIT nunca disparou, 175 células do
+    # gabarito assinado não emitidas. Ver docs/referencia/MEDICAO_003FF_par_T65.md §3.]
+    termos: ["Trabalho em Altura", "Queda em altura"]  # NR-35 (título) e item 35.2.1
   vibracao_corpo_inteiro:
     tipo_ibe: null
     cas: null
@@ -157,7 +167,19 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: true
     protocolos_especiais: [R-RX-01]
-    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita"]
+    # R-PGR-07 (proposta 003.FF): os 6 termos abaixo são todos NUS — nomeiam a substância sem a
+    # fração medida. O PGR real escreve substância + fração no mesmo campo.
+    # [DERIVADO — NR-07 Anexo III: o Quadro 1 trata de "poeira CONTENDO sílica" e o Quadro 2 mede
+    # "poeira respirável". "Sílica Livre - Poeira respirável" NOMEIA a substância, logo resolve;
+    # não é `fracao_sem_agente` de D-ARQ-83 cl.2, que barra só a fração isolada. Fonte oficial:
+    # gov.br/MTE, NRs vigentes.]
+    # [MEDIDO — 003.FF, PGR ALT T65: 3 grafias de caixa distintas, nenhuma resolvida; 52 células
+    # (rx_torax_oit + espirometria) não emitidas. Ver MEDICAO_003FF_par_T65.md §3.]
+    # UM alias cobre as 3 grafias: `normalizar_termo` faz casefold e pontuação->espaço, então
+    # "Sílica Livre - Poeira respirável", "Silica Livre - Poeira respiravel" e a versão em caixa
+    # alta colapsam todas em `silica_livre_poeira_respiravel`. Enumerar as 3 seria redundante e
+    # levantaria colisão-consigo-mesma em `construir_indice_termos`.
+    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável"]
   asbesto:
     tipo_ibe: null
     cas: "1332-21-4"
@@ -297,7 +319,12 @@ agentes:
     # próprio (17.5), distinto de "uso excessivo de força muscular" (17.4.3 "c"), e o
     # vocabulário não tem slug de levantamento de cargas. Decisão do Arquiteto: não criar slug
     # sem consumidor (precedente 003.DG-1). Inspecionar se algum PGR futuro distinguir os dois.
-    termos: ["Levantamento e Transporte Manual de cargas"]
+    # R-PGR-07 (proposta 003.FF) cl.3 — variação de forma inclui SUFIXO, não só a palavra-núcleo.
+    # [MEDIDO — 003.FF, PGR ALT T65: o alias acima falha contra
+    # "Levantamento e transporte manual de cargas ou volumes" apenas pelo sufixo " ou volumes";
+    # Levenshtein ≤2 não alcança (11 caracteres de distância). Ver MEDICAO_003FF_par_T65.md §7,
+    # citado ali como um dos dois casos que provam que o modo de falha não é "falta slug".]
+    termos: ["Levantamento e Transporte Manual de cargas", "Levantamento e transporte manual de cargas ou volumes"]
   movimento_repetitivo:
     tipo_ibe: null
     cas: null
@@ -319,7 +346,15 @@ agentes:
     # alínea "a", "posturas extremas ou nocivas do tronco, do pescoço, da cabeça, dos membros
     # superiores e/ou dos membros inferiores" (Portaria MTP 4.219/2022, texto oficial MTE
     # conferido em 18/08/2026).
-    termos: ["Postural"]
+    # R-PGR-07 (proposta 003.FF): "Postural" é inútil contra as 6 formas que o T65 usa para o
+    # mesmo conceito. Entram aqui as 2 com verbatim citado em doc versionado
+    # (MEDICAO_003FF_par_T65.md §4): "Postura incorreta de trabalho" (7 ocorrências) e
+    # "Postura de pé por longos períodos" (2 grafias — o casefold de `normalizar_termo` colapsa
+    # as duas). As outras 4 formas ficam [A MEDIR]: o PGR ALT T65 não está no acervo versionado
+    # (DH-003FE-01) e o verbatim delas não foi transcrito para nenhum doc do repo.
+    # [DERIVADO — NR-17 item 17.4.3 alínea "a", mesma âncora de "Postural" acima: as duas formas
+    # descrevem postura de trabalho, dentro do literal da norma. Fonte oficial: gov.br/MTE.]
+    termos: ["Postural", "Postura incorreta de trabalho", "Postura de pé por longos períodos"]
   dermatite_contato:
     tipo_ibe: null
     cas: null

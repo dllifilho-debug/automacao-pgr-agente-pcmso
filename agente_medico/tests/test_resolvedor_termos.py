@@ -31,8 +31,10 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_114_entradas(indice_real: IndiceTermos) -> None:
-    assert len(indice_real.slug_por_forma) == 114
+def test_indice_real_tem_119_entradas(indice_real: IndiceTermos) -> None:
+    # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). Guard de
+    # inventário movido junto com o dado, lição de 003.CV/003.DM.
+    assert len(indice_real.slug_por_forma) == 119
 
 
 # ---------------------------------------------------------------------------
@@ -510,3 +512,110 @@ def test_fracao_sem_agente_colidindo_com_slug_levanta_value_error() -> None:
     vocab_sintetico = {"poeira_de_ferro": {}}
     with pytest.raises(ValueError, match="Colisão"):
         construir_indice_termos(vocab_sintetico, fracoes_sem_agente=["Poeira de ferro"])
+
+
+# ---------------------------------------------------------------------------
+# R-PGR-07 (proposta 003.FF) — sinonímia de nomenclatura de perigo, 003.FH
+#
+# Fatia de DADO: nenhum código de motor tocado. Cada teste nomeia a reversão
+# em `agentes.yaml` que o deixa vermelho — sem isso o teste não entra
+# (CLAUDE.md, cláusula de reversão nomeada).
+#
+# Escopo declarado: só formas com verbatim MEDIDO e citado em doc versionado
+# (MEDICAO_003FF_par_T65.md §3/§4/§7). O PGR ALT T65 não está no acervo
+# versionado (DH-003FE-01), logo as demais formas do resíduo ficam [A MEDIR].
+# ---------------------------------------------------------------------------
+
+def test_r_pgr_07_queda_em_altura_resolve_trabalho_altura(
+    indice_real: IndiceTermos,
+) -> None:
+    """Reversão que mata: remover "Queda em altura" de `termos:` de
+    `trabalho_altura` em agentes.yaml. Sinônimo, não typo — Levenshtein ≤2
+    contra "Trabalho em Altura" nunca casaria (13 caracteres de distância),
+    e `trabalho_altura` sequer tem `fuzzy_permitido`.
+    """
+    resolucao = resolver_termo("Queda em altura", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "trabalho_altura"
+    assert resolucao.pendencia is None
+
+
+# NOTA: "o alias novo não desloca a grafia da NR-35" NÃO ganha teste próprio.
+# `test_aliases_tier1_resolvem_exata` já carrega ("Trabalho em Altura",
+# "trabalho_altura") desde 003.DM, e a reversão que mataria um mata o outro —
+# não seria discriminante. Varredura inversa de 003.EK aplicada antes de entrar.
+
+
+@pytest.mark.parametrize(
+    "grafia",
+    [
+        "Sílica Livre - Poeira respirável",
+        "Silica Livre - Poeira respiravel",
+        "SÍLICA LIVRE - POEIRA RESPIRÁVEL",
+    ],
+)
+def test_r_pgr_07_silica_com_fracao_resolve_nas_tres_grafias_de_caixa(
+    indice_real: IndiceTermos, grafia: str
+) -> None:
+    """Reversão que mata: remover "Sílica Livre - Poeira respirável" de
+    `termos:` de `silica`. Reversão que mata só as duas últimas grafias:
+    retirar o `.casefold()` de `normalizar_termo` — é ele que colapsa as três
+    num alias só, e é por isso que enumerar as três seria colisão-consigo-mesma.
+    """
+    resolucao = resolver_termo(grafia, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "silica"
+
+
+def test_fracao_nua_segue_nao_resolvida_apos_o_alias_de_silica(
+    indice_real: IndiceTermos,
+) -> None:
+    """D-ARQ-83 cl.2 sobrevive à fatia: substância+fração resolve, fração nua não.
+
+    Reversão que mata: **remover "Poeira respirável" de `fracoes_sem_agente`** —
+    com ou sem promovê-la a `termos:` de `silica`, as duas variantes deixam este
+    teste vermelho. É o erro que o alias novo torna tentador e que atribuiria
+    sílica a toda poeira medida, inclusive a de madeira e a metálica.
+
+    Reversão que NÃO serve, e por quê: acrescentar "Poeira respirável" a
+    `termos:` de `silica` **sem** tirá-la de `fracoes_sem_agente` faz
+    `construir_indice_termos` levantar `ValueError` de colisão — o teste erra na
+    fixture em vez de falhar na asserção, logo quem discrimina ali é o guard de
+    colisão pré-existente, não este teste (varredura inversa, 003.FH).
+    """
+    resolucao = resolver_termo("Poeira respirável", indice_real)
+    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
+    assert resolucao.slug is None
+    assert "poeira_respiravel" in indice_real.fracoes_sem_agente
+    assert "poeira_respiravel" not in indice_real.slug_por_forma
+
+
+def test_r_pgr_07_sufixo_ou_volumes_resolve_esforco_fisico(
+    indice_real: IndiceTermos,
+) -> None:
+    """Reversão que mata: remover
+    "Levantamento e transporte manual de cargas ou volumes" de `termos:` de
+    `esforco_fisico`. O alias antigo, sem o sufixo, não alcança: são 11
+    caracteres de diferença contra um piso fuzzy de 2.
+    """
+    resolucao = resolver_termo(
+        "Levantamento e transporte manual de cargas ou volumes", indice_real
+    )
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "esforco_fisico"
+
+
+@pytest.mark.parametrize(
+    "forma",
+    ["Postura incorreta de trabalho", "Postura de pé por longos períodos"],
+)
+def test_r_pgr_07_duas_formas_de_postura_resolvem_postura_inadequada(
+    indice_real: IndiceTermos, forma: str
+) -> None:
+    """Reversão que mata: remover as duas formas de `termos:` de
+    `postura_inadequada`, deixando só "Postural". Nenhuma das duas cai no raio
+    fuzzy de "Postural".
+    """
+    resolucao = resolver_termo(forma, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "postura_inadequada"
