@@ -175,10 +175,13 @@ agentes:
     # gov.br/MTE, NRs vigentes.]
     # [MEDIDO — 003.FF, PGR ALT T65: 3 grafias de caixa distintas, nenhuma resolvida; 52 células
     # (rx_torax_oit + espirometria) não emitidas. Ver MEDICAO_003FF_par_T65.md §3.]
-    # UM alias cobre as 3 grafias: `normalizar_termo` faz casefold e pontuação->espaço, então
-    # "Sílica Livre - Poeira respirável", "Silica Livre - Poeira respiravel" e a versão em caixa
-    # alta colapsam todas em `silica_livre_poeira_respiravel`. Enumerar as 3 seria redundante e
-    # levantaria colisão-consigo-mesma em `construir_indice_termos`.
+    # UM alias cobre as 3 grafias, por DOIS mecanismos distintos de `normalizar_termo` — a
+    # decomposição NFKD (que descarta o acento) e o casefold (que descarta a caixa), mais
+    # pontuação->espaço. As três colapsam em `silica_livre_poeira_respiravel`. Enumerar as 3
+    # seria redundante e levantaria colisão-consigo-mesma em `construir_indice_termos`.
+    # [MEDIDO — 003.FH, correção 003.FH-C3: os mecanismos são independentes e nenhum sozinho
+    # cobre duas grafias. Sem o casefold cai só a caixa-alta; sem o NFKD cai só a forma sem
+    # acento. O par sufixo de `postura_inadequada` não é desta classe — ver lá.]
     termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável"]
   asbesto:
     tipo_ibe: null
@@ -347,14 +350,23 @@ agentes:
     # superiores e/ou dos membros inferiores" (Portaria MTP 4.219/2022, texto oficial MTE
     # conferido em 18/08/2026).
     # R-PGR-07 (proposta 003.FF): "Postural" é inútil contra as 6 formas que o T65 usa para o
-    # mesmo conceito. Entram aqui as 2 com verbatim citado em doc versionado
-    # (MEDICAO_003FF_par_T65.md §4): "Postura incorreta de trabalho" (7 ocorrências) e
-    # "Postura de pé por longos períodos" (2 grafias — o casefold de `normalizar_termo` colapsa
-    # as duas). As outras 4 formas ficam [A MEDIR]: o PGR ALT T65 não está no acervo versionado
+    # mesmo conceito. Entram aqui as formas com verbatim citado em doc versionado
+    # (MEDICAO_003FF_par_T65.md §4): "Postura incorreta de trabalho" (7 ocorrências) e o par de
+    # grafias "Postura de pe por longos periodo" / "…periodos", que a nota de grafia do §4
+    # registra no MESMO documento.
+    # [MEDIDO — 003.FH, correção 003.FH-C3: o par NÃO difere por caixa nem por acento, difere
+    # pelo SUFIXO "s". `normalizar_termo` colapsa caixa (casefold) e acento (NFKD), e nenhum dos
+    # dois alcança "periodo" vs "periodos" — daí as duas entrarem como aliases distintos. Com um
+    # alias só, a forma singular chegava a este slug pelo ramo FUZZY de D-ARQ-64 (distância 1,
+    # `fuzzy_permitido: true` acima): mecanismo distinto e confiança distinta da EXATA que o
+    # comentário anterior afirmava. O aviso do §4 é literal: "Qualquer solucao por alias literal
+    # tem de aguentar isso".]
+    # As outras 4 formas ficam [A MEDIR]: o PGR ALT T65 não está no acervo versionado
     # (DH-003FE-01) e o verbatim delas não foi transcrito para nenhum doc do repo.
     # [DERIVADO — NR-17 item 17.4.3 alínea "a", mesma âncora de "Postural" acima: as duas formas
-    # descrevem postura de trabalho, dentro do literal da norma. Fonte oficial: gov.br/MTE.]
-    termos: ["Postural", "Postura incorreta de trabalho", "Postura de pé por longos períodos"]
+    # acima (o par de grafias conta como UMA forma, daí "outras 4 de 6") descrevem postura de
+    # trabalho, dentro do literal da norma. Fonte oficial: gov.br/MTE.]
+    termos: ["Postural", "Postura incorreta de trabalho", "Postura de pé por longos períodos", "Postura de pé por longos período"]
   dermatite_contato:
     tipo_ibe: null
     cas: null

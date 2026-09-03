@@ -31,10 +31,12 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_119_entradas(indice_real: IndiceTermos) -> None:
-    # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). Guard de
-    # inventário movido junto com o dado, lição de 003.CV/003.DM.
-    assert len(indice_real.slug_por_forma) == 119
+def test_indice_real_tem_120_entradas(indice_real: IndiceTermos) -> None:
+    # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
+    # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
+    # `postura_inadequada`. Guard de inventário movido junto com o dado, lição de
+    # 003.CV/003.DM.
+    assert len(indice_real.slug_por_forma) == 120
 
 
 # ---------------------------------------------------------------------------
@@ -557,10 +559,17 @@ def test_r_pgr_07_queda_em_altura_resolve_trabalho_altura(
 def test_r_pgr_07_silica_com_fracao_resolve_nas_tres_grafias_de_caixa(
     indice_real: IndiceTermos, grafia: str
 ) -> None:
-    """Reversão que mata: remover "Sílica Livre - Poeira respirável" de
-    `termos:` de `silica`. Reversão que mata só as duas últimas grafias:
-    retirar o `.casefold()` de `normalizar_termo` — é ele que colapsa as três
-    num alias só, e é por isso que enumerar as três seria colisão-consigo-mesma.
+    """Reversão que mata as três: remover "Sílica Livre - Poeira respirável" de
+    `termos:` de `silica`.
+
+    Reversões parciais, **medidas** na correção 003.FH-C3 (a redação anterior
+    dizia que retirar o `.casefold()` matava "as duas últimas", e não mata):
+    são DOIS mecanismos independentes em `normalizar_termo`, cada um cobrindo
+    uma grafia. Retirar o `.casefold()` mata só "SÍLICA LIVRE - POEIRA
+    RESPIRÁVEL" — a forma sem acento continua resolvendo, porque quem a colapsa
+    é a decomposição NFKD, que roda antes. Retirar o descarte de combinantes
+    NFKD mata só "Silica Livre - Poeira respiravel". Nenhum dos dois, sozinho,
+    mata duas grafias.
     """
     resolucao = resolver_termo(grafia, indice_real)
     assert resolucao.confianca == Confianca.EXATA
@@ -619,3 +628,27 @@ def test_r_pgr_07_duas_formas_de_postura_resolvem_postura_inadequada(
     resolucao = resolver_termo(forma, indice_real)
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == "postura_inadequada"
+
+
+def test_r_pgr_07_par_de_sufixo_de_postura_resolve_exata_nas_duas_grafias(
+    indice_real: IndiceTermos,
+) -> None:
+    """O par de grafias do §4 difere por SUFIXO, e as duas têm de sair EXATA.
+
+    Reversão que mata: remover **"Postura de pé por longos período"** (singular)
+    de `termos:` de `postura_inadequada`, mantendo a plural. A singular continua
+    chegando ao slug — mas pelo ramo FUZZY de D-ARQ-64, distância 1, porque
+    `postura_inadequada` tem `fuzzy_permitido: true` —, logo a asserção de
+    `Confianca.EXATA` fica vermelha e a de slug, não. É exatamente a confusão que
+    a correção 003.FH-C3 desfez: `casefold`/NFKD colapsam caixa e acento, nunca
+    "periodo" vs "periodos".
+
+    Discriminante contra o teste acima, medido: remover a grafia **singular**
+    mata só este (o de cima segue verde); remover a plural mata os dois. Logo
+    este teste cobre comportamento que nenhum outro cobre.
+    """
+    for grafia in ("Postura de pé por longos períodos", "Postura de pé por longos período"):
+        resolucao = resolver_termo(grafia, indice_real)
+        assert resolucao.confianca == Confianca.EXATA, grafia
+        assert resolucao.slug == "postura_inadequada", grafia
+        assert resolucao.pendencia is None, grafia

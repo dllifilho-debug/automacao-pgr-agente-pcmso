@@ -6304,3 +6304,95 @@ está registrada na `Correção 003.FH-C`, e fechar é decisão do Arquiteto, n�
 > `D-ARQ-84` não estende essa exigência ao `/conferir`. **Insumo medido para a próxima META, não
 > regra proposta aqui:** duas ocorrências (esta e as três de `DH-003FH-01`) não bastam para criar
 > cláusula, e §11 exige origem medida com teste de morte.
+
+### Gate de fechamento — `/critico` `eb94b06..fb12ef5`
+
+Rodado **a frio, em sessão separada**, modo IMPLEMENTAÇÃO. Gate de abertura do Crítico: PROTOCOLO e
+ÍNDICE integrais, transversais `D-ARQ-{06,09,22}`, eixo derivado do artefato `D-ARQ-{83,70}`, mais
+`D-ARQ-84 cl.4`, `MEDICAO_003FF_par_T65.md` §3/§4/§7 e `resolvedor_termos.py` — git objects @
+`fb12ef5`, base `eb94b06`.
+
+**CRÍTICO rejeitou** — gap: o comentário de `postura_inadequada` crava `[MEDIDO]` que o casefold de
+`normalizar_termo` colapsa as 2 grafias de `"Postura de pé por longos períodos"`, mas o par que a
+fonte citada mede difere por **sufixo** (`"…longos periodo"` / `"…periodos"`, §4, nota de grafia) e
+não por caixa nem acento — o alias cobria uma, e a outra só chegava ao slug pelo ramo **FUZZY** de
+`D-ARQ-64` (distância 1, `fuzzy_permitido: true`): mecanismo distinto, confiança distinta, não
+declarado e não testado, contra o aviso literal da própria medição.
+
+Demais achados do veredito: teste-por-regra **PARCIAL** (7 dos 8 casos novos discriminam; o 8º tem
+reversão secundária errada — ver Falha 1 abaixo); ID+fonte normativa **cumprido com ressalva**
+(`R-PGR-07` é proposta 003.FF, não existe no PROTOCOLO: o rastro linha→norma existe, linha→regra
+não); ID antiga preservada **cumprido** (nenhum termo removido, nenhum DEPRECATED devido); registro
+de suíte **falho** (a mensagem de `fb12ef5` registra só o recorte, não nomeia o comando canônico nem
+commit de medição — corrigido nesta nota, ver Verificação abaixo).
+
+> **Correção 003.FH-C3** *(nota aditiva; a redação acima do bloco fica intacta — classe 10 do
+> `/conferir`, mesma regra que este bloco aplicou a 003.FE, 003.FG e a si próprio)*. O gap foi
+> **tratado antes de qualquer merge**, como manda o gate. Fatia de dado + teste + comentário;
+> **nenhum código de motor tocado**, de novo.
+>
+> **Reprodução do gap, medida nesta sessão** (worktree isolado @ `cfa99cb`, árvore parada):
+> `"Postura de pe por longos periodos"` → `postura_inadequada` **EXATA**;
+> `"Postura de pe por longos periodo"` → `postura_inadequada` **FUZZY**. O Crítico confere.
+>
+> **Falha 1 do veredito também confere, e também foi medida.** A reversão secundária no docstring de
+> `test_r_pgr_07_silica_com_fracao_resolve_nas_tres_grafias_de_caixa` dizia que retirar o
+> `.casefold()` mataria "as duas últimas" grafias. Executada: mata **uma** — só a caixa-alta. Quem
+> colapsa a forma sem acento é a decomposição **NFKD**, que roda *antes* do casefold. Retirar o
+> descarte de combinantes NFKD, medido em separado, mata **uma** — só a forma sem acento. São dois
+> mecanismos independentes, um por grafia; nenhum sozinho mata duas. É a classe 003.EK pela terceira
+> vez no mesmo artefato: reversão escrita por plausibilidade, não executada.
+>
+> **O que mudou:**
+> 1. `agentes.yaml`, `postura_inadequada`: entra o alias `"Postura de pé por longos período"`
+>    (singular). Mesmo critério das 5 da fatia — verbatim MEDIDO e citado em doc versionado
+>    (§4, nota de grafia) —, não é escolha de identidade por proximidade, logo não recai em
+>    `R-PGR-05`/`D-ARQ-14`. As duas grafias passam a sair **EXATA**; o ramo FUZZY deixa de ser o
+>    que sustenta a cobertura. Comentário reescrito com a causa certa (sufixo, não caixa) e o
+>    aviso do §4 citado literal.
+> 2. `agentes.yaml`, `silica`: comentário passa a nomear os **dois** mecanismos de
+>    `normalizar_termo` (NFKD e casefold) em vez de só o casefold.
+> 3. `test_resolvedor_termos.py`: docstring da reversão secundária de sílica corrigida com as duas
+>    medições acima; **teste novo** `test_r_pgr_07_par_de_sufixo_de_postura_resolve_exata_nas_duas_grafias`,
+>    reversão nomeada = remover a grafia singular; guard de inventário **119 → 120** (+1 exato).
+>
+> **Varredura inversa das reversões novas, teste a teste, executada:**
+> `R1` remover a grafia **singular** → vermelho **só** no teste novo (mais o guard); o parametrizado
+> anterior segue verde, logo o teste novo não é redundante. `R2` remover a **plural** → vermelho nos
+> dois. `R3` retirar `.casefold()` → vermelho **só** na parametrização `SÍLICA LIVRE — POEIRA
+> RESPIRÁVEL`. `R4` retirar o NFKD → vermelho **só** na parametrização sem acento. **4/4
+> discriminantes.** O `agentes.yaml` e o `resolvedor_termos.py` foram restaurados do backup após cada
+> reversão (`git diff --stat` limpo no motor, conferido).
+>
+> **Verificação, com o comando canônico nomeado, que é o que o veredito cobrou:**
+> - `python -m mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py app_matriz_local.py`
+>   → **limpo, 48 arquivos**, delta-zero contra 003.EV e contra `fb12ef5`.
+> - `python -m pytest agente_medico/tests/test_resolvedor_termos.py` → **79 passed**.
+> - Recorte dos **23** arquivos de teste que citam `agentes`
+>   (`grep -rl "agentes" --include="test_*.py" agente_medico/tests tests`), **árvore parada** nas duas
+>   pontas: **519 passed, 6 failed, 15 skipped** em 118.83s @ `cfa99cb` (worktree isolado) →
+>   **520 passed, 6 failed, 15 skipped** em 120.02s com a correção. Delta **+1 exato** (o teste novo);
+>   `failed` e `skipped` inalterados, e os 6 nomes vermelhos são **idênticos** nas duas tiragens
+>   (`diff` dos `FAILED` vazio) — Cjr e Ricco-Adm, `FileNotFoundError` em `matrizes_originais/`,
+>   `DH-003FH-02`. Nenhuma quebra colateral.
+> - Uma primeira tiragem deste recorte foi **descartada por escrita concorrente** — eu ainda editava
+>   docstring e comentário enquanto ela rodava. `CLAUDE.md` é explícito e o precedente é 003.EF:
+>   sem árvore parada o número não tem proveniência. Os valores acima são da re-tiragem.
+> - **Suíte completa não re-tirada nesta passada** e o número de `fb12ef5` (1145/8/21) **não é
+>   re-afirmado** para a árvore corrigida: fica `[A MEDIR]`. Motivo declarado, não conveniência —
+>   este container subiu sem `pytest`, sem `mypy` e sem `_cffi_backend` (5 erros de coleta por
+>   `pyo3_runtime.PanicException` até reinstalar `cffi`), e `DH-003FH-02` segue aberta: os 4 PGRs
+>   ausentes continuam ausentes, então a tiragem daqui não seria comparável com a de `fb12ef5` linha
+>   a linha. Quem fechar a suíte inteira mede na sessão corrente, com árvore parada.
+>
+> **Decisões do Arquiteto que este gate NÃO tocou** e que seguem abertas, como estavam:
+> tamanho da sessão sob §2; painel `22/42` × `medir_painel` `23/42`, não ajustado; push do acervo
+> `matrizes_originais/` completo; e os dois mapeamentos termo→slug fora por `R-PGR-05`/`D-ARQ-14`
+> (`"Choque Elétrico"`, `"Objetos cortantes e/ou perfurocortantes"`).
+>
+> **Lição de método, e ela é nova:** o gap do Crítico e a Falha 1 são o **mesmo defeito** — afirmar
+> que `normalizar_termo` colapsa um par sem executar o colapso. Ele passou pela varredura inversa
+> 9/9 e pelo `/conferir` a frio de 003.FH-C2 porque nenhum dos dois lê *comentário* como afirmação
+> verificável: a varredura inversa testa o teste, e o `/conferir` extraiu do bloco, não do YAML.
+> **Comentário que carrega `[MEDIDO]` é afirmação de medição e precisa de reprodução igual à do
+> corpo do bloco.** Insumo medido para a próxima META — uma ocorrência, §11 não autoriza cláusula.
