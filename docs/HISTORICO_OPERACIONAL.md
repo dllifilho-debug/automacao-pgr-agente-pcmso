@@ -6278,3 +6278,29 @@ está registrada na `Correção 003.FH-C`, e fechar é decisão do Arquiteto, n�
   4 ficaram fora, e são justamente os 4 que sustentam os três percentuais que 003.FE/FF publicam
   como resultado. A dispensa de `DH-003FE-01` foi decidida sobre LGPD; este custo não estava à vista
   quando ela foi tomada.
+
+> **Correção 003.FH-C2** *(nota aditiva; a redação acima fica intacta — classe 10 do `/conferir`,
+> a mesma regra que este bloco aplicou a 003.FE e 003.FG, sem exceção para si)*.
+> `/conferir` **a frio** sobre este bloco, @ `919b32c`, a pedido do Diovanni: **46 afirmações,
+> 38 CONFERE, 2 DIVERGE, 6 NÃO VERIFICÁVEL**. As duas:
+>
+> **(1) "quatro PGRs que os testes abrem" — falso.** Os testes abrem 6 caminhos de PGR, dos quais
+> **3** estão ausentes: Fascino, Cjr e Ricco-Adm. O **PGR ALT T65 não é aberto por teste algum** —
+> as duas ocorrências de "T65" em `agente_medico/tests/` são `fds_t65.py` e `fds_verbatim_t65.py`,
+> fixtures de **FDS** com dado embutido, que apenas citam o T65 como procedência. O T65 é insumo da
+> **medição** de 003.FF (`medicao_pgr`, fora da suíte). A `DH-003FH-02` está **correta** — diz "que
+> os testes **e as medições** abrem", e a tabela atribui o T65 a "medição 48,4%". O defeito é do
+> resumo dentro deste bloco, que perdeu metade da frase da DH que ele mesmo abriu.
+> Reproduz: `git grep -ohE "matrizes_originais/[^\"]+\.(pdf|docx)" HEAD -- agente_medico/tests/ tests/ | sort -u`
+>
+> **(2) "21 afirmações, 21 CONFERE, 0 DIVERGE" — selo, não conferência.** A extração não foi
+> exaustiva: a afirmação (1) estava no bloco e passou. A `/conferir` proíbe selo por escrito
+> (*"nunca escreva 'está tudo certo'"*) e eu emiti um com outra roupa — placar limpo produzido pela
+> mesma sessão que escreveu o artefato.
+>
+> **Lição, e é a que vale mais que as duas correções:** o `/conferir` funciona e o **auto-`/conferir`
+> na mesma sessão não**. O placar 21/21 saiu horas antes; a passada a frio achou 2. É exatamente a
+> razão por que o Gauntlet roda em sessão nova e nunca na que produziu o artefato — só que
+> `D-ARQ-84` não estende essa exigência ao `/conferir`. **Insumo medido para a próxima META, não
+> regra proposta aqui:** duas ocorrências (esta e as três de `DH-003FH-01`) não bastam para criar
+> cláusula, e §11 exige origem medida com teste de morte.

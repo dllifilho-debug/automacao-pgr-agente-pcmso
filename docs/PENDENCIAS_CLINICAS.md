@@ -2325,6 +2325,18 @@ replica. A lacuna é de execução, não de texto.
 referenciado no próprio bloco, sem DIVERGE material. Se três fechamentos seguidos fizerem isso, a
 DH fecha por comportamento, não por decisão.
 
+**Faceta nova, medida em 003.FH — auto-conferência não substitui conferência.** A própria 003.FH
+rodou `/conferir` sobre o seu bloco **na sessão que o escreveu** e declarou *"21 afirmações, 21
+CONFERE, 0 DIVERGE"*. Uma passada **a frio** sobre o mesmo bloco, @ `919b32c`, extraiu **46** e achou
+**2 DIVERGE** — uma delas um fato errado sobre o acervo, a outra o próprio placar limpo. Ou seja: a
+cláusula foi cumprida na letra e falhou no efeito.
+
+O `Crítico` já resolve isso para o Gauntlet — `INSTRUCOES_ARQUITETO.md` §6: *"roda em sessão nova,
+nunca na que produziu o artefato"*. `D-ARQ-84` **não** estende a mesma exigência ao `/conferir`.
+Se estender é decisão do Arquiteto, e ainda **não tem origem medida suficiente**: são duas
+ocorrências (esta e as três desta DH), e §11 exige origem medida + teste de morte para regra nova.
+Registrado como insumo da próxima META, não como cláusula proposta.
+
 **Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
 
 ### DH-003FH-02 — Os três gabaritos que sustentam os números de 003.FE/FF não são reproduzíveis a partir do repositório `[ABERTA — higiene de método]`
