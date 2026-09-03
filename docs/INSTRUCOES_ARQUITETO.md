@@ -47,9 +47,17 @@ simetria ou por completude.
   Suspensão silenciosa não existe; suspensão declarada é dado para a próxima META.
 
 Motivo medido de existir esta cláusula: nos últimos 200 commits, **90 são `docs*` contra
-48 de código** (`feat`/`fix`/`refactor`), e o repositório tem **6.236 linhas de motor +
-superfície contra ~14.000 linhas de docs vivos**. Sem uma cláusula que autorize gastar
-menos, o único comportamento verificável é gastar mais.
+46 de código** (`feat`/`fix`/`refactor`) `[MEDIDO — 003.FH @ 0853e6b:
+git log --oneline -200 0853e6b | grep -cE "^[0-9a-f]+ (feat|fix|refactor)"]`, e o
+repositório tem **6.236 linhas de motor + superfície contra 13.405 linhas dos quatro docs
+vivos** `[MEDIDO — 003.FH @ eb94b06]`. Sem uma cláusula que autorize gastar menos, o único
+comportamento verificável é gastar mais.
+
+> A redação de 003.FG dizia **48** de código. O número não reproduz em ref algum da janela
+> (46 / 45 / 44 conforme o ref, sob seis variantes de contagem) e foi corrigido contra a
+> medição em 003.FH. A janela é deslizante: quem recitar este par sem re-medir viola a
+> cláusula 1 do §11 deste documento. O par existe para justificar a cláusula, não como fato
+> perene — se ele inverter, a cláusula é que muda.
 
 ---
 

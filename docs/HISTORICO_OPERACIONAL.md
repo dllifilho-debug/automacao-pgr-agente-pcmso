@@ -5848,6 +5848,20 @@ PR #315.
 Crítico proíbe ler) — `15dec76` é a primeira materialização da correção estrutural que aquela DT
 nomeava: a contagem na mensagem do commit. O paliativo da exceção nominal pode sair.
 
+> **Correção 003.FH-C** *(nota aditiva; a redação acima fica intacta — bloco de sessão é registro,
+> não sítio editável, classe 10 do `/conferir`, precedente `6895958`/`9bc875d`)*. Conferência de
+> 03/09/2026 @ `eb94b06`, três divergências neste bloco:
+> **(1) âncora da suíte.** O bloco diz "medida em `4fa18bd`"; o commit de registro `15dec76` diz
+> "1160 passed, 6 skipped **em `deed9f6`**". As árvores de `deed9f6` e `15dec76` são idênticas
+> (`9f57b6d…`); a de `4fa18bd` é `909c87d…`. A âncora correta é `deed9f6`.
+> **(2) duração.** O bloco diz `1444.52s`; `15dec76` registra **1471s**.
+> **(3) `DT-003FD-02`.** A dívida **não** está paga no doc: o header em `PENDENCIAS_CLINICAS.md`
+> segue `[ABERTA — higiene de instrumento]` e o corpo mantém a seção "Correção estrutural
+> candidata (**não decidida**)". O que `15dec76` demonstra é que a correção é exequível — não que
+> a DT foi fechada. Fechar (ou não) é decisão do Arquiteto, não consequência deste bloco.
+> Reproduz: `git log -1 --format=%B 15dec76` · `git log -1 --format=%T deed9f6` ·
+> `git log -1 --format=%T 4fa18bd` · `git grep -n "^### DT-003FD-02" HEAD -- docs/PENDENCIAS_CLINICAS.md`
+
 **Pendências.** `DT-003EW-02` faceta de escrita IMPLEMENTADA, segue ABERTA pelos 4% residuais de
 2026 (122 ocorrências não investigadas nominalmente). Novas: `DH-003FE-01` (acervo parcialmente
 versionado — **DISPENSADA**, decisão do Diovanni), `DH-003FE-02` (branches remotas órfãs de maio),
@@ -6077,3 +6091,308 @@ não regenerado por não haver o que regenerar.
 - **Instrução não versionada envelhece sem aviso.** O alvo errado do mypy sobreviveu no `.docx`
   depois de duas sessões terem pago por ele no `CLAUDE.md`. Nenhum gate olhava para lá porque o
   arquivo não estava no repositório.
+
+> **Correção 003.FH-C** *(nota aditiva; redação acima intacta, mesma razão do bloco 003.FE)*.
+> Conferência de 03/09/2026 @ `eb94b06`, três divergências neste bloco:
+> **(1) `DH-003FE-02`.** O bloco a declara `DECIDIDA, não FECHADA`, bloqueada por HTTP 403 e
+> pendente de execução manual. O delete **foi executado** em 02/09/2026 (Claude Code local) e
+> `acc8850`/PR #320 gravou o fecho: o header em `PENDENCIAS_CLINICAS.md` é
+> `[FECHADA em 02/09/2026 — descarte executado]`, e `git branch -r` não lista nenhuma das duas.
+> O parágrafo acima é anterior a esse commit e ficou defasado dentro da própria sessão.
+> **(2) branch do PR #317.** O bloco diz que a remota `claude/cowork-architect-feedback-oryupu`
+> "o GitHub já tinha apagado no merge". `ef71655` é o **PR #318, da mesma branch remota**, e entra
+> em `main` depois de `e8ca311` (#317), carregando `2e54924`…`3315c60`. A branch não estava
+> apagada no ponto em que o bloco a declara apagada.
+> **(3) `48` commits de código.** "90 commits `docs*` contra 48 `feat`/`fix`/`refactor` nos
+> últimos 200": o **90 reproduz** exatamente em `0853e6b`; o **48 não reproduz em ref algum** da
+> janela — 46 de `cba02c0^` a `0853e6b`, 45 em `c2bda40`, 44 em `HEAD`, sob seis variantes de
+> contagem (estrita, frouxa, `--no-merges`). Valor medido: **90 docs / 46 código @ `0853e6b`**.
+> Importa porque esse par é citado em `docs/INSTRUCOES_ARQUITETO.md` §2 como *motivo medido* de
+> uma cláusula normativa — corrigido lá, que é estado corrente e não registro.
+> Reproduz: `git grep -n "^### DH-003FE-02" HEAD -- docs/PENDENCIAS_CLINICAS.md` · `git branch -r` ·
+> `git log --oneline --merges -8 | grep -E "#317|#318"` ·
+> `git log --oneline -200 0853e6b | grep -cE "^[0-9a-f]+ (feat|fix|refactor)"`
+
+---
+
+## Sessão 003.FH — 03/09/2026 — IMPLEMENTAÇÃO (fatia de dado) + conferência
+
+**Numeração `[DERIVADA do repo, não ratificada]`.** Último bloco em `main` é 003.FG (`eb94b06`,
+PR #320); nenhuma branch remota reivindica número intermediário (`git branch -r` lista só `main` e
+a branch desta sessão). Vale a ressalva que 003.FG pagou: o container não enxerga working tree não
+commitado na máquina do Diovanni, e foi exatamente assim que `DT-003FF-01` colidiu. Se existir
+bloco `003.FH` não commitado lá, **esta sessão cede**, pela regra de §4 das instruções do Arquiteto.
+
+**Branch `claude/kickoff-5e5yvb`, imposta pelo harness da sessão remota** — não segue a convenção
+`feat/<sessao>-<nome>` do `CLAUDE.md`. Registrado como desvio observado, não como decisão.
+
+**Foco.** Três passos, nesta ordem: medir o que estava herdado; corrigir as divergências que
+envenenavam medição futura; entregar a fatia de dado que a fila de 003.FF recomendou.
+
+### Passo 1 — a medição que faltava
+
+`mypy --strict` no alvo canônico literal do `CLAUDE.md`: **limpo, 48 arquivos**, delta-zero contra a
+referência de 003.EV. As duas primeiras execuções deram 2 erros — `types-PyYAML` e `types-requests`
+ausentes no container, não código; instalados os stubs, limpo. Fica a nota de ambiente: `mypy 2.3.1`
+e `pytest 9.1.1`, mais novos que os de 003.EV/003.EZ, e ainda assim delta-zero.
+
+**Suíte de partida, árvore parada em `eb94b06`: 1137 passed, 8 failed, 21 skipped** — contra os
+`1160 passed, 6 skipped` herdados de 003.FE. **Bloqueador reportado, não ajustado.** Causa medida e
+nomeada: **1166 coletados nas duas tiragens** — nenhum teste criado ou perdido —, e os 8 vermelhos
+mais 15 dos 21 skips são um-para-um com quatro PGRs que os testes abrem e que não estão no acervo
+versionado. Abre `DH-003FH-02`.
+
+### Passo 2 — as divergências de `/conferir` corrigidas na fonte certa
+
+Conferência dos blocos 003.FE/FF/FG (293 linhas, @ `eb94b06`): **118 afirmações, 91 CONFERE,
+10 DIVERGE, 17 NÃO VERIFICÁVEL**. Abre `DH-003FH-01`.
+
+Três corrigidas por envenenarem medição futura; sete ficam como nota. **A correção respeitou a
+classe 10 do `/conferir`:** bloco de sessão é registro histórico, então 003.FE e 003.FG receberam
+**nota aditiva `Correção 003.FH-C`** com a redação original intacta (precedente `6895958`/`9bc875d`).
+Só os dois sítios de **estado corrente** foram reescritos:
+
+- **`INSTRUCOES_ARQUITETO.md` §2** — o "48 commits de código" que justifica a cláusula de
+  proporcionalidade não reproduz em ref algum da janela (46 / 45 / 44 conforme o ref, sob seis
+  variantes de contagem). Corrigido para **90 docs / 46 código @ `0853e6b`**, com o comando que
+  reproduz e o aviso de que a janela é deslizante. O `90` reproduz exato; o `48` nunca reproduziu.
+  Importa porque §11 do próprio documento proíbe regra sustentada por número não medido.
+- **`PAINEL_ESTADO.md` Baseline** — re-tirado com o número desta sessão e a causa dos vermelhos
+  nomeada, em vez de propagar `4fa18bd` mais uma vez.
+
+### Passo 3 — fatia de dado: `termos:` de 4 slugs (`R-PGR-07`)
+
+Commit `fb12ef5`. **Nenhum código de motor tocado.** Cinco aliases, todos com verbatim MEDIDO e
+citado em doc versionado:
+
+| slug | forma que o T65 escreve | efeito medido em 003.FF |
+|---|---|---|
+| `trabalho_altura` | `"Queda em altura"` (13×) | 175 células |
+| `silica` | `"Sílica Livre - Poeira respirável"` (3 grafias) | 52 células |
+| `esforco_fisico` | `"…de cargas ou volumes"` | falha só pelo sufixo |
+| `postura_inadequada` | `"Postura incorreta de trabalho"` (7×) | — |
+| `postura_inadequada` | `"Postura de pé por longos períodos"` (2 grafias) | — |
+
+**Um alias cobre as 3 grafias de sílica** — `normalizar_termo` faz casefold, então as três colapsam
+em `silica_livre_poeira_respiravel`; enumerá-las levantaria colisão-consigo-mesma em
+`construir_indice_termos`. **`D-ARQ-83` cl.2 preservada:** `"Poeira respirável"` nua segue
+`NAO_RESOLVIDO` — o alias novo nomeia a substância, logo não é fração-sem-agente.
+
+Base normativa nos comentários do YAML: NR-35 item 35.2.1; NR-07 Anexo III Quadros 1 e 2; NR-17
+itens 17.4.3 "a" e 17.5. Fonte oficial gov.br/MTE.
+
+**Escopo declarado, não silencioso.** Das 24 formas do resíduo, 19 ficam `[A MEDIR]` — o PGR ALT T65
+não está no acervo e o verbatim delas não foi transcrito para nenhum doc do repo (`DT-003FH-01`).
+E dois mapeamentos ficam **fora por decisão**: `"Choque Elétrico"` → `eletricidade` e
+`"Objetos cortantes e/ou perfurocortantes"` → `acidente_perfurocortante` — o termo nomeia o dano ou
+o objeto, o slug nomeia o agente; atribuir é inferir agente por proximidade de texto, que
+`R-PGR-05`/`D-ARQ-14` proíbem. Decisão do Arquiteto, não do Code.
+
+**Nenhuma `R-*` criada, alterada ou depreciada.** `R-PGR-07` segue **proposta**, não inserida —
+esta fatia materializa o dado que ela descreve, não a regra. PROTOCOLO segue **v91**; DECISOES
+segue **v186**; `INDICE_DARQ.md` não regenerado por `DECISOES_ARQUITETURAIS.md` não ter sido tocado.
+
+### Verificação
+
+- `mypy --strict` alvo canônico: **limpo, 48 arquivos**, delta-zero.
+- Recorte dos 13 arquivos de teste que derivam de `agentes.yaml`: **259 passed, 3 skipped**.
+- Suíte completa: **1145 passed, 8 failed, 21 skipped** em 314.32s — delta **+8 exato** contra a
+  tiragem de partida (os 8 testes novos); `failed` e `skipped` inalterados, logo nenhuma quebra
+  colateral. Os 8 vermelhos seguem sendo os 4 PGRs ausentes (`DH-003FH-02`) (árvore parada em `fb12ef5`).
+- Guard de inventário movido junto com o dado: `test_indice_real_tem_114_entradas` →
+  `_119_entradas` (+5 exato), lição de 003.CV/003.DM.
+- **Varredura inversa 9/9**, teste a teste, revertendo o dado e confirmando o vermelho.
+
+### Dois testes que a varredura inversa corrigiu antes de entrar
+
+1. **Um teste candidato foi retirado por não discriminar.** "O alias novo não desloca a grafia da
+   NR-35" parecia um invariante próprio, mas `test_aliases_tier1_resolvem_exata` já carrega
+   `("Trabalho em Altura", "trabalho_altura")` desde 003.DM — a reversão que mataria um mata o
+   outro. Nota no arquivo, no lugar do teste.
+2. **Uma reversão nomeada estava errada.** Para `test_fracao_nua_segue_nao_resolvida…` eu havia
+   nomeado "mover `Poeira respirável` para `termos:` de `silica`". Executada, ela dá **erro de
+   fixture**, não falha: `construir_indice_termos` levanta `ValueError` de colisão antes das
+   asserções — quem discrimina ali é o guard pré-existente, não o teste novo. Reversão corrigida
+   para "**remover de `fracoes_sem_agente`**", que o teste de fato mata, nas duas variantes.
+
+É a classe 003.EK vista de dentro: reversão que se escreve por plausibilidade e não se executa
+descreve um teste que não existe.
+
+### Bloqueador do painel — reportado, não ajustado
+
+`python -m scripts.medir_painel` devolve **`regras: 23/42 ativas (55%)`**; o `PAINEL_ESTADO.md`
+declara **22/42 (52%)** desde a tiragem 003.EZ. Medido em worktree isolado: **23/42 já em
+`eb94b06`** — a fatia desta sessão **não** moveu o número, e `cas: 50/79` é idêntico antes e
+depois. Entre a tiragem 003.EZ e o HEAD, o único commit que tocou `PROTOCOLO`/`regras.yaml` é
+`6895958` (003.FC).
+
+**Qual regra explica o +1 fica `[A MEDIR]` por decisão, não por preguiça:** identificá-la exige
+entender as internas de `medir_painel.py`, e `DH-003EC-01` faceta **(b) segue ABERTA** afirmando
+que esse instrumento "conta prosa como implementação". Arbitrar entre painel e instrumento quando
+o instrumento tem DH aberta sobre contagem seria escolher número por conveniência. Tabela do
+painel **não ajustada**. Decisão do Arquiteto.
+
+### `/conferir` sobre este próprio bloco (`D-ARQ-84` cl.1(c), passo 8 do ritual)
+
+Sem selo, por desenho (cl.2) — o que segue é o relatório. **21 afirmações verificáveis extraídas
+deste bloco, 21 CONFERE, 0 DIVERGE**, @ `fb12ef5` + working tree de docs. Ancoradas:
+`003.FG` é o último bloco em `eb94b06`; `git branch -r` lista só `main` e a branch desta sessão;
+`fb12ef5` é a fatia; guard em 119; 8 testes novos coletados; DECISOES v186 e PROTOCOLO v91
+presentes na tabela; `git diff --name-only eb94b06..HEAD` devolve exatamente `agentes.yaml` e
+`test_resolvedor_termos.py`, confirmando `DECISOES_ARQUITETURAIS.md` intocado.
+
+**Duas afirmações foram corrigidas pela conferência antes de o bloco ser gravado**, que é o ponto
+da cláusula:
+1. **"varredura inversa 9/9" estava por verificar.** As reversões R1–R5 cobriam os 8 testes novos;
+   o **guard de inventário** eu havia contado como coberto por implicação, sem executar. Executado:
+   reverter um alias deixa `test_indice_real_tem_119_entradas` vermelho. 9/9 agora é medido, não
+   inferido.
+2. **"13 arquivos de teste" no recorte.** O `grep -rl` devolve **14** — o 14º é
+   `agente_medico/tests/fixtures/fds_t65.py`, fixture e não arquivo de teste. Restringindo a
+   `--include="test_*.py"`: **13**. A redação fica 13, agora com o filtro nomeado.
+
+### Pendências
+
+Novas: **`DH-003FH-01`** (`D-ARQ-84` cl.1(c) não aplicada a três blocos consecutivos),
+**`DH-003FH-02`** (gabaritos irreprodutíveis a partir do repo) e **`DT-003FH-01`** (19 formas do
+resíduo do T65 sem alias por falta do documento). Nenhuma bloqueante para o motor;
+`DH-003FH-02` é bloqueante para reprodução de gabarito.
+
+Tocadas sem fechar: `DT-003FD-02` — 003.FE a declarou paga, o header segue `[ABERTA]`; a divergência
+está registrada na `Correção 003.FH-C`, e fechar é decisão do Arquiteto, não consequência do bloco.
+
+### Lições de método
+
+- **Regra aprovada não é regra aplicada.** `D-ARQ-84` cl.1(c) custou três rodadas de Gauntlet em
+  003.FD e nomeia o bloco de sessão por extenso. Três blocos depois, nenhum tinha sido conferido.
+  O ritual já replica a cláusula no passo 8. O que faltou foi execução — e o custo de descobrir
+  isso depois foi 10 divergências, três delas propagadas para docs vivos.
+- **Corrigir registro histórico é falsificar medição.** A tentação era reescrever `1444.52s` para
+  `1471s` dentro do bloco 003.FE. A classe 10 do `/conferir` existe porque isso já foi feito uma vez
+  (`6895958`, corrigido por `9bc875d`). Nota aditiva preserva o que a sessão mediu e registra o que
+  a conferência achou; reescrita apaga as duas coisas.
+- **Reversão nomeada só vale executada.** Ver acima: uma das cinco não fazia o que eu disse que
+  fazia, e só a execução mostrou. "Reversão nomeada" sem rodar é a mesma classe de "leio a forma,
+  não a prova" que este projeto já registrou 12 vezes.
+- **Acervo parcialmente versionado transforma gabarito em testemunho.** 17 arquivos entraram,
+  4 ficaram fora, e são justamente os 4 que sustentam os três percentuais que 003.FE/FF publicam
+  como resultado. A dispensa de `DH-003FE-01` foi decidida sobre LGPD; este custo não estava à vista
+  quando ela foi tomada.
+
+> **Correção 003.FH-C2** *(nota aditiva; a redação acima fica intacta — classe 10 do `/conferir`,
+> a mesma regra que este bloco aplicou a 003.FE e 003.FG, sem exceção para si)*.
+> `/conferir` **a frio** sobre este bloco, @ `919b32c`, a pedido do Diovanni: **46 afirmações,
+> 38 CONFERE, 2 DIVERGE, 6 NÃO VERIFICÁVEL**. As duas:
+>
+> **(1) "quatro PGRs que os testes abrem" — falso.** Os testes abrem 6 caminhos de PGR, dos quais
+> **3** estão ausentes: Fascino, Cjr e Ricco-Adm. O **PGR ALT T65 não é aberto por teste algum** —
+> as duas ocorrências de "T65" em `agente_medico/tests/` são `fds_t65.py` e `fds_verbatim_t65.py`,
+> fixtures de **FDS** com dado embutido, que apenas citam o T65 como procedência. O T65 é insumo da
+> **medição** de 003.FF (`medicao_pgr`, fora da suíte). A `DH-003FH-02` está **correta** — diz "que
+> os testes **e as medições** abrem", e a tabela atribui o T65 a "medição 48,4%". O defeito é do
+> resumo dentro deste bloco, que perdeu metade da frase da DH que ele mesmo abriu.
+> Reproduz: `git grep -ohE "matrizes_originais/[^\"]+\.(pdf|docx)" HEAD -- agente_medico/tests/ tests/ | sort -u`
+>
+> **(2) "21 afirmações, 21 CONFERE, 0 DIVERGE" — selo, não conferência.** A extração não foi
+> exaustiva: a afirmação (1) estava no bloco e passou. A `/conferir` proíbe selo por escrito
+> (*"nunca escreva 'está tudo certo'"*) e eu emiti um com outra roupa — placar limpo produzido pela
+> mesma sessão que escreveu o artefato.
+>
+> **Lição, e é a que vale mais que as duas correções:** o `/conferir` funciona e o **auto-`/conferir`
+> na mesma sessão não**. O placar 21/21 saiu horas antes; a passada a frio achou 2. É exatamente a
+> razão por que o Gauntlet roda em sessão nova e nunca na que produziu o artefato — só que
+> `D-ARQ-84` não estende essa exigência ao `/conferir`. **Insumo medido para a próxima META, não
+> regra proposta aqui:** duas ocorrências (esta e as três de `DH-003FH-01`) não bastam para criar
+> cláusula, e §11 exige origem medida com teste de morte.
+
+### Gate de fechamento — `/critico` `eb94b06..fb12ef5`
+
+Rodado **a frio, em sessão separada**, modo IMPLEMENTAÇÃO. Gate de abertura do Crítico: PROTOCOLO e
+ÍNDICE integrais, transversais `D-ARQ-{06,09,22}`, eixo derivado do artefato `D-ARQ-{83,70}`, mais
+`D-ARQ-84 cl.4`, `MEDICAO_003FF_par_T65.md` §3/§4/§7 e `resolvedor_termos.py` — git objects @
+`fb12ef5`, base `eb94b06`.
+
+**CRÍTICO rejeitou** — gap: o comentário de `postura_inadequada` crava `[MEDIDO]` que o casefold de
+`normalizar_termo` colapsa as 2 grafias de `"Postura de pé por longos períodos"`, mas o par que a
+fonte citada mede difere por **sufixo** (`"…longos periodo"` / `"…periodos"`, §4, nota de grafia) e
+não por caixa nem acento — o alias cobria uma, e a outra só chegava ao slug pelo ramo **FUZZY** de
+`D-ARQ-64` (distância 1, `fuzzy_permitido: true`): mecanismo distinto, confiança distinta, não
+declarado e não testado, contra o aviso literal da própria medição.
+
+Demais achados do veredito: teste-por-regra **PARCIAL** (7 dos 8 casos novos discriminam; o 8º tem
+reversão secundária errada — ver Falha 1 abaixo); ID+fonte normativa **cumprido com ressalva**
+(`R-PGR-07` é proposta 003.FF, não existe no PROTOCOLO: o rastro linha→norma existe, linha→regra
+não); ID antiga preservada **cumprido** (nenhum termo removido, nenhum DEPRECATED devido); registro
+de suíte **falho** (a mensagem de `fb12ef5` registra só o recorte, não nomeia o comando canônico nem
+commit de medição — corrigido nesta nota, ver Verificação abaixo).
+
+> **Correção 003.FH-C3** *(nota aditiva; a redação acima do bloco fica intacta — classe 10 do
+> `/conferir`, mesma regra que este bloco aplicou a 003.FE, 003.FG e a si próprio)*. O gap foi
+> **tratado antes de qualquer merge**, como manda o gate. Fatia de dado + teste + comentário;
+> **nenhum código de motor tocado**, de novo.
+>
+> **Reprodução do gap, medida nesta sessão** (worktree isolado @ `cfa99cb`, árvore parada):
+> `"Postura de pe por longos periodos"` → `postura_inadequada` **EXATA**;
+> `"Postura de pe por longos periodo"` → `postura_inadequada` **FUZZY**. O Crítico confere.
+>
+> **Falha 1 do veredito também confere, e também foi medida.** A reversão secundária no docstring de
+> `test_r_pgr_07_silica_com_fracao_resolve_nas_tres_grafias_de_caixa` dizia que retirar o
+> `.casefold()` mataria "as duas últimas" grafias. Executada: mata **uma** — só a caixa-alta. Quem
+> colapsa a forma sem acento é a decomposição **NFKD**, que roda *antes* do casefold. Retirar o
+> descarte de combinantes NFKD, medido em separado, mata **uma** — só a forma sem acento. São dois
+> mecanismos independentes, um por grafia; nenhum sozinho mata duas. É a classe 003.EK pela terceira
+> vez no mesmo artefato: reversão escrita por plausibilidade, não executada.
+>
+> **O que mudou:**
+> 1. `agentes.yaml`, `postura_inadequada`: entra o alias `"Postura de pé por longos período"`
+>    (singular). Mesmo critério das 5 da fatia — verbatim MEDIDO e citado em doc versionado
+>    (§4, nota de grafia) —, não é escolha de identidade por proximidade, logo não recai em
+>    `R-PGR-05`/`D-ARQ-14`. As duas grafias passam a sair **EXATA**; o ramo FUZZY deixa de ser o
+>    que sustenta a cobertura. Comentário reescrito com a causa certa (sufixo, não caixa) e o
+>    aviso do §4 citado literal.
+> 2. `agentes.yaml`, `silica`: comentário passa a nomear os **dois** mecanismos de
+>    `normalizar_termo` (NFKD e casefold) em vez de só o casefold.
+> 3. `test_resolvedor_termos.py`: docstring da reversão secundária de sílica corrigida com as duas
+>    medições acima; **teste novo** `test_r_pgr_07_par_de_sufixo_de_postura_resolve_exata_nas_duas_grafias`,
+>    reversão nomeada = remover a grafia singular; guard de inventário **119 → 120** (+1 exato).
+>
+> **Varredura inversa das reversões novas, teste a teste, executada:**
+> `R1` remover a grafia **singular** → vermelho **só** no teste novo (mais o guard); o parametrizado
+> anterior segue verde, logo o teste novo não é redundante. `R2` remover a **plural** → vermelho nos
+> dois. `R3` retirar `.casefold()` → vermelho **só** na parametrização `SÍLICA LIVRE — POEIRA
+> RESPIRÁVEL`. `R4` retirar o NFKD → vermelho **só** na parametrização sem acento. **4/4
+> discriminantes.** O `agentes.yaml` e o `resolvedor_termos.py` foram restaurados do backup após cada
+> reversão (`git diff --stat` limpo no motor, conferido).
+>
+> **Verificação, com o comando canônico nomeado, que é o que o veredito cobrou:**
+> - `python -m mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py app_matriz_local.py`
+>   → **limpo, 48 arquivos**, delta-zero contra 003.EV e contra `fb12ef5`.
+> - `python -m pytest agente_medico/tests/test_resolvedor_termos.py` → **79 passed**.
+> - Recorte dos **23** arquivos de teste que citam `agentes`
+>   (`grep -rl "agentes" --include="test_*.py" agente_medico/tests tests`), **árvore parada** nas duas
+>   pontas: **519 passed, 6 failed, 15 skipped** em 118.83s @ `cfa99cb` (worktree isolado) →
+>   **520 passed, 6 failed, 15 skipped** em 120.02s com a correção. Delta **+1 exato** (o teste novo);
+>   `failed` e `skipped` inalterados, e os 6 nomes vermelhos são **idênticos** nas duas tiragens
+>   (`diff` dos `FAILED` vazio) — Cjr e Ricco-Adm, `FileNotFoundError` em `matrizes_originais/`,
+>   `DH-003FH-02`. Nenhuma quebra colateral.
+> - Uma primeira tiragem deste recorte foi **descartada por escrita concorrente** — eu ainda editava
+>   docstring e comentário enquanto ela rodava. `CLAUDE.md` é explícito e o precedente é 003.EF:
+>   sem árvore parada o número não tem proveniência. Os valores acima são da re-tiragem.
+> - **Suíte completa não re-tirada nesta passada** e o número de `fb12ef5` (1145/8/21) **não é
+>   re-afirmado** para a árvore corrigida: fica `[A MEDIR]`. Motivo declarado, não conveniência —
+>   este container subiu sem `pytest`, sem `mypy` e sem `_cffi_backend` (5 erros de coleta por
+>   `pyo3_runtime.PanicException` até reinstalar `cffi`), e `DH-003FH-02` segue aberta: os 4 PGRs
+>   ausentes continuam ausentes, então a tiragem daqui não seria comparável com a de `fb12ef5` linha
+>   a linha. Quem fechar a suíte inteira mede na sessão corrente, com árvore parada.
+>
+> **Decisões do Arquiteto que este gate NÃO tocou** e que seguem abertas, como estavam:
+> tamanho da sessão sob §2; painel `22/42` × `medir_painel` `23/42`, não ajustado; push do acervo
+> `matrizes_originais/` completo; e os dois mapeamentos termo→slug fora por `R-PGR-05`/`D-ARQ-14`
+> (`"Choque Elétrico"`, `"Objetos cortantes e/ou perfurocortantes"`).
+>
+> **Lição de método, e ela é nova:** o gap do Crítico e a Falha 1 são o **mesmo defeito** — afirmar
+> que `normalizar_termo` colapsa um par sem executar o colapso. Ele passou pela varredura inversa
+> 9/9 e pelo `/conferir` a frio de 003.FH-C2 porque nenhum dos dois lê *comentário* como afirmação
+> verificável: a varredura inversa testa o teste, e o `/conferir` extraiu do bloco, não do YAML.
+> **Comentário que carrega `[MEDIDO]` é afirmação de medição e precisa de reprodução igual à do
+> corpo do bloco.** Insumo medido para a próxima META — uma ocorrência, §11 não autoriza cláusula.
