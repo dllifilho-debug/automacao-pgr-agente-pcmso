@@ -6665,3 +6665,42 @@ A dúvida era **fabricada**, e era o único resíduo que o artefato deixava sobr
 > **Insumo medido para a próxima META, não regra proposta aqui:** três ocorrências na mesma sessão,
 > com a mesma forma e três instrumentos distintos de detecção, é origem medida — mas propor cláusula
 > é decisão do Arquiteto sob §11, e este bloco não a propõe.
+
+### Gate de fechamento — `/critico` `4d1bc01..fedbacc` (3ª rodada)
+
+Barra **CONHECIMENTO**. Universalidade **PASSA** (3/3 setores; `DH-003FI-01` não duplica ID —
+0 ocorrências em `4d1bc01`). Caso local **PASSA (fraco)**. Registrabilidade **FALHA** — as duas
+fronteiras amostradas conferem contra o texto real, e o Crítico reproduziu e confirmou os fatos de
+git que as correções anteriores gravaram: 17→83; **8/8** arquivos referenciados pelos testes; a
+`003.FI-C2` está certa sobre `tests/test_regressao_pcmso.py:168`; os 4 PGRs batem em nome e byte
+(567.168 / 1.037.924 / 10.366.538 / 1.296.117, blob `7f5c942`); partição `83 = 38 PDF + 45 não-PDF`.
+
+**CRÍTICO rejeitou** — gap: a "Nota de instrumento" de `DH-003FE-01` publica `ERRO_EXTRACAO` em
+**"28 dos 83 — todos os `.doc` e `.rtf`"**, e o conjunto que ela mesma nomeia tem **31** arquivos
+(`.doc` 27 + `.rtf` 4). O número não reconcilia com partição medível alguma, sob a própria tese
+"varredura que não declara o que não conseguiu ler não é varredura" — e é o alicerce empírico do
+"83 de 83 extraídos" que sustenta manter `DH-003FE-01` DISPENSADA.
+
+> **Correção 003.FI-C5** *(nota aditiva; redação acima intacta — classe 10)*. **O gap procede como
+> defeito de reconstrutibilidade, e a correção está feita.** Medido: os 28 são **`.doc` 27 de 27**
+> mais **`.rtf` 1 de 4** (`PCMSO (OBRA NOVA) PASSARELA ESTADIO SERRA DOURADA.rtf`). O descritor
+> "todos os `.doc` e `.rtf`" é que estava errado; o `28` sempre esteve certo. `DH-003FE-01` passa a
+> publicar a composição por extensão e a conta que fecha: `28 + 3 = 31`, e
+> `31 + 38 + 13 + 1 = 83`.
+>
+> **Uma parte da consequência enunciada não procede, e registrar isso é obrigação, não defesa.**
+> O veredito diz que ficam "3 de 83 com estado de extração não declarado". **Não ficam.** Os 3 `.rtf`
+> saíram `ACHADO` no próprio passe 1 — estado declarado, na mesma saída, em linha própria — e a soma
+> bruta `83 = 28 ERRO_EXTRACAO + 32 ACHADO + 23 limpo` já fechava. O que faltava era **um terceiro
+> conseguir refazer a conta lendo só o texto**, e isso é registrabilidade, exatamente o teste que
+> falhou. A cobertura da varredura nunca teve buraco; a prosa sobre ela tinha.
+>
+> **Quarta instância da mesma raiz, e a mais fina.** Nas três anteriores um filtro virou universo
+> (`7` = literal único, `40` = não-PDF, `dois arquivos` = com marcador). Aqui o número está certo e
+> **o rótulo é que generaliza** — `28` medido, "todos os `.doc` e `.rtf`" inferido. É o mesmo defeito
+> visto do outro lado: antes eu publicava o número sem o escopo; agora publiquei o número com um
+> escopo **maior do que o medido**. Nos dois casos o leitor não consegue fechar a conta.
+>
+> **Insumo medido para a próxima META, agora com quatro ocorrências e quatro detecções
+> independentes** (`/kickoff`, `/conferir`, `/critico` 2ª e 3ª rodadas). Propor cláusula segue sendo
+> decisão do Arquiteto sob §11; este bloco não a propõe.

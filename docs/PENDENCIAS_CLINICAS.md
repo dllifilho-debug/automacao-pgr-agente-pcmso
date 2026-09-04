@@ -2099,12 +2099,22 @@ no corpo do documento e sobrevive a qualquer redação de conteúdo. Não muda a
 pessoal comum de profissional, mesma faixa do CRM —, mas é achado de eixo distinto e tem DH própria.
 Números medidos sobre o escopo completo; ver `DH-003FI-01` e sua `Correção 003.FI-C2`.
 
-**Nota de instrumento, medida:** a primeira passada da varredura deu `ERRO_EXTRACAO` em **28 dos 83**
-— todos os `.doc` e `.rtf` —, porque o container não tinha `libreoffice-writer`. Reportar ali teria
-dito "limpo" sobre 55 e calado sobre 28, um terço do acervo. Instalado o filtro e re-rodado: os 28
-saíram, 27 limpos. O `apt-get` então quebrou `charset_normalizer` e matou a terceira passada em
-silêncio; reinstalado e re-rodado. **Varredura que não declara o que não conseguiu ler não é
-varredura.**
+**Nota de instrumento, medida.** A primeira passada deu `ERRO_EXTRACAO` em **28 dos 83**, porque o
+container não tinha `libreoffice-writer`. **Composição dos 28, por extensão:** `.doc` **27 de 27** e
+`.rtf` **1 de 4** — `PCMSO (OBRA NOVA) PASSARELA ESTADIO SERRA DOURADA.rtf`. Os outros **3 `.rtf`**
+extraíram nessa mesma passada e saíram classificados `ACHADO`; RTF é parcialmente texto plano e não
+depende do filtro Writer do mesmo jeito que o OLE2 do `.doc`. Instalado o filtro e re-rodados os 28:
+**1 `ACHADO`, 27 limpos**. Fecha: `28 + 3 = 31` = `.doc` (27) + `.rtf` (4); e `31 + 38 .pdf +
+13 .docx + 1 .xlsx = 83`. Depois disso o `apt-get` quebrou `charset_normalizer` e matou a terceira
+passada em silêncio; reinstalado e re-rodado. **Varredura que não declara o que não conseguiu ler
+não é varredura.**
+
+> **Correção 003.FI-C5 (04/09/2026).** A redação anterior dizia `"28 dos 83 — todos os .doc e .rtf"`.
+> O **28 estava certo**; o descritor, não — `.doc` + `.rtf` são **31**, e a frase fazia o número não
+> reconciliar com partição medível alguma. **Nenhum arquivo ficou sem estado declarado:** os 3 `.rtf`
+> que a frase engolia saíram `ACHADO` no próprio passe 1, e a soma `83 = 28 erro + 32 achado +
+> 23 limpo` já fechava na saída bruta. O defeito era de reconstrutibilidade — um terceiro lendo só o
+> texto não conseguia refazer a conta —, não de cobertura. Achado pela 3ª rodada do `/critico`.
 
 ### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[FECHADA em 02/09/2026 — descarte executado]`
 
