@@ -2426,6 +2426,13 @@ primeiro caminho candidato (versionar os PDFs), não o extrato textual.
 referenciados pelos testes existem em disco. Suíte completa pelo comando canônico
 `python -m pytest agente_medico/tests/ tests/`: **1169 passed, 6 skipped, 0 failed** em 580.32s.
 
+**E os 4 PGRs que esta DH nomeia estão rastreados sob os nomes exatos da tabela acima**, conferidos
+um a um com `git ls-tree -r -l 7815f20`: `PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf` (567.168 B),
+`pgr_Cjr Engenharia Ltda (M Construtora).pdf` (1.037.924 B), `PGR - CONSCIENTE … FASCINO
+(15.07.26).pdf` (10.366.538 B) e `PGR - ALT T65 2024.2026.pdf` (1.296.117 B). O T65 é o único dos
+quatro que nenhum teste abre — é insumo de `medicao_pgr` —, e por isso a suíte verde não responde
+por ele; o `ls-tree` responde.
+
 > **Correção 003.FI-C2 (04/09/2026).** A primeira redação dizia **7**, medidos por
 > `git grep -ohE "matrizes_originais/[^\"']+\.(pdf|docx|doc|xlsx)"`. O `/conferir` a frio mostrou que
 > esse comando exige `matrizes_originais/` colado ao nome **num literal só**, e
@@ -2472,16 +2479,24 @@ nem `trabalho_altura`.
 **O que fecha esta DT:** o T65 (ou o extrato do seu resíduo) chegando ao repo, e uma passada que
 popule os 19 restantes com o mesmo critério de procedência.
 
-**Metade da condição caiu em 04/09/2026 (sessão 003.FI).** O PR #322 trouxe o T65 ao acervo, em dois
-arquivos: `PCMSO OBRA NOVA TOCTAO SPE_T65_ 18.03.2024 [assinado].pdf` e `PGR - TOCTAO ALT 65.pdf`.
+**Metade da condição caiu em 04/09/2026 (sessão 003.FI).** O PR #322 trouxe o T65 ao acervo.
+**`matrizes_originais/PGR - ALT T65 2024.2026.pdf` está rastreado sob o nome exato que a
+`DH-003FH-02` nomeou** — blob `7f5c942`, 1.296.117 bytes —, mais dois arquivos da mesma família:
+`PCMSO OBRA NOVA TOCTAO SPE_T65_ 18.03.2024 [assinado].pdf` e `PGR - TOCTAO ALT 65.pdf`.
 Os 19 termos deixam de ser `[A MEDIR]` por falta de documento — passam a ser re-mediveis a partir do
 repositório. **A DT NÃO fecha aqui:** falta a passada que popula os aliases, e ela é fatia de dado
 com o mesmo critério de procedência das 5 de 003.FH (verbatim medido, reversão nomeada, varredura
 inversa). Sessão futura.
 
-**Ressalva de nome, não conferida:** a `DH-003FH-02` nomeava o arquivo como
-`PGR - ALT T65 2024.2026.pdf`; o que chegou tem os dois nomes acima. Que sejam o mesmo documento é
-`[A MEDIR]` — nenhum teste os abre, então a suíte não responde por isso.
+> **Correção 003.FI-C4 (04/09/2026).** A primeira redação criava uma **ressalva fabricada**: dizia
+> que o T65 chegara "em dois arquivos" com nomes diferentes do que a `DH-003FH-02` cita, e marcava
+> `[A MEDIR]` se seriam o mesmo documento. **Não havia o que medir** — o arquivo com o nome exato
+> está rastreado em `4d1bc01` e em `7815f20`, e um `git ls-tree` responde. Reproduz:
+> `git ls-tree -r 7815f20 -- "matrizes_originais/PGR - ALT T65 2024.2026.pdf"`.
+> **Causa medida:** a lista de "dois arquivos" saiu da saída do passe 3 da varredura, que **só
+> imprime arquivo com marcador**; o `PGR - ALT T65 2024.2026.pdf` tem zero marcadores, então não
+> apareceu. Ele **foi varrido** — está no cache dos 83/83 —, mas eu li uma **listagem filtrada como
+> se fosse inventário**. O `/critico` apanhou isso na 2ª rodada.
 
 **Status:** ABERTA, não-bloqueante. Dado, não motor. Insumo destravado, trabalho não feito.
 

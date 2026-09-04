@@ -6625,3 +6625,43 @@ do mesmo intervalo — `"40 arquivos / 16 nomes"` na cláusula testada de `DH-00
 > não varrer as cópias propagadas deixa o documento com dois números do mesmo fato, e o errado é o
 > que está nos sítios que o leitor alcança primeiro** — a premissa de custo, a cláusula testada, o
 > painel. Correção que não varre a classe inteira é correção que fabrica contradição.
+
+### Gate de fechamento — `/critico` `4d1bc01..7815f20` (2ª rodada)
+
+Rodado **a frio, em sessão separada**, sobre o artefato já corrigido pela 1ª rodada. Barra
+**CONHECIMENTO**. Universalidade **PASSA** (3/3 setores). Caso local **PASSA-FRACO** — removido o
+âncora do PR #322, `DH-003FI-01` segue prescrevendo fato e reprodução genérica; o fechamento de
+`DH-003FH-02` é integralmente âncora-dependente, "o que é próprio de um fechamento".
+Registrabilidade **FALHA**.
+
+**CRÍTICO rejeitou** — gap: a emenda de `DT-003FH-01` afirmava que o T65 chegou "em dois arquivos"
+com nomes distintos do que `DH-003FH-02` cita, e criava ressalva `[A MEDIR]` sobre serem o mesmo
+documento — mas `matrizes_originais/PGR - ALT T65 2024.2026.pdf` está rastreado **sob o nome exato**
+em `4d1bc01` e em `7815f20`, dentro dos 83 arquivos que a sessão declara ter varrido integralmente.
+A dúvida era **fabricada**, e era o único resíduo que o artefato deixava sobre o gabarito T65
+(48,4%) — um dos três que `DH-003FH-02` existe para cobrir.
+
+> **Correção 003.FI-C4** *(nota aditiva; redação acima intacta — classe 10)*. **O gap procede, e é o
+> pior dos três que as passadas frias acharam** — os outros eram números sem escopo; este é uma
+> ressalva inventada sobre um fato que um comando responde. Reproduzido:
+> `git ls-tree -r 7815f20 -- "matrizes_originais/PGR - ALT T65 2024.2026.pdf"` devolve blob
+> `7f5c942`, 1.296.117 bytes, idêntico em `4d1bc01`. Corrigido na fonte: a ressalva saiu, o arquivo
+> entrou nomeado com blob e tamanho, e `DH-003FH-02` passa a listar os **4** PGRs que nomeia
+> conferidos um a um por `git ls-tree -r -l` — 567.168 B, 1.037.924 B, 10.366.538 B e 1.296.117 B.
+>
+> **Causa medida, e ela fecha a série.** A lista de "dois arquivos" saiu da saída do **passe 3** da
+> varredura, que por desenho **só imprime arquivo com marcador**. O `PGR - ALT T65 2024.2026.pdf`
+> tem zero marcadores, logo não apareceu. Ele **foi varrido** — está no cache dos 83/83, e o
+> "escopo completo" que o bloco afirma é verdadeiro. O que falhou não foi a varredura: foi eu ter
+> lido uma **listagem filtrada como se fosse inventário**.
+>
+> **É a terceira instância da mesma raiz em uma sessão só**, e agora ela tem nome exato:
+> `7` era certo para "literal único"; `40` era certo para "não-PDF"; `dois arquivos` era certo para
+> "arquivos com marcador". **Toda vez, um filtro virou universo porque o filtro não foi escrito ao
+> lado do número.** As três passaram por mim, e cada uma foi pega por uma passada fria diferente —
+> `/kickoff`, `/conferir`, `/critico`. Nenhuma das três teria sido pega por mim relendo o artefato,
+> porque relendo eu leio o número, não o escopo que o produziu.
+>
+> **Insumo medido para a próxima META, não regra proposta aqui:** três ocorrências na mesma sessão,
+> com a mesma forma e três instrumentos distintos de detecção, é origem medida — mas propor cláusula
+> é decisão do Arquiteto sob §11, e este bloco não a propõe.
