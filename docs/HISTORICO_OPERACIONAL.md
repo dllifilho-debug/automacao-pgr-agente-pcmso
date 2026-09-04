@@ -6532,3 +6532,54 @@ varredura de conteúdo o acha e nenhuma redação de corpo o remove.
 > mesmo que não ter o buraco — as duas coisas que faltavam eram uma cláusula dura (`D-ARQ-85`) e uma
 > justificativa de escolha de base, e nenhuma das duas precisava do ritual para ser feita. **Ritual
 > ausente vira desculpa se a sessão parar em declará-lo.**
+
+> **Correção 003.FI-C2** *(nota aditiva; redação acima intacta — classe 10)*. `/conferir` **a frio,
+> em sessão separada**, sobre a lista de afirmações que esta sessão publicou:
+> **24 afirmações, 8 CONFERE, 3 DIVERGE, 13 NÃO VERIFICÁVEL** (as 13 por exigirem execução de
+> suíte/extração de texto, fora do `allowed-tools` da skill — limite de instrumento, não achado).
+> **Os 3 DIVERGE foram reproduzidos e os 3 procedem.**
+>
+> **Ressalva de escopo, e ela importa para ler o placar:** a conferência rodou contra `4d1bc01` e
+> sobre a **lista de afirmações do chat**, não sobre o bloco commitado. Parte do que ela marca como
+> ausente — o hash da tiragem, por exemplo — **está** no bloco (`árvore parada @ 4d1bc01`) e faltava
+> só no resumo. Isso não anula nenhum dos três DIVERGE abaixo, que são de fato.
+>
+> **(1) `"a soma que fecha DH-003FH-02"` — atribuição indevida.** `DH-003FH-02` **não crava critério
+> numérico de fechamento**; o que ela nomeia é qualitativo (gabarito reproduzível a partir do repo) e
+> o caminho ficou explicitamente em aberto: *"Caminho candidato, não decidido: versionar os 4 PGRs
+> faltantes […] ou publicar um extrato textual […]. A escolha é do Arquiteto"*. A soma é **a
+> evidência que esta sessão produziu** para o critério qualitativo, não um critério que a DH tenha
+> enunciado. A escolha entre os dois caminhos foi feita pelo Diovanni ao mergear o PR #322 — e é
+> isso que fecha, não a aritmética.
+>
+> **Procedência das parcelas, que o bloco não declarava e a conferência forneceu:**
+> o `+8` está medido em `PAINEL_ESTADO.md:24` (*"a fatia de dado somou +8 exato (1174 coletados)"*,
+> @ `fb12ef5`); o `+1` é delta líquido de `7789ef8` — duas funções de teste adicionadas, uma removida
+> por renome (`test_indice_real_tem_119_entradas` → `_120_entradas`). `1174 + 1 = 1175 = 1169 + 6`.
+>
+> **(2) `"os 7 caminhos que a suíte abre"` — são 8, e o defeito é do método.** O comando que o bloco
+> publica como reprodução exige `matrizes_originais/` **colado ao nome dentro de um literal só**.
+> `tests/test_regressao_pcmso.py:168` monta o caminho partido —
+> `_PDF_FALLBACK = ROOT / "matrizes_originais" / "PCMSO(ATUALIZAÇÃO)CMO RESIDENCIAL VIVERDE AREIAO
+> 06.03.25.pdf"` — e some do grep. Re-medido por casamento de **nome de arquivo do acervo contra o
+> texto dos testes**, com normalização NFC (sem ela o acento derruba dois nomes): **8 referenciados**.
+> O 8º está rastreado no HEAD, então nenhuma conclusão muda — mas **o comando de reprodução publicado
+> media literais de string, não aberturas**, e teria escondido um arquivo ausente.
+>
+> **(3) `"40 arquivos na metadata"` — número sem escopo declarado, e o escopo estava errado.**
+> O `40` era **rendimento sobre 45 não-PDF** (31 legado + 14 OOXML), nunca dito. Pior: os **38 PDFs
+> não foram varridos** — e carregam `Author` com nome de pessoa. Re-medido sobre os **83 de 83**:
+> **64 arquivos** com metadata de autoria, **27 valores distintos**, dos quais 7 não são pessoa
+> (`DELL`, `CMO`, `RIMA`, `Computador`, `Admin`, `Usuario`, `python-docx`) e **20 são nome de
+> pessoa** — contra os 16 que `DH-003FI-01` registrava. Entram nomes que só existiam nos PDFs:
+> ALDEMAMAR FERREIRA LIMA, Pablo Goulart, Marcos Vinicius Souza Mota, Leandro S.Mota,
+> Flavio Felipe Soares da Silva, CARLOS EDUARDO, Guilherme, adriano.oliveira.
+> `DH-003FI-01` corrigida na fonte: **64 arquivos / 20 nomes**, não 40/16.
+>
+> **Lição, e é a terceira vez que esta classe aparece em duas sessões.** Os três DIVERGE têm a mesma
+> forma: **o número estava certo para o escopo que eu varri, e o escopo não estava escrito.** 7 era
+> certo para "literal único"; 40 era certo para "não-PDF"; a soma era certa como evidência e errada
+> como critério. Nenhum era mentira e nenhum era conferível. **Número sem escopo declarado não é
+> medição — é anedota com dígitos.** É a mesma raiz do gap que o `/critico` achou em 003.FH (afirmar
+> que `normalizar_termo` colapsa um par sem executar o colapso) e da falha de `D-ARQ-85` que o
+> `/kickoff` achou nesta: o instrumento não foi rodado até o fim, e o relato não disse onde parou.

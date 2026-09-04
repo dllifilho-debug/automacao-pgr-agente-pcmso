@@ -2420,10 +2420,23 @@ PDF fora. A escolha é do Arquiteto — as duas têm custo de LGPD distinto.
 novos, `matrizes_originais/` passa de 17 para **83 arquivos rastreados**, 386 MB. Foi escolhido o
 primeiro caminho candidato (versionar os PDFs), não o extrato textual.
 
-**Medido nesta sessão, árvore parada @ `4d1bc01`:** os **7** caminhos de `matrizes_originais/` que a
-suíte abre existem em disco (`git grep -ohE "matrizes_originais/[^\"']+\.(pdf|docx|doc|xlsx)"` sobre
-`agente_medico/tests/` e `tests/`, um a um). Suíte completa pelo comando canônico
+**Medido nesta sessão, árvore parada @ `4d1bc01`:** os **8** arquivos de `matrizes_originais/`
+referenciados pelos testes existem em disco. Suíte completa pelo comando canônico
 `python -m pytest agente_medico/tests/ tests/`: **1169 passed, 6 skipped, 0 failed** em 580.32s.
+
+> **Correção 003.FI-C2 (04/09/2026).** A primeira redação dizia **7**, medidos por
+> `git grep -ohE "matrizes_originais/[^\"']+\.(pdf|docx|doc|xlsx)"`. O `/conferir` a frio mostrou que
+> esse comando exige `matrizes_originais/` colado ao nome **num literal só**, e
+> `tests/test_regressao_pcmso.py:168` monta o caminho partido
+> (`ROOT / "matrizes_originais" / "PCMSO(ATUALIZAÇÃO)CMO RESIDENCIAL VIVERDE AREIAO 06.03.25.pdf"`),
+> logo invisível ao grep. Re-medido por casamento de nome de arquivo do acervo contra o texto dos
+> testes, com normalização NFC: **8**. O 8º está rastreado, então a conclusão não muda — mas o
+> comando publicado media **literais de string, não aberturas**, e teria escondido um arquivo ausente.
+
+**O que fecha esta DH é a escolha do Arquiteto, não a aritmética.** A DH não crava critério numérico:
+ela nomeia um critério qualitativo (gabarito reproduzível a partir do repo) e deixa dois caminhos
+candidatos explicitamente não decididos. O Diovanni escolheu o primeiro ao mergear o PR #322; a
+suíte verde é a **evidência** de que o critério qualitativo foi atendido.
 
 **A conta fecha exata, e é ela que fecha a DH:** `1160` passed herdados de 003.FE `+ 8` testes de
 003.FH `+ 1` da correção 003.FH-C3 = **1169**; `skipped` volta de **21** para os **6** herdados. Os
@@ -2474,11 +2487,22 @@ inversa). Sessão futura.
 
 **Origem:** sessão 003.FI, varredura do acervo depois do PR #322.
 
-**Medido (04/09/2026, os 83 arquivos de `matrizes_originais/`).** **40 arquivos** carregam nome de
-pessoa nos campos `Author` e `Last Saved By` — cabeçalho OLE2 nos `.doc`/`.rtf`,
-`docProps/core.xml` nos `.docx`/`.xlsx`. **16 nomes distintos**, entre eles médicas do PCMSO
-(incluindo a coordenadora nomeada nos próprios documentos), pessoal do escritório e o do Diovanni.
-Reproduz: `file -b <arquivo.doc>` para OLE2; `unzip -p <arquivo.docx> docProps/core.xml` para OOXML.
+**Medido (04/09/2026, os 83 arquivos de `matrizes_originais/` — escopo completo).**
+**64 arquivos** carregam metadata de autoria: cabeçalho OLE2 nos `.doc`/`.rtf` (campos `Author` e
+`Last Saved By`), `docProps/core.xml` nos `.docx`/`.xlsx` (`dc:creator`, `cp:lastModifiedBy`), e
+dicionário de informações nos `.pdf` (`Author`). **27 valores distintos**, dos quais 7 não são
+pessoa (`DELL`, `CMO`, `RIMA`, `Computador`, `Admin`, `Usuario`, `python-docx`) e **20 são nome de
+pessoa** — médicas do PCMSO (incluindo a coordenadora nomeada nos próprios documentos), pessoal do
+escritório, engenheiros de terceiros e o do Diovanni.
+Reproduz: `file -b <arquivo.doc>` para OLE2; `unzip -p <arquivo.docx> docProps/core.xml` para OOXML;
+`pdfplumber.open(p).metadata["Author"]` para PDF.
+
+> **Correção 003.FI-C2 (04/09/2026).** A primeira redação desta DH dizia **40 arquivos / 16 nomes**.
+> Estava errada por **escopo não declarado**: o `40` era rendimento sobre os **45 não-PDF**, e os
+> **38 PDFs não tinham sido varridos**. Re-medido sobre os 83, os números são os acima. O `/conferir`
+> a frio marcou o `40` como DIVERGE por não bater com partição medível alguma (83 total, 38 PDF,
+> 45 não-PDF) — e o achado, ao ser reproduzido, revelou um escopo maior, não menor. Oito nomes só
+> existem nos PDFs.
 
 **Por que é eixo próprio e não nota na `DH-003FE-01`.** Aquela mede dado pessoal no **conteúdo**, e
 foi dispensada sobre esse eixo. Este dado está no **cabeçalho do arquivo**: nenhuma varredura de
