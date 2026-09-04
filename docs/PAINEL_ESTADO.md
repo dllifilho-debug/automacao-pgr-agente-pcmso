@@ -14,16 +14,28 @@
 
 ---
 
-**Tiragem corrente:** 003.EZ · 16/08/2026 — **não re-tirada em 003.FH**, e a decisão é declarada, não omissão (`D-ARQ-85` cl.1): a fatia de 003.FH popula `termos:`, que é forma e não conceito. Medido nos dois lados: `cas: 50/79 slugs (63%)` **antes e depois** da fatia — mesmo resultado que 003.EI já havia registrado ao popular `termos:`. Nenhuma `R-*` criada, alterada ou depreciada.
+**Tiragem corrente:** 003.EZ · 16/08/2026 — **não re-tirada em 003.FH nem em 003.FI**, e a decisão é declarada, não omissão (`D-ARQ-85` cl.1). Em 003.FI: nenhuma `R-*` criada, alterada ou depreciada, e `git diff --name-only eb94b06 e27754c -- '*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml'` devolve **vazio** — medido, não inferido; a sessão mexeu em acervo e docs, não em conceito. Em 003.FH: a fatia de 003.FH popula `termos:`, que é forma e não conceito. Medido nos dois lados: `cas: 50/79 slugs (63%)` **antes e depois** da fatia — mesmo resultado que 003.EI já havia registrado ao popular `termos:`. Nenhuma `R-*` criada, alterada ou depreciada.
 
 > **`[BLOQUEADOR — reportado, não ajustado]` Instrumento diverge do painel em uma regra, e a divergência PRECEDE esta sessão.** `python -m scripts.medir_painel` devolve **`regras: 23/42 ativas (55%)`**; a tabela abaixo declara **22 de 42 (52%)** desde a tiragem 003.EZ. Medido em worktree isolado: **23/42 já em `eb94b06`**, antes do commit desta sessão — a fatia de 003.FH não moveu o número. Entre a tiragem 003.EZ e o HEAD, o único commit que tocou `PROTOCOLO`/`regras.yaml` é `6895958` (003.FC).
 >
 > **Qual regra explica o +1 fica `[A MEDIR]`, deliberadamente.** Identificá-la exige entender as internas de `medir_painel.py`, e `DH-003EC-01` faceta **(b) segue ABERTA** dizendo que esse instrumento "reporta verde sobre vermelho, conta prosa como implementação e não vigia derivados". Arbitrar entre painel e instrumento quando o instrumento tem DH aberta sobre contagem seria escolher um número por conveniência. A tabela **não foi ajustada para bater**. Decisão do Arquiteto.
-**Baseline:** branch `claude/kickoff-5e5yvb` sobre `main eb94b06` · **1145 passed, 8 failed, 21 skipped** *(1174 coletados; medido em `fb12ef5`, sessão 003.FH, árvore parada, 314.32s)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v91 · DECISOES v186
+**Baseline:** branch `feat/003fi-varredura-acervo` sobre `main 4d1bc01` · **1169 passed, 6 skipped, 0 failed** *(1175 coletados; medido em `4d1bc01`, sessão 003.FI, árvore parada, 580.32s)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v91 · DECISOES v186
 
-> **Os 8 vermelhos são de ambiente, não de código `[MEDIDO — 003.FH]`.** A tiragem de partida desta sessão (@ `eb94b06`, antes da fatia) deu **1137 passed, 8 failed, 21 skipped, 1166 coletados** — mesmo total coletado do Baseline anterior (1160+6), logo nenhum teste criado ou perdido. A fatia de dado somou **+8 exato** (1174 coletados), com `failed` e `skipped` inalterados. Os 8 vermelhos e 15 dos 21 skips são um-para-um com **PGRs referenciados pelos testes e ausentes do acervo versionado**: `PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf` (2), `pgr_Cjr Engenharia Ltda (M Construtora).pdf` (6) e `PGR - CONSCIENTE … SPE 0030 - FASCINO (15.07.26).pdf` (skips). `matrizes_originais/` tem 17 arquivos rastreados apesar do `.gitignore:23` — manifestação de `DH-003FE-01` (DISPENSADA); a classe está em `DH-003ET-01` (ABERTA). **A contagem de host completo não é conhecida por esta sessão e não foi inferida** — o Baseline anterior (`1160 passed, 6 skipped @ deed9f6`, ver Correção 003.FH-C no bloco 003.FE do HISTORICO) segue sendo o único número de acervo completo, e envelheceu em 6 dias.
+> **Os 8 vermelhos sumiram, e a causa nomeada por 003.FH era a certa `[MEDIDO — 003.FI]`.**
+> O PR #322 levou `matrizes_originais/` de **17 para 83 arquivos** rastreados. Os **7** caminhos de
+> `matrizes_originais/` que a suíte abre passam a existir em disco, conferidos um a um
+> (`git grep -ohE "matrizes_originais/[^\"']+\\.(pdf|docx|doc|xlsx)" HEAD -- agente_medico/tests/ tests/`).
+> A tiragem foi de **1145/8/21** para **1169/6/0** sem uma linha de código mudar entre as duas.
 >
-> Achado colateral, dentro de `DH-003ET-01`: a mesma ausência de PDF produz `skip` declarado em alguns testes e `FileNotFoundError` em outros. Inconsistência de instrumento, não de conduta clínica.
+> **A reconciliação é por coletados, que é invariante a ambiente:** `1166` (003.FE e a tiragem de
+> partida de 003.FH, idênticos) `+ 8` (fatia 003.FH) `+ 1` (correção 003.FH-C3) = **1175**, e
+> `1169 + 6 = 1175`. Nenhum teste criado ou perdido em nenhum ponto da cadeia. O `1160 passed,
+> 6 skipped @ deed9f6` deixa de ser "o único número de acervo completo" — agora há um medido no
+> repositório, e ele é reproduzível por quem clonar.
+>
+> `DH-003FH-02` **FECHADA** por esta medição. `DH-003ET-01` (fixtures de PDF não versionadas) segue
+> ABERTA: a classe não foi resolvida, só deixou de se manifestar neste acervo.
+
 **Três números clínicos avaliados, não re-tirados nesta tiragem** — 003.FE é IMPLEMENTAÇÃO de apresentação: nenhuma R-* criada, alterada ou depreciada; vocabulário/CAS intocado; as 3 dívidas que travam produção seguem as mesmas. Nenhum dos três se moveu. Decisão declarada sob `D-ARQ-85` cl.1.
 
 ---

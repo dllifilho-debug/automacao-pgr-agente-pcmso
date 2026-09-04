@@ -6491,3 +6491,44 @@ varredura de conteúdo o acha e nenhuma redação de corpo o remove.
 - **Metadata é conteúdo que ninguém varre.** Os 16 nomes não apareceriam em nenhuma passada de
   texto — apareceram porque `file -b` cospe o cabeçalho OLE2 de graça, num comando rodado para
   outra finalidade. O achado foi sorte de instrumento, não cobertura de método.
+
+> **Correção 003.FI-C** *(nota aditiva; a redação acima fica intacta — classe 10 do `/conferir`,
+> a mesma regra que 003.FH aplicou a si próprio)*. O `/kickoff` **rodou**, em sessão separada, a
+> pedido do Diovanni, depois que este bloco foi escrito. Achou duas coisas que o bloco devia ter
+> tratado e não tratou.
+>
+> **(1) A escolha do `1160` como base da conta não estava justificada.** O bloco afirma
+> `1160 + 8 + 1 = 1169` sem dizer por que compara com `1160` e não com o **`1145/8/21`** que o
+> `PAINEL_ESTADO.md` declara como Baseline. A justificativa existe e é do próprio PAINEL, literal:
+> *"o Baseline anterior (`1160 passed, 6 skipped @ deed9f6`) segue sendo o **único número de acervo
+> completo**"*. O `1145/8/21` foi medido em container **sem** os 4 PGRs, logo não é comparável a uma
+> tiragem de acervo completo. A escolha estava certa; a omissão era da redação.
+>
+> **Reconciliação mais forte, que o bloco também não deu — por coletados, não por `passed`:**
+> `1166` coletados (003.FE e a tiragem de partida de 003.FH, idênticos) `+ 8` (fatia 003.FH)
+> `+ 1` (correção 003.FH-C3) = **1175**. A tiragem desta sessão dá `1169 + 6 = 1175`. Coletados é
+> invariante a ambiente — nenhum PGR ausente muda quantos testes existem —, então essa igualdade
+> prova que nada foi criado nem perdido, o que a soma por `passed` sozinha não prova.
+>
+> **(2) `D-ARQ-85` manda re-tirar o Baseline em todo fechamento que produza commit, e eu não
+> re-tirei.** Falha de cláusula, não de medição: o número estava medido desde a Medição 2 e ficou
+> fora do `PAINEL_ESTADO.md`, que seguia apontando `claude/kickoff-5e5yvb` sobre `eb94b06` — branch
+> apagada e ref dois merges atrás. Corrigido nesta emenda; o PAINEL é estado corrente, então foi
+> reescrito, não anotado.
+>
+> **Não corrigido, e declarado:** os três números clínicos **não** foram re-tirados, sob
+> `D-ARQ-85` cl.1 — 003.FI não criou, alterou nem depreciou `R-*`, e `git diff --name-only
+> eb94b06 e27754c -- '*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml'` **devolve vazio**, medido. Pelo
+> mesmo motivo o bloqueador `medir_painel` 23/42 × painel 22/42 segue exatamente como estava:
+> **não re-medido nesta sessão**, e o `+1` continua sem regra nomeada.
+>
+> **O que o `/kickoff` confirmou e vale registrar:** `DECISOES v186` e `PROTOCOLO v91` batem com as
+> tabelas de revisão; o cruzamento HISTORICO × docs reais **CONFERE**. E ele contou **83 headers
+> abertos** pelo filtro literal (1 em DECISOES, 82 em PENDENCIAS) mais **6 `[PARCIALMENTE
+> RESOLVIDA]`** que o filtro literal exclui — número que este bloco não tinha.
+>
+> **Lição, e é a mesma de 003.FH por outro caminho:** o bloco declarou honestamente que o
+> `/kickoff` não rodou e que o cruzamento de abertura ficava `[A MEDIR]`. Declarar o buraco não é o
+> mesmo que não ter o buraco — as duas coisas que faltavam eram uma cláusula dura (`D-ARQ-85`) e uma
+> justificativa de escolha de base, e nenhuma das duas precisava do ritual para ser feita. **Ritual
+> ausente vira desculpa se a sessão parar em declará-lo.**
