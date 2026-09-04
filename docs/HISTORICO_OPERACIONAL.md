@@ -6396,3 +6396,386 @@ commit de medição — corrigido nesta nota, ver Verificação abaixo).
 > verificável: a varredura inversa testa o teste, e o `/conferir` extraiu do bloco, não do YAML.
 > **Comentário que carrega `[MEDIDO]` é afirmação de medição e precisa de reprodução igual à do
 > corpo do bloco.** Insumo medido para a próxima META — uma ocorrência, §11 não autoriza cláusula.
+
+## Sessão 003.FI — 04/09/2026 — MEDIÇÃO (varredura de acervo) + FECHAMENTO de dívida
+
+**Numeração derivada do repo e ratificada pelo merge:** `003.FH` é o último bloco em `main`
+(`b32a7e3`, PR #321). Sem ressalva desta vez — a de 003.FH caiu quando o merge aconteceu.
+
+**`/kickoff` não rodou.** A skill é `disable-model-invocation` e a instrução dela é explícita: só
+invocação manual do Arquiteto, e não replicar o fluxo por outros meios. Esta sessão leu de disco
+apenas o que precisava para escrever certo. **Consequência declarada:** não há relatório de estado
+de abertura, e o cruzamento HISTORICO × docs reais que o ritual faz **não foi feito**. `DECISOES`
+segue **v186** e `PROTOCOLO` segue **v91** (lidos da tabela de revisões, não do que o HISTORICO
+declara), mas as demais checagens do passo de abertura ficam `[A MEDIR]`.
+
+**Nenhum código de motor tocado. Nenhuma `R-*` criada, alterada ou depreciada. Nenhum teste novo.**
+`DECISOES_ARQUITETURAIS.md` intocado, logo `INDICE_DARQ.md` não regenerado.
+
+### O que provocou a sessão
+
+O Diovanni subiu o acervo completo pelo GitHub Desktop — **PR #322, 66 arquivos novos**,
+`matrizes_originais/` de **17 para 83 arquivos**, 386 MB de working tree, `.git` a 143 MB.
+Mergeado direto em `main` (`4d1bc01`), **sem a varredura de dado pessoal que estava combinada** e
+sem passar por revisão. A varredura virou post-hoc — é o que esta sessão fez.
+
+**Registro honesto da ordem dos fatos:** a recomendação era varrer antes do commit, em branch
+descartável. O acervo entrou primeiro. A medição abaixo vale igual; o que se perdeu foi a opção
+barata de desfazer.
+
+### Medição 1 — a cláusula de reabertura de `DH-003FE-01` **não** disparou
+
+Ela reabre "se o repositório deixar de ser privado, **ou o acervo passar a conter dado de
+trabalhador**". Nenhuma das duas.
+
+Varredura dos **83 arquivos**, com extração real de texto — `pdfplumber` para PDF, `zipfile` para
+OOXML, LibreOffice headless para `.doc`/`.rtf`. **83 de 83 extraídos; 0 escaneados; 0 não medidos.**
+
+- **Dado de trabalhador: ausente.** 34 arquivos casaram marcador (`ASO`, relação de empregados,
+  `matrícula`, admissão, apto/inapto, prontuário) e **o contexto de cada classe foi lido**: é
+  prosa de procedimento e campo em branco de formulário. *"Relação de empregados próprios, em
+  planilha EXCEL, discriminando nome…"* é a exigência que a empresa cumpre, não a lista;
+  `"(Nome do funcionário)"` é lacuna em modelo de placa; `"MATRÍCULA:"` é campo vazio de permissão
+  de trabalho; `"prontuário médico individual"` é o literal da NR-07 citado. Zero ASO preenchido,
+  zero lista nominal, zero resultado ligado a pessoa.
+- **Repositório privado**, 0 forks (API do GitHub).
+- **7 CPFs distintos com DV válido, em 4 arquivos** — todos em página de assinatura digital ou
+  ficha de responsável técnico, com nome e e-mail corporativo. Signatários, não trabalhadores.
+- **PIS/NIT: 1 real de 3 candidatos** — descartados um número de série de calibrador de vazão e
+  ruído de texto invertido no PGR da EBSERH.
+
+Detalhe integral na própria `DH-003FE-01`, que segue **DISPENSADA** com a cláusula agora testada.
+
+**Contagem de marcador é forma; contexto é prova.** Parar em "34 arquivos com marcador de ASO"
+teria produzido um alarme falso sobre um acervo limpo — a mesma classe de erro que este projeto
+registra como "leio a forma, não a prova".
+
+### Medição 2 — `DH-003FH-02` **FECHADA**, e a conta fecha exata
+
+Os **7** caminhos de `matrizes_originais/` que a suíte abre existem em disco, conferidos um a um.
+Suíte completa pelo comando canônico, árvore parada @ `4d1bc01`:
+**1169 passed, 6 skipped, 0 failed** em 580.32s.
+
+`1160` herdados de 003.FE `+ 8` testes de 003.FH `+ 1` da correção 003.FH-C3 = **1169**;
+`skipped` volta de **21** para os **6** herdados. Os 8 vermelhos e os 15 skips extras eram,
+um-para-um, os PGRs ausentes. `mypy --strict` no alvo canônico: **limpo, 48 arquivos**.
+
+Os três percentuais de 003.FE/FF (Fascino 97,0%, Ricco 91,1%, T65 48,4%) **passam a ser
+re-mediveis**, mas **não foram re-medidos** — re-medir é rodar `medicao_pgr`, fora da suíte.
+Fica `[A MEDIR]`. A DH afirmava irreprodutibilidade, e isso deixou de valer; o valor dos números
+não foi reconferido.
+
+### Pendências
+
+**Fechada:** `DH-003FH-02`.
+**Nova:** `DH-003FI-01` — 40 arquivos carregam **16 nomes de pessoa na metadata** (`Author` /
+`Last Saved By`, OLE2 e OOXML), incluindo médicas e equipe do escritório. Dado pessoal comum de
+profissional, mesma faixa do CRM que os documentos já publicam no corpo; não-bloqueante. Ganha DH
+própria porque é **eixo distinto** do de `DH-003FE-01`: está no cabeçalho do arquivo, nenhuma
+varredura de conteúdo o acha e nenhuma redação de corpo o remove.
+**Anotada sem fechar:** `DT-003FH-01` — o T65 chegou ao acervo, então os 19 termos deixam de ser
+`[A MEDIR]` por falta de documento. A DT segue **ABERTA**: falta a passada que popula os aliases.
+
+### Lições de método
+
+- **Varredura que não declara o que não conseguiu ler não é varredura.** A primeira passada deu
+  `ERRO_EXTRACAO` em **28 dos 83** — todos os `.doc` e `.rtf` —, porque o container não tinha
+  `libreoffice-writer`. Reportar ali teria dito "limpo" sobre 55 arquivos e calado sobre um terço
+  do acervo, com a mesma cara de resultado completo. Instalado o filtro, os 28 saíram: 27 limpos.
+  Depois o `apt-get` quebrou `charset_normalizer` e matou a terceira passada em silêncio.
+  **Duas ferramentas falharam sem gritar, na mesma sessão.**
+- **A cláusula de reabertura fez o trabalho dela.** `DH-003FE-01` foi dispensada em 29/08 com um
+  gatilho escrito. Quatro dias depois o gatilho foi testado contra fato novo, com método, e a
+  dispensa sobreviveu **medida** em vez de por inércia. Dispensa com cláusula é diferente de
+  dispensa: a primeira é decisão, a segunda é esquecimento.
+- **Metadata é conteúdo que ninguém varre.** Os 16 nomes não apareceriam em nenhuma passada de
+  texto — apareceram porque `file -b` cospe o cabeçalho OLE2 de graça, num comando rodado para
+  outra finalidade. O achado foi sorte de instrumento, não cobertura de método.
+
+> **Correção 003.FI-C** *(nota aditiva; a redação acima fica intacta — classe 10 do `/conferir`,
+> a mesma regra que 003.FH aplicou a si próprio)*. O `/kickoff` **rodou**, em sessão separada, a
+> pedido do Diovanni, depois que este bloco foi escrito. Achou duas coisas que o bloco devia ter
+> tratado e não tratou.
+>
+> **(1) A escolha do `1160` como base da conta não estava justificada.** O bloco afirma
+> `1160 + 8 + 1 = 1169` sem dizer por que compara com `1160` e não com o **`1145/8/21`** que o
+> `PAINEL_ESTADO.md` declara como Baseline. A justificativa existe e é do próprio PAINEL, literal:
+> *"o Baseline anterior (`1160 passed, 6 skipped @ deed9f6`) segue sendo o **único número de acervo
+> completo**"*. O `1145/8/21` foi medido em container **sem** os 4 PGRs, logo não é comparável a uma
+> tiragem de acervo completo. A escolha estava certa; a omissão era da redação.
+>
+> **Reconciliação mais forte, que o bloco também não deu — por coletados, não por `passed`:**
+> `1166` coletados (003.FE e a tiragem de partida de 003.FH, idênticos) `+ 8` (fatia 003.FH)
+> `+ 1` (correção 003.FH-C3) = **1175**. A tiragem desta sessão dá `1169 + 6 = 1175`. Coletados é
+> invariante a ambiente — nenhum PGR ausente muda quantos testes existem —, então essa igualdade
+> prova que nada foi criado nem perdido, o que a soma por `passed` sozinha não prova.
+>
+> **(2) `D-ARQ-85` manda re-tirar o Baseline em todo fechamento que produza commit, e eu não
+> re-tirei.** Falha de cláusula, não de medição: o número estava medido desde a Medição 2 e ficou
+> fora do `PAINEL_ESTADO.md`, que seguia apontando `claude/kickoff-5e5yvb` sobre `eb94b06` — branch
+> apagada e ref dois merges atrás. Corrigido nesta emenda; o PAINEL é estado corrente, então foi
+> reescrito, não anotado.
+>
+> **Não corrigido, e declarado:** os três números clínicos **não** foram re-tirados, sob
+> `D-ARQ-85` cl.1 — 003.FI não criou, alterou nem depreciou `R-*`, e `git diff --name-only
+> eb94b06 e27754c -- '*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml'` **devolve vazio**, medido. Pelo
+> mesmo motivo o bloqueador `medir_painel` 23/42 × painel 22/42 segue exatamente como estava:
+> **não re-medido nesta sessão**, e o `+1` continua sem regra nomeada.
+>
+> **O que o `/kickoff` confirmou e vale registrar:** `DECISOES v186` e `PROTOCOLO v91` batem com as
+> tabelas de revisão; o cruzamento HISTORICO × docs reais **CONFERE**. E ele contou **83 headers
+> abertos** pelo filtro literal (1 em DECISOES, 82 em PENDENCIAS) mais **6 `[PARCIALMENTE
+> RESOLVIDA]`** que o filtro literal exclui — número que este bloco não tinha.
+>
+> **Lição, e é a mesma de 003.FH por outro caminho:** o bloco declarou honestamente que o
+> `/kickoff` não rodou e que o cruzamento de abertura ficava `[A MEDIR]`. Declarar o buraco não é o
+> mesmo que não ter o buraco — as duas coisas que faltavam eram uma cláusula dura (`D-ARQ-85`) e uma
+> justificativa de escolha de base, e nenhuma das duas precisava do ritual para ser feita. **Ritual
+> ausente vira desculpa se a sessão parar em declará-lo.**
+
+> **Correção 003.FI-C2** *(nota aditiva; redação acima intacta — classe 10)*. `/conferir` **a frio,
+> em sessão separada**, sobre a lista de afirmações que esta sessão publicou:
+> **24 afirmações, 8 CONFERE, 3 DIVERGE, 13 NÃO VERIFICÁVEL** (as 13 por exigirem execução de
+> suíte/extração de texto, fora do `allowed-tools` da skill — limite de instrumento, não achado).
+> **Os 3 DIVERGE foram reproduzidos e os 3 procedem.**
+>
+> **Ressalva de escopo, e ela importa para ler o placar:** a conferência rodou contra `4d1bc01` e
+> sobre a **lista de afirmações do chat**, não sobre o bloco commitado. Parte do que ela marca como
+> ausente — o hash da tiragem, por exemplo — **está** no bloco (`árvore parada @ 4d1bc01`) e faltava
+> só no resumo. Isso não anula nenhum dos três DIVERGE abaixo, que são de fato.
+>
+> **(1) `"a soma que fecha DH-003FH-02"` — atribuição indevida.** `DH-003FH-02` **não crava critério
+> numérico de fechamento**; o que ela nomeia é qualitativo (gabarito reproduzível a partir do repo) e
+> o caminho ficou explicitamente em aberto: *"Caminho candidato, não decidido: versionar os 4 PGRs
+> faltantes […] ou publicar um extrato textual […]. A escolha é do Arquiteto"*. A soma é **a
+> evidência que esta sessão produziu** para o critério qualitativo, não um critério que a DH tenha
+> enunciado. A escolha entre os dois caminhos foi feita pelo Diovanni ao mergear o PR #322 — e é
+> isso que fecha, não a aritmética.
+>
+> **Procedência das parcelas, que o bloco não declarava e a conferência forneceu:**
+> o `+8` está medido em `PAINEL_ESTADO.md:24` (*"a fatia de dado somou +8 exato (1174 coletados)"*,
+> @ `fb12ef5`); o `+1` é delta líquido de `7789ef8` — duas funções de teste adicionadas, uma removida
+> por renome (`test_indice_real_tem_119_entradas` → `_120_entradas`). `1174 + 1 = 1175 = 1169 + 6`.
+>
+> **(2) `"os 7 caminhos que a suíte abre"` — são 8, e o defeito é do método.** O comando que o bloco
+> publica como reprodução exige `matrizes_originais/` **colado ao nome dentro de um literal só**.
+> `tests/test_regressao_pcmso.py:168` monta o caminho partido —
+> `_PDF_FALLBACK = ROOT / "matrizes_originais" / "PCMSO(ATUALIZAÇÃO)CMO RESIDENCIAL VIVERDE AREIAO
+> 06.03.25.pdf"` — e some do grep. Re-medido por casamento de **nome de arquivo do acervo contra o
+> texto dos testes**, com normalização NFC (sem ela o acento derruba dois nomes): **8 referenciados**.
+> O 8º está rastreado no HEAD, então nenhuma conclusão muda — mas **o comando de reprodução publicado
+> media literais de string, não aberturas**, e teria escondido um arquivo ausente.
+>
+> **(3) `"40 arquivos na metadata"` — número sem escopo declarado, e o escopo estava errado.**
+> O `40` era **rendimento sobre 45 não-PDF** (31 legado + 14 OOXML), nunca dito. Pior: os **38 PDFs
+> não foram varridos** — e carregam `Author` com nome de pessoa. Re-medido sobre os **83 de 83**:
+> **64 arquivos** com metadata de autoria, **27 valores distintos**, dos quais 7 não são pessoa
+> (`DELL`, `CMO`, `RIMA`, `Computador`, `Admin`, `Usuario`, `python-docx`) e **20 são nome de
+> pessoa** — contra os 16 que `DH-003FI-01` registrava. Entram nomes que só existiam nos PDFs:
+> ALDEMAMAR FERREIRA LIMA, Pablo Goulart, Marcos Vinicius Souza Mota, Leandro S.Mota,
+> Flavio Felipe Soares da Silva, CARLOS EDUARDO, Guilherme, adriano.oliveira.
+> `DH-003FI-01` corrigida na fonte: **64 arquivos / 20 nomes**, não 40/16.
+>
+> **Lição, e é a terceira vez que esta classe aparece em duas sessões.** Os três DIVERGE têm a mesma
+> forma: **o número estava certo para o escopo que eu varri, e o escopo não estava escrito.** 7 era
+> certo para "literal único"; 40 era certo para "não-PDF"; a soma era certa como evidência e errada
+> como critério. Nenhum era mentira e nenhum era conferível. **Número sem escopo declarado não é
+> medição — é anedota com dígitos.** É a mesma raiz do gap que o `/critico` achou em 003.FH (afirmar
+> que `normalizar_termo` colapsa um par sem executar o colapso) e da falha de `D-ARQ-85` que o
+> `/kickoff` achou nesta: o instrumento não foi rodado até o fim, e o relato não disse onde parou.
+
+### Gate de fechamento — `/critico` `4d1bc01..f8bdfc0`
+
+Rodado **a frio, em sessão separada**. Barra derivada do artefato: **CONHECIMENTO** (docs-only —
+abre `DH-003FI-01`, fecha `DH-003FH-02`, emenda `DT-003FH-01` e `DH-003FE-01`, re-tira o Baseline;
+nenhuma `R-*`, nenhuma `D-ARQ`, nenhum código, nenhum teste). Universalidade **PASSA** (3/3 setores
+instanciados sobre o eixo de `DH-003FI-01` — construção, química, saúde; os comandos de reprodução
+são ligados a formato, não a setor). Caso local **PASSA** (removido o âncora dos 83 arquivos, a DH
+segue prescrevendo eixo, critério de classificação e razão de não se deixar cobrir por
+`DH-003FE-01`). Registrabilidade **FALHA**.
+
+**CRÍTICO rejeitou** — gap: a `Correção 003.FI-C2` foi aplicada **só no cabeçalho de
+`DH-003FI-01`**, e os números que ela própria refuta seguiam publicados como medidos em três sítios
+do mesmo intervalo — `"40 arquivos / 16 nomes"` na cláusula testada de `DH-003FE-01`,
+`"reescrever os 40 binários"` na premissa de custo que carrega a classificação não-bloqueante de
+`DH-003FI-01`, e o `"7 caminhos"` com o grep que o próprio artefato declara defeituoso, no
+`PAINEL_ESTADO.md`.
+
+> **Correção 003.FI-C3** *(nota aditiva; redação acima intacta — classe 10)*. Os três sítios foram
+> conferidos na linha e **os três procediam**. Corrigidos na fonte, por serem estado corrente:
+> `DH-003FE-01` passa a **64 dos 83 / 20 nomes** com o escopo dito; `DH-003FI-01` passa a
+> "reescrever os **64** binários"; o `PAINEL_ESTADO.md` passa a **8 arquivos referenciados**, com o
+> método de casamento por nome + NFC no lugar do `git grep` de caminho literal, e a razão escrita.
+>
+> **Varri a classe inteira em vez de só os três nomeados**, que é o que um achado desta forma pede.
+> A varredura encontrou **mais dois sítios, e os dois ficam como estão**: o resumo de pendências
+> (`"DH-003FI-01 — 40 arquivos carregam 16 nomes"`) e a lição de método (`"Os 16 nomes não
+> apareceriam em nenhuma passada de texto"`), ambos **dentro do corpo original deste bloco**.
+> Classe 10 proíbe reescrevê-los: bloco de sessão é registro do que a sessão mediu, e a `003.FI-C2`
+> já publica o número certo. **Enumerá-los aqui é a alternativa à reescrita** — quem ler o bloco
+> encontra o aviso antes de usar o número. Mesma regra vale para `"os 7 caminhos"` na Medição 2.
+>
+> **O que o Crítico observou e eu não corrigi:** o artefato tem fronteira em substância mas nenhum
+> parágrafo em negrito iniciando por "Fronteira". Não é o gap e não foi enunciado como exigência —
+> fica registrado por ser convenção de leitura do Gauntlet, e a decisão de torná-la obrigatória é do
+> Arquiteto, não deste bloco.
+>
+> **A lição da 003.FI-C2 sobrevive ao próprio conserto, e piorou.** Lá eu escrevi que número sem
+> escopo declarado não é medição. O gap agora é o degrau seguinte: **corrigir no ponto de medição e
+> não varrer as cópias propagadas deixa o documento com dois números do mesmo fato, e o errado é o
+> que está nos sítios que o leitor alcança primeiro** — a premissa de custo, a cláusula testada, o
+> painel. Correção que não varre a classe inteira é correção que fabrica contradição.
+
+### Gate de fechamento — `/critico` `4d1bc01..7815f20` (2ª rodada)
+
+Rodado **a frio, em sessão separada**, sobre o artefato já corrigido pela 1ª rodada. Barra
+**CONHECIMENTO**. Universalidade **PASSA** (3/3 setores). Caso local **PASSA-FRACO** — removido o
+âncora do PR #322, `DH-003FI-01` segue prescrevendo fato e reprodução genérica; o fechamento de
+`DH-003FH-02` é integralmente âncora-dependente, "o que é próprio de um fechamento".
+Registrabilidade **FALHA**.
+
+**CRÍTICO rejeitou** — gap: a emenda de `DT-003FH-01` afirmava que o T65 chegou "em dois arquivos"
+com nomes distintos do que `DH-003FH-02` cita, e criava ressalva `[A MEDIR]` sobre serem o mesmo
+documento — mas `matrizes_originais/PGR - ALT T65 2024.2026.pdf` está rastreado **sob o nome exato**
+em `4d1bc01` e em `7815f20`, dentro dos 83 arquivos que a sessão declara ter varrido integralmente.
+A dúvida era **fabricada**, e era o único resíduo que o artefato deixava sobre o gabarito T65
+(48,4%) — um dos três que `DH-003FH-02` existe para cobrir.
+
+> **Correção 003.FI-C4** *(nota aditiva; redação acima intacta — classe 10)*. **O gap procede, e é o
+> pior dos três que as passadas frias acharam** — os outros eram números sem escopo; este é uma
+> ressalva inventada sobre um fato que um comando responde. Reproduzido:
+> `git ls-tree -r 7815f20 -- "matrizes_originais/PGR - ALT T65 2024.2026.pdf"` devolve blob
+> `7f5c942`, 1.296.117 bytes, idêntico em `4d1bc01`. Corrigido na fonte: a ressalva saiu, o arquivo
+> entrou nomeado com blob e tamanho, e `DH-003FH-02` passa a listar os **4** PGRs que nomeia
+> conferidos um a um por `git ls-tree -r -l` — 567.168 B, 1.037.924 B, 10.366.538 B e 1.296.117 B.
+>
+> **Causa medida, e ela fecha a série.** A lista de "dois arquivos" saiu da saída do **passe 3** da
+> varredura, que por desenho **só imprime arquivo com marcador**. O `PGR - ALT T65 2024.2026.pdf`
+> tem zero marcadores, logo não apareceu. Ele **foi varrido** — está no cache dos 83/83, e o
+> "escopo completo" que o bloco afirma é verdadeiro. O que falhou não foi a varredura: foi eu ter
+> lido uma **listagem filtrada como se fosse inventário**.
+>
+> **É a terceira instância da mesma raiz em uma sessão só**, e agora ela tem nome exato:
+> `7` era certo para "literal único"; `40` era certo para "não-PDF"; `dois arquivos` era certo para
+> "arquivos com marcador". **Toda vez, um filtro virou universo porque o filtro não foi escrito ao
+> lado do número.** As três passaram por mim, e cada uma foi pega por uma passada fria diferente —
+> `/kickoff`, `/conferir`, `/critico`. Nenhuma das três teria sido pega por mim relendo o artefato,
+> porque relendo eu leio o número, não o escopo que o produziu.
+>
+> **Insumo medido para a próxima META, não regra proposta aqui:** três ocorrências na mesma sessão,
+> com a mesma forma e três instrumentos distintos de detecção, é origem medida — mas propor cláusula
+> é decisão do Arquiteto sob §11, e este bloco não a propõe.
+
+### Gate de fechamento — `/critico` `4d1bc01..fedbacc` (3ª rodada)
+
+Barra **CONHECIMENTO**. Universalidade **PASSA** (3/3 setores; `DH-003FI-01` não duplica ID —
+0 ocorrências em `4d1bc01`). Caso local **PASSA (fraco)**. Registrabilidade **FALHA** — as duas
+fronteiras amostradas conferem contra o texto real, e o Crítico reproduziu e confirmou os fatos de
+git que as correções anteriores gravaram: 17→83; **8/8** arquivos referenciados pelos testes; a
+`003.FI-C2` está certa sobre `tests/test_regressao_pcmso.py:168`; os 4 PGRs batem em nome e byte
+(567.168 / 1.037.924 / 10.366.538 / 1.296.117, blob `7f5c942`); partição `83 = 38 PDF + 45 não-PDF`.
+
+**CRÍTICO rejeitou** — gap: a "Nota de instrumento" de `DH-003FE-01` publica `ERRO_EXTRACAO` em
+**"28 dos 83 — todos os `.doc` e `.rtf`"**, e o conjunto que ela mesma nomeia tem **31** arquivos
+(`.doc` 27 + `.rtf` 4). O número não reconcilia com partição medível alguma, sob a própria tese
+"varredura que não declara o que não conseguiu ler não é varredura" — e é o alicerce empírico do
+"83 de 83 extraídos" que sustenta manter `DH-003FE-01` DISPENSADA.
+
+> **Correção 003.FI-C5** *(nota aditiva; redação acima intacta — classe 10)*. **O gap procede como
+> defeito de reconstrutibilidade, e a correção está feita.** Medido: os 28 são **`.doc` 27 de 27**
+> mais **`.rtf` 1 de 4** (`PCMSO (OBRA NOVA) PASSARELA ESTADIO SERRA DOURADA.rtf`). O descritor
+> "todos os `.doc` e `.rtf`" é que estava errado; o `28` sempre esteve certo. `DH-003FE-01` passa a
+> publicar a composição por extensão e a conta que fecha: `28 + 3 = 31`, e
+> `31 + 38 + 13 + 1 = 83`.
+>
+> **Uma parte da consequência enunciada não procede, e registrar isso é obrigação, não defesa.**
+> O veredito diz que ficam "3 de 83 com estado de extração não declarado". **Não ficam.** Os 3 `.rtf`
+> saíram `ACHADO` no próprio passe 1 — estado declarado, na mesma saída, em linha própria — e a soma
+> bruta `83 = 28 ERRO_EXTRACAO + 32 ACHADO + 23 limpo` já fechava. O que faltava era **um terceiro
+> conseguir refazer a conta lendo só o texto**, e isso é registrabilidade, exatamente o teste que
+> falhou. A cobertura da varredura nunca teve buraco; a prosa sobre ela tinha.
+>
+> **Quarta instância da mesma raiz, e a mais fina.** Nas três anteriores um filtro virou universo
+> (`7` = literal único, `40` = não-PDF, `dois arquivos` = com marcador). Aqui o número está certo e
+> **o rótulo é que generaliza** — `28` medido, "todos os `.doc` e `.rtf`" inferido. É o mesmo defeito
+> visto do outro lado: antes eu publicava o número sem o escopo; agora publiquei o número com um
+> escopo **maior do que o medido**. Nos dois casos o leitor não consegue fechar a conta.
+>
+> **Insumo medido para a próxima META, agora com quatro ocorrências e quatro detecções
+> independentes** (`/kickoff`, `/conferir`, `/critico` 2ª e 3ª rodadas). Propor cláusula segue sendo
+> decisão do Arquiteto sob §11; este bloco não a propõe.
+
+### Gate de fechamento — `/critico` `4d1bc01..2197738` (4ª rodada)
+
+Barra julgada **IMPLEMENTAÇÃO** (as três rodadas anteriores julgaram CONHECIMENTO — divergência de
+enquadramento do próprio Gauntlet, registrada, não arbitrada por este bloco). Teste-por-regra,
+ID+fonte e ID antiga **N/A** — `git diff --stat` confirma zero código, zero `regras.yaml`, zero
+teste. Registro de suíte **PRESENTE**. O Crítico reproduziu independentemente e confirmou: 83
+arquivos em `4d1bc01`; os 4 PGRs rastreados, inclusive blob `7f5c942b08…` / 1.296.117 B; o 8º
+arquivo da `003.FI-C2` linha a linha; e `git diff --name-only eb94b06 e27754c` sobre `PROTOCOLO`/
+`regras.yaml` vazio. Declarou também ter lido o bloco desta sessão por acidente e tratado seu
+conteúdo como **não-fonte** — a apuração se apoiou só em `PENDENCIAS`, `PAINEL` e objetos git.
+
+**CRÍTICO rejeitou** — gap: o header de `DH-003FH-02` foi alterado para `[FECHADA em 04/09/2026]`,
+mas o campo canônico **`Status:`** dentro do corpo da própria DH seguia dizendo
+`"ABERTA, não-bloqueante para o motor; bloqueante para reprodução de gabarito"`. Nem a `Resolução`
+nem a `Correção 003.FI-C2` reescreveram essa linha. Um terceiro que abrisse só a DH leria os dois
+estados no mesmo bloco.
+
+> **Correção 003.FI-C6** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e é o gap
+> mais limpo das quatro rodadas** — uma linha, um campo canônico, contradição literal. Corrigido na
+> fonte: o `Status:` passa a FECHADA com a data, a evidência (`1169 passed, 6 skipped, 0 failed`) e
+> a ressalva de que `DH-003ET-01` **não** foi resolvida, só deixou de se manifestar neste acervo.
+>
+> **Varri a classe inteira em vez do sítio nomeado**, como nas correções anteriores: script sobre
+> os headers `### D*` e o campo `**Status:**` de cada corpo, procurando header fechado com Status
+> aberto. **Sete candidatos, cinco falsos positivos** — `DT-003M-02` tem o estado misto no próprio
+> header (`[ABERTA — só (A); (B) FECHADA]`), e `DH-003AO-01`, `DT-003ED-01`, `DH-003ED-01` e
+> `DH-003EI-01` são `PARCIALMENTE RESOLVIDA` com faceta aberta declarada. Sobra **um real além do
+> meu, e ele é anterior a esta sessão**: `DT-003EG-01` (`PENDENCIAS_CLINICAS.md:900`) tem header
+> `[FECHADA — D-ARQ-68 cl.5, 003.EZ]` e `**Status:** ABERTA`. **Não está no diff desta sessão e não
+> foi tocado** — corrigi-lo aqui seria alargar o PR sobre dívida de terceiro. Fica registrado com a
+> linha exata; abrir DH para ele é decisão do Arquiteto.
+>
+> **Quinta instância, e ela muda a forma da série.** As quatro anteriores eram escopo não escrito
+> (`7`, `40`, `dois arquivos`, `todos os .doc e .rtf`). Esta é outra coisa: **eu editei o header e
+> não o campo canônico do mesmo registro** — inseri duas seções longas *antes* da linha `Status:` e
+> nunca desci até ela. Não é escopo mal declarado; é edição parcial de estrutura. O que as duas
+> classes compartilham é o mecanismo de detecção: **nenhuma foi pega por releitura minha, e todas
+> por instrumento externo.**
+>
+> **Nota sobre o enquadramento:** a 4ª rodada julgou sob IMPLEMENTAÇÃO e as três anteriores sob
+> CONHECIMENTO, sobre artefatos da mesma natureza. O gap achado não depende da barra — mas a
+> divergência de modo entre rodadas do mesmo Gauntlet sobre o mesmo tipo de diff é insumo medido
+> para a próxima META, não algo que este bloco arbitre.
+
+### Gate de fechamento — `/critico` `4d1bc01..01b1a8a` (5ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. Teste-por-regra, ID+fonte e ID antiga **N/A** — nenhuma regra clínica
+tocada, nada a reverter. Registro de suíte **PASSA**: contagem `1169 passed, 6 skipped, 0 failed`,
+commit `4d1bc01` e o comando canônico `python -m pytest agente_medico/tests/ tests/` citados
+literalmente em `PENDENCIAS_CLINICAS.md`. Sobre a ausência de seção "Fronteira", que a 4ª rodada
+havia levantado: o Crítico a examinou e **não a tratou como gap** — o artefato não é decisão
+`D-ARQ`, é fechamento de DH/DT, onde o item não se aplica.
+
+**Gate de fechamento: CRÍTICO aprovou** — `4d1bc01..01b1a8a`, a frio, sessão separada.
+
+**O que ele verificou além do mínimo exigido, e é o que dá lastro ao fechamento:** os 8 arquivos de
+`matrizes_originais/` que a suíte referencia, presentes em `01b1a8a` com hash e tamanho batendo
+exato — T65 blob `7f5c942` / 1.296.117 B, RICCO 567.168 B, Cjr 1.037.924 B, FASCINO 10.366.538 B —
+e a contagem do acervo `17 → 83` por `git ls-tree`. Re-medido aqui em cinco refs para fixar a
+transição: `c9db9cc` 17 · `eb94b06` 17 · `b32a7e3` 17 · `4d1bc01` **83** · `01b1a8a` 83. O salto é
+o PR #322 e nada mais.
+
+**Saldo do Gauntlet nesta sessão: 4 rejeições, 4 gaps procedentes, 0 sobre a medição.** Os quatro
+foram de prosa e de estrutura — escopo não escrito (`7`, `40`, `dois arquivos`,
+`todos os .doc e .rtf`) e edição parcial de registro (header × campo `Status:`). O que o Crítico
+reproduziu de forma independente em três rodadas distintas — acervo, hashes, caminhos, suíte — nunca
+caiu. **É o resultado mais útil da sessão sobre método: a medição resistiu; o relato sobre ela, não.**
+
+**Fica aberto e é decisão do Arquiteto, não deste bloco:**
+`DT-003EG-01` (`docs/PENDENCIAS_CLINICAS.md:900`) carrega a mesma contradição que a `003.FI-C6`
+corrigiu — header `[FECHADA — D-ARQ-68 cl.5, 003.EZ]` com `**Status:** ABERTA`. É anterior a esta
+sessão, está fora do diff e **não foi tocada**. A divergência de enquadramento entre rodadas do
+próprio Gauntlet (1ª a 3ª julgaram CONHECIMENTO, 4ª e 5ª julgaram IMPLEMENTAÇÃO, sobre artefatos da
+mesma natureza) segue registrada e não arbitrada.
