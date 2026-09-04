@@ -6748,3 +6748,34 @@ estados no mesmo bloco.
 > CONHECIMENTO, sobre artefatos da mesma natureza. O gap achado não depende da barra — mas a
 > divergência de modo entre rodadas do mesmo Gauntlet sobre o mesmo tipo de diff é insumo medido
 > para a próxima META, não algo que este bloco arbitre.
+
+### Gate de fechamento — `/critico` `4d1bc01..01b1a8a` (5ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. Teste-por-regra, ID+fonte e ID antiga **N/A** — nenhuma regra clínica
+tocada, nada a reverter. Registro de suíte **PASSA**: contagem `1169 passed, 6 skipped, 0 failed`,
+commit `4d1bc01` e o comando canônico `python -m pytest agente_medico/tests/ tests/` citados
+literalmente em `PENDENCIAS_CLINICAS.md`. Sobre a ausência de seção "Fronteira", que a 4ª rodada
+havia levantado: o Crítico a examinou e **não a tratou como gap** — o artefato não é decisão
+`D-ARQ`, é fechamento de DH/DT, onde o item não se aplica.
+
+**Gate de fechamento: CRÍTICO aprovou** — `4d1bc01..01b1a8a`, a frio, sessão separada.
+
+**O que ele verificou além do mínimo exigido, e é o que dá lastro ao fechamento:** os 8 arquivos de
+`matrizes_originais/` que a suíte referencia, presentes em `01b1a8a` com hash e tamanho batendo
+exato — T65 blob `7f5c942` / 1.296.117 B, RICCO 567.168 B, Cjr 1.037.924 B, FASCINO 10.366.538 B —
+e a contagem do acervo `17 → 83` por `git ls-tree`. Re-medido aqui em cinco refs para fixar a
+transição: `c9db9cc` 17 · `eb94b06` 17 · `b32a7e3` 17 · `4d1bc01` **83** · `01b1a8a` 83. O salto é
+o PR #322 e nada mais.
+
+**Saldo do Gauntlet nesta sessão: 4 rejeições, 4 gaps procedentes, 0 sobre a medição.** Os quatro
+foram de prosa e de estrutura — escopo não escrito (`7`, `40`, `dois arquivos`,
+`todos os .doc e .rtf`) e edição parcial de registro (header × campo `Status:`). O que o Crítico
+reproduziu de forma independente em três rodadas distintas — acervo, hashes, caminhos, suíte — nunca
+caiu. **É o resultado mais útil da sessão sobre método: a medição resistiu; o relato sobre ela, não.**
+
+**Fica aberto e é decisão do Arquiteto, não deste bloco:**
+`DT-003EG-01` (`docs/PENDENCIAS_CLINICAS.md:900`) carrega a mesma contradição que a `003.FI-C6`
+corrigiu — header `[FECHADA — D-ARQ-68 cl.5, 003.EZ]` com `**Status:** ABERTA`. É anterior a esta
+sessão, está fora do diff e **não foi tocada**. A divergência de enquadramento entre rodadas do
+próprio Gauntlet (1ª a 3ª julgaram CONHECIMENTO, 4ª e 5ª julgaram IMPLEMENTAÇÃO, sobre artefatos da
+mesma natureza) segue registrada e não arbitrada.
