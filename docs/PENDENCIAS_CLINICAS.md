@@ -2064,6 +2064,46 @@ redescoberta e re-litigada a cada varredura.
 **Reabre se:** o repositório deixar de ser privado, ou o acervo passar a conter dado de
 trabalhador (hoje não contém — medido: matriz de exames tem 0 ocorrências de CPF).
 
+**Cláusula testada em 04/09/2026 (sessão 003.FI) — NÃO disparou. Segue DISPENSADA.**
+PR #322 levou `matrizes_originais/` de 17 para **83 arquivos**. Varredura post-hoc dos 83, com
+extração real de texto (pdfplumber; OOXML por `zipfile`; `.doc`/`.rtf` por LibreOffice headless):
+**83 de 83 extraídos, 0 escaneados, 0 não medidos.**
+
+- **Eixo que decide a cláusula — dado de TRABALHADOR: ausente.** 34 arquivos casaram marcador
+  (`ASO`, relação de empregados, `matrícula`, data de admissão, apto/inapto, prontuário) e o
+  contexto de cada classe foi lido: é integralmente **prosa de procedimento e campo em branco de
+  formulário** — *"Relação de empregados próprios, em planilha EXCEL, discriminando nome…"* é a
+  exigência que a empresa deve cumprir, não a lista; `"(Nome do funcionário)"` é lacuna em modelo de
+  placa de máquina; `"MATRÍCULA:"` é campo vazio de permissão de trabalho; `"prontuário médico
+  individual"` é o literal da NR-07 sendo citado. Nenhum ASO preenchido, nenhuma lista nominal,
+  nenhum resultado de exame ligado a pessoa. Contagem de marcador é forma; o contexto é a prova.
+- **Repositório segue privado**, 0 forks (medido pela API do GitHub) — a outra metade da cláusula.
+- **CPF com dígito verificador válido: 7 distintos, em 4 arquivos**, todos em página de assinatura
+  digital ou ficha de responsável técnico, sempre acompanhados de nome e e-mail corporativo:
+  `PGR VIVERDE V02` (`.pdf` e `.docx`), `PCMSO OBRA NOVA TOCTAO SPE_T65 [assinado].pdf` e
+  `PGR - Programa de Gerenciamento de Riscos 27.08.26.pdf`. São **signatários** — profissionais
+  assinando documento que já é assinado —, a mesma classe que sustentou a dispensa de 29/08.
+  O `17` do VIVERDE bate exato com a medição original: lá o número era de **ocorrências**, aqui os
+  **distintos** são 4. Mesma medição, contagem diferente — não é divergência.
+- **PIS/NIT: 1 real de 3 candidatos.** Descartados: número de série de calibrador de vazão
+  (`41461832041`) e ruído de texto invertido no `PGR_EBSERH_HUMAP.pdf`. O real é o NIT do
+  responsável técnico, junto do CPF dele.
+- **CRM em 11 arquivos, CREA em 13, e-mail em 29** — registro profissional e e-mail corporativo,
+  a faixa que o `.gitignore` já declara como dado pessoal comum de baixo risco.
+
+**Eixo novo, que não estava à vista quando a dispensa foi tomada — `DH-003FI-01`.** 40 arquivos
+carregam **16 nomes de pessoa na metadata** (`Author` / `Last Saved By` do OLE2 e do OOXML),
+incluindo as médicas do PCMSO e a equipe do escritório. Não está no corpo do documento e sobrevive a
+qualquer redação de conteúdo. Não muda a classificação — dado pessoal comum de profissional, mesma
+faixa do CRM —, mas é achado de eixo distinto e ganha DH própria em vez de nota aqui.
+
+**Nota de instrumento, medida:** a primeira passada da varredura deu `ERRO_EXTRACAO` em **28 dos 83**
+— todos os `.doc` e `.rtf` —, porque o container não tinha `libreoffice-writer`. Reportar ali teria
+dito "limpo" sobre 55 e calado sobre 28, um terço do acervo. Instalado o filtro e re-rodado: os 28
+saíram, 27 limpos. O `apt-get` então quebrou `charset_normalizer` e matou a terceira passada em
+silêncio; reinstalado e re-rodado. **Varredura que não declara o que não conseguiu ler não é
+varredura.**
+
 ### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[FECHADA em 02/09/2026 — descarte executado]`
 
 **Medido (29/08/2026, primeira aplicação do passo 9 do ritual).** Restam no remoto
@@ -2339,7 +2379,7 @@ Registrado como insumo da próxima META, não como cláusula proposta.
 
 **Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
 
-### DH-003FH-02 — Os três gabaritos que sustentam os números de 003.FE/FF não são reproduzíveis a partir do repositório `[ABERTA — higiene de método]`
+### DH-003FH-02 — Os três gabaritos que sustentam os números de 003.FE/FF não são reproduzíveis a partir do repositório `[FECHADA em 04/09/2026 — acervo completo versionado, suíte verde medida]`
 
 **Origem:** sessão 003.FH, ao medir a suíte no container.
 
@@ -2376,6 +2416,25 @@ PDF fora. A escolha é do Arquiteto — as duas têm custo de LGPD distinto.
 
 **Status:** ABERTA, não-bloqueante para o motor; **bloqueante para reprodução de gabarito**.
 
+**Resolução (04/09/2026, sessão 003.FI).** O Diovanni subiu o acervo completo — PR #322, 66 arquivos
+novos, `matrizes_originais/` passa de 17 para **83 arquivos rastreados**, 386 MB. Foi escolhido o
+primeiro caminho candidato (versionar os PDFs), não o extrato textual.
+
+**Medido nesta sessão, árvore parada @ `4d1bc01`:** os **7** caminhos de `matrizes_originais/` que a
+suíte abre existem em disco (`git grep -ohE "matrizes_originais/[^\"']+\.(pdf|docx|doc|xlsx)"` sobre
+`agente_medico/tests/` e `tests/`, um a um). Suíte completa pelo comando canônico
+`python -m pytest agente_medico/tests/ tests/`: **1169 passed, 6 skipped, 0 failed** em 580.32s.
+
+**A conta fecha exata, e é ela que fecha a DH:** `1160` passed herdados de 003.FE `+ 8` testes de
+003.FH `+ 1` da correção 003.FH-C3 = **1169**; `skipped` volta de **21** para os **6** herdados. Os
+8 vermelhos e os 15 skips extras que esta DH nomeou eram, um-para-um, os PGRs ausentes — e sumiram
+com a chegada deles. `mypy --strict` no alvo canônico segue limpo, 48 arquivos.
+
+**Os três percentuais de 003.FE/FF passam a ser re-mediveis a partir do repositório.** Não foram
+re-medidos aqui — fica `[A MEDIR]`, porque re-medir é rodar `medicao_pgr`, fora da suíte, e esta
+sessão não o fez. O que esta DH afirmava (irreprodutibilidade) deixou de valer; o valor dos
+percentuais não foi reconferido.
+
 ### DT-003FH-01 — 19 das 24 formas do resíduo do T65 ficam sem alias por falta do documento `[ABERTA — insumo medido, não-bloqueante]`
 
 **Origem:** sessão 003.FH, fatia de dado de `R-PGR-07`.
@@ -2398,4 +2457,42 @@ nem `trabalho_altura`.
 **O que fecha esta DT:** o T65 (ou o extrato do seu resíduo) chegando ao repo, e uma passada que
 popule os 19 restantes com o mesmo critério de procedência.
 
-**Status:** ABERTA, não-bloqueante. Dado, não motor.
+**Metade da condição caiu em 04/09/2026 (sessão 003.FI).** O PR #322 trouxe o T65 ao acervo, em dois
+arquivos: `PCMSO OBRA NOVA TOCTAO SPE_T65_ 18.03.2024 [assinado].pdf` e `PGR - TOCTAO ALT 65.pdf`.
+Os 19 termos deixam de ser `[A MEDIR]` por falta de documento — passam a ser re-mediveis a partir do
+repositório. **A DT NÃO fecha aqui:** falta a passada que popula os aliases, e ela é fatia de dado
+com o mesmo critério de procedência das 5 de 003.FH (verbatim medido, reversão nomeada, varredura
+inversa). Sessão futura.
+
+**Ressalva de nome, não conferida:** a `DH-003FH-02` nomeava o arquivo como
+`PGR - ALT T65 2024.2026.pdf`; o que chegou tem os dois nomes acima. Que sejam o mesmo documento é
+`[A MEDIR]` — nenhum teste os abre, então a suíte não responde por isso.
+
+**Status:** ABERTA, não-bloqueante. Dado, não motor. Insumo destravado, trabalho não feito.
+
+### DH-003FI-01 — Nome de pessoa na metadata dos arquivos do acervo `[ABERTA — medida, não-bloqueante]`
+
+**Origem:** sessão 003.FI, varredura do acervo depois do PR #322.
+
+**Medido (04/09/2026, os 83 arquivos de `matrizes_originais/`).** **40 arquivos** carregam nome de
+pessoa nos campos `Author` e `Last Saved By` — cabeçalho OLE2 nos `.doc`/`.rtf`,
+`docProps/core.xml` nos `.docx`/`.xlsx`. **16 nomes distintos**, entre eles médicas do PCMSO
+(incluindo a coordenadora nomeada nos próprios documentos), pessoal do escritório e o do Diovanni.
+Reproduz: `file -b <arquivo.doc>` para OLE2; `unzip -p <arquivo.docx> docProps/core.xml` para OOXML.
+
+**Por que é eixo próprio e não nota na `DH-003FE-01`.** Aquela mede dado pessoal no **conteúdo**, e
+foi dispensada sobre esse eixo. Este dado está no **cabeçalho do arquivo**: nenhuma varredura de
+conteúdo o encontra, nenhuma redação de corpo o remove, e ele viaja junto do binário para qualquer
+lugar em que o arquivo seja aberto. A dispensa de 29/08 não foi tomada com este custo à vista —
+mesma forma do argumento que a própria `DH-003FH-02` usou para não se deixar cobrir por ela.
+
+**Classificação, e ela não é alarmante.** Dado pessoal **comum** (LGPD art. 5º I) de profissional
+identificado no exercício da função — mesma faixa do CRM e do CREA que os documentos já publicam no
+corpo, e o repositório é privado. **Não** é dado sensível, **não** é dado de trabalhador sob
+vigilância de saúde. Não muda o veredito de `DH-003FE-01`.
+
+**Não-bloqueante, e o custo de limpar é medido.** Limpar exigiria reescrever os 40 binários e o
+histórico que já os contém — o mesmo custo desproporcional que dispensou a `DH-003FE-01`. A decisão
+é do Arquiteto; esta DH existe para que o fato esteja registrado antes de alguém redescobri-lo.
+
+**Status:** ABERTA. Registro de fato medido, não pedido de trabalho.

@@ -6396,3 +6396,98 @@ commit de medição — corrigido nesta nota, ver Verificação abaixo).
 > verificável: a varredura inversa testa o teste, e o `/conferir` extraiu do bloco, não do YAML.
 > **Comentário que carrega `[MEDIDO]` é afirmação de medição e precisa de reprodução igual à do
 > corpo do bloco.** Insumo medido para a próxima META — uma ocorrência, §11 não autoriza cláusula.
+
+## Sessão 003.FI — 04/09/2026 — MEDIÇÃO (varredura de acervo) + FECHAMENTO de dívida
+
+**Numeração derivada do repo e ratificada pelo merge:** `003.FH` é o último bloco em `main`
+(`b32a7e3`, PR #321). Sem ressalva desta vez — a de 003.FH caiu quando o merge aconteceu.
+
+**`/kickoff` não rodou.** A skill é `disable-model-invocation` e a instrução dela é explícita: só
+invocação manual do Arquiteto, e não replicar o fluxo por outros meios. Esta sessão leu de disco
+apenas o que precisava para escrever certo. **Consequência declarada:** não há relatório de estado
+de abertura, e o cruzamento HISTORICO × docs reais que o ritual faz **não foi feito**. `DECISOES`
+segue **v186** e `PROTOCOLO` segue **v91** (lidos da tabela de revisões, não do que o HISTORICO
+declara), mas as demais checagens do passo de abertura ficam `[A MEDIR]`.
+
+**Nenhum código de motor tocado. Nenhuma `R-*` criada, alterada ou depreciada. Nenhum teste novo.**
+`DECISOES_ARQUITETURAIS.md` intocado, logo `INDICE_DARQ.md` não regenerado.
+
+### O que provocou a sessão
+
+O Diovanni subiu o acervo completo pelo GitHub Desktop — **PR #322, 66 arquivos novos**,
+`matrizes_originais/` de **17 para 83 arquivos**, 386 MB de working tree, `.git` a 143 MB.
+Mergeado direto em `main` (`4d1bc01`), **sem a varredura de dado pessoal que estava combinada** e
+sem passar por revisão. A varredura virou post-hoc — é o que esta sessão fez.
+
+**Registro honesto da ordem dos fatos:** a recomendação era varrer antes do commit, em branch
+descartável. O acervo entrou primeiro. A medição abaixo vale igual; o que se perdeu foi a opção
+barata de desfazer.
+
+### Medição 1 — a cláusula de reabertura de `DH-003FE-01` **não** disparou
+
+Ela reabre "se o repositório deixar de ser privado, **ou o acervo passar a conter dado de
+trabalhador**". Nenhuma das duas.
+
+Varredura dos **83 arquivos**, com extração real de texto — `pdfplumber` para PDF, `zipfile` para
+OOXML, LibreOffice headless para `.doc`/`.rtf`. **83 de 83 extraídos; 0 escaneados; 0 não medidos.**
+
+- **Dado de trabalhador: ausente.** 34 arquivos casaram marcador (`ASO`, relação de empregados,
+  `matrícula`, admissão, apto/inapto, prontuário) e **o contexto de cada classe foi lido**: é
+  prosa de procedimento e campo em branco de formulário. *"Relação de empregados próprios, em
+  planilha EXCEL, discriminando nome…"* é a exigência que a empresa cumpre, não a lista;
+  `"(Nome do funcionário)"` é lacuna em modelo de placa; `"MATRÍCULA:"` é campo vazio de permissão
+  de trabalho; `"prontuário médico individual"` é o literal da NR-07 citado. Zero ASO preenchido,
+  zero lista nominal, zero resultado ligado a pessoa.
+- **Repositório privado**, 0 forks (API do GitHub).
+- **7 CPFs distintos com DV válido, em 4 arquivos** — todos em página de assinatura digital ou
+  ficha de responsável técnico, com nome e e-mail corporativo. Signatários, não trabalhadores.
+- **PIS/NIT: 1 real de 3 candidatos** — descartados um número de série de calibrador de vazão e
+  ruído de texto invertido no PGR da EBSERH.
+
+Detalhe integral na própria `DH-003FE-01`, que segue **DISPENSADA** com a cláusula agora testada.
+
+**Contagem de marcador é forma; contexto é prova.** Parar em "34 arquivos com marcador de ASO"
+teria produzido um alarme falso sobre um acervo limpo — a mesma classe de erro que este projeto
+registra como "leio a forma, não a prova".
+
+### Medição 2 — `DH-003FH-02` **FECHADA**, e a conta fecha exata
+
+Os **7** caminhos de `matrizes_originais/` que a suíte abre existem em disco, conferidos um a um.
+Suíte completa pelo comando canônico, árvore parada @ `4d1bc01`:
+**1169 passed, 6 skipped, 0 failed** em 580.32s.
+
+`1160` herdados de 003.FE `+ 8` testes de 003.FH `+ 1` da correção 003.FH-C3 = **1169**;
+`skipped` volta de **21** para os **6** herdados. Os 8 vermelhos e os 15 skips extras eram,
+um-para-um, os PGRs ausentes. `mypy --strict` no alvo canônico: **limpo, 48 arquivos**.
+
+Os três percentuais de 003.FE/FF (Fascino 97,0%, Ricco 91,1%, T65 48,4%) **passam a ser
+re-mediveis**, mas **não foram re-medidos** — re-medir é rodar `medicao_pgr`, fora da suíte.
+Fica `[A MEDIR]`. A DH afirmava irreprodutibilidade, e isso deixou de valer; o valor dos números
+não foi reconferido.
+
+### Pendências
+
+**Fechada:** `DH-003FH-02`.
+**Nova:** `DH-003FI-01` — 40 arquivos carregam **16 nomes de pessoa na metadata** (`Author` /
+`Last Saved By`, OLE2 e OOXML), incluindo médicas e equipe do escritório. Dado pessoal comum de
+profissional, mesma faixa do CRM que os documentos já publicam no corpo; não-bloqueante. Ganha DH
+própria porque é **eixo distinto** do de `DH-003FE-01`: está no cabeçalho do arquivo, nenhuma
+varredura de conteúdo o acha e nenhuma redação de corpo o remove.
+**Anotada sem fechar:** `DT-003FH-01` — o T65 chegou ao acervo, então os 19 termos deixam de ser
+`[A MEDIR]` por falta de documento. A DT segue **ABERTA**: falta a passada que popula os aliases.
+
+### Lições de método
+
+- **Varredura que não declara o que não conseguiu ler não é varredura.** A primeira passada deu
+  `ERRO_EXTRACAO` em **28 dos 83** — todos os `.doc` e `.rtf` —, porque o container não tinha
+  `libreoffice-writer`. Reportar ali teria dito "limpo" sobre 55 arquivos e calado sobre um terço
+  do acervo, com a mesma cara de resultado completo. Instalado o filtro, os 28 saíram: 27 limpos.
+  Depois o `apt-get` quebrou `charset_normalizer` e matou a terceira passada em silêncio.
+  **Duas ferramentas falharam sem gritar, na mesma sessão.**
+- **A cláusula de reabertura fez o trabalho dela.** `DH-003FE-01` foi dispensada em 29/08 com um
+  gatilho escrito. Quatro dias depois o gatilho foi testado contra fato novo, com método, e a
+  dispensa sobreviveu **medida** em vez de por inércia. Dispensa com cláusula é diferente de
+  dispensa: a primeira é decisão, a segunda é esquecimento.
+- **Metadata é conteúdo que ninguém varre.** Os 16 nomes não apareceriam em nenhuma passada de
+  texto — apareceram porque `file -b` cospe o cabeçalho OLE2 de graça, num comando rodado para
+  outra finalidade. O achado foi sorte de instrumento, não cobertura de método.
