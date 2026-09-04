@@ -2426,7 +2426,16 @@ clínica.
 entraram), ou publicar um extrato textual versionado por PGR suficiente para os testes, mantendo o
 PDF fora. A escolha é do Arquiteto — as duas têm custo de LGPD distinto.
 
-**Status:** ABERTA, não-bloqueante para o motor; **bloqueante para reprodução de gabarito**.
+**Status:** **FECHADA em 04/09/2026** (sessão 003.FI) — o acervo completo foi versionado (PR #322),
+os 4 PGRs que esta DH nomeia estão rastreados sob os nomes exatos, e a suíte roda verde no container
+(`1169 passed, 6 skipped, 0 failed`). Deixa de ser bloqueante para reprodução de gabarito. A classe
+mais ampla segue em `DH-003ET-01` (fixtures de PDF não versionadas), que **não** foi resolvida — só
+deixou de se manifestar neste acervo.
+
+> **Correção 003.FI-C6 (04/09/2026).** Esta linha dizia `"**Status:** ABERTA, não-bloqueante para o
+> motor; bloqueante para reprodução de gabarito"` **enquanto o header da DH já dizia FECHADA** — a
+> `Resolução` e a `Correção 003.FI-C2` foram inseridas antes dela e nenhuma a reescreveu. Um terceiro
+> que abrisse só esta DH leria os dois estados no mesmo bloco. Achado pela 4ª rodada do `/critico`.
 
 **Resolução (04/09/2026, sessão 003.FI).** O Diovanni subiu o acervo completo — PR #322, 66 arquivos
 novos, `matrizes_originais/` passa de 17 para **83 arquivos rastreados**, 386 MB. Foi escolhido o

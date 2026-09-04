@@ -6704,3 +6704,47 @@ git que as correções anteriores gravaram: 17→83; **8/8** arquivos referencia
 > **Insumo medido para a próxima META, agora com quatro ocorrências e quatro detecções
 > independentes** (`/kickoff`, `/conferir`, `/critico` 2ª e 3ª rodadas). Propor cláusula segue sendo
 > decisão do Arquiteto sob §11; este bloco não a propõe.
+
+### Gate de fechamento — `/critico` `4d1bc01..2197738` (4ª rodada)
+
+Barra julgada **IMPLEMENTAÇÃO** (as três rodadas anteriores julgaram CONHECIMENTO — divergência de
+enquadramento do próprio Gauntlet, registrada, não arbitrada por este bloco). Teste-por-regra,
+ID+fonte e ID antiga **N/A** — `git diff --stat` confirma zero código, zero `regras.yaml`, zero
+teste. Registro de suíte **PRESENTE**. O Crítico reproduziu independentemente e confirmou: 83
+arquivos em `4d1bc01`; os 4 PGRs rastreados, inclusive blob `7f5c942b08…` / 1.296.117 B; o 8º
+arquivo da `003.FI-C2` linha a linha; e `git diff --name-only eb94b06 e27754c` sobre `PROTOCOLO`/
+`regras.yaml` vazio. Declarou também ter lido o bloco desta sessão por acidente e tratado seu
+conteúdo como **não-fonte** — a apuração se apoiou só em `PENDENCIAS`, `PAINEL` e objetos git.
+
+**CRÍTICO rejeitou** — gap: o header de `DH-003FH-02` foi alterado para `[FECHADA em 04/09/2026]`,
+mas o campo canônico **`Status:`** dentro do corpo da própria DH seguia dizendo
+`"ABERTA, não-bloqueante para o motor; bloqueante para reprodução de gabarito"`. Nem a `Resolução`
+nem a `Correção 003.FI-C2` reescreveram essa linha. Um terceiro que abrisse só a DH leria os dois
+estados no mesmo bloco.
+
+> **Correção 003.FI-C6** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e é o gap
+> mais limpo das quatro rodadas** — uma linha, um campo canônico, contradição literal. Corrigido na
+> fonte: o `Status:` passa a FECHADA com a data, a evidência (`1169 passed, 6 skipped, 0 failed`) e
+> a ressalva de que `DH-003ET-01` **não** foi resolvida, só deixou de se manifestar neste acervo.
+>
+> **Varri a classe inteira em vez do sítio nomeado**, como nas correções anteriores: script sobre
+> os headers `### D*` e o campo `**Status:**` de cada corpo, procurando header fechado com Status
+> aberto. **Sete candidatos, cinco falsos positivos** — `DT-003M-02` tem o estado misto no próprio
+> header (`[ABERTA — só (A); (B) FECHADA]`), e `DH-003AO-01`, `DT-003ED-01`, `DH-003ED-01` e
+> `DH-003EI-01` são `PARCIALMENTE RESOLVIDA` com faceta aberta declarada. Sobra **um real além do
+> meu, e ele é anterior a esta sessão**: `DT-003EG-01` (`PENDENCIAS_CLINICAS.md:900`) tem header
+> `[FECHADA — D-ARQ-68 cl.5, 003.EZ]` e `**Status:** ABERTA`. **Não está no diff desta sessão e não
+> foi tocado** — corrigi-lo aqui seria alargar o PR sobre dívida de terceiro. Fica registrado com a
+> linha exata; abrir DH para ele é decisão do Arquiteto.
+>
+> **Quinta instância, e ela muda a forma da série.** As quatro anteriores eram escopo não escrito
+> (`7`, `40`, `dois arquivos`, `todos os .doc e .rtf`). Esta é outra coisa: **eu editei o header e
+> não o campo canônico do mesmo registro** — inseri duas seções longas *antes* da linha `Status:` e
+> nunca desci até ela. Não é escopo mal declarado; é edição parcial de estrutura. O que as duas
+> classes compartilham é o mecanismo de detecção: **nenhuma foi pega por releitura minha, e todas
+> por instrumento externo.**
+>
+> **Nota sobre o enquadramento:** a 4ª rodada julgou sob IMPLEMENTAÇÃO e as três anteriores sob
+> CONHECIMENTO, sobre artefatos da mesma natureza. O gap achado não depende da barra — mas a
+> divergência de modo entre rodadas do mesmo Gauntlet sobre o mesmo tipo de diff é insumo medido
+> para a próxima META, não algo que este bloco arbitre.
