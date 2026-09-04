@@ -22,9 +22,12 @@
 **Baseline:** branch `feat/003fi-varredura-acervo` sobre `main 4d1bc01` · **1169 passed, 6 skipped, 0 failed** *(1175 coletados; medido em `4d1bc01`, sessão 003.FI, árvore parada, 580.32s)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v91 · DECISOES v186
 
 > **Os 8 vermelhos sumiram, e a causa nomeada por 003.FH era a certa `[MEDIDO — 003.FI]`.**
-> O PR #322 levou `matrizes_originais/` de **17 para 83 arquivos** rastreados. Os **7** caminhos de
-> `matrizes_originais/` que a suíte abre passam a existir em disco, conferidos um a um
-> (`git grep -ohE "matrizes_originais/[^\"']+\\.(pdf|docx|doc|xlsx)" HEAD -- agente_medico/tests/ tests/`).
+> O PR #322 levou `matrizes_originais/` de **17 para 83 arquivos** rastreados. Os **8** arquivos do
+> acervo referenciados pelos testes passam a existir em disco, conferidos um a um. Medidos por
+> casamento de **nome de arquivo do acervo contra o texto dos testes**, com normalização NFC — e não
+> por `git grep` de caminho literal, que mede literais de string e não aberturas: em
+> `tests/test_regressao_pcmso.py:168` o caminho é montado partido
+> (`ROOT / "matrizes_originais" / "…"`) e escapa ao grep (`Correção 003.FI-C2`).
 > A tiragem foi de **1145/8/21** para **1169/6/0** sem uma linha de código mudar entre as duas.
 >
 > **A reconciliação é por coletados, que é invariante a ambiente:** `1166` (003.FE e a tiragem de

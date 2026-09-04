@@ -6583,3 +6583,45 @@ varredura de conteúdo o acha e nenhuma redação de corpo o remove.
 > medição — é anedota com dígitos.** É a mesma raiz do gap que o `/critico` achou em 003.FH (afirmar
 > que `normalizar_termo` colapsa um par sem executar o colapso) e da falha de `D-ARQ-85` que o
 > `/kickoff` achou nesta: o instrumento não foi rodado até o fim, e o relato não disse onde parou.
+
+### Gate de fechamento — `/critico` `4d1bc01..f8bdfc0`
+
+Rodado **a frio, em sessão separada**. Barra derivada do artefato: **CONHECIMENTO** (docs-only —
+abre `DH-003FI-01`, fecha `DH-003FH-02`, emenda `DT-003FH-01` e `DH-003FE-01`, re-tira o Baseline;
+nenhuma `R-*`, nenhuma `D-ARQ`, nenhum código, nenhum teste). Universalidade **PASSA** (3/3 setores
+instanciados sobre o eixo de `DH-003FI-01` — construção, química, saúde; os comandos de reprodução
+são ligados a formato, não a setor). Caso local **PASSA** (removido o âncora dos 83 arquivos, a DH
+segue prescrevendo eixo, critério de classificação e razão de não se deixar cobrir por
+`DH-003FE-01`). Registrabilidade **FALHA**.
+
+**CRÍTICO rejeitou** — gap: a `Correção 003.FI-C2` foi aplicada **só no cabeçalho de
+`DH-003FI-01`**, e os números que ela própria refuta seguiam publicados como medidos em três sítios
+do mesmo intervalo — `"40 arquivos / 16 nomes"` na cláusula testada de `DH-003FE-01`,
+`"reescrever os 40 binários"` na premissa de custo que carrega a classificação não-bloqueante de
+`DH-003FI-01`, e o `"7 caminhos"` com o grep que o próprio artefato declara defeituoso, no
+`PAINEL_ESTADO.md`.
+
+> **Correção 003.FI-C3** *(nota aditiva; redação acima intacta — classe 10)*. Os três sítios foram
+> conferidos na linha e **os três procediam**. Corrigidos na fonte, por serem estado corrente:
+> `DH-003FE-01` passa a **64 dos 83 / 20 nomes** com o escopo dito; `DH-003FI-01` passa a
+> "reescrever os **64** binários"; o `PAINEL_ESTADO.md` passa a **8 arquivos referenciados**, com o
+> método de casamento por nome + NFC no lugar do `git grep` de caminho literal, e a razão escrita.
+>
+> **Varri a classe inteira em vez de só os três nomeados**, que é o que um achado desta forma pede.
+> A varredura encontrou **mais dois sítios, e os dois ficam como estão**: o resumo de pendências
+> (`"DH-003FI-01 — 40 arquivos carregam 16 nomes"`) e a lição de método (`"Os 16 nomes não
+> apareceriam em nenhuma passada de texto"`), ambos **dentro do corpo original deste bloco**.
+> Classe 10 proíbe reescrevê-los: bloco de sessão é registro do que a sessão mediu, e a `003.FI-C2`
+> já publica o número certo. **Enumerá-los aqui é a alternativa à reescrita** — quem ler o bloco
+> encontra o aviso antes de usar o número. Mesma regra vale para `"os 7 caminhos"` na Medição 2.
+>
+> **O que o Crítico observou e eu não corrigi:** o artefato tem fronteira em substância mas nenhum
+> parágrafo em negrito iniciando por "Fronteira". Não é o gap e não foi enunciado como exigência —
+> fica registrado por ser convenção de leitura do Gauntlet, e a decisão de torná-la obrigatória é do
+> Arquiteto, não deste bloco.
+>
+> **A lição da 003.FI-C2 sobrevive ao próprio conserto, e piorou.** Lá eu escrevi que número sem
+> escopo declarado não é medição. O gap agora é o degrau seguinte: **corrigir no ponto de medição e
+> não varrer as cópias propagadas deixa o documento com dois números do mesmo fato, e o errado é o
+> que está nos sítios que o leitor alcança primeiro** — a premissa de custo, a cláusula testada, o
+> painel. Correção que não varre a classe inteira é correção que fabrica contradição.

@@ -2091,11 +2091,13 @@ extração real de texto (pdfplumber; OOXML por `zipfile`; `.doc`/`.rtf` por Lib
 - **CRM em 11 arquivos, CREA em 13, e-mail em 29** — registro profissional e e-mail corporativo,
   a faixa que o `.gitignore` já declara como dado pessoal comum de baixo risco.
 
-**Eixo novo, que não estava à vista quando a dispensa foi tomada — `DH-003FI-01`.** 40 arquivos
-carregam **16 nomes de pessoa na metadata** (`Author` / `Last Saved By` do OLE2 e do OOXML),
-incluindo as médicas do PCMSO e a equipe do escritório. Não está no corpo do documento e sobrevive a
-qualquer redação de conteúdo. Não muda a classificação — dado pessoal comum de profissional, mesma
-faixa do CRM —, mas é achado de eixo distinto e ganha DH própria em vez de nota aqui.
+**Eixo novo, que não estava à vista quando a dispensa foi tomada — `DH-003FI-01`.**
+**64 dos 83 arquivos** carregam metadata de autoria, com **20 nomes de pessoa** distintos —
+cabeçalho OLE2 nos `.doc`/`.rtf`, `docProps/core.xml` nos `.docx`/`.xlsx`, dicionário de informações
+nos `.pdf`. Inclui as médicas do PCMSO, a equipe do escritório e engenheiros de terceiros. Não está
+no corpo do documento e sobrevive a qualquer redação de conteúdo. Não muda a classificação — dado
+pessoal comum de profissional, mesma faixa do CRM —, mas é achado de eixo distinto e tem DH própria.
+Números medidos sobre o escopo completo; ver `DH-003FI-01` e sua `Correção 003.FI-C2`.
 
 **Nota de instrumento, medida:** a primeira passada da varredura deu `ERRO_EXTRACAO` em **28 dos 83**
 — todos os `.doc` e `.rtf` —, porque o container não tinha `libreoffice-writer`. Reportar ali teria
@@ -2515,8 +2517,8 @@ identificado no exercício da função — mesma faixa do CRM e do CREA que os d
 corpo, e o repositório é privado. **Não** é dado sensível, **não** é dado de trabalhador sob
 vigilância de saúde. Não muda o veredito de `DH-003FE-01`.
 
-**Não-bloqueante, e o custo de limpar é medido.** Limpar exigiria reescrever os 40 binários e o
-histórico que já os contém — o mesmo custo desproporcional que dispensou a `DH-003FE-01`. A decisão
+**Não-bloqueante, e o custo de limpar é medido.** Limpar exigiria reescrever os **64** binários e
+o histórico que já os contém — o mesmo custo desproporcional que dispensou a `DH-003FE-01`. A decisão
 é do Arquiteto; esta DH existe para que o fato esteja registrado antes de alguém redescobri-lo.
 
 **Status:** ABERTA. Registro de fato medido, não pedido de trabalho.
