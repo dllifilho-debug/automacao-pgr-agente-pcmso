@@ -47,4 +47,4 @@ relatorios/
 
 # Sondas/medições locais (uso único, 003.BH)
 /medir_*.py
-._eoltest
+._eoltest.varredura_tmp/

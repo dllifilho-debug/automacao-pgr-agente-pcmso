@@ -972,6 +972,18 @@ bruto continua grande e reproduzível sob demanda.
 
 **Status:** ABERTA. Não-bloqueante.
 
+**Reincidência medida (04/09/2026, sessão 003.FI) e endereçada em parte (003.FJ).** A varredura de
+dado pessoal que fechou `DH-003FH-02` e abriu `DH-003FI-01` rodou de `/tmp` num container remoto —
+`varrer.py` (4.669 B) e `passe3.py` (2.979 B) — e morreria com ele. Era a mesma classe desta DH:
+`DH-003FE-01` promete que a cláusula de reabertura é testável, e sem instrumento versionado a
+promessa não se cumpre.
+
+**Pago para este instrumento, não para a classe.** 003.FJ versiona
+`scripts/varrer_acervo_lgpd.py` com `tests/test_varrer_acervo_lgpd.py` (10 testes, reversão nomeada
+cada um). **A DH segue ABERTA:** o diff motor×gabarito, que é o instrumento original desta dívida,
+continua em `relatorios/`, ignorado pelo `.gitignore:26`. Um instrumento a menos fora do git não
+fecha a dívida de todos eles.
+
 ### DH-003EG-03 — Derivado do `INDICE_DARQ` tem vigilância, mas o ritual não a invoca em sessão docs-only `[ABERTA — higiene de método]`
 
 **Origem:** 003.EG (emenda), ao fechar a sessão principal.
@@ -2065,6 +2077,10 @@ redescoberta e re-litigada a cada varredura.
 trabalhador (hoje não contém — medido: matriz de exames tem 0 ocorrências de CPF).
 
 **Cláusula testada em 04/09/2026 (sessão 003.FI) — NÃO disparou. Segue DISPENSADA.**
+**Instrumento versionado em 003.FJ:** `python -m scripts.varrer_acervo_lgpd` reproduz esta
+verificação a partir do repositório — `83 de 83 extraídos, 7 CPFs distintos em 4 arquivos, 20 nomes
+de pessoa na metadata`, os mesmos números de 003.FI. Quem re-testar a cláusula roda o comando; não
+depende mais de reescrever a varredura.
 PR #322 levou `matrizes_originais/` de 17 para **83 arquivos**. Varredura post-hoc dos 83, com
 extração real de texto (pdfplumber; OOXML por `zipfile`; `.doc`/`.rtf` por LibreOffice headless):
 **83 de 83 extraídos, 0 escaneados, 0 não medidos.**
@@ -2530,7 +2546,10 @@ dicionário de informações nos `.pdf` (`Author`). **27 valores distintos**, do
 pessoa (`DELL`, `CMO`, `RIMA`, `Computador`, `Admin`, `Usuario`, `python-docx`) e **20 são nome de
 pessoa** — médicas do PCMSO (incluindo a coordenadora nomeada nos próprios documentos), pessoal do
 escritório, engenheiros de terceiros e o do Diovanni.
-Reproduz: `file -b <arquivo.doc>` para OLE2; `unzip -p <arquivo.docx> docProps/core.xml` para OOXML;
+Reproduz, desde 003.FJ, por instrumento versionado: `python -m scripts.varrer_acervo_lgpd`, que
+imprime `nomes de pessoa na metadata: 20 distintos (excluidos 8 valores de conta generica/
+equipamento)` com o escopo na mesma linha. Os comandos avulsos seguem valendo para conferência
+pontual: `file -b <arquivo.doc>` para OLE2; `unzip -p <arquivo.docx> docProps/core.xml` para OOXML;
 `pdfplumber.open(p).metadata["Author"]` para PDF.
 
 > **Correção 003.FI-C2 (04/09/2026).** A primeira redação desta DH dizia **40 arquivos / 16 nomes**.

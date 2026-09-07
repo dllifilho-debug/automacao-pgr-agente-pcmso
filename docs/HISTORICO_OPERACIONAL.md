@@ -6779,3 +6779,87 @@ corrigiu — header `[FECHADA — D-ARQ-68 cl.5, 003.EZ]` com `**Status:** ABERT
 sessão, está fora do diff e **não foi tocada**. A divergência de enquadramento entre rodadas do
 próprio Gauntlet (1ª a 3ª julgaram CONHECIMENTO, 4ª e 5ª julgaram IMPLEMENTAÇÃO, sobre artefatos da
 mesma natureza) segue registrada e não arbitrada.
+
+## Sessão 003.FJ — 04/09/2026 — IMPLEMENTAÇÃO (instrumento) + higiene
+
+**Numeração:** 003.FI é o último bloco em `main` (`74139b5`, PR #323). Sem ressalva.
+
+**Foco, em uma frase:** versionar o instrumento de varredura que 003.FI usou e perdeu.
+
+**Nenhuma regra clínica tocada.** Nenhuma `R-*` criada, alterada ou depreciada; o motor não é
+importado pelo script; `regras.yaml`, `agentes.yaml` e `exames.yaml` intocados.
+`DECISOES_ARQUITETURAIS.md` intocado, logo `INDICE_DARQ.md` não regenerado. PROTOCOLO segue **v91**,
+DECISOES segue **v186**.
+
+**`/kickoff` não rodou** — skill reservada à invocação do Arquiteto, e a instrução proíbe replicar o
+fluxo. Consequência declarada: sem relatório de estado de abertura e sem o cruzamento
+HISTORICO × docs reais. O foco veio do Arquiteto no chat, não de derivação minha.
+
+### O que provocou a sessão
+
+A varredura que fechou `DH-003FH-02` e abriu `DH-003FI-01` rodou de `/tmp` num container remoto —
+`varrer.py` (4.669 B) e `passe3.py` (2.979 B) — e morreria com ele. É `DH-003EG-02` reincidindo:
+*"o instrumento que pauta a fila vive fora do git"*. Pior que perder código: `DH-003FE-01` **promete**
+que a cláusula de reabertura é testável, e sem instrumento versionado a promessa não se cumpre.
+
+### Entrega — `scripts/varrer_acervo_lgpd.py` (464 linhas)
+
+Responde a uma pergunta só, a da cláusula: *o acervo passou a conter dado de trabalhador?* Separa
+signatário (dado comum de profissional, LGPD art. 5º I) de trabalhador sob vigilância de saúde.
+
+**Princípio de projeto, e ele vem de erro medido.** Todo número que o script imprime carrega o
+escopo que o produziu, na mesma linha. As quatro rejeições do Gauntlet em 003.FI tiveram a mesma
+raiz — um filtro virou universo porque não foi escrito ao lado do número (`7` = literal único,
+`40` = não-PDF, `dois arquivos` = com marcador, `28` = rótulo maior que o medido).
+`RelatorioAcervo.linhas_escopo()` transforma a lição em **invariante de saída**, e dois testes a
+matam se sumir. É a diferença entre aprender a lição e instalá-la.
+
+Três decisões de projeto que o script carrega em nome, não em comentário:
+- **`Achados.pis_candidatos`**, não `pis` — em 003.FI, 2 dos 3 candidatos eram número de série de
+  calibrador de vazão e ruído de texto invertido. O nome do campo impede a promoção silenciosa.
+- **`marcadores_com_contexto`** devolve a fatia de texto, não só a contagem. Contagem de marcador é
+  forma; foi o contexto que provou que os 34 arquivos casados eram prosa de procedimento.
+- **`VALORES_NAO_PESSOA`** é lista explícita, não heurística — `RIMA` e `Guilherme` têm a mesma cara
+  para um regex.
+
+### Verificação
+
+- **`tests/test_varrer_acervo_lgpd.py`: 10 testes, 10 passed**, cada um com reversão nomeada.
+- **Varredura inversa 10/10, executada teste a teste.** R1 laço do DV → mata 2; R2 guarda de
+  sequência repetida → mata 1 (discriminante contra R1); R3 aceitar todo casamento → mata 1;
+  R4 renomear `pis_candidatos`→`pis` → mata 1; R5 marcador sem contexto → mata 1; R6 remover o
+  filtro de conta genérica → mata 2; R7 tirar o denominador do CPF → mata 1; R8 remover a lista
+  nominal de falhas → mata 1 (discriminante contra R7); R9 remover o ramo PDF da metadata → mata 1;
+  R10 `gerar_relatorio` sem escopo → mata 1.
+- **Um teste foi refeito por não discriminar, e a varredura inversa é que pegou.**
+  `test_metadata_conta_pdf_no_escopo` montava `RegistroArquivo` com metadata já preenchida e
+  **sobrevivia** à reversão que dizia cobrir — R9 dava 10 passed. É a classe 003.EK literal: unidade
+  sobre função que nunca leu o campo. Refeito como `test_metadata_de_autoria_le_o_ramo_pdf`,
+  chamando `extrair_metadata_autoria` num PDF **rastreado** (`PGR_EBSERH_UFGD_v7.pdf`, `Author`
+  = `Flavio Felipe Soares da Silva`). Agora R9 mata.
+- **O instrumento reproduz 003.FI exatamente**, rodado contra o acervo real:
+  `83 arquivos (27 .doc + 13 .docx + 38 .pdf + 4 .rtf + 1 .xlsx)` · `extraidos: 83 de 83, nenhuma
+  falha` · `CPF com DV valido: 7 distintos em 4 de 83` · `nomes de pessoa na metadata: 20 distintos`
+  · `metadata de autoria: 64 de 83`. **Os cinco números batem com os de 003.FI**, medidos por
+  instrumento descartável — que é a prova de que a versão versionada não perdeu nada.
+- `mypy --strict` sobre `scripts/varrer_acervo_lgpd.py`: **limpo, 1 arquivo**.
+- `mypy --strict` no **alvo canônico**: **limpo, 48 arquivos**, delta-zero. **Ressalva declarada:**
+  o alvo canônico do `CLAUDE.md` **não cobre `scripts/`** — o script novo não está sob o gate, como
+  nenhum outro de `scripts/`. Alargar o alvo é decisão do Arquiteto; medi o arquivo em separado
+  para que a ausência de cobertura não vire ausência de medição.
+- `.gitignore`: entra `.varredura_tmp/`, diretório de conversão do LibreOffice.
+
+### Pendências
+
+`DH-003EG-02` recebe **nota de reincidência** e **segue ABERTA** — este instrumento saiu de `/tmp`,
+mas o diff motor×gabarito, que é o instrumento original da dívida, continua em `relatorios/` sob o
+`.gitignore:26`. Um instrumento a menos fora do git não fecha a dívida de todos eles.
+`DH-003FE-01` e `DH-003FI-01` passam a apontar o comando que as reproduz.
+
+### Lição de método
+
+**A lição de 003.FI virou código executável, não parágrafo.** Aquela sessão levou quatro rejeições
+por publicar número sem escopo, escreveu quatro notas dizendo que não faria de novo, e a garantia
+disso agora é um teste que fica vermelho — não a memória de quem escreve o próximo relatório.
+Regra que só existe em prosa depende de quem lê lembrar dela na hora certa; a mesma regra como
+invariante de saída não depende de ninguém.
