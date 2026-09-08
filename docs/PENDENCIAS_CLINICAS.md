@@ -979,8 +979,9 @@ dado pessoal que fechou `DH-003FH-02` e abriu `DH-003FI-01` rodou de `/tmp` num 
 promessa não se cumpre.
 
 **Pago para este instrumento, não para a classe.** 003.FJ versiona
-`scripts/varrer_acervo_lgpd.py` com `tests/test_varrer_acervo_lgpd.py` (10 testes, reversão nomeada
-cada um). **A DH segue ABERTA:** o diff motor×gabarito, que é o instrumento original desta dívida,
+`scripts/varrer_acervo_lgpd.py` com `tests/test_varrer_acervo_lgpd.py` (**13 testes** @ `cc62333`,
+reversão nomeada cada um, varredura inversa 13/13). Foram 10 na entrega inicial (`4c86f18`) e 3 a
+mais no tratamento do gap do Gauntlet, que cobriram o destino do texto extraído. **A DH segue ABERTA:** o diff motor×gabarito, que é o instrumento original desta dívida,
 continua em `relatorios/`, ignorado pelo `.gitignore:26`. Um instrumento a menos fora do git não
 fecha a dívida de todos eles.
 

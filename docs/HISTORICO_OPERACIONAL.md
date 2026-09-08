@@ -6919,3 +6919,52 @@ instrumento mede 7 CPFs — em `.varredura_tmp/` **não-ignorada**, ao alcance d
 > tinha acontecido.** Baseline re-tirado nesta emenda. Escrever a lição não instala a lição; foi
 > exatamente por isso que `linhas_escopo()` virou invariante de código nesta sessão, e é o argumento
 > a favor de fazer o mesmo com o que ainda vive em prosa.
+
+### Gate de fechamento — `/critico` `74139b5..cc62333` (2ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. Teste-por-regra **13/13** — o Crítico refez a varredura inversa a frio e
+**todas as 13 matam**, com as discriminâncias confirmadas (T2 contra T1, T8 contra T7, T13 contra
+T12); ressalva dele, justa: **T4 mata por renome de campo, não por comportamento**. ID+fonte
+**PASSA** — LGPD art. 5º I conferido correto (sensível é art. 5º II). ID antiga **PASSA**. Registro
+de suíte **FALHA**. Ausência de seção "Fronteira" registrada como gap, julgamento seguiu.
+
+**CRÍTICO rejeitou** — gap: `PENDENCIAS_CLINICAS.md:982`, **no mesmo commit que entrega o arquivo**,
+declarava `"tests/test_varrer_acervo_lgpd.py (10 testes)"` enquanto o arquivo entregue tem **13** e o
+`PAINEL_ESTADO.md` do mesmo commit crava `+13`. Número refutado sobrevivendo em doc vivo — a classe
+que custou quatro rodadas em 003.FI e que o princípio de projeto do próprio script diz eliminar.
+Segundo achado: o Baseline gravava `"medido em 4c86f18 + emenda do gate"`, e em `4c86f18` a árvore
+tinha 10 testes → 1185 coletados, não 1188; o número só reproduz em `cc62333`, que o registro não
+nomeava.
+
+> **Correção 003.FJ-C2** *(nota aditiva; redação acima intacta — classe 10)*. **Os dois procedem e
+> os dois são meus.** Medido: `git show 4c86f18:tests/test_varrer_acervo_lgpd.py | grep -c "^def test_"`
+> devolve **10**; em `cc62333`, **13**. E `pytest --collect-only` na árvore de `cc62333` devolve
+> **1188 coletados**, confirmando que o Baseline nomeava o commit errado.
+>
+> **Corrigidos na fonte, por serem estado corrente:** `DH-003EG-02` passa a **13 testes @ `cc62333`**,
+> dizendo que foram 10 na entrega e 3 no tratamento do gap; o Baseline passa a **medido em
+> `cc62333`**, sem o "+ emenda do gate", que era exatamente a imprecisão.
+>
+> **Sobrevive por classe 10, e fica enumerado aqui:** a linha do corpo original deste bloco
+> (`"13 testes"` não; ela diz `"10 testes, 10 passed"`) estava **certa no momento em que foi
+> escrita** — o bloco registra a entrega, e os 3 testes vieram depois, na `003.FJ-C`. Registro
+> histórico não se reescreve; quem ler o bloco encontra a `003.FJ-C` com a varredura 13/13 logo
+> abaixo.
+>
+> **A ausência de fronteira, apontada em duas rodadas, foi paga em vez de contestada.** O docstring
+> do script ganha seção **Fronteira** declarando o que ele não faz: não decide (a leitura do
+> resultado é do Arquiteto, `D-ARQ-22`), não classifica juridicamente, não toca motor nem
+> vocabulário, não faz OCR (PDF escaneado sai `nao_extraido` com motivo, nunca "limpo"), não valida
+> PIS/NIT (devolve candidatos) e não vigia o histórico — mede a árvore corrente.
+>
+> **A ressalva do Crítico sobre T4 é justa e fica registrada sem conserto.**
+> `test_pis_sai_como_candidato_e_nao_como_achado` mata por renome de campo, não por comportamento —
+> é um teste de *nome*, e nome não é contrato executável. Vale menos que os outros doze. Mantido
+> porque o nome do campo é, aqui, a única barreira contra promover candidato a achado, e não achei
+> forma de testar isso por comportamento sem inventar um validador de NIT que o script
+> deliberadamente não tem. **Insumo para o Arquiteto, não decisão minha.**
+>
+> **A reincidência que importa:** a mesma classe de 003.FI — número refutado em doc vivo — voltou na
+> sessão que existe para instalar a lição contra ela. O script ganhou `linhas_escopo()` como
+> invariante, mas **a prosa em volta do script não tem invariante nenhum**, e foi ali que caiu de
+> novo. Instalar a regra no código não cobre o texto que descreve o código.

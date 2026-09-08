@@ -31,6 +31,16 @@ O texto extraido NUNCA e escrito no repositorio por padrao: a conversao do
 LibreOffice vai para um `tempfile` fora da arvore, apagado ao fim da execucao.
 `--tmp` existe para quem quiser inspecionar, e a ajuda do argumento diz o custo.
 
+**Fronteira — o que este instrumento NÃO faz.** Não decide: devolve medição com
+escopo e contexto, e a leitura do resultado é do Arquiteto (`D-ARQ-22`, classe de
+escolha silenciosa). Não classifica juridicamente — dizer se um achado dispara a
+cláusula de `DH-003FE-01` é julgamento, não varredura. Não toca motor, regra
+clínica nem vocabulário: `agentes.yaml`, `regras.yaml` e `exames.yaml` não são
+importados nem lidos. Não faz OCR — PDF escaneado sai como `nao_extraido` com o
+motivo, nunca como "limpo". Não valida PIS/NIT: devolve candidatos, e separar
+NIT de número de série exige ler o contexto, não o padrão. E não vigia o
+histórico: mede a árvore corrente, não o que já foi commitado antes.
+
 Uso:
     python -m scripts.varrer_acervo_lgpd
     python -m scripts.varrer_acervo_lgpd --pasta matrizes_originais --json saida.json
