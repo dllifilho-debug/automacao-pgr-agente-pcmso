@@ -21,6 +21,8 @@ from scripts.varrer_acervo_lgpd import (
     achados_em_texto,
     cpf_valido,
     varrer,
+    extrair_texto,
+    gerar_relatorio,
     destino_temporario_padrao,
     extrair_metadata_autoria,
     gerar_relatorio,
@@ -537,3 +539,191 @@ def test_metadata_de_autoria_le_o_ramo_legado_ole2() -> None:
     assert campos.get("Author") == "Roberto"
     assert campos.get("Last Saved By") == "Amanda da Silva Rodrigues"
     assert "Amanda da Silva Rodrigues" in nomes_de_pessoa(campos.values())
+
+
+# ---------------------------------------------------------------------------
+# Cobertura dos ramos que dependem de ambiente. Sem estes, `_texto_pdf` e
+# `_texto_legado` — os dois extratores que produzem o texto onde os CPFs são
+# procurados — ficam sem execução alguma na suíte.
+# ---------------------------------------------------------------------------
+
+_PDF_PEQUENO = Path("matrizes_originais") / "PGR R78 NATURIA PARTE 2 12.11.25.pdf"
+
+
+@pytest.mark.skipif(not _PDF_PEQUENO.exists(), reason="acervo ausente (DH-003ET-01)")
+def test_extrair_texto_le_pdf_de_verdade(tmp_path: Path) -> None:
+    """Reversão que mata: em `extrair_texto`, remover
+    `if extensao in EXT_PDF: return _texto_pdf(caminho)`.
+
+    `_texto_pdf` é onde nasce o texto em que os CPFs são procurados nos 38 PDFs
+    do acervo, e não tinha execução alguma na suíte — só era exercitado quando
+    alguém rodava o script à mão.
+    """
+    texto = extrair_texto(_PDF_PEQUENO, tmp_path / "tmp")
+    assert len(texto.strip()) > 200, "PDF com camada de texto deve render conteúdo"
+
+
+def test_extrair_texto_le_ooxml_de_verdade(tmp_path: Path) -> None:
+    """Reversão que mata: em `extrair_texto`, remover
+    `if extensao in EXT_OOXML: return _texto_ooxml(caminho)`.
+
+    Discriminante contra o de PDF: cada um morre com a remoção do seu ramo.
+    """
+    alvo = tmp_path / "a.docx"
+    _docx_minimo(alvo, "conteudo mensuravel " * 20)
+    texto = extrair_texto(alvo, tmp_path / "tmp")
+    assert "conteudo mensuravel" in texto
+
+
+def test_json_carrega_as_mesmas_classes_do_relatorio(tmp_path: Path) -> None:
+    """Reversão que mata: em `main`, remover o bloco `if args.json is not None`.
+
+    O `--json` é a interface que outra sessão consome; sem ele o instrumento só
+    fala com quem lê o terminal.
+    """
+    import json
+
+    pasta = tmp_path / "acervo"
+    pasta.mkdir()
+    _docx_minimo(pasta / "a.docx", "conteudo de teste " * 30)
+    destino = tmp_path / "saida.json"
+
+    import scripts.varrer_acervo_lgpd as modulo
+
+    assert modulo.main(["--pasta", str(pasta), "--json", str(destino)]) == 0
+
+    dados = json.loads(destino.read_text("utf-8"))
+    assert dados["total"] == 1
+    assert dados["por_extensao"] == {".docx": 1}
+    assert dados["extraidos"] == 1
+    for chave in (
+        "cpfs_distintos",
+        "pis_candidatos_distintos",
+        "emails_distintos",
+        "com_assinatura_digital",
+        "com_registro_profissional",
+        "nomes_metadata",
+        "nao_extraidos",
+    ):
+        assert chave in dados, f"--json perdeu a classe {chave}"
+
+
+def test_pasta_inexistente_sai_com_codigo_2_e_nao_relatorio_vazio(tmp_path: Path) -> None:
+    """Reversão que mata: em `main`, remover a guarda `if not args.pasta.is_dir()`.
+
+    Sem ela, apontar para pasta errada produz um relatório de **zero arquivos**
+    que parece uma varredura limpa. É a mesma classe do PDF escaneado: ausência
+    lida como ausência de achado.
+    """
+    import scripts.varrer_acervo_lgpd as modulo
+
+    assert modulo.main(["--pasta", str(tmp_path / "nao_existe")]) == 2
+
+
+def test_gerar_relatorio_lista_marcador_e_nomes_por_arquivo() -> None:
+    """Reversão que mata: em `gerar_relatorio`, remover o laço que imprime
+    `ocorrencia.marcador` e `ocorrencia.contexto` por arquivo.
+
+    A contagem de marcadores sai em `linhas_escopo`; o contexto, que é a prova,
+    sai só aqui — e era o único trecho de `gerar_relatorio` sem execução.
+    """
+    relatorio = RelatorioAcervo(
+        pasta="acervo",
+        registros=[
+            RegistroArquivo(
+                nome="a.pdf",
+                extensao=".pdf",
+                extraido=True,
+                achados=Achados(cpfs=(_CPF_VALIDO,), emails=("x@y.com",)),
+                marcadores=marcadores_com_contexto(
+                    "documento cita Relacao de empregados proprios em planilha EXCEL"
+                ),
+                metadata={"Author": "Ana Claudia Petry"},
+            )
+        ],
+    )
+    saida = gerar_relatorio(relatorio)
+    assert "relacao_empregados" in saida
+    assert "planilha EXCEL" in saida
+    assert "Ana Claudia Petry" in saida
+    assert "emails=['x@y.com']" in saida
+
+
+def test_cpf_valido_rejeita_comprimento_e_nao_digito() -> None:
+    """Reversão que mata: remover a guarda
+    `if len(digitos) != 11 or not digitos.isdigit(): return False` de `cpf_valido`.
+
+    Sem ela, uma sequência curta estoura `IndexError` dentro do laço do DV — e o
+    `except Exception` de `varrer` transformaria isso em `nao_extraido`, ou seja,
+    o arquivo inteiro sairia como falha de extração por causa de um número mal
+    formado no texto. Discriminante contra os dois testes de DV: aqueles morrem
+    tirando aritmética, este tirando a validação de forma.
+    """
+    assert cpf_valido("529") is False
+    assert cpf_valido("5299822472a") is False
+    assert cpf_valido("") is False
+
+
+def test_ooxml_sem_core_xml_devolve_metadata_vazia(tmp_path: Path) -> None:
+    """Reversão que mata: em `_metadata_ooxml`, remover
+    `if "docProps/core.xml" not in pacote.namelist(): return campos`.
+
+    Sem a guarda, um `.docx` sem `docProps/core.xml` levanta `KeyError` no
+    `pacote.read`, e o `except` de `varrer` engoliria o arquivo como falha de
+    extração — quando o correto é "sem metadata de autoria", que é informação
+    diferente de "não consegui ler".
+    """
+    import zipfile
+
+    alvo = tmp_path / "sem_props.docx"
+    with zipfile.ZipFile(alvo, "w") as pacote:
+        pacote.writestr("word/document.xml", "<w:document><w:t>corpo</w:t></w:document>")
+
+    assert extrair_metadata_autoria(alvo) == {}
+
+
+@pytest.mark.skipif(shutil.which("soffice") is None, reason="LibreOffice ausente no ambiente")
+def test_extrair_texto_le_legado_via_libreoffice(tmp_path: Path) -> None:
+    """Reversão que mata: em `extrair_texto`, remover
+    `if extensao in EXT_LEGADO: return _texto_legado(caminho, destino_tmp)`.
+
+    `_texto_legado` cobre 31 dos 83 arquivos do acervo e não tinha execução
+    alguma na suíte — era o maior bloco sem cobertura do script. Usa um `.rtf`
+    fabricado, não do acervo: RTF é texto plano com marcação, então o arquivo
+    cabe no teste e o caminho exercitado é o mesmo (`soffice --convert-to`).
+
+    O `skipif` é honesto e não cosmético: sem `libreoffice-writer` o ramo falha
+    em bloco, e foi exatamente isso que aconteceu em 003.FI (28 de 83 na
+    primeira passada). Ver `DH-003FE-01`, nota de instrumento.
+    """
+    alvo = tmp_path / "documento.rtf"
+    corpo = "Empresa exemplo com texto suficiente para passar do piso. " * 8
+    alvo.write_text(r"{\rtf1\ansi " + corpo + "}", encoding="utf-8")
+
+    texto = extrair_texto(alvo, tmp_path / "tmp")
+    assert "Empresa exemplo" in texto
+
+
+def test_libreoffice_sem_saida_levanta_falha_nomeada(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reversão que mata: em `_texto_legado`, remover
+    `if not convertido.exists(): raise RuntimeError("conversao_sem_saida ...")`.
+
+    Sem ele, LibreOffice sem o filtro Writer faz o `.txt` nunca aparecer e o
+    `read_text` estoura `FileNotFoundError` — que o `except` de `varrer`
+    converte num motivo genérico, perdendo a pista de que **falta pacote**.
+    Foi exatamente este ramo que disparou em 003.FI: 28 dos 83 arquivos, e o
+    motivo nomeado é o que permitiu diagnosticar em vez de adivinhar.
+
+    Simula o `soffice` que roda e não produz saída, sem depender de desinstalar
+    o pacote.
+    """
+    import scripts.varrer_acervo_lgpd as modulo
+
+    monkeypatch.setattr(modulo.subprocess, "run", lambda *a, **k: None)
+    alvo = tmp_path / "documento.rtf"
+    alvo.write_text("qualquer coisa", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="conversao_sem_saida"):
+        extrair_texto(alvo, tmp_path / "tmp")

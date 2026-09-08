@@ -573,5 +573,5 @@ def main(argv: Optional[list[str]] = None) -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover — entrypoint; `main` e testada direto
     raise SystemExit(main())
