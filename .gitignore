@@ -53,3 +53,6 @@ relatorios/
 # SECUNDARIA: o destino padrao do script e tempfile fora do repositorio, e
 # este padrao so cobre quem passar --tmp apontando para dentro da arvore.
 .varredura_tmp/
+
+# Base do coverage, escrita pelo portao tests/test_cobertura_varrer_acervo.py
+.coverage

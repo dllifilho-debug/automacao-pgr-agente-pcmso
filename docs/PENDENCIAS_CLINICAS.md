@@ -979,12 +979,13 @@ dado pessoal que fechou `DH-003FH-02` e abriu `DH-003FI-01` rodou de `/tmp` num 
 promessa não se cumpre.
 
 **Pago para este instrumento, não para a classe.** 003.FJ versiona
-`scripts/varrer_acervo_lgpd.py` com `tests/test_varrer_acervo_lgpd.py` (**21 testes** @ `dc77b28`,
-reversão nomeada cada um, varredura inversa 21/21). Foram 10 na entrega inicial (`4c86f18`), 13 no
+`scripts/varrer_acervo_lgpd.py` com `tests/test_varrer_acervo_lgpd.py` (**30 testes** @ `3fb98e2`, reversão
+nomeada cada um, mais o portão `tests/test_cobertura_varrer_acervo.py` que trava **100% de
+cobertura** do script). Foram 10 na entrega inicial (`4c86f18`), 13 no
 1º gap (`cc62333`, destino do texto extraído), 14 no 3º (`9b0d496`, exclusão medida em vez de
 tamanho de lista), 16 no 4º (`4d85c35`, cinco classes coletadas que nenhuma saída lia) 19 no 5º
-(`b4580d5`, os três ramos de falha de `varrer()`) e 21 no 6º (`dc77b28`, dois dos três ramos de
-`extrair_metadata_autoria`). **A DH segue ABERTA:** o diff motor×gabarito, que é o instrumento original desta dívida,
+(`b4580d5`, os três ramos de falha de `varrer()`) 21 no 6º (`dc77b28`, dois dos três ramos de
+`extrair_metadata_autoria`) e 30 + portão no fecho de classe (`3fb98e2`). **A DH segue ABERTA:** o diff motor×gabarito, que é o instrumento original desta dívida,
 continua em `relatorios/`, ignorado pelo `.gitignore:26`. Um instrumento a menos fora do git não
 fecha a dívida de todos eles.
 

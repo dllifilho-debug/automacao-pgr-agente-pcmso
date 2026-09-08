@@ -7143,3 +7143,40 @@ tautologia, porque o nome do campo *é* `pis_candidatos`.
 > rodada nomeou uma função e eu tratei o gap como a função nomeada, não como o padrão que ela
 > exemplificava. É o oposto exato do que fiz de certo na 4ª, quando o guarda estrutural sobre
 > `__dataclass_fields__` fechou a classe em vez dos cinco casos.
+
+### Fecho de classe — portão de cobertura (`3fb98e2`)
+
+**Decisão do Arquiteto, tomada entre a 6ª e a 7ª rodada:** em vez de esperar o Gauntlet apontar o
+terceiro ramo sem teste, fechar a classe. As 5ª e 6ª rodadas acharam o **mesmo defeito** em alvos
+diferentes, e nas duas a detecção veio de fora.
+
+**Medido antes:** `coverage` do script pela própria suíte = **91%**, 23 linhas sem execução — entre
+elas `_texto_pdf` **inteiro** (o extrator dos 38 PDFs, onde os CPFs nascem) e `_texto_legado`
+**inteiro** (31 dos 83 arquivos). Os dois maiores blocos do instrumento nunca tinham rodado sob
+teste.
+
+**Nove testes levam a 100%**, cada um com reversão nomeada: os três ramos de `extrair_texto`; o
+`RuntimeError` de `conversao_sem_saida` por `monkeypatch` no `subprocess` — **o ramo que disparou em
+003.FI, 28 de 83**; `_metadata_ooxml` sem `docProps/core.xml`; `cpf_valido` com forma inválida; o
+`--json`; pasta inexistente (que sem guarda produz relatório de zero arquivos **parecendo limpo**);
+e o detalhe por arquivo de `gerar_relatorio`.
+
+**O portão tem dois eixos, e os dois foram revertidos:**
+`test_instrumento_de_varredura_tem_cobertura_total` roda `coverage` em subprocesso e falha
+**nomeando a linha órfã** — R25 (apagar o teste de PDF) devolve literalmente
+`8 linha(s) sem execucao: 208-215, 252`. E `test_pragmas_de_exclusao_sao_os_declarados` barra o
+atalho: marcar `# pragma: no cover` no ramo difícil passa a exigir edição consciente em **dois
+arquivos** — R26 o mata. Único pragma no script é o `if __name__ == "__main__"`, com a razão escrita
+ao lado.
+
+**Registro de suíte, árvore de `3fb98e2`, parada:** **1201 passed, 6 skipped, 0 failed** em 429.62s.
+`1175 + 30 + 2 = 1207`, e `1201 + 6 = 1207`.
+
+**O `.coverage` que o portão escreve foi ignorado com a lição da 1ª rodada aplicada:** conferi
+`tail -c 1 .gitignore` **antes** de anexar, assertei o newline final no próprio script de edição, e
+validei por `git check-ignore -v` em vez de reler o arquivo. O defeito que abriu esta sessão não se
+repete por acidente duas vezes no mesmo diff.
+
+**O que este portão muda, e é o ponto:** *"quem chama esta função?"* deixa de depender de alguém
+perguntar. Era a pergunta que produziu três das seis rejeições, e nenhuma delas veio de releitura
+minha. Agora ela é feita por um teste, a cada tiragem, nomeando a linha.
