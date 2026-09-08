@@ -6863,3 +6863,59 @@ por publicar número sem escopo, escreveu quatro notas dizendo que não faria de
 disso agora é um teste que fica vermelho — não a memória de quem escreve o próximo relatório.
 Regra que só existe em prosa depende de quem lê lembrar dela na hora certa; a mesma regra como
 invariante de saída não depende de ninguém.
+
+### Gate de fechamento — `/critico` `74139b5..4c86f18`
+
+Barra **IMPLEMENTAÇÃO**, com os quatro itens aplicáveis pela primeira vez em duas sessões.
+Teste-por-regra **PARCIAL** — o Crítico refez a varredura inversa a frio e **confirmou as 10**
+(R1 mata 2, R2 discrimina contra R1, R9 conferido contra `PGR_EBSERH_UFGD_v7.pdf` rastreado por
+`git ls-tree`), mas apontou que **a fatia `.gitignore` do diff não tinha teste nem reversão
+nomeável**. ID+fonte **N/A declarado**. ID antiga **PASSA** — nada removido, `DH-003EG-02` segue
+ABERTA, `DH-003FE-01` segue DISPENSADA, os comandos avulsos de `DH-003FI-01` preservados ao lado do
+novo. Registro de suíte **FALHA** — o bloco trazia só "recorte: 41 passed", sem `skipped` e sem o
+commit da medição.
+
+**CRÍTICO rejeitou** — gap: a entrada de `.gitignore` que o bloco afirmava ter criado **não
+existia**. O `echo ".varredura_tmp/" >> .gitignore` colou em `._eoltest`, linha herdada de 003.EH
+(PR #271) **sem newline final**, produzindo o padrão literal inerte `._eoltest.varredura_tmp/`.
+Consequência: rodar o comando que `DH-003FE-01` e `DH-003FI-01` agora prescrevem despejaria os
+`.txt` do LibreOffice — texto integral dos 31 `.doc`/`.rtf`, incluindo os 4 arquivos onde o próprio
+instrumento mede 7 CPFs — em `.varredura_tmp/` **não-ignorada**, ao alcance de `git add`.
+**O instrumento que existe para vigiar dado pessoal no repositório passaria a produzi-lo.**
+
+> **Correção 003.FJ-C** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e é o gap
+> mais grave de todo o ciclo 003.FI–FJ** — os anteriores eram defeito de relato; este era defeito de
+> efeito. Reproduzido: `grep -n "^\.varredura_tmp/$" .gitignore` não devolvia nada, e
+> `git check-ignore -v .varredura_tmp/x.txt` saía vazio.
+>
+> **Corrigido em dois níveis, porque um só não bastava.**
+> **(1) `.gitignore`:** `._eoltest` restaurada como padrão próprio, com newline, e `.varredura_tmp/`
+> entra em linha separada — a armadilha de 003.EH some para o próximo que usar `>>`.
+> **(2) O script deixa de depender do ignore.** `destino_temporario_padrao()` devolve
+> `tempfile.mkdtemp()` **fora da árvore**, e `main` apaga em `finally`. O `.txt` com os CPFs não
+> nasce mais no repositório; `--tmp` continua existindo para inspeção, e a ajuda do argumento diz o
+> custo. O `.gitignore` vira rede **secundária**, declarada como tal no próprio arquivo.
+>
+> **Três testes novos, três reversões nomeadas, varredura inversa 13/13:** R11 destino padrão
+> relativo → mata 1; R12 `efemero = False` → mata 1; R13 apagar sempre, ignorando `--tmp` → mata 1.
+> R12 e R13 são os dois lados da mesma garantia e nenhuma implementação trivial satisfaz os dois.
+>
+> **Um dos três nasceu errado e eu peguei antes da varredura, o que é a novidade.** A primeira
+> versão de `test_main_apaga_o_destino_efemero` chamava `shutil.rmtree` direto e teria sobrevivido à
+> reversão que dizia cobrir — testaria a stdlib, não o `finally` do `main`. Refeito com
+> `monkeypatch` sobre `destino_temporario_padrao` e um `.docx` mínimo montado por `zipfile`, que
+> dispensa o LibreOffice. Uma quarta asserção tautológica (`assert ... or True`) também caiu, trocada
+> por sentinela. É a classe 003.EK pela terceira vez no ciclo — desta a detecção foi minha, não do
+> instrumento externo.
+>
+> **Registro de suíte, que o Crítico marcou FALHA — agora medido e nomeado.** Suíte completa pelo
+> comando canônico `python -m pytest agente_medico/tests/ tests/`, árvore parada:
+> **1182 passed, 6 skipped, 0 failed** em 452.06s. Delta **+13 exato** contra 003.FI por coletados:
+> `1175 + 13 = 1188`, e `1182 + 6 = 1188`. `mypy --strict` no alvo canônico: **limpo, 48 arquivos**.
+>
+> **E uma falha de cláusula que eu repeti e peguei sozinho.** `D-ARQ-85` manda re-tirar o Baseline em
+> todo fechamento que produza commit. O commit `4c86f18` não tocou o `PAINEL_ESTADO.md` — **mesma
+> falha que o `/kickoff` apanhou em 003.FI, quatro dias depois de eu escrever a nota dizendo que ela
+> tinha acontecido.** Baseline re-tirado nesta emenda. Escrever a lição não instala a lição; foi
+> exatamente por isso que `linhas_escopo()` virou invariante de código nesta sessão, e é o argumento
+> a favor de fazer o mesmo com o que ainda vive em prosa.

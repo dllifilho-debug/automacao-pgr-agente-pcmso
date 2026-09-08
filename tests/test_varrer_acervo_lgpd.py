@@ -8,6 +8,7 @@ na medição — em particular, que todo número sai com o escopo que o produziu
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,7 @@ from scripts.varrer_acervo_lgpd import (
     RelatorioAcervo,
     achados_em_texto,
     cpf_valido,
+    destino_temporario_padrao,
     extrair_metadata_autoria,
     gerar_relatorio,
     marcadores_com_contexto,
@@ -186,3 +188,90 @@ def test_gerar_relatorio_abre_pelo_escopo() -> None:
     """
     saida = gerar_relatorio(_relatorio_sintetico())
     assert saida.splitlines()[1].startswith("escopo: 2 arquivos")
+
+
+def test_destino_do_texto_extraido_fica_fora_do_repositorio() -> None:
+    """Reversão que mata: fazer `destino_temporario_padrao` devolver
+    `Path(".varredura_tmp")` — ou qualquer caminho relativo, que resolve dentro
+    da árvore.
+
+    O `.txt` do LibreOffice carrega o texto integral do documento, inclusive os
+    CPFs que este script existe para achar. Nascer dentro da árvore o deixa ao
+    alcance de `git add`. Em 003.FJ a proteção era só o `.gitignore`, e ela
+    falhou: o `echo >>` colou numa linha sem newline final (`._eoltest`) e
+    produziu o padrão inerte `._eoltest.varredura_tmp/`. O Gauntlet apanhou, e a
+    correção de fundo é esta — não escrever no repositório, em vez de escrever e
+    depender do ignore.
+    """
+    destino = destino_temporario_padrao()
+    try:
+        assert destino.is_absolute(), "caminho relativo resolve dentro da árvore"
+        assert Path.cwd() not in destino.resolve().parents
+        assert destino.resolve() != (Path.cwd() / ".varredura_tmp").resolve()
+    finally:
+        shutil.rmtree(destino, ignore_errors=True)
+
+
+def _docx_minimo(destino: Path, corpo: str) -> None:
+    """OOXML mínimo que `_texto_ooxml` consegue ler — evita depender do
+    LibreOffice, que não está em todo container (`DH-003FE-01`, nota de
+    instrumento)."""
+    import zipfile
+
+    with zipfile.ZipFile(destino, "w") as pacote:
+        pacote.writestr("docProps/core.xml", "<cp><dc:creator>Ana Claudia Petry</dc:creator></cp>")
+        pacote.writestr("word/document.xml", f"<w:document><w:t>{corpo}</w:t></w:document>")
+
+
+def test_main_apaga_o_destino_efemero_do_texto_extraido(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reversão que mata: em `main`, trocar `efemero = args.tmp is None` por
+    `efemero = False`, ou remover o bloco `finally: shutil.rmtree(...)`.
+
+    Exercita `main` de ponta a ponta com o destino efêmero substituído por um
+    caminho observável — sem isso o teste mediria `shutil.rmtree`, que é
+    stdlib, e sobreviveria à reversão que diz cobrir (classe 003.EK; a mesma
+    armadilha já custou um teste refeito nesta sessão).
+
+    Discriminante contra o teste acima: aquele morre mudando o *destino*; este
+    morre mantendo o destino certo e não o *apagando*. O `.txt` que fica carrega
+    o texto integral do documento, com os CPFs.
+    """
+    import scripts.varrer_acervo_lgpd as modulo
+
+    destino = tmp_path / "efemero"
+    destino.mkdir()
+    monkeypatch.setattr(modulo, "destino_temporario_padrao", lambda: destino)
+
+    pasta = tmp_path / "acervo"
+    pasta.mkdir()
+    _docx_minimo(pasta / "a.docx", "conteudo de teste " * 30)
+
+    assert modulo.main(["--pasta", str(pasta)]) == 0
+    assert not destino.exists(), "destino efêmero sobreviveu ao fim de main"
+
+
+def test_main_preserva_destino_quando_o_usuario_o_nomeia(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reversão que mata: apagar sempre, ignorando `--tmp` — trocar
+    `if efemero:` por um `shutil.rmtree` incondicional no `finally`.
+
+    `--tmp` existe para inspeção; apagar o que o usuário nomeou destrói o objeto
+    da inspeção. Discriminante contra o teste acima: aquele exige apagar, este
+    exige NÃO apagar, e a mesma implementação tem de satisfazer os dois.
+    """
+    import scripts.varrer_acervo_lgpd as modulo
+
+    nomeado = tmp_path / "nomeado"
+    nomeado.mkdir()
+    sentinela = nomeado / "inspecao.txt"
+    sentinela.write_text("conteudo que o usuario quer inspecionar", encoding="utf-8")
+
+    pasta = tmp_path / "acervo"
+    pasta.mkdir()
+    _docx_minimo(pasta / "a.docx", "conteudo de teste " * 30)
+
+    assert modulo.main(["--pasta", str(pasta), "--tmp", str(nomeado)]) == 0
+    assert sentinela.exists(), "o script apagou o destino que o usuário nomeou"

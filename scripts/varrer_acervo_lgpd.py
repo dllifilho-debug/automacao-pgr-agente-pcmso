@@ -27,6 +27,10 @@ maior que o medido). Aqui isso é invariante de saída, não disciplina de quem
 escreve: `RelatorioAcervo.linhas_escopo()` é obrigatória e os testes a matam se
 sumir.
 
+O texto extraido NUNCA e escrito no repositorio por padrao: a conversao do
+LibreOffice vai para um `tempfile` fora da arvore, apagado ao fim da execucao.
+`--tmp` existe para quem quiser inspecionar, e a ajuda do argumento diz o custo.
+
 Uso:
     python -m scripts.varrer_acervo_lgpd
     python -m scripts.varrer_acervo_lgpd --pasta matrizes_originais --json saida.json
@@ -44,8 +48,10 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import unicodedata
 import zipfile
 from dataclasses import dataclass, field
@@ -214,6 +220,20 @@ def _texto_legado(caminho: Path, destino: Path) -> str:
     if not convertido.exists():
         raise RuntimeError("conversao_sem_saida (falta libreoffice-writer?)")
     return convertido.read_text("utf-8", "ignore")
+
+
+def destino_temporario_padrao() -> Path:
+    """Diretório de conversão do LibreOffice, FORA da árvore do repositório.
+
+    O `.txt` que o LibreOffice escreve carrega o texto integral do documento —
+    inclusive os CPFs que este script existe para encontrar. Nascer dentro da
+    árvore o deixa ao alcance de um `git add`, e depender do `.gitignore` para
+    isso é frágil: em 003.FJ o `echo >> .gitignore` colou numa linha sem newline
+    final (`._eoltest`, herdada de 003.EH) e produziu o padrão inerte
+    `._eoltest.varredura_tmp/`. O Gauntlet apanhou. A correção de fundo é não
+    escrever no repositório, não escrever e torcer para o ignore pegar.
+    """
+    return Path(tempfile.mkdtemp(prefix="varredura_lgpd_"))
 
 
 def extrair_texto(caminho: Path, destino_tmp: Path) -> str:
@@ -427,7 +447,14 @@ def gerar_relatorio(relatorio: RelatorioAcervo) -> str:
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--pasta", type=Path, default=Path("matrizes_originais"))
-    parser.add_argument("--tmp", type=Path, default=Path(".varredura_tmp"))
+    parser.add_argument(
+        "--tmp",
+        type=Path,
+        default=None,
+        help="destino da conversao do LibreOffice; padrao = tempfile fora do repositorio,"
+        " apagado ao fim. Apontar para dentro da arvore deixa texto extraido (com CPF)"
+        " no working tree.",
+    )
     parser.add_argument("--json", type=Path, default=None)
     args = parser.parse_args(argv)
 
@@ -435,8 +462,14 @@ def main(argv: Optional[list[str]] = None) -> int:
         print(f"pasta inexistente: {args.pasta}", file=sys.stderr)
         return 2
 
-    relatorio = varrer(args.pasta, args.tmp)
-    print(gerar_relatorio(relatorio))
+    efemero = args.tmp is None
+    destino_tmp = destino_temporario_padrao() if efemero else args.tmp
+    try:
+        relatorio = varrer(args.pasta, destino_tmp)
+        print(gerar_relatorio(relatorio))
+    finally:
+        if efemero:
+            shutil.rmtree(destino_tmp, ignore_errors=True)
 
     if args.json is not None:
         args.json.write_text(
