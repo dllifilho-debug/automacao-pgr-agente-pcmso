@@ -312,3 +312,82 @@ def test_exclusao_de_conta_generica_e_medida_e_nao_o_tamanho_da_lista() -> None:
     texto = "\n".join(relatorio.linhas_escopo())
     assert "valores distintos no campo de autoria: 2 = 1 nomes de pessoa + 1 de conta" in texto
     assert "a lista do filtro VALORES_NAO_PESSOA tem 8 entradas" in texto
+
+
+def test_toda_classe_coletada_chega_a_saida() -> None:
+    """Reversão que mata: remover de `linhas_escopo` qualquer uma das linhas que
+    publicam `pis_candidatos`, `emails`, `assinatura_digital` ou o par
+    `crm`/`crea`.
+
+    **Guarda estrutural, não enumeração.** O teste itera os campos de `Achados`
+    por `__dataclass_fields__`, então um campo novo que nasça sem caminho de
+    saída falha aqui sem ninguém lembrar de estender o teste.
+
+    Origem medida: até `4e67ef2`, cinco das seis classes que `achados_em_texto`
+    coleta — `pis_candidatos`, `emails`, `assinatura_digital`, `crm`, `crea` —
+    não eram lidas por `linhas_escopo`, `gerar_relatorio` nem `--json`. Um
+    e-mail ou PIS de trabalhador no acervo era encontrado e **descartado em
+    silêncio**, e o relatório saía limpo no eixo em que a cláusula de
+    `DH-003FE-01` decide. É a classe 003.EK do `CLAUDE.md` aplicada ao campo em
+    vez de ao teste: dado que nenhuma saída consome.
+    """
+    relatorio = RelatorioAcervo(
+        pasta="acervo",
+        registros=[
+            RegistroArquivo(
+                nome="a.pdf",
+                extensao=".pdf",
+                extraido=True,
+                achados=Achados(
+                    cpfs=(_CPF_VALIDO,),
+                    pis_candidatos=("203.69644.09-8",),
+                    emails=("rt@construtora.com.br",),
+                    assinatura_digital=True,
+                    crm=1,
+                    crea=2,
+                ),
+            )
+        ],
+    )
+    texto = "\n".join(relatorio.linhas_escopo())
+    rotulo_por_campo = {
+        "cpfs": "CPF com DV valido",
+        "pis_candidatos": "PIS/NIT",
+        "emails": "e-mail",
+        "assinatura_digital": "assinatura digital",
+        "crm": "registro profissional",
+        "crea": "registro profissional",
+    }
+    assert set(rotulo_por_campo) == set(Achados.__dataclass_fields__), (
+        "campo novo em Achados sem rótulo de saída declarado neste teste"
+    )
+    for campo, rotulo in rotulo_por_campo.items():
+        assert rotulo in texto, f"{campo} coletado mas ausente da saída"
+
+
+def test_saida_declara_que_pis_nao_e_validado() -> None:
+    """Reversão que mata: em `linhas_escopo`, apagar o trecho
+    `"nao validados por digito verificador"` da linha de PIS/NIT.
+
+    A seção Fronteira promete "não valida PIS/NIT: devolve candidatos". Até
+    `4e67ef2` isso era **falso na única interface do instrumento** — nenhum
+    candidato saía. Agora saem, e a saída tem de dizer que não passaram por
+    validação, senão o leitor os lê como achado.
+
+    Discriminante contra o teste acima: aquele morre se a linha de PIS sumir;
+    este morre com a linha presente e a ressalva removida.
+    """
+    relatorio = RelatorioAcervo(
+        pasta="acervo",
+        registros=[
+            RegistroArquivo(
+                nome="a.pdf",
+                extensao=".pdf",
+                extraido=True,
+                achados=Achados(pis_candidatos=("203.69644.09-8",)),
+            )
+        ],
+    )
+    texto = "\n".join(relatorio.linhas_escopo())
+    assert "CANDIDATOS" in texto
+    assert "nao validados por digito verificador" in texto

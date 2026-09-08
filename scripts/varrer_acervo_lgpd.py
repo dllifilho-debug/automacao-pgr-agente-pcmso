@@ -343,6 +343,24 @@ class RelatorioAcervo:
             contagem[registro.extensao] = contagem.get(registro.extensao, 0) + 1
         return dict(sorted(contagem.items()))
 
+    def _uniao(self, campo: str) -> tuple[str, ...]:
+        uniao: set[str] = set()
+        for registro in self.extraidos:
+            uniao.update(getattr(registro.achados, campo))
+        return tuple(sorted(uniao))
+
+    def pis_candidatos_distintos(self) -> tuple[str, ...]:
+        return self._uniao("pis_candidatos")
+
+    def emails_distintos(self) -> tuple[str, ...]:
+        return self._uniao("emails")
+
+    def com_assinatura_digital(self) -> tuple[str, ...]:
+        return tuple(sorted(r.nome for r in self.extraidos if r.achados.assinatura_digital))
+
+    def registros_com_registro_profissional(self) -> tuple[str, ...]:
+        return tuple(sorted(r.nome for r in self.extraidos if r.achados.crm or r.achados.crea))
+
     def cpfs_distintos(self) -> tuple[str, ...]:
         uniao: set[str] = set()
         for registro in self.extraidos:
@@ -390,6 +408,27 @@ class RelatorioAcervo:
         linhas.append(
             f"CPF com DV valido: {len(self.cpfs_distintos())} distintos"
             f" em {len(com_cpf)} de {len(self.extraidos)} arquivos extraidos"
+        )
+        com_pis = [r for r in self.extraidos if r.achados.pis_candidatos]
+        linhas.append(
+            f"PIS/NIT: {len(self.pis_candidatos_distintos())} CANDIDATOS distintos"
+            f" em {len(com_pis)} de {len(self.extraidos)} extraidos"
+            " — nao validados por digito verificador; separar NIT de numero de serie"
+            " exige ler o contexto (ver Fronteira)"
+        )
+        com_email = [r for r in self.extraidos if r.achados.emails]
+        linhas.append(
+            f"e-mail: {len(self.emails_distintos())} distintos"
+            f" em {len(com_email)} de {len(self.extraidos)} extraidos"
+        )
+        assinados = self.com_assinatura_digital()
+        linhas.append(
+            f"marca de assinatura digital: {len(assinados)} de {len(self.extraidos)} extraidos"
+        )
+        profissionais = self.registros_com_registro_profissional()
+        linhas.append(
+            f"registro profissional (CRM ou CREA): {len(profissionais)}"
+            f" de {len(self.extraidos)} extraidos"
         )
         com_marcador = [r for r in self.extraidos if r.marcadores]
         linhas.append(
@@ -462,6 +501,14 @@ def gerar_relatorio(relatorio: RelatorioAcervo) -> str:
         if registro.achados.cpfs:
             linhas.append(f"  {len(registro.achados.cpfs)}\t{registro.nome}")
     linhas.append("")
+    linhas.append("-- PIS/NIT candidatos e e-mail, por arquivo --")
+    for registro in relatorio.extraidos:
+        if registro.achados.pis_candidatos or registro.achados.emails:
+            linhas.append(
+                f"  {registro.nome}\tpis_candidatos={list(registro.achados.pis_candidatos)}"
+                f"\temails={list(registro.achados.emails)}"
+            )
+    linhas.append("")
     linhas.append("-- marcador de trabalhador: contexto, arquivo a arquivo --")
     for registro in relatorio.extraidos:
         for ocorrencia in registro.marcadores:
@@ -512,6 +559,10 @@ def main(argv: Optional[list[str]] = None) -> int:
                         {"nome": r.nome, "motivo": r.motivo_falha} for r in relatorio.nao_extraidos
                     ],
                     "cpfs_distintos": len(relatorio.cpfs_distintos()),
+                    "pis_candidatos_distintos": list(relatorio.pis_candidatos_distintos()),
+                    "emails_distintos": len(relatorio.emails_distintos()),
+                    "com_assinatura_digital": list(relatorio.com_assinatura_digital()),
+                    "com_registro_profissional": len(relatorio.registros_com_registro_profissional()),
                     "nomes_metadata": list(relatorio.nomes_na_metadata()),
                 },
                 ensure_ascii=False,
