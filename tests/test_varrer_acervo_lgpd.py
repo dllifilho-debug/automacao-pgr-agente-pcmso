@@ -20,6 +20,7 @@ from scripts.varrer_acervo_lgpd import (
     RelatorioAcervo,
     achados_em_texto,
     cpf_valido,
+    varrer,
     destino_temporario_padrao,
     extrair_metadata_autoria,
     gerar_relatorio,
@@ -391,3 +392,89 @@ def test_saida_declara_que_pis_nao_e_validado() -> None:
     texto = "\n".join(relatorio.linhas_escopo())
     assert "CANDIDATOS" in texto
     assert "nao validados por digito verificador" in texto
+
+
+# ---------------------------------------------------------------------------
+# Os três ramos de FALHA de `varrer()`. Até `ff7203d` nenhum tinha teste: a
+# suíte só exercitava `varrer` por dentro de `main`, com um `.docx` que extrai
+# bem, e todo `RegistroArquivo(extraido=False)` era montado à mão. Logo o
+# número `83 de 83 extraidos` que `PENDENCIAS_CLINICAS.md` publica era
+# reversível com a suíte verde. Achado pela 5ª rodada do `/critico`.
+# ---------------------------------------------------------------------------
+
+
+def test_pdf_escaneado_sai_nao_extraido_e_nunca_limpo(tmp_path: Path) -> None:
+    """Reversão que mata: remover a guarda
+    `if len(texto.strip()) < _MIN_TEXTO_UTIL:` de `varrer`.
+
+    Sem ela o escaneado conta como **extraído e limpo** — medido e descartado em
+    silêncio, no eixo em que a cláusula de `DH-003FE-01` decide. A seção
+    Fronteira promete "não faz OCR — PDF escaneado sai como `nao_extraido` com o
+    motivo, nunca como 'limpo'", e a promessa não tinha teste.
+
+    Simulado por um `.docx` cujo corpo tem menos de `_MIN_TEXTO_UTIL` caracteres
+    — mesmo ramo, sem depender de um PDF sem camada de texto no acervo.
+    """
+    pasta = tmp_path / "acervo"
+    pasta.mkdir()
+    _docx_minimo(pasta / "escaneado.docx", "pouco texto")
+
+    relatorio = varrer(pasta, tmp_path / "tmp")
+
+    assert relatorio.total == 1
+    assert relatorio.extraidos == []
+    (falha,) = relatorio.nao_extraidos
+    assert falha.nome == "escaneado.docx"
+    assert "texto_insuficiente" in (falha.motivo_falha or "")
+    assert "escaneado" in (falha.motivo_falha or "")
+    texto = "\n".join(relatorio.linhas_escopo())
+    assert "extraidos: 0 de 1" in texto
+    assert "nao_extraido\tescaneado.docx" in texto
+
+
+def test_extensao_sem_extrator_sai_nomeada_e_nao_silenciosa(tmp_path: Path) -> None:
+    """Reversão que mata: remover o `raise RuntimeError("extensao_sem_extrator: ...")`
+    de `extrair_texto`, devolvendo `""` para extensão desconhecida.
+
+    Discriminante contra o teste acima: aquele morre tirando a guarda de
+    tamanho; este morre com a guarda intacta e a extensão desconhecida
+    silenciada. Um `.odt` ou `.pages` no acervo não pode virar "limpo".
+    """
+    pasta = tmp_path / "acervo"
+    pasta.mkdir()
+    (pasta / "estranho.odt").write_text("conteudo " * 60, encoding="utf-8")
+
+    relatorio = varrer(pasta, tmp_path / "tmp")
+
+    (falha,) = relatorio.nao_extraidos
+    assert "extensao_sem_extrator" in (falha.motivo_falha or "")
+    assert ".odt" in (falha.motivo_falha or "")
+
+
+def test_arquivo_corrompido_vira_falha_nomeada_e_nao_derruba_a_varredura(
+    tmp_path: Path,
+) -> None:
+    """Reversão que mata: remover o `try/except Exception` de `varrer` que
+    converte erro de extração em `RegistroArquivo(extraido=False, motivo_falha=...)`.
+
+    Sem ele um único arquivo corrompido aborta a varredura inteira — e o
+    operador fica sem relatório algum, que é pior que o relatório incompleto.
+    Discriminante contra os dois acima: o `.docx` aqui é um ZIP inválido, então
+    a guarda de tamanho nunca é alcançada e a extensão É conhecida.
+
+    Cobre também o invariante de que a varredura **continua**: o segundo arquivo
+    da pasta tem de ser medido apesar da falha do primeiro.
+    """
+    pasta = tmp_path / "acervo"
+    pasta.mkdir()
+    (pasta / "a_corrompido.docx").write_bytes(b"nao sou um zip")
+    _docx_minimo(pasta / "b_ok.docx", "conteudo de teste " * 30)
+
+    relatorio = varrer(pasta, tmp_path / "tmp")
+
+    assert relatorio.total == 2
+    (falha,) = relatorio.nao_extraidos
+    assert falha.nome == "a_corrompido.docx"
+    assert falha.motivo_falha, "falha sem motivo nomeado"
+    (ok,) = relatorio.extraidos
+    assert ok.nome == "b_ok.docx", "a varredura parou no primeiro erro"
