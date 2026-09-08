@@ -7060,3 +7060,44 @@ consome: a classe 003.EK do `CLAUDE.md`, aplicada ao campo em vez de ao teste.
 > em doc vivo; invariante violando a si mesmo). **Nenhuma teria sido pega por releitura minha** — e
 > a mais grave das quatro só apareceu quando alguém perguntou "quem lê este campo?", que é uma
 > pergunta que o autor não faz sobre o próprio código.
+
+### Gate de fechamento — `/critico` `74139b5..ff7203d` (5ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. ID+fonte **PASSA**, ID antiga **PASSA**, registro de suíte **PASSA** —
+o Crítico conferiu a reconciliação nas duas pontas sem re-executar a suíte, e aceitou `4d85c35`
+como árvore de código por `ff7203d` ser docs-only. Teste-por-regra **REPROVA**.
+
+**Declaração de procedimento do próprio Crítico**, registrada porque é do mesmo tipo que este
+projeto cobra de si: ele leu o bloco 003.FJ por acidente ao rodar `git diff` sem limitar caminho,
+declarou a exposição, tratou o conteúdo como **não-fonte** e ofereceu ao Arquiteto descartar o
+julgamento. **Não descartei:** a varredura inversa dele foi feita antes da leitura, e o gap é
+achado próprio, ausente daquele texto, que **reproduz por execução**.
+
+**CRÍTICO rejeitou** — gap: a cláusula da própria seção **Fronteira** — *"não faz OCR: PDF
+escaneado sai como `nao_extraido` com o motivo, nunca como 'limpo'"* — **não tinha teste**.
+Reproduzido aqui: remover inteira a guarda `if len(texto.strip()) < _MIN_TEXTO_UTIL` deixava os
+**16 verdes**.
+
+> **Correção 003.FJ-C5** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e a causa
+> é estrutural: `varrer()` não era chamada por teste algum.** Era exercitada só por dentro de `main`,
+> em dois testes, ambos com um `.docx` de 540 caracteres que extrai bem, e todo
+> `RegistroArquivo(extraido=False)` era **montado à mão**. Logo os três ramos que produzem o número
+> `83 de 83 extraidos` — publicado em `PENDENCIAS_CLINICAS.md` e usado para sustentar
+> `DH-003FE-01` — eram reversíveis com a suíte verde.
+>
+> **Três testes novos, cada um chamando `varrer()` direto:** o do escaneado (R18), o da extensão sem
+> extrator (R19) e o do arquivo corrompido (R20) — este último cobrindo também o invariante de que
+> **a varredura continua** depois da falha, porque um arquivo corrompido abortar o relatório inteiro
+> é pior que o relatório incompleto.
+>
+> **Varredura inversa 19/19.** R18 mata só o do escaneado; R19 só o da extensão; R20 mata dois, o
+> que é esperado — sem o `try/except` a exceção de extensão também propaga.
+>
+> **Registro de suíte, árvore de `b4580d5`, parada:** **1188 passed, 6 skipped, 0 failed** em
+> 431.25s. `1175 + 19 = 1194`, e `1188 + 6 = 1194`.
+>
+> **Cinco rodadas, cinco classes, progressão 10 → 13 → 14 → 16 → 19.** E há um padrão que só fica
+> visível agora: **três das cinco são a mesma pergunta feita a alvos diferentes** — *quem lê este
+> campo?* (4ª), *quem chama esta função?* (5ª), *quem confere este número?* (2ª e 3ª). É a pergunta
+> que o autor não faz sobre o próprio trabalho, porque quem escreveu o código sabe o que ele
+> pretende fazer e lê a intenção no lugar do texto.
