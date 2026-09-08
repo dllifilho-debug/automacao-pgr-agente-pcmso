@@ -6968,3 +6968,48 @@ nomeava.
 > sessão que existe para instalar a lição contra ela. O script ganhou `linhas_escopo()` como
 > invariante, mas **a prosa em volta do script não tem invariante nenhum**, e foi ali que caiu de
 > novo. Instalar a regra no código não cobre o texto que descreve o código.
+
+### Gate de fechamento — `/critico` `74139b5..d1009b8` (3ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. Teste-por-regra **13/13 mortos**, conferidos teste a teste a frio, com os
+pares discriminantes confirmados. ID+fonte **N/A satisfeito**. ID antiga **PASSA**. Registro de suíte
+**FALHA** — medido em `cc62333`, e `d1009b8` voltou a tocar `scripts/`, logo a árvore medida não era
+a do artefato julgado. A seção **Fronteira**, entregue nesta rodada, foi aceita como eixo: o Crítico
+derivou `D-ARQ-22` dela.
+
+**CRÍTICO rejeitou** — gap: `linhas_escopo()` imprimia `excluidos {len(VALORES_NAO_PESSOA)}` = **8**
+como se fosse exclusão medida. O `8` é o **tamanho da lista** do filtro; no acervo só **7**
+apareceram (`Microsoft Office Word` está no filtro e nunca ocorreu). O publicado dava
+`20 nomes + 8 excluídos = 28` contra os **27** valores medidos, e `DH-003FI-01` repetia a conta
+quebrada. **O invariante que o artefato declara travado por teste emitia número sem o escopo que o
+produziu** — o princípio de projeto do script, violado pelo script. E
+`test_relatorio_declara_escopo_de_todo_numero_que_imprime` só asseria a substring `"excluidos"`,
+sobrevivendo à troca.
+
+> **Correção 003.FJ-C3** *(nota aditiva; redação acima intacta — classe 10)*. **Procede inteiro, e é
+> o achado mais fino do ciclo:** os anteriores eram número errado; este é o instrumento anti-erro
+> falhando na própria classe que existe para impedir.
+>
+> **Corrigido na raiz, não na string.** Entram `valores_de_autoria()` (os distintos observados) e
+> `excluidos_nesta_medicao()` (interseção do filtro com o que de fato apareceu). `linhas_escopo()`
+> passa a **fechar a conta na própria linha**, e o tamanho da lista sai declarado ao lado, separado
+> do que foi excluído. Medido contra o acervo real depois da correção:
+> `valores distintos no campo de autoria: 27 = 20 nomes de pessoa + 7 de conta generica/equipamento
+> excluidos NESTA medicao (a lista do filtro VALORES_NAO_PESSOA tem 8 entradas; as nao observadas
+> aqui nao entram na conta)`. **27 = 20 + 7.**
+>
+> **Teste novo com R14 nomeada**, e a varredura inversa prova o ponto do Crítico: R14 (publicar
+> `len(VALORES_NAO_PESSOA)` no lugar de `len(excluidos)`) **mata só o teste novo — o antigo
+> sobrevive**. A cobertura anterior era substring, não contrato.
+>
+> **Registro de suíte, agora com a árvore certa.** `python -m pytest agente_medico/tests/ tests/`,
+> árvore parada em **`9b0d496`**: **1183 passed, 6 skipped, 0 failed** em 515.26s.
+> `1175 + 14 = 1189`, e `1183 + 6 = 1189`. O Baseline nomeia `9b0d496` e registra a progressão —
+> 10 testes em `4c86f18`, 13 em `cc62333`, 14 em `9b0d496`. **Cada rodada do Gauntlet somou um
+> teste**, e é a medida mais honesta do que estas três rejeições produziram.
+>
+> **Três rejeições, três classes distintas, e a terceira é a que ensina.** A 1ª foi defeito de
+> efeito (`.gitignore` inerte deixando CPF ao alcance de `git add`). A 2ª, número refutado em doc
+> vivo. A 3ª, o **invariante violando a si mesmo** — e ela mostra que instalar a regra no código não
+> basta se o teste que a guarda afere forma em vez de conteúdo. `assert "excluidos" in texto` tinha
+> a aparência de um contrato e era um `grep`.
