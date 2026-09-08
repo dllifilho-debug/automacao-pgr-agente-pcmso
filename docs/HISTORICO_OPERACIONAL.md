@@ -7013,3 +7013,50 @@ sobrevivendo à troca.
 > vivo. A 3ª, o **invariante violando a si mesmo** — e ela mostra que instalar a regra no código não
 > basta se o teste que a guarda afere forma em vez de conteúdo. `assert "excluidos" in texto` tinha
 > a aparência de um contrato e era um `grep`.
+
+### Gate de fechamento — `/critico` `74139b5..4e67ef2` (4ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. **Três dos quatro itens passaram**: teste-por-regra **PASSA** (varredura
+inversa 14/14 conferida a frio, com os cinco pares discriminantes), ID+fonte **N/A satisfeito**,
+ID antiga **PASSA**, e **registro de suíte PASSA** pela primeira vez no ciclo — o Crítico aceitou
+`9b0d496` como árvore de código do artefato, por `9b0d496..4e67ef2` ser docs-only, e conferiu a
+reconciliação por coletados.
+
+**CRÍTICO rejeitou** — gap: das seis classes que `achados_em_texto` coleta, **cinco não eram lidas
+por caminho de saída algum** — `pis_candidatos`, `emails`, `assinatura_digital`, `crm`, `crea` não
+apareciam em `linhas_escopo`, `gerar_relatorio` nem `--json`. **Um e-mail ou PIS de trabalhador no
+acervo era encontrado e descartado em silêncio**, e o relatório saía limpo justamente no eixo em
+que a cláusula de `DH-003FE-01` decide. Pior: a seção **Fronteira** promete *"não valida PIS/NIT:
+devolve candidatos"* — falso na única interface do instrumento, porque nenhum candidato saía. E
+`test_pis_sai_como_candidato_e_nao_como_achado` guardava o **nome** de um campo que nenhuma saída
+consome: a classe 003.EK do `CLAUDE.md`, aplicada ao campo em vez de ao teste.
+
+> **Correção 003.FJ-C4** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e é o gap
+> mais grave desde o `.gitignore` inerte** — os dois são defeito de efeito, não de relato. Medido
+> antes de aceitar: `git grep` dos cinco campos devolvia **0 usos** fora da definição e da
+> atribuição, contra **4** de `cpfs`.
+>
+> **O que estava sumindo, medido depois da correção contra o acervo real:** PIS/NIT **3 candidatos
+> distintos em 3 de 83** — e são exatamente os três que 003.FI mediu à mão: o NIT real
+> `203.69644.09-8`, o número de série `41461832041` do calibrador de vazão e o ruído de texto
+> invertido do PGR da EBSERH. Mais **27 e-mails distintos em 30 de 83**, **3 arquivos com marca de
+> assinatura digital** e **24 com CRM ou CREA**. Tudo isso era calculado e jogado fora.
+>
+> **A correção do teste é estrutural, não enumerativa.**
+> `test_toda_classe_coletada_chega_a_saida` itera `Achados.__dataclass_fields__` e falha se um campo
+> novo nascer sem rótulo de saída — **sem ninguém lembrar de estender o teste**. É a diferença entre
+> tapar cinco buracos e fechar a classe deles. Mais `test_saida_declara_que_pis_nao_e_validado`,
+> porque candidato publicado sem a ressalva vira achado na leitura.
+>
+> **Varredura inversa 16/16.** R15 (tirar a linha de e-mail) e R17 (tirar a de CRM/CREA) matam o
+> guarda estrutural; R16 (tirar a ressalva de DV) mata só o teste da ressalva.
+>
+> **Registro de suíte, árvore de `4d85c35`, parada:** **1185 passed, 6 skipped, 0 failed** em
+> 559.06s. `1175 + 16 = 1191`, e `1185 + 6 = 1191`.
+>
+> **Quatro rodadas, quatro classes, e a progressão de testes é o resumo honesto do que elas
+> produziram: 10 → 13 → 14 → 16.** Duas foram defeito de efeito (`.gitignore` inerte deixando CPF
+> ao alcance de `git add`; cinco classes descartadas em silêncio) e duas de relato (número refutado
+> em doc vivo; invariante violando a si mesmo). **Nenhuma teria sido pega por releitura minha** — e
+> a mais grave das quatro só apareceu quando alguém perguntou "quem lê este campo?", que é uma
+> pergunta que o autor não faz sobre o próprio código.
