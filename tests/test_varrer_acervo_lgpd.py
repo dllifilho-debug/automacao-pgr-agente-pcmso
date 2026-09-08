@@ -73,7 +73,23 @@ def test_pis_sai_como_candidato_e_nao_como_achado() -> None:
     achados = achados_em_texto(serie)
     assert achados.pis_candidatos, "o padrão casa — é candidato, não achado"
     assert not hasattr(achados, "pis"), "candidato não pode ter nome de achado"
-    assert "candidato" in type(achados).__dataclass_fields__["pis_candidatos"].name
+
+    # Comportamento, não nome: o número de série tem de SAIR na varredura, e sair
+    # rotulado CANDIDATO — nunca somado aos achados validados por DV. A versão
+    # anterior deste teste asseria
+    # `"candidato" in __dataclass_fields__["pis_candidatos"].name`, que é
+    # tautologia — assert estruturalmente inalcançável, apanhado pela 6ª rodada
+    # do /critico.
+    relatorio = RelatorioAcervo(
+        pasta="acervo",
+        registros=[
+            RegistroArquivo(nome="a.pdf", extensao=".pdf", extraido=True, achados=achados)
+        ],
+    )
+    assert relatorio.pis_candidatos_distintos() == ("414.61832.04-1",)
+    assert relatorio.cpfs_distintos() == (), "candidato não pode entrar na conta de CPF"
+    texto = "\n".join(relatorio.linhas_escopo())
+    assert "PIS/NIT: 1 CANDIDATOS distintos em 1 de 1 extraidos" in texto
 
 
 def test_marcador_de_trabalhador_devolve_contexto_e_nao_so_contagem() -> None:
@@ -478,3 +494,46 @@ def test_arquivo_corrompido_vira_falha_nomeada_e_nao_derruba_a_varredura(
     assert falha.motivo_falha, "falha sem motivo nomeado"
     (ok,) = relatorio.extraidos
     assert ok.nome == "b_ok.docx", "a varredura parou no primeiro erro"
+
+
+_DOC_COM_AUTOR = Path("matrizes_originais") / "MATRIZ DE EXAME(ADENDO)ENGESEG ESTRUTURAL LTDA 24.04.25.doc"
+
+
+def test_metadata_de_autoria_le_o_ramo_ooxml(tmp_path: Path) -> None:
+    """Reversão que mata: em `extrair_metadata_autoria`, remover
+    `if extensao in EXT_OOXML: return _metadata_ooxml(caminho)`.
+
+    Sem esse ramo, todo `.docx`/`.xlsx` devolve `{}` e os nomes que só existem no
+    `docProps/core.xml` **somem em silêncio** — no eixo que decide a cláusula de
+    `DH-003FE-01` e que `DH-003FI-01` publica (20 dos 27 valores). Até `1003182`
+    o ramo não tinha teste: a metadata era montada à mão em todos os casos menos
+    o de PDF, que é o padrão que o docstring do teste vizinho condena como classe
+    003.EK. Apanhado pela 6ª rodada do `/critico`.
+
+    Discriminante contra `test_metadata_de_autoria_le_o_ramo_pdf`: aquele morre
+    removendo o ramo de PDF e este segue verde, e vice-versa.
+    """
+    alvo = tmp_path / "a.docx"
+    _docx_minimo(alvo, "corpo irrelevante")
+    campos = extrair_metadata_autoria(alvo)
+    assert campos.get("Author") == "Ana Claudia Petry"
+    assert nomes_de_pessoa(campos.values()) == ("Ana Claudia Petry",)
+
+
+@pytest.mark.skipif(not _DOC_COM_AUTOR.exists(), reason="acervo ausente (DH-003ET-01)")
+def test_metadata_de_autoria_le_o_ramo_legado_ole2() -> None:
+    """Reversão que mata: em `extrair_metadata_autoria`, remover
+    `if extensao in EXT_LEGADO: return _metadata_legado(caminho)`.
+
+    `.doc` e `.rtf` são 31 dos 83 arquivos do acervo, e o cabeçalho OLE2 é onde
+    vivem `Author` e `Last Saved By`. Sem o ramo, esses 31 devolvem `{}`.
+
+    Usa um `.doc` **rastreado** porque OLE2 não se fabrica com `zipfile`, e a
+    versão sintética não exercitaria `file -b`, que é o mecanismo real.
+    Discriminante contra os dois testes de metadata acima: cada um morre com a
+    remoção do seu próprio ramo.
+    """
+    campos = extrair_metadata_autoria(_DOC_COM_AUTOR)
+    assert campos.get("Author") == "Roberto"
+    assert campos.get("Last Saved By") == "Amanda da Silva Rodrigues"
+    assert "Amanda da Silva Rodrigues" in nomes_de_pessoa(campos.values())
