@@ -7180,3 +7180,49 @@ repete por acidente duas vezes no mesmo diff.
 **O que este portão muda, e é o ponto:** *"quem chama esta função?"* deixa de depender de alguém
 perguntar. Era a pergunta que produziu três das seis rejeições, e nenhuma delas veio de releitura
 minha. Agora ela é feita por um teste, a cada tiragem, nomeando a linha.
+
+### Gate de fechamento — `/critico` `74139b5..be01a41` (7ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. **Os quatro itens passaram.** Teste-por-regra **APROVA** — varredura
+inversa teste a teste nos **32** (30 + 2 do portão), cada docstring nomeando reversão que de fato
+mata, com os discriminantes conferidos: laço do DV × guarda de repetição × guarda de forma em
+`cpf_valido`; guarda de tamanho × `raise extensao_sem_extrator` × `try/except` de `varrer`; ramo
+PDF × OOXML × legado de `extrair_metadata_autoria`; apagar destino efêmero × preservar `--tmp`.
+ID+fonte **APROVA**. ID antiga **APROVA** — `DH-003FE-01` declarada ABERTA no próprio texto que a
+credita. Registro de suíte **APROVA**.
+
+**Gate de fechamento: CRÍTICO aprovou** — `74139b5..be01a41`, a frio, sessão separada.
+
+**O que ele conferiu contra o git, e não contra o texto do artefato:** `matrizes_originais/` tem
+**83** arquivos, **38** `.pdf`, **31** entre `.doc` e `.rtf`, **45** não-PDF — os números que os
+docstrings citam como escopo medido **conferem um a um**. Os três arquivos de acervo usados como
+fixture rastreada existem na árvore. E o padrão `.varredura_tmp/` nasce em **linha própria**, sem a
+colagem que abriu esta sessão. Ele também reproduziu a reconciliação da suíte: `4d1bc01..74139b5`
+não toca `tests/` nem `agente_medico/`, os arquivos novos coletam 30 + 2, e `1175 + 32 = 1207 =
+1201 + 6`.
+
+**Saldo do Gauntlet na 003.FJ: 6 rejeições, 6 gaps procedentes, 1 aprovação.** Cada rejeição achou
+classe distinta e nenhuma repetiu a anterior:
+
+| rodada | classe do gap | tratado em |
+|---|---|---|
+| 1ª | efeito — `.gitignore` inerte deixava CPF ao alcance de `git add` | `cc62333` |
+| 2ª | relato — `"10 testes"` refutado em doc vivo, commit da medição errado | `d1009b8` |
+| 3ª | invariante violando a si mesmo — tamanho de lista publicado como exclusão medida | `9b0d496` |
+| 4ª | efeito — cinco classes coletadas que nenhuma saída lia | `4d85c35` |
+| 5ª | ramo sem teste — os três caminhos de falha de `varrer()` | `b4580d5` |
+| 6ª | ramo sem teste — dois dos três de `extrair_metadata_autoria` | `dc77b28` |
+| — | **fecho de classe** decidido pelo Arquiteto: portão de cobertura, 91% → **100%** | `3fb98e2` |
+
+**A lição que a sessão inteira sustenta, e ela não é sobre o instrumento:** três das seis rejeições
+foram a mesma pergunta em alvos diferentes — *quem lê este campo? quem chama esta função? quem
+confere este número?* —, e **nenhuma das seis veio de releitura minha**. O que mudou o padrão não
+foi eu prometer atenção, foi transformar a pergunta em teste: primeiro `linhas_escopo()` como
+invariante de saída, depois o guarda estrutural sobre `__dataclass_fields__`, por fim o portão de
+cobertura que nomeia a linha órfã. **Regra que vive em prosa depende de quem lê lembrar dela na hora
+certa; a mesma regra como invariante executável não depende de ninguém.**
+
+E o custo disso está medido: a 6ª rodada achou a classe da 5ª num alvo vizinho, no commit seguinte
+ao que a 5ª blindou. **Corrigir o caso nomeado é o reflexo; fechar a classe é o trabalho** — e a
+diferença entre os dois foi a decisão do Arquiteto de mandar fazer o coverage em vez de esperar a
+7ª rodada apontar o terceiro ramo.
