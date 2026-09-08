@@ -7101,3 +7101,45 @@ Reproduzido aqui: remover inteira a guarda `if len(texto.strip()) < _MIN_TEXTO_U
 > campo?* (4ª), *quem chama esta função?* (5ª), *quem confere este número?* (2ª e 3ª). É a pergunta
 > que o autor não faz sobre o próprio trabalho, porque quem escreveu o código sabe o que ele
 > pretende fazer e lê a intenção no lugar do texto.
+
+### Gate de fechamento — `/critico` `74139b5..1003182` (6ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. ID+fonte **OK**, ID antiga **OK**, registro de suíte **OK** — o Crítico
+conferiu a progressão 10/13/14/16/19 **commit a commit** e notou, com razão, que o delta de `+19`
+só é alcançável no escopo `agente_medico/tests/ tests/`. Teste-por-regra **FALHA**.
+
+**CRÍTICO rejeitou** — gap: `extrair_metadata_autoria` tem três ramos (OOXML, legado OLE2, PDF) e
+**só o de PDF era exercitado**; nos demais testes a metadata era montada à mão — o padrão que o
+docstring do próprio teste de PDF condena como classe 003.EK. Reproduzido: remover o ramo OOXML
+deixava **19 verdes**; remover o legado, **19 verdes**. É o eixo que decide a cláusula de
+`DH-003FE-01` e que `DH-003FI-01` publica (20 dos 27 valores) — apagar qualquer ramo derrubaria
+nomes em silêncio, **tornando reversível o mesmo tipo de número que a 5ª rodada acabou de blindar
+para `varrer()`, enquanto o artefato publicava "varredura inversa 19/19"**.
+
+Achado colateral, também procedente: `test_pis_sai_como_candidato_e_nao_como_achado` tinha assert
+**estruturalmente inalcançável** — `"candidato" in __dataclass_fields__["pis_candidatos"].name` é
+tautologia, porque o nome do campo *é* `pis_candidatos`.
+
+> **Correção 003.FJ-C6** *(nota aditiva; redação acima intacta — classe 10)*. **Os dois procedem.**
+> Entram `test_metadata_de_autoria_le_o_ramo_ooxml` (R21, `.docx` sintético, sem dependência de
+> acervo) e `test_metadata_de_autoria_le_o_ramo_legado_ole2` (R22, `.doc` **rastreado** — OLE2 não
+> se fabrica com `zipfile`, e a versão sintética não exercitaria `file -b`, que é o mecanismo real).
+> **Os três ramos agora morrem um a um:** R21 mata só o de OOXML, R22 só o de OLE2, R23 só o de PDF.
+>
+> **T4 deixou de ser teste de nome.** Refeito para medir comportamento: o número de série do
+> calibrador tem de sair rotulado `CANDIDATOS` na linha de escopo e não pode entrar na conta de CPF.
+> R24 o mata. **Isso responde a ressalva que o Crítico levantou na 2ª rodada** — *"mata por renome
+> de campo, não por comportamento"* — que eu tinha registrado sem consertar por não ver como testar
+> sem inventar um validador de NIT. A saída de candidatos, entregue na 4ª rodada, é que tornou o
+> conserto possível: o teste passou a ter o que observar.
+>
+> **Registro de suíte, árvore de `dc77b28`, parada:** **1190 passed, 6 skipped, 0 failed** em
+> 424.78s. `1175 + 21 = 1196`, e `1190 + 6 = 1196`.
+>
+> **Seis rodadas, progressão 10 → 13 → 14 → 16 → 19 → 21, e a 6ª é a que mais ensina sobre o
+> processo.** Ela achou a mesma classe da 5ª — ramo de código que nenhum teste alcança — num alvo
+> vizinho, no commit seguinte ao que a 5ª blindou. **Corrigir um caso não fecha a classe**, e a
+> única razão de eu não ter varrido `extrair_metadata_autoria` junto com `varrer()` é que a 5ª
+> rodada nomeou uma função e eu tratei o gap como a função nomeada, não como o padrão que ela
+> exemplificava. É o oposto exato do que fiz de certo na 4ª, quando o guarda estrutural sobre
+> `__dataclass_fields__` fechou a classe em vez dos cinco casos.
