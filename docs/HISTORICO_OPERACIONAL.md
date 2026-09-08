@@ -6779,3 +6779,450 @@ corrigiu — header `[FECHADA — D-ARQ-68 cl.5, 003.EZ]` com `**Status:** ABERT
 sessão, está fora do diff e **não foi tocada**. A divergência de enquadramento entre rodadas do
 próprio Gauntlet (1ª a 3ª julgaram CONHECIMENTO, 4ª e 5ª julgaram IMPLEMENTAÇÃO, sobre artefatos da
 mesma natureza) segue registrada e não arbitrada.
+
+## Sessão 003.FJ — 04/09/2026 — IMPLEMENTAÇÃO (instrumento) + higiene
+
+**Numeração:** 003.FI é o último bloco em `main` (`74139b5`, PR #323). Sem ressalva.
+
+**Foco, em uma frase:** versionar o instrumento de varredura que 003.FI usou e perdeu.
+
+**Nenhuma regra clínica tocada.** Nenhuma `R-*` criada, alterada ou depreciada; o motor não é
+importado pelo script; `regras.yaml`, `agentes.yaml` e `exames.yaml` intocados.
+`DECISOES_ARQUITETURAIS.md` intocado, logo `INDICE_DARQ.md` não regenerado. PROTOCOLO segue **v91**,
+DECISOES segue **v186**.
+
+**`/kickoff` não rodou** — skill reservada à invocação do Arquiteto, e a instrução proíbe replicar o
+fluxo. Consequência declarada: sem relatório de estado de abertura e sem o cruzamento
+HISTORICO × docs reais. O foco veio do Arquiteto no chat, não de derivação minha.
+
+### O que provocou a sessão
+
+A varredura que fechou `DH-003FH-02` e abriu `DH-003FI-01` rodou de `/tmp` num container remoto —
+`varrer.py` (4.669 B) e `passe3.py` (2.979 B) — e morreria com ele. É `DH-003EG-02` reincidindo:
+*"o instrumento que pauta a fila vive fora do git"*. Pior que perder código: `DH-003FE-01` **promete**
+que a cláusula de reabertura é testável, e sem instrumento versionado a promessa não se cumpre.
+
+### Entrega — `scripts/varrer_acervo_lgpd.py` (464 linhas)
+
+Responde a uma pergunta só, a da cláusula: *o acervo passou a conter dado de trabalhador?* Separa
+signatário (dado comum de profissional, LGPD art. 5º I) de trabalhador sob vigilância de saúde.
+
+**Princípio de projeto, e ele vem de erro medido.** Todo número que o script imprime carrega o
+escopo que o produziu, na mesma linha. As quatro rejeições do Gauntlet em 003.FI tiveram a mesma
+raiz — um filtro virou universo porque não foi escrito ao lado do número (`7` = literal único,
+`40` = não-PDF, `dois arquivos` = com marcador, `28` = rótulo maior que o medido).
+`RelatorioAcervo.linhas_escopo()` transforma a lição em **invariante de saída**, e dois testes a
+matam se sumir. É a diferença entre aprender a lição e instalá-la.
+
+Três decisões de projeto que o script carrega em nome, não em comentário:
+- **`Achados.pis_candidatos`**, não `pis` — em 003.FI, 2 dos 3 candidatos eram número de série de
+  calibrador de vazão e ruído de texto invertido. O nome do campo impede a promoção silenciosa.
+- **`marcadores_com_contexto`** devolve a fatia de texto, não só a contagem. Contagem de marcador é
+  forma; foi o contexto que provou que os 34 arquivos casados eram prosa de procedimento.
+- **`VALORES_NAO_PESSOA`** é lista explícita, não heurística — `RIMA` e `Guilherme` têm a mesma cara
+  para um regex.
+
+### Verificação
+
+- **`tests/test_varrer_acervo_lgpd.py`: 10 testes, 10 passed**, cada um com reversão nomeada.
+- **Varredura inversa 10/10, executada teste a teste.** R1 laço do DV → mata 2; R2 guarda de
+  sequência repetida → mata 1 (discriminante contra R1); R3 aceitar todo casamento → mata 1;
+  R4 renomear `pis_candidatos`→`pis` → mata 1; R5 marcador sem contexto → mata 1; R6 remover o
+  filtro de conta genérica → mata 2; R7 tirar o denominador do CPF → mata 1; R8 remover a lista
+  nominal de falhas → mata 1 (discriminante contra R7); R9 remover o ramo PDF da metadata → mata 1;
+  R10 `gerar_relatorio` sem escopo → mata 1.
+- **Um teste foi refeito por não discriminar, e a varredura inversa é que pegou.**
+  `test_metadata_conta_pdf_no_escopo` montava `RegistroArquivo` com metadata já preenchida e
+  **sobrevivia** à reversão que dizia cobrir — R9 dava 10 passed. É a classe 003.EK literal: unidade
+  sobre função que nunca leu o campo. Refeito como `test_metadata_de_autoria_le_o_ramo_pdf`,
+  chamando `extrair_metadata_autoria` num PDF **rastreado** (`PGR_EBSERH_UFGD_v7.pdf`, `Author`
+  = `Flavio Felipe Soares da Silva`). Agora R9 mata.
+- **O instrumento reproduz 003.FI exatamente**, rodado contra o acervo real:
+  `83 arquivos (27 .doc + 13 .docx + 38 .pdf + 4 .rtf + 1 .xlsx)` · `extraidos: 83 de 83, nenhuma
+  falha` · `CPF com DV valido: 7 distintos em 4 de 83` · `nomes de pessoa na metadata: 20 distintos`
+  · `metadata de autoria: 64 de 83`. **Os cinco números batem com os de 003.FI**, medidos por
+  instrumento descartável — que é a prova de que a versão versionada não perdeu nada.
+- `mypy --strict` sobre `scripts/varrer_acervo_lgpd.py`: **limpo, 1 arquivo**.
+- `mypy --strict` no **alvo canônico**: **limpo, 48 arquivos**, delta-zero. **Ressalva declarada:**
+  o alvo canônico do `CLAUDE.md` **não cobre `scripts/`** — o script novo não está sob o gate, como
+  nenhum outro de `scripts/`. Alargar o alvo é decisão do Arquiteto; medi o arquivo em separado
+  para que a ausência de cobertura não vire ausência de medição.
+- `.gitignore`: entra `.varredura_tmp/`, diretório de conversão do LibreOffice.
+
+### Pendências
+
+`DH-003EG-02` recebe **nota de reincidência** e **segue ABERTA** — este instrumento saiu de `/tmp`,
+mas o diff motor×gabarito, que é o instrumento original da dívida, continua em `relatorios/` sob o
+`.gitignore:26`. Um instrumento a menos fora do git não fecha a dívida de todos eles.
+`DH-003FE-01` e `DH-003FI-01` passam a apontar o comando que as reproduz.
+
+### Lição de método
+
+**A lição de 003.FI virou código executável, não parágrafo.** Aquela sessão levou quatro rejeições
+por publicar número sem escopo, escreveu quatro notas dizendo que não faria de novo, e a garantia
+disso agora é um teste que fica vermelho — não a memória de quem escreve o próximo relatório.
+Regra que só existe em prosa depende de quem lê lembrar dela na hora certa; a mesma regra como
+invariante de saída não depende de ninguém.
+
+### Gate de fechamento — `/critico` `74139b5..4c86f18`
+
+Barra **IMPLEMENTAÇÃO**, com os quatro itens aplicáveis pela primeira vez em duas sessões.
+Teste-por-regra **PARCIAL** — o Crítico refez a varredura inversa a frio e **confirmou as 10**
+(R1 mata 2, R2 discrimina contra R1, R9 conferido contra `PGR_EBSERH_UFGD_v7.pdf` rastreado por
+`git ls-tree`), mas apontou que **a fatia `.gitignore` do diff não tinha teste nem reversão
+nomeável**. ID+fonte **N/A declarado**. ID antiga **PASSA** — nada removido, `DH-003EG-02` segue
+ABERTA, `DH-003FE-01` segue DISPENSADA, os comandos avulsos de `DH-003FI-01` preservados ao lado do
+novo. Registro de suíte **FALHA** — o bloco trazia só "recorte: 41 passed", sem `skipped` e sem o
+commit da medição.
+
+**CRÍTICO rejeitou** — gap: a entrada de `.gitignore` que o bloco afirmava ter criado **não
+existia**. O `echo ".varredura_tmp/" >> .gitignore` colou em `._eoltest`, linha herdada de 003.EH
+(PR #271) **sem newline final**, produzindo o padrão literal inerte `._eoltest.varredura_tmp/`.
+Consequência: rodar o comando que `DH-003FE-01` e `DH-003FI-01` agora prescrevem despejaria os
+`.txt` do LibreOffice — texto integral dos 31 `.doc`/`.rtf`, incluindo os 4 arquivos onde o próprio
+instrumento mede 7 CPFs — em `.varredura_tmp/` **não-ignorada**, ao alcance de `git add`.
+**O instrumento que existe para vigiar dado pessoal no repositório passaria a produzi-lo.**
+
+> **Correção 003.FJ-C** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e é o gap
+> mais grave de todo o ciclo 003.FI–FJ** — os anteriores eram defeito de relato; este era defeito de
+> efeito. Reproduzido: `grep -n "^\.varredura_tmp/$" .gitignore` não devolvia nada, e
+> `git check-ignore -v .varredura_tmp/x.txt` saía vazio.
+>
+> **Corrigido em dois níveis, porque um só não bastava.**
+> **(1) `.gitignore`:** `._eoltest` restaurada como padrão próprio, com newline, e `.varredura_tmp/`
+> entra em linha separada — a armadilha de 003.EH some para o próximo que usar `>>`.
+> **(2) O script deixa de depender do ignore.** `destino_temporario_padrao()` devolve
+> `tempfile.mkdtemp()` **fora da árvore**, e `main` apaga em `finally`. O `.txt` com os CPFs não
+> nasce mais no repositório; `--tmp` continua existindo para inspeção, e a ajuda do argumento diz o
+> custo. O `.gitignore` vira rede **secundária**, declarada como tal no próprio arquivo.
+>
+> **Três testes novos, três reversões nomeadas, varredura inversa 13/13:** R11 destino padrão
+> relativo → mata 1; R12 `efemero = False` → mata 1; R13 apagar sempre, ignorando `--tmp` → mata 1.
+> R12 e R13 são os dois lados da mesma garantia e nenhuma implementação trivial satisfaz os dois.
+>
+> **Um dos três nasceu errado e eu peguei antes da varredura, o que é a novidade.** A primeira
+> versão de `test_main_apaga_o_destino_efemero` chamava `shutil.rmtree` direto e teria sobrevivido à
+> reversão que dizia cobrir — testaria a stdlib, não o `finally` do `main`. Refeito com
+> `monkeypatch` sobre `destino_temporario_padrao` e um `.docx` mínimo montado por `zipfile`, que
+> dispensa o LibreOffice. Uma quarta asserção tautológica (`assert ... or True`) também caiu, trocada
+> por sentinela. É a classe 003.EK pela terceira vez no ciclo — desta a detecção foi minha, não do
+> instrumento externo.
+>
+> **Registro de suíte, que o Crítico marcou FALHA — agora medido e nomeado.** Suíte completa pelo
+> comando canônico `python -m pytest agente_medico/tests/ tests/`, árvore parada:
+> **1182 passed, 6 skipped, 0 failed** em 452.06s. Delta **+13 exato** contra 003.FI por coletados:
+> `1175 + 13 = 1188`, e `1182 + 6 = 1188`. `mypy --strict` no alvo canônico: **limpo, 48 arquivos**.
+>
+> **E uma falha de cláusula que eu repeti e peguei sozinho.** `D-ARQ-85` manda re-tirar o Baseline em
+> todo fechamento que produza commit. O commit `4c86f18` não tocou o `PAINEL_ESTADO.md` — **mesma
+> falha que o `/kickoff` apanhou em 003.FI, quatro dias depois de eu escrever a nota dizendo que ela
+> tinha acontecido.** Baseline re-tirado nesta emenda. Escrever a lição não instala a lição; foi
+> exatamente por isso que `linhas_escopo()` virou invariante de código nesta sessão, e é o argumento
+> a favor de fazer o mesmo com o que ainda vive em prosa.
+
+### Gate de fechamento — `/critico` `74139b5..cc62333` (2ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. Teste-por-regra **13/13** — o Crítico refez a varredura inversa a frio e
+**todas as 13 matam**, com as discriminâncias confirmadas (T2 contra T1, T8 contra T7, T13 contra
+T12); ressalva dele, justa: **T4 mata por renome de campo, não por comportamento**. ID+fonte
+**PASSA** — LGPD art. 5º I conferido correto (sensível é art. 5º II). ID antiga **PASSA**. Registro
+de suíte **FALHA**. Ausência de seção "Fronteira" registrada como gap, julgamento seguiu.
+
+**CRÍTICO rejeitou** — gap: `PENDENCIAS_CLINICAS.md:982`, **no mesmo commit que entrega o arquivo**,
+declarava `"tests/test_varrer_acervo_lgpd.py (10 testes)"` enquanto o arquivo entregue tem **13** e o
+`PAINEL_ESTADO.md` do mesmo commit crava `+13`. Número refutado sobrevivendo em doc vivo — a classe
+que custou quatro rodadas em 003.FI e que o princípio de projeto do próprio script diz eliminar.
+Segundo achado: o Baseline gravava `"medido em 4c86f18 + emenda do gate"`, e em `4c86f18` a árvore
+tinha 10 testes → 1185 coletados, não 1188; o número só reproduz em `cc62333`, que o registro não
+nomeava.
+
+> **Correção 003.FJ-C2** *(nota aditiva; redação acima intacta — classe 10)*. **Os dois procedem e
+> os dois são meus.** Medido: `git show 4c86f18:tests/test_varrer_acervo_lgpd.py | grep -c "^def test_"`
+> devolve **10**; em `cc62333`, **13**. E `pytest --collect-only` na árvore de `cc62333` devolve
+> **1188 coletados**, confirmando que o Baseline nomeava o commit errado.
+>
+> **Corrigidos na fonte, por serem estado corrente:** `DH-003EG-02` passa a **13 testes @ `cc62333`**,
+> dizendo que foram 10 na entrega e 3 no tratamento do gap; o Baseline passa a **medido em
+> `cc62333`**, sem o "+ emenda do gate", que era exatamente a imprecisão.
+>
+> **Sobrevive por classe 10, e fica enumerado aqui:** a linha do corpo original deste bloco
+> (`"13 testes"` não; ela diz `"10 testes, 10 passed"`) estava **certa no momento em que foi
+> escrita** — o bloco registra a entrega, e os 3 testes vieram depois, na `003.FJ-C`. Registro
+> histórico não se reescreve; quem ler o bloco encontra a `003.FJ-C` com a varredura 13/13 logo
+> abaixo.
+>
+> **A ausência de fronteira, apontada em duas rodadas, foi paga em vez de contestada.** O docstring
+> do script ganha seção **Fronteira** declarando o que ele não faz: não decide (a leitura do
+> resultado é do Arquiteto, `D-ARQ-22`), não classifica juridicamente, não toca motor nem
+> vocabulário, não faz OCR (PDF escaneado sai `nao_extraido` com motivo, nunca "limpo"), não valida
+> PIS/NIT (devolve candidatos) e não vigia o histórico — mede a árvore corrente.
+>
+> **A ressalva do Crítico sobre T4 é justa e fica registrada sem conserto.**
+> `test_pis_sai_como_candidato_e_nao_como_achado` mata por renome de campo, não por comportamento —
+> é um teste de *nome*, e nome não é contrato executável. Vale menos que os outros doze. Mantido
+> porque o nome do campo é, aqui, a única barreira contra promover candidato a achado, e não achei
+> forma de testar isso por comportamento sem inventar um validador de NIT que o script
+> deliberadamente não tem. **Insumo para o Arquiteto, não decisão minha.**
+>
+> **A reincidência que importa:** a mesma classe de 003.FI — número refutado em doc vivo — voltou na
+> sessão que existe para instalar a lição contra ela. O script ganhou `linhas_escopo()` como
+> invariante, mas **a prosa em volta do script não tem invariante nenhum**, e foi ali que caiu de
+> novo. Instalar a regra no código não cobre o texto que descreve o código.
+
+### Gate de fechamento — `/critico` `74139b5..d1009b8` (3ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. Teste-por-regra **13/13 mortos**, conferidos teste a teste a frio, com os
+pares discriminantes confirmados. ID+fonte **N/A satisfeito**. ID antiga **PASSA**. Registro de suíte
+**FALHA** — medido em `cc62333`, e `d1009b8` voltou a tocar `scripts/`, logo a árvore medida não era
+a do artefato julgado. A seção **Fronteira**, entregue nesta rodada, foi aceita como eixo: o Crítico
+derivou `D-ARQ-22` dela.
+
+**CRÍTICO rejeitou** — gap: `linhas_escopo()` imprimia `excluidos {len(VALORES_NAO_PESSOA)}` = **8**
+como se fosse exclusão medida. O `8` é o **tamanho da lista** do filtro; no acervo só **7**
+apareceram (`Microsoft Office Word` está no filtro e nunca ocorreu). O publicado dava
+`20 nomes + 8 excluídos = 28` contra os **27** valores medidos, e `DH-003FI-01` repetia a conta
+quebrada. **O invariante que o artefato declara travado por teste emitia número sem o escopo que o
+produziu** — o princípio de projeto do script, violado pelo script. E
+`test_relatorio_declara_escopo_de_todo_numero_que_imprime` só asseria a substring `"excluidos"`,
+sobrevivendo à troca.
+
+> **Correção 003.FJ-C3** *(nota aditiva; redação acima intacta — classe 10)*. **Procede inteiro, e é
+> o achado mais fino do ciclo:** os anteriores eram número errado; este é o instrumento anti-erro
+> falhando na própria classe que existe para impedir.
+>
+> **Corrigido na raiz, não na string.** Entram `valores_de_autoria()` (os distintos observados) e
+> `excluidos_nesta_medicao()` (interseção do filtro com o que de fato apareceu). `linhas_escopo()`
+> passa a **fechar a conta na própria linha**, e o tamanho da lista sai declarado ao lado, separado
+> do que foi excluído. Medido contra o acervo real depois da correção:
+> `valores distintos no campo de autoria: 27 = 20 nomes de pessoa + 7 de conta generica/equipamento
+> excluidos NESTA medicao (a lista do filtro VALORES_NAO_PESSOA tem 8 entradas; as nao observadas
+> aqui nao entram na conta)`. **27 = 20 + 7.**
+>
+> **Teste novo com R14 nomeada**, e a varredura inversa prova o ponto do Crítico: R14 (publicar
+> `len(VALORES_NAO_PESSOA)` no lugar de `len(excluidos)`) **mata só o teste novo — o antigo
+> sobrevive**. A cobertura anterior era substring, não contrato.
+>
+> **Registro de suíte, agora com a árvore certa.** `python -m pytest agente_medico/tests/ tests/`,
+> árvore parada em **`9b0d496`**: **1183 passed, 6 skipped, 0 failed** em 515.26s.
+> `1175 + 14 = 1189`, e `1183 + 6 = 1189`. O Baseline nomeia `9b0d496` e registra a progressão —
+> 10 testes em `4c86f18`, 13 em `cc62333`, 14 em `9b0d496`. **Cada rodada do Gauntlet somou um
+> teste**, e é a medida mais honesta do que estas três rejeições produziram.
+>
+> **Três rejeições, três classes distintas, e a terceira é a que ensina.** A 1ª foi defeito de
+> efeito (`.gitignore` inerte deixando CPF ao alcance de `git add`). A 2ª, número refutado em doc
+> vivo. A 3ª, o **invariante violando a si mesmo** — e ela mostra que instalar a regra no código não
+> basta se o teste que a guarda afere forma em vez de conteúdo. `assert "excluidos" in texto` tinha
+> a aparência de um contrato e era um `grep`.
+
+### Gate de fechamento — `/critico` `74139b5..4e67ef2` (4ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. **Três dos quatro itens passaram**: teste-por-regra **PASSA** (varredura
+inversa 14/14 conferida a frio, com os cinco pares discriminantes), ID+fonte **N/A satisfeito**,
+ID antiga **PASSA**, e **registro de suíte PASSA** pela primeira vez no ciclo — o Crítico aceitou
+`9b0d496` como árvore de código do artefato, por `9b0d496..4e67ef2` ser docs-only, e conferiu a
+reconciliação por coletados.
+
+**CRÍTICO rejeitou** — gap: das seis classes que `achados_em_texto` coleta, **cinco não eram lidas
+por caminho de saída algum** — `pis_candidatos`, `emails`, `assinatura_digital`, `crm`, `crea` não
+apareciam em `linhas_escopo`, `gerar_relatorio` nem `--json`. **Um e-mail ou PIS de trabalhador no
+acervo era encontrado e descartado em silêncio**, e o relatório saía limpo justamente no eixo em
+que a cláusula de `DH-003FE-01` decide. Pior: a seção **Fronteira** promete *"não valida PIS/NIT:
+devolve candidatos"* — falso na única interface do instrumento, porque nenhum candidato saía. E
+`test_pis_sai_como_candidato_e_nao_como_achado` guardava o **nome** de um campo que nenhuma saída
+consome: a classe 003.EK do `CLAUDE.md`, aplicada ao campo em vez de ao teste.
+
+> **Correção 003.FJ-C4** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e é o gap
+> mais grave desde o `.gitignore` inerte** — os dois são defeito de efeito, não de relato. Medido
+> antes de aceitar: `git grep` dos cinco campos devolvia **0 usos** fora da definição e da
+> atribuição, contra **4** de `cpfs`.
+>
+> **O que estava sumindo, medido depois da correção contra o acervo real:** PIS/NIT **3 candidatos
+> distintos em 3 de 83** — e são exatamente os três que 003.FI mediu à mão: o NIT real
+> `203.69644.09-8`, o número de série `41461832041` do calibrador de vazão e o ruído de texto
+> invertido do PGR da EBSERH. Mais **27 e-mails distintos em 30 de 83**, **3 arquivos com marca de
+> assinatura digital** e **24 com CRM ou CREA**. Tudo isso era calculado e jogado fora.
+>
+> **A correção do teste é estrutural, não enumerativa.**
+> `test_toda_classe_coletada_chega_a_saida` itera `Achados.__dataclass_fields__` e falha se um campo
+> novo nascer sem rótulo de saída — **sem ninguém lembrar de estender o teste**. É a diferença entre
+> tapar cinco buracos e fechar a classe deles. Mais `test_saida_declara_que_pis_nao_e_validado`,
+> porque candidato publicado sem a ressalva vira achado na leitura.
+>
+> **Varredura inversa 16/16.** R15 (tirar a linha de e-mail) e R17 (tirar a de CRM/CREA) matam o
+> guarda estrutural; R16 (tirar a ressalva de DV) mata só o teste da ressalva.
+>
+> **Registro de suíte, árvore de `4d85c35`, parada:** **1185 passed, 6 skipped, 0 failed** em
+> 559.06s. `1175 + 16 = 1191`, e `1185 + 6 = 1191`.
+>
+> **Quatro rodadas, quatro classes, e a progressão de testes é o resumo honesto do que elas
+> produziram: 10 → 13 → 14 → 16.** Duas foram defeito de efeito (`.gitignore` inerte deixando CPF
+> ao alcance de `git add`; cinco classes descartadas em silêncio) e duas de relato (número refutado
+> em doc vivo; invariante violando a si mesmo). **Nenhuma teria sido pega por releitura minha** — e
+> a mais grave das quatro só apareceu quando alguém perguntou "quem lê este campo?", que é uma
+> pergunta que o autor não faz sobre o próprio código.
+
+### Gate de fechamento — `/critico` `74139b5..ff7203d` (5ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. ID+fonte **PASSA**, ID antiga **PASSA**, registro de suíte **PASSA** —
+o Crítico conferiu a reconciliação nas duas pontas sem re-executar a suíte, e aceitou `4d85c35`
+como árvore de código por `ff7203d` ser docs-only. Teste-por-regra **REPROVA**.
+
+**Declaração de procedimento do próprio Crítico**, registrada porque é do mesmo tipo que este
+projeto cobra de si: ele leu o bloco 003.FJ por acidente ao rodar `git diff` sem limitar caminho,
+declarou a exposição, tratou o conteúdo como **não-fonte** e ofereceu ao Arquiteto descartar o
+julgamento. **Não descartei:** a varredura inversa dele foi feita antes da leitura, e o gap é
+achado próprio, ausente daquele texto, que **reproduz por execução**.
+
+**CRÍTICO rejeitou** — gap: a cláusula da própria seção **Fronteira** — *"não faz OCR: PDF
+escaneado sai como `nao_extraido` com o motivo, nunca como 'limpo'"* — **não tinha teste**.
+Reproduzido aqui: remover inteira a guarda `if len(texto.strip()) < _MIN_TEXTO_UTIL` deixava os
+**16 verdes**.
+
+> **Correção 003.FJ-C5** *(nota aditiva; redação acima intacta — classe 10)*. **Procede, e a causa
+> é estrutural: `varrer()` não era chamada por teste algum.** Era exercitada só por dentro de `main`,
+> em dois testes, ambos com um `.docx` de 540 caracteres que extrai bem, e todo
+> `RegistroArquivo(extraido=False)` era **montado à mão**. Logo os três ramos que produzem o número
+> `83 de 83 extraidos` — publicado em `PENDENCIAS_CLINICAS.md` e usado para sustentar
+> `DH-003FE-01` — eram reversíveis com a suíte verde.
+>
+> **Três testes novos, cada um chamando `varrer()` direto:** o do escaneado (R18), o da extensão sem
+> extrator (R19) e o do arquivo corrompido (R20) — este último cobrindo também o invariante de que
+> **a varredura continua** depois da falha, porque um arquivo corrompido abortar o relatório inteiro
+> é pior que o relatório incompleto.
+>
+> **Varredura inversa 19/19.** R18 mata só o do escaneado; R19 só o da extensão; R20 mata dois, o
+> que é esperado — sem o `try/except` a exceção de extensão também propaga.
+>
+> **Registro de suíte, árvore de `b4580d5`, parada:** **1188 passed, 6 skipped, 0 failed** em
+> 431.25s. `1175 + 19 = 1194`, e `1188 + 6 = 1194`.
+>
+> **Cinco rodadas, cinco classes, progressão 10 → 13 → 14 → 16 → 19.** E há um padrão que só fica
+> visível agora: **três das cinco são a mesma pergunta feita a alvos diferentes** — *quem lê este
+> campo?* (4ª), *quem chama esta função?* (5ª), *quem confere este número?* (2ª e 3ª). É a pergunta
+> que o autor não faz sobre o próprio trabalho, porque quem escreveu o código sabe o que ele
+> pretende fazer e lê a intenção no lugar do texto.
+
+### Gate de fechamento — `/critico` `74139b5..1003182` (6ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. ID+fonte **OK**, ID antiga **OK**, registro de suíte **OK** — o Crítico
+conferiu a progressão 10/13/14/16/19 **commit a commit** e notou, com razão, que o delta de `+19`
+só é alcançável no escopo `agente_medico/tests/ tests/`. Teste-por-regra **FALHA**.
+
+**CRÍTICO rejeitou** — gap: `extrair_metadata_autoria` tem três ramos (OOXML, legado OLE2, PDF) e
+**só o de PDF era exercitado**; nos demais testes a metadata era montada à mão — o padrão que o
+docstring do próprio teste de PDF condena como classe 003.EK. Reproduzido: remover o ramo OOXML
+deixava **19 verdes**; remover o legado, **19 verdes**. É o eixo que decide a cláusula de
+`DH-003FE-01` e que `DH-003FI-01` publica (20 dos 27 valores) — apagar qualquer ramo derrubaria
+nomes em silêncio, **tornando reversível o mesmo tipo de número que a 5ª rodada acabou de blindar
+para `varrer()`, enquanto o artefato publicava "varredura inversa 19/19"**.
+
+Achado colateral, também procedente: `test_pis_sai_como_candidato_e_nao_como_achado` tinha assert
+**estruturalmente inalcançável** — `"candidato" in __dataclass_fields__["pis_candidatos"].name` é
+tautologia, porque o nome do campo *é* `pis_candidatos`.
+
+> **Correção 003.FJ-C6** *(nota aditiva; redação acima intacta — classe 10)*. **Os dois procedem.**
+> Entram `test_metadata_de_autoria_le_o_ramo_ooxml` (R21, `.docx` sintético, sem dependência de
+> acervo) e `test_metadata_de_autoria_le_o_ramo_legado_ole2` (R22, `.doc` **rastreado** — OLE2 não
+> se fabrica com `zipfile`, e a versão sintética não exercitaria `file -b`, que é o mecanismo real).
+> **Os três ramos agora morrem um a um:** R21 mata só o de OOXML, R22 só o de OLE2, R23 só o de PDF.
+>
+> **T4 deixou de ser teste de nome.** Refeito para medir comportamento: o número de série do
+> calibrador tem de sair rotulado `CANDIDATOS` na linha de escopo e não pode entrar na conta de CPF.
+> R24 o mata. **Isso responde a ressalva que o Crítico levantou na 2ª rodada** — *"mata por renome
+> de campo, não por comportamento"* — que eu tinha registrado sem consertar por não ver como testar
+> sem inventar um validador de NIT. A saída de candidatos, entregue na 4ª rodada, é que tornou o
+> conserto possível: o teste passou a ter o que observar.
+>
+> **Registro de suíte, árvore de `dc77b28`, parada:** **1190 passed, 6 skipped, 0 failed** em
+> 424.78s. `1175 + 21 = 1196`, e `1190 + 6 = 1196`.
+>
+> **Seis rodadas, progressão 10 → 13 → 14 → 16 → 19 → 21, e a 6ª é a que mais ensina sobre o
+> processo.** Ela achou a mesma classe da 5ª — ramo de código que nenhum teste alcança — num alvo
+> vizinho, no commit seguinte ao que a 5ª blindou. **Corrigir um caso não fecha a classe**, e a
+> única razão de eu não ter varrido `extrair_metadata_autoria` junto com `varrer()` é que a 5ª
+> rodada nomeou uma função e eu tratei o gap como a função nomeada, não como o padrão que ela
+> exemplificava. É o oposto exato do que fiz de certo na 4ª, quando o guarda estrutural sobre
+> `__dataclass_fields__` fechou a classe em vez dos cinco casos.
+
+### Fecho de classe — portão de cobertura (`3fb98e2`)
+
+**Decisão do Arquiteto, tomada entre a 6ª e a 7ª rodada:** em vez de esperar o Gauntlet apontar o
+terceiro ramo sem teste, fechar a classe. As 5ª e 6ª rodadas acharam o **mesmo defeito** em alvos
+diferentes, e nas duas a detecção veio de fora.
+
+**Medido antes:** `coverage` do script pela própria suíte = **91%**, 23 linhas sem execução — entre
+elas `_texto_pdf` **inteiro** (o extrator dos 38 PDFs, onde os CPFs nascem) e `_texto_legado`
+**inteiro** (31 dos 83 arquivos). Os dois maiores blocos do instrumento nunca tinham rodado sob
+teste.
+
+**Nove testes levam a 100%**, cada um com reversão nomeada: os três ramos de `extrair_texto`; o
+`RuntimeError` de `conversao_sem_saida` por `monkeypatch` no `subprocess` — **o ramo que disparou em
+003.FI, 28 de 83**; `_metadata_ooxml` sem `docProps/core.xml`; `cpf_valido` com forma inválida; o
+`--json`; pasta inexistente (que sem guarda produz relatório de zero arquivos **parecendo limpo**);
+e o detalhe por arquivo de `gerar_relatorio`.
+
+**O portão tem dois eixos, e os dois foram revertidos:**
+`test_instrumento_de_varredura_tem_cobertura_total` roda `coverage` em subprocesso e falha
+**nomeando a linha órfã** — R25 (apagar o teste de PDF) devolve literalmente
+`8 linha(s) sem execucao: 208-215, 252`. E `test_pragmas_de_exclusao_sao_os_declarados` barra o
+atalho: marcar `# pragma: no cover` no ramo difícil passa a exigir edição consciente em **dois
+arquivos** — R26 o mata. Único pragma no script é o `if __name__ == "__main__"`, com a razão escrita
+ao lado.
+
+**Registro de suíte, árvore de `3fb98e2`, parada:** **1201 passed, 6 skipped, 0 failed** em 429.62s.
+`1175 + 30 + 2 = 1207`, e `1201 + 6 = 1207`.
+
+**O `.coverage` que o portão escreve foi ignorado com a lição da 1ª rodada aplicada:** conferi
+`tail -c 1 .gitignore` **antes** de anexar, assertei o newline final no próprio script de edição, e
+validei por `git check-ignore -v` em vez de reler o arquivo. O defeito que abriu esta sessão não se
+repete por acidente duas vezes no mesmo diff.
+
+**O que este portão muda, e é o ponto:** *"quem chama esta função?"* deixa de depender de alguém
+perguntar. Era a pergunta que produziu três das seis rejeições, e nenhuma delas veio de releitura
+minha. Agora ela é feita por um teste, a cada tiragem, nomeando a linha.
+
+### Gate de fechamento — `/critico` `74139b5..be01a41` (7ª rodada)
+
+Barra **IMPLEMENTAÇÃO**. **Os quatro itens passaram.** Teste-por-regra **APROVA** — varredura
+inversa teste a teste nos **32** (30 + 2 do portão), cada docstring nomeando reversão que de fato
+mata, com os discriminantes conferidos: laço do DV × guarda de repetição × guarda de forma em
+`cpf_valido`; guarda de tamanho × `raise extensao_sem_extrator` × `try/except` de `varrer`; ramo
+PDF × OOXML × legado de `extrair_metadata_autoria`; apagar destino efêmero × preservar `--tmp`.
+ID+fonte **APROVA**. ID antiga **APROVA** — `DH-003FE-01` declarada ABERTA no próprio texto que a
+credita. Registro de suíte **APROVA**.
+
+**Gate de fechamento: CRÍTICO aprovou** — `74139b5..be01a41`, a frio, sessão separada.
+
+**O que ele conferiu contra o git, e não contra o texto do artefato:** `matrizes_originais/` tem
+**83** arquivos, **38** `.pdf`, **31** entre `.doc` e `.rtf`, **45** não-PDF — os números que os
+docstrings citam como escopo medido **conferem um a um**. Os três arquivos de acervo usados como
+fixture rastreada existem na árvore. E o padrão `.varredura_tmp/` nasce em **linha própria**, sem a
+colagem que abriu esta sessão. Ele também reproduziu a reconciliação da suíte: `4d1bc01..74139b5`
+não toca `tests/` nem `agente_medico/`, os arquivos novos coletam 30 + 2, e `1175 + 32 = 1207 =
+1201 + 6`.
+
+**Saldo do Gauntlet na 003.FJ: 6 rejeições, 6 gaps procedentes, 1 aprovação.** Cada rejeição achou
+classe distinta e nenhuma repetiu a anterior:
+
+| rodada | classe do gap | tratado em |
+|---|---|---|
+| 1ª | efeito — `.gitignore` inerte deixava CPF ao alcance de `git add` | `cc62333` |
+| 2ª | relato — `"10 testes"` refutado em doc vivo, commit da medição errado | `d1009b8` |
+| 3ª | invariante violando a si mesmo — tamanho de lista publicado como exclusão medida | `9b0d496` |
+| 4ª | efeito — cinco classes coletadas que nenhuma saída lia | `4d85c35` |
+| 5ª | ramo sem teste — os três caminhos de falha de `varrer()` | `b4580d5` |
+| 6ª | ramo sem teste — dois dos três de `extrair_metadata_autoria` | `dc77b28` |
+| — | **fecho de classe** decidido pelo Arquiteto: portão de cobertura, 91% → **100%** | `3fb98e2` |
+
+**A lição que a sessão inteira sustenta, e ela não é sobre o instrumento:** três das seis rejeições
+foram a mesma pergunta em alvos diferentes — *quem lê este campo? quem chama esta função? quem
+confere este número?* —, e **nenhuma das seis veio de releitura minha**. O que mudou o padrão não
+foi eu prometer atenção, foi transformar a pergunta em teste: primeiro `linhas_escopo()` como
+invariante de saída, depois o guarda estrutural sobre `__dataclass_fields__`, por fim o portão de
+cobertura que nomeia a linha órfã. **Regra que vive em prosa depende de quem lê lembrar dela na hora
+certa; a mesma regra como invariante executável não depende de ninguém.**
+
+E o custo disso está medido: a 6ª rodada achou a classe da 5ª num alvo vizinho, no commit seguinte
+ao que a 5ª blindou. **Corrigir o caso nomeado é o reflexo; fechar a classe é o trabalho** — e a
+diferença entre os dois foi a decisão do Arquiteto de mandar fazer o coverage em vez de esperar a
+7ª rodada apontar o terceiro ramo.

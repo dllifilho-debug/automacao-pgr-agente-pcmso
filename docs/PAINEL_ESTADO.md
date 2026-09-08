@@ -19,8 +19,21 @@
 > **`[BLOQUEADOR — reportado, não ajustado]` Instrumento diverge do painel em uma regra, e a divergência PRECEDE esta sessão.** `python -m scripts.medir_painel` devolve **`regras: 23/42 ativas (55%)`**; a tabela abaixo declara **22 de 42 (52%)** desde a tiragem 003.EZ. Medido em worktree isolado: **23/42 já em `eb94b06`**, antes do commit desta sessão — a fatia de 003.FH não moveu o número. Entre a tiragem 003.EZ e o HEAD, o único commit que tocou `PROTOCOLO`/`regras.yaml` é `6895958` (003.FC).
 >
 > **Qual regra explica o +1 fica `[A MEDIR]`, deliberadamente.** Identificá-la exige entender as internas de `medir_painel.py`, e `DH-003EC-01` faceta **(b) segue ABERTA** dizendo que esse instrumento "reporta verde sobre vermelho, conta prosa como implementação e não vigia derivados". Arbitrar entre painel e instrumento quando o instrumento tem DH aberta sobre contagem seria escolher um número por conveniência. A tabela **não foi ajustada para bater**. Decisão do Arquiteto.
-**Baseline:** branch `feat/003fi-varredura-acervo` sobre `main 4d1bc01` · **1169 passed, 6 skipped, 0 failed** *(1175 coletados; medido em `4d1bc01`, sessão 003.FI, árvore parada, 580.32s)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v91 · DECISOES v186
+**Baseline:** branch `feat/003fj-instrumento-varredura` sobre `main 74139b5` · **1201 passed, 6 skipped, 0 failed** *(1207 coletados; medido em `3fb98e2`, sessão 003.FJ, árvore parada, 429.62s)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v91 · DECISOES v186
 
+> **Delta de 003.FI para 003.FJ: `+32` exato `[MEDIDO — 003.FJ]`.** `1175` coletados em `4d1bc01`
+> mais **30** de `tests/test_varrer_acervo_lgpd.py` e **2** do portão de cobertura
+> `tests/test_cobertura_varrer_acervo.py` = **1207**, e `1201 + 6 = 1207`.
+> Progressão por rodada do Gauntlet: **10** na entrega (`4c86f18`), **13** no 1º gap (`cc62333`,
+> destino do texto extraído), **14** no 3º (`9b0d496`, exclusão medida × tamanho de lista), **16**
+> no 4º (`4d85c35`, classes coletadas sem caminho de saída), **19** no 5º (`b4580d5`, os três
+> ramos de falha de `varrer()`), **21** no 6º (`dc77b28`, dois dos três ramos de
+> `extrair_metadata_autoria`) e **32** no fecho de classe (`3fb98e2`, portão de cobertura: o script
+> passa de 91% para **100%**, com o único `# pragma: no cover` declarado e conferido por teste).
+> Cada rodada somou teste, e o Baseline nomeia o commit de cada medição.
+> `skipped` inalterado em 6; nenhum vermelho em nenhuma das duas pontas. O script novo vive em
+> `scripts/`, fora do alvo canônico do `mypy` — medido em separado, limpo, 1 arquivo.
+>
 > **Os 8 vermelhos sumiram, e a causa nomeada por 003.FH era a certa `[MEDIDO — 003.FI]`.**
 > O PR #322 levou `matrizes_originais/` de **17 para 83 arquivos** rastreados. Os **8** arquivos do
 > acervo referenciados pelos testes passam a existir em disco, conferidos um a um. Medidos por

@@ -48,3 +48,11 @@ relatorios/
 # Sondas/medições locais (uso único, 003.BH)
 /medir_*.py
 ._eoltest
+
+# Saida de conversao do LibreOffice na varredura de acervo (003.FJ). Rede
+# SECUNDARIA: o destino padrao do script e tempfile fora do repositorio, e
+# este padrao so cobre quem passar --tmp apontando para dentro da arvore.
+.varredura_tmp/
+
+# Base do coverage, escrita pelo portao tests/test_cobertura_varrer_acervo.py
+.coverage
