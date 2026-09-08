@@ -2548,8 +2548,16 @@ pessoa (`DELL`, `CMO`, `RIMA`, `Computador`, `Admin`, `Usuario`, `python-docx`) 
 pessoa** — médicas do PCMSO (incluindo a coordenadora nomeada nos próprios documentos), pessoal do
 escritório, engenheiros de terceiros e o do Diovanni.
 Reproduz, desde 003.FJ, por instrumento versionado: `python -m scripts.varrer_acervo_lgpd`, que
-imprime `nomes de pessoa na metadata: 20 distintos (excluidos 8 valores de conta generica/
-equipamento)` com o escopo na mesma linha. Os comandos avulsos seguem valendo para conferência
+imprime `valores distintos no campo de autoria: 27 = 20 nomes de pessoa + 7 de conta generica/
+equipamento excluidos NESTA medicao` — a conta fecha na própria linha, e o tamanho da lista do
+filtro (8 entradas) sai declarado ao lado, separado do que foi de fato excluído.
+
+> **Correção 003.FJ-C3 (08/09/2026).** A redação anterior citava a saída como
+> `"20 distintos (excluidos 8 …)"`, e `20 + 8 = 28` contra os **27** medidos. O `8` era o
+> **tamanho da lista** `VALORES_NAO_PESSOA`, não o que apareceu no acervo: `Microsoft Office Word`
+> está no filtro e nunca ocorreu. O script emitia número sem o escopo que o produziu — **o próprio
+> invariante que ele instala, violado por ele**. Corrigido na fonte do script (`excluidos_nesta_medicao()`)
+> e aqui. Achado pela 3ª rodada do `/critico`. Os comandos avulsos seguem valendo para conferência
 pontual: `file -b <arquivo.doc>` para OLE2; `unzip -p <arquivo.docx> docProps/core.xml` para OOXML;
 `pdfplumber.open(p).metadata["Author"]` para PDF.
 

@@ -142,7 +142,7 @@ def test_relatorio_declara_escopo_de_todo_numero_que_imprime() -> None:
     assert "extraidos: 1 de 2" in texto
     assert "em 1 de 1 arquivos extraidos" in texto, "CPF sem denominador"
     assert "de 2 arquivos (escopo: todas as extensoes, PDF incluido)" in texto
-    assert "excluidos" in texto, "contagem de nomes sem declarar a exclusão"
+    assert "excluidos NESTA medicao" in texto, "contagem de nomes sem declarar a exclusão"
 
 
 def test_relatorio_nomeia_cada_arquivo_nao_extraido() -> None:
@@ -275,3 +275,40 @@ def test_main_preserva_destino_quando_o_usuario_o_nomeia(
 
     assert modulo.main(["--pasta", str(pasta), "--tmp", str(nomeado)]) == 0
     assert sentinela.exists(), "o script apagou o destino que o usuário nomeou"
+
+
+def test_exclusao_de_conta_generica_e_medida_e_nao_o_tamanho_da_lista() -> None:
+    """Reversão que mata: em `linhas_escopo`, trocar `len(excluidos)` por
+    `len(VALORES_NAO_PESSOA)` — isto é, publicar o tamanho da lista do filtro no
+    lugar do que foi de fato excluído nesta varredura.
+
+    A distinção não é cosmética. Em 003.FI a lista tinha 8 entradas e só 7
+    apareceram no acervo (`Microsoft Office Word` nunca ocorreu), então o número
+    publicado fazia `20 nomes + 8 excluídos = 28` contra **27** valores medidos.
+    Era o invariante de escopo sendo violado pelo próprio script que o instala —
+    número emitido sem o escopo que o produziu —, e o Gauntlet apanhou na 3ª
+    rodada. A conta agora tem de fechar: `distintos = pessoas + excluídos`.
+
+    Discriminante contra `test_relatorio_declara_escopo_de_todo_numero_que_imprime`:
+    aquele morre tirando um denominador qualquer e sobreviveria a esta troca,
+    porque só olhava a substring "excluidos"; este morre exatamente na troca.
+    """
+    relatorio = RelatorioAcervo(
+        pasta="acervo",
+        registros=[
+            RegistroArquivo(
+                nome="a.doc",
+                extensao=".doc",
+                extraido=True,
+                metadata={"Author": "Ana Claudia Petry", "Last Saved By": "DELL"},
+            ),
+        ],
+    )
+    # A lista do filtro tem 8 entradas; só `DELL` aparece nesta medição.
+    assert len(VALORES_NAO_PESSOA) == 8
+    assert relatorio.excluidos_nesta_medicao() == ("DELL",)
+    assert relatorio.valores_de_autoria() == ("Ana Claudia Petry", "DELL")
+
+    texto = "\n".join(relatorio.linhas_escopo())
+    assert "valores distintos no campo de autoria: 2 = 1 nomes de pessoa + 1 de conta" in texto
+    assert "a lista do filtro VALORES_NAO_PESSOA tem 8 entradas" in texto

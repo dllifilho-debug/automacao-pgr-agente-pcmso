@@ -349,8 +349,23 @@ class RelatorioAcervo:
             uniao.update(registro.achados.cpfs)
         return tuple(sorted(uniao))
 
+    def valores_de_autoria(self) -> tuple[str, ...]:
+        return tuple(sorted({v.strip() for r in self.registros for v in r.metadata.values() if v.strip()}))
+
     def nomes_na_metadata(self) -> tuple[str, ...]:
-        return nomes_de_pessoa(v for r in self.registros for v in r.metadata.values())
+        return nomes_de_pessoa(self.valores_de_autoria())
+
+    def excluidos_nesta_medicao(self) -> tuple[str, ...]:
+        """Valores do filtro que **de fato apareceram** nesta varredura.
+
+        Distinto de `len(VALORES_NAO_PESSOA)`, que é o tamanho da lista. A
+        diferença não é cosmética: em 003.FI a lista tinha 8 entradas e só 7
+        apareceram (`Microsoft Office Word` nunca ocorreu), então publicar o
+        tamanho da lista fazia `20 + 8 = 28` contra os 27 valores medidos. Era o
+        próprio invariante de escopo sendo violado pelo script que o instala —
+        número emitido sem o escopo que o produziu.
+        """
+        return tuple(sorted(set(self.valores_de_autoria()) & set(VALORES_NAO_PESSOA)))
 
     def linhas_escopo(self) -> list[str]:
         """Invariante de saída: nenhum número deste relatório aparece sem o
@@ -382,9 +397,13 @@ class RelatorioAcervo:
             f" de {len(self.extraidos)} extraidos"
             " — contagem e forma; o contexto abaixo e a prova"
         )
+        excluidos = self.excluidos_nesta_medicao()
         linhas.append(
-            f"nomes de pessoa na metadata: {len(self.nomes_na_metadata())} distintos"
-            f" (excluidos {len(VALORES_NAO_PESSOA)} valores de conta generica/equipamento)"
+            f"valores distintos no campo de autoria: {len(self.valores_de_autoria())}"
+            f" = {len(self.nomes_na_metadata())} nomes de pessoa"
+            f" + {len(excluidos)} de conta generica/equipamento excluidos NESTA medicao"
+            f" (a lista do filtro VALORES_NAO_PESSOA tem {len(VALORES_NAO_PESSOA)} entradas;"
+            f" as nao observadas aqui nao entram na conta)"
         )
         return linhas
 
