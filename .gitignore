@@ -11,9 +11,13 @@ prompt_*.txt
 # Artefatos runtime do motor legado
 data/cargos_desconhecidos.json
 
-# Claude Code (worktrees, config local fora; skills versionadas)
+# Claude Code (worktrees e config local fora; skills, hook de sessão e o
+# settings.json que o registra são versionados — instrumento de ambiente fora
+# do git é a classe de DH-003EG-02)
 .claude/*
 !.claude/skills/
+!.claude/hooks/
+!.claude/settings.json
 
 # Dumps de inspeção (uso único)
 **/*_diff.txt

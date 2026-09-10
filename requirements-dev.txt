@@ -1,0 +1,38 @@
+# Ambiente de teste e verificação. O `requirements.txt` cobre o app que o
+# Streamlit Community Cloud e o Dockerfile consomem; este cobre o que os
+# comandos padrão do CLAUDE.md e a suíte invocam, e NÃO entra na imagem de
+# deploy — o Dockerfile não copia `tests/` nem `scripts/`.
+#
+# Motivo de existir, medido em 10/09/2026: o container de sessão remota abria
+# sem `pytest`, `mypy` nem `coverage`, e nenhum arquivo do repositório os
+# declarava. A cláusula "nenhum prompt ou sessão dispensa a suíte" ficava sem
+# instrumento, e quem abrisse a sessão tinha duas saídas — redescobrir as
+# dependências à mão ou pular a suíte.
+#
+# Guardado por `tests/test_ambiente_de_teste.py`, que deriva o conteúdo do
+# repositório em vez de repetir esta lista: os comandos padrão saem do
+# `CLAUDE.md` e as ferramentas geradas em subprocesso saem da varredura de
+# `tests/` e `scripts/`. Não editar à mão sem rodar esse teste.
+
+-r requirements.txt
+
+# Comandos padrão do CLAUDE.md: `python -m pytest` e `python -m mypy --strict`.
+pytest
+mypy
+
+# `tests/test_cobertura_varrer_acervo.py` gera `python -m coverage` em
+# subprocesso para o portão de 100% do instrumento de varredura (003.FJ).
+coverage
+
+# Exigidos pelo `mypy --strict` no alvo canônico. Medido em 10/09/2026: sem os
+# dois, a mesma invocação devolve `Found 2 errors in 2 files (checked 48 source
+# files)` — `motor/protocolo.py` (yaml) e `adaptadores/transcritor_gemini.py`
+# (requests) — em vez de limpo.
+types-PyYAML
+types-requests
+
+# Versões sob as quais a medição de 10/09/2026 foi tirada, para reprodução:
+# pytest 9.1.1 · mypy 2.3.1 · coverage 7.16.0 · types-PyYAML 6.0.12.20260906 ·
+# types-requests 2.33.0.20260906. Sem piso travado: nenhuma dessas versões tem
+# significado normativo como o `streamlit>=1.42.0` de `requirements.txt`, que
+# marca a introdução de `st.login`.
