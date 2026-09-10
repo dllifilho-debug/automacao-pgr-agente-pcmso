@@ -7236,3 +7236,153 @@ E o custo disso está medido: a 6ª rodada achou a classe da 5ª num alvo vizinh
 ao que a 5ª blindou. **Corrigir o caso nomeado é o reflexo; fechar a classe é o trabalho** — e a
 diferença entre os dois foi a decisão do Arquiteto de mandar fazer o coverage em vez de esperar a
 7ª rodada apontar o terceiro ramo.
+
+## Sessão 003.FK — 10/09/2026 — higiene de registro + IMPLEMENTAÇÃO (ambiente)
+
+**Numeração `[ASSUMIDA — não derivada de medição]`.** 003.FJ é o último bloco em `main` (`e0b8c9b`,
+PR #324) e `003.FK` é o sucessor sequencial, mas numeração é decisão do Arquiteto e esta sessão
+rodou inteira sem número. O rótulo entra para o bloco ter cabeçalho; corrigi-lo é do Arquiteto.
+
+**Foco, em uma frase:** fechar as divergências que o `/kickoff` e o `/conferir` acharam no bloco
+003.FJ, e versionar o ambiente de teste que a própria sessão descobriu não existir.
+
+**Nenhuma regra clínica tocada.** Nenhuma `R-*` criada, alterada ou depreciada; o motor não é
+importado por nada do diff; `regras.yaml`, `agentes.yaml` e `exames.yaml` intocados.
+`DECISOES_ARQUITETURAIS.md` intocado, logo `INDICE_DARQ.md` não regenerado. DECISOES segue **v186**.
+PROTOCOLO passa de **v91** para **v92** — correção de âncora, higiene de documento, precedente v91.
+
+**`/kickoff` rodou**, na abertura, por invocação do Arquiteto, seguido de `/conferir` sobre o bloco
+003.FJ. É a diferença material contra 003.FJ, que declarou não ter rodado: as duas entregas desta
+sessão saíram do que esse cruzamento achou.
+
+### O que provocou a sessão
+
+O `/conferir` extraiu 190 afirmações do bloco 003.FJ e devolveu 6 divergentes. Quatro eram âncora
+errada contra a árvore, uma era data e uma era ID trocada dentro de um registro de gate. Duas das
+seis atravessavam para `PENDENCIAS_CLINICAS.md` e para o `PROTOCOLO`.
+
+A segunda entrega não estava no plano. Ela apareceu quando a primeira exigiu rodar o recorte e o
+container não tinha `pytest`.
+
+### Entrega 1 — cinco âncoras de registro (PR #325, merge `b9d6729`)
+
+Três commits, quatro arquivos, `+46/-11`.
+
+- `0147e14` — quatro âncoras do bloco 003.FJ. Data do cabeçalho (`04/09` era a data do merge de
+  003.FI, `74139b5`; os commits da sessão são de `07` e `08/09`), `.gitignore:26` para `:42`, o
+  commit da entrada `.coverage` (`be01a41`, não `3fb98e2`), e a ID do gate da 7ª rodada
+  (`DH-003EG-02`, não `DH-003FE-01`, que está DISPENSADA desde 29/08).
+- `09d80dd` — a quinta ocorrência da mesma âncora, na linha da **v73** do `PROTOCOLO`. Ficou fora do
+  commit anterior por tocar doc versionado; entra com a âncora antiga nomeada na própria linha e
+  registrada como **v92**.
+- `4812e78` — Baseline re-tirado. O bloco anterior nomeava a branch de 003.FJ sobre `main 74139b5`
+  e declarava PROTOCOLO v91; as duas coisas ficaram defasadas pelo merge de #324 e pela v92.
+
+**A âncora `.gitignore:26` vinha propagada desde 003.EG sem re-medição**, em cinco pontos e três
+arquivos. `relatorios/` está na linha 42; a 26 é comentário sobre LGPD art. 5º II. `DH-003EG-02`
+segue **ABERTA**: `git ls-files relatorios/` continua vazio.
+
+**Dois achados ficaram de fora, com motivo escrito.** A tese de que "as quatro rejeições de 003.FI
+tiveram a mesma raiz" está replicada no docstring de `scripts/varrer_acervo_lgpd.py`, e a quarta
+rejeição teve raiz distinta — o próprio bloco 003.FI a separa em "Quinta instância, e ela muda a
+forma da série". Corrigir deixa de ser docs-only. E a afirmação sobre o que o bloco continha em
+`4c86f18` não reproduz: a string `"recorte: 41 passed"` não existe em `docs/` naquele commit, e
+decidir se o registro descreve o commit ou a árvore que o Crítico viu é do Arquiteto.
+
+### Entrega 2 — ambiente de teste versionado (PR #326, merge `6dfb137`)
+
+Um commit (`d7bb344`), cinco arquivos, `+315/-1`.
+
+**Medido na abertura:** o container remoto não trazia `pytest`, `mypy` nem `coverage`, e **nenhum
+arquivo do repositório os declarava**. A cláusula do `CLAUDE.md` "nenhum prompt ou sessão dispensa a
+suíte", com o recorte "nunca zero", ficava sem instrumento — quem abrisse a sessão tinha duas
+saídas, redescobrir as dependências à mão ou pular a suíte. É a classe de `DH-003EG-02` com outro
+instrumento: o que vive fora do git aqui é o ambiente.
+
+Entram `requirements-dev.txt`, `.claude/hooks/session-start.sh`, `.claude/settings.json`, as
+exceções correspondentes no `.gitignore` e `tests/test_ambiente_de_teste.py` (7 testes).
+
+**Três medições decidiram o recorte:**
+
+1. **O `Dockerfile` fica intocado.** Ele é a imagem de deploy e não copia `tests/` nem `scripts/`;
+   `soffice` é usado só por `scripts/varrer_acervo_lgpd.py`, que a imagem não carrega. O
+   `libreoffice-writer` foi para o hook, não para a produção.
+2. **Os dois stubs são exigidos de fato.** Sem `types-PyYAML` e `types-requests`, o `mypy --strict`
+   no alvo canônico devolve `Found 2 errors in 2 files (checked 48 source files)` em vez de limpo.
+   Medido removendo e recolocando.
+3. **O `.gitignore` ia engolir a entrega.** `.claude/*` tinha exceção só para `skills/`, então o
+   hook e o `settings.json` entrariam ignorados. Versionar um hook e deixá-lo ignorado não versiona
+   nada — a dívida que o PR ataca, dentro do próprio PR.
+
+**Defeito do próprio hook, achado ao validá-lo.** Sob `set -u`, `CLAUDE_PROJECT_DIR` ausente matava
+o script, e hook que morre abre a sessão sem ambiente **em silêncio** — o modo de falha que ele
+existe para eliminar. Fallback derivado da posição do script; os três caminhos validados
+(não-remoto, remoto sem a variável, remoto com ela) devolvem `exit 0`.
+
+**O que deliberadamente não tem teste:** os pisos dos dois stubs. A reversão que os mataria exige
+rodar `mypy --strict` seguindo imports transitivos para fora do alvo canônico —
+`adaptadores/transcritor_gemini.py` não está no alvo e é quem importa `requests`. Teste cuja
+reversão não é nomeável não entra.
+
+### Verificação
+
+**Varredura inversa da entrega 2: 8 reversões contra 7 testes, cada uma matando exatamente um e só
+um.** R1 remover `mypy` do manifesto · R2 remover `coverage` · R3 remover `-r requirements.txt` ·
+R4 remover a instalação do manifesto no hook · R5 remover `libreoffice-writer` do hook · R6 remover
+a entrada `SessionStart` do settings · R7a e R7b remover cada exceção do `.gitignore`.
+
+**Registro de suíte, duas tiragens, árvore parada nas duas:**
+
+- árvore de `09d80dd`: **1201 passed, 6 skipped, 0 failed** (1207 coletados), 524.55s. Delta-zero
+  contra 003.FJ, esperado — o intervalo `e0b8c9b..09d80dd` é docs-only, sem arquivo Python.
+- árvore de `d7bb344`: **1208 passed, 6 skipped, 0 failed**, 504.25s. `1201 + 7 = 1208`, os sete de
+  `tests/test_ambiente_de_teste.py`.
+
+`python -m mypy --strict` no alvo canônico literal: **limpo, 48 arquivos**, nas duas tiragens.
+`python -m scripts.medir_painel` em `09d80dd`: `regras 23/42 (55%)`, `cas 50/79 (63%)`, índice
+sincronizado.
+
+**Ressalva de ambiente, e ela é a origem da entrega 2.** As duas tiragens acima rodaram com o
+ambiente instalado à mão nesta sessão, antes de o hook existir. Antes disso, na árvore limpa de
+`e0b8c9b`, dois testes falhavam por ausência do filtro Writer — verificado com o diff guardado no
+stash, logo falha do container e não do diff. **A primeira execução real do hook será numa sessão
+nova; nesta ele foi validado por invocação direta, não por abertura de sessão.**
+
+### Desvios de método, declarados
+
+- **Nenhuma rodada de `/critico` em nenhuma das duas PRs.** 003.FJ fechou com sete rodadas de
+  Gauntlet; esta fechou com zero. As duas PRs foram mergeadas sem gate de fechamento.
+- **O bloco foi escrito depois dos dois merges**, não antes. A sessão rodou inteira sem número e sem
+  registro: seis commits e dois merges em `main` com o HISTORICO parado em 003.FJ. Pela hierarquia
+  do `CLAUDE.md` o git tinha a verdade e os docs não a alcançavam.
+- **Branch fora da convenção.** `claude/charming-bell-zbd59d`, fixada pelo harness, contra o
+  `feat/<sessao>-<nome>` do `CLAUDE.md`. O mesmo nome aparece em dois merges sucessivos de `main`
+  sem relação entre si, porque foi reiniciado a partir de `main` após cada merge.
+
+### Pendências
+
+`DH-003EG-02` segue **ABERTA** — cinco âncoras corrigidas não fecham a dívida; o diff motor×gabarito
+continua em `relatorios/`, agora citado pela linha certa.
+
+**Duas candidatas a DH, não abertas nesta sessão** (a decisão é do Arquiteto):
+
+1. **O `skipif` do extrator legado checa presença, não capacidade.**
+   `tests/test_varrer_acervo_lgpd.py` e `tests/test_cobertura_varrer_acervo.py` guardam por
+   `shutil.which("soffice")`, e o filtro Writer é pacote separado do binário. Com binário presente e
+   filtro ausente — o estado exato do container desta sessão — o guarda não dispara, o teste roda e
+   falha em bloco. Não foi tocado: afrouxar guarda para ficar verde é o que a regra proíbe. Com o
+   ambiente garantido pelo hook a fraqueza para de importar na prática, e continua lá.
+2. **Convenção de branch contra o nome fixado pelo harness**, conforme o desvio declarado acima.
+
+### Lição de método
+
+**A conferência achou seis defeitos de registro num bloco que já tinha passado por sete rodadas de
+Gauntlet.** O Gauntlet daquela sessão olhou o instrumento entregue — cobertura, ramos sem teste,
+reversão nomeada — e nenhuma das sete rodadas conferiu se as âncoras do próprio bloco reproduziam
+contra a árvore. São dois eixos distintos: o gate mede o que a sessão construiu, a conferência mede
+o que a sessão *afirmou*. Passar num não é passar no outro.
+
+**E a segunda entrega saiu de tentar cumprir a primeira regra do projeto.** Rodar o recorte era
+obrigação; foi ao tentar cumpri-la que apareceu que a obrigação não tinha instrumento. Regra sem
+ferramenta versionada depende de quem abre a sessão lembrar de montá-la — que é a mesma forma de
+`DH-003EG-02`, com o ambiente no lugar do relatório.
