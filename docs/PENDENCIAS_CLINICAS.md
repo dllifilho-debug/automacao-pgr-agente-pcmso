@@ -959,7 +959,7 @@ origem.
 
 **Origem:** 003.EG, ao abrir a sessão contra um diff desatualizado.
 
-**Situação.** `.gitignore:26` ignora `relatorios/` inteiro (`git ls-files relatorios/` = vazio).
+**Situação.** `.gitignore:42` ignora `relatorios/` inteiro (`git ls-files relatorios/` = vazio).
 O diff motor×gabarito é o instrumento que pauta a fila desde D-ARQ-62, e nada em `git log`
 denuncia um relatório vencido. Consequência medida: o último diff completo era de 003.EB
 (`6f29928`) e envelheceu 4 sessões — 003.EC/ED/EE/EF mudaram o motor sem que a evidência fosse
@@ -986,8 +986,13 @@ cobertura** do script). Foram 10 na entrega inicial (`4c86f18`), 13 no
 tamanho de lista), 16 no 4º (`4d85c35`, cinco classes coletadas que nenhuma saída lia) 19 no 5º
 (`b4580d5`, os três ramos de falha de `varrer()`) 21 no 6º (`dc77b28`, dois dos três ramos de
 `extrair_metadata_autoria`) e 30 + portão no fecho de classe (`3fb98e2`). **A DH segue ABERTA:** o diff motor×gabarito, que é o instrumento original desta dívida,
-continua em `relatorios/`, ignorado pelo `.gitignore:26`. Um instrumento a menos fora do git não
+continua em `relatorios/`, ignorado pelo `.gitignore:42`. Um instrumento a menos fora do git não
 fecha a dívida de todos eles.
+
+**Correção de âncora (10/09/2026).** A `Situação` e a nota acima citavam `.gitignore:26`; a entrada
+`relatorios/` está na **linha 42** — a 26 é linha de comentário. A âncora vinha propagada desde
+003.EG sem re-medição, e o mesmo erro estava no bloco 003.FJ de `HISTORICO_OPERACIONAL.md`. Nada
+mais da DH muda: `git ls-files relatorios/` segue vazio e a DH segue **ABERTA**.
 
 ### DH-003EG-03 — Derivado do `INDICE_DARQ` tem vigilância, mas o ritual não a invoca em sessão docs-only `[ABERTA — higiene de método]`
 
