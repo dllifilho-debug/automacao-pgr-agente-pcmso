@@ -6780,7 +6780,17 @@ sessão, está fora do diff e **não foi tocada**. A divergência de enquadramen
 próprio Gauntlet (1ª a 3ª julgaram CONHECIMENTO, 4ª e 5ª julgaram IMPLEMENTAÇÃO, sobre artefatos da
 mesma natureza) segue registrada e não arbitrada.
 
-## Sessão 003.FJ — 04/09/2026 — IMPLEMENTAÇÃO (instrumento) + higiene
+## Sessão 003.FJ — 07-08/09/2026 — IMPLEMENTAÇÃO (instrumento) + higiene
+
+**Correção de registro (10/09/2026, aplicada em sessão posterior sobre `e0b8c9b`; corrigida no
+ponto, sem reescrita do bloco).** Quatro âncoras deste bloco não reproduziam contra a árvore.
+(1) O cabeçalho datava `04/09/2026`, que é a data do merge de 003.FI (`74139b5`); os treze commits
+desta sessão são de `07` e `08/09/2026`, e a própria `Correção 003.FJ-C3`, em
+`PENDENCIAS_CLINICAS.md`, se data `08/09/2026`. (2) `relatorios/` está em `.gitignore:42`, não
+`:26` — a 26 é linha de comentário. (3) A entrada `.coverage` do `.gitignore` entra em `be01a41`,
+não em `3fb98e2`. (4) O gate da 7ª rodada creditava `DH-003FE-01`, que está **DISPENSADA** desde
+29/08/2026 e que este mesmo bloco trata assim no gate da 1ª rodada; a DH declarada **ABERTA** no
+texto que credita o instrumento é `DH-003EG-02`. Nenhum número de medição foi alterado.
 
 **Numeração:** 003.FI é o último bloco em `main` (`74139b5`, PR #323). Sem ressalva.
 
@@ -6853,7 +6863,7 @@ Três decisões de projeto que o script carrega em nome, não em comentário:
 
 `DH-003EG-02` recebe **nota de reincidência** e **segue ABERTA** — este instrumento saiu de `/tmp`,
 mas o diff motor×gabarito, que é o instrumento original da dívida, continua em `relatorios/` sob o
-`.gitignore:26`. Um instrumento a menos fora do git não fecha a dívida de todos eles.
+`.gitignore:42`. Um instrumento a menos fora do git não fecha a dívida de todos eles.
 `DH-003FE-01` e `DH-003FI-01` passam a apontar o comando que as reproduz.
 
 ### Lição de método
@@ -7172,10 +7182,10 @@ ao lado.
 **Registro de suíte, árvore de `3fb98e2`, parada:** **1201 passed, 6 skipped, 0 failed** em 429.62s.
 `1175 + 30 + 2 = 1207`, e `1201 + 6 = 1207`.
 
-**O `.coverage` que o portão escreve foi ignorado com a lição da 1ª rodada aplicada:** conferi
-`tail -c 1 .gitignore` **antes** de anexar, assertei o newline final no próprio script de edição, e
-validei por `git check-ignore -v` em vez de reler o arquivo. O defeito que abriu esta sessão não se
-repete por acidente duas vezes no mesmo diff.
+**O `.coverage` que o portão escreve foi ignorado em `be01a41`, o commit seguinte, com a lição da
+1ª rodada aplicada:** conferi `tail -c 1 .gitignore` **antes** de anexar, assertei o newline final
+no próprio script de edição, e validei por `git check-ignore -v` em vez de reler o arquivo. O
+defeito que abriu esta sessão não se repete por acidente duas vezes no mesmo diff.
 
 **O que este portão muda, e é o ponto:** *"quem chama esta função?"* deixa de depender de alguém
 perguntar. Era a pergunta que produziu três das seis rejeições, e nenhuma delas veio de releitura
@@ -7188,7 +7198,7 @@ inversa teste a teste nos **32** (30 + 2 do portão), cada docstring nomeando re
 mata, com os discriminantes conferidos: laço do DV × guarda de repetição × guarda de forma em
 `cpf_valido`; guarda de tamanho × `raise extensao_sem_extrator` × `try/except` de `varrer`; ramo
 PDF × OOXML × legado de `extrair_metadata_autoria`; apagar destino efêmero × preservar `--tmp`.
-ID+fonte **APROVA**. ID antiga **APROVA** — `DH-003FE-01` declarada ABERTA no próprio texto que a
+ID+fonte **APROVA**. ID antiga **APROVA** — `DH-003EG-02` declarada ABERTA no próprio texto que a
 credita. Registro de suíte **APROVA**.
 
 **Gate de fechamento: CRÍTICO aprovou** — `74139b5..be01a41`, a frio, sessão separada.
