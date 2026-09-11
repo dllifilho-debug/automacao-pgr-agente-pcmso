@@ -14,26 +14,23 @@
 
 ---
 
-**Tiragem corrente:** 003.EZ · 16/08/2026 — **não re-tirada em 003.FH nem em 003.FI**, e a decisão é declarada, não omissão (`D-ARQ-85` cl.1). Em 003.FI: nenhuma `R-*` criada, alterada ou depreciada, e `git diff --name-only eb94b06 e27754c -- '*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml'` devolve **vazio** — medido, não inferido; a sessão mexeu em acervo e docs, não em conceito. Em 003.FH: a fatia de 003.FH popula `termos:`, que é forma e não conceito. Medido nos dois lados: `cas: 50/79 slugs (63%)` **antes e depois** da fatia — mesmo resultado que 003.EI já havia registrado ao popular `termos:`. Nenhuma `R-*` criada, alterada ou depreciada.
+**Tiragem corrente:** 003.EZ · 16/08/2026 — **não re-tirada em 003.FH, 003.FI, 003.FJ nem 003.FK**, e a decisão é declarada, não omissão (`D-ARQ-85` cl.1). Em 003.FI: nenhuma `R-*` criada, alterada ou depreciada, e `git diff --name-only eb94b06 e27754c -- '*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml'` devolve **vazio** — medido, não inferido; a sessão mexeu em acervo e docs, não em conceito. Em 003.FH: a fatia de 003.FH popula `termos:`, que é forma e não conceito. Medido nos dois lados: `cas: 50/79 slugs (63%)` **antes e depois** da fatia — mesmo resultado que 003.EI já havia registrado ao popular `termos:`. Nenhuma `R-*` criada, alterada ou depreciada. Em 003.FJ e 003.FK, mesma decisão e pela mesma prova: `git diff --name-only 74139b5 e0b8c9b -- '*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml' '*agentes.yaml' '*exames.yaml'` devolve **vazio**, e o mesmo diff em `e0b8c9b 6dfb137` devolve **só o `PROTOCOLO`**, cuja mudança inteira são duas linhas da tabela de revisões (a âncora errada da v73 e a linha nova da v92) — changelog, não conceito. Medido, não inferido; nenhuma seção de regra e nenhum `.yaml` tocados. `python -m scripts.medir_painel` em `6dfb137` devolve `regras 23/42` e `cas 50/79`, os mesmos valores da tiragem 003.EZ.
 
 > **`[BLOQUEADOR — reportado, não ajustado]` Instrumento diverge do painel em uma regra, e a divergência PRECEDE esta sessão.** `python -m scripts.medir_painel` devolve **`regras: 23/42 ativas (55%)`**; a tabela abaixo declara **22 de 42 (52%)** desde a tiragem 003.EZ. Medido em worktree isolado: **23/42 já em `eb94b06`**, antes do commit desta sessão — a fatia de 003.FH não moveu o número. Entre a tiragem 003.EZ e o HEAD, o único commit que tocou `PROTOCOLO`/`regras.yaml` é `6895958` (003.FC).
 >
 > **Qual regra explica o +1 fica `[A MEDIR]`, deliberadamente.** Identificá-la exige entender as internas de `medir_painel.py`, e `DH-003EC-01` faceta **(b) segue ABERTA** dizendo que esse instrumento "reporta verde sobre vermelho, conta prosa como implementação e não vigia derivados". Arbitrar entre painel e instrumento quando o instrumento tem DH aberta sobre contagem seria escolher um número por conveniência. A tabela **não foi ajustada para bater**. Decisão do Arquiteto.
-**Baseline:** branch `claude/charming-bell-zbd59d` sobre `main e0b8c9b` · **1201 passed, 6 skipped, 0 failed** *(1207 coletados; medido em `09d80dd`, árvore parada, 524.55s)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v92 · DECISOES v186
+**Baseline:** branch `claude/charming-bell-zbd59d` sobre `main 6dfb137` · **1208 passed, 6 skipped, 0 failed** *(1214 coletados; medido na árvore de `d7bb344`, parada, 504.25s)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v92 · DECISOES v186
 
-> **Re-tiragem em sessão sem número `[MEDIDO — 10/09/2026]`.** `D-ARQ-85` manda re-tirar o
-> Baseline em todo fechamento que produza commit, e esta re-tiragem não fecha sessão: foi pedida
-> pelo Arquiteto depois que a correção de âncora de `DH-003EG-02` levou `PROTOCOLO` de **v91**
-> para **v92** e deixou o bloco anterior defasado. Medida em `09d80dd`, árvore parada, com o
-> ambiente de teste instalado nesta sessão — o container não o trazia (faltavam `pytest`,
-> `pdfplumber`, `python-docx`, `streamlit`, `coverage`, `cffi` e o pacote `libreoffice-writer`,
-> sem o qual `_texto_legado` falha em bloco).
+> **Tiragem de 003.FK `[MEDIDO — 10/09/2026]`.** Duas medições na sessão, as duas com árvore
+> parada. A primeira em `09d80dd` deu **1201 passed, 6 skipped, 0 failed**, `1207` coletados,
+> 524.55s — delta-zero contra 003.FJ, esperado, porque `e0b8c9b..09d80dd` é docs-only. A segunda,
+> que é a que este Baseline registra, na árvore de `d7bb344`: **1208 passed**, 504.25s, com
+> `1201 + 7 = 1208` — os sete de `tests/test_ambiente_de_teste.py`.
 >
-> **Delta de suíte contra 003.FJ: zero.** `1201 passed, 6 skipped, 0 failed` e `1207` coletados
-> nas duas pontas. O intervalo `e0b8c9b..09d80dd` é docs-only — `HISTORICO_OPERACIONAL.md`,
-> `PENDENCIAS_CLINICAS.md` e `PROTOCOLO_AGENTE_MEDICO.md`, nenhum arquivo Python — e o `mypy`
-> no alvo canônico segue **limpo, 48 arquivos**, delta-zero também. O tempo sobe de **429.62s**
-> para **524.55s**: é container diferente, não conjunto diferente.
+> **As duas rodaram com o ambiente instalado à mão, antes de o hook existir.** O container não o
+> trazia: faltavam `pytest`, `mypy`, `coverage`, `cffi` e o pacote `libreoffice-writer`, sem o qual
+> `_texto_legado` falha em bloco. É o que a entrega 2 de 003.FK versionou. O tempo contra os
+> 429.62s de 003.FJ é container diferente, não conjunto diferente.
 >
 > **O bloqueador do instrumento segue vivo e inalterado `[MEDIDO — 10/09/2026]`.**
 > `python -m scripts.medir_painel` em `09d80dd` devolve `regras: 23/42 ativas (55%)` e
