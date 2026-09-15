@@ -98,6 +98,15 @@ def _parsear_ghe(texto: str) -> GHEVerbatim:
 # do prompt — é o que permite 6 blocos por requisição em vez de 1.
 _BLOCOS_POR_LOTE = 6
 
+# Medido em produção (PGR Viverde, lote 2/6, 15/09/2026): mesmo prompt, mesmo
+# modelo, temperature=0 — 1ª chamada devolveu JSON cortado no meio (finishReason
+# STOP mesmo assim, o "thinking" do Gemini às vezes encerra a geração antes do
+# JSON fechar), 2ª chamada idêntica devolveu JSON completo. Não é bug de
+# parsing local, é variância do provedor — retentativa curta resolve o caso
+# medido. Só cobre JSON malformado; falha de rede/HTTP já tem a cascata de
+# modelos em _chamar_gemini, não duplicar aqui.
+_TENTATIVAS_LOTE = 2
+
 _PROMPT_GHE_LOTE = """Você é um especialista em Programas de Gerenciamento de Riscos (PGR/GRO) conforme a NR-01.
 
 Abaixo estão VÁRIOS blocos GHE (Grupo Homogêneo de Exposição) de um PGR, cada um extraído por leitura de \
@@ -208,6 +217,9 @@ class TranscritorGeminiGHE:
         por dia por modelo; descer para 1 requisição é decisão de fatia
         futura, depois de medir se a resposta única sai íntegra.
 
+        Cada lote tem até _TENTATIVAS_LOTE chamadas se o JSON vier malformado
+        (ver nota em _TENTATIVAS_LOTE) — só a última falha levanta.
+
         Falha de invocação (TranscricaoIndisponivel de _chamar_gemini)
         propaga sem ser capturada — não mascara a falha de um lote como
         resultado parcial silencioso."""
@@ -217,9 +229,15 @@ class TranscritorGeminiGHE:
         resultado: list[GHEVerbatim] = []
         for inicio in range(0, len(blocos), _BLOCOS_POR_LOTE):
             lote = blocos[inicio : inicio + _BLOCOS_POR_LOTE]
+            resultado.extend(self._transcrever_um_lote(lote, chave))
+        return tuple(resultado)
+
+    def _transcrever_um_lote(self, lote: Sequence[str], chave: str) -> tuple[GHEVerbatim, ...]:
+        ultimo_erro: Exception | None = None
+        for _ in range(_TENTATIVAS_LOTE):
             resposta = _chamar_gemini(_montar_prompt_lote(lote), chave)
             try:
-                resultado.extend(_parsear_ghes_lote(resposta, len(lote)))
+                return _parsear_ghes_lote(resposta, len(lote))
             except Exception as e:
-                raise TranscricaoIndisponivel(f"JSON inválido (lote): {e}") from e
-        return tuple(resultado)
+                ultimo_erro = e
+        raise TranscricaoIndisponivel(f"JSON inválido (lote): {ultimo_erro}") from ultimo_erro

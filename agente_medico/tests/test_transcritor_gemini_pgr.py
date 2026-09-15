@@ -205,6 +205,57 @@ def test_transcrever_lote_respeita_blocos_por_lote(monkeypatch: pytest.MonkeyPat
     assert len(resultado) == 13
 
 
+def test_transcrever_lote_json_invalido_na_1a_tentativa_recupera_na_2a(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: voltar a _transcrever_um_lote para uma chamada única
+    # (sem loop de retentativa) deixa vermelho — a 1ª resposta malformada já
+    # levantaria TranscricaoIndisponivel, sem chegar à 2ª chamada boa.
+    chamadas: list[str] = []
+    payload_valido = [{"nome": "Pintura", "cargos": [], "riscos": []}]
+
+    def _chamar_falso(prompt: str, chave: str) -> str:
+        chamadas.append(prompt)
+        if len(chamadas) == 1:
+            return '[{"nome": "Pintura", "cargos": [], "riscos": ['  # cortado, igual ao caso real
+        return json.dumps(payload_valido)
+
+    monkeypatch.setattr(
+        "agente_medico.adaptadores.transcritor_gemini_pgr._chamar_gemini", _chamar_falso
+    )
+
+    cliente = TranscritorGeminiGHE(chave="fake")
+    resultado = cliente.transcrever_lote(["bloco 1"])
+
+    assert len(chamadas) == 2
+    assert len(resultado) == 1
+    assert resultado[0].nome == "Pintura"
+
+
+def test_transcrever_lote_json_invalido_em_todas_tentativas_levanta_apos_limite(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: um limite maior (ou ausência de limite) deixa vermelho
+    # no assert de contagem de chamadas — a retentativa não pode virar loop
+    # sem fim nem silenciar a falha real de conteúdo.
+    chamadas: list[str] = []
+
+    def _chamar_falso(prompt: str, chave: str) -> str:
+        chamadas.append(prompt)
+        return "isso nao e json {{{"
+
+    monkeypatch.setattr(
+        "agente_medico.adaptadores.transcritor_gemini_pgr._chamar_gemini", _chamar_falso
+    )
+
+    cliente = TranscritorGeminiGHE(chave="fake")
+    with pytest.raises(TranscricaoIndisponivel) as exc:
+        cliente.transcrever_lote(["bloco 1"])
+
+    assert len(chamadas) == 2
+    assert exc.value.motivo.startswith("JSON inválido (lote):")
+
+
 def test_prompt_enviado_contem_o_texto_do_bloco() -> None:
     payload = {"nome": "Pintura", "cargos": [], "riscos": []}
     capturado: dict[str, Any] = {}
