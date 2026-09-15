@@ -31,12 +31,15 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_120_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_123_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
-    # `postura_inadequada`. Guard de inventário movido junto com o dado, lição de
-    # 003.CV/003.DM.
-    assert len(indice_real.slug_por_forma) == 120
+    # `postura_inadequada`. 120 -> 123 nesta sessão (sem número atribuído ainda,
+    # branch `claude/upbeat-keller-090zpu`): +3 aliases de PNOS/PNOR em
+    # `poeira_nao_classificada`, achado da comparação PGR Viverde × gabarito
+    # assinado (Dra. Patrícia Montalvo Moraes). Guard de inventário movido junto
+    # com o dado, lição de 003.CV/003.DM.
+    assert len(indice_real.slug_por_forma) == 123
 
 
 # ---------------------------------------------------------------------------
@@ -248,6 +251,27 @@ def test_termos_silicato_e_poeira_nao_resolvem_para_silica(
     # anti-FP D-ARQ-22: grafias vizinhas de sílica que não são o agente sílica.
     resolucao = resolver_termo(termo, indice_real)
     assert resolucao.slug != "silica"
+
+
+# ---------------------------------------------------------------------------
+# resolver_termo — sigla PNOS/PNOR (R-RX-01-pnos-*/R-ESP-02, NR-07 Anexo III
+# Quadro 2). Medido no PGR VIVERDE V02 - 03.02.25.pdf: a CMO nomeia a
+# classificação diretamente na coluna "Perigo" ("PNOS/ PNOR", quebrada em
+# duas linhas pelo PDF) — não é fração isolada (D-ARQ-83 cl.2 não se aplica).
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("termo", ["PNOS", "PNOR", "PNOS/PNOR", "pnos", "PNOS / PNOR"])
+def test_sigla_pnos_pnor_resolve_para_poeira_nao_classificada(
+    indice_real: IndiceTermos, termo: str
+) -> None:
+    # Reversão: remover os aliases de `poeira_nao_classificada.termos` em
+    # agentes.yaml (ou reduzi-los a ["PNOS/PNOR"], derrubando as parametrizações
+    # "PNOS"/"PNOR" isoladas) faz este teste falhar — confiança cai para
+    # NAO_RESOLVIDO e o slug retorna None.
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "poeira_nao_classificada"
+    assert resolucao.pendencia is None
 
 
 # ---------------------------------------------------------------------------

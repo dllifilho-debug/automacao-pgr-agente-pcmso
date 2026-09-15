@@ -195,6 +195,14 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-RX-01]
+    # R-RX-01-pnos-*/R-ESP-02: "PNOS" é o próprio nome da classificação (NR-07
+    # Anexo III Quadro 2, "poeiras de menor toxicidade"), não fração isolada
+    # (D-ARQ-83 cl.2 barra só fração sem substância — aqui a CMO já nomeia a
+    # classificação). [MEDIDO — PGR VIVERDE V02, ex.: página com bloco ET05,
+    # coluna "Perigo": "PNOS/ PNOR"; 14 ocorrências de PNOS e 15 de PNOR no
+    # documento.] Três formas cobertas: sigla isolada e o par grudado que o
+    # PDF quebra em duas linhas.
+    termos: ["PNOS", "PNOR", "PNOS/PNOR"]
   etanol:
     tipo_ibe: null
     cas: "64-17-5"
