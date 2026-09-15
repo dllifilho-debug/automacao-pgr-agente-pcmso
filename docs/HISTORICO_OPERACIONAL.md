@@ -7386,3 +7386,85 @@ o que a sessão *afirmou*. Passar num não é passar no outro.
 obrigação; foi ao tentar cumpri-la que apareceu que a obrigação não tinha instrumento. Regra sem
 ferramenta versionada depende de quem abre a sessão lembrar de montá-la — que é a mesma forma de
 `DH-003EG-02`, com o ambiente no lugar do relatório.
+
+## Sessão 003.FL — 15/09/2026 — IMPLEMENTAÇÃO (vocabulário) + achados clínicos (comparação Viverde)
+
+**Numeração `[ASSUMIDA — não derivada de medição]`.** `003.FK` é o último bloco escrito neste
+arquivo, mas entre o merge que o fechou (`6dfb137`) e esta sessão, **três PRs entraram em `main`
+sem bloco próprio** — `#327` (`45c362a`, fix `st.login`), `#328` (`7376220`, 2ª tiragem
+motor×gabarito Fascino) e `#329` (`5414b96`, retentativa no transcritor-Gemini de lote GHE,
+sessão que também produziu a comparação clínica citada abaixo). Quantas sessões esses três merges
+representam não é medível daqui — mesma classe de lacuna que o próprio `003.FK` declarou ao se
+rotular. O rótulo `003.FL` é o sucessor sequencial do último bloco *escrito*, não do último merge;
+corrigi-lo (ou renumerar/backfillar `#327`–`#329`) é decisão do Arquiteto.
+
+**Contexto.** A sessão que produziu `#329` (sem número registrado) fechou com uma comparação
+manual entre a saída do motor e o gabarito assinado da Matriz de Exames Viverde (Dra. Patrícia
+Montalvo Moraes, 06/03/2025) — `matrizes_originais/MATRIZ DE EXAMES(ATUALIZAÇÃO)CMO VIVERDE
+AREIAO 06.03.2025.pdf` contra `matrizes_originais/PGR VIVERDE V02 - 03.02.25.pdf`. Levantou 5
+achados (89 subemissões, 157 superemissões após normalização canônica, 31 GHEs pareados), entregue
+como handoff no início desta sessão sem abrir dívida formal (`DT-`/`DH-`), a pedido do Arquiteto.
+Esta sessão investigou os três achados em aberto.
+
+**Achado 2 — CONFIRMADO e CORRIGIDO. Sigla "PNOS/PNOR" sem alias em `agentes.yaml`.**
+Medido diretamente no PDF bruto (`PGR VIVERDE V02 - 03.02.25.pdf`, ex. bloco ET05): a CMO nomeia a
+classificação de poeira na coluna "Perigo" como **"PNOS/ PNOR"** (quebrada em duas linhas pelo
+PDF) — 14 ocorrências de PNOS, 15 de PNOR, no documento inteiro. O termo nunca teve entrada em
+`agentes.yaml`. Não é fração isolada sob `D-ARQ-83` cl.2 — PNOS é o próprio nome da classificação
+do NR-07 Anexo III Quadro 2, e a família `R-RX-01-pnos-*`/`R-ESP-02` já usa essa sigla como nome
+próprio desde 002.X/002.Y. Explica a subemissão de Espirometria/RX Tórax OIT em ~15 dos 31 GHEs
+do achado original.
+
+**Achado 4 — RECLASSIFICADO. Não é subemissão; é `R-GHE-05` `[VALIDADO]` operando.** O achado
+original apontava Serralheria sem Carboxihemoglobina/Manganês como possível gap de vocabulário.
+Já estava resolvido em 002.L-estudo/002.M (`DT-002K-02` RESOLVIDA, `docs/PROTOCOLO_AGENTE_MEDICO.md`
+§ caso-âncora serralheiro): risco é por exposição real confirmada documentalmente, não por
+denominação de cargo. O PGR Viverde declara para o serralheiro `radiacao_uv_ir` + `dioxido_de_titanio`
+(0,008 mg/m³) — **não** cromo nem manganês. A nota "Risco Cromo abaixo de 10% LT ACGIH" que o
+gabarito carrega é anotação editorial da médica, fora do bloco de risco do PGR — mesma classe do
+achado 3 original (biomonitoramento anotado à mão, já documentado em
+`docs/referencia/MEDICAO_FASCINO_vs_GABARITO.md`). O gap real e nomeado (não fechado por esta
+sessão) é `D-ARQ-23` ("operação como dado de primeira classe", proposta em 002.M, nunca
+implementada) — decisão de arquitetura, não vocabulário.
+
+**Achado 5 — CONFIRMADO no PGR bruto, registrado, não implementado (decisão do Arquiteto).**
+PDF bruto, página 114: `GHE 03 - Execução de obra`, `FUNÇÃO Mestre de obra/encarregado`, com
+**4 sub-funções nomeadas** (`enc. pedreiro` CBO 710205, `enc. pintor` CBO 720135,
+`enc. Eletricista` CBO 950105, `enc. Encanador` CBO 720145), cada uma com atividade detalhada
+própria, todas sob o mesmo bloco de risco (ADC09/ADC10 — trabalho em altura, queda de materiais).
+O transcritor-LLM colapsou as 4 em um cargo genérico "encarregado" — perda de granularidade de
+cargo no parser, sem impacto clínico (risco idêntico para os 4). Arquiteto decidiu não investigar
+o transcritor nesta sessão.
+
+**Entrega — PR #330, commit `75959d9`, merge `96fd0ea`.** Dois arquivos:
+`agente_medico/protocolo/vocabulario/agentes.yaml` ganha
+`termos: ["PNOS", "PNOR", "PNOS/PNOR"]` no slug `poeira_nao_classificada`, com comentário citando
+`R-RX-01-pnos-*`/`R-ESP-02`, a fonte normativa (NR-07 Anexo III Quadro 2) e o achado medido no PGR
+(regra do `CLAUDE.md` — código de regra clínica carrega o ID da regra). `test_resolvedor_termos.py`
+ganha teste parametrizado (`PNOS`, `PNOR`, `PNOS/PNOR`, variações de caixa/espaçamento) e o guard
+de inventário sobe de 120 para 123 entradas.
+
+**Verificação.** Varredura inversa: zerar os 3 aliases derruba as 5 parametrizações do teste novo
++ o guard de contagem — **6/6 vermelhos**; restaurado e reconfirmado verde. Recorte que cobre os
+derivados tocados (`test_resolvedor_termos`, `test_vocabulario`, `test_espirometria_poeira_mineral`,
+`test_rx_periodicidade`, `test_integracao_viverde`): **134 passed**. `python -m mypy --strict` no
+alvo canônico: limpo, 48 arquivos, delta-zero. Suíte completa pós-merge (`python -m
+scripts.medir_painel --suite`, árvore parada, `96fd0ea`): **1223 passed, 6 skipped**. Contra o
+baseline escrito de `003.FK` (1208 passed em `d7bb344`) o delta é **+15**, não decomposto aqui —
+abrange os três merges não documentados (`#327`–`#329`) mais os 5 casos novos desta sessão; a
+decomposição fica `[A MEDIR]` se algum dia alguém escrever os blocos de `#327`/`#328`.
+
+**Regras e vocabulário/CAS inalterados, medido.** `git diff --name-only d1f9df6 96fd0ea --
+'*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml' '*agentes.yaml' '*exames.yaml'` devolve só
+`agentes.yaml`, e a mudança nele é `termos:` (forma), não `cas:` nem slug novo — mesma classe já
+registrada em 003.FH/003.EI. `python -m scripts.medir_painel`: `regras 23/42 (55%)`, `cas 50/79
+(63%)`, `índice: sincronizado` — valores idênticos ao baseline de 003.FK. **O bloqueador do
+instrumento segue vivo e inalterado**: a tabela do `PAINEL_ESTADO.md` declara 22/42, o instrumento
+devolve 23/42, mesma divergência não resolvida desde 003.FH — não investigada nesta sessão.
+Nenhuma `R-*` criada, alterada ou depreciada. `DECISOES_ARQUITETURAIS.md` intocado — `INDICE_DARQ.md`
+não regenerado (já sincronizado, v186 · 85 decisões). PROTOCOLO segue v92.
+
+**Desvios de método, declarados.** Sessão não invocou `/kickoff` nem `/conferir` na abertura, nem
+`/critico` no fechamento. Branch fixada pelo harness (`claude/upbeat-keller-090zpu`), fora da
+convenção `feat/<sessão>-<nome>` — mesmo desvio já declarado em 003.FI/003.FJ/003.FK para sessões
+abertas pela web.
