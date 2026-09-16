@@ -31,15 +31,18 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_123_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_124_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
-    # `postura_inadequada`. 120 -> 123 nesta sessão (sem número atribuído ainda,
-    # branch `claude/upbeat-keller-090zpu`): +3 aliases de PNOS/PNOR em
+    # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
     # `poeira_nao_classificada`, achado da comparação PGR Viverde × gabarito
-    # assinado (Dra. Patrícia Montalvo Moraes). Guard de inventário movido junto
-    # com o dado, lição de 003.CV/003.DM.
-    assert len(indice_real.slug_por_forma) == 123
+    # assinado (Dra. Patrícia Montalvo Moraes). 123 -> 124 nesta sessão (sem
+    # número atribuído ainda, branch `claude/festive-gates-soy0fr`): +1 alias, a
+    # mesma classificação PNOS nomeada por extenso, achado da comparação PGR CMO
+    # Residencial Aurora Lago das Rosas × gabarito assinado (Dra. Patrícia
+    # Montalvo Moraes). Guard de inventário movido junto com o dado, lição de
+    # 003.CV/003.DM.
+    assert len(indice_real.slug_por_forma) == 124
 
 
 # ---------------------------------------------------------------------------
@@ -268,6 +271,36 @@ def test_sigla_pnos_pnor_resolve_para_poeira_nao_classificada(
     # agentes.yaml (ou reduzi-los a ["PNOS/PNOR"], derrubando as parametrizações
     # "PNOS"/"PNOR" isoladas) faz este teste falhar — confiança cai para
     # NAO_RESOLVIDO e o slug retorna None.
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "poeira_nao_classificada"
+    assert resolucao.pendencia is None
+
+
+# ---------------------------------------------------------------------------
+# resolver_termo — PNOS por extenso (R-RX-01-pnos-*/R-ESP-02, NR-07 Anexo III
+# Quadro 2). Medido no PGR(ADENDO) CMO RESIDENCIAL AURORA LAGO DAS ROSAS
+# 27.08.26.pdf: a CMO nomeia a mesma classificação por extenso em vez da
+# sigla — "Particulados insolúveis ou de baixa solubilidade não
+# especificados de outra maneira (PNOS)", 10 ocorrências no documento — sem
+# nenhum uso da sigla isolada nesse PGR. Mesma classificação de D-ARQ-83
+# cl.2, não fração isolada.
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "termo",
+    [
+        "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)",
+        "particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (pnos)",
+        "Particulados insolúveis ou de baixa solubilidade não especificados de outra  maneira (PNOS)",
+    ],
+)
+def test_pnos_por_extenso_resolve_para_poeira_nao_classificada(
+    indice_real: IndiceTermos, termo: str
+) -> None:
+    # Reversão: remover o 4º alias (a forma por extenso) de
+    # `poeira_nao_classificada.termos` em agentes.yaml faz este teste falhar —
+    # confiança cai para NAO_RESOLVIDO e o slug retorna None.
     resolucao = resolver_termo(termo, indice_real)
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == "poeira_nao_classificada"
