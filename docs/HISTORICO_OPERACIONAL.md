@@ -7589,6 +7589,22 @@ historicamente após o merge (precedente `003.FL`: PR #330 com o fix, PR #331 j�
 clínicos não se moveram (nenhuma `R-*`, nenhum slug/CAS novo, nenhuma das 3 dívidas que travam
 produção tocada) e ficam avaliados-e-não-re-tirados sob `D-ARQ-85` cl.1.
 
+**Pós-merge (mesma sessão, correção do parágrafo acima — D-ARQ-06, registro preservado).** PR #332
+mergeado pelo Diovanni: commits `f519721`/`7b69d52`, merge `7c58d25` (dois pais, `d46f848` +
+`7b69d52` — merge commit real, não squash/rebase; `git diff 7b69d52 origin/main` vazio, árvore
+idêntica). `docs/PAINEL_ESTADO.md` Baseline **re-tirado** nesta mesma sessão, já com o hash em
+mãos: branch/PR/commits atualizados, suíte remedida em `7c58d25` (`python -m scripts.medir_painel
+--suite`) — **1226 passed, 6 skipped, 0 failed**, delta +3 exato contra o Baseline de `003.FL`
+(os 3 casos novos do achado 1; ver nota de container abaixo). `mypy --strict` reconfirmado limpo,
+48 arquivos. `regras 23/42 (55%)`, `cas 50/79 (63%)`, `índice: sincronizado` — inalterados. Os três
+números clínicos seguem não-movidos (mesma leitura acima), agora declarados sobre o commit real.
+**Nota de container:** a medição de suíte completa registrada mais acima nesta sessão (1224
+passed, 2 failed) rodou num container sem `libreoffice-writer`; o container desta chamada
+pós-merge já trouxe o pacote pré-instalado pelo hook, então os mesmos 2 testes
+(`test_varrer_acervo_lgpd.py`/`test_cobertura_varrer_acervo.py`) passam aqui — efeito de ambiente,
+não de código, já confirmado pré-existente por `git stash` antes do merge. Detalhe da aritmética em
+`PAINEL_ESTADO.md`.
+
 **Lições de método.** (1) O handoff caracterizou 2 dos 4 achados (2 e 3) como "bugs a corrigir por
 aliasing" quando na verdade já eram dívidas abertas e nomeadas em sessões anteriores
 (`DT-003EJ-01`, `DT-003EC-01`) com derivação já escrita explicando por que o comportamento atual
