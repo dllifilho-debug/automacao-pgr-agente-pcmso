@@ -7617,3 +7617,94 @@ tinha deixado em aberto por falta dessa checagem. **Desvios de método, declarad
 invocou `/kickoff` nem `/conferir` na abertura, nem `/critico` no fechamento. Branch fixada pelo
 harness (`claude/festive-gates-soy0fr`), fora da convenção `feat/<sessão>-<nome>` — mesmo desvio
 já declarado em 003.FI/003.FJ/003.FK/003.FL para sessões abertas pela web.
+
+## Mesma sessão, continuação — 16/09/2026 — IMPLEMENTAÇÃO: `R-RX-03`/`R-ESP-03` (poeira de madeira), `DT-003EJ-01` RESOLVIDA
+
+**Contexto.** Depois de fechados os PRs #332/#333/#334 (achados 1/3/4 da comparação Aurora Lago
+das Rosas, achado 2 reclassificado como `DT-003EJ-01` já aberta), o Arquiteto pediu recomendação
+de como resolver `DT-003EJ-01` (slug próprio × `vocabulario_ausente`) e `DT-003EC-01` (24M×12M).
+Recomendação dada: criar slug próprio para poeira de madeira com regime `[INTERPRETADO]` ancorado
+em IARC + matriz-precedente (não esperar norma brasileira, que não cobre o agente); manter
+`DT-003EC-01` como bloqueador para decisão clínica (RX 24M×12M é mudança de regra `[DERIVADO]`,
+efeito mais amplo que um agente novo). Pergunta do Arquiteto sobre por que consultar a Dra.
+Carolini, dado que a validação humana de toda matriz antes de sair para o cliente já é
+**reconferência linha a linha**: resposta dada foi que, sendo esse o nível de revisão real, o
+risco de uma regra `[INTERPRETADO]` errada não sair sem ser pega é baixo — autorização de
+implementar sem sessão CONHECIMENTO dedicada veio em seguida.
+
+**Medição adicional antes de implementar (verificação da recomendação).** Convertido o gabarito
+`.doc` do Fascino (`MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc`) via
+`soffice --headless --convert-to txt` (mesma classe de conversão que `scripts/varrer_acervo_lgpd.py`
+usa para `.doc`/`.rtf` legado) para conferir a Espirometria de GHE-08 Carpintaria, não só o RX já
+medido: **Espirometria (ADM, PER 24 meses, MRO, DEM)** — mesmo valor do GHE-04 da Aurora, medido
+na sessão anterior. Os dois exames (RX 60M, Espirometria 24M) agora têm **n=2** independente, não
+só o RX.
+
+**Implementação.** Novo agente `poeira_de_madeira` em `agentes.yaml` (`is_carcinogeno_iarc: true`,
+`cas: null`, sem `termos:` — o próprio slug normaliza igual ao literal "Poeira de madeira" do PGR,
+confirmado por execução direta de `normalizar_termo`). Novo primitivo homônimo em `predicados.py`
+(mesmo padrão de `fumos_metalicos`/`silica`/`asbesto`/`pnos`: presença do agente nos riscos do
+GHE). Duas regras novas em `regras.yaml`: `R-RX-03` (RX 60M, adm/per/MR/dem) e `R-ESP-03`
+(Espirometria 24M, adm/per/MR/dem) — IDs separadas de `R-RX-01`/`R-ESP-02` por mudança de escopo
+de substância (mesma classificação de versionamento que já separou `R-RX-02` de `R-RX-01` para
+fumos metálicos), ambas `[INTERPRETADO]`, `base_normativa` citando IARC Monographs Vol. 62/1995 e
+100C/2012 (Grupo 1) + os 2 PGRs medidos, explicitando a ausência de âncora normativa brasileira.
+Documentação em `docs/PROTOCOLO_AGENTE_MEDICO.md` §5.3/§5.4 (novas subseções R-ESP-03/R-RX-03,
+changelog v92→v93) e nota de aplicação em `D-ARQ-83` (`docs/DECISOES_ARQUITETURAIS.md`, changelog
+v187→v188, sem cláusula alterada — confirma que o anti-FP "Poeira de madeira" da tiragem original
+de 003.FB nunca precisou entrar em `fracoes_sem_agente`). `DT-003EJ-01` marcada `[RESOLVIDA]` em
+`docs/PENDENCIAS_CLINICAS.md`, nota preservando a decisão e a autorização do Diovanni.
+
+**Testes e verificação.** 7 testes novos com reversão nomeada: 3 parametrizados
+(`test_poeira_de_madeira_resolve_para_slug_proprio`, grafia exata/minúscula/maiúscula) + guard de
+inventário renomeado (124→125 entradas) em `test_resolvedor_termos.py`; 4 de emissão em
+`agente_medico/tests/test_poeira_de_madeira.py` (arquivo novo, padrão de
+`test_espirometria_poeira_mineral.py`): RX 60M com motivo `R-RX-03`, Espirometria 24M com motivo
+`R-ESP-03`, ausência de ambos sem o agente, e confirmação de que `R-ESP-02` não dispara para
+madeira (anti-confusão mineral×orgânica). Um teste existente reescrito (D-ARQ-06, redação antiga
+preservada abaixo em vez de apagada):
+`test_poeira_de_madeira_anti_fp_segue_vocabulario_ausente` afirmava `NAO_RESOLVIDO` — comportamento
+correto até esta sessão, agora superado pela decisão — substituído por
+`test_poeira_de_madeira_nao_e_fracao_sem_agente` (preserva só o invariante que continua verdadeiro:
+o termo nunca é `fracao_sem_agente`) e pelo novo teste de resolução EXATA.
+
+Redação antiga preservada (D-ARQ-06): *"anti-FP D-ARQ-83 cl.4(iv): madeira é o agente, o termo não
+entra na categoria. Reverte para: categoria virar balde de tudo que começa com 'poeira'."* —
+`resolucao.confianca == Confianca.NAO_RESOLVIDO`, `resolucao.slug is None`,
+`resolucao.pendencia.tipo == "vocabulario_ausente"`. Válida até esta sessão decidir o slug próprio.
+
+**Varredura inversa.** `git stash` do código-fonte (`agentes.yaml`, `regras.yaml`, `predicados.py`),
+mantendo os testes: **7/7 vermelhos** (guard de contagem, 3 parametrizações de resolução, 3 testes
+de emissão — os dois de emissão positiva por `StopIteration` explícito, o de anti-confusão R-ESP-02
+por `StopIteration` também já que sem o agente nenhum exame é emitido). Restaurado, reconfirmado
+verde. Recorte que cobre os derivados tocados (`test_resolvedor_termos`, `test_vocabulario`,
+`test_poeira_de_madeira`, `test_espirometria_poeira_mineral`, `test_rx_periodicidade`,
+`test_integracao_viverde`): **144 passed**. `mypy --strict` no alvo canônico: limpo, 48 arquivos,
+delta-zero (o novo arquivo de teste fica fora do alvo, mesma classe dos demais `agente_medico/tests/*.py`
+não-`invariantes.py`). Suíte completa (`agente_medico/tests/ tests/`, árvore parada): **1233
+passed, 6 skipped, 0 failed** — +7 exato contra o Baseline anterior desta sessão (1226), os 7
+testes novos, nada mais.
+
+**Painel.** Primeira vez desde 003.EZ que os três números clínicos se movem de verdade: `regras
+23/42 → 25/44` pelo instrumento (`scripts/medir_painel.py`, real), `cas 50/79 → 50/80` (denominador
+sobe com o slug novo, numerador não muda — `cas: null`), `índice: sincronizado`. A folga de `+1`
+entre o instrumento e a tabela "Os três números" (documentada como bloqueador `[A MEDIR]` desde
+003.FH) persiste inalterada nesta sessão — tabela mostra `24/44`, instrumento real `25/44`, mesma
+folga de 1, não investigada aqui. `docs/PAINEL_ESTADO.md` atualizado: Baseline, tabela "Os três
+números", seção "Cobertura clínica" (denominador/numerador, linhas da tabela por superfície,
+re-tiragem registrada), gargalos de índice CAS (Camada 1 e 2).
+
+**Regras e vocabulário/CAS.** `R-RX-03` e `R-ESP-03` CRIADAS — primeiras `R-*` novas desde
+`R-PSY-02` (003.EN). Nenhuma `R-*` existente alterada ou depreciada. PROTOCOLO v92→**v93**; DECISOES
+v187→**v188**, decisões inalteradas em **85** (nota de aplicação, não D-ARQ nova). Índice D-ARQ
+regenerado (`python -m scripts.gerar_indice_darq`), `python -m pytest tests/test_gerar_indice_darq.py`:
+6 passed — regra fixa do `CLAUDE.md` por ter tocado `DECISOES_ARQUITETURAIS.md`.
+
+**Lição de método.** A recomendação de implementação (slug próprio, regime `[INTERPRETADO]`
+ancorado em IARC + matriz-precedente, sem esperar sessão CONHECIMENTO dedicada) só foi seguida
+depois de uma pergunta direta do Arquiteto sobre o motivo de envolver a Dra. Carolini — a resposta
+honesta (o risco real depende do nível de revisão humana pós-app, não de uma regra genérica de
+"sempre validar com clínico") mudou a decisão. Registrado para não se perder: a próxima vez que uma
+regra `[INTERPRETADO]` sem âncora normativa brasileira for proposta, a pergunta "qual é o nível de
+revisão real antes de a matriz sair" é a que decide se implementa direto ou pede sessão CONHECIMENTO
+— não uma regra fixa de sempre esperar.
