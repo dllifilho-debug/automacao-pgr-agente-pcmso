@@ -2608,3 +2608,62 @@ o histórico que já os contém — o mesmo custo desproporcional que dispensou 
 é do Arquiteto; esta DH existe para que o fato esteja registrado antes de alguém redescobri-lo.
 
 **Status:** ABERTA. Registro de fato medido, não pedido de trabalho.
+
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-01 — Nível de risco psicossocial do PGR bruto (COPSOQ) é boilerplate, não sinal por GHE `[ABERTA — medida, não-bloqueante]`
+
+**Origem.** Handoff da sessão que abriu o PR #335 (branch `claude/festive-gates-soy0fr`): tabela
+manuscrita das Dras. Carolini e Patrícia, não baseada em norma, cruza tipo de atividade (Trabalho
+em Altura/Espaço Confinado × Sem Atividade Crítica) com nível de risco psicossocial (baixo/médio/
+alto, corte SRQ-20≥7) para decidir Avaliação Psicossocial/Av. Médica de Saúde Mental — em aparente
+contradição com `R-PSY-02` (`quando: todo_trabalhador`, incondicional, `[DERIVADO — corpus de 6
+matrizes pós-vigência, 5 clientes, 2 médicas, 284 cargos, 99% de cobertura; grupo de controle de 13
+matrizes pré-vigência em ~0%]`, sucede `R-PSY-01` DEPRECATED que era condicionada a atividade
+crítica). Hipótese não testada proposta no handoff: se nenhum PGR real jamais declara risco
+psicossocial baixo, os 99% incondicionais deixam de contradizer a tabela nova — decidiria se
+`R-PSY-02` precisa revisão.
+
+**Medido — refuta a hipótese, por motivo mais específico que "baixo existe".** Abertos os 2 PGRs
+brutos do acervo com par mais recente medido (Fascino, Aurora Lago das Rosas), seção "26.1
+INVENTÁRIO DE RISCOS PSICOSSOCIAIS" (COPSOQ II-BR/AQUALI-RPS, 9 fatores, Matriz 5×5 P×S)
+`[MEDIDO — pdfplumber desta sessão; Fascino páginas 90-91, Aurora páginas 75-76]`:
+
+- **BAIXO aparece, predominante nos 2 documentos:** 7-8 de 9 fatores BAIXO, 1-2 MODERADO, nenhum
+  ALTO.
+- **Mas a tabela é boilerplate, não medição por GHE.** Texto **idêntico** — mesma lista de cargos
+  (Armador, Carpinteiro, Eletricista, Servente, Pedreiro etc.), mesmas descrições de fator, quase
+  os mesmos valores P×S — nos 2 PGRs, de 2 empresas distintas. O próprio documento rotula a tabela
+  de "modelo": "Replicar o modelo acima para cada função/cargo... obrigatório para a validade do
+  PGR (NR-01 subitem 1.5.6.1 alínea 'a')" — e nenhum dos 2 PGRs replica. Aparece **uma vez**, sob
+  um GHE genérico ("TÉCNICO ADM/OPERACIONAL"), nunca sob GHE-06 Administração nem GHE-19 Vendas
+  (os GHEs citados no handoff como "aparentemente baixo risco").
+- Os cartões de perigo de GHE-06 Administração e GHE-19 Vendas (Fascino, páginas 43 e 88) **não
+  têm linha Psicossocial própria** — só uma nota remetendo ao item 26.1 genérico.
+- **Instrumentos diferentes, não sobrepostos.** O PGR usa COPSOQ (por GHE nominal, quando
+  preenchido). A tabela das doutoras usa corte SRQ-20≥7 — questionário clínico autoaplicado ao
+  trabalhador individual, cujo resultado só existe depois do exame; não é dado extraível do texto
+  do PGR.
+
+**Leitura.** O eixo "nível de risco psicossocial" da tabela das doutoras não pode vir, pelo menos
+nos 2 PGRs medidos, de extração do texto do PGR — a seção que existiria para isso é preenchimento
+de conformidade genérico (mesmo texto em empresas diferentes), não sinal diferenciado por GHE.
+`GHEPGR.psicossocial` (bool, hoje sem nenhuma regra que o leia) não tem de onde vir um nível
+baixo/médio/alto real por essa via. Reforça o precedente já escrito na `base_normativa` de
+`R-PSY-02` (PGR sem FRPRT — Ricco 2026 Adm — cuja matriz emite mesmo assim, sob a postura de
+`D-ARQ-68`): aqui o PGR não está silencioso, está com FRPRT preenchido e predominantemente BAIXO,
+e mesmo assim não há, no próprio documento, diferenciação por GHE que pudesse ter alimentado uma
+condicional. Os 99% incondicionais medidos e a tabela nova continuam parecendo contraditórios — a
+hipótese "PGR nunca declara baixo" está refutada, não confirmada.
+
+**Não implementado.** Decisão sobre revisar `R-PSY-02`, tratar a tabela das doutoras como
+instrumento clínico separado (SRQ-20 pós-exame, não gatilho de pré-exame), ou pedir sessão
+CONHECIMENTO com a Dra. Carolini sobre a origem real do eixo "nível de risco psicossocial" da
+tabela é do Arquiteto. Divergência entre medição real e a hipótese do handoff é bloqueador nomeado
+(regra do `CLAUDE.md`) — registrado, não ajustado para bater com a hipótese.
+
+**Numeração.** Sessão aberta pelo harness na branch `claude/youthful-lamport-3kfkog`, sem número
+`003.F?` atribuído — mesma classe de desvio já declarada em 003.FI/003.FJ/003.FK/003.FL e na
+sessão do PR #335. ID desta DT fica sem sessão numérica até o Arquiteto rotular; número não
+fabricado aqui.
+
+**Status:** ABERTA, não-bloqueante. Bloqueia decisão clínica sobre `R-PSY-02`, não bloqueia
+produção — a regra atual segue rodando como está.

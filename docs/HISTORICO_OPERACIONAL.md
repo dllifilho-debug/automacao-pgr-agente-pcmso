@@ -7708,3 +7708,50 @@ honesta (o risco real depende do nível de revisão humana pós-app, não de uma
 regra `[INTERPRETADO]` sem âncora normativa brasileira for proposta, a pergunta "qual é o nível de
 revisão real antes de a matriz sair" é a que decide se implementa direto ou pede sessão CONHECIMENTO
 — não uma regra fixa de sempre esperar.
+
+## Sessão (branch `claude/youthful-lamport-3kfkog`, número não atribuído) — 16/09/2026 — administrativo (PR) + achado clínico (psicossocial)
+
+**Numeração não atribuída, mesma classe declarada na sessão anterior (branch
+`claude/festive-gates-soy0fr`).** Rotular esta sessão é decisão do Arquiteto; o corpo abaixo usa a
+branch como referência.
+
+**Contexto.** Handoff recebido: (1) trabalho de `DT-003EJ-01` (slug `poeira_de_madeira`,
+`R-RX-03`/`R-ESP-03`) já implementado e pushed na branch `claude/festive-gates-soy0fr`, PR ainda
+não aberto; (2) achado novo, não investigado, sobre uma tabela manuscrita das Dras. Carolini e
+Patrícia cruzando atividade crítica × nível de risco psicossocial (corte SRQ-20≥7), em aparente
+contradição com `R-PSY-02` incondicional — com um próximo passo sugerido, não executado: conferir
+se algum PGR bruto do acervo declara risco psicossocial "baixo".
+
+**Ambiente.** Container abriu sem `pdfplumber`/`streamlit` — o hook `session-start.sh` morre no
+meio de `pip install -r requirements-dev.txt`: o `cryptography` do apt (sem `_cffi_backend`) não
+tem `RECORD`, e o pip aborta ao tentar desinstalá-lo para a versão que `pdfminer.six` pede.
+Contornado nesta sessão com `pip install --ignore-installed cryptography -r requirements-dev.txt`
+(efeito de container, não do repositório — hook em si não tocado, fora de escopo desta sessão).
+`libreoffice-writer` instalado em seguida, fechando o hook.
+
+**PR aberto.** Verificado que `claude/festive-gates-soy0fr` batia exatamente com o handoff (`main`
+`e210acd` + `82a944a` + `a3fe651`, árvore limpa). Re-medido nesta sessão antes de abrir: recorte
+`test_poeira_de_madeira.py` + `test_resolvedor_termos.py` — **94 passed**; `mypy --strict` alvo
+canônico — limpo, 48 arquivos; suíte completa (`agente_medico/tests/ tests/`, árvore parada) —
+**1233 passed, 6 skipped, 0 failed**, mesmo número da sessão de origem, confirmado de forma
+independente nesta sessão. PR #335 aberto (`claude/festive-gates-soy0fr` → `main`), aguardando
+revisão do Diovanni.
+
+**Achado psicossocial — investigado, hipótese refutada.** Detalhe completo em
+`docs/PENDENCIAS_CLINICAS.md`, DT nova ao final do documento (sem sessão numérica, mesma razão
+acima). Resumo: abertos os 2 PGRs brutos do acervo com par mais recente (Fascino, Aurora Lago das
+Rosas) via `pdfplumber`; a seção "26.1 INVENTÁRIO DE RISCOS PSICOSSOCIAIS" (COPSOQ II-BR/AQUALI-RPS)
+**declara BAIXO**, predominante nos dois — refutando a hipótese "PGR nunca declara baixo" tal como
+proposta. Mas o motivo é mais específico: a tabela é **boilerplate** (texto idêntico em 2 empresas
+distintas, rotulado "modelo" pelo próprio documento, nunca replicado por GHE) e aparece uma única
+vez por PGR, nunca sob GHE-06 Administração nem GHE-19 Vendas — os GHEs citados no handoff. O
+instrumento do PGR (COPSOQ, por GHE nominal) também não é o mesmo da tabela das doutoras (SRQ-20,
+clínico individual, pós-exame). Conclusão registrada: o eixo "nível de risco psicossocial" da
+tabela nova não é extraível do texto do PGR nos 2 casos medidos — decisão sobre `R-PSY-02` segue
+do Arquiteto, não implementada.
+
+**Desvios de método, declarados.** Sessão não invocou `/kickoff` nem `/conferir` na abertura, nem
+`/critico` no fechamento. Branch fixada pelo harness (`claude/youthful-lamport-3kfkog`), fora da
+convenção `feat/<sessão>-<nome>` — mesmo desvio já declarado nas sessões anteriores abertas pela
+web. Nenhum `R-*`/slug/CAS tocado nesta sessão (só leitura de PDFs brutos e docs); `PAINEL_ESTADO.md`
+não re-tirado — os três números clínicos não se moveram.
