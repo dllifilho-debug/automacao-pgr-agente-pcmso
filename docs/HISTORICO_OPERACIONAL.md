@@ -7809,3 +7809,7 @@ regenerado, 85 decisões inalterado, `python -m pytest tests/test_gerar_indice_d
 (regra fixa do `CLAUDE.md` por ter tocado `DECISOES_ARQUITETURAIS.md`). `PROTOCOLO_AGENTE_MEDICO.md`
 inalterado, segue v93 (nenhuma regra clínica tocada). `PAINEL_ESTADO.md` não re-tirado — os três
 números clínicos não se moveram (mudança é só de emissor/apresentação).
+
+**Suíte completa (pós-commit `2ef4d97`).** `python -m pytest agente_medico/tests/ tests/`, árvore
+parada: **1236 passed, 6 skipped, 0 failed** — +3 exato contra o Baseline de origem (1233,
+sessão do PR #335), os 3 testes novos deste commit, nada mais.
