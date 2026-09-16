@@ -1084,7 +1084,7 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 
 **Status:** ABERTA. Não-bloqueante.
 
-### DT-003EJ-01 — `Poeira de madeira` é agente identificável fora dos dois quadros do Anexo III `[ABERTA — não-bloqueante]`
+### DT-003EJ-01 — `Poeira de madeira` é agente identificável fora dos dois quadros do Anexo III `[RESOLVIDA — R-RX-03/R-ESP-03, sessão atual]`
 
 **Origem:** 003.EJ, derivação da ausência de RX em GHE-08 (Carpintaria) do Fascino.
 
@@ -1102,6 +1102,10 @@ Duas ressalvas medidas, não decisivas para a leitura acima mas registradas por 
 
 1. **Réplica não é limpa 1:1.** O PGR bruto da Aurora (página 30) declara, no mesmo bloco de risco do GHE-04, **duas linhas químicas distintas** — `Poeira de madeira` e `Poeira respirável` (esta última é `fracao_sem_agente`, D-ARQ-83, sem substância própria) — coexistindo. O caso-âncora do Fascino (GHE-08) tinha só `Poeira de madeira`, isolada. O co-occurrence na Aurora não muda a leitura (o caso isolado do Fascino já bate em 60M sozinho), mas os dois casos não são réplicas idênticas.
 2. **Achado novo, faceta ainda não nomeada.** O mesmo gabarito prescreve Espirometria (ADM, PER 24 meses, MRO, DEM) para o mesmo GHE-04 — mas `R-ESP-02` (item 3.1, disparo incondicional) é ancorado em **poeira mineral** (sílica/asbesto/PNOS); poeira de madeira é orgânica, não mineral, e não está no escopo de substância de `R-ESP-02` como especificado hoje. Se a prescrição da Dra. Patrícia for tomada ao pé da letra, o regime do slug novo precisaria decidir também a espirometria, não só o RX — pergunta em aberto, não investigada além desta observação.
+
+**Resolução (mesma sessão, branch `claude/festive-gates-soy0fr`).** Decisão tomada pelo Diovanni: slug próprio, `poeira_de_madeira` em `agentes.yaml` (`is_carcinogeno_iarc: true`, IARC Grupo 1). Regime materializado em duas regras novas — `R-RX-03` (RX 60M) e `R-ESP-03` (Espirometria 24M, resolve de passagem a ressalva 2 acima) — ambas `[INTERPRETADO]`, ancoradas nos 2 PGRs medidos (Fascino GHE-08 + Aurora GHE-04), não em texto normativo brasileiro (que não cobre o agente). Autorização explícita: a implementação só avançou sem passar por sessão CONHECIMENTO com a Dra. Carolini porque o Diovanni confirmou que a validação humana de toda matriz antes de sair para o cliente é **reconferência linha a linha**, não sign-off superficial — o risco de uma regra `[INTERPRETADO]` errada não sai do app sem ser pega. A ressalva 1 (co-occurrence com `Poeira respirável`/`fracao_sem_agente` na Aurora) não afeta a implementação — `poeira_de_madeira` resolve por identidade própria, independente do que mais o GHE declara. Sensibilização respiratória (item (b) original) segue `[INCERTO — não conferido em fonte primária]`, registrado em `agentes.yaml`; não bloqueia porque o regime de R-RX-03/R-ESP-03 não depende dela.
+
+**Status:** RESOLVIDA.
 
 ### DT-003EJ-02 — Perna `Ausente` absorvida por `ou` verdadeiro não gera pendência; matriz vai a VÁLIDA com lacuna ambiental real ainda visível em `predicados_avaliados` `[RESOLVIDA — D-ARQ-71, 003.EK]`
 

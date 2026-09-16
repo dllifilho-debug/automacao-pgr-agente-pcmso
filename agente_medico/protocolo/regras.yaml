@@ -215,6 +215,16 @@ regras:
       crava só adm+per. Sucede R-ESP-01 (DEPRECATED)."
     status: DERIVADO
 
+  - id: R-ESP-03
+    quando: poeira_de_madeira
+    emite:
+      - exame: espirometria
+        periodicidade_meses: 24
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Poeira de madeira → espirometria 24M. SEM âncora no item 3.1 do Anexo III (que dispara por 'poeira mineral' — madeira é orgânica, fora do escopo textual de R-ESP-02) — origem matriz Patrícia, não norma conferida [INTERPRETADO]. Mesmo par de PGRs de R-RX-03 (GHE-08 Carpintaria Fascino 15.07.26, GHE-04 Carpintaria Aurora 27.08.26), mesma médica, mesmo valor: ambos Espirometria 24M. ID separada de R-ESP-02 por mudança de escopo de substância (mineral -> madeira), não faixa da mesma regra."
+    status: INTERPRETADO
+
   - id: R-RX-02
     quando: fumos_metalicos
     emite:
@@ -223,6 +233,16 @@ regras:
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
     base_normativa: "Fumos metálicos → RX OIT 60M. SEM âncora no Anexo III da NR-07 (fumos não é Quadro 1 nem Quadro 2) — origem matriz Patrícia/analogia, não norma conferida [INTERPRETADO]. DT-002K-02 firmou risco por metal individual (Mn/Cr⁶⁺), não categoria 'fumos'. Roteamento correto depende da decomposição em metais — ver DT-D3-02."
+    status: INTERPRETADO
+
+  - id: R-RX-03
+    quando: poeira_de_madeira
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Poeira de madeira → RX OIT 60M. SEM âncora no Anexo III da NR-07 (não é sílica/asbesto/carvão do Quadro 1, nem PNOS do Quadro 2 — agente identificável, DT-003EJ-01) — origem IARC Monographs Vol.62/1995 e 100C/2012 (Grupo 1, carcinogênico p/ humanos) + matriz Patrícia, não norma brasileira conferida [INTERPRETADO]. Medido em 2 PGRs independentes, mesma médica, mesmo valor: GHE-08 Carpintaria (PGR CONSCIENTE SPE 0030 FASCINO, 15.07.26) e GHE-04 Carpintaria (PGR CMO Residencial Aurora Lago das Rosas, 27.08.26), ambos RX 60M. DT-003EJ-01 RESOLVIDA por esta regra."
     status: INTERPRETADO
 
   - id: R-PKG-BZ
