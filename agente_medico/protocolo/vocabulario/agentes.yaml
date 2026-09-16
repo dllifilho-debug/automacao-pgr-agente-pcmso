@@ -207,6 +207,29 @@ agentes:
     # "Particulados insolúveis ou de baixa solubilidade não especificados de
     # outra maneira (PNOS)", quebrada em 4 linhas pelo PDF.
     termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)"]
+  poeira_de_madeira:
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: [R-RX-03, R-ESP-03]
+    # DT-003EJ-01 (RESOLVIDA): agente identificável, mas fora dos dois quadros do
+    # Anexo III NR-07 — não é sílica/asbesto/carvão mineral (Quadro 1) nem PNOS
+    # (Quadro 2, "não especificado de outra maneira"; madeira TEM nome próprio).
+    # is_carcinogeno_iarc: true [DERIVADO — IARC Monographs Vol. 62 (1995), "Wood
+    # Dust and Formaldehyde", Grupo 1 (carcinogênico para humanos), reafirmado no
+    # Vol. 100C (2012); fonte internacional, NÃO gov.br/MTE — NR-07/NHO brasileiras
+    # não têm lista própria de carcinógenos, remetem ao Anexo V]. Regime de RX/
+    # espirometria em R-RX-03/R-ESP-03 é [INTERPRETADO] por medição, não por texto
+    # normativo brasileiro: 2 PGRs independentes, mesma médica (Dra. Patrícia
+    # Montalvo Moraes), mesmo cargo (Carpintaria), mesmos valores — RX 60M e
+    # Espirometria 24M nos dois. [MEDIDO — GHE-08 Carpintaria, PGR CONSCIENTE SPE
+    # 0030 FASCINO 15.07.26 (gabarito MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE
+    # 0030 LTDA 08.07.26.doc); GHE-04 Carpintaria, PGR(ADENDO) CMO RESIDENCIAL
+    # AURORA LAGO DAS ROSAS 27.08.26 (gabarito MATRIZ DE EXAMES(ADENDO) mesma
+    # data)]. Sensibilização respiratória (asma ocupacional por poeiras de
+    # madeira) segue [INCERTO — não conferido em fonte primária]; não bloqueia
+    # esta implementação porque o regime não depende dessa faceta.
   etanol:
     tipo_ibe: null
     cas: "64-17-5"

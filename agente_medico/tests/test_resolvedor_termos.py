@@ -31,18 +31,20 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_124_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_125_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
     # `poeira_nao_classificada`, achado da comparação PGR Viverde × gabarito
-    # assinado (Dra. Patrícia Montalvo Moraes). 123 -> 124 nesta sessão (sem
-    # número atribuído ainda, branch `claude/festive-gates-soy0fr`): +1 alias, a
-    # mesma classificação PNOS nomeada por extenso, achado da comparação PGR CMO
-    # Residencial Aurora Lago das Rosas × gabarito assinado (Dra. Patrícia
-    # Montalvo Moraes). Guard de inventário movido junto com o dado, lição de
-    # 003.CV/003.DM.
-    assert len(indice_real.slug_por_forma) == 124
+    # assinado (Dra. Patrícia Montalvo Moraes). 123 -> 124 na mesma sessão
+    # (branch `claude/festive-gates-soy0fr`): +1 alias, a mesma classificação
+    # PNOS nomeada por extenso, achado da comparação PGR CMO Residencial Aurora
+    # Lago das Rosas × gabarito assinado. 124 -> 125 na mesma sessão: +1 slug
+    # novo, `poeira_de_madeira` (DT-003EJ-01 RESOLVIDA, R-RX-03/R-ESP-03) — o
+    # próprio slug entra sem precisar de `termos:` (normaliza igual ao literal
+    # "Poeira de madeira" do PGR). Guard de inventário movido junto com o dado,
+    # lição de 003.CV/003.DM.
+    assert len(indice_real.slug_por_forma) == 125
 
 
 # ---------------------------------------------------------------------------
@@ -539,15 +541,28 @@ def test_poeiras_respiraveis_metalicas_nao_resolve_com_pendencia_fracao_sem_agen
     assert resolucao.pendencia.regra_origem == "R-PGR-05"
 
 
-def test_poeira_de_madeira_anti_fp_segue_vocabulario_ausente(indice_real: IndiceTermos) -> None:
-    # anti-FP D-ARQ-83 cl.4(iv): madeira é o agente, o termo não entra na
-    # categoria. Reverte para: categoria virar balde de tudo que começa com
-    # "poeira".
+def test_poeira_de_madeira_nao_e_fracao_sem_agente(indice_real: IndiceTermos) -> None:
+    # anti-FP D-ARQ-83 cl.4(iv), preservado: madeira é o agente, o termo não
+    # entra na categoria fracao_sem_agente. Reverte para: categoria virar
+    # balde de tudo que começa com "poeira".
     resolucao = resolver_termo("Poeira de madeira", indice_real)
-    assert resolucao.confianca == Confianca.NAO_RESOLVIDO
-    assert resolucao.slug is None
-    assert resolucao.pendencia is not None
-    assert resolucao.pendencia.tipo == "vocabulario_ausente"
+    assert resolucao.pendencia is None or resolucao.pendencia.tipo != "fracao_sem_agente"
+
+
+@pytest.mark.parametrize("termo", ["Poeira de madeira", "poeira de madeira", "POEIRA DE MADEIRA"])
+def test_poeira_de_madeira_resolve_para_slug_proprio(
+    indice_real: IndiceTermos, termo: str
+) -> None:
+    # Correção (DT-003EJ-01 RESOLVIDA, R-RX-03/R-ESP-03): até esta sessão o termo
+    # ficava vocabulario_ausente por decisão deliberada (madeira não é PNOS,
+    # ver test_poeira_de_madeira_nao_e_fracao_sem_agente acima) — o registro
+    # antigo da asserção NAO_RESOLVIDO fica preservado no histórico (D-ARQ-06),
+    # não aqui. Reversão: remover o agente `poeira_de_madeira` de agentes.yaml
+    # faz este teste falhar — confiança cai para NAO_RESOLVIDO.
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "poeira_de_madeira"
+    assert resolucao.pendencia is None
 
 
 def test_fracoes_sem_agente_nunca_entram_no_indice_de_slugs(indice_real: IndiceTermos) -> None:

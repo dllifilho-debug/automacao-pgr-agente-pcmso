@@ -163,6 +163,13 @@ def _fumos_metalicos(ctx: GHEContext) -> bool:
     return any(r.agente == "fumos_metalicos" for r in ctx.riscos)
 
 
+@primitivo("poeira_de_madeira")
+def _poeira_de_madeira(ctx: GHEContext) -> bool:
+    """R-RX-03/R-ESP-03; agente carcinogênico (IARC Grupo 1) fora dos Quadros 1 e 2
+    do Anexo III NR-07 (não é sílica/asbesto/carvão nem PNOS) — DT-003EJ-01."""
+    return any(r.agente == "poeira_de_madeira" for r in ctx.riscos)
+
+
 @primitivo("silica")
 def _silica(ctx: GHEContext) -> bool:
     """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022)."""
