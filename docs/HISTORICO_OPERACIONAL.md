@@ -7755,3 +7755,57 @@ do Arquiteto, não implementada.
 convenção `feat/<sessão>-<nome>` — mesmo desvio já declarado nas sessões anteriores abertas pela
 web. Nenhum `R-*`/slug/CAS tocado nesta sessão (só leitura de PDFs brutos e docs); `PAINEL_ESTADO.md`
 não re-tirado — os três números clínicos não se moveram.
+
+## Sessão (branch `claude/youthful-lamport-3kfkog`, número não atribuído) — 16/09/2026 — IMPLEMENTAÇÃO: estilo visual do `.docx` (D-ARQ-73)
+
+**Contexto.** PR #335 mergeado durante esta sessão sofreu conflito em `docs/HISTORICO_OPERACIONAL.md`
+contra o PR #336 (achado psicossocial, mergeado primeiro) — resolvido com merge de `main` na
+branch `claude/festive-gates-soy0fr`, mantendo os dois blocos de sessão em sequência, revalidado
+(96 passed no recorte, `mypy --strict` limpo) e pushed; PR #335 mergeado em seguida. Discussão
+com o Diovanni sobre dois pontos: (1) achado psicossocial — esclarecido que NR-01 (itens
+1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3) obriga inventariar/gerenciar o FRPRT mas não prescreve o
+mecanismo de decisão que a tabela das doutoras usa; SRQ-20 é instrumento pós-exame, não pode
+gatilhar o próprio exame — pergunta específica levada à Dra. Carolini, sem código tocado; (2)
+pedido para a saída em Word ficar visualmente parecida com o legado. Escopo acordado antes de
+implementar: portar só a camada visual de `modules/modulo_pcmso.py::gerar_docx_rq61` (legado,
+v9.5) para `agente_medico/superficie/documento_matriz.py::renderizar_docx`, sem tocar
+`DocumentoMatriz`/`montar_documento`/regras.
+
+**Implementação.** `renderizar_docx` ganha: margens de página (`Cm(2)`), título do documento
+centralizado em cor de destaque, cabeçalho de GHE (`add_heading`) na mesma cor, tabela por GHE
+com estilo `"Table Grid"` e cabeçalho de coluna (`FUNÇÃO`/`EXAMES SOLICITADOS`) com fundo colorido
+(`w:shd` via XML, mesma técnica de `_set_cell_background` do legado) e texto branco em negrito.
+Cor reaproveitada do legado (`RGBColor(0x08, 0x4D, 0x22)`) — não é identidade visual de terceiro,
+é só a paleta que já sai pro cliente hoje, trocável em um lugar só (`_COR_DESTAQUE`).
+
+**Correção de escopo, achada ao implementar (não no planejamento).** O escopo inicial cogitava
+portar também o merge vertical de célula por Cargo do legado (que evita repetir o nome do cargo
+quando ele tem N exames em N linhas separadas). Não se aplica: a forma atual de
+`renderizar_docx` já emite **um cargo por linha** (célula de exames com N parágrafos dentro da
+MESMA linha, não N linhas repetidas) — não existe célula de cargo repetida para mesclar. Achado
+só ao ler o código de novo antes de escrever o diff, não na fase de escopo em chat.
+
+**Testes e verificação.** 3 testes novos em `agente_medico/tests/test_documento_matriz.py`,
+mesmo padrão dos já existentes (reabre o `.docx` com `python-docx`, assert estrutural, comentário
+com a reversão que mata): estilo de tabela (`tabela.style.name == "Table Grid"`), sombreamento +
+cor do texto do cabeçalho de coluna, cor do título/cabeçalho de GHE. Varredura inversa: 3
+reversões pontuais (uma por assertiva, restaurando entre cada uma), **3/3 vermelhas**,
+discriminação confirmada. Recorte (`test_documento_matriz.py`): 19 passed. `mypy --strict` no
+alvo canônico: limpo, 48 arquivos, delta-zero. Verificação visual (não só assert estrutural):
+pipeline real do Fascino (19 GHEs, `processar_arquivo_pgr` → `montar_documento` →
+`renderizar_docx`) gerado, convertido a PDF via `soffice --headless --convert-to pdf`, páginas
+renderizadas como imagem (`pypdfium2`) e inspecionadas — título, cabeçalhos de GHE e tabela
+saem coloridos e com borda, conteúdo clínico idêntico ao já validado, sem defeito de layout.
+
+**Achado colateral, não corrigido (fora do escopo acordado).** O título de cada GHE sai
+duplicado ("GHE GHE-01 ENGENHARIA") porque `bloco.ghe_id` já vem prefixado com "GHE" do parser —
+`titulo = f"GHE {bloco.ghe_id} ..."` em `montar_documento` duplica o prefixo. Pré-existente
+(não introduzido nesta sessão, o literal não foi tocado); registrado aqui para não se perder,
+não corrigido por ser mudança de conteúdo/dado, fora do escopo desta nota (visual apenas).
+
+**Regras e vocabulário/CAS.** Nenhuma `R-*` criada, alterada ou depreciada; nenhum slug/CAS
+tocado. Nota de aplicação em `D-ARQ-73` (mesma ID, nenhuma cláusula alterada), índice D-ARQ
+regenerado, 85 decisões inalterado, `python -m pytest tests/test_gerar_indice_darq.py`: 6 passed
+(regra fixa do `CLAUDE.md` por ter tocado `DECISOES_ARQUITETURAIS.md`). `PROTOCOLO_AGENTE_MEDICO.md`
+inalterado, segue v93 (nenhuma regra clínica tocada). `PAINEL_ESTADO.md` não re-tirado — os três
+números clínicos não se moveram (mudança é só de emissor/apresentação).

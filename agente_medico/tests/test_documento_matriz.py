@@ -6,11 +6,15 @@ from pathlib import Path
 
 import pytest
 from docx import Document as DocxDocument
+from docx.oxml.ns import qn
 
 from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import EnvelopeConfirmado, ExameEmitido, GHEVerbatim, MatrizGHE, Momento
 from agente_medico.superficie.documento_matriz import (
+    _COR_DESTAQUE,
+    _COR_DESTAQUE_HEX,
+    _COR_TEXTO_SOBRE_DESTAQUE,
     _ROTULO_MOMENTO,
     CabecalhoDocumento,
     RodapeDocumento,
@@ -334,6 +338,74 @@ def test_docx_celula_de_exames_preserva_quebra_por_exame(tmp_path: Path) -> None
     assert textos[0].startswith("Exame Clínico")
     assert textos[1].startswith("Audiometria")
     assert textos[2].startswith("Hemograma")
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-73, nota de aplicação desta sessão — estilo visual portado de
+# modulo_pcmso.py::gerar_docx_rq61 (legado). Conteúdo/contagem de tabelas e
+# linhas não muda; só a aparência.
+# ---------------------------------------------------------------------------
+
+
+def test_docx_tabela_por_ghe_usa_estilo_com_borda(tmp_path: Path) -> None:
+    # Reversão que mata: tirar `tabela.style = "Table Grid"` -> volta ao
+    # estilo default do python-docx (sem nome, sem borda visível).
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    reaberto = DocxDocument(str(destino))
+    tabela = reaberto.tables[0]
+    assert tabela.style is not None
+    assert tabela.style.name == "Table Grid"
+
+
+def test_docx_cabecalho_de_coluna_tem_fundo_e_texto_destacados(tmp_path: Path) -> None:
+    # Reversão que mata: tirar a chamada de `_aplicar_fundo` e a cor do texto
+    # do cabeçalho de coluna -> célula fica sem `w:shd` no XML e o texto sai
+    # na cor padrão (preto), não branco.
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    reaberto = DocxDocument(str(destino))
+    tabela = reaberto.tables[0]
+    celula_funcao = tabela.rows[0].cells[0]
+
+    tcPr = celula_funcao._tc.tcPr
+    assert tcPr is not None
+    sombreado = tcPr.find(qn("w:shd"))
+    assert sombreado is not None
+    assert sombreado.get(qn("w:fill")).upper() == _COR_DESTAQUE_HEX
+
+    run_cabecalho = celula_funcao.paragraphs[0].runs[0]
+    assert run_cabecalho.bold is True
+    assert run_cabecalho.font.color.rgb == _COR_TEXTO_SOBRE_DESTAQUE
+
+
+def test_docx_titulo_e_cabecalho_de_ghe_usam_cor_de_destaque(tmp_path: Path) -> None:
+    # Reversão que mata: tirar `run_titulo.font.color.rgb = _COR_DESTAQUE` (e
+    # o equivalente no cabeçalho de GHE) -> cor volta a None (preto padrão).
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    reaberto = DocxDocument(str(destino))
+    titulo_documento = reaberto.paragraphs[0]
+    assert titulo_documento.runs[0].font.color.rgb == _COR_DESTAQUE
+
+    cabecalhos_ghe = [p for p in reaberto.paragraphs if p.style.name == "Heading 2"]
+    assert len(cabecalhos_ghe) == 1
+    assert cabecalhos_ghe[0].runs[0].font.color.rgb == _COR_DESTAQUE
 
 
 # ---------------------------------------------------------------------------

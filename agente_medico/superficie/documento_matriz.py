@@ -13,6 +13,10 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Cm, Pt, RGBColor
 
 from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento
 
@@ -40,6 +44,26 @@ _LIMPAR_CONTROLE = str.maketrans(
 
 def _sanitizar(texto: str) -> str:
     return texto.translate(_LIMPAR_CONTROLE)
+
+
+# D-ARQ-73, nota de aplicação desta sessão: paleta reaproveitada de
+# `modules/modulo_pcmso.py::gerar_docx_rq61`
+# (v9.5, já em produção no legado) — não é identidade visual de terceiro, é só a
+# cor que o escritório já usa; troca-se em um lugar só se decidirem por outra.
+_COR_DESTAQUE = RGBColor(0x08, 0x4D, 0x22)
+_COR_DESTAQUE_HEX = "084D22"
+_COR_TEXTO_SOBRE_DESTAQUE = RGBColor(0xFF, 0xFF, 0xFF)
+
+
+def _aplicar_fundo(celula: Any, cor_hex: str) -> None:
+    """Cor de fundo de célula via XML — python-docx não expõe shading na API
+    pública. Mesma técnica de `modulo_pcmso.py::_set_cell_background`."""
+    propriedades = celula._tc.get_or_add_tcPr()
+    sombreado = OxmlElement("w:shd")
+    sombreado.set(qn("w:fill"), cor_hex)
+    sombreado.set(qn("w:color"), "auto")
+    sombreado.set(qn("w:val"), "clear")
+    propriedades.append(sombreado)
 
 
 # Medição 0a (003.EO, gabarito Fascino 08/07/26, sequência majoritária de
@@ -196,23 +220,50 @@ def renderizar_docx(doc: DocumentoMatriz, destino: Path) -> None:
     gabarito é um exame por PARÁGRAFO dentro da célula, não uma célula-frase
     concatenada por vírgula — um emissor ingênuo (`", ".join(...)`) passaria
     numa checagem de "tem uma tabela por GHE" mas erraria a forma real.
+
+    Estilo (D-ARQ-73, nota de aplicação desta sessão): borda, cabeçalho de
+    coluna com fundo e texto brancos, título e cabeçalho de GHE coloridos —
+    portado de `modulo_pcmso.py::gerar_docx_rq61` (legado). Conteúdo e
+    contagem de tabelas/linhas idênticos às fatias 1-3; só a aparência muda.
     """
     c = doc.cabecalho
     r = doc.rodape
     documento = Document()
+
+    for secao in documento.sections:
+        secao.top_margin = secao.bottom_margin = Cm(2)
+        secao.left_margin = secao.right_margin = Cm(2)
+
+    titulo_documento = documento.add_paragraph()
+    titulo_documento.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_titulo = titulo_documento.add_run(c.tipo_documento)
+    run_titulo.bold = True
+    run_titulo.font.size = Pt(16)
+    run_titulo.font.color.rgb = _COR_DESTAQUE
+
     documento.add_paragraph(f"Empresa: {c.empresa}")
     documento.add_paragraph(f"Obra: {c.obra}")
-    documento.add_paragraph(c.tipo_documento)
     documento.add_paragraph(f"Data: {c.data}")
     documento.add_paragraph(f"{c.medico_coordenador} | {c.crm}")
 
     for bloco in doc.blocos:
         titulo = f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip()
-        documento.add_heading(titulo, level=2)
+        cabecalho_ghe = documento.add_heading(titulo, level=2)
+        if cabecalho_ghe.runs:
+            cabecalho_ghe.runs[0].font.color.rgb = _COR_DESTAQUE
+
         tabela = documento.add_table(rows=1, cols=2)
+        tabela.style = "Table Grid"
         cabecalho_linha = tabela.rows[0].cells
-        cabecalho_linha[0].text = "FUNÇÃO"
-        cabecalho_linha[1].text = "EXAMES SOLICITADOS"
+        for indice, rotulo in enumerate(("FUNÇÃO", "EXAMES SOLICITADOS")):
+            celula = cabecalho_linha[indice]
+            celula.text = rotulo
+            paragrafo = celula.paragraphs[0]
+            paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            if paragrafo.runs:
+                paragrafo.runs[0].bold = True
+                paragrafo.runs[0].font.color.rgb = _COR_TEXTO_SOBRE_DESTAQUE
+            _aplicar_fundo(celula, _COR_DESTAQUE_HEX)
         for linha in bloco.linhas:
             celulas_linha = tabela.add_row().cells
             celulas_linha[0].text = linha.cargo
