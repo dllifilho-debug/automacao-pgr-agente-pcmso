@@ -7468,3 +7468,136 @@ não regenerado (já sincronizado, v186 · 85 decisões). PROTOCOLO segue v92.
 `/critico` no fechamento. Branch fixada pelo harness (`claude/upbeat-keller-090zpu`), fora da
 convenção `feat/<sessão>-<nome>` — mesmo desvio já declarado em 003.FI/003.FJ/003.FK para sessões
 abertas pela web.
+
+## Sessão (branch `claude/festive-gates-soy0fr`, número não atribuído) — 15-16/09/2026 — IMPLEMENTAÇÃO (vocabulário) + achados clínicos (comparação Aurora Lago das Rosas)
+
+**Numeração não atribuída, mesma classe declarada em 003.FL.** Esta sessão é sucessora de `003.FL`
+(fechada, PRs #330/#331) — o commit `d46f848` na `main` (versiona os dois PDFs brutos da comparação
+abaixo) entrou entre o fechamento de `003.FL` e esta sessão, sem bloco próprio. Rotular esta sessão
+é decisão do Arquiteto; o corpo abaixo usa a branch como referência.
+
+**Contexto.** Handoff recebido no início desta sessão (resumo colado, sem dívida formal aberta):
+comparação nova entre a matriz do app (`matriz_7.docx`, rota 100% LLM) e o gabarito RQ.61 assinado
+(Dra. Patrícia Montalvo Moraes) para o PGR "CMO Residencial Aurora Lago das Rosas", contra o PGR
+bruto (`PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf` e
+`MATRIZ DE EXAMES(ADENDO)...pdf`, ambos versionados em `d46f848`). O handoff trazia 4 achados;
+esta sessão investigou os 4, com fonte primária (PDF bruto reparseado com `pdfplumber`, e o parser
+determinístico do motor rodado diretamente) em vez de aceitar a caracterização recebida sem
+conferência.
+
+**Achado 1 — CONFIRMADO e CORRIGIDO. PNOS por extenso sem alias em `agentes.yaml`.**
+`[MEDIDO — PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf, 10 páginas, ex. página
+25]`: o termo "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira
+(PNOS)" — a mesma classificação NR-07 Anexo III Quadro 2 que a sessão `003.FL` já cobriu pela sigla
+(`PNOS`/`PNOR`/`PNOS/PNOR`) — nunca teve entrada em `agentes.yaml` por extenso; confirmado que o
+resolvedor real (`resolver_termo` sobre o índice de disco) devolve `NAO_RESOLVIDO`/`vocabulario_ausente`
+para essa string antes da correção. Mesma família de regra (`R-RX-01-pnos-*`/`R-ESP-02`), mesma
+fonte normativa, quarta forma da mesma classificação — não fração isolada sob `D-ARQ-83` cl.2.
+`termos:` de `poeira_nao_classificada` ganha a 4ª forma; índice de termos 123 → 124 entradas.
+
+**Achado 2 — RECLASSIFICADO. Não é bug; é a dívida já aberta `DT-003EJ-01`, comportamento correto
+por desenho.** O handoff caracterizava a ausência de alias de "Poeira de madeira" (GHE-04
+Carpintaria) como lacuna a corrigir por aliasing em `poeira_nao_classificada`. Medido: essa mesma
+questão já é `DT-003EJ-01` (`[ABERTA — não-bloqueante]`, aberta em 003.EJ a partir do caso-âncora
+GHE-08 Carpintaria do Fascino), que já deriva que "Poeira de madeira" **não** é PNOS — é agente
+identificável fora dos dois Quadros do Anexo III, cuja resolução exige decidir se ganha slug
+próprio com regime próprio, não aliasing para a classificação errada. A DT já declara que o
+não-emitir atual **é o comportamento correto** sob essa derivação. Aliasing para
+`poeira_nao_classificada` teria sido a correção errada. Nota acrescentada à DT: **gatilho de
+reabertura satisfeito** (2º PGR do acervo com a mesma ocorrência — GHE 04 Carpintaria da Aurora,
+mesma denominação de cargo do caso-âncora original) e faceta de carcinogenicidade parcialmente
+confirmada — IARC Monographs Volume 62 (1995)/100C (2012) classificam pó de madeira em **Grupo 1**
+`[DERIVADO — IARC Monographs, consulta desta sessão]`, e o próprio PGR bruto já lista
+"adenocarcinoma das vias respiratórias superiores" como agravo à saúde na linha do risco
+`[MEDIDO — página 30]`. Faceta de sensibilização respiratória segue `[INCERTO]`. Decisão de slug
+próprio × regime segue do Arquiteto — não implementada.
+
+**Achado 3 — MEDIDO, mesma dívida já aberta `DT-003EC-01`, gatilho de reabertura satisfeito.** O
+app emite RX Tórax OIT 24M (`R-RX-01-sem`, sílica sem medição) onde o gabarito assinado dá 12M.
+Confirmado no PGR bruto: **zero** ocorrências de `mg/m³`/`dB(A)`/`ppm` no documento inteiro; 62
+ocorrências do aviso de template "⚠ Avaliação ainda qualitativa... apague este aviso", nunca
+substituído `[MEDIDO — PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf]` — os 12M da
+Dra. Patrícia não vêm de nenhuma quantificação escrita no PGR. Confirmado no gabarito
+`[MEDIDO — MATRIZ DE EXAMES(ADENDO)...pdf]`: mistura de 12M/60M para RX Tórax OIT, nenhuma
+ocorrência de 24M. Esta é a mesma pergunta de método que `DT-003EC-01` já registra (Fascino,
+003.EC/003.EH) — mesma médica, PGR/empresa distintos, mesma divergência (24M da regra vs. 12M do
+gabarito para "sem avaliação quantitativa"), o que satisfaz o gatilho de reabertura que a própria
+DT nomeia ("2º PGR atualizado no acervo, não n=1"). Nota acrescentada à DT. Não implementado:
+divergência entre medição real e valor esperado é bloqueador nomeado (regra do `CLAUDE.md`) —
+decisão do Arquiteto/Dra. Carolini, não ajuste de código para bater com o gabarito.
+
+**Achado 4 — RESOLVIDO. Não há bug de calibração isolado no bloco GHE-01; é a mesma
+`familia_nao_medida` (D-ARQ-65) operando no documento inteiro.** O handoff caracterizava a
+pendência `familia_nao_medida` do bloco "ADMINISTRAÇÃO" (GHE-01) como possível lacuna própria,
+podendo "comer" outros riscos do bloco sem conferência. Medido por execução direta do parser
+determinístico (`parser_familia_consciente.parsear_arquivo`, sem LLM, contra o PDF bruto): levanta
+`FamiliaNaoReconhecida` já no 1º bloco (cabeçalho GRUPO/PERIGO/FONTE/AGRAVO não localizado). Por
+leitura de `adaptadores/orquestracao_pgr.py:188-211`, `parsear_arquivo` é chamado **uma vez por
+documento inteiro** — a exceção no 1º bloco aborta a chamada antes de alcançar os 8 blocos
+seguintes, e a `Pendencia` `familia_nao_medida` resultante governa o documento inteiro, não um GHE
+isolado. O fluxo LLM (medido no app como rota "100% LLM" para esta matriz) assume todos os 9 GHEs,
+GHE-01 incluído — não há parse parcial nem contaminação seletiva de um GHE por essa via. Terceira
+testemunha negativa do mecanismo (Viverde já era a segunda). Nota de aplicação em `D-ARQ-65`, sem
+cláusula alterada. Qualquer gap real nos riscos de GHE-01 (Ruído/Postural/Corte-Perfuração/Queda)
+seria questão de acurácia de transcrição-LLM, não de calibração de parser — não investigado por
+falta de acesso ao artefato `matriz_7.docx` (não versionado) e de chave de API nesta sessão.
+
+**Achados menores do handoff, não verificados nesta sessão** `[NÃO MEDIDO NESTA SESSÃO]` — GHE-18
+Pintura (falta Cobalto na Urina/Ác.Trans-Trans-Mucônico/Reticulócitos, termos de Octoato de
+Cobalto/solvente não resolvidos); GHE-12 Elevador de Carga (falta RX de Coluna Lombo-Sacra,
+`Vibração de corpo inteiro` não resolvido); GHE-19 Porteiro (falta Acuidade Visual, possível
+resolução de cargo contra `cargos.yaml`); GHE-11 Encanador (app emite Acetona na urina a mais,
+anotação do gabarito classifica como risco baixo/inserir no Word); Serralheria GHE-16 (falta
+Carboxihemoglobina/Manganês, comportamento **correto** por `R-GHE-05`, mesmo padrão do Viverde,
+não mexer). Ficam registrados aqui para não se perderem entre sessões, sem virar `DT-*` formal
+sem medição própria.
+
+**Entrega.** `agente_medico/protocolo/vocabulario/agentes.yaml` ganha a 4ª forma de
+`poeira_nao_classificada.termos:` (achado 1), com comentário citando a regra, a fonte normativa e
+a medição (regra do `CLAUDE.md` — código de regra clínica carrega o ID da regra).
+`test_resolvedor_termos.py` ganha teste parametrizado (grafia exata, minúscula, espaço duplo) e o
+guard de inventário sobe de 123 para 124. `docs/PENDENCIAS_CLINICAS.md` ganha notas em
+`DT-003EJ-01` (achado 2) e `DT-003EC-01` (achado 3), sem criar DT nova nem fechar as existentes.
+`docs/DECISOES_ARQUITETURAIS.md` ganha nota de aplicação em `D-ARQ-65` (achado 4), sem cláusula
+alterada; `docs/INDICE_DARQ.md` regenerado (`python -m scripts.gerar_indice_darq`), 85 decisões
+inalterado, carimbo `Fonte:` v186→v187.
+
+**Verificação.** Varredura inversa do teste novo: zerar a 4ª forma (revertendo `termos:` a 3
+entradas) derruba as 3 parametrizações do teste novo + o guard de contagem — **4/4 vermelhos**;
+restaurado e reconfirmado verde. Recorte que cobre os derivados tocados
+(`test_resolvedor_termos`, `test_vocabulario`, `test_espirometria_poeira_mineral`,
+`test_rx_periodicidade`, `test_integracao_viverde`): **137 passed**. `python -m mypy --strict`
+no alvo canônico: limpo, 48 arquivos, delta-zero. `python -m pytest tests/test_gerar_indice_darq.py`:
+6 passed (regra fixa do `CLAUDE.md` por ter tocado `DECISOES_ARQUITETURAIS.md`). Suíte completa
+(`python -m pytest agente_medico/tests/ tests/`, árvore parada): **1224 passed, 6 skipped, 2
+failed** — os 2 falhos (`test_cobertura_varrer_acervo.py::test_instrumento_de_varredura_tem_cobertura_total`,
+`test_varrer_acervo_lgpd.py::test_extrair_texto_le_legado_via_libreoffice`) são pré-existentes,
+ambiente sem o pacote `libreoffice-writer` (mesma classe já documentada em `DH-003FE-01`/nota
+003.FK) — confirmado por `git stash` + mesma suíte na árvore anterior a esta sessão, falha idêntica,
+independente do diff. Ambiente desta sessão partiu sem `pdfplumber`/`PyMuPDF`/`streamlit` instalados
+(só `pytest`/`mypy`/`pypdfium2` pré-existentes) — instalados via `pip install` (`requirements.txt`)
+para permitir a medição de fonte primária e a suíte completa; não versionado (ambiente de container,
+não do repo).
+
+**Regras e vocabulário/CAS.** `git diff --name-only d46f848 HEAD -- '*PROTOCOLO_AGENTE_MEDICO.md'
+'*regras.yaml' '*agentes.yaml' '*exames.yaml'` devolve só `agentes.yaml`, mudança em `termos:`
+(achado 1), não `cas:` nem slug novo — mesma classe de `003.FH`/`003.FL`. Nenhuma `R-*` criada,
+alterada ou depreciada. PROTOCOLO inalterado, segue v92. `docs/PAINEL_ESTADO.md` **não** re-tirado
+nesta sessão — decisão declarada, não omissão: o Baseline (hash/suíte/versões) do painel é re-tirado
+historicamente após o merge (precedente `003.FL`: PR #330 com o fix, PR #331 já com o merge commit
+`96fd0ea` em mãos, escrito depois), e esta sessão ainda não tem hash de merge; os três números
+clínicos não se moveram (nenhuma `R-*`, nenhum slug/CAS novo, nenhuma das 3 dívidas que travam
+produção tocada) e ficam avaliados-e-não-re-tirados sob `D-ARQ-85` cl.1.
+
+**Lições de método.** (1) O handoff caracterizou 2 dos 4 achados (2 e 3) como "bugs a corrigir por
+aliasing" quando na verdade já eram dívidas abertas e nomeadas em sessões anteriores
+(`DT-003EJ-01`, `DT-003EC-01`) com derivação já escrita explicando por que o comportamento atual
+é correto — conferir contra `docs/PENDENCIAS_CLINICAS.md` antes de implementar a partir de um
+resumo evita reintroduzir exatamente o erro que a dívida já registra como refutado (mesma classe
+de risco que `D-ARQ-06` nomeia). (2) O achado 4 tinha resposta no próprio código
+(`orquestracao_pgr.py`) sem precisar de acesso ao artefato LLM da matriz — rodar o parser
+determinístico diretamente contra o PDF bruto respondeu em segundos uma dúvida que o handoff
+tinha deixado em aberto por falta dessa checagem. **Desvios de método, declarados.** Sessão não
+invocou `/kickoff` nem `/conferir` na abertura, nem `/critico` no fechamento. Branch fixada pelo
+harness (`claude/festive-gates-soy0fr`), fora da convenção `feat/<sessão>-<nome>` — mesmo desvio
+já declarado em 003.FI/003.FJ/003.FK/003.FL para sessões abertas pela web.

@@ -201,8 +201,12 @@ agentes:
     # classificação). [MEDIDO — PGR VIVERDE V02, ex.: página com bloco ET05,
     # coluna "Perigo": "PNOS/ PNOR"; 14 ocorrências de PNOS e 15 de PNOR no
     # documento.] Três formas cobertas: sigla isolada e o par grudado que o
-    # PDF quebra em duas linhas.
-    termos: ["PNOS", "PNOR", "PNOS/PNOR"]
+    # PDF quebra em duas linhas. Quarta forma [MEDIDO — PGR(ADENDO) CMO
+    # RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf, 10 ocorrências, ex.
+    # página 25]: mesma classificação nomeada por extenso em vez da sigla —
+    # "Particulados insolúveis ou de baixa solubilidade não especificados de
+    # outra maneira (PNOS)", quebrada em 4 linhas pelo PDF.
+    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)"]
   etanol:
     tipo_ibe: null
     cas: "64-17-5"
