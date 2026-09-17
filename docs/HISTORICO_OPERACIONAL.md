@@ -7827,3 +7827,47 @@ contra, e a Dra. Carolini sinalizou não ter mais paciência para responder nova
 rodada. Próximo passo (não desta sessão): medir a primeira matriz refeita sob o protocolo novo
 assim que existir, mesma disciplina de nunca formalizar sobre documento pré-mudança que o projeto
 já aplica em `DT-003EJ-01`/`DT-003EC-01`.
+
+## Sessão (branch `claude/youthful-lamport-3kfkog`, número não atribuído) — 17/09/2026 — continuação: bug real (parser Hetrin) + fechamento do achado psicossocial
+
+**Estado no início deste bloco.** PR #337 (estilo visual do `.docx`) aberto, `mergeable_state:
+"clean"`, sem CI configurado, sem review — aguardando o Diovanni. Nenhum código tocado neste
+bloco; só investigação e registro em docs.
+
+**Bug real reportado pelo Diovanni.** Tentativa de gerar matriz do PGR
+`PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 páginas) no serviço falhou:
+`segmentacao_implausivel`, 0 blocos GHE. Diagnóstico completo em
+`DT-(branch claude/youthful-lamport-3kfkog)-02` (`PENDENCIAS_CLINICAS.md`): é a mesma família AIHA
+já reconhecida (Hetrin/Serra Dourada), mas a revisão de setembro/2026 do mesmo cliente/obra mudou
+o cabeçalho da tabela pra CAIXA ALTA e o `pdfplumber` extrai `FUNÇÃO` e `PERIGO/RISCO` em linhas
+separadas — dois motivos independentes de falha contra o regex `_reconhece_funcao_grid_perigo_risco`
+(`r"Função .*Perigo / Risco"`). Confirmado contra o PGR de março/2025 do mesmo Hetrin (casa
+limpo) e contra busca case-insensitive no PGR novo (zero linha casa, mesmo afrouxando). Não
+implementado — é escopo de sessão própria (nova variante de família de parser, molde do que já
+foi feito pro T65), registrado para não se perder.
+
+**Achado psicossocial — fechamento com evidência forte, proposta pronta.** O Diovanni forneceu 2
+matrizes reais pós-protocolo-de-setembro com desfechos opostos: Ricco Hetrin 14/09 (validada,
+confirmado pelo Diovanni) sai com **zero** exame psicossocial em 28/28 cargos — e o PGR bruto
+correspondente (mesmo arquivo do bug acima, 197 páginas lidas por completo) tem **zero**
+ocorrência de "psicossocial"/COPSOQ/FRPRT/SRQ em qualquer página; **inclusive Pedreiro, que tem
+"QUEDAS DE ALTURA" no próprio PGR**, saiu sem psicossocial — refutando por si só a hipótese de
+cascata por atividade crítica que a Dra. Carolini tinha descrito verbalmente. CMO Varandas
+Flamboyant 16/09 (validada por Carolini M. P. Lisita) sai com os dois exames incondicionais em
+TODO GHE, sem exceção, incluindo Portaria (sem atividade crítica). Pergunta ao Diovanni sobre a
+causa: **"quem decide o psicossocial é o PGR — no do Hetrin o engenheiro não quis ter o
+psicossocial, por isso na matriz não tem."** Fecha o círculo: é decisão binária do engenheiro
+autor do PGR (incluir ou não a seção de inventário psicossocial), não classificação de risco nem
+atividade. Achado feliz: `GHEPGR.psicossocial: bool` já existe desde `D-ARQ-49` P2 (maio/2026),
+desenhado exatamente para este sinal, nunca implementado (`hidratacao.py` crava `False` sempre).
+Proposta registrada na DT, não implementada: extrator que popula o campo lendo a presença da
+seção do PGR + `R-PSY-03` nova condicionada a ele, sucedendo `R-PSY-02` (que sai `[DEPRECATED —
+fundamento refutado]`, mesmo padrão de `D-ARQ-81`/`R-AUD-04`). Detalhe completo, incluindo o
+risco residual declarado (n=2, mesma classe de obra), na DT em `PENDENCIAS_CLINICAS.md`.
+
+**Não implementado nesta sessão, por decisão de handoff — não por bloqueio técnico.** O Diovanni
+vai continuar esta conversa em outra sessão; este bloco e as duas DTs em `PENDENCIAS_CLINICAS.md`
+existem para que a próxima sessão retome sem depender do histórico de chat. Duas frentes prontas
+para autorização de implementação: (1) `R-PSY-03`/depreciação de `R-PSY-02`; (2) nova variante de
+família de parser para o Hetrin de setembro. Nenhum código tocado neste bloco; só
+`docs/PENDENCIAS_CLINICAS.md` (2 DTs) e este bloco.

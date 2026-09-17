@@ -2697,11 +2697,89 @@ documento de 08/07 aqui invalidado), a medição de 99% incondicional está data
 anterior, não a atual, e `R-PSY-02` pode já estar desatualizada mesmo antes de qualquer questão
 sobre a tabela das doutoras.
 
-**Não implementado, e por quê.** Protocolo em reformulação ativa, nenhuma matriz nova
-(pós-setembro) ainda existe no acervo pra medir contra — implementar agora seria codificar
-regra sobre alvo em movimento, sem gabarito fresco pra validar. Próximo passo correto é o mesmo
-padrão que `DT-003EJ-01`/`DT-003EC-01` já usam neste projeto (nunca formalizar sobre n=1/documento
-pré-mudança): esperar a Dra. Carolini terminar de refazer ao menos uma matriz sob o protocolo
-novo, então medir essa matriz contra a tabela das doutoras e contra `R-PSY-02` antes de tocar
-`regras.yaml`. Sem pergunta nova pra ela — a Dra. Carolini já indicou não ter mais paciência
-para essa rodada.
+**Atualização — 2 matrizes pós-setembro medidas, achado se inverte (17/09/2026).**
+
+O Diovanni forneceu 2 matrizes novas, ambas pós-mudança de protocolo, com desfechos opostos:
+
+- **Ricco Hetrin, 14/09/2026, VALIDADA** (confirmado pelo Diovanni — não é rascunho). PGR bruto
+  correspondente (`matrizes_originais/PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf`,
+  197 páginas) lido por completo `[MEDIDO — pdfplumber, 197/197 páginas]`: **zero** ocorrência de
+  "psicossocial"/"COPSOQ"/"FRPRT"/"SRQ" em qualquer página. A matriz validada sai com **zero**
+  exames psicossociais em **28 de 28 cargos** — inclusive Pedreiro, cujo bloco de risco no PGR
+  (página 31) já lista "QUEDAS DE ALTURA" com EPI de cinto paraquedista `[MEDIDO]`. Atividade
+  crítica presente no PGR, exame psicossocial ausente na matriz.
+- **CMO Residencial Varandas Flamboyant, 16/09/2026, validada por Carolini M. P. Lisita.** Todo
+  GHE, incluindo Portaria (Servente, sem atividade crítica), sai com Avaliação Psicossocial +
+  Av. Médica de Saúde Mental incondicional — mesmo padrão de sempre.
+
+**Causa, segundo o Diovanni: não é atividade crítica nem nível de risco julgado pela médica — é
+decisão do engenheiro que elabora o PGR.** "Quem decide o psicossocial é o PGR. No do Hetrin o
+engenheiro não quis ter o psicossocial. Por isso na matriz não tem." Isso refuta a leitura de
+cascata por atividade (rodada 1 da Dra. Carolini) — o contra-exemplo do Pedreiro/altura no Hetrin
+já bastaria — e é consistente com a rodada 2 ("a classificação vem do PGR"), mas afina o *quem*:
+não é uma classificação de risco baixo/médio/alto que alguém preenche no PGR — é uma decisão
+binária do engenheiro autor: incluir ou não a seção/inventário de risco psicossocial no documento.
+PGR sem a seção → motor não deveria emitir nada. PGR com a seção → emite incondicional para
+o PGR inteiro (não há, até agora, evidência de variação por GHE dentro do mesmo PGR).
+
+**Já tem endereço no código, nunca implementado.** `GHEPGR.psicossocial: bool`
+(`agente_medico/motor/tipos.py:202`) existe desde `D-ARQ-49` P2 (maio/2026), desenhado
+nomeadamente como sinal de PGR-documenta-psicossocial para alimentar o extinto `R-PSY-01` — e
+nunca ganhou extrator: `hidratacao.py:133` crava `psicossocial=False` sempre, sem ler o PGR.
+`R-PSY-02` (regra viva) não lê o campo — dispara `quando: todo_trabalhador`, incondicional,
+independente do PGR.
+
+**Proposta, não implementada — decisão do Arquiteto.**
+1. Extrator: detectar no texto do PGR a presença da seção de inventário psicossocial (mesmo
+   marcador medido no Fascino/Aurora: "INVENTÁRIO DE RISCOS PSICOSSOCIAIS"/COPSOQ/FRPRT) e
+   popular `GHEPGR.psicossocial`.
+2. `R-PSY-03` nova (sucede `R-PSY-02` — mudança de escopo de aplicação exige ID nova, mesma
+   convenção de `R-PSY-01→R-PSY-02`), `quando: psicossocial`, mesma conduta atual
+   (avaliacao_psicossocial + avaliacao_saude_mental, adm/per/MR).
+3. `R-PSY-02` sai `[DEPRECATED — fundamento refutado por n=2 pós-protocolo, Hetrin 14/09 ×
+   Varandas 16/09, mesmo padrão de D-ARQ-81 aplicado a R-AUD-04]`.
+
+**Risco residual, não resolvido.** N=2 é o piso de reabertura que este projeto já usa (precedente
+`poeira_de_madeira`/`DT-003EJ-01`), não uma amostra grande — ambos os PGRs são de obra de
+construção civil, mesma classe de risco físico. Não sabemos ainda se a granularidade é por PGR
+inteiro (medido: sim, nos 2 casos) ou se pode variar por GHE dentro do mesmo PGR quando o
+elaborador documenta parcialmente. Sem pergunta nova pra Dra. Carolini — ela já indicou não ter
+mais paciência para esta rodada; a decisão de implementar (ou esperar mais um caso) é do
+Arquiteto, não pendente de resposta clínica adicional.
+
+**Status atualizado:** ABERTA — de "aguardando matriz nova" para "proposta concreta pronta,
+aguardando autorização de implementação". Não bloqueia produção (regra atual, embora com
+fundamento refutado, segue rodando sem crash).
+
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-02 — Segunda variante do template Ricco Hetrin quebra o reconhecedor de família AIHA `[ABERTA — bloqueante para este documento, não-bloqueante para o app]`
+
+**Origem.** Diovanni reportou erro real no serviço ao tentar gerar a matriz do PGR
+`PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 páginas): `"Parse total falho —
+nenhuma matriz gerada (D-ARQ-22)"`, `segmentacao_implausivel: 0 bloco(s) GHE detectado(s) em
+documento de 197 páginas`.
+
+**Medido — reproduzido localmente.** `avaliar_estrutura`/`avaliar_familia` direto contra o PDF:
+`eh_cabecalho_ghe` = 0 casos, `eh_ancora_card_cargo` = 0 casos, `avaliar_familia` = `None` →
+cai no fallback `avaliar_segmentacao`, que bloqueia (`_LIMIAR_PAGINAS_DOC_MINIMO` excedido, 0
+blocos). Por `D-ARQ-57`, pendência de estrutura bloqueia **antes** de qualquer tentativa de rota
+LLM — não existe hoje workaround no app para este documento específico.
+
+**Causa raiz.** É a MESMA família já reconhecida (grid AIHA, `_reconhece_funcao_grid_perigo_risco`,
+regex `r"Função .*Perigo / Risco"` — comentário do código já cita "Hetrin/Serra Dourada" como
+caso-âncora). Confirmado no PGR de março/2025 do mesmo Hetrin
+(`matrizes_originais/01. PGR RICCO HETRIN - MAR25.pdf`): o cabeçalho aparece **exatamente** como
+`"Função Identificação de Perigo / Risco Tempo de Meio de..."`, título-caixa, uma linha só —
+casa limpo. No PGR de 14/09/2026 (mesmo cliente, mesma obra), o cabeçalho da tabela virou **TUDO
+CAIXA ALTA** e o `pdfplumber` extrai `"FUNÇÃO"` e `"PERIGO/ RISCO"` em **linhas separadas** — dois
+motivos independentes de falha (maiúscula E fragmentação de linha), confirmado por busca
+case-insensitive: zero linha do documento inteiro casa `"FUN.?.?O.*PERIGO.*RISCO"` mesmo
+afrouxando o regex. Não é reversão trivial de 1 linha — o cabeçalho não aparece inteiro em
+nenhuma linha extraída, precisa de reconhecedor que junte linhas vizinhas ou case por conjunto de
+palavras-chave, não regex de linha única.
+
+**Não implementado.** Escopo de sessão própria (nova família/variante de parser), no molde do
+que o projeto já fez para o T65 (`DT-003FE-01`/`DT-003FF-01`). Não tocado nesta sessão —
+registrado para não se perder.
+
+**Status:** ABERTA. Bloqueia a geração desta matriz específica no serviço; não bloqueia o app
+em geral (outras famílias inalteradas).
