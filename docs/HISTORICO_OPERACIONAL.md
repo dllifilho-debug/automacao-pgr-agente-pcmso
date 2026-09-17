@@ -7755,3 +7755,119 @@ do Arquiteto, não implementada.
 convenção `feat/<sessão>-<nome>` — mesmo desvio já declarado nas sessões anteriores abertas pela
 web. Nenhum `R-*`/slug/CAS tocado nesta sessão (só leitura de PDFs brutos e docs); `PAINEL_ESTADO.md`
 não re-tirado — os três números clínicos não se moveram.
+
+## Sessão (branch `claude/youthful-lamport-3kfkog`, número não atribuído) — 16/09/2026 — IMPLEMENTAÇÃO: estilo visual do `.docx` (D-ARQ-73)
+
+**Contexto.** PR #335 mergeado durante esta sessão sofreu conflito em `docs/HISTORICO_OPERACIONAL.md`
+contra o PR #336 (achado psicossocial, mergeado primeiro) — resolvido com merge de `main` na
+branch `claude/festive-gates-soy0fr`, mantendo os dois blocos de sessão em sequência, revalidado
+(96 passed no recorte, `mypy --strict` limpo) e pushed; PR #335 mergeado em seguida. Discussão
+com o Diovanni sobre dois pontos: (1) achado psicossocial — esclarecido que NR-01 (itens
+1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3) obriga inventariar/gerenciar o FRPRT mas não prescreve o
+mecanismo de decisão que a tabela das doutoras usa; SRQ-20 é instrumento pós-exame, não pode
+gatilhar o próprio exame — pergunta específica levada à Dra. Carolini, sem código tocado; (2)
+pedido para a saída em Word ficar visualmente parecida com o legado. Escopo acordado antes de
+implementar: portar só a camada visual de `modules/modulo_pcmso.py::gerar_docx_rq61` (legado,
+v9.5) para `agente_medico/superficie/documento_matriz.py::renderizar_docx`, sem tocar
+`DocumentoMatriz`/`montar_documento`/regras.
+
+**Implementação.** `renderizar_docx` ganha: margens de página (`Cm(2)`), título do documento
+centralizado em cor de destaque, cabeçalho de GHE (`add_heading`) na mesma cor, tabela por GHE
+com estilo `"Table Grid"` e cabeçalho de coluna (`FUNÇÃO`/`EXAMES SOLICITADOS`) com fundo colorido
+(`w:shd` via XML, mesma técnica de `_set_cell_background` do legado) e texto branco em negrito.
+Cor reaproveitada do legado (`RGBColor(0x08, 0x4D, 0x22)`) — não é identidade visual de terceiro,
+é só a paleta que já sai pro cliente hoje, trocável em um lugar só (`_COR_DESTAQUE`).
+
+**Correção de escopo, achada ao implementar (não no planejamento).** O escopo inicial cogitava
+portar também o merge vertical de célula por Cargo do legado (que evita repetir o nome do cargo
+quando ele tem N exames em N linhas separadas). Não se aplica: a forma atual de
+`renderizar_docx` já emite **um cargo por linha** (célula de exames com N parágrafos dentro da
+MESMA linha, não N linhas repetidas) — não existe célula de cargo repetida para mesclar. Achado
+só ao ler o código de novo antes de escrever o diff, não na fase de escopo em chat.
+
+**Testes e verificação.** 3 testes novos em `agente_medico/tests/test_documento_matriz.py`,
+mesmo padrão dos já existentes (reabre o `.docx` com `python-docx`, assert estrutural, comentário
+com a reversão que mata): estilo de tabela (`tabela.style.name == "Table Grid"`), sombreamento +
+cor do texto do cabeçalho de coluna, cor do título/cabeçalho de GHE. Varredura inversa: 3
+reversões pontuais (uma por assertiva, restaurando entre cada uma), **3/3 vermelhas**,
+discriminação confirmada. Recorte (`test_documento_matriz.py`): 19 passed. `mypy --strict` no
+alvo canônico: limpo, 48 arquivos, delta-zero. Verificação visual (não só assert estrutural):
+pipeline real do Fascino (19 GHEs, `processar_arquivo_pgr` → `montar_documento` →
+`renderizar_docx`) gerado, convertido a PDF via `soffice --headless --convert-to pdf`, páginas
+renderizadas como imagem (`pypdfium2`) e inspecionadas — título, cabeçalhos de GHE e tabela
+saem coloridos e com borda, conteúdo clínico idêntico ao já validado, sem defeito de layout.
+
+**Achado colateral, não corrigido (fora do escopo acordado).** O título de cada GHE sai
+duplicado ("GHE GHE-01 ENGENHARIA") porque `bloco.ghe_id` já vem prefixado com "GHE" do parser —
+`titulo = f"GHE {bloco.ghe_id} ..."` em `montar_documento` duplica o prefixo. Pré-existente
+(não introduzido nesta sessão, o literal não foi tocado); registrado aqui para não se perder,
+não corrigido por ser mudança de conteúdo/dado, fora do escopo desta nota (visual apenas).
+
+**Regras e vocabulário/CAS.** Nenhuma `R-*` criada, alterada ou depreciada; nenhum slug/CAS
+tocado. Nota de aplicação em `D-ARQ-73` (mesma ID, nenhuma cláusula alterada), índice D-ARQ
+regenerado, 85 decisões inalterado, `python -m pytest tests/test_gerar_indice_darq.py`: 6 passed
+(regra fixa do `CLAUDE.md` por ter tocado `DECISOES_ARQUITETURAIS.md`). `PROTOCOLO_AGENTE_MEDICO.md`
+inalterado, segue v93 (nenhuma regra clínica tocada). `PAINEL_ESTADO.md` não re-tirado — os três
+números clínicos não se moveram (mudança é só de emissor/apresentação).
+
+**Suíte completa (pós-commit `2ef4d97`).** `python -m pytest agente_medico/tests/ tests/`, árvore
+parada: **1236 passed, 6 skipped, 0 failed** — +3 exato contra o Baseline de origem (1233,
+sessão do PR #335), os 3 testes novos deste commit, nada mais.
+
+**Achado psicossocial — resposta da Dra. Carolini, mesma sessão (17/09/2026).** Duas rodadas de
+pergunta fechada, sem código tocado. Rodada 1 resolve a estrutura (cascata de 2 estágios por
+atividade crítica, não circular — detalhe na DT em `PENDENCIAS_CLINICAS.md`). Rodada 2 traz achado
+mais sério que o previsto: a Dra. Carolini invalidou a própria matriz assinada de 08/07/2026
+(usada nesta sessão como evidência) como referência de prática corrente — "o protocolo mudou
+agora, em setembro; tô refazendo todas as matrizes". Isso levanta dúvida sobre a data de corte do
+corpus que sustenta `R-PSY-02` como `[DERIVADO]` (6 matrizes pós-vigência NR-01): sem confirmação
+de que alguma delas é pós-setembro, a medição de 99% incondicional pode estar medindo o protocolo
+ANTERIOR, não o atual. Não implementado — sem matriz nova (pós-protocolo) no acervo pra medir
+contra, e a Dra. Carolini sinalizou não ter mais paciência para responder novas perguntas desta
+rodada. Próximo passo (não desta sessão): medir a primeira matriz refeita sob o protocolo novo
+assim que existir, mesma disciplina de nunca formalizar sobre documento pré-mudança que o projeto
+já aplica em `DT-003EJ-01`/`DT-003EC-01`.
+
+## Sessão (branch `claude/youthful-lamport-3kfkog`, número não atribuído) — 17/09/2026 — continuação: bug real (parser Hetrin) + fechamento do achado psicossocial
+
+**Estado no início deste bloco.** PR #337 (estilo visual do `.docx`) aberto, `mergeable_state:
+"clean"`, sem CI configurado, sem review — aguardando o Diovanni. Nenhum código tocado neste
+bloco; só investigação e registro em docs.
+
+**Bug real reportado pelo Diovanni.** Tentativa de gerar matriz do PGR
+`PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 páginas) no serviço falhou:
+`segmentacao_implausivel`, 0 blocos GHE. Diagnóstico completo em
+`DT-(branch claude/youthful-lamport-3kfkog)-02` (`PENDENCIAS_CLINICAS.md`): é a mesma família AIHA
+já reconhecida (Hetrin/Serra Dourada), mas a revisão de setembro/2026 do mesmo cliente/obra mudou
+o cabeçalho da tabela pra CAIXA ALTA e o `pdfplumber` extrai `FUNÇÃO` e `PERIGO/RISCO` em linhas
+separadas — dois motivos independentes de falha contra o regex `_reconhece_funcao_grid_perigo_risco`
+(`r"Função .*Perigo / Risco"`). Confirmado contra o PGR de março/2025 do mesmo Hetrin (casa
+limpo) e contra busca case-insensitive no PGR novo (zero linha casa, mesmo afrouxando). Não
+implementado — é escopo de sessão própria (nova variante de família de parser, molde do que já
+foi feito pro T65), registrado para não se perder.
+
+**Achado psicossocial — fechamento com evidência forte, proposta pronta.** O Diovanni forneceu 2
+matrizes reais pós-protocolo-de-setembro com desfechos opostos: Ricco Hetrin 14/09 (validada,
+confirmado pelo Diovanni) sai com **zero** exame psicossocial em 28/28 cargos — e o PGR bruto
+correspondente (mesmo arquivo do bug acima, 197 páginas lidas por completo) tem **zero**
+ocorrência de "psicossocial"/COPSOQ/FRPRT/SRQ em qualquer página; **inclusive Pedreiro, que tem
+"QUEDAS DE ALTURA" no próprio PGR**, saiu sem psicossocial — refutando por si só a hipótese de
+cascata por atividade crítica que a Dra. Carolini tinha descrito verbalmente. CMO Varandas
+Flamboyant 16/09 (validada por Carolini M. P. Lisita) sai com os dois exames incondicionais em
+TODO GHE, sem exceção, incluindo Portaria (sem atividade crítica). Pergunta ao Diovanni sobre a
+causa: **"quem decide o psicossocial é o PGR — no do Hetrin o engenheiro não quis ter o
+psicossocial, por isso na matriz não tem."** Fecha o círculo: é decisão binária do engenheiro
+autor do PGR (incluir ou não a seção de inventário psicossocial), não classificação de risco nem
+atividade. Achado feliz: `GHEPGR.psicossocial: bool` já existe desde `D-ARQ-49` P2 (maio/2026),
+desenhado exatamente para este sinal, nunca implementado (`hidratacao.py` crava `False` sempre).
+Proposta registrada na DT, não implementada: extrator que popula o campo lendo a presença da
+seção do PGR + `R-PSY-03` nova condicionada a ele, sucedendo `R-PSY-02` (que sai `[DEPRECATED —
+fundamento refutado]`, mesmo padrão de `D-ARQ-81`/`R-AUD-04`). Detalhe completo, incluindo o
+risco residual declarado (n=2, mesma classe de obra), na DT em `PENDENCIAS_CLINICAS.md`.
+
+**Não implementado nesta sessão, por decisão de handoff — não por bloqueio técnico.** O Diovanni
+vai continuar esta conversa em outra sessão; este bloco e as duas DTs em `PENDENCIAS_CLINICAS.md`
+existem para que a próxima sessão retome sem depender do histórico de chat. Duas frentes prontas
+para autorização de implementação: (1) `R-PSY-03`/depreciação de `R-PSY-02`; (2) nova variante de
+família de parser para o Hetrin de setembro. Nenhum código tocado neste bloco; só
+`docs/PENDENCIAS_CLINICAS.md` (2 DTs) e este bloco.
