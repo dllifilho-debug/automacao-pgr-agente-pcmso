@@ -47,7 +47,11 @@ def _pgr(
     return PGR(validade=validade, assinatura_engenheiro=assinatura, ghes=ghes)
 
 
-def _ghe(ghe_id: str = "GHE-01", riscos: tuple[RiscoPGR, ...] = ()) -> GHEPGR:
+def _ghe(
+    ghe_id: str = "GHE-01",
+    riscos: tuple[RiscoPGR, ...] = (),
+    psicossocial: bool = False,
+) -> GHEPGR:
     return GHEPGR(
         id=ghe_id,
         nome="Teste",
@@ -55,7 +59,7 @@ def _ghe(ghe_id: str = "GHE-01", riscos: tuple[RiscoPGR, ...] = ()) -> GHEPGR:
         riscos=riscos,
         epis=(),
         produtos_quimicos=(),
-        psicossocial=False,
+        psicossocial=psicossocial,
     )
 
 
@@ -293,11 +297,14 @@ def test_integracao_end_to_end() -> None:
     assert resultado.status == "OK"
     assert len(resultado.matrizes) == 1
     matriz = resultado.matrizes[0]
-    assert len(matriz.linhas) == 8
+    # 8->6 (sessão de 17/09/2026, R-PSY-03): avaliacao_psicossocial/
+    # avaliacao_saude_mental saíam daqui via R-PSY-02 incondicional; R-PSY-02
+    # está DEPRECATED e R-PSY-03 exige GHEPGR.psicossocial=True, que este GHE
+    # (fixture genérica, sem relação com o achado psicossocial) não declara.
+    assert len(matriz.linhas) == 6
     nomes = {e.exame.strip().lower() for e in matriz.linhas}
     assert nomes == {
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg", "exame_clinico",
-        "avaliacao_psicossocial", "avaliacao_saude_mental",
     }
     for e in matriz.linhas:
         assert e.periodicidade_meses == 12
@@ -557,18 +564,25 @@ def test_raud01_raud02_presuncao_promove_bloqueada_para_parcial_com_linha_de_ris
 
 
 # ---------------------------------------------------------------------------
-# R-PSY-02 — psicossocial incondicional (003.EN). Sucede R-PSY-01 (DEPRECATED,
-# condicionada). NR-01 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3. Usa o protocolo real
-# porque R-PSY-02 é a regra sob teste, não um fixture sintético.
+# R-PSY-03 — psicossocial condicionada ao GHEPGR.psicossocial (sessão de
+# 17/09/2026). Sucede R-PSY-02 (DEPRECATED — fundamento refutado por n=2
+# pós-protocolo-de-setembro/2026, Hetrin 14/09 x Varandas 16/09). NR-01
+# 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3. Usa o protocolo real porque R-PSY-03 é a
+# regra sob teste, não um fixture sintético.
+#
+# Troca registrada, não apagamento silencioso (D-ARQ-06, mesmo precedente de
+# poeira_de_madeira/003.FL): test_rpsy02_emite_psicossocial_e_saude_mental_
+# 12m_sem_risco (003.EN) assertava emissão incondicional — comportamento que
+# esta sessão revoga. Redação antiga preservada em HISTORICO_OPERACIONAL.md.
 # ---------------------------------------------------------------------------
 
 _MOMENTOS_PSY = {Momento.ADM, Momento.PER, Momento.MR}
 
 
-def test_rpsy02_emite_psicossocial_e_saude_mental_12m_sem_risco() -> None:
-    # GHE sem nenhum risco: R-PSY-02 é incondicional, deve emitir mesmo assim.
+def test_rpsy03_emite_psicossocial_e_saude_mental_12m_quando_ghe_pgr_documenta() -> None:
+    # GHE sem risco algum, mas com GHEPGR.psicossocial=True: R-PSY-03 emite.
     proto = carregar(_PROTOCOLO_DIR)
-    ghe = _ghe(riscos=())
+    ghe = _ghe(riscos=(), psicossocial=True)
     pgr = _pgr(ghes=(ghe,))
     resultado = executar(pgr, proto, hoje=HOJE)
     matriz = resultado.matrizes[0]
@@ -577,7 +591,30 @@ def test_rpsy02_emite_psicossocial_e_saude_mental_12m_sem_risco() -> None:
     for linha in (psicossocial, saude_mental):
         assert linha.periodicidade_meses == 12
         assert linha.momentos == _MOMENTOS_PSY
-        assert any(m.regra_id == "R-PSY-02" for m in linha.motivos)
+        assert any(m.regra_id == "R-PSY-03" for m in linha.motivos)
+
+
+def test_rpsy03_nao_emite_quando_ghe_pgr_nao_documenta_psicossocial() -> None:
+    # Reversão que mata: reverter `quando: psicossocial` de R-PSY-03 para
+    # `quando: todo_trabalhador` em regras.yaml (volta ao comportamento
+    # incondicional de R-PSY-02).
+    proto = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe(riscos=(), psicossocial=False)
+    pgr = _pgr(ghes=(ghe,))
+    resultado = executar(pgr, proto, hoje=HOJE)
+    matriz = resultado.matrizes[0]
+    nomes = {ln.exame for ln in matriz.linhas}
+    assert "avaliacao_psicossocial" not in nomes
+    assert "avaliacao_saude_mental" not in nomes
+
+
+def test_rpsy02_deprecated_nao_emite_mesmo_incondicional() -> None:
+    # R-PSY-02 fica no protocolo (status: DEPRECATED, rastreabilidade), mas o
+    # carregador a exclui do motor de avaliação (protocolo.py). Reversão que
+    # mata: remover `status: DEPRECATED` de R-PSY-02 em regras.yaml.
+    proto = carregar(_PROTOCOLO_DIR)
+    ids_ativos = {r["id"] for r in proto.regras}
+    assert "R-PSY-02" not in ids_ativos
 
 
 # ---------------------------------------------------------------------------

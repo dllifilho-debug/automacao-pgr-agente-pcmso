@@ -47,6 +47,31 @@ def extrair_texto_pgr(caminho: Path) -> list[str]:
     return [page.extract_text() or "" for page in paginas_liberadas(caminho)]
 
 
+# R-PSY-03; NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal PGR-documenta-
+# psicossocial (GHEPGR.psicossocial, diferido em D-ARQ-49 P2, nunca extraído
+# até aqui). Marcadores e case-insensitive [INTERPRETADO — DT-(sessão não
+# numerada, branch claude/youthful-lamport-3kfkog)-01]: mesmos 3 termos que a
+# medição do PGR Hetrin 14/09 (197 páginas, zero ocorrência, matriz validada
+# sai sem psicossocial em 28/28 cargos) e do PGR CMO Varandas Flamboyant
+# 16/09 (marcador presente, matriz sai com psicossocial em todo GHE) usaram
+# para diferenciar os dois casos.
+_MARCADORES_PSICOSSOCIAL = (
+    "inventário de riscos psicossociais",
+    "copsoq",
+    "frprt",
+)
+
+
+def detectar_psicossocial(paginas: Sequence[str]) -> bool:
+    """Presença de ao menos 1 marcador do inventário de risco psicossocial
+    em qualquer página do PGR (R-PSY-03). Sinal de PGR inteiro, não por GHE
+    — não há, até a medição de origem, evidência de variação por GHE dentro
+    do mesmo documento; o chamador replica o resultado para todo GHEPGR do
+    PGR."""
+    texto = "\n".join(paginas).lower()
+    return any(marcador in texto for marcador in _MARCADORES_PSICOSSOCIAL)
+
+
 def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:
     linha_normalizada = linha.strip()
     if len(linha_normalizada) > 80:
@@ -218,6 +243,25 @@ def _reconhece_cargo_cbo(linha: str) -> bool:
 def _reconhece_funcao_grid_perigo_risco(linha: str) -> bool:
     linha_normalizada = linha.strip()
     return re.match(r"Função .*Perigo / Risco", linha_normalizada) is not None
+
+
+def _reconhece_funcao_grid_perigo_risco_fragmentado(linha_a: str, linha_b: str) -> bool:
+    """Variante fragmentada do cabeçalho grid AIHA (Hetrin/Serra Dourada;
+    medida na revisão de 14/09/2026 do PGR Hetrin — DT-(sessão não numerada,
+    branch claude/youthful-lamport-3kfkog)-02): o wrap de coluna do
+    pdfplumber quebra "Função"/"Perigo"/"Risco" em duas linhas físicas
+    adjacentes, intercaladas com palavras de outras colunas do cabeçalho
+    ("FUNÇÃO (quando MEIO DE" / "RISCO PERIGO/ RISCO TEMPO DE..."), e em
+    caixa alta — não casa mais `_reconhece_funcao_grid_perigo_risco`
+    (linha única, Título-Caso, forma medida em 003.CQ). `\\b` sobre as duas
+    linhas concatenadas evita falso-positivo em prosa no plural ("perigos e
+    riscos", "funções") — a fronteira de palavra falha logo após o 's'."""
+    par = f"{linha_a} {linha_b}"
+    return (
+        re.search(r"\bFunção\b", par, re.IGNORECASE) is not None
+        and re.search(r"\bPerigo\b", par, re.IGNORECASE) is not None
+        and re.search(r"\bRisco\b", par, re.IGNORECASE) is not None
+    )
 
 
 def _reconhece_lotacao_escala_qtd(linha: str) -> bool:
@@ -444,9 +488,17 @@ def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
 
     Mesmo achatamento por linhas dos irmãos (avaliar_segmentacao):
     documento é família cargo-based sse ZERO linhas casarem eh_cabecalho_ghe
-    E pelo menos 1 linha casar eh_sinal_cargo. Presença de QUALQUER âncora
-    GHE veta o diagnóstico (GHE-presente sempre vence) — mesmo se o
+    E pelo menos 1 linha (ou par de linhas adjacentes, grid AIHA
+    fragmentado — ver abaixo) casar sinal de cargo. Presença de QUALQUER
+    âncora GHE veta o diagnóstico (GHE-presente sempre vence) — mesmo se o
     documento também tiver sinais de cargo (ex.: boilerplate de assinatura).
+
+    Par de linhas adjacentes é checado à parte de eh_sinal_cargo
+    (_reconhece_funcao_grid_perigo_risco_fragmentado) porque o sinal
+    fragmentado do grid AIHA (Hetrin/Serra Dourada, revisão de 14/09/2026)
+    não cabe no contrato de linha única que os demais reconhecedores de
+    _RECONHECEDORES_CARGO compartilham — não altera esse contrato nem os
+    outros reconhecedores.
 
     Pendência tipo "pgr_cargo_based", sempre bloqueante (anti-supressão:
     D-ARQ-31/35 — nunca silêncio), regra_origem "D-ARQ-57", ghe_id=None.
@@ -457,6 +509,11 @@ def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
         return None
 
     n_sinais_cargo = sum(1 for linha in linhas if eh_sinal_cargo(linha))
+    n_sinais_cargo += sum(
+        1
+        for linha_a, linha_b in zip(linhas, linhas[1:])
+        if _reconhece_funcao_grid_perigo_risco_fragmentado(linha_a, linha_b)
+    )
     if n_sinais_cargo == 0:
         return None
 

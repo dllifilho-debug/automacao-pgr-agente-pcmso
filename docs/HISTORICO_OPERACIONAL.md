@@ -7871,3 +7871,173 @@ existem para que a próxima sessão retome sem depender do histórico de chat. D
 para autorização de implementação: (1) `R-PSY-03`/depreciação de `R-PSY-02`; (2) nova variante de
 família de parser para o Hetrin de setembro. Nenhum código tocado neste bloco; só
 `docs/PENDENCIAS_CLINICAS.md` (2 DTs) e este bloco.
+
+## Sessão (branch `claude/fervent-brown-7dcc0y`, número não atribuído) — 17/09/2026 — IMPLEMENTAÇÃO: `R-PSY-03` (autorizada pelo Diovanni)
+
+**Contexto de abertura.** Handoff da sessão anterior (branch `claude/youthful-lamport-3kfkog`,
+PR #337 já mergeado nesta altura — a tarefa desta sessão descrevia PR #337 como "aberto,
+aguardando revisão", divergência medida contra a API do GitHub e reportada ao Diovanni antes de
+prosseguir, D-ARQ-guarda "bloqueador reportado = decisão do Arquiteto"). Autorizada a implementar
+as duas DTs em `PENDENCIAS_CLINICAS.md`: `R-PSY-03` (esta) e a variante nova do parser Hetrin
+(sessão própria, ver bloco seguinte). Ordem escolhida: `R-PSY-03` primeiro — escopo fechado
+(proposta já registrada), menor risco de iteração que o reconhecedor de parser novo.
+
+**Fatia 1 (extrator).** `detectar_psicossocial` novo em `extracao_pgr.py`: varre o texto cru do
+PGR inteiro (`"\n".join(paginas).lower()`) por 3 marcadores — "inventário de riscos
+psicossociais"/"copsoq"/"frprt" — case-insensitive. Sinal de PGR inteiro, não por GHE (mesma
+leitura da Parte 2 de `D-ARQ-49`, que diferia o campo).
+
+**Fatia 2 (threading).** `hidratar_ghe`/`hidratar_pgr` (`hidratacao.py`) ganham parâmetro
+`psicossocial: bool = False` — substitui o `psicossocial=False` hardcoded na construção do
+`GHEPGR`; `hidratar_pgr` replica o mesmo valor a todo GHE do PGR (default preserva o
+comportamento de todo chamador existente que não o repassa). `processar_arquivo_pgr`
+(`orquestracao_pgr.py`) ganha uma 3ª leitura de `extrair_texto_pgr` sobre o mesmo arquivo (mesma
+classe da duplicação já documentada em `D-ARQ-52`/`D-ARQ-53` entre `preparar_envelope` e
+`preparar_ghes`) e repassa `detectar_psicossocial(paginas)` a `hidratar_pgr`.
+
+**Fatia 3 (primitivo + regra).** `psicossocial` novo em `predicados.py` (`ctx.pgr_ghe.psicossocial`).
+`R-PSY-02` marcada `status: DEPRECATED` em `regras.yaml` — fundamento refutado por n=2
+pós-protocolo-de-setembro/2026 (Ricco Hetrin 14/09 × CMO Varandas Flamboyant 16/09, desfechos
+opostos; confirmado pelo Diovanni: quem decide é o engenheiro que elabora o PGR), mesmo padrão de
+`D-ARQ-81`/`R-AUD-04`, exceto que HÁ sucessora (a norma segue obrigando inventariar o FRPRT — só a
+condição de disparo do exame muda). `R-PSY-03` criada, `quando: psicossocial`, mesma conduta
+(avaliacao_psicossocial + avaliacao_saude_mental, 12M, adm/per/MR), `status: INTERPRETADO`
+(n=2, mesma classe de obra — risco residual de granularidade por-PGR-vs-por-GHE não resolvido,
+registrado no corpo da regra). `docs/PROTOCOLO_AGENTE_MEDICO.md` §5.7 espelha os dois: R-PSY-02
+`[DEPRECATED]` com nota "Fundamento refutado" preservando o corpo antigo; R-PSY-03 nova. PROTOCOLO
+v93→**v94**.
+
+**Fatia 4 (testes, reversão nomeada).** `test_extracao_pgr.py`: 6 testes novos do extrator
+(ausente sem marcador, 3 parametrizados por marcador, case-insensitive, marcador na 2ª página) —
+reversão: `return True`/`return False` fixo, ou remover marcador de `_MARCADORES_PSICOSSOCIAL`, ou
+checar só `paginas[0]`. `test_hidratacao.py`: 2 testes novos (`hidratar_ghe`/`hidratar_pgr`
+repassam `psicossocial=True`) — reversão: voltar ao hardcoded `False`, ou não repassar no loop de
+`hidratar_pgr`. `test_predicados.py`: 2 testes novos do primitivo — reversão: `return False` fixo.
+`test_orquestrador.py`: 2 testes novos (`R-PSY-03` emite sse `psicossocial=True`, não emite sse
+`False`) + 1 teste novo (`R-PSY-02` excluída de `proto.regras` pelo carregador) — reversão:
+reverter `quando:` de R-PSY-03 para `todo_trabalhador`, ou remover `status: DEPRECATED` de
+R-PSY-02. Troca registrada, não apagamento silencioso (D-ARQ-06, precedente `poeira_de_madeira`):
+`test_rpsy02_emite_psicossocial_e_saude_mental_12m_sem_risco` (003.EN, assertava emissão
+incondicional) reescrito para `test_rpsy03_*` — redação antiga preservada acima, no bloco 003.EN
+deste histórico.
+
+**Quebras legítimas corrigidas com causa nomeada** (mesma classe das 4 quebras de `R-AUD-04`
+DEPRECATED em 003.EZ): `test_integracao_end_to_end` (`test_orquestrador.py`) — 8→6 linhas, perde
+`avaliacao_psicossocial`/`avaliacao_saude_mental` (fixture não declara `psicossocial=True`).
+`test_pipeline_gates_emissao_consolidacao_atividade_critica` (`test_integracao_002c.py`) — mesma
+causa, assert trocado de "issubset" para "not... &" + `_INCONDICIONAIS` perde os 2 slugs.
+
+**Verificação.** `python -m mypy --strict` alvo canônico: limpo, **48 arquivos**, delta-zero
+(`agente_medico/adaptadores/orquestracao_pgr.py` fora do alvo canônico, checado à parte: limpo).
+`python -m pytest tests/test_gerar_indice_darq.py`: 6 passed (tocou `DECISOES_ARQUITETURAIS.md` —
+nota de aplicação em `D-ARQ-49`, sem cláusula alterada; índice regenerado; 85 decisões inalterado).
+Recorte (`test_extracao_pgr.py test_hidratacao.py test_predicados.py test_orquestrador.py
+test_tipos.py test_integracao_002c.py`): **214 passed**. Suíte completa
+(`agente_medico/tests/ tests/`, árvore parada): **1247 passed, 6 skipped, 2 failed** — os 2 falhos
+são ambiente (`libreoffice-writer` ausente no container — `test_varrer_acervo_lgpd.py`/
+`test_cobertura_varrer_acervo.py`), mesma classe já registrada em 003.FI, confirmados
+pré-existentes (nenhum arquivo desta sessão pertence a `scripts/varrer_acervo_lgpd.py`). Delta
+**+13** exato contra o baseline de PR #337 (`1236` — `f15744a`), fechando com os 13 testes novos
+descritos na Fatia 4. Varredura inversa: cada reversão nomeada (extrator, threading `hidratar_ghe`/
+`hidratar_pgr`, primitivo, `quando`/`status` de `R-PSY-03`/`R-PSY-02`) aplicada isoladamente via
+`Edit`, suíte recortada rodada, confirmado vermelho exatamente nos testes previstos — nenhum a
+mais, nenhum a menos — e restaurada antes da próxima reversão; suíte recortada verde de novo ao
+final (214 passed) e `mypy --strict` limpo de novo. Discriminantes: `detectar_psicossocial`
+`return False` fixo mata os 5 testes "presente" (3 parametrizados + case-insensitive + segunda
+página), `return True` mata os 2 "ausente"/"páginas vazias"; `hidratar_ghe` sem repassar
+`psicossocial` mata os 2 testes de threading (`hidratar_pgr` herda a quebra); `hidratar_pgr` sem
+repassar no loop mata só o teste de `hidratar_pgr` (isolado do de `hidratar_ghe`); primitivo
+`return False` fixo mata o teste "true"; `R-PSY-03.quando: todo_trabalhador` mata o teste "não
+emite"; `R-PSY-02` sem `status: DEPRECATED` mata o teste dedicado + as 2 quebras legítimas
+(`test_integracao_end_to_end`, `test_pipeline_gates_emissao_consolidacao_atividade_critica`).
+
+**Fatia 5 (docs).** `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA
+(`PENDENCIAS_CLINICAS.md`) — risco residual (granularidade por-PGR-vs-por-GHE) não reaberto como
+pendência solta, fica registrado no corpo de R-PSY-03. `PAINEL_ESTADO.md` re-tirado: `regras 25/44
+(57%)`, `cas 50/80 (62%)`, `índice: sincronizado` — idênticos ao valor pós-`R-RX-03`/`R-ESP-03`
+(troca 1-por-1 R-PSY-02→R-PSY-03, sem movimento líquido; D-ARQ-85 cl.1 não exige re-tiragem para
+merge que não move número, nota adicionada mesmo assim por medição, não por gatilho).
+
+## Sessão (branch `claude/fervent-brown-7dcc0y`, número não atribuído) — 17/09/2026 — continuação: parser Hetrin (DT reenquadrada + fix de escopo contido, autorizado pelo Diovanni)
+
+**Ordem escolhida.** R-PSY-03 primeiro (bloco acima, escopo fechado, menor risco de iteração),
+depois o parser Hetrin — mesma sessão, branch única (regra do CLAUDE.md de não abrir a branch da
+próxima sessão antes do merge da atual não se aplica: infra de sessão já amarra 1 branch por
+sessão inteira, não por DT).
+
+**Investigação — a causa raiz da DT anterior estava incompleta.** A DT
+`(sessão claude/youthful-lamport-3kfkog)-02` dizia "casa limpo" no PGR Hetrin de março/2025 como
+evidência de que só a revisão de setembro regrediu. Reproduzido `avaliar_estrutura`/
+`avaliar_familia`/`parsear_arquivo` direto contra os dois PDFs reais `[MEDIDO — execução direta
+desta sessão]`: "casa limpo" media só o regex isolado, não o pipeline inteiro — o PGR de março
+**também bloqueia hoje**, via `pgr_cargo_based` (123 linhas casam o regex de linha única),
+simplesmente nunca tinha sido tentado em produção. `parsear_arquivo` (`parser_familia_consciente.py`,
+D-ARQ-65) devolve 0 blocos para os dois arquivos Hetrin sem levantar `FamiliaNaoReconhecida` — não
+por bug, mas porque esse módulo é o parser da família **Consciente/Fascino**
+(`GRUPO/PERIGO-ASPECTO/FONTE/AGRAVO`), inteiramente distinta do grid AIHA Hetrin/Serra Dourada
+(`Função ... Perigo/Risco`); nomear os dois como "a mesma família" foi o erro de leitura do
+handoff. Releitura de `D-ARQ-57` peça 3 (003.CQ) e da decisão da peça 4 (003.DC/003.DF,
+ratificada pelo Diovanni) confirma: o grid AIHA é **deliberadamente excluído** do recorte-por-cargo
+que a peça 4 entregou (serve só Cjr/EBSERH, formato card 1:1 — o grid AIHA é 1 tabela
+compartilhada, N linhas-de-cargo, "sinal-de-família ≠ âncora-de-recorte"). Conclusão: a família
+Hetrin/Serra Dourada nunca teve caminho de ingestão automática, nem antes nem depois da mudança
+de cabeçalho de setembro — não é regressão, é lacuna arquitetural nunca fechada. Registrado como
+reenquadramento na DT (`PENDENCIAS_CLINICAS.md`) antes de tocar código — reportado ao Diovanni via
+pergunta fechada, que autorizou escopo contido: só o conserto do regex (restaura o diagnóstico
+correto), não a ARQUITETURA de ingestão do grid AIHA (que seguiria o molde da peça 4 — multi-sessão,
+como 003.DB→003.DK foram para EBSERH/Cjr).
+
+**Anatomia medida da fragmentação (14/09/2026).** O cabeçalho do grid quebra em até 4 linhas
+físicas por página (wrap de coluna do pdfplumber varia por página, não é uniforme): boilerplate
+("PGR | PROGRAMA...", "AVALIAÇÃO DE RISCO") + "TIPO DE IDENTIFICAÇÃO DE... eSocial" + "FUNÇÃO
+(quando..." + "RISCO PERIGO/ RISCO TEMPO DE... CONTROLE EXISTENTE" — em caixa alta, ordem de
+palavras variável entre ocorrências (~14 no documento de 197 páginas). Em 2 das ~14 ocorrências o
+wrap fragmenta ainda mais (uma palavra por linha, "FUNÇÃO" / "T" / "R" / "IP"...) — não coberto
+pelo fix (par de linhas adjacentes), mas irrelevante: basta 1 ocorrência casar para
+`avaliar_familia` classificar corretamente, e ~12 das ~14 seguem o padrão de 2 linhas.
+
+**Fix.** `_reconhece_funcao_grid_perigo_risco_fragmentado(linha_a, linha_b)` novo em
+`extracao_pgr.py`: casa "Função"/"Perigo"/"Risco" (regex `\b`-delimitado, case-insensitive) no PAR
+de linhas adjacentes concatenadas — `\b` evita falso-positivo em prosa no plural ("perigos e
+riscos identificados nas atividades e funções", presente no próprio PGR fora da tabela; "função"→
+"funções" já não bate nem sem `\b`, o acento muda ã→õ, mas "perigo"→"perigos" e "risco"→"riscos"
+são substring puro e precisam da fronteira). Integrado em `avaliar_familia` como soma adicional a
+`n_sinais_cargo`, sem alterar `eh_sinal_cargo`/`_RECONHECEDORES_CARGO` (contrato de linha única,
+único consumidor de produção — os outros 3 reconhecedores da peça 3 ficam intocados).
+
+**Validação contra o acervo real (anti-regressão, script ad-hoc não commitado).** Rodado
+`avaliar_familia` antes/depois do fix contra os **40 PGRs reais** trackeados em
+`matrizes_originais/`: a classificação muda em **exatamente 1** documento (Hetrin 14/09/2026,
+`None`/`segmentacao_implausivel` → `pgr_cargo_based`); os outros 39 — 3 famílias cargo-based já
+reconhecidas por outro recorte (Cjr, EBSERH UFGD/HUMAP, ambas com `n_frag=0`) e todas as famílias
+GHE-based, incluindo Fascino (`n_frag=0`) — ficam bytewise inalterados. `[MEDIDO — execução direta
+desta sessão]`.
+
+**Testes (reversão nomeada, varredura inversa 15/15 confirmada).** `test_extracao_pgr.py`: 4
+parametrizados das formas reais de fragmentação + 1 de equivalência com a forma de linha única + 3
+parametrizados anti-falso-positivo (isolando cada termo pluralizado com os outros 2 no singular —
+não os 3 no plural ao mesmo tempo, que passaria mesmo sem a fronteira de palavra por acidente
+ortográfico de "função"→"funções") + 1 sintético de integração em `avaliar_familia` + 2 reais
+contra o PDF de 14/09/2026 (`avaliar_familia` e `avaliar_estrutura`) + 1 de não-regressão contra o
+PDF de março/2025. Reversões testadas isoladamente e restauradas: `return False` fixo na função
+nova mata as 6 formas-reais/equivalência/sintético; trocar `\b` por substring simples (`in`) mata
+só os 2 casos anti-falso-positivo que isolam "risco"/"perigo" pluralizados (o 3º, prosa real com
+os 3 termos no plural, sobrevive por acidente ortográfico de "função", não pela fronteira —
+diferenciado deliberadamente no teste); remover a soma em `avaliar_familia` mata os 2 testes reais
++ o sintético, sem afetar os testes unitários da função pura nem o de março/2025 (que já casava
+pelo regex original).
+
+**Verificação.** `python -m mypy --strict` alvo canônico: limpo, 48 arquivos, delta-zero.
+`python -m pytest agente_medico/tests/test_extracao_pgr.py`: 108 passed. `python -m pytest
+agente_medico/tests/test_orquestracao_pgr.py` (não tocado, recorte de derivado — `avaliar_familia`
+consumido por `preparar_ghes`): 24 passed. `python -m pytest tests/test_gerar_indice_darq.py`: 6
+passed (tocou `DECISOES_ARQUITETURAIS.md` — nota de aplicação em `D-ARQ-57`, sem cláusula alterada;
+índice regenerado; 85 decisões inalterado).
+
+**Docs.** Nota de aplicação em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`, mesma ID, sem cláusula
+alterada). `DT-(sessão claude/youthful-lamport-3kfkog)-02` REENQUADRADA (não fechada) —
+`PENDENCIAS_CLINICAS.md` registra o achado completo e o escopo real de "resolver" (ARQUITETURA
+própria, molde peça 4, decisão do Arquiteto sobre prioridade). Nenhuma `R-*` tocada;
+`PROTOCOLO_AGENTE_MEDICO.md` inalterado (não é regra clínica). `PAINEL_ESTADO.md` não re-tirado —
+os três números clínicos não se movem (mudança é só de mecanismo de diagnóstico de estrutura, não
+de regra/vocabulário).

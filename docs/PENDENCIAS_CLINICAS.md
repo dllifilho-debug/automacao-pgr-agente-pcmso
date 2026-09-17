@@ -2609,7 +2609,7 @@ o histórico que já os contém — o mesmo custo desproporcional que dispensou 
 
 **Status:** ABERTA. Registro de fato medido, não pedido de trabalho.
 
-### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-01 — Nível de risco psicossocial do PGR bruto (COPSOQ) é boilerplate, não sinal por GHE `[ABERTA — medida, não-bloqueante]`
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-01 — Nível de risco psicossocial do PGR bruto (COPSOQ) é boilerplate, não sinal por GHE `[RESOLVIDA — R-PSY-03/R-PSY-02 DEPRECATED, sessão branch claude/fervent-brown-7dcc0y]`
 
 **Origem.** Handoff da sessão que abriu o PR #335 (branch `claude/festive-gates-soy0fr`): tabela
 manuscrita das Dras. Carolini e Patrícia, não baseada em norma, cruza tipo de atividade (Trabalho
@@ -2751,7 +2751,20 @@ Arquiteto, não pendente de resposta clínica adicional.
 aguardando autorização de implementação". Não bloqueia produção (regra atual, embora com
 fundamento refutado, segue rodando sem crash).
 
-### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-02 — Segunda variante do template Ricco Hetrin quebra o reconhecedor de família AIHA `[ABERTA — bloqueante para este documento, não-bloqueante para o app]`
+**RESOLVIDA (17/09/2026, branch `claude/fervent-brown-7dcc0y`, autorizada pelo Diovanni).**
+Proposta implementada tal como registrada acima: `detectar_psicossocial` (`extracao_pgr.py`)
+extrai o marcador do PGR inteiro e popula `GHEPGR.psicossocial`; `R-PSY-03` nova (`quando:
+psicossocial`, mesma conduta) sucede `R-PSY-02`, que sai `[DEPRECATED — fundamento refutado]`
+em `regras.yaml`/`PROTOCOLO_AGENTE_MEDICO.md` §5.7 (PROTOCOLO v93→v94). Risco residual desta DT
+(granularidade por PGR inteiro vs. por GHE, n=2) **não resolvido** — fica registrado no corpo de
+`R-PSY-03` (`regras.yaml`/PROTOCOLO §5.7), não reaberto aqui como pendência solta. Testes com
+reversão nomeada em `test_extracao_pgr.py` (extrator), `test_hidratacao.py`/`test_predicados.py`
+(threading + primitivo) e `test_orquestrador.py` (regra fim-a-fim + R-PSY-02 excluída do motor);
+quebras legítimas em `test_integracao_002c.py` e o `test_integracao_end_to_end` de
+`test_orquestrador.py` corrigidas com causa nomeada (perdem as 2 linhas que só saíam por
+R-PSY-02 incondicional). Detalhe completo em HISTORICO_OPERACIONAL.md (bloco desta sessão).
+
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-02 — Segunda variante do template Ricco Hetrin quebra o reconhecedor de família AIHA `[REENQUADRADA + fix de diagnóstico IMPLEMENTADO — 17/09/2026, branch claude/fervent-brown-7dcc0y; ingestão do grid AIHA segue ABERTA]`
 
 **Origem.** Diovanni reportou erro real no serviço ao tentar gerar a matriz do PGR
 `PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 páginas): `"Parse total falho —
@@ -2781,5 +2794,60 @@ palavras-chave, não regex de linha única.
 que o projeto já fez para o T65 (`DT-003FE-01`/`DT-003FF-01`). Não tocado nesta sessão —
 registrado para não se perder.
 
-**Status:** ABERTA. Bloqueia a geração desta matriz específica no serviço; não bloqueia o app
-em geral (outras famílias inalteradas).
+**Reenquadramento (17/09/2026, branch `claude/fervent-brown-7dcc0y`) — a causa raiz acima está
+incompleta: "casa limpo" no PGR de março era só o teste do regex isolado, não o pipeline
+inteiro.** Reproduzido `avaliar_estrutura`/`avaliar_familia`/`parsear_arquivo` direto contra os
+dois PDFs reais (`01. PGR RICCO HETRIN - MAR25.pdf` e `PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN
+14.09.26.pdf`) `[MEDIDO — execução direta desta sessão]`:
+
+- **PGR mar/2025:** `eh_cabecalho_ghe`=0, `eh_ancora_card_cargo`=0, `_reconhece_funcao_grid_perigo_risco`=**123** casos → `avaliar_familia` retorna `Pendencia(tipo="pgr_cargo_based", bloqueante=True, motivo="...recorte-GHE inaplicável")`. **Também bloqueado hoje** — não gera matriz.
+- **PGR set/2026 (14/09):** mesmos reconhecedores GHE/card = 0; `_reconhece_funcao_grid_perigo_risco`=**0** (cabeçalho em caixa alta e fragmentado em linhas, como já diagnosticado) → `avaliar_familia` retorna `None` → cai no fallback `avaliar_segmentacao`, que bloqueia como `segmentacao_implausivel`.
+- `parsear_arquivo` (`parser_familia_consciente.py`, D-ARQ-65) devolve **0 blocos para os dois arquivos**, sem `FamiliaNaoReconhecida` — não por bug, mas porque esse módulo é o parser determinístico da família **Consciente/Fascino** (cabeçalho `GRUPO/PERIGO-ASPECTO/FONTE/AGRAVO`, D-ARQ-65), inteiramente distinta do grid AIHA Hetrin/Serra Dourada (`Função ... Perigo/Risco`). Confundir os dois nomes ("reconhecedor da família AIHA") foi o erro de leitura da sessão anterior.
+
+**O achado que muda o escopo.** `D-ARQ-57` peça 3 (003.CQ) e a decisão da peça 4 (003.DC,
+ratificada pelo Diovanni) **excluem deliberadamente** o grid AIHA do recorte-por-cargo que foi
+construído: *"grid-header AIHA Hetrin/SD **FORA** [do repertório de recorte] — sinal-de-família
+≠ âncora-de-recorte... o grid AIHA não delimita card individual (é cabeçalho de tabela
+compartilhada)"* (D-ARQ-57, notas 003.DC/003.DF). O recorte-por-cargo 1:1 que a peça 4 entregou
+(`recortar_cards_cargo`) serve só Cjr (`CARGO-CBO`) e EBSERH (`Lotação:`-tripla) — famílias
+"1 card = 1 cargo autocontido". O grid AIHA é estruturalmente diferente: **1 tabela
+compartilhada, N linhas-de-cargo** — mais parecido com a tabela de risco do Fascino (D-ARQ-65)
+do que com um card EBSERH, mas sem cabeçalho-GHE numerado para segmentar por GHE. **Conclusão:
+a família Hetrin/Serra Dourada nunca teve caminho de ingestão automática — nem antes nem depois
+da mudança de cabeçalho de setembro.** `_reconhece_funcao_grid_perigo_risco` sempre foi só
+diagnóstico (classificar corretamente como `pgr_cargo_based` para revisão humana), nunca um
+passo rumo a parsear a tabela.
+
+**O que o conserto do regex ainda vale — e o que não vale.** Ajustar o reconhecedor para casar o
+cabeçalho em caixa-alta/fragmentado (a causa raiz textual, que segue correta) restauraria a
+pendência **correta** (`pgr_cargo_based`, "recorte-GHE inaplicável") no PGR de setembro, em vez
+da atual `segmentacao_implausivel` (que sugere anomalia estrutural, não família reconhecida e
+deliberadamente não-automatizada) — ganho real de qualidade de diagnóstico para quem revisa. **Não
+gera matriz em nenhum dos dois casos** — mar/2025 já está bloqueado hoje pelo mesmo
+`pgr_cargo_based`, sem ninguém ter notado por não ter sido tentado em produção.
+
+**Escopo real de "resolver" o Hetrin/Serra Dourada é maior que uma variante de parser — é uma
+peça nova, irmã da peça 4.** Precisaria: (1) decidir a unidade de recorte de uma tabela
+compartilhada por linha-de-cargo (não card, não GHE — molde mais próximo é a extração de linhas
+de risco do Fascino em `parser_familia_consciente.py`, D-ARQ-65, mas sem os blocos-GHE que lá
+segmentam por GHE); (2) ARQUITETURA própria (molde D-ARQ-57 peça 4 / D-ARQ-65), não fatia
+avulsa — mesmo padrão que `DT-003FE-01` virou `DT-003FF-01` ao ser investigada a fundo (T65: "o
+gargalo é a família de conteúdo", não a âncora). Precedente direto de escopo subestimado citado
+por engano nesta própria DT.
+
+**Fix de escopo contido, implementado (17/09/2026, mesma branch, autorizado pelo Diovanni — só o
+regex, não a arquitetura de ingestão).** `_reconhece_funcao_grid_perigo_risco_fragmentado` novo em
+`extracao_pgr.py`, casa o cabeçalho quebrado em 2 linhas adjacentes (`\b`-delimitado, anti-prosa),
+integrado em `avaliar_familia`. Restaura a pendência **correta** no PGR de 14/09/2026:
+`pgr_cargo_based` em vez de `segmentacao_implausivel`. Validado contra os 40 PGRs reais do acervo
+— só este documento muda de classificação. 15 testes com reversão nomeada, varredura inversa
+15/15 confirmada. Nota de aplicação em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`). Detalhe em
+HISTORICO_OPERACIONAL.md (bloco desta sessão).
+
+**Status:** REENQUADRADA, fix parcial IMPLEMENTADO. Deixou de ser "bug de regressão" (nunca
+funcionou) e passou a ser "família nunca implementada, exclusão deliberada de D-ARQ-57/D-ARQ-65".
+O conserto do regex acima corrige o DIAGNÓSTICO (pendência certa, revisão humana informada
+corretamente) — **não gera matriz** em nenhum PGR Hetrin/Serra Dourada, nem no de março/2025 nem
+no de setembro/2026: ambos bloqueiam hoje, corretamente, para revisão humana. Gerar matriz exige
+ARQUITETURA própria (unidade de recorte de tabela compartilhada por linha-de-cargo, molde D-ARQ-57
+peça 4/D-ARQ-65) — escopo e prioridade a definir pelo Arquiteto, não aberta nesta sessão.

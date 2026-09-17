@@ -14,8 +14,12 @@ risco entra mesmo assim). Recorte remanescente: quantificacao de ruído
 (slug "ruido", EXATA ou FUZZY) é classificada em relacao_LT por
 classificar_ruido (D-ARQ-51 fatia 3, R-RUIDO-01), aplicada pós-resolução do
 termo — agente=None não classifica.
-EPIs, produtos_quimicos, psicossocial e cenario ficam em default (diferidos,
-D-ARQ-49 P2). Risco NUNCA descartado (D-ARQ-31/35 P3): tri-estado do
+EPIs, produtos_quimicos e cenario ficam em default (diferidos, D-ARQ-49 P2).
+psicossocial (R-PSY-03) é populado por parâmetro — o extrator
+(detectar_psicossocial, extracao_pgr.py) roda sobre o texto cru do PGR
+inteiro, fora do escopo por-GHE desta hidratação; o valor chega já resolvido
+e é replicado para todo GHEPGR do documento, default False para chamador que
+não o repassa. Risco NUNCA descartado (D-ARQ-31/35 P3): tri-estado do
 resolver (EXATA/FUZZY/NAO_RESOLVIDO) sempre vira exatamente 1 RiscoPGR.
 """
 from __future__ import annotations
@@ -34,6 +38,7 @@ def hidratar_ghe(
     ghe: GHEVerbatim,
     indice: IndiceTermos,
     posicao: int,
+    psicossocial: bool = False,
 ) -> tuple[GHEPGR, list[Pendencia]]:
     """Hidrata um bloco GHE transcrito em GHEPGR + pendências (D-ARQ-51).
 
@@ -130,7 +135,7 @@ def hidratar_ghe(
         riscos=tuple(riscos),
         epis=(),
         produtos_quimicos=(),
-        psicossocial=False,
+        psicossocial=psicossocial,
         cenario=None,
     )
     return ghe_pgr, pendencias
@@ -141,6 +146,7 @@ def hidratar_pgr(
     indice: IndiceTermos,
     validade: date,
     assinatura_engenheiro: bool,
+    psicossocial: bool = False,
 ) -> tuple[PGR, list[Pendencia]]:
     """Hidrata a sequência de blocos GHE transcritos em PGR (D-ARQ-51 costura plural).
 
@@ -155,7 +161,7 @@ def hidratar_pgr(
     pendencias: list[Pendencia] = []
 
     for posicao, ghe in enumerate(ghes, start=1):
-        ghe_pgr, pendencias_ghe = hidratar_ghe(ghe, indice, posicao)
+        ghe_pgr, pendencias_ghe = hidratar_ghe(ghe, indice, posicao, psicossocial)
         ghes_pgr.append(ghe_pgr)
         pendencias.extend(pendencias_ghe)
 

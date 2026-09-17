@@ -237,11 +237,22 @@ def test_gabarito_de_forma_ghepgr(indice_real: IndiceTermos) -> None:
     assert ghe_pgr.riscos[0].quantificacao.unidade == "dB(A)"
     assert all(r.severidade is None for r in ghe_pgr.riscos)
 
-    # diferidos em default (D-ARQ-49 P2)
+    # epis/produtos_quimicos/cenario diferidos em default (D-ARQ-49 P2);
+    # psicossocial (R-PSY-03) tem extrator, mas hidratar_ghe só repassa o
+    # parâmetro — sem argumento aqui, fica no default False.
     assert ghe_pgr.epis == ()
     assert ghe_pgr.produtos_quimicos == ()
     assert ghe_pgr.psicossocial is False
     assert ghe_pgr.cenario is None
+
+
+def test_hidratar_ghe_psicossocial_true_repassado_ao_ghe_pgr(indice_real: IndiceTermos) -> None:
+    # R-PSY-03: hidratar_ghe repassa o parâmetro psicossocial ao GHEPGR em vez
+    # do hardcoded False. Reversão que mata: voltar `psicossocial=psicossocial`
+    # para `psicossocial=False` na construção do GHEPGR (hidratacao.py).
+    ghe = _ghe_verbatim(riscos=())
+    ghe_pgr, _ = hidratar_ghe(ghe, indice_real, posicao=1, psicossocial=True)
+    assert ghe_pgr.psicossocial is True
 
 
 # ---------------------------------------------------------------------------
@@ -259,6 +270,27 @@ def test_hidratar_pgr_ids_posicionais_ordem_preservada(indice_real: IndiceTermos
     assert [g.id for g in pgr.ghes] == ["GHE-01", "GHE-02"]
     assert pgr.ghes[0].nome == ghe_a.nome
     assert pgr.ghes[1].nome == ghe_b.nome
+
+
+def test_hidratar_pgr_psicossocial_true_replicado_a_todos_os_ghe(
+    indice_real: IndiceTermos,
+) -> None:
+    # R-PSY-03: psicossocial é sinal de PGR inteiro (D-ARQ-49 P2 aplicado) —
+    # hidratar_pgr replica o mesmo valor para todo GHEPGR do documento.
+    # Reversão que mata: não repassar `psicossocial` na chamada a
+    # hidratar_ghe dentro do loop de hidratar_pgr (hidratacao.py).
+    ghe_a = _ghe_verbatim(riscos=())
+    ghe_b = _ghe_verbatim(riscos=())
+
+    pgr, _ = hidratar_pgr(
+        (ghe_a, ghe_b),
+        indice_real,
+        validade=date(2025, 1, 1),
+        assinatura_engenheiro=True,
+        psicossocial=True,
+    )
+
+    assert all(g.psicossocial is True for g in pgr.ghes)
 
 
 def test_hidratar_pgr_agrega_pendencias_com_ghe_id_correto(indice_real: IndiceTermos) -> None:
