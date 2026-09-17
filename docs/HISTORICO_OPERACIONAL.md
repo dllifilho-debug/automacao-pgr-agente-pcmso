@@ -7813,3 +7813,17 @@ números clínicos não se moveram (mudança é só de emissor/apresentação).
 **Suíte completa (pós-commit `2ef4d97`).** `python -m pytest agente_medico/tests/ tests/`, árvore
 parada: **1236 passed, 6 skipped, 0 failed** — +3 exato contra o Baseline de origem (1233,
 sessão do PR #335), os 3 testes novos deste commit, nada mais.
+
+**Achado psicossocial — resposta da Dra. Carolini, mesma sessão (17/09/2026).** Duas rodadas de
+pergunta fechada, sem código tocado. Rodada 1 resolve a estrutura (cascata de 2 estágios por
+atividade crítica, não circular — detalhe na DT em `PENDENCIAS_CLINICAS.md`). Rodada 2 traz achado
+mais sério que o previsto: a Dra. Carolini invalidou a própria matriz assinada de 08/07/2026
+(usada nesta sessão como evidência) como referência de prática corrente — "o protocolo mudou
+agora, em setembro; tô refazendo todas as matrizes". Isso levanta dúvida sobre a data de corte do
+corpus que sustenta `R-PSY-02` como `[DERIVADO]` (6 matrizes pós-vigência NR-01): sem confirmação
+de que alguma delas é pós-setembro, a medição de 99% incondicional pode estar medindo o protocolo
+ANTERIOR, não o atual. Não implementado — sem matriz nova (pós-protocolo) no acervo pra medir
+contra, e a Dra. Carolini sinalizou não ter mais paciência para responder novas perguntas desta
+rodada. Próximo passo (não desta sessão): medir a primeira matriz refeita sob o protocolo novo
+assim que existir, mesma disciplina de nunca formalizar sobre documento pré-mudança que o projeto
+já aplica em `DT-003EJ-01`/`DT-003EC-01`.

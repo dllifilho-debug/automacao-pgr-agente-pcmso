@@ -2667,3 +2667,41 @@ fabricado aqui.
 
 **Status:** ABERTA, não-bloqueante. Bloqueia decisão clínica sobre `R-PSY-02`, não bloqueia
 produção — a regra atual segue rodando como está.
+
+**Atualização — resposta da Dra. Carolini (17/09/2026), duas rodadas.**
+
+Rodada 1, sobre a estrutura da tabela das doutoras: **não é circular.** Trabalho em altura
+(atividade crítica) → Avaliação Psicossocial + Av. Saúde Mental, incondicional (bate com
+`R-PSY-02` hoje). Sem trabalho em altura → só SRQ-20 (triagem); SRQ-20 ≥ 7 → aí sim Avaliação
+Psicossocial. Resolve a objeção original desta DT (SRQ-20 não pode gatilhar o próprio exame que
+o mede) — é cascata em 2 estágios, não um único exame se autocondicionando.
+
+Rodada 2, pergunta de fechamento sobre o eixo que falta (nível de risco psicossocial em GHE-06
+Administração/GHE-19 Vendas do Fascino, que a matriz assinada de 08/07/2026 mostra recebendo os
+dois exames mesmo sem atividade crítica — contradição aparente com a rodada 1): duas respostas.
+(1) **"A classificação de risco não sou eu que faço, vem do PGR."** Confirma a direção da
+medição desta DT — o eixo deveria vir do documento, não de julgamento clínico ad-hoc — mas não
+resolve o problema que a medição achou: nos 2 PGRs conferidos (Fascino, Aurora), a seção do PGR
+que deveria carregar esse dado (26.1, COPSOQ) é boilerplate genérico, sem diferenciação real por
+GHE. Se a fonte é o PGR e o PGR normalmente não tem esse dado, a pergunta de origem do eixo
+continua sem resposta prática — só muda de "quem classifica" para "o documento raramente
+classifica".
+(2) **A matriz de 08/07/2026 não serve mais de referência — "o protocolo mudou agora, em
+setembro; tô refazendo todas as matrizes; não pode olhar por essa aí."** Isto invalida o
+documento usado nesta DT como evidência de prática corrente: ele reflete o protocolo ANTERIOR a
+setembro/2026, não o que ela descreveu na rodada 1. Consequência direta e mais séria: o corpus
+que fundamenta `R-PSY-02` como `[DERIVADO]` — "6 matrizes pós-vigência NR-01, 5 clientes, 2
+médicas, 284 cargos, 99% de cobertura" — não tem, até agora, confirmação de que alguma dessas 6
+matrizes já é pós-protocolo-de-setembro. Se todas são do protocolo antigo (mesma classe do
+documento de 08/07 aqui invalidado), a medição de 99% incondicional está datada — mede a prática
+anterior, não a atual, e `R-PSY-02` pode já estar desatualizada mesmo antes de qualquer questão
+sobre a tabela das doutoras.
+
+**Não implementado, e por quê.** Protocolo em reformulação ativa, nenhuma matriz nova
+(pós-setembro) ainda existe no acervo pra medir contra — implementar agora seria codificar
+regra sobre alvo em movimento, sem gabarito fresco pra validar. Próximo passo correto é o mesmo
+padrão que `DT-003EJ-01`/`DT-003EC-01` já usam neste projeto (nunca formalizar sobre n=1/documento
+pré-mudança): esperar a Dra. Carolini terminar de refazer ao menos uma matriz sob o protocolo
+novo, então medir essa matriz contra a tabela das doutoras e contra `R-PSY-02` antes de tocar
+`regras.yaml`. Sem pergunta nova pra ela — a Dra. Carolini já indicou não ter mais paciência
+para essa rodada.
