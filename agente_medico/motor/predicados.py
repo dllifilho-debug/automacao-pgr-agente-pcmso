@@ -163,6 +163,14 @@ def _fumos_metalicos(ctx: GHEContext) -> bool:
     return any(r.agente == "fumos_metalicos" for r in ctx.riscos)
 
 
+@primitivo("psicossocial")
+def _psicossocial(ctx: GHEContext) -> bool:
+    """R-PSY-03; NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal
+    PGR-documenta-psicossocial (GHEPGR.psicossocial, extraído por
+    detectar_psicossocial em extracao_pgr.py)."""
+    return ctx.pgr_ghe.psicossocial
+
+
 @primitivo("poeira_de_madeira")
 def _poeira_de_madeira(ctx: GHEContext) -> bool:
     """R-RX-03/R-ESP-03; agente carcinogênico (IARC Grupo 1) fora dos Quadros 1 e 2

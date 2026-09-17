@@ -47,6 +47,31 @@ def extrair_texto_pgr(caminho: Path) -> list[str]:
     return [page.extract_text() or "" for page in paginas_liberadas(caminho)]
 
 
+# R-PSY-03; NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal PGR-documenta-
+# psicossocial (GHEPGR.psicossocial, diferido em D-ARQ-49 P2, nunca extraído
+# até aqui). Marcadores e case-insensitive [INTERPRETADO — DT-(sessão não
+# numerada, branch claude/youthful-lamport-3kfkog)-01]: mesmos 3 termos que a
+# medição do PGR Hetrin 14/09 (197 páginas, zero ocorrência, matriz validada
+# sai sem psicossocial em 28/28 cargos) e do PGR CMO Varandas Flamboyant
+# 16/09 (marcador presente, matriz sai com psicossocial em todo GHE) usaram
+# para diferenciar os dois casos.
+_MARCADORES_PSICOSSOCIAL = (
+    "inventário de riscos psicossociais",
+    "copsoq",
+    "frprt",
+)
+
+
+def detectar_psicossocial(paginas: Sequence[str]) -> bool:
+    """Presença de ao menos 1 marcador do inventário de risco psicossocial
+    em qualquer página do PGR (R-PSY-03). Sinal de PGR inteiro, não por GHE
+    — não há, até a medição de origem, evidência de variação por GHE dentro
+    do mesmo documento; o chamador replica o resultado para todo GHEPGR do
+    PGR."""
+    texto = "\n".join(paginas).lower()
+    return any(marcador in texto for marcador in _MARCADORES_PSICOSSOCIAL)
+
+
 def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:
     linha_normalizada = linha.strip()
     if len(linha_normalizada) > 80:

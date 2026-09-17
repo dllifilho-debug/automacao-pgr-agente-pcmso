@@ -7871,3 +7871,89 @@ existem para que a próxima sessão retome sem depender do histórico de chat. D
 para autorização de implementação: (1) `R-PSY-03`/depreciação de `R-PSY-02`; (2) nova variante de
 família de parser para o Hetrin de setembro. Nenhum código tocado neste bloco; só
 `docs/PENDENCIAS_CLINICAS.md` (2 DTs) e este bloco.
+
+## Sessão (branch `claude/fervent-brown-7dcc0y`, número não atribuído) — 17/09/2026 — IMPLEMENTAÇÃO: `R-PSY-03` (autorizada pelo Diovanni)
+
+**Contexto de abertura.** Handoff da sessão anterior (branch `claude/youthful-lamport-3kfkog`,
+PR #337 já mergeado nesta altura — a tarefa desta sessão descrevia PR #337 como "aberto,
+aguardando revisão", divergência medida contra a API do GitHub e reportada ao Diovanni antes de
+prosseguir, D-ARQ-guarda "bloqueador reportado = decisão do Arquiteto"). Autorizada a implementar
+as duas DTs em `PENDENCIAS_CLINICAS.md`: `R-PSY-03` (esta) e a variante nova do parser Hetrin
+(sessão própria, ver bloco seguinte). Ordem escolhida: `R-PSY-03` primeiro — escopo fechado
+(proposta já registrada), menor risco de iteração que o reconhecedor de parser novo.
+
+**Fatia 1 (extrator).** `detectar_psicossocial` novo em `extracao_pgr.py`: varre o texto cru do
+PGR inteiro (`"\n".join(paginas).lower()`) por 3 marcadores — "inventário de riscos
+psicossociais"/"copsoq"/"frprt" — case-insensitive. Sinal de PGR inteiro, não por GHE (mesma
+leitura da Parte 2 de `D-ARQ-49`, que diferia o campo).
+
+**Fatia 2 (threading).** `hidratar_ghe`/`hidratar_pgr` (`hidratacao.py`) ganham parâmetro
+`psicossocial: bool = False` — substitui o `psicossocial=False` hardcoded na construção do
+`GHEPGR`; `hidratar_pgr` replica o mesmo valor a todo GHE do PGR (default preserva o
+comportamento de todo chamador existente que não o repassa). `processar_arquivo_pgr`
+(`orquestracao_pgr.py`) ganha uma 3ª leitura de `extrair_texto_pgr` sobre o mesmo arquivo (mesma
+classe da duplicação já documentada em `D-ARQ-52`/`D-ARQ-53` entre `preparar_envelope` e
+`preparar_ghes`) e repassa `detectar_psicossocial(paginas)` a `hidratar_pgr`.
+
+**Fatia 3 (primitivo + regra).** `psicossocial` novo em `predicados.py` (`ctx.pgr_ghe.psicossocial`).
+`R-PSY-02` marcada `status: DEPRECATED` em `regras.yaml` — fundamento refutado por n=2
+pós-protocolo-de-setembro/2026 (Ricco Hetrin 14/09 × CMO Varandas Flamboyant 16/09, desfechos
+opostos; confirmado pelo Diovanni: quem decide é o engenheiro que elabora o PGR), mesmo padrão de
+`D-ARQ-81`/`R-AUD-04`, exceto que HÁ sucessora (a norma segue obrigando inventariar o FRPRT — só a
+condição de disparo do exame muda). `R-PSY-03` criada, `quando: psicossocial`, mesma conduta
+(avaliacao_psicossocial + avaliacao_saude_mental, 12M, adm/per/MR), `status: INTERPRETADO`
+(n=2, mesma classe de obra — risco residual de granularidade por-PGR-vs-por-GHE não resolvido,
+registrado no corpo da regra). `docs/PROTOCOLO_AGENTE_MEDICO.md` §5.7 espelha os dois: R-PSY-02
+`[DEPRECATED]` com nota "Fundamento refutado" preservando o corpo antigo; R-PSY-03 nova. PROTOCOLO
+v93→**v94**.
+
+**Fatia 4 (testes, reversão nomeada).** `test_extracao_pgr.py`: 6 testes novos do extrator
+(ausente sem marcador, 3 parametrizados por marcador, case-insensitive, marcador na 2ª página) —
+reversão: `return True`/`return False` fixo, ou remover marcador de `_MARCADORES_PSICOSSOCIAL`, ou
+checar só `paginas[0]`. `test_hidratacao.py`: 2 testes novos (`hidratar_ghe`/`hidratar_pgr`
+repassam `psicossocial=True`) — reversão: voltar ao hardcoded `False`, ou não repassar no loop de
+`hidratar_pgr`. `test_predicados.py`: 2 testes novos do primitivo — reversão: `return False` fixo.
+`test_orquestrador.py`: 2 testes novos (`R-PSY-03` emite sse `psicossocial=True`, não emite sse
+`False`) + 1 teste novo (`R-PSY-02` excluída de `proto.regras` pelo carregador) — reversão:
+reverter `quando:` de R-PSY-03 para `todo_trabalhador`, ou remover `status: DEPRECATED` de
+R-PSY-02. Troca registrada, não apagamento silencioso (D-ARQ-06, precedente `poeira_de_madeira`):
+`test_rpsy02_emite_psicossocial_e_saude_mental_12m_sem_risco` (003.EN, assertava emissão
+incondicional) reescrito para `test_rpsy03_*` — redação antiga preservada acima, no bloco 003.EN
+deste histórico.
+
+**Quebras legítimas corrigidas com causa nomeada** (mesma classe das 4 quebras de `R-AUD-04`
+DEPRECATED em 003.EZ): `test_integracao_end_to_end` (`test_orquestrador.py`) — 8→6 linhas, perde
+`avaliacao_psicossocial`/`avaliacao_saude_mental` (fixture não declara `psicossocial=True`).
+`test_pipeline_gates_emissao_consolidacao_atividade_critica` (`test_integracao_002c.py`) — mesma
+causa, assert trocado de "issubset" para "not... &" + `_INCONDICIONAIS` perde os 2 slugs.
+
+**Verificação.** `python -m mypy --strict` alvo canônico: limpo, **48 arquivos**, delta-zero
+(`agente_medico/adaptadores/orquestracao_pgr.py` fora do alvo canônico, checado à parte: limpo).
+`python -m pytest tests/test_gerar_indice_darq.py`: 6 passed (tocou `DECISOES_ARQUITETURAIS.md` —
+nota de aplicação em `D-ARQ-49`, sem cláusula alterada; índice regenerado; 85 decisões inalterado).
+Recorte (`test_extracao_pgr.py test_hidratacao.py test_predicados.py test_orquestrador.py
+test_tipos.py test_integracao_002c.py`): **214 passed**. Suíte completa
+(`agente_medico/tests/ tests/`, árvore parada): **1247 passed, 6 skipped, 2 failed** — os 2 falhos
+são ambiente (`libreoffice-writer` ausente no container — `test_varrer_acervo_lgpd.py`/
+`test_cobertura_varrer_acervo.py`), mesma classe já registrada em 003.FI, confirmados
+pré-existentes (nenhum arquivo desta sessão pertence a `scripts/varrer_acervo_lgpd.py`). Delta
+**+13** exato contra o baseline de PR #337 (`1236` — `f15744a`), fechando com os 13 testes novos
+descritos na Fatia 4. Varredura inversa: cada reversão nomeada (extrator, threading `hidratar_ghe`/
+`hidratar_pgr`, primitivo, `quando`/`status` de `R-PSY-03`/`R-PSY-02`) aplicada isoladamente via
+`Edit`, suíte recortada rodada, confirmado vermelho exatamente nos testes previstos — nenhum a
+mais, nenhum a menos — e restaurada antes da próxima reversão; suíte recortada verde de novo ao
+final (214 passed) e `mypy --strict` limpo de novo. Discriminantes: `detectar_psicossocial`
+`return False` fixo mata os 5 testes "presente" (3 parametrizados + case-insensitive + segunda
+página), `return True` mata os 2 "ausente"/"páginas vazias"; `hidratar_ghe` sem repassar
+`psicossocial` mata os 2 testes de threading (`hidratar_pgr` herda a quebra); `hidratar_pgr` sem
+repassar no loop mata só o teste de `hidratar_pgr` (isolado do de `hidratar_ghe`); primitivo
+`return False` fixo mata o teste "true"; `R-PSY-03.quando: todo_trabalhador` mata o teste "não
+emite"; `R-PSY-02` sem `status: DEPRECATED` mata o teste dedicado + as 2 quebras legítimas
+(`test_integracao_end_to_end`, `test_pipeline_gates_emissao_consolidacao_atividade_critica`).
+
+**Fatia 5 (docs).** `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA
+(`PENDENCIAS_CLINICAS.md`) — risco residual (granularidade por-PGR-vs-por-GHE) não reaberto como
+pendência solta, fica registrado no corpo de R-PSY-03. `PAINEL_ESTADO.md` re-tirado: `regras 25/44
+(57%)`, `cas 50/80 (62%)`, `índice: sincronizado` — idênticos ao valor pós-`R-RX-03`/`R-ESP-03`
+(troca 1-por-1 R-PSY-02→R-PSY-03, sem movimento líquido; D-ARQ-85 cl.1 não exige re-tiragem para
+merge que não move número, nota adicionada mesmo assim por medição, não por gatilho).

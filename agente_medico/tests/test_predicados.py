@@ -90,6 +90,28 @@ def test_ruido_true_quando_presente() -> None:
     assert REGISTRO_PRIMITIVOS["ruido"](_ctx("ruido")) is True
 
 
+def _ctx_psicossocial(valor: bool) -> GHEContext:
+    ghe = GHEPGR(
+        id="GHE-01",
+        nome="Teste",
+        cargos=(),
+        riscos=(),
+        epis=(),
+        produtos_quimicos=(),
+        psicossocial=valor,
+    )
+    return GHEContext(pgr_ghe=ghe, riscos=[])
+
+
+def test_psicossocial_true_quando_ghe_pgr_documenta() -> None:
+    # R-PSY-03. Reversão que mata: `return False` fixo no primitivo.
+    assert REGISTRO_PRIMITIVOS["psicossocial"](_ctx_psicossocial(True)) is True
+
+
+def test_psicossocial_false_quando_ghe_pgr_nao_documenta() -> None:
+    assert REGISTRO_PRIMITIVOS["psicossocial"](_ctx_psicossocial(False)) is False
+
+
 # ---------------------------------------------------------------------------
 # ruido_acima_acao
 # ---------------------------------------------------------------------------

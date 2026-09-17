@@ -18,14 +18,44 @@ regras:
     base_normativa: "NR-01 itens 1.5.3.1.4, 1.5.3.2.1 e 1.5.4.4.5.3 (redação da
       Portaria MTE 1.419/2024; vigência 26/05/2026 pela Portaria MTE 765/2025) —
       a norma obriga inventariar e gerenciar o fator de risco psicossocial (FRPRT),
-      mas NÃO prescreve exame. A conduta é [DERIVADO — corpus de 6 matrizes
+      mas NÃO prescreve exame. A conduta era [DERIVADO — corpus de 6 matrizes
       pós-vigência, 5 clientes, 2 médicas, 284 cargos, 99% de cobertura; grupo de
-      controle de 13 matrizes pré-vigência em ~0%]. Incondicional (não condicionada
+      controle de 13 matrizes pré-vigência em ~0%], incondicional (não condicionada
       à declaração no PGR): medido PGR sem FRPRT cuja matriz emite mesmo assim
       (Ricco 2026 Adm) — silêncio documental não desobriga, postura D-ARQ-68.
       Sucede R-PSY-01 (DEPRECATED): mudança de escopo de aplicação
-      (condicionada → incondicional) exige ID nova."
-    status: DERIVADO
+      (condicionada → incondicional) exige ID nova.
+      [DEPRECATED — fundamento refutado por n=2 pós-protocolo-de-setembro/2026,
+      mesmo padrão de D-ARQ-81 aplicado a R-AUD-04]: Ricco Hetrin 14/09 (validada)
+      sai com zero exame psicossocial em 28/28 cargos — PGR correspondente lido
+      por completo (197 páginas), zero ocorrência de marcador de inventário
+      psicossocial, inclusive no Pedreiro com risco de altura documentado no
+      próprio PGR (refuta cascata por atividade crítica); CMO Varandas Flamboyant
+      16/09 (validada) sai incondicional em todo GHE, marcador presente no PGR.
+      Confirmado pelo Diovanni: quem decide é o engenheiro que elabora o PGR
+      (inclui ou não a seção de inventário psicossocial), não classificação de
+      risco nem atividade — o corpus que fundamentava a incondicionalidade media
+      protocolo anterior a esta distinção. COM sucessora, diferente do molde
+      'sem sucessora' de D-ARQ-81 cl.2: R-PSY-03."
+    status: DEPRECATED
+
+  - id: R-PSY-03
+    quando: psicossocial
+    emite:
+      - {exame: avaliacao_psicossocial,  periodicidade_meses: 12, momentos: [adm, per, MR]}
+      - {exame: avaliacao_saude_mental,  periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "NR-01 itens 1.5.3.1.4, 1.5.3.2.1 e 1.5.4.4.5.3 (mesma base de
+      R-PSY-02) — a norma obriga inventariar/gerenciar o FRPRT, não prescreve
+      exame; conduta [DERIVADO], igual a R-PSY-02. Sucede R-PSY-02 (DEPRECATED):
+      mudança de escopo de aplicação (incondicional → condicionada à presença da
+      seção de inventário psicossocial no PGR, primitivo 'psicossocial',
+      detectar_psicossocial em extracao_pgr.py) exige ID nova, mesma convenção de
+      R-PSY-01→R-PSY-02. [INTERPRETADO — n=2, mesma classe de obra (construção
+      civil) nos dois PGRs-âncora; risco residual não resolvido: granularidade
+      medida é por PGR inteiro, variação por GHE dentro do mesmo PGR não
+      descartada por falta de caso. Ver DT-(sessão não numerada, branch
+      claude/youthful-lamport-3kfkog)-01 em PENDENCIAS_CLINICAS.md]."
+    status: INTERPRETADO
 
   - id: R-PKG-ATIVCRIT
     quando: atividade_critica

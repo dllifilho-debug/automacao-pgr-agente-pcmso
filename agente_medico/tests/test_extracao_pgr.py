@@ -9,6 +9,7 @@ from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
     avaliar_familia,
     avaliar_segmentacao,
+    detectar_psicossocial,
     eh_ancora_card_cargo,
     eh_cabecalho_ghe,
     eh_sinal_cargo,
@@ -790,3 +791,47 @@ def test_recuperar_titulos_cargo_invariante_paralelismo_cjr() -> None:
     assert len(recuperar_titulos_cargo(paginas_cjr)) == len(
         recortar_cards_cargo(paginas_cjr)
     )
+
+
+# ---------------------------------------------------------------------------
+# detectar_psicossocial (R-PSY-03) — marcadores medidos no Hetrin 14/09 (zero
+# ocorrência) e Varandas Flamboyant 16/09 (presente); ver DT-(sessão não
+# numerada, branch claude/youthful-lamport-3kfkog)-01 em PENDENCIAS_CLINICAS.md
+# ---------------------------------------------------------------------------
+
+
+def test_detectar_psicossocial_ausente_sem_marcador() -> None:
+    # Reversão que mata: `return True` fixo em detectar_psicossocial.
+    paginas = ["PGR CONSTRUTORA HETRIN\nQUEDAS DE ALTURA\nCinto paraquedista"]
+    assert detectar_psicossocial(paginas) is False
+
+
+@pytest.mark.parametrize(
+    "marcador",
+    [
+        "Inventário de Riscos Psicossociais",
+        "COPSOQ",
+        "FRPRT",
+    ],
+)
+def test_detectar_psicossocial_presente_por_marcador(marcador: str) -> None:
+    # Reversão que mata: remover o marcador de _MARCADORES_PSICOSSOCIAL.
+    paginas = ["Texto de abertura do PGR", f"Seção — {marcador} — inventário"]
+    assert detectar_psicossocial(paginas) is True
+
+
+def test_detectar_psicossocial_case_insensitive() -> None:
+    # Cabeçalho em caixa alta (mesma classe de variação do bug Hetrin/parser
+    # AIHA) não pode apagar o sinal.
+    paginas = ["INVENTÁRIO DE RISCOS PSICOSSOCIAIS"]
+    assert detectar_psicossocial(paginas) is True
+
+
+def test_detectar_psicossocial_marcador_na_segunda_pagina() -> None:
+    # Reversão que mata: checar só paginas[0] em vez de varrer a lista inteira.
+    paginas = ["Página de abertura, sem marcador", "FRPRT aparece só aqui"]
+    assert detectar_psicossocial(paginas) is True
+
+
+def test_detectar_psicossocial_paginas_vazias() -> None:
+    assert detectar_psicossocial(["", "", ""]) is False

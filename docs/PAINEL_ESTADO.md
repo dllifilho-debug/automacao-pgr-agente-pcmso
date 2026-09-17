@@ -21,6 +21,29 @@
 > **Qual regra explica o +1 fica `[A MEDIR]`, deliberadamente.** Identificá-la exige entender as internas de `medir_painel.py`, e `DH-003EC-01` faceta **(b) segue ABERTA** dizendo que esse instrumento "reporta verde sobre vermelho, conta prosa como implementação e não vigia derivados". Arbitrar entre painel e instrumento quando o instrumento tem DH aberta sobre contagem seria escolher um número por conveniência. A tabela **não foi ajustada para bater**. Decisão do Arquiteto.
 >
 > **O `+1` persiste, inalterado por esta sessão `[MEDIDO — 16/09/2026]`.** `R-RX-03`/`R-ESP-03` são regras novas, plenamente executáveis (`quando`/`emite`), então somam igualmente ao instrumento e à intenção do painel — a lacuna acima não cresce nem fecha. Instrumento pós-sessão: **25/44 (57%)**; tabela "Os três números" pós-sessão: **24/44 (55%)** — mesma folga de 1 já documentada acima, agora sobre denominador maior. Não investigado nesta sessão; fora do escopo do achado que motivou a implementação.
+
+> **`R-PSY-02`/`R-PSY-03` `[MEDIDO — 17/09/2026]` (branch `claude/fervent-brown-7dcc0y`, número não
+> atribuído; IMPLEMENTAÇÃO — `R-PSY-03`, autorizada pelo Diovanni).** `R-PSY-02` sai `DEPRECATED`
+> (fundamento refutado), `R-PSY-03` nova a sucede — troca 1-por-1, sem gatilho de re-tiragem por
+> D-ARQ-85 cl.1 (merge que não move número não dispara re-tiragem). Confirmado por medição, não
+> presumido: `python -m scripts.medir_painel` devolve **`regras: 25/44 (57%)`**,
+> **`cas: 50/80 (62%)`**, **`índice: sincronizado`** — os três idênticos ao valor pós-`R-RX-03`/
+> `R-ESP-03` acima. A folga de `+1` entre instrumento e tabela "Os três números" (nota acima)
+> também persiste inalterada — nenhuma das duas regras tocadas nesta sessão é a que explica o `+1`.
+> `mypy --strict` alvo canônico: limpo, **48 arquivos**, delta-zero. Suíte completa
+> (`agente_medico/tests/ tests/`, árvore parada): **1247 passed, 6 skipped, 2 failed** — os 2
+> falhos são ambiente (`libreoffice-writer` ausente no container, `test_varrer_acervo_lgpd.py`/
+> `test_cobertura_varrer_acervo.py`), mesma classe já registrada em 003.FI (nota de container,
+> acima) e confirmados pré-existentes (nenhum arquivo tocado nesta sessão pertence a
+> `scripts/varrer_acervo_lgpd.py`). Delta **+13** exato contra o baseline de PR #337 (`1236` —
+> `f15744a`): 7 testes novos em `test_extracao_pgr.py` (extrator `detectar_psicossocial`,
+> 1 parametrizado ×3), 2 em `test_hidratacao.py`, 2 em `test_predicados.py`, 2 líquidos em
+> `test_orquestrador.py` (1 removido/3 novos — troca registrada, redação antiga preservada em
+> HISTORICO). Varredura inversa: cada reversão nomeada (extrator, threading, primitivo, `quando`/
+> `status` da regra) aplicada e restaurada isoladamente, confirmando exatamente os testes previstos
+> em vermelho — detalhe em HISTORICO (bloco desta sessão). Detalhe completo em HISTORICO e
+> `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA em
+> `PENDENCIAS_CLINICAS.md`.
 **Baseline:** branch `claude/festive-gates-soy0fr` sobre `main e210acd` (PRs #332/#333/#334, commits pendentes desta implementação) · **1233 passed, 6 skipped, 0 failed** *(medido via `python -m scripts.medir_painel --suite`, árvore parada)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v93 · DECISOES v188
 
 > **Tiragem desta sessão, parte 2 `[MEDIDO — 16/09/2026]` (branch `claude/festive-gates-soy0fr`,

@@ -73,19 +73,23 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     exames_final = stage_8_consolidacao(exames)
 
     nomes = {e.exame.strip().lower() for e in exames_final}
-    # Superconjunto, não contagem exata: R-CLI-01 (piso universal, 003.EC) e
-    # R-PSY-02 (psicossocial incondicional, 003.EN) somam exames a toda
-    # matriz; cravar contagem fixa quebraria na próxima regra incondicional.
+    # Superconjunto, não contagem exata: R-CLI-01 (piso universal, 003.EC)
+    # soma exame_clinico a toda matriz; cravar contagem fixa quebraria na
+    # próxima regra incondicional.
     assert {"hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg"}.issubset(nomes)
     assert "exame_clinico" in nomes
-    assert {"avaliacao_psicossocial", "avaliacao_saude_mental"}.issubset(nomes)
+    # avaliacao_psicossocial/avaliacao_saude_mental NÃO saem mais aqui (sessão
+    # de 17/09/2026): R-PSY-02 (incondicional, 003.EN) está DEPRECATED,
+    # sucedida por R-PSY-03 (quando: psicossocial) — este GHE não declara
+    # GHEPGR.psicossocial=True.
+    assert not {"avaliacao_psicossocial", "avaliacao_saude_mental"} & nomes
 
     # R-AUD-04 (piso incondicional todo_trabalhador) foi DEPRECATED em 003.EZ
     # (D-ARQ-81 — fundamento refutado por DT-003EY-01). Este GHE não tem risco
     # ruído, então R-AUD-01/02 não disparam (nem emitem, nem bloqueiam) — a
     # audiometria volta a sair só por R-PKG-ATIVCRIT (adm/per/MR, sem dem) e
     # cai no loop genérico abaixo, junto dos outros 4 exames do pacote.
-    _INCONDICIONAIS = {"exame_clinico", "avaliacao_psicossocial", "avaliacao_saude_mental"}
+    _INCONDICIONAIS = {"exame_clinico"}
     exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() not in _INCONDICIONAIS]
     for e in exames_ativcrit:
         assert e.periodicidade_meses == 12

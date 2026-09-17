@@ -2609,7 +2609,7 @@ o histórico que já os contém — o mesmo custo desproporcional que dispensou 
 
 **Status:** ABERTA. Registro de fato medido, não pedido de trabalho.
 
-### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-01 — Nível de risco psicossocial do PGR bruto (COPSOQ) é boilerplate, não sinal por GHE `[ABERTA — medida, não-bloqueante]`
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-01 — Nível de risco psicossocial do PGR bruto (COPSOQ) é boilerplate, não sinal por GHE `[RESOLVIDA — R-PSY-03/R-PSY-02 DEPRECATED, sessão branch claude/fervent-brown-7dcc0y]`
 
 **Origem.** Handoff da sessão que abriu o PR #335 (branch `claude/festive-gates-soy0fr`): tabela
 manuscrita das Dras. Carolini e Patrícia, não baseada em norma, cruza tipo de atividade (Trabalho
@@ -2750,6 +2750,19 @@ Arquiteto, não pendente de resposta clínica adicional.
 **Status atualizado:** ABERTA — de "aguardando matriz nova" para "proposta concreta pronta,
 aguardando autorização de implementação". Não bloqueia produção (regra atual, embora com
 fundamento refutado, segue rodando sem crash).
+
+**RESOLVIDA (17/09/2026, branch `claude/fervent-brown-7dcc0y`, autorizada pelo Diovanni).**
+Proposta implementada tal como registrada acima: `detectar_psicossocial` (`extracao_pgr.py`)
+extrai o marcador do PGR inteiro e popula `GHEPGR.psicossocial`; `R-PSY-03` nova (`quando:
+psicossocial`, mesma conduta) sucede `R-PSY-02`, que sai `[DEPRECATED — fundamento refutado]`
+em `regras.yaml`/`PROTOCOLO_AGENTE_MEDICO.md` §5.7 (PROTOCOLO v93→v94). Risco residual desta DT
+(granularidade por PGR inteiro vs. por GHE, n=2) **não resolvido** — fica registrado no corpo de
+`R-PSY-03` (`regras.yaml`/PROTOCOLO §5.7), não reaberto aqui como pendência solta. Testes com
+reversão nomeada em `test_extracao_pgr.py` (extrator), `test_hidratacao.py`/`test_predicados.py`
+(threading + primitivo) e `test_orquestrador.py` (regra fim-a-fim + R-PSY-02 excluída do motor);
+quebras legítimas em `test_integracao_002c.py` e o `test_integracao_end_to_end` de
+`test_orquestrador.py` corrigidas com causa nomeada (perdem as 2 linhas que só saíam por
+R-PSY-02 incondicional). Detalhe completo em HISTORICO_OPERACIONAL.md (bloco desta sessão).
 
 ### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-02 — Segunda variante do template Ricco Hetrin quebra o reconhecedor de família AIHA `[ABERTA — bloqueante para este documento, não-bloqueante para o app]`
 

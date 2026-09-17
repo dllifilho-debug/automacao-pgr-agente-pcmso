@@ -6,6 +6,7 @@ from pathlib import Path
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
+    detectar_psicossocial,
     extrair_texto_pgr,
     recortar_blocos_ghe,
     recortar_cards_cargo,
@@ -270,8 +271,17 @@ def processar_arquivo_pgr(
         protocolo.vocabulario.agentes,
         fracoes_sem_agente=protocolo.vocabulario.fracoes_sem_agente,
     )
+    # R-PSY-03: 3ª leitura de extrair_texto_pgr sobre o mesmo arquivo — mesma
+    # classe da duplicação já documentada acima (preparar_envelope/
+    # preparar_ghes), texto puro sem custo de LLM. psicossocial é sinal de
+    # PGR inteiro (D-ARQ-49 P2 aplicado): replicado a todo GHE via hidratar_pgr.
+    psicossocial = detectar_psicossocial(extrair_texto_pgr(caminho))
     pgr, pend_hidr = hidratar_pgr(
-        aprovados, indice, envelope.validade, envelope.assinatura_engenheiro
+        aprovados,
+        indice,
+        envelope.validade,
+        envelope.assinatura_engenheiro,
+        psicossocial,
     )
     resultado = processar_pgr(pgr, protocolo, hoje)
     return resultado, (*pend_forma, *tuple(pend_hidr))
