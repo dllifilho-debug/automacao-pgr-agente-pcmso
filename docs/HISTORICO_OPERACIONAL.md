@@ -8566,8 +8566,18 @@ como empilhar prompt — mesma cláusula do §8 para o Code, aplicada aqui por a
 a citar a função já versionada (`parsear_arquivo`) como via de reprodução, e a alegação foi
 reescrita de "não existe threshold" (mais forte que os dados sustentavam — os dados mostram lacuna
 limpa NESTE witness, não ausência de qualquer corte possível) para "nenhum threshold tem garantia
-estrutural" (o que a medição realmente mostra). Rejulgado por 2ª sessão nova: **[resultado a
-registrar após a 2ª rodada — ver adendo abaixo]**.
+estrutural" (o que a medição realmente mostra). Rejulgado por 2ª sessão nova, sem contexto da 1ª:
+**APROVOU.** Maior gap apontado (não-fatal, já disclosed no próprio texto): a universalidade é
+demonstrada no mecanismo (não usa heurística sobre o texto do PGR), mas para indústria química —
+o domínio onde `produtos_quimicos` mais importa — o custo de digitação manual do RT por produto/GHE
+não foi medido contra um witness real; o artefato já rotula isso "paliativo sinalizado, não
+escondido", e o Crítico concordou que a ressalva está corretamente marcada, não escondida. Barra:
+(1) PARCIAL — cobertura lógica dos 3 domínios, mas reserva não resolvida para química intensiva;
+(2) SIM — a decisão rejeita a extração automática exatamente por overfitting ao witness Fascino, e
+o mecanismo adotado não depende de nenhuma particularidade desse documento; (3) SIM — números e
+método de reprodução citados são auditáveis a partir do próprio artefato, sem depender de confiar
+na sessão original. Nenhuma correção adicional pedida — decisão permanece como ARQUITETURA
+PROPOSTA, aprovada pelo Crítico, aguardando ratificação do Diovanni.
 
 **Docs.** Nota de ARQUITETURA PROPOSTA em `D-ARQ-49` (`DECISOES_ARQUITETURAIS.md` v198→**v199**,
 decisões inalteradas em **85**). `DT-(sessão claude/nice-ptolemy-wxk1wo)-01` ganha 2 notas (achado
