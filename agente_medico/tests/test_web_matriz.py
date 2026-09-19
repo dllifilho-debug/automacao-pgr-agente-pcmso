@@ -14,10 +14,12 @@ from streamlit.testing.v1 import AppTest
 
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.tipos import (
+    BlocoVerbatim,
     EnvelopeConfirmado,
     ExameEmitido,
     GHEVerbatim,
     MatrizGHE,
+    MembroVerbatim,
     Momento,
     Pendencia,
     Resultado,
@@ -513,3 +515,109 @@ def test_zero_chamadas_ia_nao_mostra_aviso_de_procedencia(
     assert not at.info
     textos = [el.value for el in at.markdown]
     assert not any("lido(s) por IA" in t for t in textos)
+
+
+# ---------------------------------------------------------------------------
+# FDS/FISPQ avulsa (fatia "só FDS") — upload opcional, independente do PGR.
+# ---------------------------------------------------------------------------
+
+
+def test_pagina_matriz_fds_avulsa_sem_pgr_mostra_composicao(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: mover o bloco de upload/processamento de FDS pra
+    # DEPOIS do `if arquivo is None: return` — sem PGR, a função retornaria
+    # antes de processar a FDS, e o CAS/frases-H nunca apareceriam na tela.
+    bloco = BlocoVerbatim(
+        faixa="1-5%",
+        membros=(MembroVerbatim(cas="71-43-2", nome="Benzeno", frases_h=("H350", "H340")),),
+    )
+
+    def _preparar_falso(
+        *args: Any, **kwargs: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        return (bloco,), ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_composicao", _preparar_falso)
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+
+    assert not at.exception
+    textos = [el.value for el in at.markdown]
+    assert any("71-43-2" in t and "Benzeno" in t for t in textos)
+    assert any("H350" in t and "H340" in t for t in textos)
+
+
+def test_pagina_matriz_sem_fds_nao_chama_preparar_composicao(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: trocar `for arquivo_fds in arquivos_fds or ()` por
+    # algo que itere mesmo com arquivos_fds vazio/None — preparar_composicao
+    # seria chamada sem nenhum upload de FDS.
+    chamadas: list[int] = []
+
+    def _preparar_espiao(
+        *args: Any, **kwargs: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        chamadas.append(1)
+        return (), ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_composicao", _preparar_espiao)
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+
+    assert not at.exception
+    assert chamadas == []
+
+
+def test_pagina_matriz_fds_avulsa_mostra_pendencias(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: remover o laço `for p in pendencias_fds: st.write(...)`
+    # — pendência bloqueante da FDS (ex. composição ausente) desapareceria da
+    # tela, violando D-ARQ-22/31 (nunca silenciar pendência).
+    pendencia = Pendencia(
+        tipo="composicao_ausente_fds",
+        destinatario="extracao",
+        motivo="Região de composição não localizada",
+        bloqueante=True,
+        regra_origem="D-ARQ-47",
+    )
+
+    def _preparar_falso(
+        *args: Any, **kwargs: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        return (), (pendencia,)
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_composicao", _preparar_falso)
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+
+    assert not at.exception
+    textos = [el.value for el in at.markdown]
+    assert any("composicao_ausente_fds" in t for t in textos)
+
+
+def test_pagina_matriz_fds_avulsa_com_pgr_nao_interfere_no_fluxo_pgr(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: qualquer mudança que faça o upload de FDS estourar
+    # ou pular o fluxo normal do PGR antes do `if arquivo is None` — o
+    # formulário do PGR deixaria de aparecer mesmo com o PGR enviado.
+    def _preparar_falso(
+        *args: Any, **kwargs: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        return (), ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_composicao", _preparar_falso)
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+
+    assert not at.exception
+    assert at.button  # formulário do PGR renderizou normalmente (form_submit_button)

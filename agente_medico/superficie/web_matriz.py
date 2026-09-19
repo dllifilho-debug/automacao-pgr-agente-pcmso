@@ -25,7 +25,9 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Sequence
 
+from agente_medico.adaptadores.orquestracao_fds import preparar_composicao
 from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
+from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini
 from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.protocolo import carregar
@@ -41,6 +43,7 @@ from agente_medico.superficie.documento_matriz import (
 
 __all__ = [
     "CacheMatrizes",
+    "TranscritorGemini",
     "calcular_chave_cache",
     "deve_reprocessar",
     "executar_rota_determinista",
@@ -48,6 +51,7 @@ __all__ = [
     "gerar_documento",
     "montar_envelope",
     "pagina_matriz",
+    "preparar_composicao",
 ]
 
 
@@ -248,13 +252,39 @@ def pagina_matriz() -> None:
         renderizar_docx,
     )
     from agente_medico.superficie.web_matriz import (
+        TranscritorGemini,
         executar_rota_determinista_cacheada,
         montar_envelope,
+        preparar_composicao,
     )
 
     st.title("Matriz de Exames — PCMSO")
 
     arquivo = st.file_uploader("PDF do PGR", type="pdf")
+
+    st.subheader("FDS/FISPQ dos produtos químicos (opcional)")
+    st.caption(
+        "Funciona com ou sem o PGR acima — extrai CAS e frases-H de cada FDS enviada. "
+        "O vínculo com um produto do PGR é a próxima fatia (ainda não implementada)."
+    )
+    arquivos_fds = st.file_uploader(
+        "PDF(s) da FDS/FISPQ", type="pdf", accept_multiple_files=True, key="fds_avulsas"
+    )
+    for arquivo_fds in arquivos_fds or ():
+        st.write(f"**{arquivo_fds.name}**")
+        with tempfile.TemporaryDirectory() as tmp_fds:
+            caminho_fds = Path(tmp_fds) / arquivo_fds.name
+            caminho_fds.write_bytes(arquivo_fds.getvalue())
+            with st.spinner(f"Lendo composição de {arquivo_fds.name}..."):
+                blocos_fds, pendencias_fds = preparar_composicao(caminho_fds, TranscritorGemini())
+        for bloco_fds in blocos_fds:
+            st.write(f"Faixa: {bloco_fds.faixa}")
+            for membro in bloco_fds.membros:
+                frases_h = ", ".join(membro.frases_h) or "—"
+                st.write(f"- CAS {membro.cas} | {membro.nome} | H: {frases_h}")
+        for p in pendencias_fds:
+            st.write(f"- `{p.tipo}`: {p.motivo}")
+
     if arquivo is None:
         st.session_state.pop("web_matriz_cache", None)
         return

@@ -8338,3 +8338,81 @@ nesta continuação (só os scripts de medição ad-hoc no scratchpad, fora do r
 tocada; `PROTOCOLO_AGENTE_MEDICO.md` inalterado; `PAINEL_ESTADO.md` Baseline re-tirado de novo
 (hash/versões desta continuação); três números clínicos seguem NÃO re-tirados. Segundo commit
 desta sessão (docs), autorização de push pendente de confirmação por turno (`CLAUDE.md`).
+
+## Sessão (branch `claude/nice-ptolemy-wxk1wo`, número não atribuído) — 19/09/2026 — IMPLEMENTAÇÃO: FDS/FISPQ ganha upload avulso na tela (fatia 1 de 2, D-ARQ-47)
+
+**Pedido do Diovanni.** Depois de fechar o PR #344 (bloqueador da fatia 5b), Diovanni pediu outra
+frente: a tela só sobe o PGR, mas os produtos químicos (CAS, agravos à saúde) vêm da FDS/FISPQ e
+complementam o PGR/PCMSO — queria poder subir a FDS também.
+
+**Levantamento antes de codar.** `preparar_composicao` (`orquestracao_fds.py`, D-ARQ-47) já faz a
+cascata inteira — extração real, transcrição-LLM real (`TranscritorGemini`), gate de forma — mas
+`git grep` confirmou: nenhuma função de produção chama `preparar_composicao`, só teste. `web_fds.py`
+(revisão-RT) existe mas é só colar JSON, sem upload nem extração, desconectada da tela principal.
+`processar_pgr` (D-ARQ-40) já chama `executar_com_composicao` internamente, mas
+`ProdutoQuimico.fds` (`motor/tipos.py`) nunca é populado em produção — o mecanismo de resolução de
+composição existe, mas não tem insumo real hoje.
+
+**Decisão de fluxo, com o Diovanni.** Duas perguntas resolvidas em conversa antes de codar:
+1. Casamento FDS↔produto do PGR: **manual na tela** (usuário escolhe da lista de produtos que a IA
+   leu do PGR), não automático por nome — decisão do Diovanni, minha recomendação (risco de vínculo
+   errado e silencioso, classe D-ARQ-22).
+2. "E se eu quiser só extrair da FDS, sem o PGR?" — confirmei que `preparar_composicao` é standalone
+   (não depende de PGR) e propus fluxo em 2 fatias: (1) só FDS — extração avulsa, sem casamento; (2)
+   PGR + FDS — casamento manual, composição entra no motor. Diovanni topou.
+
+**Fatia 1 IMPLEMENTADA nesta sessão.** `web_matriz.py::pagina_matriz()` ganha um `st.file_uploader`
+de FDS/FISPQ (`accept_multiple_files=True`), posicionado ANTES do `if arquivo is None: return` do
+PGR — funciona com ou sem PGR. Pra cada FDS: grava em tempfile, chama `preparar_composicao(caminho,
+TranscritorGemini())`, renderiza CAS/nome/frases-H por membro + pendências.
+
+**Achado de mecânica de teste (AppTest).** `AppTest.from_function` re-executa só o CÓDIGO-FONTE da
+função (não o módulo inteiro) — nomes importados no TOPO do arquivo (`preparar_composicao`,
+`TranscritorGemini`) não ficam visíveis dentro de `pagina_matriz()` a menos que a própria função
+os re-importe localmente (mesmo padrão que `executar_rota_determinista_cacheada`/`montar_envelope`
+já usavam). 1ª rodada estourou `NameError` nos 3 testes que exercitam a FDS COM upload; corrigido
+adicionando os dois nomes ao bloco de import local já existente + `__all__` (mypy --strict exige
+reexport explícito sob `no_implicit_reexport`).
+
+**Achado de tipo (mypy --strict).** A variável de laço `bloco` da FDS colidia, por reuso de nome,
+com o `bloco` do laço `for bloco in doc.blocos` mais abaixo na mesma função (`BlocoVerbatim` vs.
+`BlocoGHE`) — Python não escopa variável de `for` ao corpo do laço, e mypy viu os dois tipos na
+mesma variável. Renomeado pra `bloco_fds` no laço novo.
+
+**Verificação.** 4 testes novos (`test_web_matriz.py`, AppTest): FDS sem PGR mostra composição
+(CAS/nome/frases-H); sem upload de FDS não chama `preparar_composicao`; pendência da FDS aparece na
+tela; upload de FDS não interfere no fluxo normal do PGR. Varredura inversa: `git stash` do
+`web_matriz.py` (mantendo os testes) derruba exatamente os 4 novos, mais nenhum — restaurado e
+reconfirmado verde. `mypy --strict` alvo canônico: limpo, 49 arquivos, delta-zero.
+
+**Teste ao vivo no navegador** (pedido do `run`/UI: "start the dev server and use the feature in a
+browser"). `streamlit run app_matriz_local.py` (entrypoint sem gate OIDC, D-ARQ-79) + Playwright
+headless: screenshot 1 confirma a nova seção "FDS/FISPQ dos produtos químicos (opcional)" com
+upload próprio, sem quebrar o layout existente. Amostra real: recortei 10 páginas (80-90, produto
+"ADESIVO PL...") do FISPQ embutido no PGR `PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf`
+(o mesmo witness da fatia 5b acima) com `pypdf`, subi pelo uploader real — screenshot 2 confirma:
+extração real localizou a seção de composição (não caiu em `composicao_ausente_fds`), e sem
+`CHAVE_API_GOOGLE` no ambiente a tentativa de transcrição virou `transcricao_indisponivel_fds` na
+tela, sem exceção nem crash — confirma a costura ida completa até o ponto em que falta credencial,
+contra um PDF real, não só contra mock.
+
+**Escopo.** Só a fatia 1 (extração avulsa). Falta a fatia 2 — casamento FDS↔`ProdutoQuimico` do
+PGR, que alimenta `resolver_composicao`/`materialidade` de verdade — registrada como
+`DT-(sessão claude/nice-ptolemy-wxk1wo)-01` (`PENDENCIAS_CLINICAS.md`), com o levantamento do que
+falta (expor a lista de produtos do PGR hidratado; separar o CARO — parse+hidratação — do BARATO —
+resolução de composição + `processar_pgr` — pra re-rodar sem custo de LLM/PDF quando o usuário
+escolhe o casamento; `st.selectbox` por FDS). Nada disso medido/desenhado ainda.
+
+**Suíte completa** (`agente_medico/tests/ tests/`, árvore parada, código tocado — recorte da
+cláusula fixa não bastava aqui): **1278 passed, 6 skipped, 0 failed**, 635,23s. Delta **+17** exato
+contra o baseline herdado (`b3f5e62`/`claude/dreamy-mayer-os6jce`, 1261): **13** dos testes novos da
+fatia 5a (`test_parser_familia_grid_aiha.py`, sessão `claude/blissful-knuth-riqucz`) — primeira vez
+confirmados contra a suíte inteira, nunca tinham rodado nela — **+** os **4** desta sessão
+(`test_web_matriz.py`, FDS avulsa). Reconciliação exata: `1261 + 13 + 4 = 1278`.
+
+**Docs.** `D-ARQ-47` ganha 1 nota de aplicação (mesma ID, nenhuma cláusula alterada), `DECISOES`
+v195→**v196**. `DT-(sessão claude/nice-ptolemy-wxk1wo)-01` nova, ABERTA. Índice D-ARQ regenerado
+(`python -m pytest tests/test_gerar_indice_darq.py`: 6 passed). Nenhuma `R-*` tocada; PROTOCOLO
+inalterado. `PAINEL_ESTADO.md`: Baseline re-tirado com o número real desta sessão (suíte medida
+nesta árvore, não mais herdado); três números clínicos NÃO re-tirados (nenhum se move, nenhuma
+`R-*` tocada, sessão não é META).
