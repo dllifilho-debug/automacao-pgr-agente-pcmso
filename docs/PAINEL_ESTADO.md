@@ -22,6 +22,33 @@
 >
 > **O `+1` persiste, inalterado por esta sessão `[MEDIDO — 16/09/2026]`.** `R-RX-03`/`R-ESP-03` são regras novas, plenamente executáveis (`quando`/`emite`), então somam igualmente ao instrumento e à intenção do painel — a lacuna acima não cresce nem fecha. Instrumento pós-sessão: **25/44 (57%)**; tabela "Os três números" pós-sessão: **24/44 (55%)** — mesma folga de 1 já documentada acima, agora sobre denominador maior. Não investigado nesta sessão; fora do escopo do achado que motivou a implementação.
 
+> **Tiragem de fechamento `[MEDIDO — 18-19/09/2026]` (branch `claude/dreamy-mayer-os6jce`, número
+> não atribuído; ARQUITETURA + docs — D-ARQ-57 peça 5 + DT do relatório de rastreabilidade da
+> matriz, PRs #339/#340, merges `67705b5`/`a2ae366`).** Nenhuma `R-*` criada, alterada ou
+> depreciada; nenhum `.yaml` de regra/vocabulário tocado — `git diff --name-only 0f168b4 b3f5e62 --
+> '*PROTOCOLO_AGENTE_MEDICO.md' '*regras.yaml' '*agentes.yaml' '*exames.yaml'` devolve **vazio**
+> (`0f168b4` = checkpoint da tiragem R-PSY-02/R-PSY-03 abaixo). `python -m scripts.medir_painel
+> --suite` em `b3f5e62` (== `main a2ae366`; `git diff --stat b3f5e62 origin/main` vazio,
+> confirmado): **`regras: 25/44 (57%)`**, **`cas: 50/80 (62%)`**, **`índice: sincronizado`** — os
+> três idênticos à tiragem anterior. `mypy --strict` alvo canônico: limpo, **48 arquivos**,
+> delta-zero. Suíte completa (`agente_medico/tests/ tests/`, árvore parada): **1261 passed, 6
+> skipped, 0 failed**. Delta **+12 exato** contra o checkpoint anterior (`0f168b4`: 1247 passed + 2
+> failed = 1249 não-skip): os 12 testes de `62a2aa1` (PR #338, fix do reconhecedor de cabeçalho
+> grid-AIHA fragmentado — fora desta sessão; 4 parametrizados de fragmentação + 1 de equivalência +
+> 3 anti-falso-positivo + 1 sintético + 2 reais + 1 de não-regressão, per HISTORICO daquela sessão)
+> **+** os 2 que eram `failed` por ambiente (`libreoffice-writer` ausente) e passam a `passed`
+> neste container — mesma classe já registrada em 003.FK (pacote pré-instalado pelo hook de
+> sessão, não mudança de código): `1247 + 2 + 12 = 1261`, reconciliado exato. PR #338 nunca ganhou
+> bloco de Baseline próprio — mesmo padrão já documentado acima para `#327`/`#328`/`#329`. Esta
+> sessão em si: só docs — `DECISOES_ARQUITETURAIS.md` (novo andamento "ARQUITETURA da peça 5" sob
+> `D-ARQ-57`; sem D-ARQ novo, contagem de decisões intacta em **85**), `PENDENCIAS_CLINICAS.md`
+> (1 nota em `DT-(sessão claude/youthful-lamport-3kfkog)-02` + 1 DT nova aberta,
+> `DT-(sessão claude/dreamy-mayer-os6jce)-01`), `HISTORICO_OPERACIONAL.md` (2 blocos de sessão),
+> `INDICE_DARQ.md` regenerado. `DECISOES v190→v191` (pela nota de andamento); `PROTOCOLO v94`
+> inalterado. Nenhuma fatia de D-ARQ-57 peça 5 implementada — decisão fica como ARQUITETURA
+> proposta, sem ratificação formal do Diovanni registrada neste turno (ver nota em `D-ARQ-57`).
+> Escrita autorizada pelo usuário desta sessão ("fecha o dia, atualiza o PAINEL_ESTADO.md").
+
 > **`R-PSY-02`/`R-PSY-03` `[MEDIDO — 17/09/2026]` (branch `claude/fervent-brown-7dcc0y`, número não
 > atribuído; IMPLEMENTAÇÃO — `R-PSY-03`, autorizada pelo Diovanni).** `R-PSY-02` sai `DEPRECATED`
 > (fundamento refutado), `R-PSY-03` nova a sucede — troca 1-por-1, sem gatilho de re-tiragem por
