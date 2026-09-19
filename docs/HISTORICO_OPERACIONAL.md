@@ -8125,3 +8125,93 @@ superfície de geração do documento), não medido nesta sessão — nenhum pon
 para confirmar onde a proveniência se perde. Fica ABERTA, sem prioridade relativa definida frente
 à fatia 5a-5d de `D-ARQ-57`; aguardando sessão ARQUITETURA própria. Escrita autorizada pelo
 usuário ("pode gravar"). Sem código.
+
+## Sessão (branch `claude/blissful-knuth-riqucz`, número não atribuído) — 19/09/2026 — decisões pendentes, ratificação D-ARQ-57 peça 5 e IMPLEMENTAÇÃO da fatia 5a
+
+**Abertura.** Leitura do estado real de disco (`git log`, `PENDENCIAS_CLINICAS.md`,
+`DECISOES_ARQUITETURAIS.md` D-ARQ-57, `PAINEL_ESTADO.md`), sem reusar nada de conversa anterior —
+achou a PR #341 (re-tiragem do `PAINEL_ESTADO.md`) já mergeada, ponto que o prompt de abertura
+trazia como ainda pendente; corrigido por medição, não assumido.
+
+**Decisões do Diovanni.** Duas perguntas em aberto desde a sessão `claude/dreamy-mayer-os6jce`:
+(1) ordem do fatiamento 5a→5b→5c→5d de `D-ARQ-57` peça 5 — mantida como desenhada, sem reordenar
+para priorizar o witness Hetrin/set-2026; (2) prioridade entre fechar a peça 5 e abrir ARQUITETURA
+para `DT-(sessão claude/dreamy-mayer-os6jce)-01` (relatório de rastreabilidade) — peça 5 primeiro.
+Ambas registradas em `D-ARQ-57` (nota "Ratificação") e nas duas DTs (`PENDENCIAS_CLINICAS.md`),
+commit `34e2a5f`, PR #342 mergeada.
+
+**IMPLEMENTAÇÃO da fatia 5a — `agente_medico/motor/parser_familia_grid_aiha.py` (módulo irmão a
+`parser_familia_consciente.py`, D-ARQ-65).** Banda de coluna calibrada por PÁGINA (o cabeçalho do
+grid repete em toda página, ao contrário do Fascino onde repete por bloco GHE) + reconhecedor de
+fronteira de função.
+
+**Medição contra os 2 witnesses limpos achou 2 problemas de anatomia que a ARQUITETURA não tinha
+previsto** (medição direta, pdfplumber, antes de codar qualquer coisa em cima da hipótese
+"1ª célula da coluna Função não-vazia"):
+
+1. O rótulo da função pode compartilhar o MESMO `top` de palavras de OUTRAS colunas — medido
+   Hetrin/mar pág. 64: "Administrativo de Obra" (banda Função) no mesmo `top` de "Cutânea"/
+   "Vestimenta de trabalho (H)" (colunas Meio de Propagação/Eliminação). Um reconhecedor que exige
+   a linha física INTEIRA dentro da banda Função (1ª tentativa desta sessão) perde esse rótulo na
+   página CONTINUAÇÃO — tratou um fragmento de descrição ("serviços administrativos,") como se
+   fosse nome de função nova, quebrando 1 grupo real em 2. Corrigido separando as palavras da
+   página em duas correntes (banda Função vs. resto) ANTES de agrupar em linha — cada corrente
+   agrupa só consigo mesma, sem colisão de `top` entre colunas.
+2. O nome pode quebrar em MAIS de uma linha física — medido "Técnico de Segurança do" + "Trabalho"
+   (Serra Dourada, pág. 62). A fronteira título/descrição não é "1 linha só": é a quebra de
+   espaçamento vertical — linhas do MESMO parágrafo (nome ou descrição) distam ~7.4-7.6pt; a
+   quebra entre nome e descrição distam ~14.9-15.0pt, medido em 12 ocorrências (8 funções, 2
+   witnesses), 100% consistente. `_LIMIAR_QUEBRA_TITULO_PT = 10.0` fica seguro no meio das duas.
+
+**Consequência — a "ambiguidade" da nota de ARQUITETURA anterior desapareceu.** A 1ª medição desta
+sessão (antes do fix acima) reproduziu o padrão "2-6 linhas de risco antes do rótulo de cada
+função" já registrado na ARQUITETURA e, sem saber ainda que era artefato do bug (1), essa
+descoberta foi levada ao usuário via `AskUserQuestion` — pergunta sobre atribuir essas linhas à
+função anterior, à seguinte, ou marcar como `Pendencia` ambígua. O usuário pediu a recomendação;
+recomendei `Pendencia` (molde D-ARQ-31/35, anti-supressão) e ele autorizou. **Só depois, ao
+implementar, o bug (1) apareceu e a investigação seguinte mostrou que a atribuição por PÁGINA
+(cada página pertence inteira a uma função — repetição de nome = continuação, nome novo = fecha o
+grupo anterior e abre um novo, TODAS as linhas de resto da página vão pro grupo que fica aberto)
+resolve sem ambiguidade nenhuma** — as linhas pré-rótulo sempre pertencem à função cuja página as
+contém, nunca à anterior (validado: 28 funções em 56 páginas de Serra Dourada, exatamente 2
+páginas cada, sem sobra nem superposição). Voltei ao usuário com a correção antes de fechar o
+desenho — `TrechoAmbiguo`/`Pendencia` desenhados na aprovação inicial NÃO entraram no código
+(campo sem consumidor teria sido a classe D-ARQ-DG-1).
+
+**2º bug medido, achado pela varredura inversa dos testes de integração:** `header_fim_top`
+(fronteira cabeçalho/corpo) usava `linha.palavras[0].top` (palavra mais à esquerda por x0) como
+referência — mas a própria linha do cabeçalho tem variação interna de `top` dentro da tolerância
+de agrupamento (medido Serra Dourada pág. 58: um "Risco" residual de sub-linha do cabeçalho,
+`top=91.26`, agrupado com "Exposição"/"Propagação"/"Risco" reais do cabeçalho, `top=91.50`, mesma
+`_Linha` — a palavra mais à esquerda tinha o `top` mais baixo). Corrigido usando `max(p.top for p
+in linha.palavras)`. Sem esse fix, a própria linha do cabeçalho vazava pro corpo como 1ª "linha de
+risco" de cada grupo (2 linhas a mais por função, medido Serra Dourada 103→101).
+
+**Validação.** Núcleo puro: 9 testes sintéticos (2 de exceção — `GrupoFuncaoNaoReconhecido` sem
+cabeçalho / sem linha-função). Varredura inversa: 7/7 reversões nomeadas confirmadas (cada uma
+aplicada isoladamente e restaurada) — antes de fechar, a 1ª versão do teste do rodapé
+(`test_nucleo_puro_rodape_matriz_de_risco_nao_vira_nome_de_funcao`) passou mesmo com a exclusão
+por literal revertida (a linha do rodapé, isolada no fim da página, já era descartada pelo limiar
+de quebra de parágrafo, tornando a reversão inócua) — reescrito o teste (página cujo ÚNICO
+conteúdo na banda Função é o rodapé) até a reversão derrubar o teste de fato, não só a intenção.
+Integração (2 PDFs reais, marcador `requer_pdfs`): nomes e contagens de linha exatas batendo
+(Hetrin/mar "Administrativo de Obra"=95, "Almoxarife"=111; Serra Dourada "Encarregado de
+Obra"=101, "Pedreiro"=118, "Técnico de Segurança do Trabalho"=101); confirmação cruzada com
+`extract_tables()` (instrumento independente já usado na ARQUITETURA): 41 funções em Hetrin/mar
+págs. 63-142 (80 de ~123 páginas) extrapola pra ~63 no documento inteiro — mesma ordem de grandeza
+do "~60" já medido; Serra Dourada págs. 58-113 fecha em exatos 28 grupos / 56 páginas, sem sobra.
+`mypy --strict` alvo canônico limpo, **49 arquivos** (+1, delta exato do módulo novo).
+`tests/test_gerar_indice_darq.py` 6/6 (cláusula fixa, tocou `DECISOES_ARQUITETURAIS.md`).
+
+**Escopo.** Só a fatia 5a (banda + fronteira + nome + linhas cruas por grupo, sem decompor N:1 nem
+parsear a célula de risco). `D-ARQ-57` peça 3 (`eh_sinal_cargo`) e a peça 4/D-ARQ-65 permanecem
+intocadas. Nenhuma `R-*` criada, alterada ou depreciada; `PROTOCOLO_AGENTE_MEDICO.md` inalterado;
+`PAINEL_ESTADO.md` não re-tirado (nenhum número clínico se move — nenhum `.yaml` de regra/
+vocabulário tocado). Próxima fatia: 5b (decomposição N:1, molde `_separar_cargos_da_celula` do
+Fascino), escopo do witness instável Hetrin/set-2026, fora desta sessão.
+
+**Docs.** `D-ARQ-57` ganha duas notas (Ratificação + Fatia 5a IMPLEMENTADA), `DECISOES` v191→**v193**
+(2 linhas de changelog). `DT-(sessão claude/youthful-lamport-3kfkog)-02` e `DT-(sessão claude/
+dreamy-mayer-os6jce)-01` (`PENDENCIAS_CLINICAS.md`) recebem notas — as duas seguem ABERTAS. Índice
+D-ARQ regenerado. Dois commits: `34e2a5f` (docs, PR #342, mergeada) + este (docs + código,
+autorização de push pendente de confirmação por turno, `CLAUDE.md`).
