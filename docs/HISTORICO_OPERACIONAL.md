@@ -8041,3 +8041,71 @@ própria, molde peça 4, decisão do Arquiteto sobre prioridade). Nenhuma `R-*` 
 `PROTOCOLO_AGENTE_MEDICO.md` inalterado (não é regra clínica). `PAINEL_ESTADO.md` não re-tirado —
 os três números clínicos não se movem (mudança é só de mecanismo de diagnóstico de estrutura, não
 de regra/vocabulário).
+
+## Sessão (branch `claude/dreamy-mayer-os6jce`, número não atribuído) — 18-19/09/2026 — ARQUITETURA: peça 5 de D-ARQ-57 (ingestão do grid AIHA, Hetrin/Serra Dourada)
+
+**Contexto de abertura.** Pedido do usuário: "abre a arquitetura do grid AIHA agora", depois "vamos
+fechar a AIHA. E deixar no gatilho essa proposta de D-ARQ [relatório de rastreabilidade/porquê da
+matriz, discutido em separado, não implementado nesta sessão]". Consome
+`DT-(sessão claude/youthful-lamport-3kfkog)-02` (`PENDENCIAS_CLINICAS.md`): o fix do regex
+fragmentado do cabeçalho grid-AIHA (PR #338, já em main) restaura o diagnóstico correto
+(`pgr_cargo_based`), mas a DT deixou nomeado que nenhum PGR da família Hetrin/Serra Dourada gera
+matriz — nunca teve caminho de ingestão, só diagnóstico. Sessão só de ARQUITETURA/medição, nenhum
+código tocado.
+
+**Medição própria desta sessão** `[MEDIDO — pdfplumber, execução direta contra os 3 witnesses reais
+em matrizes_originais/]`, contra `01. PGR RICCO HETRIN - MAR25.pdf` (396 págs.),
+`01. PGR RICCO SERRA DOURADA - MAI.24 1.pdf` (272 págs.) e
+`PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 págs., o documento do chamado real do
+Diovanni citado na DT). Achados, em ordem de descoberta:
+
+1. O cabeçalho `Função | Identificação de Perigo/Risco | ...` que `D-ARQ-57` peça 3 reconhece
+   repete em TODA página de um intervalo contínuo de dezenas de páginas (Hetrin/mar: págs. 63-185,
+   123 seguidas, zero gap; Serra Dourada: págs. 58-113, 56 seguidas, zero gap) — é cabeçalho de
+   tabela, nunca delimita função individual. Confirma por medição direta a leitura já registrada na
+   DT ("sinal-de-família ≠ âncora-de-recorte").
+2. `extract_text()` linear (o primitivo de `linha -> bool` que sustenta toda a peça 1/3 de
+   `D-ARQ-57`) é inutilizável nesta família: um reconhecedor "linha curta = nome de função" sobre o
+   texto linearizado produz fragmentos de sigla de categoria de risco ("A", "Q", "N o"), não nomes
+   — as colunas se intercalam por posição Y na extração linear.
+3. `pdfplumber.extract_tables()` resolve estruturalmente nos 2 witnesses limpos (coluna Função = 1
+   célula não-vazia por grupo, `None` nas linhas seguintes do mesmo grupo; ~60 funções contadas em
+   Hetrin/mar, mesmo padrão em Serra Dourada) — mas é frágil no witness do chamado real
+   (Hetrin/set-2026): 8-9 tabelas espúrias por página, célula de função fragmentada
+   palavra-por-linha. ~22 grupos contados ali, com grupos **N:1** (ex.:
+   `ENGENHEIRO CIVIL/ENGENHEIRO RESIDENTE/ESTAGIÁRIO DE ENGENHARIA/APONTADOR/ADMINISTRATIVO DE
+   OBRA/TÉCNICO DE SEGURANÇA` compartilhando 1 grupo de risco); decompondo as barras dá ~28-29
+   cargos, batendo com o "28/28 cargos" já medido na matriz aprovada desse mesmo documento (achado
+   psicossocial, sessão `claude/youthful-lamport-3kfkog`) — validação cruzada.
+4. Achado que muda a recomendação da DT: `parser_familia_consciente.py` (D-ARQ-65, família
+   Fascino) não usa `extract_tables()` — usa `pdfplumber.extract_words()` + banda de coluna
+   calibrada POR BLOCO a partir do próprio cabeçalho (`PalavraPDF`, `_localizar_cabecalho_tabela`,
+   `_banda`), porque a medição original de bandas fixas (003.DZ, comentário no módulo) divergiu
+   contra o acervo real. É o mesmo sintoma que quebra `extract_tables()` no Hetrin/set. Esse módulo
+   já resolve, para outra família, o sub-problema estrutural do grid-AIHA:
+   `_separar_cargos_da_celula`/`_extrair_cargos_da_linha` já decompõem célula com múltiplos cargos
+   compartilhando 1 grupo de risco em `GHEVerbatim(cargos=[...])` — o caso N:1 do item 3.
+
+**Decisão registrada em `D-ARQ-57`** (andamento "ARQUITETURA da peça 5",
+`DECISOES_ARQUITETURAIS.md`): módulo irmão a `parser_familia_consciente.py`, mesma classe de
+primitivo (`PalavraPDF` + banda por bloco), schema de coluna próprio do grid-AIHA. Fatiamento 4
+peças: 5a (banda de coluna + fronteira de função, testado só nos 2 witnesses limpos) → 5b
+(decomposição N:1, reuso de `_separar_cargos_da_celula`) → 5c (parsing da célula de risco →
+`RiscoVerbatim`) → 5d (roteamento em `avaliar_estrutura`/`avaliar_familia` + plug `preparar_ghes` +
+e2e, só aqui a DT fecha). Risco nomeado: o witness do chamado real (Hetrin/set-2026) só é
+destravado em 5b/5d, não em 5a — se a prioridade é esse documento específico, a ordem do
+fatiamento exige decisão explícita do Arquiteto/Diovanni antes da IMPL, não assumida nesta sessão.
+
+**Fronteiras.** `D-ARQ-57` peça 3 (`eh_sinal_cargo`) e `D-ARQ-65`/Fascino permanecem intocados —
+esta sessão só dá caminho de ingestão ao que hoje é só diagnóstico. Nenhuma `R-*` criada ou
+alterada; `PROTOCOLO_AGENTE_MEDICO.md` inalterado; `PAINEL_ESTADO.md` não re-tirado (nenhum número
+clínico se move — é decisão de arquitetura de extração, sem código).
+
+**Docs.** Nota de andamento em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`, mesma ID, novo andamento
+"ARQUITETURA da peça 5"). Nota em `DT-(sessão claude/youthful-lamport-3kfkog)-02`
+(`PENDENCIAS_CLINICAS.md`) — DT segue ABERTA, fecha só na fatia 5d. `python -m pytest
+tests/test_gerar_indice_darq.py` rodado após tocar `DECISOES_ARQUITETURAIS.md` (índice
+regenerado — ver saída registrada nesta mesma sessão). Escrita nos docs vivos autorizada pelo
+usuário desta sessão ("pode gravar"); ratificação formal do Diovanni sobre o fatiamento/prioridade
+não registrada neste turno — decisão fica sinalizada como ARQUITETURA proposta, não fechada, até
+essa confirmação chegar por outro canal. Sem código nesta sessão.
