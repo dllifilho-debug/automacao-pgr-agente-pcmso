@@ -8295,5 +8295,46 @@ claude/youthful-lamport-3kfkog)-02` (`PENDENCIAS_CLINICAS.md`) recebe nota espel
 ABERTA. Índice D-ARQ regenerado. `PROTOCOLO_AGENTE_MEDICO.md` inalterado (v94); nenhuma `R-*`
 tocada. `PAINEL_ESTADO.md`: bloco Baseline re-tirado (hash/branch/versões desta sessão; suíte e
 mypy herdados com origem visível, D-ARQ-85) — os três números clínicos NÃO re-tirados (nenhum se
-move, nenhum marco fechado, sessão não é META). Um commit (docs), autorização de push pendente de
-confirmação por turno (`CLAUDE.md`).
+move, nenhum marco fechado, sessão não é META). Commit `3739b3d` (docs), push autorizado e feito
+para `origin/claude/nice-ptolemy-wxk1wo`.
+
+**Continuação (mesma sessão, mesmo dia) — Diovanni pede o caminho recomendado (generalizar o cabeçalho antes de decompor N:1); medição aprofundada muda a recomendação para "não perseguir agora".**
+Recomendei generalizar `_localizar_cabecalho_grid` pra aceitar CAIXA ALTA (molde 003.DD-1: classe
+de caractere estreita, não reabertura de escopo) — Diovanni autorizou ("vamos mudar de chat pra
+sua recomendação, podemos seguir assim?"). Antes de codar, medi o que a mudança exigiria de fato
+contra o PDF real da pág. 14 em diante (Hetrin/set-2026) e achei que o gap é maior do que
+case-sensitivity:
+
+1. **Banda Função muito mais estreita** que os 2 witnesses limpos (~50-83pt contra ~60pt) — quase
+   1 palavra por linha física. Medido o único caso N:1 real do documento (pág. 14, top
+   373.9-452.4pt): `'ENGENHEIRO'` `'CIVIL/'` `'ENGENHEIRO'` `'RESIDENTE/'` `'ESTAGIÁRIO'` `'DE'`
+   `'ENGENHARIA/'` `'APONTADOR'` `'ADMINISTRATIVO'` `'DE'` `'OBRA/'` `'TÉCNICO'` `'DE'`
+   `'SEGURANÇA'` `'DO'` `'TRABALHO'` — 6 cargos, mas **falta o `/` entre `'APONTADOR'` e
+   `'ADMINISTRATIVO'`** no texto extraído; decompor só por `/` funde os dois cargos, divergindo da
+   matriz já aprovada desse documento (6 distintos, achado da sessão `claude/dreamy-mayer-os6jce`).
+   Não determinei se a barra falta no PDF-fonte ou se é perda de extração.
+2. **O cabeçalho não repete em toda página.** Grid medido nas págs. 14-36 (0-indexed, presença da
+   palavra `'FUNÇÃO'`/`'FUNÇAO'`) — todas têm, EXCETO a pág. 32 (corpo sem nenhum cabeçalho de
+   coluna). O contrato "recalibra por página; sem cabeçalho é falha explícita" da fatia 5a quebra
+   pra esse witness sem mudança de desenho (herdar calibração da página anterior).
+
+Levei essas 2 medições de volta ao Diovanni em vez de seguir codando — não é mais "aceitar
+CAIXA ALTA", é uma calibração própria pro layout desse documento, ordem de grandeza mais próxima
+de repetir o esforço da 5a que de um fix pontual. Ele perguntou se valia o trabalho todo pra 1 PGR
+e o que eu faria. **Ponto que decidiu:** mesmo com a 5b completa pra esse witness, o documento não
+ingere hoje — faltam 5c (parse da célula de risco) e 5d (roteamento + plug), nenhuma das duas
+implementada — já cai em revisão humana via `pgr_cargo_based`, gated by design, mesma classe de
+HUMAP/Cjr (`DT-003DK-01`), sem risco de dado errado. Recomendei não perseguir agora, condicionado a
+saber se esse layout é o template novo do cliente Ricco (a partir de 14/09/26) ou formatação
+pontual desse envio — **Diovanni concordou** ("uma ressalva eu sou o Diovanni kk... vamos na sua
+recomendação").
+
+**Docs desta continuação.** `D-ARQ-57` ganha 1 nota ("medição aprofundada... decisão de não
+perseguir agora"), `DECISOES` v194→**v195** (1 linha de changelog, mesma D-ARQ, nenhuma cláusula
+alterada). `DT-(sessão claude/youthful-lamport-3kfkog)-02` recebe nota espelhada — segue ABERTA,
+fatiamento 5a→5b→5c→5d inalterado, só sem data pra 5b entrar de fato. Índice D-ARQ regenerado
+(`python -m pytest tests/test_gerar_indice_darq.py`: 6 passed). Nenhum código de produção tocado
+nesta continuação (só os scripts de medição ad-hoc no scratchpad, fora do repo). Nenhuma `R-*`
+tocada; `PROTOCOLO_AGENTE_MEDICO.md` inalterado; `PAINEL_ESTADO.md` Baseline re-tirado de novo
+(hash/versões desta continuação); três números clínicos seguem NÃO re-tirados. Segundo commit
+desta sessão (docs), autorização de push pendente de confirmação por turno (`CLAUDE.md`).
