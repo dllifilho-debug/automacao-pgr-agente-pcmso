@@ -71,7 +71,7 @@
 > em vermelho — detalhe em HISTORICO (bloco desta sessão). Detalhe completo em HISTORICO e
 > `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA em
 > `PENDENCIAS_CLINICAS.md`.
-**Baseline:** branch `claude/nice-ptolemy-wxk1wo` sobre `main 26039d9` (commit desta sessão, FDS avulsa, pendente) · **1278 passed, 6 skipped, 0 failed** *(medido nesta sessão, `python -m pytest agente_medico/tests/ tests/`, árvore parada, 635,23s — reconcilia exato contra o herdado: `1261` (`b3f5e62`/`claude/dreamy-mayer-os6jce`) `+ 13` (fatia 5a, `test_parser_familia_grid_aiha.py`, 1ª confirmação contra a suíte inteira) `+ 4` (FDS avulsa, desta sessão) `= 1278`)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(medido nesta sessão, delta-zero)* · PROTOCOLO v94 · DECISOES v196
+**Baseline:** branch `claude/nice-ptolemy-wxk1wo` sobre `main 7e9b632` (commit desta continuação, docs-only, pendente) · **1278 passed, 6 skipped, 0 failed** *(herdado desta mesma sessão, commit da FDS avulsa — esta continuação não tocou código, sem derivado a re-medir)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(herdado, idem)* · PROTOCOLO v94 · DECISOES v197
 
 > **Tiragem desta sessão, parte 2 `[MEDIDO — 16/09/2026]` (branch `claude/festive-gates-soy0fr`,
 > IMPLEMENTAÇÃO — `R-RX-03`/`R-ESP-03`).** Suíte **1233 passed, 6 skipped, 0 failed**, árvore

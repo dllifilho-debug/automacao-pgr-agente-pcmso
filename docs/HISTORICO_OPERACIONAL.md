@@ -8416,3 +8416,39 @@ v195→**v196**. `DT-(sessão claude/nice-ptolemy-wxk1wo)-01` nova, ABERTA. Índ
 inalterado. `PAINEL_ESTADO.md`: Baseline re-tirado com o número real desta sessão (suíte medida
 nesta árvore, não mais herdado); três números clínicos NÃO re-tirados (nenhum se move, nenhuma
 `R-*` tocada, sessão não é META).
+
+**Continuação (mesma sessão, mesmo dia) — Diovanni pede a fatia 2 (casamento manual FDS↔produto
+do PGR); achado bloqueia antes de qualquer código.** Ao planejar a fatia 2 (a DT já registrada
+acima nomeava "expor a lista de produtos do PGR" como passo 1), reli `motor/hidratacao.py` para
+entender de onde essa lista viria — e medi que ela não existe: linha 137 crava
+`GHEPGR.produtos_quimicos=()` sempre, com o motivo já documentado na linha 17 do próprio arquivo
+("diferidos, D-ARQ-49 P2"). A suposição da DT (que a lista já estava lá, só faltando expor na tela)
+estava errada — é campo deferido desde a arquitetura original do parse-PGR, nunca implementado, e
+a forma concreta real (`GHEVerbatim`/`RiscoVerbatim`, D-ARQ-49 nota 003.BN) não tem apontador-FDS
+distinto.
+
+**Duas rotas consideradas, nenhuma seguida.** (1) Construir a extração formal de
+`produtos_quimicos` — do tamanho da própria D-ARQ-49, fora do escopo de uma fatia de UI. (2) Reusar
+`RiscoVerbatim.agente`/`fonte_geradora` (texto cru do risco, já extraído) como substituto barato da
+lista — o refactor caro/barato (hidratar o PGR separado de rodar `processar_pgr`) seria o MESMO
+trabalho independente da fonte da lista, então não é jogado fora se a extração formal vier depois.
+Não segui essa rota nesta sessão porque não medi se `agente`/`fonte_geradora` de um PGR real lê
+como nome de produto limpo ou vem misturado com risco não-químico ("Ruído contínuo" não é produto
+de FDS nenhuma) — é usuário real escolhendo na tela, ruído aqui pesa mais que noutro contexto.
+
+**Levei o achado ao Diovanni em vez de escolher uma rota.** Perguntei se ele topava a rota (2)
+mesmo sem medir, ou preferia parar. Ele perguntou de volta se era melhor parar, já que a separação
+caro/barato vai ser necessária de qualquer forma no futuro, e pediu minha opinião. Respondi que
+concordo em parar, mas pelo motivo da qualidade não-medida de `agente`/`fonte_geradora` (o
+refactor em si não é desperdício, viria de qualquer forma) — ele concordou.
+
+**Docs.** `D-ARQ-49` ganha 1 nota ("Consequência observada", mesma ID, nenhuma cláusula alterada),
+`DECISOES` v196→**v197**. `DT-(sessão claude/nice-ptolemy-wxk1wo)-01` ganha 3 notas (achado,
+alternativa considerada, decisão de parar) — segue ABERTA, com 2 caminhos nomeados pra retomada:
+medir `agente`/`fonte_geradora` contra PGR real primeiro, ou abrir sessão de arquitetura própria
+pra D-ARQ-49 Parte 2. Índice D-ARQ regenerado. Nenhum código de produção tocado nesta continuação
+(sem derivado de código a cobrir, além do índice D-ARQ). Nenhuma `R-*` tocada; PROTOCOLO
+inalterado. `PAINEL_ESTADO.md`: bloco Baseline re-tirado (hash/versões desta continuação, suíte/
+mypy herdados desta mesma sessão — nenhum código tocado aqui); três números clínicos NÃO
+re-tirados. Terceiro commit desta sessão (docs), autorização de push pendente de confirmação por
+turno (`CLAUDE.md`).
