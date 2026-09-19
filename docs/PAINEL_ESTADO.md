@@ -71,7 +71,7 @@
 > em vermelho — detalhe em HISTORICO (bloco desta sessão). Detalhe completo em HISTORICO e
 > `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA em
 > `PENDENCIAS_CLINICAS.md`.
-**Baseline:** branch `claude/festive-gates-soy0fr` sobre `main e210acd` (PRs #332/#333/#334, commits pendentes desta implementação) · **1233 passed, 6 skipped, 0 failed** *(medido via `python -m scripts.medir_painel --suite`, árvore parada)* · `mypy --strict` alvo canônico **limpo, 48 arquivos** · PROTOCOLO v93 · DECISOES v188
+**Baseline:** branch `claude/nice-ptolemy-wxk1wo` sobre `main c6e05e6` (commit `3739b3d` desta sessão já pushed; commit desta continuação pendente) · **1261 passed, 6 skipped, 0 failed** *(herdado de `b3f5e62`/sessão `claude/dreamy-mayer-os6jce`, `python -m scripts.medir_painel --suite`, árvore parada — esta sessão não mediu a suíte completa, nenhum derivado de código tocado; não inclui os 13 testes novos de `test_parser_familia_grid_aiha.py`, fatia 5a/`claude/blissful-knuth-riqucz`, ainda não confirmados contra a suíte inteira)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(herdado de `claude/blissful-knuth-riqucz`, fatia 5a; esta sessão não mediu)* · PROTOCOLO v94 · DECISOES v195
 
 > **Tiragem desta sessão, parte 2 `[MEDIDO — 16/09/2026]` (branch `claude/festive-gates-soy0fr`,
 > IMPLEMENTAÇÃO — `R-RX-03`/`R-ESP-03`).** Suíte **1233 passed, 6 skipped, 0 failed**, árvore
