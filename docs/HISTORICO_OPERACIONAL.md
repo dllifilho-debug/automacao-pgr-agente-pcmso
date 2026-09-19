@@ -8109,3 +8109,19 @@ regenerado — ver saída registrada nesta mesma sessão). Escrita nos docs vivo
 usuário desta sessão ("pode gravar"); ratificação formal do Diovanni sobre o fatiamento/prioridade
 não registrada neste turno — decisão fica sinalizada como ARQUITETURA proposta, não fechada, até
 essa confirmação chegar por outro canal. Sem código nesta sessão.
+
+**Addendum (mesma sessão) — segunda DT registrada: relatório de rastreabilidade/proveniência da
+matriz.** Antes de encerrar a sessão, o usuário pediu para registrar um segundo item discutido em
+chat (não medido em código): a matriz de exames deveria vir acompanhada de um relatório explicando
+a origem de cada risco/exame e o porquê da decisão do motor, para a médica coordenadora conseguir
+rastrear uma decisão sem reconstruir a cadeia manualmente (o mesmo trabalho que a auditoria
+comparativa da matriz Aurora, discutida no início desta sessão, precisou fazer à mão). Registrado
+como `DT-(sessão não numerada, branch claude/dreamy-mayer-os6jce)-01`
+(`PENDENCIAS_CLINICAS.md`): parte do mecanismo já existe (`R-*` com fonte normativa; `Pendencia`
+com `tipo`/`destinatario`/`regra_origem`), mas só cobre o caminho de pendência — o caminho feliz
+(exames que entram na matriz) não persiste proveniência hoje, ela é calculada em runtime e
+descartada ao gerar o `.docx`. Escopo é arquitetural (toca `agente_medico/motor`, não só a
+superfície de geração do documento), não medido nesta sessão — nenhum ponto do motor foi lido
+para confirmar onde a proveniência se perde. Fica ABERTA, sem prioridade relativa definida frente
+à fatia 5a-5d de `D-ARQ-57`; aguardando sessão ARQUITETURA própria. Escrita autorizada pelo
+usuário ("pode gravar"). Sem código.
