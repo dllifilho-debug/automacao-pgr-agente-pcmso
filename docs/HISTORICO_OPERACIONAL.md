@@ -8215,3 +8215,85 @@ Fascino), escopo do witness instável Hetrin/set-2026, fora desta sessão.
 dreamy-mayer-os6jce)-01` (`PENDENCIAS_CLINICAS.md`) recebem notas — as duas seguem ABERTAS. Índice
 D-ARQ regenerado. Dois commits: `34e2a5f` (docs, PR #342, mergeada) + este (docs + código,
 autorização de push pendente de confirmação por turno, `CLAUDE.md`).
+
+## Sessão (branch `claude/nice-ptolemy-wxk1wo`, número não atribuído) — 19/09/2026 — bloqueador medido ao abrir a fatia 5b de D-ARQ-57
+
+**Estado lido do disco na abertura.** `git log`/`git status` (branch limpa, na ponta de `main`
+`c6e05e6`, PR #343/fatia 5a já mergeada), `docs/PENDENCIAS_CLINICAS.md` (`DT-(sessão claude/
+youthful-lamport-3kfkog)-02` ABERTA, próximo passo nomeado: fatia 5b), `docs/DECISOES_ARQUITETURAIS.md`
+D-ARQ-57 (fatiamento 5a→5b→5c→5d ratificado, 5a IMPLEMENTADA), `docs/PAINEL_ESTADO.md` (três
+números clínicos inalterados desde 003.EZ, nenhum tocado por esta sessão). Ambiente do container
+sem `pytest`/`pdfplumber`/`libreoffice-writer` na abertura — reprovisionado à mão pelos mesmos
+comandos do hook (`.claude/hooks/`), idempotente.
+
+**Foco.** Continuar D-ARQ-57 peça 5 pela fatia 5b (decomposição N:1), como o painel/DT apontavam.
+Antes de escrever qualquer decomposição, medi se existe um caso N:1 real alcançável pela fatia 5a
+— disciplina do projeto (`CLAUDE.md`, "Teste cuja reversão não é nomeável não entra") aplicada ao
+código de produção, não só a teste: decompor sem um caso real pra nomear a reversão seria a mesma
+classe de `DH-003EK`.
+
+**Medição 1 — os 2 witnesses calibrados não têm N:1 genuíno.** `segmentar_arquivo` real (fatia 5a)
+contra o intervalo CHEIO do grid nos 2 witnesses limpos: Hetrin/mar (págs. 63-185) devolve **63
+grupos**, 3 com `/` no nome (`Encarregado de Encanador/Hidráulica` págs. 81-82, `Comprador /
+Compradora` págs. 130-131, `Engenheiro Civil / Planejamento` págs. 142-143); Serra Dourada (págs.
+58-113) devolve **28 grupos**, 0 com `/`. Lido o texto cru sob cada um dos 3 candidatos
+(`page.extract_text()`, pdfplumber direto): os 3 são **1 cargo só** — `Comprador / Compradora` é
+par de gênero gramatical (mesma descrição, "Recebe requisições de compras, executa processo de
+cotação..."); `Engenheiro Civil / Planejamento` e `Encarregado de Encanador/Hidráulica` são título
+composto (a descrição sob cada um cobre as duas metades como 1 atribuição só — "Elabora projetos
+de engenharia civil... Coordena manutenção..." / "Supervisiona equipes de trabalhadores da
+construção..."). Nenhum é o N:1 do exemplo da ARQUITETURA (lista de cargos DISTINTOS
+compartilhando 1 grupo de risco). Também conferi que nenhum grupo tem título anomalamente longo
+por concatenação silenciosa sem separador (máximo medido: 6 palavras, "Auxiliar Técnico de
+Segurança do Trabalho", Serra Dourada) — não há sinal de fusão de múltiplos cargos sem `/`.
+
+**Medição 2 — o N:1 real só existe no witness que a fatia 5a não alcança.** `segmentar_arquivo`
+contra `PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 págs., o documento do chamado
+real) levanta `GrupoFuncaoNaoReconhecido` em qualquer página testada do intervalo do grid (medido
+págs. 11-36, 0-indexed — `page.find_tables()` devolve 8 a 10 tabelas espúrias por página nesse
+intervalo, batendo com "8-9 tabelas espúrias por página" já registrado na ARQUITETURA/sessão
+`claude/dreamy-mayer-os6jce`). Causa raiz isolada: `_localizar_cabecalho_grid` exige `p.text ==
+"Função"` e `p.text == "Tipo"` (title-case); o cabeçalho deste documento é CAIXA ALTA — pág. 14
+(0-indexed), palavra `'FUNÇÃO'` em top=132.2/x0=60.2 e `'TIPO'` em top=128.6/x0=100.6, nunca
+`'Função'`/`'Tipo'`. Varredura das 197 páginas por `p.text == "Função"` exato acha só a pág. 62,
+uma tabela de EPI-por-função sem relação com o grid de risco. O cabeçalho também tem 2 rótulos
+ausentes nos 2 witnesses limpos (linha de seção `'AVALIAÇÃO' 'DE' 'RISCO'`; `'CÓDIGO' 'eSocial'`)
+e ordem de coluna trocada — mesmo conjunto de conceitos dos 2 witnesses limpos (tipo de risco,
+identificação de perigo/risco, tempo de exposição, meio de propagação/eliminação, nível de risco,
+probabilidade, efeito, classificação, controle existente, código e-Social), forma de cabeçalho
+diferente — leitura consistente com ser a MESMA família (grid AIHA) numa revisão de template
+posterior (14/09/26), não uma família nova; não confirmado com certeza, achado nomeado, não
+arbitrado nesta sessão.
+
+**Conclusão — bloqueador reportado, sem ajuste pra bater.** A fatia 5b, como ratificada, presumia
+gerar um caso N:1 real a partir do witness instável assim que a decomposição existisse
+("reuso/generalização de `_separar_cargos_da_celula`... caso mais instável (Hetrin/set), não o
+âncora de calibração"). Medido: o bloqueio é anterior a isso — a fatia 5a não localiza o cabeçalho
+desse witness, então não há hoje nenhum `nome` N:1 genuíno alcançável para calibrar ou testar
+decomposição nenhuma contra dado real. Escrever decomposição especulativa (só sobre os 2 casos
+sintéticos dos witnesses limpos, que são falsos-positivos) arriscaria fixar em código um separador
+(`/`) e uma regra que nenhum caso real corrobora — e faria exatamente o oposto do que a
+decomposição deveria fazer se algum dia rodar contra esses 2 witnesses (decompor `Comprador /
+Compradora` produziria um GHE fantasma "Compradora" sem risco próprio). Parei antes de escrever
+qualquer decomposição e registrei o achado como bloqueador — decisão de como prosseguir
+(generalizar `_localizar_cabecalho_grid` pra aceitar a forma CAIXA-ALTA antes de decompor N:1;
+redefinir a 5b como sem alvo dentro dos 2 witnesses calibrados e adiar decomposição pra quando o
+cabeçalho Hetrin/set for coberto; ou outra ordem) cabe ao Arquiteto/Diovanni.
+
+**Verificação.** Sessão sem código de produção — só docs + os scripts de medição ad-hoc no
+scratchpad (fora do repo, não versionados). O único derivado tocado é `DECISOES_ARQUITETURAIS.md`
+(via `PENDENCIAS_CLINICAS.md`/`HISTORICO_OPERACIONAL.md`, sem derivado de teste próprio): cláusula
+fixa aplicada — `python -m scripts.gerar_indice_darq` rodado, `python -m pytest
+tests/test_gerar_indice_darq.py`: **6 passed**. Recorte não-zero é este; nenhum arquivo
+`agente_medico/**/*.py` ou `tests/**/*.py` (além do índice) mudou nesta sessão, então a suíte
+completa e o `mypy --strict` não têm derivado próprio a cobrir aqui — não é dispensa por "docs-
+only" (classe `DH-003EG-03`), é ausência de derivado de código nesta sessão específica.
+
+**Docs.** `D-ARQ-57` ganha 1 nota ("Bloqueador medido ao abrir a fatia 5b"), `DECISOES`
+v193→**v194** (1 linha de changelog, mesma D-ARQ, nenhuma cláusula alterada). `DT-(sessão
+claude/youthful-lamport-3kfkog)-02` (`PENDENCIAS_CLINICAS.md`) recebe nota espelhada — segue
+ABERTA. Índice D-ARQ regenerado. `PROTOCOLO_AGENTE_MEDICO.md` inalterado (v94); nenhuma `R-*`
+tocada. `PAINEL_ESTADO.md`: bloco Baseline re-tirado (hash/branch/versões desta sessão; suíte e
+mypy herdados com origem visível, D-ARQ-85) — os três números clínicos NÃO re-tirados (nenhum se
+move, nenhum marco fechado, sessão não é META). Um commit (docs), autorização de push pendente de
+confirmação por turno (`CLAUDE.md`).
