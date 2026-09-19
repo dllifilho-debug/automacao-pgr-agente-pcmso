@@ -8489,3 +8489,97 @@ atividade/contexto de exposição. Diovanni confirmou parar aqui de novo.
 do índice D-ARQ. Nenhuma `R-*` tocada; PROTOCOLO inalterado; `PAINEL_ESTADO.md` Baseline re-tirado
 (hash/versões desta continuação); três números clínicos NÃO re-tirados. Quarto commit desta sessão
 (docs), autorização de push pendente de confirmação por turno (`CLAUDE.md`).
+
+## Sessão (branch `claude/sharp-wozniak-j4596a`, número não atribuído) — 19/09/2026 — ARQUITETURA: D-ARQ-49 Parte 2 retomada, extração automática rejeitada por achado novo
+
+**Contexto de abertura.** Continuação pedida pelo usuário ("continua o projeto, lê o estado real
+do disco antes de qualquer coisa"). Estado medido: `HEAD` local igual a `origin/main` (`3d1b33b`,
+merge do PR #347), working tree limpo, branch remota anterior já deletada pelo GitHub após o
+merge. Três frentes vivas identificadas em `PAINEL_ESTADO.md`/`DECISOES_ARQUITETURAIS.md` — todas
+paradas por decisão do Diovanni: `D-ARQ-57` peça 5b (Hetrin/set-2026, sem data), o relatório de
+rastreabilidade represado (`DT-(sessão claude/dreamy-mayer-os6jce)-01`) e `D-ARQ-49` Parte 2. Sem
+spec de IMPLEMENTAÇÃO pronta em nenhuma das três (`INSTRUCOES_ARQUITETO.md` §7), a decisão de qual
+abrir foi levada ao usuário; escolheu `D-ARQ-49` Parte 2.
+
+**Leitura de abertura (gate §8).** `motor/tipos.py` (`ProdutoQuimico`, `RiscoVerbatim`,
+`GHEVerbatim`), `motor/hidratacao.py` (`hidratar_ghe`/`hidratar_pgr`), `motor/composicao.py`
+(`resolver_composicao`), `motor/estagios/riscos.py` (Fase C de promoção),
+`motor/estagios/pendencias_estruturais.py` (`stage_3_pendencias_estruturais`, R-PGR-04 —
+NÃO lido pelas duas sessões anteriores, v197/v198), `motor/entrada.py`/`motor/orquestrador.py`
+(confirma que `processar_pgr` já roda `resolver_composicao`), `adaptadores/orquestracao_pgr.py`
+(`processar_arquivo_pgr`), `superficie/web_matriz.py` (`pagina_matriz`, fluxo FDS avulsa já em
+produção), `protocolo/vocabulario/agentes.yaml` (campos existentes — nenhum discrimina categoria
+química/física) e `PROTOCOLO_AGENTE_MEDICO.md` §R-PGR-04.
+
+**Medição própria desta sessão** `[MEDIDO — ambiente sem `pdfplumber`/`pytest`/`streamlit`
+pré-instalados; `pip install pdfplumber PyYAML python-docx pytest streamlit` rodado nesta sessão,
+sem tocar `cryptography` (conflito com pacote do sistema, contornado evitando `requirements-dev.txt`
+inteiro)]`. Rodei `parsear_arquivo` (`parser_familia_consciente.py`, D-ARQ-65, determinístico, sem
+LLM — já versionada, reproduzível por qualquer sessão futura com as mesmas 2 linhas de código, sem
+depender de script externo) contra o mesmo PGR Fascino real das duas sessões anteriores, agrupando
+`RiscoVerbatim` por `fonte_geradora` dentro de cada GHE: 19 GHEs, 237 riscos. Achado que muda a
+decisão — grupos **físicos** de `n=2` existem e são comuns (`'Operação de máquinas e equipamentos
+eletroportáteis...'` → `['Ruido', 'Vibrações localizadas (mão e braço)']`; `'Poeiras geradas no
+processo produtivo...'` → `['Sílica livre', 'Poeira respirável']`, repetidos em quase todo GHE do
+documento) contra grupos **químicos** reais de `n=10`/`n=8`/`n≈15` (`'Exposição a cimento e
+concreto'`; `'Na execução do trabalho de encanação'`; a tinta medida na v198) — lacuna limpa NESTE
+witness, mas um único witness não prova invariante: nada na estrutura do PGR impede um documento
+diferente de combinar 3+ agentes físicos sob 1 `fonte_geradora` (Ruído/Vibração/Radiação aparecem
+como riscos SEPARADOS noutros GHEs deste mesmo Fascino). Cravar um corte de `n` sem essa garantia
+estrutural inventa categoria sem fonte normativa (classe D-ARQ-22) — a **Crítico** (Gauntlet)
+desta sessão rejeitou a 1ª redação por alegar esse threshold sem citar dados reproduzíveis; a
+redação corrigida troca "não existe threshold" (afirmação forte, não sustentada pelos dados) por
+"nenhum threshold tem garantia estrutural" (o que os dados realmente mostram).
+
+**Segundo achado, mais grave — `stage_3_pendencias_estruturais`/R-PGR-04
+(`estagios/pendencias_estruturais.py:7-19`) emite pendência BLOQUEANTE `composicao_ausente` para
+TODO `produto` com `fds is None`.** Essa regra nunca disparou em produção porque
+`GHEPGR.produtos_quimicos` sempre foi `()`. Popular esse campo automaticamente a partir de
+QUALQUER `fonte_geradora` não-vazia (a decisão que as sessões v197/v198 encaminhavam) dispararia
+R-PGR-04 falsamente em quase todo GHE de todo PGR real — Ruído, Vibração, Postura, Trabalho em
+Altura não são "produto químico" e não deveriam exigir FDS. Regressão de produção, não avanço; as
+duas sessões anteriores não tinham lido este stage.
+
+**Decisão de arquitetura revisada, registrada em `D-ARQ-49`** (`DECISOES_ARQUITETURAIS.md` v199,
+mesma ID, nenhuma cláusula alterada). `produtos_quimicos` deixa de ser candidato a extração
+automática — nasce vazio na hidratação, sem mudança em `hidratar_ghe`/`hidratar_pgr`. O RT passa a
+CRIAR o `ProdutoQuimico` explicitamente na tela, ao anexar uma FDS avulsa a um GHE do PGR já
+carregado — o slot só existe já com `fds` populada, nunca `None` órfão, então R-PGR-04 nunca
+dispara por essa via (o gatilho original da regra — PGR aponta produto sem dar composição — segue
+não-implementado, declarado como tal, não escondido). Fatiamento sequencial: 2a (split cheap/
+expensive em `processar_arquivo_pgr` — expor o `PGR` hidratado antes de `processar_pgr`, sem
+reprocessar PDF/LLM a cada rerun do Streamlit) antes de 2b (UI em `web_matriz.py`: RT escolhe GHE +
+nome do produto ao anexar a FDS). Discriminantes e fronteiras de cada fatia documentados na nota
+de `D-ARQ-49`.
+
+**Fronteiras.** Motor (`entrada.py`/`orquestrador.py`/`composicao.py`) intocado — a decisão não
+altera o que já funciona, só onde `produtos_quimicos` nasce. Nenhuma `R-*` criada, alterada ou
+depreciada; `agentes.yaml` intocado; `PROTOCOLO_AGENTE_MEDICO.md` inalterado (`v94`).
+
+**Gate de fechamento — Crítico (§8, obrigatório em ARQUITETURA).** Rodado em sessão nova (subagente
+sem acesso ao raciocínio desta sessão, só o artefato final da nota em `D-ARQ-49` + a barra de
+ARQUITETURA do `INSTRUCOES_ARQUITETO.md`). 1ª rodada: **REJEITOU** — gap apontado: a medição
+central citava "script descartável desta sessão, não versionado", tornando a alegação de threshold
+não-auditável a partir só do documento (viola a pergunta 3 da barra: verificável sem reconstruir o
+raciocínio da sessão). Corrigido nesta mesma sessão (builder corrige só o gap apontado, não conta
+como empilhar prompt — mesma cláusula do §8 para o Code, aplicada aqui por analogia): a nota passou
+a citar a função já versionada (`parsear_arquivo`) como via de reprodução, e a alegação foi
+reescrita de "não existe threshold" (mais forte que os dados sustentavam — os dados mostram lacuna
+limpa NESTE witness, não ausência de qualquer corte possível) para "nenhum threshold tem garantia
+estrutural" (o que a medição realmente mostra). Rejulgado por 2ª sessão nova: **[resultado a
+registrar após a 2ª rodada — ver adendo abaixo]**.
+
+**Docs.** Nota de ARQUITETURA PROPOSTA em `D-ARQ-49` (`DECISOES_ARQUITETURAIS.md` v198→**v199**,
+decisões inalteradas em **85**). `DT-(sessão claude/nice-ptolemy-wxk1wo)-01` ganha 2 notas (achado
+R-PGR-04 + decisão revisada) e o rótulo de status muda de "caminho (b) a decidir" para "ARQUITETURA
+proposta, aguarda ratificação". `python -m pytest tests/test_gerar_indice_darq.py` rodado após
+tocar `DECISOES_ARQUITETURAIS.md` — **6 passed**. Índice D-ARQ regenerado (só deslocamento de
+linha/chars pelas notas maiores; 85 decisões, contagem intacta). `PAINEL_ESTADO.md`: bloco
+Baseline re-tirado (hash/branch desta sessão); suíte/mypy herdados (nenhum código de produção
+tocado — a medição desta sessão é reproduzível a partir de função já versionada, sem script
+externo); três números clínicos NÃO re-tirados (nenhuma `R-*` tocada). Sem código de produção
+nesta sessão.
+
+**Status.** ARQUITETURA PROPOSTA, não ratificada. Aguardando confirmação do Diovanni antes de virar
+fila de IMPLEMENTAÇÃO para a fatia 2a. `git add` por arquivo nominal; push pendente de autorização
+explícita do usuário nesta sessão (`CLAUDE.md`).
