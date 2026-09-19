@@ -8452,3 +8452,40 @@ inalterado. `PAINEL_ESTADO.md`: bloco Baseline re-tirado (hash/versões desta co
 mypy herdados desta mesma sessão — nenhum código tocado aqui); três números clínicos NÃO
 re-tirados. Terceiro commit desta sessão (docs), autorização de push pendente de confirmação por
 turno (`CLAUDE.md`).
+
+**Continuação (mesma sessão, mesmo dia) — Diovanni pede pra eu mesmo rodar a medição do caminho
+(a); resultado descarta o substituto por dado real.** Rodei `parsear_arquivo`
+(`parser_familia_consciente.py`, D-ARQ-65 — determinístico, sem LLM, sem chave de API necessária)
+contra o PGR real da família Consciente/Fascino (`matrizes_originais/PGR - CONSCIENTE...
+FASCINO (15.07.26).pdf`): 19 GHEs, 237 riscos, todos os `agente`/`fonte_geradora` distintos
+inspecionados.
+
+**Achado — não é ruído, é granularidade errada, no sentido inverso do N:1 da fatia 5b.**
+`fonte_geradora="Exposição a tintas e seus componentes."` sozinha agrupa ~15 `agente` distintos:
+`Destilados (Petróleo) leves tratados com hidrogênio`, `Tolueno`, `Etanol`, `Metiletilcetona`,
+`Xileno`, `Dióxido de Titânio`, `Óxido de Ferro Amarelo`... — a composição química de 1 produto
+(tinta) já decomposta ingrediente-a-ingrediente no texto do PGR. Mesmo padrão em `"Na execução do
+trabalho de encanação"` (Hidróxido de sódio, Acetona, Acetato de etila, Copolímero de PVC) e
+soldagem (Silicato de alumínio, Ferro, Manganês, Quartzo). É 1 FDS : N linhas de `agente`, nunca
+1:1 — o inverso exato do N:1 que a fatia 5b de `D-ARQ-57` mediu mais cedo nesta mesma sessão
+(lá, N cargos : 1 grupo de risco; aqui, 1 produto : N linhas de risco). Uma `selectbox` de `agente`
+pra escolher "qual corresponde a esta FDS" obrigaria o usuário a saber que 15 itens da lista são o
+mesmo produto — não sobra 1 item limpo pra apontar.
+
+**De passagem, sem investigar:** achei uma linha corrompida (`"Bater contra ou ser atingido por
+(trânsito) S.. Irrelevante Avaliação..."`) entre os `agente` — já é defeito conhecido e registrado
+(`DT-003L-01`, nota já existente em `PENDENCIAS_CLINICAS.md`), não é achado novo desta sessão.
+
+**Conclusão — o caminho (a) está descartado, por dado, não por cautela.** Só resta o caminho (b):
+sessão de arquitetura própria pra `D-ARQ-49` Parte 2 (extração formal de `produtos_quimicos`), e
+ela precisa decidir a unidade de casamento como **grupo por `fonte_geradora`**, não "produto
+nomeado" — o PGR (ao menos este witness) não nomeia produto, só declara componentes agrupados por
+atividade/contexto de exposição. Diovanni confirmou parar aqui de novo.
+
+**Docs.** `D-ARQ-49` ganha 1 nota ("Medição do substituto", mesma ID, nenhuma cláusula alterada),
+`DECISOES` v197→**v198**. `DT-(sessão claude/nice-ptolemy-wxk1wo)-01` ganha a medição do caminho
+(a) e fecha esse caminho como não-viável — segue ABERTA, só o caminho (b) nomeado pra retomada.
+Índice D-ARQ regenerado. Nenhum código de produção tocado; sem derivado de código a cobrir, além
+do índice D-ARQ. Nenhuma `R-*` tocada; PROTOCOLO inalterado; `PAINEL_ESTADO.md` Baseline re-tirado
+(hash/versões desta continuação); três números clínicos NÃO re-tirados. Quarto commit desta sessão
+(docs), autorização de push pendente de confirmação por turno (`CLAUDE.md`).

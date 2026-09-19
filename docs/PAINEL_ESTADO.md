@@ -71,7 +71,7 @@
 > em vermelho — detalhe em HISTORICO (bloco desta sessão). Detalhe completo em HISTORICO e
 > `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA em
 > `PENDENCIAS_CLINICAS.md`.
-**Baseline:** branch `claude/nice-ptolemy-wxk1wo` sobre `main 7e9b632` (commit desta continuação, docs-only, pendente) · **1278 passed, 6 skipped, 0 failed** *(herdado desta mesma sessão, commit da FDS avulsa — esta continuação não tocou código, sem derivado a re-medir)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(herdado, idem)* · PROTOCOLO v94 · DECISOES v197
+**Baseline:** branch `claude/nice-ptolemy-wxk1wo` sobre `main 4be30ad` (commit desta continuação, docs-only, pendente) · **1278 passed, 6 skipped, 0 failed** *(herdado desta mesma sessão, commit da FDS avulsa — esta continuação não tocou código, sem derivado a re-medir)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(herdado, idem)* · PROTOCOLO v94 · DECISOES v198
 
 > **Tiragem desta sessão, parte 2 `[MEDIDO — 16/09/2026]` (branch `claude/festive-gates-soy0fr`,
 > IMPLEMENTAÇÃO — `R-RX-03`/`R-ESP-03`).** Suíte **1233 passed, 6 skipped, 0 failed**, árvore
