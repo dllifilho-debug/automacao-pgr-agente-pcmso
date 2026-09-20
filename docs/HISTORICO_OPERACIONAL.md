@@ -8593,3 +8593,15 @@ nesta sessão.
 **Status.** ARQUITETURA PROPOSTA, não ratificada. Aguardando confirmação do Diovanni antes de virar
 fila de IMPLEMENTAÇÃO para a fatia 2a. `git add` por arquivo nominal; push pendente de autorização
 explícita do usuário nesta sessão (`CLAUDE.md`).
+
+**Ratificação (mesma sessão, 20/09/2026) — "sim para o push e sim para a ratificação".** Diovanni
+ratifica a decisão como desenhada, sem reordenar o fatiamento 2a→2b; o gap nomeado pelo Crítico
+(universalidade em indústria química não medida contra witness real) fica aceito, não mitigado —
+mesma classe de decisão explícita já usada em D-ARQ-57 peça 5 (v189). `DECISOES_ARQUITETURAIS.md`
+v199→**v200** (ratificação em `D-ARQ-49`, mesma ID); `DT-(sessão claude/nice-ptolemy-wxk1wo)-01`
+recebe nota de ratificação, status muda para "ARQUITETURA ratificada, liberada para IMPL da fatia
+2a". `python -m pytest tests/test_gerar_indice_darq.py` rodado de novo após a nova nota — verde;
+índice D-ARQ regenerado (85 decisões, contagem intacta). Push autorizado explicitamente pelo
+usuário nesta sessão — `git push -u origin claude/sharp-wozniak-j4596a` a seguir. D-ARQ-49 Parte 2
+está pronta para virar prompt cirúrgico de IMPLEMENTAÇÃO da fatia 2a numa sessão de Code futura
+(contrato, discriminante e fronteira já documentados na nota v199 de `DECISOES_ARQUITETURAIS.md`).
