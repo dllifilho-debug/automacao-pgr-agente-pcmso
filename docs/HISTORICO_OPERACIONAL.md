@@ -8799,6 +8799,7 @@ FDS reais segue aberto (as 11 FDS por-cargo do commit `96a15e9` — `FDS PINTOR.
 `FDS ENCANADOR.pdf` etc. — não examinadas nesta sessão). Índice D-ARQ regenerado, sua
 suíte verde. Nenhuma `R-*` criada, alterada ou depreciada; nenhuma D-ARQ nova.
 
-**Status.** (A) de DT-003M-02 parcialmente resolvida (recorte das 6 FDS medidas).
-Aguardando resultado da suíte completa (corrida em andamento) antes do commit final
-desta fatia.
+**Status.** (A) de DT-003M-02 parcialmente resolvida (recorte das 6 FDS medidas). Suíte
+completa medida: **1281 passed, 6 skipped, 0 failed**, 716.04s — delta-zero exato contra
+o Baseline v202 (as reescritas trocaram asserção, não contagem de teste). Commit local
+`cebeb75` + este registro.
