@@ -13,10 +13,13 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
+from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import (
+    PGR,
     BlocoVerbatim,
     EnvelopeConfirmado,
     ExameEmitido,
+    GHEPGR,
     GHEVerbatim,
     MatrizGHE,
     MembroVerbatim,
@@ -24,10 +27,13 @@ from agente_medico.motor.tipos import (
     Pendencia,
     Resultado,
 )
+from agente_medico.motor.transcricao_fds import montar_fds
 from agente_medico.motor.transcritor_pgr import transcrever_ghes
 from agente_medico.superficie.documento_matriz import CabecalhoDocumento, LinhaCargo, RodapeDocumento
 from agente_medico.superficie.web_matriz import (
+    CacheMatrizes,
     _TranscritorContado,
+    anexar_produto_e_reprocessar,
     deve_reprocessar,
     executar_rota_determinista,
     executar_rota_determinista_cacheada,
@@ -35,6 +41,50 @@ from agente_medico.superficie.web_matriz import (
     montar_envelope,
     pagina_matriz,
 )
+
+_PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
+
+
+def _ghe_pgr(
+    *,
+    ghe_id: str = "GHE-01",
+    nome: str = "",
+    cargos: tuple[str, ...] = (),
+) -> GHEPGR:
+    return GHEPGR(
+        id=ghe_id,
+        nome=nome,
+        cargos=cargos,
+        riscos=(),
+        epis=(),
+        produtos_quimicos=(),
+        psicossocial=False,
+    )
+
+
+def _pgr_sintetico(*ghes: GHEPGR) -> PGR:
+    return PGR(validade=date(2030, 1, 1), assinatura_engenheiro=True, ghes=ghes or (_ghe_pgr(),))
+
+
+def _mockar_parse_deterministico(
+    monkeypatch: pytest.MonkeyPatch,
+    resultado: Resultado,
+    pendencias_extracao: tuple[Pendencia, ...] = (),
+    pgr: PGR | None = None,
+) -> None:
+    """Substitui a dupla preparar_pgr_hidratado + processar_pgr (D-ARQ-49
+    fatia 2a) — equivalente ao antigo mock único de processar_arquivo_pgr,
+    decomposto porque a fatia 2a expôs o PGR intermediário."""
+    pgr_sintetico = pgr if pgr is not None else _pgr_sintetico()
+
+    def _preparar_falso(*args: Any, **kwargs: Any) -> tuple[PGR, tuple[Pendencia, ...]]:
+        return pgr_sintetico, pendencias_extracao
+
+    def _processar_pgr_falso(*args: Any, **kwargs: Any) -> Resultado:
+        return resultado
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_falso)
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.processar_pgr", _processar_pgr_falso)
 
 
 def _cabecalho() -> CabecalhoDocumento:
@@ -128,11 +178,11 @@ def test_executar_rota_determinista_sem_matriz_devolve_pendencias(
         regra_origem="D-ARQ-52",
     )
 
-    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[None, tuple[Pendencia, ...]]:
+    def _preparar_falso(*args: Any, **kwargs: Any) -> tuple[None, tuple[Pendencia, ...]]:
         return None, (pendencia,)
 
     monkeypatch.setattr(
-        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_falso
     )
 
     envelope = EnvelopeConfirmado(validade=date(2030, 1, 1), assinatura_engenheiro=True)
@@ -204,19 +254,25 @@ def test_troca_de_cabecalho_regenera_documento_sem_reprocessar(
     # Reversão que mata: incluir cabeçalho/rodapé na chave de
     # calcular_chave_cache — a segunda chamada, com cabeçalho diferente mas
     # MESMO pdf/envelope, passaria a divergir do cache e reprocessaria
-    # (contagem de chamadas ao processar_arquivo_pgr viraria 2, não 1).
+    # (contagem de chamadas à parte CARA — preparar_pgr_hidratado — viraria
+    # 2, não 1).
     chamadas: list[int] = []
     exame = ExameEmitido(exame="exame_clinico", periodicidade_meses=12, momentos={Momento.ADM})
     matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=("Cargo Único",))
     resultado_sintetico = Resultado(status="OK", matrizes=[matriz])
+    pgr_sintetico = _pgr_sintetico()
 
-    def _processar_espiao(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
+    def _preparar_espiao(*args: Any, **kwargs: Any) -> tuple[PGR, tuple[Pendencia, ...]]:
         chamadas.append(1)
-        return resultado_sintetico, ()
+        return pgr_sintetico, ()
+
+    def _processar_pgr_falso(*args: Any, **kwargs: Any) -> Resultado:
+        return resultado_sintetico
 
     monkeypatch.setattr(
-        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_espiao
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_espiao
     )
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.processar_pgr", _processar_pgr_falso)
 
     envelope = EnvelopeConfirmado(validade=date(2030, 1, 1), assinatura_engenheiro=True)
     conteudo_pdf = b"conteudo qualquer do pdf"
@@ -296,12 +352,7 @@ def test_status_rejeitado_mostra_motivo_e_nao_oferece_download(
         motivo_rejeicao=pendencia_gate.motivo,
     )
 
-    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
-        return resultado_rejeitado, ()
-
-    monkeypatch.setattr(
-        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
-    )
+    _mockar_parse_deterministico(monkeypatch, resultado_rejeitado)
 
     at = AppTest.from_function(pagina_matriz)
     at.run()
@@ -344,12 +395,7 @@ def test_pendencias_globais_aparecem_antes_das_de_extracao(
     matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=("Cargo Teste",))
     resultado = Resultado(status="OK", matrizes=[matriz], pendencias_globais=[pendencia_global])
 
-    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
-        return resultado, (pendencia_extracao,)
-
-    monkeypatch.setattr(
-        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
-    )
+    _mockar_parse_deterministico(monkeypatch, resultado, pendencias_extracao=(pendencia_extracao,))
 
     at = AppTest.from_function(pagina_matriz)
     at.run()
@@ -380,12 +426,7 @@ def test_documento_sem_linha_cargo_nao_e_oferecido_para_download(
     matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=())
     resultado = Resultado(status="OK", matrizes=[matriz])
 
-    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
-        return resultado, ()
-
-    monkeypatch.setattr(
-        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
-    )
+    _mockar_parse_deterministico(monkeypatch, resultado)
 
     at = AppTest.from_function(pagina_matriz)
     at.run()
@@ -500,12 +541,7 @@ def test_zero_chamadas_ia_nao_mostra_aviso_de_procedencia(
     matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=("Cargo Teste",))
     resultado = Resultado(status="OK", matrizes=[matriz])
 
-    def _processar_falso(*args: Any, **kwargs: Any) -> tuple[Resultado, tuple[Pendencia, ...]]:
-        return resultado, ()
-
-    monkeypatch.setattr(
-        "agente_medico.superficie.web_matriz.processar_arquivo_pgr", _processar_falso
-    )
+    _mockar_parse_deterministico(monkeypatch, resultado)
 
     at = AppTest.from_function(pagina_matriz)
     at.run()
@@ -621,3 +657,138 @@ def test_pagina_matriz_fds_avulsa_com_pgr_nao_interfere_no_fluxo_pgr(
 
     assert not at.exception
     assert at.button  # formulário do PGR renderizou normalmente (form_submit_button)
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-49 Parte 2 fatia 2b — casamento manual FDS<->produto: RT escolhe o
+# GHE e nomeia o produto na tela; anexar_produto_e_reprocessar roda
+# processar_pgr de novo sobre o PGR já hidratado, sem tocar PDF/LLM.
+# ---------------------------------------------------------------------------
+
+_FDS_TOLUENO = BlocoVerbatim(
+    faixa="6-10%",
+    membros=(MembroVerbatim(cas="108-88-3", nome="Tolueno", frases_h=()),),
+)
+
+
+def test_anexar_produto_e_reprocessar_promove_componente_fase_c() -> None:
+    # Reversão que mata: fazer anexar_produto_e_reprocessar devolver o cache
+    # original sem rodar processar_pgr sobre o PGR mutado (ou sem de fato
+    # anexar o ProdutoQuimico ao GHE certo) — "tolueno" nunca apareceria em
+    # riscos_resolvidos: a promoção Fase C (estagios/riscos.py, componentes
+    # de FDS -> Risco, via resolver_composicao dentro de processar_pgr) nunca
+    # rodaria sobre o produto novo. composicao_verbatim (não composicao) é o
+    # que anexar_produto_e_reprocessar planta no PGR anexado — a resolução
+    # (gate_cas) é sempre recalculada dentro de processar_pgr, nunca
+    # persistida de volta em cache.pgr_hidratado (mesma invariante de
+    # resolver_composicao: puro, refeito a cada chamada).
+    protocolo = carregar(_PROTOCOLO_DIR)
+    ghe = _ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",))
+    pgr = _pgr_sintetico(ghe)
+    cache = CacheMatrizes(
+        chave="chave-teste",
+        matrizes=(),
+        exames_vocab=protocolo.vocabulario.exames,
+        pendencias=(),
+        status="OK",
+        pendencias_globais=(),
+        chamadas_ia=0,
+        pgr_hidratado=pgr,
+    )
+    fds_extraida = montar_fds((_FDS_TOLUENO,))
+
+    cache_novo = anexar_produto_e_reprocessar(cache, protocolo, "GHE-01", "Tinta Fascino", fds_extraida)
+
+    assert cache_novo.pgr_hidratado is not None
+    produto = cache_novo.pgr_hidratado.ghes[0].produtos_quimicos[0]
+    assert produto.nome == "Tinta Fascino"
+    assert produto.fds is not None
+    assert produto.fds.composicao_verbatim[0].membros[0].cas == "108-88-3"
+    assert cache_novo.matrizes is not None
+    assert "tolueno" in cache_novo.matrizes[0].riscos_resolvidos
+    # chamadas_ia preservado do cache original — anexar não reprocessa PDF/LLM.
+    assert cache_novo.chamadas_ia == 0
+
+
+def test_anexar_produto_e_reprocessar_anexa_so_no_ghe_escolhido() -> None:
+    # Reversão que mata: trocar o filtro `ghe.id == ghe_id` por algo que
+    # anexe o produto em todo GHE (ou no primeiro, ignorando ghe_id) — o
+    # componente promovido apareceria também no GHE-02, que nunca recebeu FDS.
+    protocolo = carregar(_PROTOCOLO_DIR)
+    ghe1 = _ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",))
+    ghe2 = _ghe_pgr(ghe_id="GHE-02", nome="Almoxarifado", cargos=("Almoxarife",))
+    pgr = _pgr_sintetico(ghe1, ghe2)
+    cache = CacheMatrizes(
+        chave="chave-teste",
+        matrizes=(),
+        exames_vocab=protocolo.vocabulario.exames,
+        pendencias=(),
+        status="OK",
+        pendencias_globais=(),
+        chamadas_ia=0,
+        pgr_hidratado=pgr,
+    )
+    fds_extraida = montar_fds((_FDS_TOLUENO,))
+
+    cache_novo = anexar_produto_e_reprocessar(cache, protocolo, "GHE-01", "Tinta Fascino", fds_extraida)
+
+    assert cache_novo.pgr_hidratado is not None
+    ghe1_novo, ghe2_novo = cache_novo.pgr_hidratado.ghes
+    assert len(ghe1_novo.produtos_quimicos) == 1
+    assert ghe2_novo.produtos_quimicos == ()
+
+
+def test_pagina_matriz_fds_anexada_persiste_entre_reruns_sem_chamada_ia(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: não persistir o PGR mutado em st.session_state após
+    # o clique em "Anexar ao GHE selecionado" — o próximo rerun do Streamlit
+    # (aqui, um 2º at.run() sem tocar em nenhum widget) buscaria de novo o
+    # cache ANTIGO de session_state e o componente prometido some.
+    pgr_sintetico = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)))
+
+    def _preparar_falso(*args: Any, **kwargs: Any) -> tuple[PGR, tuple[Pendencia, ...]]:
+        return pgr_sintetico, ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_falso)
+    # processar_pgr NÃO é mockado aqui — a promoção Fase C precisa rodar de
+    # verdade para "tolueno" aparecer em riscos_resolvidos.
+
+    def _preparar_composicao_falso(
+        *args: Any, **kwargs: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        return (_FDS_TOLUENO,), ()
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_composicao", _preparar_composicao_falso
+    )
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    assert not at.exception
+
+    cache_antes = at.session_state["web_matriz_cache"]
+    assert cache_antes.pgr_hidratado is not None
+    assert cache_antes.pgr_hidratado.ghes[0].produtos_quimicos == ()
+
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+    assert not at.exception
+
+    at.button(key="anexar_fds_fds.pdf").click().run()
+    assert not at.exception
+
+    cache_depois = at.session_state["web_matriz_cache"]
+    produto = cache_depois.pgr_hidratado.ghes[0].produtos_quimicos[0]
+    assert produto.fds.composicao_verbatim[0].membros[0].cas == "108-88-3"
+    assert "tolueno" in cache_depois.matrizes[0].riscos_resolvidos
+    assert cache_depois.chamadas_ia == 0
+
+    # Reversão-alvo: rerun seguinte, sem tocar em nenhum widget — se a casca
+    # não persistiu em st.session_state, este 2º .run() perderia o produto.
+    at.run()
+    assert not at.exception
+    cache_rerun = at.session_state["web_matriz_cache"]
+    assert cache_rerun.pgr_hidratado.ghes[0].produtos_quimicos != ()
+    assert "tolueno" in cache_rerun.matrizes[0].riscos_resolvidos
+    assert cache_rerun.chamadas_ia == 0

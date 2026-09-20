@@ -19,6 +19,7 @@ de uma mudança real de conteúdo/envelope. Lógica de domínio zero na casca.
 
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 from dataclasses import dataclass
 from datetime import date
@@ -26,12 +27,22 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from agente_medico.adaptadores.orquestracao_fds import preparar_composicao
-from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
+from agente_medico.adaptadores.orquestracao_pgr import preparar_pgr_hidratado
 from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini
 from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
-from agente_medico.motor.protocolo import carregar
-from agente_medico.motor.tipos import EnvelopeConfirmado, GHEVerbatim, MatrizGHE, Pendencia
+from agente_medico.motor.entrada import processar_pgr
+from agente_medico.motor.protocolo import Protocolo, carregar
+from agente_medico.motor.tipos import (
+    FDS,
+    PGR,
+    EnvelopeConfirmado,
+    GHEVerbatim,
+    MatrizGHE,
+    Pendencia,
+    ProdutoQuimico,
+)
+from agente_medico.motor.transcricao_fds import montar_fds
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
 from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
@@ -44,12 +55,14 @@ from agente_medico.superficie.documento_matriz import (
 __all__ = [
     "CacheMatrizes",
     "TranscritorGemini",
+    "anexar_produto_e_reprocessar",
     "calcular_chave_cache",
     "deve_reprocessar",
     "executar_rota_determinista",
     "executar_rota_determinista_cacheada",
     "gerar_documento",
     "montar_envelope",
+    "montar_fds",
     "pagina_matriz",
     "preparar_composicao",
 ]
@@ -109,9 +122,21 @@ class _TranscritorContado:
         return tuple(self.interno.transcrever(b) for b in blocos)
 
 
+def _protocolo_padrao() -> Protocolo:
+    """Carrega o protocolo do diretório do pacote — via `__file__` DESTE
+    módulo (web_matriz.py), nunca do `__file__` de quem chama: dentro de
+    pagina_matriz(), AppTest.from_function copia o CORPO da função para um
+    script temporário, e `__file__` ali resolveria para esse script, não
+    para este arquivo (achado da fatia 2b). Único ponto de carregamento —
+    _rodar_parse_deterministico e pagina_matriz (ao anexar produto) usam
+    este helper, nunca Path(__file__) direto."""
+    return carregar(Path(__file__).resolve().parent.parent / "protocolo")
+
+
 def _rodar_parse_deterministico(
     caminho_pdf: Path, envelope: EnvelopeConfirmado
 ) -> tuple[
+    PGR | None,
     tuple[MatrizGHE, ...] | None,
     dict[str, Any],
     tuple[Pendencia, ...],
@@ -125,25 +150,32 @@ def _rodar_parse_deterministico(
     Resultado(status="REJEITADO", matrizes=[])) de um parse legitimamente
     vazio (achado 003.EQ emenda 3: `matrizes=[]` não é None, então esse ramo
     passava reto pelo guard `doc is None`). Sexto campo: quantos blocos GHE
-    foram lidos por IA (003.EW) — 0 quando a rota determinística cobriu tudo."""
-    protocolo = carregar(Path(__file__).resolve().parent.parent / "protocolo")
+    foram lidos por IA (003.EW) — 0 quando a rota determinística cobriu tudo.
+    Primeiro campo (D-ARQ-49 Parte 2 fatia 2b): o PGR hidratado, exposto para a
+    casca anexar produtos_quimicos via anexar_produto_e_reprocessar sem
+    reprocessar PDF/LLM. Decompõe o que antes era 1 chamada a
+    processar_arquivo_pgr em preparar_pgr_hidratado (caro) + processar_pgr
+    (barato, D-ARQ-49 fatia 2a) — MESMO comportamento externo, o intermediário
+    só fica visível para quem chama esta função."""
+    protocolo = _protocolo_padrao()
     contador = _TranscritorContado(interno=TranscritorGeminiGHE())
-    resultado, pendencias = processar_arquivo_pgr(
+    pgr_hidratado, pendencias = preparar_pgr_hidratado(
         caminho_pdf,
         protocolo,
         contador,
         TranscritorGeminiCard(),
         envelope,
     )
-    matrizes = tuple(resultado.matrizes) if resultado is not None else None
-    status = resultado.status if resultado is not None else None
-    pendencias_globais = tuple(resultado.pendencias_globais) if resultado is not None else ()
+    if pgr_hidratado is None:
+        return None, None, protocolo.vocabulario.exames, pendencias, None, (), contador.chamadas
+    resultado = processar_pgr(pgr_hidratado, protocolo)
     return (
-        matrizes,
+        pgr_hidratado,
+        tuple(resultado.matrizes),
         protocolo.vocabulario.exames,
         pendencias,
-        status,
-        pendencias_globais,
+        resultado.status,
+        tuple(resultado.pendencias_globais),
         contador.chamadas,
     )
 
@@ -154,15 +186,15 @@ def executar_rota_determinista(
     cabecalho: CabecalhoDocumento,
     rodape: RodapeDocumento,
 ) -> tuple[DocumentoMatriz | None, str | None, tuple[Pendencia, ...]]:
-    """Carrega o protocolo e roda processar_arquivo_pgr com os clientes reais
-    (D-ARQ-65 fatia 2, roteamento determinístico-primeiro): a rota por
-    coordenadas é tentada antes, e o cliente LLM só é invocado quando a
-    família não é reconhecida (FamiliaNaoReconhecida ou contagem divergente).
-    Com Resultado não-None, gera o documento. Parse total falho devolve
-    (None, None, pendencias) — nunca inventa matriz (D-ARQ-22). Primitiva
-    sem cache — executar_rota_determinista_cacheada é a versão que a casca
-    usa de fato."""
-    matrizes, exames_vocab, pendencias, _status, _pendencias_globais, _chamadas_ia = (
+    """Carrega o protocolo e roda a costura arquivo->PGR->Resultado com os
+    clientes reais (D-ARQ-65 fatia 2, roteamento determinístico-primeiro): a
+    rota por coordenadas é tentada antes, e o cliente LLM só é invocado quando
+    a família não é reconhecida (FamiliaNaoReconhecida ou contagem
+    divergente). Com Resultado não-None, gera o documento. Parse total falho
+    devolve (None, None, pendencias) — nunca inventa matriz (D-ARQ-22).
+    Primitiva sem cache — executar_rota_determinista_cacheada é a versão que a
+    casca usa de fato."""
+    _pgr_hidratado, matrizes, exames_vocab, pendencias, _status, _pendencias_globais, _chamadas_ia = (
         _rodar_parse_deterministico(caminho_pdf, envelope)
     )
     if matrizes is None:
@@ -173,13 +205,17 @@ def executar_rota_determinista(
 
 @dataclass(frozen=True)
 class CacheMatrizes:
-    """Resultado cacheado da parte CARA (processar_arquivo_pgr) da rota
-    determinística. `chave` vem de calcular_chave_cache — PDF + envelope,
+    """Resultado cacheado da parte CARA (preparar_pgr_hidratado + processar_pgr)
+    da rota determinística. `chave` vem de calcular_chave_cache — PDF + envelope,
     nunca cabeçalho/rodapé. `status`/`pendencias_globais` espelham
     Resultado — a casca usa `status == "REJEITADO"` para parar duro
     (003.EQ emenda 3, elo A). `chamadas_ia` (003.EW, campo aditivo) é quantos
     blocos GHE foram lidos por IA — não entra em calcular_chave_cache: é
-    resultado do parse, não identidade dele."""
+    resultado do parse, não identidade dele. `pgr_hidratado` (D-ARQ-49 Parte 2
+    fatia 2b, campo aditivo, molde chamadas_ia) é o PGR hidratado por
+    preparar_pgr_hidratado — também NÃO entra em calcular_chave_cache (é
+    resultado do parse, não identidade dele); anexar_produto_e_reprocessar o
+    consome para plugar um ProdutoQuimico sem reprocessar PDF/LLM."""
 
     chave: str
     matrizes: tuple[MatrizGHE, ...] | None
@@ -188,6 +224,7 @@ class CacheMatrizes:
     status: str | None
     pendencias_globais: tuple[Pendencia, ...]
     chamadas_ia: int
+    pgr_hidratado: PGR | None
 
 
 def calcular_chave_cache(conteudo_pdf: bytes, envelope: EnvelopeConfirmado) -> str:
@@ -221,7 +258,7 @@ def executar_rota_determinista_cacheada(
     persistir em st.session_state."""
     chave_atual = calcular_chave_cache(conteudo_pdf, envelope)
     if cache is None or deve_reprocessar(chave_atual, cache.chave):
-        matrizes, exames_vocab, pendencias, status, pendencias_globais, chamadas_ia = (
+        pgr_hidratado, matrizes, exames_vocab, pendencias, status, pendencias_globais, chamadas_ia = (
             _rodar_parse_deterministico(caminho_pdf, envelope)
         )
         cache = CacheMatrizes(
@@ -232,12 +269,51 @@ def executar_rota_determinista_cacheada(
             status=status,
             pendencias_globais=pendencias_globais,
             chamadas_ia=chamadas_ia,
+            pgr_hidratado=pgr_hidratado,
         )
 
     if cache.matrizes is None:
         return None, None, cache.pendencias, cache
     doc, html = gerar_documento(cache.matrizes, cache.exames_vocab, cabecalho, rodape)
     return doc, html, cache.pendencias, cache
+
+
+def anexar_produto_e_reprocessar(
+    cache: CacheMatrizes,
+    protocolo: Protocolo,
+    ghe_id: str,
+    nome_produto: str,
+    fds: FDS,
+) -> CacheMatrizes:
+    """Anexa um ProdutoQuimico(nome, fds) ao GHE `ghe_id` do PGR já hidratado
+    em `cache.pgr_hidratado` (D-ARQ-49 Parte 2 fatia 2b) e roda processar_pgr
+    de novo sobre o PGR mutado — SEM reprocessar o PDF, SEM nova chamada LLM
+    (preparar_pgr_hidratado, a parte CARA, não é chamado aqui). `fds` precisa
+    chegar com composicao_verbatim populada (nunca fds=None órfão — o slot só
+    nasce com FDS anexada, então R-PGR-04 não dispara por esta via, D-ARQ-49
+    v199); a composição resolvida/promovida (gate_cas + Fase C,
+    resolver_composicao/estagios/riscos.py) nasce de processar_pgr, não daqui.
+    Preserva chave/exames_vocab/pendencias/chamadas_ia do cache original — só
+    pgr_hidratado e os campos derivados de Resultado (matrizes/status/
+    pendencias_globais) mudam. Precondição (responsabilidade da casca):
+    cache.pgr_hidratado is not None."""
+    assert cache.pgr_hidratado is not None
+    produto = ProdutoQuimico(nome=nome_produto, fds=fds)
+    ghes_novos = tuple(
+        dataclasses.replace(ghe, produtos_quimicos=(*ghe.produtos_quimicos, produto))
+        if ghe.id == ghe_id
+        else ghe
+        for ghe in cache.pgr_hidratado.ghes
+    )
+    pgr_atualizado = dataclasses.replace(cache.pgr_hidratado, ghes=ghes_novos)
+    resultado = processar_pgr(pgr_atualizado, protocolo)
+    return dataclasses.replace(
+        cache,
+        pgr_hidratado=pgr_atualizado,
+        matrizes=tuple(resultado.matrizes),
+        status=resultado.status,
+        pendencias_globais=tuple(resultado.pendencias_globais),
+    )
 
 
 def pagina_matriz() -> None:
@@ -253,8 +329,11 @@ def pagina_matriz() -> None:
     )
     from agente_medico.superficie.web_matriz import (
         TranscritorGemini,
+        _protocolo_padrao,
+        anexar_produto_e_reprocessar,
         executar_rota_determinista_cacheada,
         montar_envelope,
+        montar_fds,
         preparar_composicao,
     )
 
@@ -262,10 +341,18 @@ def pagina_matriz() -> None:
 
     arquivo = st.file_uploader("PDF do PGR", type="pdf")
 
+    # Cache lido AQUI (não só mais abaixo, junto do form) para que o bloco de
+    # FDS avulsa, a seguir, saiba se há um PGR já carregado na tela (D-ARQ-49
+    # Parte 2 fatia 2b) — mesmo objeto, sem novo fetch de session_state depois:
+    # a mutação feita pelo botão "Anexar" abaixo tem que sobreviver até o
+    # write final de st.session_state no fim da função, no MESMO rerun.
+    cache: CacheMatrizes | None = st.session_state.get("web_matriz_cache")
+
     st.subheader("FDS/FISPQ dos produtos químicos (opcional)")
     st.caption(
         "Funciona com ou sem o PGR acima — extrai CAS e frases-H de cada FDS enviada. "
-        "O vínculo com um produto do PGR é a próxima fatia (ainda não implementada)."
+        "Com um PGR já carregado, é possível escolher o GHE e o nome do produto "
+        "para anexar a composição extraída (D-ARQ-49 Parte 2 fatia 2b)."
     )
     arquivos_fds = st.file_uploader(
         "PDF(s) da FDS/FISPQ", type="pdf", accept_multiple_files=True, key="fds_avulsas"
@@ -284,6 +371,35 @@ def pagina_matriz() -> None:
                 st.write(f"- CAS {membro.cas} | {membro.nome} | H: {frases_h}")
         for p in pendencias_fds:
             st.write(f"- `{p.tipo}`: {p.motivo}")
+
+        # Casamento manual FDS<->produto (D-ARQ-49 Parte 2 fatia 2b, decisão
+        # ratificada v199/v200: RT escolhe o GHE e nomeia o produto na tela —
+        # NUNCA extração automática por fonte_geradora/agente/heurística,
+        # descartada por medição real contra o PGR Fascino). Só aparece com
+        # PGR já carregado (cache.pgr_hidratado not None) e composição extraída
+        # (blocos_fds não-vazio) — sem PGR, comportamento idêntico ao de hoje.
+        if cache is not None and cache.pgr_hidratado is not None and blocos_fds:
+            ghes_pgr = cache.pgr_hidratado.ghes
+            rotulos_ghe = {ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in ghes_pgr}
+            ghe_escolhido = st.selectbox(
+                f"Anexar {arquivo_fds.name} a qual GHE?",
+                options=list(rotulos_ghe),
+                format_func=lambda gid: rotulos_ghe[gid],
+                key=f"ghe_destino_{arquivo_fds.name}",
+            )
+            nome_produto = st.text_input(
+                "Nome do produto",
+                value=Path(arquivo_fds.name).stem,
+                key=f"nome_produto_{arquivo_fds.name}",
+            )
+            if st.button("Anexar ao GHE selecionado", key=f"anexar_fds_{arquivo_fds.name}"):
+                protocolo = _protocolo_padrao()
+                fds_extraida = montar_fds(blocos_fds)
+                cache = anexar_produto_e_reprocessar(
+                    cache, protocolo, ghe_escolhido, nome_produto, fds_extraida
+                )
+                st.session_state["web_matriz_cache"] = cache
+                st.success(f"Produto '{nome_produto}' anexado ao GHE {ghe_escolhido}.")
 
     if arquivo is None:
         st.session_state.pop("web_matriz_cache", None)
@@ -311,7 +427,6 @@ def pagina_matriz() -> None:
 
         enviado = st.form_submit_button("Gerar matriz")
 
-    cache = st.session_state.get("web_matriz_cache")
     if not enviado and cache is None:
         return
 
