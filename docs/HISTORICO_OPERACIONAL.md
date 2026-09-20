@@ -8856,4 +8856,5 @@ inalterado (25/44).
 medidas ao todo entre as duas levas; sem candidato conhecido pendente além do OCR de
 `FDS PINTOR.pdf`. Índice D-ARQ regenerado, sua suíte verde.
 
-**Status.** Aguardando resultado da suíte completa antes do commit final desta fatia.
+**Status.** Suíte completa medida: **1281 passed, 6 skipped, 0 failed**, 713.61s —
+delta-zero exato contra o Baseline v204. Commit local `3ac98fc` + este registro.
