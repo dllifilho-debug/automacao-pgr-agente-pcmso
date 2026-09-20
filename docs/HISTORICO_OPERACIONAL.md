@@ -8665,3 +8665,141 @@ escolhe o GHE e nomeia o produto ao anexar uma FDS avulsa a um PGR já carregado
 `preparar_pgr_hidratado` para cachear o `PGR` entre reruns do Streamlit sem reprocessar PDF/LLM)
 segue aberta para sessão futura. `git add` por arquivo nominal; commit e push nesta sessão conforme
 instrução do ambiente de execução para fechar a fatia.
+
+## Sessão (branch `feat/003ff-fatia2b`, número não atribuído) — 20/09/2026 — IMPLEMENTAÇÃO: fatia 2b de D-ARQ-49 Parte 2 (UI de casamento manual FDS↔produto)
+
+**Bloco escrito retroativamente** (sessão seguinte, `docs/003fg-validacao-ao-vivo-fatia2b`) — esta
+sessão fechou fatia+PR+merge sem registrar aqui; lacuna reportada, não escondida, corrigida agora
+para o HISTORICO refletir o trabalho real do disco.
+
+**Estado lido do disco antes de qualquer mudança.** `main` em `bcf261f` (merge do PR #349, fatia
+2a); `DECISOES_ARQUITETURAIS.md` v199-v201 e `PENDENCIAS_CLINICAS.md`
+(`DT-(sessão claude/nice-ptolemy-wxk1wo)-01`, "ABERTA — fatia 2a IMPLEMENTADA, resta 2b")
+confirmam contrato/fronteira já fechados — nada a decidir, executar a fatia 2b.
+
+**Implementação.** `_rodar_parse_deterministico` (`web_matriz.py`) decompõe o que antes era 1
+chamada a `processar_arquivo_pgr` em `preparar_pgr_hidratado` (caro) + `processar_pgr` (barato),
+expondo o `PGR` hidratado. `CacheMatrizes` ganha o campo aditivo `pgr_hidratado`. Núcleo novo
+`anexar_produto_e_reprocessar(cache, protocolo, ghe_id, nome_produto, fds)`: cria
+`ProdutoQuimico(nome, fds)` já com `fds` populada, anexa ao GHE via `dataclasses.replace` aninhado
+e roda `processar_pgr` de novo — sem tocar `preparar_pgr_hidratado`/PDF/LLM. Casca
+(`pagina_matriz`): com PGR já carregado, `st.selectbox` do GHE + `st.text_input` do produto +
+botão "Anexar". Achado de implementação: `Path(__file__)` lido de dentro do CORPO de
+`pagina_matriz()` resolve para o script temporário que `AppTest.from_function` gera, não para
+`web_matriz.py` — extraído `_protocolo_padrao()` (módulo-nível) como ponto único de carregamento.
+Só `web_matriz.py`/`test_web_matriz.py` tocados; `orquestracao_pgr.py`/motor intocados.
+
+**Verificação.** 6 testes existentes com mock decomposto (`processar_arquivo_pgr` →
+`preparar_pgr_hidratado`+`processar_pgr`, mesma saída). 3 testes novos com reversão nomeada:
+`test_anexar_produto_e_reprocessar_promove_componente_fase_c`,
+`test_anexar_produto_e_reprocessar_anexa_so_no_ghe_escolhido`,
+`test_pagina_matriz_fds_anexada_persiste_entre_reruns_sem_chamada_ia`. Recorte
+(`test_orquestracao_pgr.py`+`test_web_matriz.py`+`test_documento_matriz.py`): 67 passed. Suíte
+completa (árvore parada): **1281 passed, 6 skipped, 0 failed**, 738.56s — delta **+3** exato
+contra o Baseline v201 (1278). `mypy --strict` alvo canônico: limpo, **49 arquivos**, delta-zero
+(`montar_fds` adicionado a `__all__`, re-export explícito exigido por `--strict`).
+
+**Docs.** Nota de aplicação em `D-ARQ-49` (v201→**v202**). `DT-(sessão claude/nice-ptolemy-wxk1wo)-01`
+marcada RESOLVIDA — D-ARQ-49 Parte 2 (2a+2b) fecha IMPLEMENTADA. Índice D-ARQ regenerado, sua
+suíte verde. `PAINEL_ESTADO.md` NÃO re-tirado (nenhuma `R-*`/`.yaml` de regra tocado, D-ARQ-85
+cl.1).
+
+**Status.** PR #350 aberto, revisado e MERGEADO em `main` (autorização explícita do usuário desta
+sessão para push/merge — turno próprio, registrado no PR). D-ARQ-49 Parte 2 fecha IMPLEMENTADA.
+
+## Sessão (branch `docs/003fg-validacao-ao-vivo-fatia2b`, número não atribuído) — 20/09/2026 — CONHECIMENTO: validação ao vivo da fatia 2b contra PGR/FDS reais
+
+**Estado lido do disco antes de qualquer mudança.** `main` em `96a15e9` (merge do PR #350 + upload
+de 11 FDS adicionais pelo usuário); `DECISOES_ARQUITETURAIS.md` v202 confirma D-ARQ-49 Parte 2
+fechada, mas só com cobertura de PGR/FDS sintéticos — pedido do Diovanni: validar contra dado real
+do acervo (`fds_originais/`) antes de abrir a próxima fatia.
+
+**O que foi feito (sem código de produção tocado).** `pagina_matriz()` exercitada via
+`streamlit.testing.v1.AppTest` com upload literal dos bytes do PGR Fascino real
+(`matrizes_originais/PGR - CONSCIENTE... FASCINO (15.07.26).pdf`, rota determinística
+`parsear_arquivo`, 19 GHEs, 0 chamadas LLM) e da FDS real `tinta_acrilica.pdf`. Sem
+`CHAVE_API_GOOGLE` no container, o único mock foi no passo de transcrição-LLM da composição da
+FDS — substituído pelo texto bruto REAL extraído via `extrair_texto_fds` (determinístico), não por
+dado inventado. Interação literal com `selectbox` (GHE-16 PINTURA, entre as 19 opções reais),
+`text_input` (nome do produto) e `button` ("Anexar"); confirmado zero exceção em cada etapa,
+produto persistente em `st.session_state` após um 2º `.run()` sem tocar em widget.
+
+**Achado.** Das 6 FDS originais do acervo, só 2 têm CAS resolvendo no vocabulário hoje
+(`13463-67-7`→`dioxido_de_titanio`, `78-93-3`→`metil_etil_cetona`) — as outras 4 caem em
+`vocabulario_ausente` (lacuna já mapeada em `DT-003M-02`, não achado novo). Nos GHEs plausíveis
+(Pintura, Encanador), o componente já aparecia em `riscos_resolvidos` ANTES do anexo — o PGR
+Fascino itemiza esses químicos diretamente na própria tabela de risco (D-ARQ-49 v197/v198),
+convergência de fonte, não falha. Demonstração isolada (GHE sem o químico) confirmou a promoção
+Fase C funciona: o slug só entra em `riscos_resolvidos` depois do anexo.
+
+**Docs.** Nota de validação ao vivo em `D-ARQ-49` (v202→**v203**). Índice D-ARQ regenerado, sua
+suíte verde. Nenhuma `R-*` criada, alterada ou depreciada; nenhuma D-ARQ nova; nenhum código de
+produção tocado — sem gate de suíte completa/mypy aplicável (CONHECIMENTO puro).
+
+**Status.** Validação ao vivo concluída, achados registrados. Próxima fatia (escopo aberto, três
+candidatos vivos em `PENDENCIAS_CLINICAS.md`/`PAINEL_ESTADO.md`: vocabulário químico raso
+DT-003M-02(A), D-ARQ-57 peça 5 pausada, relatório de rastreabilidade da matriz) — decisão do
+Diovanni pendente nesta mesma sessão.
+
+## Sessão (branch `docs/003fg-validacao-ao-vivo-fatia2b`, número não atribuído, continuação) — 20/09/2026 — DADO: DT-003M-02(A), 19 slugs novos em `agentes.yaml`
+
+**Escolha do Diovanni.** Entre os três candidatos levantados no fechamento da validação
+ao vivo (acima), escolhido "vocabulário químico raso (DT-003M-02)" — gargalo direto do
+que a fatia 2b acabou de expor: quanto mais CAS resolvido, mais produtos anexados viram
+risco de verdade. Escopo confirmado em duas rodadas (17 → 19, correção de contagem
+própria) como "todas de uma vez" — as 4 famílias de CAS ainda sem slug entre as 6 FDS já
+medidas no acervo (`fds_originais/`).
+
+**Pesquisa de fonte, não memória.** `WebSearch` por substância — domínio oficial
+`monographs.iarc.who.int` bloqueado pelo proxy de egresso desta sessão (`WebFetch`
+também bloqueado para vários domínios secundários), contornado cruzando snippets de SDS
+de fabricante/PubChem/InChem/ChemicalBook entre si. Nenhum dos 19 é carcinógeno IARC
+(Grupo 1/2A/2B) — achado coerente, não forçado. Único `tem_lt=true`: `hidroxido_de_amonia`
+(amônia, Quadro 1 do Anexo 11 da NR-15).
+
+**Achado colateral — 2 CAS malformados na FDS real.** `cas_bem_formado` (função de
+produção, dígito verificador) aplicado a cada candidato ANTES de pesquisar economizou
+2 buscas erradas: a FDS da Ciplan declara aluminato tricálcico como `1242-78-3`
+(FALHA o dígito) e a FDS da Leinertex declara N-octil isotiazolinona como `26530-20-2`
+(também falha) — defeito de OCR/transcrição do PDF original, não do código. CAS
+corretos usados no vocabulário (`12042-78-3`/`26530-20-1`, dígito confere, fonte
+externa); uma FDS real repetindo o CAS malformado continua caindo em `cas_invalido`
+(D-ARQ-36 ramo c) — comportamento correto do gate, registrado em comentário no yaml.
+
+**Consequência não-antecipada sobre fixtures existentes.** A fixture real `fds_t65.py`
+(3 FDS já versionadas — Cimento Ciplan/Tinta Acrílica/Adesivo PVC Tigre, as MESMAS 3 das
+6 medidas ao vivo) teve TODO CAS válido remanescente coberto pelos 19 slugs novos —
+ramo (b) do `gate_cas` zerou nela. 6 testes (`test_composicao_propaga_pendencias.py`
+×3, `test_integracao_composicao_fase_c.py` ×3) tinham asserção ancorada no estado
+antigo ("Copolímero de PVC fica sem slug", "cimento não promove nenhum componente") —
+reescritos com reversão nomeada em cada um, reconferidos contra o comportamento real
+(`stage_2_riscos`/`materialidade()`, não hardcoded à mão). Mecanismo genérico do ramo
+(b) segue coberto, independente do vocabulário real, por `test_resolvedor.py` (índice
+sintético local). Guards de inventário do resolvedor de termos também atualizados:
+`test_indice_real_tem_125_entradas`→`_144_entradas` (125→144, +19 formas, cada slug
+novo sem `termos:`); vigia de pares fuzzy ganhou 1 par novo aceito no gabarito
+(`silicato_dicalcico`/`silicato_tricalcico`, mesma classe do par MEK/MBK já existente,
+nenhum com `fuzzy_permitido`).
+
+**Verificação.** Recorte (`test_vocabulario.py`+`test_protocolo_carregamento.py`+
+`test_resolvedor.py`+`test_resolvedor_termos.py`+`test_composicao_propaga_pendencias.py`+
+`test_integracao_composicao_fase_c.py`+11 arquivos de FDS/transcrição que consomem as
+mesmas fixtures reais): **139 passed**, sem alteração de asserção fora do nomeado
+acima. `mypy --strict` alvo canônico: limpo, **49 arquivos**, delta-zero. Suíte completa
+rodada 2×: a 1ª corrida (contra os testes AINDA não corrigidos) achou os 6 vermelhos
+acima e foi encerrada antes de terminar (custo evitado, não descartado por conveniência
+— achado real, corrigido, corrida refeita do zero); a 2ª mede o estado final.
+`scripts.medir_painel`: cobertura CAS **50/80 (62%) → 69/99 (70%)**; `regras` inalterado
+(25/44) — (A) é dado, nenhuma `R-*` tocada.
+
+**Docs.** Nota de aplicação em `D-ARQ-36` (`DECISOES_ARQUITETURAIS.md` v203→**v204**,
+mesma ID, nenhuma cláusula alterada). `DT-003M-02` (`PENDENCIAS_CLINICAS.md`): (A)
+PARCIALMENTE RESOLVIDA — recorte medido (6 FDS do acervo) coberto; universo maior de
+FDS reais segue aberto (as 11 FDS por-cargo do commit `96a15e9` — `FDS PINTOR.pdf`,
+`FDS ENCANADOR.pdf` etc. — não examinadas nesta sessão). Índice D-ARQ regenerado, sua
+suíte verde. Nenhuma `R-*` criada, alterada ou depreciada; nenhuma D-ARQ nova.
+
+**Status.** (A) de DT-003M-02 parcialmente resolvida (recorte das 6 FDS medidas). Suíte
+completa medida: **1281 passed, 6 skipped, 0 failed**, 716.04s — delta-zero exato contra
+o Baseline v202 (as reescritas trocaram asserção, não contagem de teste). Commit local
+`cebeb75` + este registro.

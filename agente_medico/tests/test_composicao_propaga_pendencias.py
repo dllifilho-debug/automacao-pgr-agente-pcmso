@@ -49,7 +49,13 @@ def _pgr_cru() -> PGR:
 # ---- MOV 1: resolver_composicao retorna pendências do gate distinguíveis por ramo ----
 # Varre os 3 GHEs (adesivo+tinta+cimento). [1] agregado contém:
 #   ramo (c) cas_invalido bloq  — TiO2 (tinta, 134363-67-7) e aluminato (cimento, 1242-78-3)
-#   ramo (b) vocabulario_ausente não-bloq dest protocolo — copolimero PVC (adesivo, 9003-22-9) etc.
+#   ramo (b) vocabulario_ausente — ZERO nesta fixture desde DT-003M-02(A) (sessão
+#   `docs/003fg-...`): os 19 slugs novos em agentes.yaml cobriram TODO CAS válido
+#   remanescente das 3 FDS reais (copolímero PVC, silicatos do cimento, hidróxido de
+#   amônia etc.) — o que sobra é só ramo (c) (CAS malformado no PDF original) e ramo
+#   (d) (CAS oculto/ausente, "" na fixture). Mecanismo do ramo (b) em si segue coberto,
+#   independente de vocabulário real, por test_resolvedor.py::test_gate_ramo_b_*
+#   (índice sintético local).
 #   ramo (d) cas_ausente não-bloq — Segredo Industrial 1/2 (adesivo, cas="")
 # Asserções por PRESENÇA (>=1 por tipo). NUNCA igualdade de contagem (fixture tem
 # múltiplos de cada ramo; contagem exata é frágil a edição futura de fixture).
@@ -70,12 +76,18 @@ def test_pendencias_gate_contem_ramo_c_bloqueante() -> None:
     assert all(p.destinatario == "empresa" for p in c)
 
 
-def test_pendencias_gate_contem_ramo_b_nao_bloqueante() -> None:
+def test_pendencias_gate_ramo_b_zerado_pos_dt003m02a() -> None:
+    # Reversão que mata: reverter DT-003M-02(A) (remover os 19 slugs novos de
+    # agentes.yaml) — copolímero PVC/silicatos do cimento/etc. voltam a ramo (b) e
+    # esta contagem deixa de ser 0. Antes desta sessão, o teste era
+    # test_pendencias_gate_contem_ramo_b_nao_bloqueante (len(b) >= 1) — a fixture T65
+    # tinha ramo (b) real; a expansão do vocabulário fechou TODO CAS válido
+    # remanescente das 3 FDS reais, então hoje é 0, não >=1. Mecanismo do ramo (b)
+    # em si (não a cobertura desta fixture específica) segue coberto por
+    # test_resolvedor.py::test_gate_ramo_b_vocabulario_ausente/test_gate_ramo_b_copolimero_pvc.
     _, pend = resolver_composicao(_pgr_cru(), _INDICE)
     b = [p for p in pend if p.tipo == "vocabulario_ausente"]
-    assert len(b) >= 1
-    assert all(not p.bloqueante for p in b)
-    assert all(p.destinatario == "protocolo" for p in b)
+    assert b == []
 
 
 def test_pendencias_gate_contem_ramo_d_nao_bloqueante() -> None:
@@ -91,10 +103,14 @@ def test_pendencias_gate_sem_ghe_id() -> None:
     assert all(p.ghe_id is None for p in pend)
 
 
-def test_tres_procedencias_coexistem_distinguiveis() -> None:
+def test_duas_procedencias_coexistem_distinguiveis() -> None:
+    # Antes de DT-003M-02(A) esta fixture tinha 3 procedências vivas (c/b/d); a
+    # expansão de vocabulário zerou o ramo (b) aqui (ver
+    # test_pendencias_gate_ramo_b_zerado_pos_dt003m02a) — restam c/d.
     _, pend = resolver_composicao(_pgr_cru(), _INDICE)
     tipos = {p.tipo for p in pend}
-    assert {"cas_invalido", "vocabulario_ausente", "cas_ausente"} <= tipos
+    assert {"cas_invalido", "cas_ausente"} <= tipos
+    assert "vocabulario_ausente" not in tipos
 
 
 # ---- MOV 2: executar_com_composicao costura o [1] do gate em pendencias_globais ----
@@ -117,19 +133,23 @@ def test_wrapper_costura_pendencias_gate_no_global() -> None:
     assert len(wrap.pendencias_globais) == len(base.pendencias_globais) + len(pend_gate)
 
 
-def test_wrapper_discriminante_copolimero_vocabulario_ausente() -> None:
-    # Ancorado no ramo (b) não-bloqueante. Asserção é DIFERENCIAL (wrap = base + gate por
-    # tipo), não universal-negativa: não depende de nenhum stage do motor médico jamais
-    # cunhar "vocabulario_ausente" — só exige que o wrapper ACRESCENTE as do gate além
-    # do que executar() sozinho traz.
+def test_wrapper_discriminante_segredo_industrial_cas_ausente() -> None:
+    # Ancorado no ramo (d) não-bloqueante (Segredo Industrial 1/2, cas=""). Trocado de
+    # ramo (b)/"vocabulario_ausente" (Copolímero de PVC) porque DT-003M-02(A) deu slug
+    # ao copolímero — deixou de exercitar ramo (b) nesta fixture (ver
+    # test_pendencias_gate_ramo_b_zerado_pos_dt003m02a); ramo (d) continua vivo (CAS
+    # oculto não tem como ganhar slug — não é lacuna de vocabulário). Asserção é
+    # DIFERENCIAL (wrap = base + gate por tipo), não universal-negativa: não depende de
+    # nenhum stage do motor médico jamais cunhar "cas_ausente" — só exige que o wrapper
+    # ACRESCENTE as do gate além do que executar() sozinho traz.
     pgr_cru = _pgr_cru()
     pgr_resolvido, pend_gate = resolver_composicao(pgr_cru, _INDICE)
     base = executar(pgr_resolvido, _PROTO, _HOJE)
     wrap = executar_com_composicao(pgr_cru, _PROTO, _INDICE, _HOJE)
-    n_base = sum(1 for p in base.pendencias_globais if p.tipo == "vocabulario_ausente")
-    n_wrap = sum(1 for p in wrap.pendencias_globais if p.tipo == "vocabulario_ausente")
-    n_gate = sum(1 for p in pend_gate if p.tipo == "vocabulario_ausente")
-    assert n_gate >= 1            # pré-condição: a fixture exercita o ramo (b)
+    n_base = sum(1 for p in base.pendencias_globais if p.tipo == "cas_ausente")
+    n_wrap = sum(1 for p in wrap.pendencias_globais if p.tipo == "cas_ausente")
+    n_gate = sum(1 for p in pend_gate if p.tipo == "cas_ausente")
+    assert n_gate >= 1            # pré-condição: a fixture exercita o ramo (d)
     assert n_wrap == n_base + n_gate
 
 

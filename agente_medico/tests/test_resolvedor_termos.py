@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_125_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_144_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -42,9 +42,12 @@ def test_indice_real_tem_125_entradas(indice_real: IndiceTermos) -> None:
     # Lago das Rosas × gabarito assinado. 124 -> 125 na mesma sessão: +1 slug
     # novo, `poeira_de_madeira` (DT-003EJ-01 RESOLVIDA, R-RX-03/R-ESP-03) — o
     # próprio slug entra sem precisar de `termos:` (normaliza igual ao literal
-    # "Poeira de madeira" do PGR). Guard de inventário movido junto com o dado,
-    # lição de 003.CV/003.DM.
-    assert len(indice_real.slug_por_forma) == 125
+    # "Poeira de madeira" do PGR). 125 -> 144 (branch `docs/003fg-...`, DT-003M-02(A)):
+    # +19 slugs de composição-de-FDS (cimento Ciplan, tinta acrílica, Adesivo PVC
+    # Tigre, conservantes Leinertex — vocabulário CAS, não termo de PGR); cada um
+    # entra sem `termos:`, o próprio slug normaliza como 1 forma. Guard de
+    # inventário movido junto com o dado, lição de 003.CV/003.DM.
+    assert len(indice_real.slug_por_forma) == 144
 
 
 # ---------------------------------------------------------------------------
@@ -356,6 +359,13 @@ def test_vigia_pares_fuzzy_chaves_longas(indice_real: IndiceTermos) -> None:
         frozenset({"metil_etil_cetona", "metil_butil_cetona"}),
         frozenset({"metoxietanol_2", "butoxietanol_2"}),
         frozenset({"2_butoxietanol", "2_metoxietanol"}),
+        # DT-003M-02(A), branch `docs/003fg-...`: par novo, mesma classe dos acima
+        # (substâncias distintas de nome parecido — silicato tri- vs dicálcico, os
+        # dois componentes reais do Cimento Ciplan). Nenhum dos dois slugs tem
+        # `fuzzy_permitido: true` (omitido, default False, D-ARQ-64) — revisado e
+        # aceito no gabarito, não bloqueia; se algum dia alguém marcar fuzzy_permitido
+        # nesse par, esta proximidade já está documentada aqui.
+        frozenset({"silicato_dicalcico", "silicato_tricalcico"}),
     }
     assert pares == gabarito
 
