@@ -8665,3 +8665,78 @@ escolhe o GHE e nomeia o produto ao anexar uma FDS avulsa a um PGR já carregado
 `preparar_pgr_hidratado` para cachear o `PGR` entre reruns do Streamlit sem reprocessar PDF/LLM)
 segue aberta para sessão futura. `git add` por arquivo nominal; commit e push nesta sessão conforme
 instrução do ambiente de execução para fechar a fatia.
+
+## Sessão (branch `feat/003ff-fatia2b`, número não atribuído) — 20/09/2026 — IMPLEMENTAÇÃO: fatia 2b de D-ARQ-49 Parte 2 (UI de casamento manual FDS↔produto)
+
+**Bloco escrito retroativamente** (sessão seguinte, `docs/003fg-validacao-ao-vivo-fatia2b`) — esta
+sessão fechou fatia+PR+merge sem registrar aqui; lacuna reportada, não escondida, corrigida agora
+para o HISTORICO refletir o trabalho real do disco.
+
+**Estado lido do disco antes de qualquer mudança.** `main` em `bcf261f` (merge do PR #349, fatia
+2a); `DECISOES_ARQUITETURAIS.md` v199-v201 e `PENDENCIAS_CLINICAS.md`
+(`DT-(sessão claude/nice-ptolemy-wxk1wo)-01`, "ABERTA — fatia 2a IMPLEMENTADA, resta 2b")
+confirmam contrato/fronteira já fechados — nada a decidir, executar a fatia 2b.
+
+**Implementação.** `_rodar_parse_deterministico` (`web_matriz.py`) decompõe o que antes era 1
+chamada a `processar_arquivo_pgr` em `preparar_pgr_hidratado` (caro) + `processar_pgr` (barato),
+expondo o `PGR` hidratado. `CacheMatrizes` ganha o campo aditivo `pgr_hidratado`. Núcleo novo
+`anexar_produto_e_reprocessar(cache, protocolo, ghe_id, nome_produto, fds)`: cria
+`ProdutoQuimico(nome, fds)` já com `fds` populada, anexa ao GHE via `dataclasses.replace` aninhado
+e roda `processar_pgr` de novo — sem tocar `preparar_pgr_hidratado`/PDF/LLM. Casca
+(`pagina_matriz`): com PGR já carregado, `st.selectbox` do GHE + `st.text_input` do produto +
+botão "Anexar". Achado de implementação: `Path(__file__)` lido de dentro do CORPO de
+`pagina_matriz()` resolve para o script temporário que `AppTest.from_function` gera, não para
+`web_matriz.py` — extraído `_protocolo_padrao()` (módulo-nível) como ponto único de carregamento.
+Só `web_matriz.py`/`test_web_matriz.py` tocados; `orquestracao_pgr.py`/motor intocados.
+
+**Verificação.** 6 testes existentes com mock decomposto (`processar_arquivo_pgr` →
+`preparar_pgr_hidratado`+`processar_pgr`, mesma saída). 3 testes novos com reversão nomeada:
+`test_anexar_produto_e_reprocessar_promove_componente_fase_c`,
+`test_anexar_produto_e_reprocessar_anexa_so_no_ghe_escolhido`,
+`test_pagina_matriz_fds_anexada_persiste_entre_reruns_sem_chamada_ia`. Recorte
+(`test_orquestracao_pgr.py`+`test_web_matriz.py`+`test_documento_matriz.py`): 67 passed. Suíte
+completa (árvore parada): **1281 passed, 6 skipped, 0 failed**, 738.56s — delta **+3** exato
+contra o Baseline v201 (1278). `mypy --strict` alvo canônico: limpo, **49 arquivos**, delta-zero
+(`montar_fds` adicionado a `__all__`, re-export explícito exigido por `--strict`).
+
+**Docs.** Nota de aplicação em `D-ARQ-49` (v201→**v202**). `DT-(sessão claude/nice-ptolemy-wxk1wo)-01`
+marcada RESOLVIDA — D-ARQ-49 Parte 2 (2a+2b) fecha IMPLEMENTADA. Índice D-ARQ regenerado, sua
+suíte verde. `PAINEL_ESTADO.md` NÃO re-tirado (nenhuma `R-*`/`.yaml` de regra tocado, D-ARQ-85
+cl.1).
+
+**Status.** PR #350 aberto, revisado e MERGEADO em `main` (autorização explícita do usuário desta
+sessão para push/merge — turno próprio, registrado no PR). D-ARQ-49 Parte 2 fecha IMPLEMENTADA.
+
+## Sessão (branch `docs/003fg-validacao-ao-vivo-fatia2b`, número não atribuído) — 20/09/2026 — CONHECIMENTO: validação ao vivo da fatia 2b contra PGR/FDS reais
+
+**Estado lido do disco antes de qualquer mudança.** `main` em `96a15e9` (merge do PR #350 + upload
+de 11 FDS adicionais pelo usuário); `DECISOES_ARQUITETURAIS.md` v202 confirma D-ARQ-49 Parte 2
+fechada, mas só com cobertura de PGR/FDS sintéticos — pedido do Diovanni: validar contra dado real
+do acervo (`fds_originais/`) antes de abrir a próxima fatia.
+
+**O que foi feito (sem código de produção tocado).** `pagina_matriz()` exercitada via
+`streamlit.testing.v1.AppTest` com upload literal dos bytes do PGR Fascino real
+(`matrizes_originais/PGR - CONSCIENTE... FASCINO (15.07.26).pdf`, rota determinística
+`parsear_arquivo`, 19 GHEs, 0 chamadas LLM) e da FDS real `tinta_acrilica.pdf`. Sem
+`CHAVE_API_GOOGLE` no container, o único mock foi no passo de transcrição-LLM da composição da
+FDS — substituído pelo texto bruto REAL extraído via `extrair_texto_fds` (determinístico), não por
+dado inventado. Interação literal com `selectbox` (GHE-16 PINTURA, entre as 19 opções reais),
+`text_input` (nome do produto) e `button` ("Anexar"); confirmado zero exceção em cada etapa,
+produto persistente em `st.session_state` após um 2º `.run()` sem tocar em widget.
+
+**Achado.** Das 6 FDS originais do acervo, só 2 têm CAS resolvendo no vocabulário hoje
+(`13463-67-7`→`dioxido_de_titanio`, `78-93-3`→`metil_etil_cetona`) — as outras 4 caem em
+`vocabulario_ausente` (lacuna já mapeada em `DT-003M-02`, não achado novo). Nos GHEs plausíveis
+(Pintura, Encanador), o componente já aparecia em `riscos_resolvidos` ANTES do anexo — o PGR
+Fascino itemiza esses químicos diretamente na própria tabela de risco (D-ARQ-49 v197/v198),
+convergência de fonte, não falha. Demonstração isolada (GHE sem o químico) confirmou a promoção
+Fase C funciona: o slug só entra em `riscos_resolvidos` depois do anexo.
+
+**Docs.** Nota de validação ao vivo em `D-ARQ-49` (v202→**v203**). Índice D-ARQ regenerado, sua
+suíte verde. Nenhuma `R-*` criada, alterada ou depreciada; nenhuma D-ARQ nova; nenhum código de
+produção tocado — sem gate de suíte completa/mypy aplicável (CONHECIMENTO puro).
+
+**Status.** Validação ao vivo concluída, achados registrados. Próxima fatia (escopo aberto, três
+candidatos vivos em `PENDENCIAS_CLINICAS.md`/`PAINEL_ESTADO.md`: vocabulário químico raso
+DT-003M-02(A), D-ARQ-57 peça 5 pausada, relatório de rastreabilidade da matriz) — decisão do
+Diovanni pendente nesta mesma sessão.
