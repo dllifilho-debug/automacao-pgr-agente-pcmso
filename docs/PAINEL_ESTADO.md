@@ -71,7 +71,7 @@
 > em vermelho — detalhe em HISTORICO (bloco desta sessão). Detalhe completo em HISTORICO e
 > `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA em
 > `PENDENCIAS_CLINICAS.md`.
-**Baseline:** branch `claude/sharp-wozniak-j4596a` sobre `main 3d1b33b` (3 commits desta sessão, docs-only, ratificação pendente de push) · **1278 passed, 6 skipped, 0 failed** *(herdado — 3d1b33b é o merge do PR #347, docs-only sobre 4be30ad; esta sessão é ARQUITETURA, sem código de produção, sem derivado a re-medir)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(herdado, idem)* · PROTOCOLO v94 · DECISOES v200
+**Baseline:** branch `claude/blissful-johnson-mdeqn5` sobre `main 64e744b` (merge do PR #348 — D-ARQ-49 Parte 2 ratificada; esta sessão IMPLEMENTOU a fatia 2a, código de produção tocado) · **1278 passed, 6 skipped, 0 failed** *(MEDIDO nesta sessão, árvore parada, 570s — delta-zero exato contra o Baseline herdado de v200)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(MEDIDO nesta sessão, delta-zero)* · PROTOCOLO v94 · DECISOES v201
 
 > **Tiragem desta sessão, parte 2 `[MEDIDO — 16/09/2026]` (branch `claude/festive-gates-soy0fr`,
 > IMPLEMENTAÇÃO — `R-RX-03`/`R-ESP-03`).** Suíte **1233 passed, 6 skipped, 0 failed**, árvore
