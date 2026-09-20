@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v198 · 85 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v200 · 85 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -56,40 +56,40 @@ Fonte: DECISOES_ARQUITETURAIS.md v198 · 85 decisões
 | D-ARQ-46 | Contrato do verbatim transcrito da FDS: o LLM-transcritor emite verbatim cru (texto por campo); `tuple[Componente,...]` é saída da montagem determinística, não do LLM | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1436 | 12685 |
 | D-ARQ-47 | Contrato de invocação e gate do transcritor-LLM-FDS: candidato verbatim revisado pelo RT é a fronteira LLM↔determinístico | DECISÃO DE ARQUITETURA (CONHECIMENTO/medição → ARQUITETURA) | 1484 | 18306 |
 | D-ARQ-48 | Fronteira de impureza: adaptador-LLM fora do motor, invariante de pureza testável | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (003 | 1542 | 1778 |
-| D-ARQ-49 | Contrato do parse-PGR: instância-PGR de D-ARQ-41; recorte esqueleto-GHE (cargos+riscos+quantificação crus + FDS apontadas); mecanismo termo→slug adiado por medição | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1556 | 13753 |
-| D-ARQ-50 | Medição do PGR Viverde fecha parse-doc e mecanismo termo→slug do parse-PGR; irmão de D-ARQ-43 do lado-PGR | DECISÃO DE ARQUITETURA (CONHECIMENTO/medição → ARQUITETURA) | 1610 | 17767 |
-| D-ARQ-51 | Hidratação GHEVerbatim → tipos.PGR: consumidor de produção do resolver termo→slug; id posicional, agente tri-estado→Optional, None-agente não-bloqueante | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO por fatias | 1659 | 13159 |
-| D-ARQ-52 | Plug de produção lado-PGR: costura arquivo→Resultado; envelope RT-supplied; atravessa a hidratação (assimetria não-bloqueante vs. FDS) | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (003 | 1703 | 5516 |
-| D-ARQ-53 | Transcrição-de-topo do envelope: instância-envelope de D-ARQ-41; pré-preenchimento document-derived + confirmação-RT no gate eliminatório (molde revisão-RT D-ARQ-47 cl.4); mecanismo adiado por medição | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1733 | 11767 |
-| D-ARQ-54 | Superfície RT como apresentação-pura sobre o contrato ida/volta; CLI primeiro, web herda o mesmo artefato; escopo = os dois seams de confirmação (envelope + FDS) | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1781 | 11480 |
-| D-ARQ-55 | Recorte (B) da transcrição-FDS: verbatim-de-perigo é por-membro (H-code cru); mapa frase-H→flag é determinístico resolver-side (só sensibilização); confiança ancora em R-FDS-06 + revisão-RT | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1901 | 11308 |
-| D-ARQ-56 | Passo 2 do cluster-FDS: bypass antes do slug-check em `materialidade()`; Fase C tripartida no sem-slug; promoção-sem-slug deferida (DT-003CK-01) |  | 1944 | 3751 |
-| D-ARQ-57 | Localizador de blocos GHE: repertório determinístico de âncoras medidas + gate de segmentação; família cargo-based é fronteira de escopo sinalizada, não variação de âncora | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1966 | 81151 |
-| D-ARQ-58 | Resolução de predicado por identidade de agente: fallback genérico no avaliador, não um primitivo dedicado por agente | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (mesma sessão 003 | 2212 | 2132 |
-| D-ARQ-59 | O refactor família R-BIO-04 → "estágio genérico" é gatilho falso; a família é a forma final, o limiar ~25 aposentado | DECISÃO DE ARQUITETURA (ARQUITETURA, sessão 003 | 2224 | 4817 |
-| D-ARQ-60 | Reconciliação nome-de-exibição §5.9 → slug canônico mora no guardião (registro explícito), não no doc; §5.9 é fonte humana, `regras.yaml` a chave de máquina | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 2256 | 3530 |
-| D-ARQ-61 | Critério de escolha do indicador canônico quando o Anexo I oferece múltiplas opções ("ou") | DECISÃO DE ARQUITETURA (sessão 003 | 2280 | 3566 |
-| D-ARQ-62 | Redirecionamento de foco pós-003.DQ: Marco 1 via caso-âncora real; recorte construção civil como sequenciamento, não arquitetura | DECISÃO DE FOCO (sessão 003 | 2316 | 4921 |
-| D-ARQ-63 | Gate de abertura em dois níveis: índice derivado + eixo nomeado |  | 2343 | 9410 |
-| D-ARQ-64 | Ramo FUZZY opt-in por allowlist de dado: o veto é do resultado, nunca filtro de candidato |  | 2490 | 5616 |
-| D-ARQ-65 | Extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo, não rotina |  | 2572 | 11046 |
-| D-ARQ-66 | Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas |  | 2721 | 2159 |
-| D-ARQ-67 | Literal de vocabulário em código é contrato verificado por teste computado do dado |  | 2760 | 1815 |
-| D-ARQ-68 | Silêncio documental mapeia para o ramo normativo de ausência quando a norma o define; sem esse ramo, D-ARQ-13 prevalece |  | 2790 | 7446 |
-| D-ARQ-69 | Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita |  | 2839 | 3755 |
-| D-ARQ-70 | Alias de corpus medido entra no vocabulário só ancorado em literal normativo, com fonte dupla e teste anti-FP |  | 2879 | 3464 |
-| D-ARQ-71 | Perna `Ausente` absorvida por `ou` verdadeiro gera pendência não-bloqueante anexada à linha; o tri-estado não se move |  | 2899 | 5506 |
-| D-ARQ-72 | Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo` | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003 | 2924 | 2928 |
-| D-ARQ-73 | Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003 | 2949 | 7766 |
-| D-ARQ-74 | Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 3053 | 3033 |
-| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 3105 | 12120 |
-| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3276 | 5109 |
-| D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3351 | 4842 |
-| D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3425 | 7609 |
-| D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3532 | 1691 |
-| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3563 | 7663 |
-| D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3675 | 2897 |
-| D-ARQ-82 | O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz |  | 3719 | 14411 |
-| D-ARQ-83 | Termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para NÃO resolver, com pendência de causa e destinatário próprios |  | 3929 | 9623 |
-| D-ARQ-84 | Conferência factual é obrigação sem declaração; julgamento permanece gate declarado — os dois instrumentos separam-se pela natureza da falha, não pelo momento | DECISÃO DE MÉTODO (META) | 3978 | 10201 |
-| D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4027 | 4834 |
+| D-ARQ-49 | Contrato do parse-PGR: instância-PGR de D-ARQ-41; recorte esqueleto-GHE (cargos+riscos+quantificação crus + FDS apontadas); mecanismo termo→slug adiado por medição | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1556 | 23690 |
+| D-ARQ-50 | Medição do PGR Viverde fecha parse-doc e mecanismo termo→slug do parse-PGR; irmão de D-ARQ-43 do lado-PGR | DECISÃO DE ARQUITETURA (CONHECIMENTO/medição → ARQUITETURA) | 1626 | 17767 |
+| D-ARQ-51 | Hidratação GHEVerbatim → tipos.PGR: consumidor de produção do resolver termo→slug; id posicional, agente tri-estado→Optional, None-agente não-bloqueante | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO por fatias | 1675 | 13159 |
+| D-ARQ-52 | Plug de produção lado-PGR: costura arquivo→Resultado; envelope RT-supplied; atravessa a hidratação (assimetria não-bloqueante vs. FDS) | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (003 | 1719 | 5516 |
+| D-ARQ-53 | Transcrição-de-topo do envelope: instância-envelope de D-ARQ-41; pré-preenchimento document-derived + confirmação-RT no gate eliminatório (molde revisão-RT D-ARQ-47 cl.4); mecanismo adiado por medição | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1749 | 11767 |
+| D-ARQ-54 | Superfície RT como apresentação-pura sobre o contrato ida/volta; CLI primeiro, web herda o mesmo artefato; escopo = os dois seams de confirmação (envelope + FDS) | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1797 | 11480 |
+| D-ARQ-55 | Recorte (B) da transcrição-FDS: verbatim-de-perigo é por-membro (H-code cru); mapa frase-H→flag é determinístico resolver-side (só sensibilização); confiança ancora em R-FDS-06 + revisão-RT | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1917 | 11308 |
+| D-ARQ-56 | Passo 2 do cluster-FDS: bypass antes do slug-check em `materialidade()`; Fase C tripartida no sem-slug; promoção-sem-slug deferida (DT-003CK-01) |  | 1960 | 3751 |
+| D-ARQ-57 | Localizador de blocos GHE: repertório determinístico de âncoras medidas + gate de segmentação; família cargo-based é fronteira de escopo sinalizada, não variação de âncora | DECISÃO DE ARQUITETURA (ARQUITETURA) | 1982 | 81151 |
+| D-ARQ-58 | Resolução de predicado por identidade de agente: fallback genérico no avaliador, não um primitivo dedicado por agente | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (mesma sessão 003 | 2228 | 2132 |
+| D-ARQ-59 | O refactor família R-BIO-04 → "estágio genérico" é gatilho falso; a família é a forma final, o limiar ~25 aposentado | DECISÃO DE ARQUITETURA (ARQUITETURA, sessão 003 | 2240 | 4817 |
+| D-ARQ-60 | Reconciliação nome-de-exibição §5.9 → slug canônico mora no guardião (registro explícito), não no doc; §5.9 é fonte humana, `regras.yaml` a chave de máquina | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 2272 | 3530 |
+| D-ARQ-61 | Critério de escolha do indicador canônico quando o Anexo I oferece múltiplas opções ("ou") | DECISÃO DE ARQUITETURA (sessão 003 | 2296 | 3566 |
+| D-ARQ-62 | Redirecionamento de foco pós-003.DQ: Marco 1 via caso-âncora real; recorte construção civil como sequenciamento, não arquitetura | DECISÃO DE FOCO (sessão 003 | 2332 | 4921 |
+| D-ARQ-63 | Gate de abertura em dois níveis: índice derivado + eixo nomeado |  | 2359 | 9410 |
+| D-ARQ-64 | Ramo FUZZY opt-in por allowlist de dado: o veto é do resultado, nunca filtro de candidato |  | 2506 | 5616 |
+| D-ARQ-65 | Extração determinística por família de template; LLM rebaixado a acelerador para família não-medida; manual é corretivo, não rotina |  | 2588 | 11046 |
+| D-ARQ-66 | Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas |  | 2737 | 2159 |
+| D-ARQ-67 | Literal de vocabulário em código é contrato verificado por teste computado do dado |  | 2776 | 1815 |
+| D-ARQ-68 | Silêncio documental mapeia para o ramo normativo de ausência quando a norma o define; sem esse ramo, D-ARQ-13 prevalece |  | 2806 | 7446 |
+| D-ARQ-69 | Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita |  | 2855 | 3755 |
+| D-ARQ-70 | Alias de corpus medido entra no vocabulário só ancorado em literal normativo, com fonte dupla e teste anti-FP |  | 2895 | 3464 |
+| D-ARQ-71 | Perna `Ausente` absorvida por `ou` verdadeiro gera pendência não-bloqueante anexada à linha; o tri-estado não se move |  | 2915 | 5506 |
+| D-ARQ-72 | Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo` | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003 | 2940 | 2928 |
+| D-ARQ-73 | Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003 | 2965 | 7766 |
+| D-ARQ-74 | Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 3069 | 3033 |
+| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 3121 | 12120 |
+| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3292 | 5109 |
+| D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3367 | 4842 |
+| D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3441 | 7609 |
+| D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3548 | 1691 |
+| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3579 | 7663 |
+| D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3691 | 2897 |
+| D-ARQ-82 | O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz |  | 3735 | 14411 |
+| D-ARQ-83 | Termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para NÃO resolver, com pendência de causa e destinatário próprios |  | 3945 | 9623 |
+| D-ARQ-84 | Conferência factual é obrigação sem declaração; julgamento permanece gate declarado — os dois instrumentos separam-se pela natureza da falha, não pelo momento | DECISÃO DE MÉTODO (META) | 3994 | 10201 |
+| D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4043 | 4834 |
