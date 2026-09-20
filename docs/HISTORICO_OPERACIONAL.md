@@ -8858,3 +8858,40 @@ medidas ao todo entre as duas levas; sem candidato conhecido pendente além do O
 
 **Status.** Suíte completa medida: **1281 passed, 6 skipped, 0 failed**, 713.61s —
 delta-zero exato contra o Baseline v204. Commit local `3ac98fc` + este registro.
+
+## Sessão (branch `docs/003fi-achado-gate-forma-faixa`, número não atribuído) — 20/09/2026 — CONHECIMENTO: achado do Diovanni testando o app publicado, causa raiz confirmada
+
+**Origem.** Diovanni testou `automacao-pgr-agente-pcmso.streamlit.app` com 14 FDS reais
+(acervo já medido nas duas levas de `DT-003M-02`) e reportou por screenshot: maioria
+dos blocos saiu `forma_verbatim_fds` reprovado no gate de forma, mesmo com CAS/nome
+legíveis no motivo.
+
+**Investigação (sem código tocado).** `extrair_texto_fds` real sobre os PDFs confirma:
+a fonte já chega sem separador entre os dois números da faixa ("15 19%", "30 70",
+"35 a 50") — o hífen visual da tabela do PDF não sobrevive à extração por posição do
+`pdfplumber`. `_SEPARADOR_FAIXA` (`transcricao_fds.py:90`) só reconhece hífen/en-dash
+→ `parsear_faixa` devolve `None` → `gate_forma` reprova o bloco inteiro, bloqueante.
+O LLM não causa o problema mas é inconsistente: às vezes insere o hífen que falta
+(Cimentcola/Azulejista), às vezes não (maioria dos casos). Achado em 3 fabricantes
+distintos — padrão comum da tabela, não malformação de 1 documento.
+
+**Achado colateral, natureza distinta.** 2 dos 14 arquivos voltaram
+`transcricao_indisponivel_fds` (JSON inválido do Gemini) — falha de invocação, não de
+forma; registrado como pendência separada, não misturar numa fatia com o fix de
+separador.
+
+**Decisão de método.** Diovanni pediu para registrar o achado agora e abrir a fatia de
+implementação numa sessão NOVA, depois de reiniciar a janela de contexto (esta sessão
+está em 76% de uso + 99% do limite semanal) — não fechar a investigação sem
+documentá-la, mas não implementar em cima de uma janela quase saturada.
+
+**Docs.** `DT-(sessão branch docs/003fi-achado-gate-forma-faixa)-01` nova em
+`PENDENCIAS_CLINICAS.md`, com causa raiz, impacto medido, achado colateral e proposta
+de correção (estender `_SEPARADOR_FAIXA` para espaço puro + `" a "`, sem tocar
+LLM/prompt). `DECISOES_ARQUITETURAIS.md` NÃO tocado — nenhuma ARQUITETURA decidida
+ainda, só achado + causa raiz + proposta; índice D-ARQ não precisa regenerar.
+
+**Status.** Achado registrado. Nenhum código de produção tocado — sem gate de
+suíte/mypy aplicável (CONHECIMENTO puro). Próxima sessão: abrir a fatia de IMPL sobre
+`motor/transcricao_fds.py` (`_SEPARADOR_FAIXA`), com teste de reversão nomeada usando
+os 3 casos reais já medidos (`'15 19'`, `'30 70'`, `'35 a 50'`).
