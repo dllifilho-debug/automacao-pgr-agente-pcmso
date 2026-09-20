@@ -8803,3 +8803,57 @@ suíte verde. Nenhuma `R-*` criada, alterada ou depreciada; nenhuma D-ARQ nova.
 completa medida: **1281 passed, 6 skipped, 0 failed**, 716.04s — delta-zero exato contra
 o Baseline v202 (as reescritas trocaram asserção, não contagem de teste). Commit local
 `cebeb75` + este registro.
+
+## Sessão (branch `docs/003fh-fds-por-cargo`, número não atribuído) — 20/09/2026 — DADO: DT-003M-02(A) 2ª leva, 9 slugs novos em `agentes.yaml`
+
+**Escolha do Diovanni.** Pós-merge do PR #351 (fatia A 1ª leva), pedido explícito:
+examinar as 11 FDS por-cargo do acervo (commit `96a15e9`) que a leva anterior tinha
+deixado fora do escopo.
+
+**Dedup por hash antes de qualquer leitura.** `sha256sum` nas 11 FDS achou 3 pares
+byte-idênticos (Encanador==Montador, Aux. Serviços Gerais==Serviços Gerais, Montador
+de Estruturas Metálicas==Soldador) — reduz o trabalho real a 8 documentos distintos,
+evitando pesquisar a mesma substância duas vezes.
+
+**Achado — 3 dos 8 documentos não somam CAS novo.** Adesivo PVC Tigre (Almoxarife) é a
+MESMA composição já coberta na leva anterior (mesmo fabricante/produto). Cimentcola
+Interno Quartzolit (Azulejista) usa cimento Portland, também já coberto. Desmoldante
+Concentrado (Carpinteiro) declara explicitamente "não apresenta ingredientes ou
+impurezas que contribuam para o perigo" — nada a extrair. Checar ANTES de pesquisar
+evitou 3 buscas desperdiçadas.
+
+**Achado — FDS PINTOR.pdf é PDF só-imagem nas primeiras 12 páginas.** O arquivo tem
+20 páginas; as páginas 0-11 (produto "BLASCOR", provável tinta) não têm camada de
+texto extraível por `pdfplumber` — só a marca d'água "BLASCOR" aparece. As páginas
+12-19 são idênticas ao `IMPERMEABILIZANTE.pdf` avulso (mesmo texto de composição).
+Limitação registrada, não contornada — exigiria OCR, fora do escopo desta sessão de
+dado.
+
+**9 slugs novos**, 3 documentos genuinamente novos: Água Sanitária Zulu
+(`hipoclorito_de_sodio`, `carbonato_de_sodio`), Impermeabilizante Asfáltico
+(`asfalto`), Eletrodo de solda 60.13 (`ferro`, `feldspato`, `silicato_de_potassio`,
+`bentonita`, `celulose`, `carbonato_de_potassio`). Manganês e sílica/quartzo, também
+presentes no Eletrodo, JÁ tinham slug — conferido antes de pesquisar.
+
+**Único carcinógeno IARC desta leva: `asfalto`.** Diferente da 1ª leva (nenhum dos 19
+era carcinógeno), a pesquisa achou a Monografia IARC Vol.103 (2013) classificando
+exposição ocupacional a betume+emissões como Grupo 2A (oxidado, telhado) ou Grupo 2B
+(não-oxidado/duro, pavimentação) — a FDS declara "Asfalto" genérico sem especificar a
+classe, então `is_carcinogeno_iarc=true` por convenção (ambas as classes mapeiam a
+true). Todos os 9 CAS desta leva passaram no dígito verificador de primeira — nenhuma
+malformação como na leva anterior (aluminato tricálcico/N-octil isotiazolinona).
+
+**Verificação.** Recorte vocabulário/resolvedor/composição: **139 passed** (guard de
+inventário `test_indice_real_tem_144_entradas`→`_153_entradas`, +9 formas, sem par
+fuzzy novo). Recorte estendido (FDS/transcrição/web_matriz/orquestracao_pgr): **162
+passed, 3 skipped**. `mypy --strict` alvo canônico: limpo, **49 arquivos**, delta-zero.
+Suíte completa: corrida em andamento no momento deste registro.
+`scripts.medir_painel`: cobertura CAS **69/99 (70%) → 78/108 (72%)**; `regras`
+inalterado (25/44).
+
+**Docs.** Nota de aplicação em `D-ARQ-36` (`DECISOES_ARQUITETURAIS.md` v204→**v205**).
+`DT-003M-02` (`PENDENCIAS_CLINICAS.md`): (A) segue PARCIALMENTE RESOLVIDA — 17 FDS
+medidas ao todo entre as duas levas; sem candidato conhecido pendente além do OCR de
+`FDS PINTOR.pdf`. Índice D-ARQ regenerado, sua suíte verde.
+
+**Status.** Aguardando resultado da suíte completa antes do commit final desta fatia.
