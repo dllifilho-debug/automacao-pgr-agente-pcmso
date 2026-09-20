@@ -8605,3 +8605,63 @@ recebe nota de ratificação, status muda para "ARQUITETURA ratificada, liberada
 usuário nesta sessão — `git push -u origin claude/sharp-wozniak-j4596a` a seguir. D-ARQ-49 Parte 2
 está pronta para virar prompt cirúrgico de IMPLEMENTAÇÃO da fatia 2a numa sessão de Code futura
 (contrato, discriminante e fronteira já documentados na nota v199 de `DECISOES_ARQUITETURAIS.md`).
+
+## Sessão (branch `claude/blissful-johnson-mdeqn5`, número não atribuído) — 20/09/2026 — IMPLEMENTAÇÃO: fatia 2a de D-ARQ-49 Parte 2 (split cheap/expensive em `processar_arquivo_pgr`)
+
+**Estado lido do disco antes de qualquer mudança.** `git log`/`git status` (branch designada desta
+sessão, HEAD em `64e744b` — merge do PR #348, mesmo commit de `origin/main`, working tree limpa);
+`PAINEL_ESTADO.md`, `PENDENCIAS_CLINICAS.md` e `DECISOES_ARQUITETURAIS.md` (v199/v200 em `D-ARQ-49`
++ `DT-(sessão claude/nice-ptolemy-wxk1wo)-01`) confirmam D-ARQ-49 Parte 2 **ARQUITETURA
+ratificada**, liberada para IMPL a partir da fatia 2a — contrato, discriminante e fronteira já
+fechados nas notas v199/v200, nada a decidir nesta sessão além de executar.
+
+**Implementação.** `preparar_pgr_hidratado` nova em `agente_medico/adaptadores/orquestracao_pgr.py`
+— encapsula exatamente o trecho de `processar_arquivo_pgr` que ia de `preparar_ghes` até
+`hidratar_pgr` (inclusive o ramo `if not aprovados: return None, pend_forma` e a 3ª leitura de
+`extrair_texto_pgr` para `detectar_psicossocial`, R-PSY-03), devolvendo
+`tuple[PGR | None, tuple[Pendencia, ...]]`. `processar_arquivo_pgr` vira wrapper fino: chama a nova
+função e, se `pgr is not None`, roda `processar_pgr(pgr, protocolo, hoje)` — mesma sequência de
+chamadas, mesma ordem de pendências agregadas, nenhuma assinatura pública muda. Import de `PGR`
+acrescentado a partir de `motor.tipos` (já usado internamente pelas funções vizinhas). Único
+arquivo tocado: `orquestracao_pgr.py` — `motor/entrada.py`/`motor/orquestrador.py` intocados,
+fronteira respeitada. Nenhum teste novo: a ARQUITETURA (v199) nomeia a suíte existente como
+discriminante único deste refactor ("MESMO comportamento externo"), não pede teste com reversão —
+regra do `CLAUDE.md` sobre teste nomeado não se aplica por não ter sido pedido.
+
+**Ambiente.** Container sem `streamlit`/`pdfplumber` instalados (hook `session-start.sh` não havia
+rodado a instalação completa ainda nesta sessão); `pip install --ignore-installed cryptography -r
+requirements-dev.txt` resolveu o conflito conhecido (RECORD ausente da `cryptography` do apt —
+mesma classe já registrada no HISTORICO, "Contornado nesta sessão com `pip install
+--ignore-installed cryptography -r requirements-dev.txt`"). `libreoffice-writer` instalado via
+`apt-get` (ausente no container, checado por `dpkg -s` antes, idempotente).
+
+**Verificação.** `mypy --strict` alvo canônico (`agente_medico/motor agente_medico/superficie
+agente_medico/tests/invariantes.py app_matriz.py app_matriz_local.py`): limpo, **49 arquivos**,
+delta-zero contra o Baseline herdado. Recorte que cobre os derivados tocados
+(`test_orquestracao_pgr.py` + `test_web_matriz.py` + `test_documento_matriz.py`, os três
+consumidores diretos/indiretos de `processar_arquivo_pgr`): **64 passed**, árvore parada, sem
+alteração de asserção — rodado ANTES da suíte completa como discriminante rápido. Suíte completa
+(`python -m pytest agente_medico/tests/ tests/`, árvore parada, sem escrita concorrente):
+**1278 passed, 6 skipped, 0 failed** em 570s — **delta-zero exato** contra o Baseline herdado de
+v200 (`1278 passed, 6 skipped, 0 failed`, `main 3d1b33b`), consistente com um refactor puro sem
+teste novo/removido nem comportamento mudado.
+
+**Docs.** Nota de aplicação em `D-ARQ-49` (`DECISOES_ARQUITETURAIS.md` v200→**v201**, mesma ID,
+nenhuma cláusula alterada; decisões inalteradas em **85**). `DT-(sessão claude/nice-ptolemy-wxk1wo)-01`
+recebe nota da fatia 2a implementada, status muda para "ABERTA — fatia 2a IMPLEMENTADA, resta 2b".
+`python -m pytest tests/test_gerar_indice_darq.py` rodado após tocar `DECISOES_ARQUITETURAIS.md` —
+**6 passed**; índice D-ARQ regenerado. `PAINEL_ESTADO.md`: bloco Baseline re-tirado (hash/branch
+desta sessão, suíte/mypy medidos nesta sessão); três números clínicos NÃO re-tirados (nenhuma `R-*`
+tocada, nenhum `.yaml` de regra/vocabulário tocado). PROTOCOLO inalterado, segue **v94**.
+
+**Nota de método — branch.** O `CLAUDE.md` pede `git checkout -b feat/<sessão>-<nome>` a partir de
+`main` atualizada; esta sessão herdou a branch `claude/blissful-johnson-mdeqn5` já designada pelo
+ambiente de execução (Claude Code on the web), que já estava sobre `main` atualizada
+(`64e744b` == `origin/main` no início da sessão) — sem branch nova criada, por constrangimento da
+plataforma de execução, não por escolha. Reportado, não escondido.
+
+**Status.** Fatia 2a de D-ARQ-49 Parte 2 IMPLEMENTADA e verde. Fatia 2b (UI em `web_matriz.py`: RT
+escolhe o GHE e nomeia o produto ao anexar uma FDS avulsa a um PGR já carregado, usando
+`preparar_pgr_hidratado` para cachear o `PGR` entre reruns do Streamlit sem reprocessar PDF/LLM)
+segue aberta para sessão futura. `git add` por arquivo nominal; commit e push nesta sessão conforme
+instrução do ambiente de execução para fechar a fatia.
