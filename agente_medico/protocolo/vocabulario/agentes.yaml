@@ -636,6 +636,104 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+  # 2ª leva de DT-003M-02(A), mesma sessão (branch `docs/003fh-fds-por-cargo`) — 11 FDS
+  # reais por-cargo do acervo (fds_originais/, commit 96a15e9), dedup por hash reduz a
+  # 8 documentos distintos: Adesivo PVC Tigre (Almoxarife/Encanador/Montador — MESMA
+  # composição já coberta na leva anterior, nenhum CAS novo), Água Sanitária Zulu (Aux.
+  # Serviços Gerais/Serviços Gerais), Cimentcola Interno Quartzolit (Azulejista — cimento
+  # Portland já coberto), Desmoldante Concentrado (Carpinteiro — SEM composição
+  # declarada na FDS, "não apresenta ingredientes que contribuam para o perigo", nada a
+  # adicionar), Impermeabilizante Asfáltico (duplicado nas 2 páginas 13/de FDS
+  # PINTOR.pdf e no arquivo IMPERMEABILIZANTE.pdf avulso), Eletrodo 60.13 (Montador de
+  # Estruturas Metálicas/Soldador). Achado de limitação: as páginas 0-11 de
+  # `FDS PINTOR.pdf` (produto "BLASCOR", provável tinta) são PDF só-imagem — pdfplumber
+  # não extrai texto, sem dado de composição legível nesta sessão (fora de escopo:
+  # exigiria OCR). 9 CAS novos, mesma fonte/método da leva anterior (IARC Monographs via
+  # WebSearch, domínio oficial bloqueado pelo proxy; NR-15 Anexo 11 pra tem_lt).
+  hipoclorito_de_sodio:
+    # FDS Água Sanitária Zulu (fds_originais/FDS AUX. DE SERVIÇOS GERAIS.pdf), 15-19%.
+    # is_carcinogeno_iarc=false [DERIVADO — IARC Grupo 3, não classificável].
+    tipo_ibe: null
+    cas: "7681-52-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  carbonato_de_sodio:
+    # FDS Água Sanitária Zulu, 0,5-0,9%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "497-19-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  asfalto:
+    # FDS Impermeabilizante Asfáltico (fds_originais/IMPERMEABILIZANTE.pdf), 35-50%.
+    # is_carcinogeno_iarc=true [DERIVADO — IARC Monografia Vol.103 (2013), "Bitumens and
+    # Bitumen Emissions": exposição ocupacional a betume oxidado + emissões (telhado) =
+    # Grupo 2A; betume não-oxidado/duro + emissões (pavimentação/massa asfáltica) =
+    # Grupo 2B — a FDS declara "Asfalto" genérico, sem especificar a classe (produto de
+    # impermeabilização tende a usar betume oxidado, mas não confirmado na FDS); ambas
+    # as classes são Grupo 1/2A/2B → true por convenção deste vocabulário. Continua
+    # `tem_lt=false` — não é agente do Anexo 11 da NR-15 (que mede vapor/gás, não fumos
+    # de HPA de betume).
+    tipo_ibe: null
+    cas: "8052-42-4"
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: []
+  ferro:
+    # FDS Eletrodo 60.13 (fds_originais/FDS MONTADOR DE ESTRUTURAS METÁLICAS.pdf), >50%
+    # (ferro elementar do arame de solda). is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC — distinto de óxido de ferro/fumo metálico de
+    # solda, já coberto genericamente pelo slug "fumos_metalicos" existente].
+    tipo_ibe: null
+    cas: "7439-89-6"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  feldspato:
+    # FDS Eletrodo 60.13, 1-4% (fluxo do revestimento do eletrodo). is_carcinogeno_iarc=false
+    # [DERIVADO — ACGIH A4/não-classificável; não encontrado nas Monografias IARC —
+    # feldspato pode conter sílica cristalina como impureza, agente distinto já coberto
+    # pelo slug "silica"].
+    tipo_ibe: null
+    cas: "68476-25-5"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  silicato_de_potassio:
+    # FDS Eletrodo 60.13, 1-4% (pasta de silicato, fluxo do revestimento).
+    # is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "1312-76-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  bentonita:
+    # FDS Eletrodo 60.13, 0,2-1% (fluxo do revestimento). is_carcinogeno_iarc=false
+    # [DERIVADO — não encontrado nas Monografias IARC — bentonita pode conter sílica
+    # cristalina como impureza, agente distinto já coberto pelo slug "silica"].
+    tipo_ibe: null
+    cas: "1302-78-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  celulose:
+    # FDS Eletrodo 60.13, 0,2-1% (fluxo do revestimento). is_carcinogeno_iarc=false
+    # [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "9004-34-6"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  carbonato_de_potassio:
+    # FDS Eletrodo 60.13, 0,2-1% (fluxo do revestimento). is_carcinogeno_iarc=false
+    # [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "584-08-7"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
   # benzeno — [DERIVADO — CAS Registry 71-43-2; IARC grupo 1].
   # benzeno: tipo_ibe=EE (NR-07 Anexo I, Quadro 1). O roteamento de biomonitoramento do benzeno dispara por identidade de agente (R-PKG-BZ), independente do tipo_ibe.
   benzeno:

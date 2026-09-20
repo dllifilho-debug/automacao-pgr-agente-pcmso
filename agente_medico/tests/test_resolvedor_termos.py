@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_144_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_153_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -42,12 +42,14 @@ def test_indice_real_tem_144_entradas(indice_real: IndiceTermos) -> None:
     # Lago das Rosas × gabarito assinado. 124 -> 125 na mesma sessão: +1 slug
     # novo, `poeira_de_madeira` (DT-003EJ-01 RESOLVIDA, R-RX-03/R-ESP-03) — o
     # próprio slug entra sem precisar de `termos:` (normaliza igual ao literal
-    # "Poeira de madeira" do PGR). 125 -> 144 (branch `docs/003fg-...`, DT-003M-02(A)):
-    # +19 slugs de composição-de-FDS (cimento Ciplan, tinta acrílica, Adesivo PVC
-    # Tigre, conservantes Leinertex — vocabulário CAS, não termo de PGR); cada um
-    # entra sem `termos:`, o próprio slug normaliza como 1 forma. Guard de
-    # inventário movido junto com o dado, lição de 003.CV/003.DM.
-    assert len(indice_real.slug_por_forma) == 144
+    # "Poeira de madeira" do PGR). 125 -> 144 (branch `docs/003fg-...`, DT-003M-02(A)
+    # 1ª leva): +19 slugs de composição-de-FDS (cimento Ciplan, tinta acrílica,
+    # Adesivo PVC Tigre, conservantes Leinertex — vocabulário CAS, não termo de PGR).
+    # 144 -> 153 (branch `docs/003fh-fds-por-cargo`, DT-003M-02(A) 2ª leva): +9 slugs
+    # das 11 FDS reais por-cargo do acervo (água sanitária, asfalto, eletrodo de
+    # solda). Cada slug novo entra sem `termos:`, o próprio slug normaliza como 1
+    # forma. Guard de inventário movido junto com o dado, lição de 003.CV/003.DM.
+    assert len(indice_real.slug_por_forma) == 153
 
 
 # ---------------------------------------------------------------------------
