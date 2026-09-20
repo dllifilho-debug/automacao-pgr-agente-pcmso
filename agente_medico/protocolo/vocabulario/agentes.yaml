@@ -439,6 +439,203 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     fuzzy_permitido: true
+  # DT-003M-02(A) — sessão de dado (não ARQUITETURA), pedido do Diovanni: cobertura de
+  # composição-de-FDS medida contra 6 FDS reais do acervo (fds_originais/), 19 CAS sem
+  # slug. Fonte de is_carcinogeno_iarc: IARC Monographs "List of Classifications"
+  # (Grupo 1/2A/2B -> true; Grupo 3 ou não avaliado -> false) — busca 20/09/2026, domínio
+  # oficial monographs.iarc.who.int bloqueado pelo proxy de egresso desta sessão; verificado
+  # via WebSearch (snippets de fontes secundárias — SDS de fabricante, PubChem, InChem,
+  # ChemicalBook — cruzados entre si, não WebFetch direto). Nenhum dos 19 é Grupo 1/2A/2B.
+  # tem_lt: só hidroxido_de_amonia é true (amônia no Quadro 1 do Anexo 11 da NR-15); os
+  # demais (minerais de cimento, pigmento, polímero, biocidas de nicho) não estão nessa
+  # lista. tipo_ibe: null em todos — nenhum tem índice biológico no Anexo I da NR-07.
+  cimento_portland:
+    # FDS Cimento Ciplan (fds_originais/01 - FISPQ_cimento - Ciplan.pdf), identificação do
+    # produto. is_carcinogeno_iarc=false [DERIVADO — IARC/ACGIH: cimento Portland em si não
+    # classificado; a preocupação de carcinogenicidade em produtos de cimento é a sílica
+    # cristalina livre (IARC Grupo 1), já coberta pelo slug "silica" existente, agente
+    # DISTINTO — não fundir com este].
+    tipo_ibe: null
+    cas: "65997-15-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  silicato_tricalcico:
+    # FDS Cimento Ciplan, componente 20-70%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "12168-85-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  silicato_dicalcico:
+    # FDS Cimento Ciplan, componente 10-60%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "10034-77-2"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  ferro_aluminato_de_calcio:
+    # FDS Cimento Ciplan, componente 5-15%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "12068-35-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  aluminato_tricalcico:
+    # FDS Cimento Ciplan, componente 1-15%. CAS CORRIGIDO — a FDS real declara "1242-78-3",
+    # que FALHA o dígito verificador (cas_bem_formado, D-ARQ-33 cl.3); o CAS Registry correto
+    # do aluminato tricálcico é 12042-78-3 (dígito bate, confirmado fonte externa) — defeito
+    # de transcrição/OCR do PDF original, não deste vocabulário. Nota: uma FDS real que repita
+    # esse "1242-78-3" continua caindo em cas_invalido (D-ARQ-36 ramo c) — comportamento
+    # correto do gate, não bug; este slug só resolve para o CAS bem-formado.
+    # is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "12042-78-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  carbonato_de_calcio:
+    # FDS Cimento Ciplan, componente 0-5%. is_carcinogeno_iarc=false [DERIVADO — IARC/ACGIH:
+    # não classificado; calcário/carbonato de cálcio mineral].
+    tipo_ibe: null
+    cas: "1317-65-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  oxido_de_magnesio:
+    # FDS Cimento Ciplan, componente 0-4%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "1309-48-4"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  oxido_de_calcio:
+    # FDS Cimento Ciplan, componente 0-0,2% (cal virgem). is_carcinogeno_iarc=false
+    # [DERIVADO — IARC/ACGIH: não classificado; a preocupação de carcinogenicidade em
+    # produtos de cal é a sílica cristalina como impureza, agente distinto já coberto].
+    tipo_ibe: null
+    cas: "1305-78-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  oxido_de_ferro_amarelo:
+    # FDS Tinta Acrílica (fds_originais/tinta_acrilica.pdf), pigmento 1-3%. is_carcinogeno_iarc=false
+    # [DERIVADO — IARC/ACGIH/NTP/OSHA: não classificado — Pigment Yellow 42].
+    tipo_ibe: null
+    cas: "51274-00-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  silicato_de_aluminio_hidratado:
+    # FDS Tinta Acrílica, carga mineral 5-15% (caulim). is_carcinogeno_iarc=false [DERIVADO —
+    # IARC/ACGIH: caulim (kaolin) classificado A4/não-classificável; a preocupação de
+    # carcinogenicidade é a sílica cristalina como impureza (0,1-4% típico), agente distinto
+    # já coberto pelo slug "silica" — não fundir].
+    tipo_ibe: null
+    cas: "1332-58-7"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  hidroxido_de_amonia:
+    # FDS Tinta Acrílica, componente 0,1-1% (24°Be). is_carcinogeno_iarc=false [DERIVADO —
+    # IARC: não classificado]. tem_lt=true — amônia é agente do Quadro 1, Anexo 11 da NR-15
+    # (lista de agentes com limite de tolerância quantitativo).
+    tipo_ibe: null
+    cas: "1336-21-6"
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
+  copolimero_de_pvc:
+    # FDS Adesivo PVC Incolor Tigre (fds_originais/270 -FISPQ -  Adesivo PVC Incolor Tigre.pdf),
+    # componente 15-35%. is_carcinogeno_iarc=false [DERIVADO — IARC Monografia Vol.19 (1979),
+    # "Vinyl Chloride and Polymers": polímeros/copolímeros de cloreto de vinila avaliados como
+    # Grupo 3 (evidência insuficiente) — DISTINTO do monômero cloreto de vinila livre, esse sim
+    # Grupo 1; a FDS declara o copolímero polimerizado, não o monômero residual].
+    tipo_ibe: null
+    cas: "9003-22-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  branqueador_optico_fb184:
+    # FDS Adesivo PVC Incolor Tigre, componente 0-10% (branqueador óptico fluorescente,
+    # "2,5-tiofenodiilbis(5-terc-butil-1,3-benzoxazole)"). is_carcinogeno_iarc=false [DERIVADO
+    # — não encontrado nas Monografias IARC. Identificado como Fluorescent Brightener 184/OB
+    # (CAS 7128-64-5); sem efeitos críticos em estudos de toxicidade subcrônica/crônica do
+    # análogo estrutural Fluorescent Brightener 367, avaliado por agência regulatória
+    # (Canada.ca, screening assessment)].
+    tipo_ibe: null
+    cas: "7128-64-5"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  benzisotiazolinona:
+    # FDS Textura Textucril Leinertex (fds_originais/70 - FISPQ_textura textucril -
+    # Leinertex.pdf) e Massa Corrida (fds_originais/Massa-Corrida.pdf), conservante <0,1-0,4%.
+    # is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias IARC]. Sensibilizante
+    # dérmico conhecido (dermatite de contato ocupacional documentada) — is_sensibilizante NÃO
+    # é campo deste vocabulário (DT-003T-01: populado via frase-H na transcrição da FDS, D-ARQ-55,
+    # não aqui); registrado em comentário para quem revisar.
+    tipo_ibe: null
+    cas: "2634-33-5"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  mistura_cmit_mit:
+    # FDS Textura Textucril Leinertex e Massa Corrida, conservante <0,1-0,4% (Kathon CG,
+    # mistura 3:1 CMIT/MIT). is_carcinogeno_iarc=false [DERIVADO — não encontrado nas
+    # Monografias IARC]. Sensibilizante dérmico potente e bem documentado (mesma ressalva de
+    # is_sensibilizante da entrada acima — campo não existe neste vocabulário).
+    tipo_ibe: null
+    cas: "55965-84-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  diuron:
+    # FDS Textura Textucril Leinertex, componente <0,1-0,05%. is_carcinogeno_iarc=false
+    # [DERIVADO — não avaliado pelas Monografias IARC. A EPA/US classifica diuron
+    # separadamente sob critério próprio ("likely to be carcinogenic to humans") — sistema
+    # distinto do IARC, não confundir; este campo é especificamente IARC].
+    tipo_ibe: null
+    cas: "330-54-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  carbendazim:
+    # FDS Textura Textucril Leinertex, componente <0,1-0,05%. is_carcinogeno_iarc=false
+    # [DERIVADO — IARC Grupo 3 (evidência inadequada em humanos e inadequada/limitada em
+    # animais)]. Nota: toxicidade reprodutiva/mutagenicidade (GHS Categoria 1) documentada
+    # por outras fontes — eixo distinto de carcinogenicidade IARC, não coberto por este campo.
+    tipo_ibe: null
+    cas: "10605-21-7"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  n_octil_isotiazolinona:
+    # FDS Textura Textucril Leinertex, componente <0,01-0,008% (OIT). CAS CORRIGIDO — a FDS
+    # real declara "26530-20-2", que FALHA o dígito verificador (cas_bem_formado); o CAS
+    # Registry correto é 26530-20-1 (dígito bate, confirmado fonte externa) — mesma classe de
+    # defeito de transcrição/OCR já registrada em aluminato_tricalcico acima, não bug deste
+    # vocabulário; uma FDS real repetindo "26530-20-2" continua caindo em cas_invalido
+    # corretamente. is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias
+    # IARC]. Sensibilizante dérmico documentado, raro (mesma ressalva de is_sensibilizante).
+    tipo_ibe: null
+    cas: "26530-20-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  aguarras_mineral:
+    # FDS Textura Textucril Leinertex, componente 0,2-0,1% (hidrocarboneto alifático).
+    # is_carcinogeno_iarc=false [DERIVADO — IARC Monografia Vol.45 (1989), destilados de
+    # petróleo hidrotratados leves: Grupo 3 (não classificável)].
+    tipo_ibe: null
+    cas: "64742-47-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
   # benzeno — [DERIVADO — CAS Registry 71-43-2; IARC grupo 1].
   # benzeno: tipo_ibe=EE (NR-07 Anexo I, Quadro 1). O roteamento de biomonitoramento do benzeno dispara por identidade de agente (R-PKG-BZ), independente do tipo_ibe.
   benzeno:
