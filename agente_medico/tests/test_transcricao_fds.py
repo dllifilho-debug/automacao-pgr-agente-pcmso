@@ -169,3 +169,33 @@ def test_parsear_faixa_fallback_nao_resgata_lixo_sem_espaco() -> None:
     # "indisponível" não tem espaço nem hífen — fallback não acha 2 partes,
     # continua None. Confirma que o fallback não amplia demais.
     assert parsear_faixa("indisponível") is None
+
+
+# ---------------------------------------------------------------------------
+# parsear_faixa — faixa dupla-desigualdade (achado real, dazomete 533-74-4,
+# FDS DESMOLD SIKA - GHE 05 CARPINTARIA, sessão claude/nice-fermat-xahkji
+# pós-#354). Texto exato medido via extrair_texto_fds sobre o PDF real.
+# Reversão nomeada: reverter o branch de _FAIXA_COMPOSTA em parsear_faixa
+# (ou esvaziar o regex) derruba exatamente estes 4 testes, sem tocar nenhum
+# outro caso desta suíte — inclusive as semi-abertas simples ('< 5'/'> 1'),
+# que continuam passando pelo ramo antigo.
+# ---------------------------------------------------------------------------
+
+
+def test_parsear_faixa_composta_dazomete_real() -> None:
+    assert parsear_faixa(">= 0.1 - < 1") == FaixaConcentracao(minimo=0.1, maximo=1.0)
+
+
+def test_parsear_faixa_composta_aceita_operadores_estritos() -> None:
+    assert parsear_faixa("> 0.1 - < 1") == FaixaConcentracao(minimo=0.1, maximo=1.0)
+
+
+def test_parsear_faixa_composta_aceita_teto_ou_igual() -> None:
+    assert parsear_faixa(">= 0.1 - <= 1") == FaixaConcentracao(minimo=0.1, maximo=1.0)
+
+
+def test_parsear_faixa_composta_nao_rouba_semi_abertas_simples() -> None:
+    # ">" /"<" isolados (sem o segundo operador) continuam pelo ramo antigo —
+    # a faixa composta exige AMBOS os lados, não intercepta o caso simples.
+    assert parsear_faixa("> 1") == FaixaConcentracao(minimo=1.0, maximo=None)
+    assert parsear_faixa("< 5") == FaixaConcentracao(minimo=None, maximo=5.0)
