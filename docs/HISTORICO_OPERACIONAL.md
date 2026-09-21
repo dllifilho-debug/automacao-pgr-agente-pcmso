@@ -8895,3 +8895,109 @@ ainda, só achado + causa raiz + proposta; índice D-ARQ não precisa regenerar.
 suíte/mypy aplicável (CONHECIMENTO puro). Próxima sessão: abrir a fatia de IMPL sobre
 `motor/transcricao_fds.py` (`_SEPARADOR_FAIXA`), com teste de reversão nomeada usando
 os 3 casos reais já medidos (`'15 19'`, `'30 70'`, `'35 a 50'`).
+
+## Sessão (branch `claude/nice-fermat-xahkji`, número não atribuído) — 21/09/2026 — IMPLEMENTAÇÃO: fix de `_SEPARADOR_FAIXA`, fecha `DT-(sessão branch docs/003fi-achado-gate-forma-faixa)-01`
+
+**Origem.** Sessão nova sobre `main d05b328` (PR #353 do achado, já mergeado), como
+combinado na sessão anterior: reiniciar a janela de contexto e abrir a fatia de IMPL
+direto sobre a proposta já pronta na DT (causa raiz, 3 casos reais, proposta de fix).
+Branch da sessão (`claude/nice-fermat-xahkji`) já tinha PR próprio mergeado antes desta
+sessão abrir (PR #353) — reiniciada a partir de `origin/main` antes de qualquer commit,
+por instrução operacional do ambiente remoto (PR mergeada não é tronco para trabalho novo).
+
+**Implementação — exatamente a proposta da DT, sem desvio.** `motor/transcricao_fds.py`:
+`_SEPARADOR_FAIXA_FALLBACK = re.compile(r"\s+a\s+|\s+", re.IGNORECASE)`, consultado em
+`parsear_faixa` só quando `_SEPARADOR_FAIXA` (hífen/en-dash) não encontra 2 partes — o
+fallback nunca compete com o separador primário por construção (roda depois, condicionado
+ao primário falhar), então as âncoras de D-ARQ-43 P2 (`"0,2 – 0,05"`, pares invertidos,
+piso textual `"00"`) continuam pelo caminho antigo, intocado. LLM/prompt intocados, como
+prescrito. `gate_forma` (`transcritor_fds.py`) não muda — reusa `parsear_faixa` por
+construção, então os 3 blocos reais passam a ser aprovados sem editar o gate.
+
+**Testes — os 3 casos reais como fixture direta, mais 2 de fronteira e 1 no gate.**
+`test_transcricao_fds.py`: `parsear_faixa("15 19")`→`(15.0, 19.0)`, `parsear_faixa("30 70")`
+→`(30.0, 70.0)`, `parsear_faixa("35 a 50")`→`(35.0, 50.0)` (Água Sanitária Zulu, Adesivo PVC
+Tigre, Impermeabilizante — os mesmos 3 fabricantes medidos na sessão do achado); +
+`test_parsear_faixa_fallback_nao_compete_com_hifen` (hífen presente sempre vence) e
+`test_parsear_faixa_fallback_nao_resgata_lixo_sem_espaco` (`"indisponível"` continua
+`None` — fallback não amplia demais). `test_transcritor_fds.py`:
+`test_faixas_reais_sem_hifen_sao_aprovadas`, os mesmos 3 blocos no nível do gate,
+confirmando que deixam de gerar `Pendencia` bloqueante. 6 testes novos ao todo.
+
+**Varredura inversa `[MEDIDO]`.** Reversão nomeada, a mesma que a DT já indicava: revogar
+o fallback (remover a chamada a `_SEPARADOR_FAIXA_FALLBACK` em `parsear_faixa`, restaurando
+só `_SEPARADOR_FAIXA`) — aplicada isoladamente, só no código-fonte, testes intactos. Derruba
+exatamente **4 dos 6** testes novos (os 3 casos reais + o teste de gate); os outros 2
+(fallback-não-compete-com-hífen, fallback-não-resgata-lixo) continuam verdes porque
+descrevem comportamento que não depende do fallback existir — discriminante correto,
+nenhum falso-positivo de cobertura. Nenhum teste pré-existente da suíte se move.
+Restaurado o fix em seguida, suíte volta a verde.
+
+**Checado antes de escrever — nenhuma fixture existente dependia do comportamento antigo
+de retornar `None` para espaço puro ou `" a "`.** Varredura de todo `faixa="..."`/
+`BlocoVerbatim(faixa=...)` do repositório: todos os casos existentes usam hífen/en-dash,
+string vazia, ou lixo sem espaço (`"abc"`, `"xyz"`) — nenhum tinha número-espaço-número
+nem `" a "` esperando `None`. Zero fixture quebrada, confirmado antes de rodar, não só
+depois.
+
+**Verificação.** Recorte que cobre os derivados tocados
+(`test_transcricao_fds.py`+`test_transcritor_fds.py`+`test_montagem_verbatim.py`+
+`test_revisao_verbatim.py`+`test_orquestracao_fds.py`+`test_transcritor_gemini.py`+
+`test_cli_fds.py`+`test_web_fds.py`+`test_web_matriz.py`+
+`test_composicao_propaga_pendencias.py`+`test_integracao_composicao_fase_c.py`):
+**156 passed, 3 skipped** (os 3 skips são `@requer_pdfs`, PDFs de `fds_originais/`
+ausentes/untracked neste checkout — DH-003ET-01, classe já registrada). `mypy --strict`
+alvo canônico: limpo, **49 arquivos** — mesma contagem já registrada em 003fh/003fi
+(nenhum arquivo novo entrou no alvo nesta sessão; o alvo tem `agente_medico/motor`,
+`agente_medico/superficie`, `agente_medico/tests/invariantes.py`, `app_matriz.py`,
+`app_matriz_local.py` — 35+11+1+1+1=49, contado de disco). Ambiente remoto abriu sem
+`pdfplumber`/`pytest`/`mypy`/`libreoffice-writer` (hook `session-start.sh` tropeçou num
+conflito `pip`/`apt` do `cryptography` pré-instalado — RECORD ausente, pacote do apt;
+contornado com `--ignore-installed` antes de `-r requirements-dev.txt`; achado de
+ambiente, não deste fix, não registrado como DH por não ser reprodutível pelo código
+do hook em si, só pela imagem-base).
+
+**Suíte completa `[MEDIDO — árvore parada]`: 1287 passed, 6 skipped, 0 failed, 764.80s.**
+Delta **+6** exato contra o Baseline de 003fh (`1281`, commit `3ac98fc`) — os 6 testes
+novos desta sessão, nenhum removido/renomeado, nenhum outro teste se move.
+**Nota de proveniência, verificada.** Durante a corrida em background desta medição,
+`docs/PENDENCIAS_CLINICAS.md` foi editado (texto de resolução da DT) — violação literal
+de "árvore parada" (regra dura do CLAUDE.md, precedente 003.EF). Nenhum código de
+produção foi tocado durante a corrida. Verificado que não invalida o número: o único
+teste da suíte que lê o *conteúdo* de `PENDENCIAS_CLINICAS.md` é
+`tests/test_particao_pendencias.py::test_dividas_todas_no_arquivo_novo_nenhuma_no_protocolo`,
+que checa presença de ao menos 1 header `DT-`/`DH-` e ausência de header `R-*` no
+arquivo — a edição só trocou a tag de status de um header `DT-` já existente
+(`[ABERTA...]`→`[RESOLVIDA...]`), sem criar/mover header `R-*` nem remover o único
+header `DT-` que o teste exige presente; `test_particao_nao_moveu_regra_clinica` mede
+`medir_cobertura_clinica()`, que não lê prosa de resolução. Registrado por rigor, não
+por dúvida real sobre o número.
+
+**Números clínicos — nenhum se move.** Nenhuma `R-*` criada, alterada ou depreciada;
+nenhum `.yaml` de vocabulário tocado; `python -m scripts.medir_painel` não rodado nesta
+sessão por não haver por que rodar (esta fatia é FORMA do gate, não regra clínica nem
+CAS/slug) — mesma classe de decisão já usada em 003.FH/003.FI/003.FJ/003.FK/003.FL
+(D-ARQ-85 cl.1: merge que não move número não dispara re-tiragem dos três números
+clínicos). `DECISOES_ARQUITETURAIS.md` **tocado** — não para revogar/emendar D-ARQ-34
+P1/D-ARQ-43 P2, mas para registrar `v206` na tabela-changelog com nota de aplicação nas
+duas IDs (mesmo molde de v201-v205: sessão de código sobre decisão já ratificada), como
+todas as sessões de código anteriores fizeram. Índice D-ARQ regenerado
+(`python -m scripts.gerar_indice_darq`, 85 decisões, contagem intacta) e
+`python -m pytest tests/test_gerar_indice_darq.py`: **6 passed** — cláusula fixa do
+CLAUDE.md cumprida.
+
+**Docs.** `PENDENCIAS_CLINICAS.md`: `DT-(sessão branch docs/003fi-achado-gate-forma-faixa)-01`
+RESOLVIDA (resolução, varredura inversa e status atualizados no próprio bloco da DT).
+`DECISOES_ARQUITETURAIS.md` v205→**v206** (nota de aplicação em D-ARQ-34/D-ARQ-43, nenhuma
+cláusula alterada); `INDICE_DARQ.md` regenerado. `PAINEL_ESTADO.md`: nota declarando a
+não-re-tiragem dos três números clínicos (mesma prova acima) + bloco de Baseline re-tirado
+(D-ARQ-85 cl.2 — todo fechamento que produz commit re-tira hash/suíte/mypy, independente
+do gatilho clínico). `PROTOCOLO_AGENTE_MEDICO.md` não tocado (segue v94).
+
+**Status.** Suíte completa medida: **1287 passed, 6 skipped, 0 failed**, 764.80s — delta
+**+6** exato contra o Baseline de 003fh (`1281`, commit `3ac98fc`), reconciliado.
+`mypy --strict` alvo canônico limpo, 49 arquivos. `test_gerar_indice_darq.py`: 6 passed.
+Commit local pendente (`git add` por arquivo nominal, ainda não executado no momento
+deste registro). **Push pendente de autorização por turno (CLAUDE.md)** — branch
+`claude/nice-fermat-xahkji` restaurada de `origin/main` nesta sessão (PR anterior da
+mesma branch, #353, já mergeada); PR novo depende de push autorizado.

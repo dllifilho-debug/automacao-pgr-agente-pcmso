@@ -71,7 +71,33 @@
 > em vermelho — detalhe em HISTORICO (bloco desta sessão). Detalhe completo em HISTORICO e
 > `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA em
 > `PENDENCIAS_CLINICAS.md`.
-**Baseline:** branch `claude/blissful-johnson-mdeqn5` sobre `main 64e744b` (merge do PR #348 — D-ARQ-49 Parte 2 ratificada; esta sessão IMPLEMENTOU a fatia 2a, código de produção tocado) · **1278 passed, 6 skipped, 0 failed** *(MEDIDO nesta sessão, árvore parada, 570s — delta-zero exato contra o Baseline herdado de v200)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(MEDIDO nesta sessão, delta-zero)* · PROTOCOLO v94 · DECISOES v201
+
+> **Tiragem desta sessão `[MEDIDO — 21/09/2026]` (branch `claude/nice-fermat-xahkji`, número
+> não atribuído; IMPLEMENTAÇÃO — fix de `_SEPARADOR_FAIXA`, fecha
+> `DT-(sessão branch docs/003fi-achado-gate-forma-faixa)-01`).** **Não re-tirada** — nenhuma
+> `R-*` criada, alterada ou depreciada; nenhum `.yaml` de vocabulário tocado; decisão
+> declarada, não omissão (`D-ARQ-85` cl.1). O fix é FORMA do gate de composição de FDS
+> (`motor/transcricao_fds.py::parsear_faixa`, fallback de separador para espaço puro/`" a "`
+> quando hífen/en-dash não bate), não regra clínica nem CAS/slug — mesma classe de decisão
+> já usada em 003.FH/003.FI/003.FJ/003.FK/003.FL. `regras`/`cas` inalterados desde a última
+> tiragem que os moveu (festive-gates, `R-RX-03`/`R-ESP-03`). Detalhe completo (causa raiz,
+> testes, varredura inversa) em `PENDENCIAS_CLINICAS.md` (DT fechada) e HISTORICO_OPERACIONAL.md
+> (bloco desta sessão).
+
+**Baseline `[MEDIDO — 21/09/2026]`:** branch `claude/nice-fermat-xahkji` sobre `main d05b328`
+(merge do PR #353 — achado do gate de forma, docs-only; esta sessão IMPLEMENTOU o fix,
+código de produção tocado; branch restaurada de `origin/main` nesta sessão porque a PR
+anterior da mesma branch, #353, já estava mergeada) · **1287 passed, 6 skipped, 0 failed**
+*(MEDIDO nesta sessão, árvore parada, 764.80s — delta **+6** exato contra o Baseline herdado
+de 003fh/`3ac98fc` — 1281 — os 6 testes novos desta sessão)* · `mypy --strict` alvo canônico
+**limpo, 49 arquivos** *(MEDIDO nesta sessão, delta-zero contra 003fh/003fi)* · PROTOCOLO v94
+(inalterado) · DECISOES v205→**v206** (nota de aplicação em D-ARQ-34/D-ARQ-43, nenhuma
+cláusula alterada; índice D-ARQ regenerado, 85 decisões, contagem intacta). **Nota de
+proveniência:** entre este Baseline e o anterior (v201, `64e744b`), cinco sessões de código/dado
+(v202-v205 + a validação ao vivo v203) mergearam sem atualizar esta linha em disco — mesma
+classe de defasagem já registrada como `DH-003FB-03` (ABERTA, Baseline envelhece por desenho
+entre re-tiragens de número clínico); corrigido agora por ser esta sessão a próxima a produzir
+commit (D-ARQ-85 cl.2), não por ter isolado a causa daquela DH.
 
 > **Tiragem desta sessão, parte 2 `[MEDIDO — 16/09/2026]` (branch `claude/festive-gates-soy0fr`,
 > IMPLEMENTAÇÃO — `R-RX-03`/`R-ESP-03`).** Suíte **1233 passed, 6 skipped, 0 failed**, árvore

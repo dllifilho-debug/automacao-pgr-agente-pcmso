@@ -87,7 +87,14 @@ def normalizar_cas_ausente(cas_bruto: str) -> str:
     return cas_bruto
 
 
+# DT-(sessão branch docs/003fi-achado-gate-forma-faixa)-01: pdfplumber extrai as
+# duas colunas da tabela de composição como números soltos — o hífen visual da
+# FDS de origem não sobrevive à extração por posição. Fallback só entra quando
+# o separador primário (hífen/en-dash) não bate, então não compete com D-ARQ-43
+# P2 (âncoras "0,2 – 0,05" etc. continuam pelo primário, sem risco de a espaço
+# entre dígito e o dash cortar antes do dash).
 _SEPARADOR_FAIXA = re.compile(r"[-–]")
+_SEPARADOR_FAIXA_FALLBACK = re.compile(r"\s+a\s+|\s+", re.IGNORECASE)
 
 
 def _texto_para_float(token: str) -> Optional[float]:
@@ -105,10 +112,15 @@ def parsear_faixa(texto: str) -> Optional[FaixaConcentracao]:
     SEM ordenar (a ordenação min/max é do resolvedor — _normalizar_faixa,
     003.AP; não duplicada aqui).
 
-    Separadores: hífen '-' e en-dash '–' (DT-003AS-01 patologia 5). Decimal
-    BR vírgula -> ponto. Piso textual "00" cai em float("00") = 0.0 sem
-    tratamento especial. Semi-abertas (D-ARQ-34 P1): '< 5' -> (None, 5.0);
-    '> 1' -> (1.0, None). Vazio ou ininteligível -> None.
+    Separadores: hífen '-' e en-dash '–' (DT-003AS-01 patologia 5), com fallback
+    para espaço puro ou o literal " a " quando nenhum dos dois aparece — padrão
+    medido em FDS reais cuja extração por posição perde o hífen visual da
+    tabela (achado da sessão branch docs/003fi-achado-gate-forma-faixa): '15 19'
+    -> (15.0, 19.0); '35 a 50' -> (35.0, 50.0). O fallback só roda quando o
+    separador primário não encontra 2 partes — nunca compete com hífen/en-dash
+    já presente. Decimal BR vírgula -> ponto. Piso textual "00" cai em
+    float("00") = 0.0 sem tratamento especial. Semi-abertas (D-ARQ-34 P1):
+    '< 5' -> (None, 5.0); '> 1' -> (1.0, None). Vazio ou ininteligível -> None.
 
     Âncoras (D-ARQ-43 P2, medição 003.AN/AS): '0,2 – 0,05' -> (0.2, 0.05);
     '00 – 10' -> (0.0, 10.0); '00 – 0,5' -> (0.0, 0.5);
@@ -132,7 +144,9 @@ def parsear_faixa(texto: str) -> Optional[FaixaConcentracao]:
 
     partes = _SEPARADOR_FAIXA.split(bruto, maxsplit=1)
     if len(partes) != 2:
-        return None
+        partes = _SEPARADOR_FAIXA_FALLBACK.split(bruto, maxsplit=1)
+        if len(partes) != 2:
+            return None
 
     minimo = _texto_para_float(partes[0])
     maximo = _texto_para_float(partes[1])

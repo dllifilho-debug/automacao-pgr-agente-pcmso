@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v205 · 85 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v206 · 85 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
