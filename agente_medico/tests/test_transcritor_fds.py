@@ -172,6 +172,18 @@ def test_faixas_reais_sem_hifen_sao_aprovadas() -> None:
         assert pendencias == ()
 
 
+def test_faixa_dupla_desigualdade_real_e_aprovada() -> None:
+    # Achado real (DESMOLD SIKA - GHE 05 CARPINTARIA, dazomete 533-74-4):
+    # faixa '>= 0.1 - < 1' reprovava no gate antes de _FAIXA_COMPOSTA.
+    bloco = BlocoVerbatim(
+        faixa=">= 0.1 - < 1",
+        membros=(MembroVerbatim(cas="533-74-4", nome="dazomete (ISO)"),),
+    )
+    aprovados, pendencias = gate_forma([bloco])
+    assert aprovados == (bloco,)
+    assert pendencias == ()
+
+
 # ---------------------------------------------------------------------------
 # Integração (marcador requer_pdfs; espelha test_extrair_texto_fds.py).
 # Composição fim-a-fim (transcrever_fds -> gate_forma -> montar_fds ->

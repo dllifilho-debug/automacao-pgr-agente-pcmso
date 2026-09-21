@@ -84,20 +84,45 @@
 > testes, varredura inversa) em `PENDENCIAS_CLINICAS.md` (DT fechada) e HISTORICO_OPERACIONAL.md
 > (bloco desta sessão).
 
-**Baseline `[MEDIDO — 21/09/2026]`:** branch `claude/nice-fermat-xahkji` sobre `main d05b328`
-(merge do PR #353 — achado do gate de forma, docs-only; esta sessão IMPLEMENTOU o fix,
-código de produção tocado; branch restaurada de `origin/main` nesta sessão porque a PR
-anterior da mesma branch, #353, já estava mergeada) · **1287 passed, 6 skipped, 0 failed**
-*(MEDIDO nesta sessão, árvore parada, 764.80s — delta **+6** exato contra o Baseline herdado
-de 003fh/`3ac98fc` — 1281 — os 6 testes novos desta sessão)* · `mypy --strict` alvo canônico
-**limpo, 49 arquivos** *(MEDIDO nesta sessão, delta-zero contra 003fh/003fi)* · PROTOCOLO v94
-(inalterado) · DECISOES v205→**v206** (nota de aplicação em D-ARQ-34/D-ARQ-43, nenhuma
-cláusula alterada; índice D-ARQ regenerado, 85 decisões, contagem intacta). **Nota de
-proveniência:** entre este Baseline e o anterior (v201, `64e744b`), cinco sessões de código/dado
-(v202-v205 + a validação ao vivo v203) mergearam sem atualizar esta linha em disco — mesma
-classe de defasagem já registrada como `DH-003FB-03` (ABERTA, Baseline envelhece por desenho
-entre re-tiragens de número clínico); corrigido agora por ser esta sessão a próxima a produzir
-commit (D-ARQ-85 cl.2), não por ter isolado a causa daquela DH.
+> **Tiragem desta sessão, parte 2 `[MEDIDO — 21/09/2026]` (mesma branch
+> `claude/nice-fermat-xahkji`, continuação pós-merge do PR #354; IMPLEMENTAÇÃO — faixa
+> dupla-desigualdade, fecha `DT-(sessão claude/nice-fermat-xahkji, achado pós-PR #354)-01`).**
+> **Não re-tirada** — mesma decisão, mesma prova (`D-ARQ-85` cl.1): nenhuma `R-*`
+> criada/alterada/depreciada, nenhum `.yaml` de vocabulário tocado. Achado veio de teste real
+> do Diovanni (PGR/FDS "CMO Residencial Verdes Mares", PDFs subidos ao acervo,
+> `fds_originais/`) — `DESMOLD SIKA` reprovava o bloco do dazomete (`faixa='>= 0.1 - < 1'`),
+> notação de desigualdade dupla que `parsear_faixa` não reconhecia (capturada errado pelo ramo
+> de semi-aberta simples de D-ARQ-34 P1). Fix + 5 testes + varredura inversa (4/5
+> discriminantes) na mesma sessão, sem handoff. Detalhe em `PENDENCIAS_CLINICAS.md` (DT
+> criada e resolvida na mesma entrada) e HISTORICO_OPERACIONAL.md (bloco desta sessão).
+
+**Baseline `[MEDIDO — 21/09/2026, parte 2]`:** branch `claude/nice-fermat-xahkji` sobre
+`main b75388d` (merge do PR #354 — fix do separador de faixa; esta sessão IMPLEMENTOU um 2º
+fix na mesma área, código de produção tocado de novo; branch restaurada de `origin/main`
+outra vez porque a PR anterior da mesma branch, #354, também já estava mergeada) ·
+**1292 passed, 6 skipped, 0 failed** *(MEDIDO nesta sessão, árvore parada, 746.98s — delta
+**+5** exato contra o Baseline da parte 1 — 1287 — os 5 testes novos desta parte; suíte
+100% mockada, confirmado via `conftest.py::_sem_chave_de_api`, nenhuma chamada real ao
+Gemini)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(MEDIDO nesta sessão,
+delta-zero)* · PROTOCOLO v94 (inalterado) · DECISOES v206→**v207** (nota de aplicação em
+D-ARQ-34 P1, nenhuma cláusula alterada; índice D-ARQ regenerado, 85 decisões, contagem
+intacta, `test_gerar_indice_darq.py`: 6 passed).
+
+**Baseline da parte 1 `[MEDIDO — 21/09/2026]`:** branch `claude/nice-fermat-xahkji` sobre
+`main d05b328` (merge do PR #353 — achado do gate de forma, docs-only; esta sessão
+IMPLEMENTOU o fix, código de produção tocado; branch restaurada de `origin/main` nesta
+sessão porque a PR anterior da mesma branch, #353, já estava mergeada) · **1287 passed, 6
+skipped, 0 failed** *(MEDIDO nesta sessão, árvore parada, 764.80s — delta **+6** exato
+contra o Baseline herdado de 003fh/`3ac98fc` — 1281 — os 6 testes novos desta sessão)* ·
+`mypy --strict` alvo canônico **limpo, 49 arquivos** *(MEDIDO nesta sessão, delta-zero
+contra 003fh/003fi)* · PROTOCOLO v94 (inalterado) · DECISOES v205→**v206** (nota de
+aplicação em D-ARQ-34/D-ARQ-43, nenhuma cláusula alterada; índice D-ARQ regenerado, 85
+decisões, contagem intacta). **Nota de proveniência:** entre este Baseline e o anterior
+(v201, `64e744b`), cinco sessões de código/dado (v202-v205 + a validação ao vivo v203)
+mergearam sem atualizar esta linha em disco — mesma classe de defasagem já registrada como
+`DH-003FB-03` (ABERTA, Baseline envelhece por desenho entre re-tiragens de número clínico);
+corrigido agora por ser esta sessão a próxima a produzir commit (D-ARQ-85 cl.2), não por ter
+isolado a causa daquela DH.
 
 > **Tiragem desta sessão, parte 2 `[MEDIDO — 16/09/2026]` (branch `claude/festive-gates-soy0fr`,
 > IMPLEMENTAÇÃO — `R-RX-03`/`R-ESP-03`).** Suíte **1233 passed, 6 skipped, 0 failed**, árvore

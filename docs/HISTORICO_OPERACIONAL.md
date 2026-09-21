@@ -9001,3 +9001,101 @@ Commit local pendente (`git add` por arquivo nominal, ainda não executado no mo
 deste registro). **Push pendente de autorização por turno (CLAUDE.md)** — branch
 `claude/nice-fermat-xahkji` restaurada de `origin/main` nesta sessão (PR anterior da
 mesma branch, #353, já mergeada); PR novo depende de push autorizado.
+
+**Correção retroativa (mesma conversa, adiante).** O commit local foi feito (`10e3ed0`),
+push autorizado pelo Diovanni no turno seguinte, PR #354 aberta e mergeada por ele
+(`b75388d`). Ver bloco seguinte para o achado que motivou reabrir a branch.
+
+## Sessão (branch `claude/nice-fermat-xahkji`, número não atribuído) — 21/09/2026 — CONHECIMENTO → IMPLEMENTAÇÃO: achado de faixa dupla-desigualdade, fecha `DT-(sessão claude/nice-fermat-xahkji, achado pós-PR #354)-01`
+
+**Origem.** Mesma conversa, pós-merge do PR #354. Diovanni pediu pra verificar a correção
+com um teste próprio: rodou o app publicado (antes do merge do #354 ainda estar no ar)
+com um PGR e FDS reais de outro cliente ("CMO Residencial Verdes Mares") e colou o
+resultado por e-mail. Também subiu os PDFs usados diretamente pelo GitHub web
+(commits `8695842`/`111ee0e`, `Add files via upload`) — inclusive `PGR — CMO
+RESIDENCIAL VERDE MARIS.pdf` e as FDS de adesivo/cimento/desmoldante/eletrodo.
+
+**Branch reaberta.** A branch `claude/nice-fermat-xahkji` já tinha PR próprio mergeado
+(#354) antes desta continuação — reiniciada de novo a partir de `origin/main`
+(`git checkout -B claude/nice-fermat-xahkji origin/main`, mesma instrução operacional
+do início da sessão) antes de qualquer commit novo.
+
+**Achado, verificado com PDF real (não só o texto colado no e-mail).** Das FDS do
+e-mail, a maioria já mostrou o botão "Anexar ao GHE" — confirma o fix da v206/PR #354
+(faixas `"15 – 35"`, `"30 – 70"` etc., separador já reconhecido; `"Faixa:"` vazia
+também aprova, por desenho). Uma reprovou: `DESMOLD SIKA - (GHE 05 CARPINTARIA).pdf`,
+bloco do dazomete — `forma_verbatim_fds: faixa='>= 0.1 - < 1'`. `extrair_texto_fds`
+rodado agora sobre o PDF real (não o texto do e-mail) confirma byte a byte:
+`"dazomete (ISO) 533-74-4 >= 0.1 - < 1"`. Causa raiz: não é separador ausente (há
+hífen) — é notação de **faixa dupla-desigualdade** (`>=`/`<` nos dois lados).
+`parsear_faixa` checa `bruto.startswith(">")` (D-ARQ-34 P1) ANTES de qualquer split,
+então `">= 0.1 - < 1"` cai nesse ramo, tenta `_texto_para_float("= 0.1 - < 1")`,
+falha, perde o teto, devolve `None`. Os outros 2 blocos da mesma FDS (`"< 0.1"`,
+semi-aberta simples) passam normalmente — por isso o botão "Anexar" ainda aparecia
+pra esse arquivo, só o bloco do dazomete virava pendência bloqueante isolada
+(gate é por-bloco, não all-or-nothing).
+
+**Implementação — mesma sessão, achado→fix sem handoff desta vez.** `_FAIXA_COMPOSTA
+= re.compile(r"^>=?\s*([\d.,]+)\s*[-–]\s*<=?\s*([\d.,]+)$")` em
+`motor/transcricao_fds.py`, checada em `parsear_faixa` ANTES dos ramos de semi-aberta
+simples — ordem importa, senão o `">="` inicial é capturado errado. `=?` aceita
+operador estrito (`>`/`<`) ou "ou-igual" (`>=`/`<=`), mesmo vocabulário que D-ARQ-34
+P1 já trata isoladamente — não é conceito novo, só permite os dois lados coexistirem.
+Escopo deliberadamente estreito: só ASCII `>`/`>=`/`<`/`<=`, sem `≥`/`≤` unicode
+(nenhuma FDS medida usa esses caracteres — não adicionado por antecipação, regra do
+CLAUDE.md contra número/padrão não medido). LLM/prompt intocados; `gate_forma` não
+muda (reusa `parsear_faixa`).
+
+**Testes — 5 novos, caso real + fronteiras.** `test_parsear_faixa_composta_dazomete_real`
+(`">= 0.1 - < 1"` → `(0.1, 1.0)`, o caso real medido), `test_parsear_faixa_composta_
+aceita_operadores_estritos` (`"> 0.1 - < 1"`), `test_parsear_faixa_composta_aceita_
+teto_ou_igual` (`">= 0.1 - <= 1"`), `test_parsear_faixa_composta_nao_rouba_semi_
+abertas_simples` (`"> 1"`/`"< 5"` continuam pelo ramo antigo) — os 4 em
+`test_transcricao_fds.py`; `test_faixa_dupla_desigualdade_real_e_aprovada` em
+`test_transcritor_fds.py`, o bloco real completo (CAS 533-74-4, "dazomete (ISO)")
+aprovado no `gate_forma`.
+
+**Varredura inversa `[MEDIDO]`.** Reversão nomeada: revogar só o branch
+`_FAIXA_COMPOSTA` em `parsear_faixa` (código-fonte, testes intactos). Derruba
+exatamente **4 dos 5** testes novos (os 3 casos de faixa composta + o teste de gate);
+o teste "não rouba semi-abertas simples" continua verde (não depende do branch
+novo — discriminante correto, não falso-positivo de cobertura). Nenhum teste
+pré-existente da suíte se move. Restaurado em seguida, suíte volta a verde.
+
+**Checado antes de escrever.** Nenhuma fixture existente do repositório usa notação
+de desigualdade dupla nem depende de `bruto.startswith(">")` capturar algo diferente
+de semi-aberta simples — varredura de `faixa="..."` em toda a suíte confere.
+
+**Verificação.** Recorte que cobre os derivados tocados (mesmos 11 arquivos da sessão
+anterior — `test_transcricao_fds.py`+`test_transcritor_fds.py`+
+`test_montagem_verbatim.py`+`test_revisao_verbatim.py`+`test_orquestracao_fds.py`+
+`test_transcritor_gemini.py`+`test_cli_fds.py`+`test_web_fds.py`+
+`test_web_matriz.py`+`test_composicao_propaga_pendencias.py`+
+`test_integracao_composicao_fase_c.py`): **161 passed, 3 skipped** (skips
+`@requer_pdfs`, mesma classe DH-003ET-01). `mypy --strict` alvo canônico: limpo,
+**49 arquivos**, delta-zero. Suíte completa (`agente_medico/tests/ tests/`, árvore
+parada): **1292 passed, 6 skipped, 0 failed**, 746.98s. Delta **+5** exato contra o
+Baseline anterior (`1287`, commit `10e3ed0`/PR #354) — os 5 testes novos, nenhum
+removido/renomeado. Suíte roda 100% mockada/determinística — confirmado de disco
+(`conftest.py::_sem_chave_de_api`, fixture `autouse` que remove `CHAVE_API_GOOGLE`
+de todo teste exceto os marcados `ao_vivo`) que nenhuma chamada real ao Gemini
+acontece na medição, dúvida levantada pelo Diovanni no meio da sessão.
+
+**Números clínicos — nenhum se move.** Nenhuma `R-*` criada, alterada ou depreciada;
+nenhum `.yaml` de vocabulário tocado — mesma classe de decisão da sessão anterior
+(D-ARQ-85 cl.1).
+
+**Docs.** `PENDENCIAS_CLINICAS.md`: `DT-(sessão claude/nice-fermat-xahkji, achado
+pós-PR #354)-01` criada e RESOLVIDA na mesma entrada (achado→causa raiz→fix→
+varredura inversa, sem handoff desta vez). `DECISOES_ARQUITETURAIS.md` v206→**v207**
+(nota de aplicação em D-ARQ-34 P1, nenhuma cláusula alterada); `INDICE_DARQ.md`
+regenerado (85 decisões, contagem intacta), `test_gerar_indice_darq.py`: 6 passed.
+`PAINEL_ESTADO.md`: Baseline re-tirado de novo (D-ARQ-85 cl.2, todo fechamento que
+produz commit) + nota de não-re-tiragem dos três números clínicos.
+`PROTOCOLO_AGENTE_MEDICO.md` não tocado (segue v94).
+
+**Status.** Suíte completa medida: **1292 passed, 6 skipped, 0 failed**, 746.98s —
+delta **+5** exato contra o Baseline anterior (1287). `mypy --strict` alvo canônico
+limpo, 49 arquivos. `test_gerar_indice_darq.py`: 6 passed. Commit local pendente no
+momento deste registro. **Push pendente de autorização por turno (CLAUDE.md)** —
+mesma regra da fatia anterior, aplicada de novo.

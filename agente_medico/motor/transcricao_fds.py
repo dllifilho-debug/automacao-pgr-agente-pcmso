@@ -96,6 +96,15 @@ def normalizar_cas_ausente(cas_bruto: str) -> str:
 _SEPARADOR_FAIXA = re.compile(r"[-–]")
 _SEPARADOR_FAIXA_FALLBACK = re.compile(r"\s+a\s+|\s+", re.IGNORECASE)
 
+# Achado real (DESMOLD SIKA, dazomete 533-74-4, sessão claude/nice-fermat-xahkji
+# pós-#354): faixa dupla-desigualdade — ">= 0.1 - < 1" — não é min/máx solto, é
+# dois operadores (D-ARQ-34 P1 já trata '<'/'>' isolados; aqui os dois aparecem
+# juntos, separados por hífen/en-dash). Checado ANTES de startswith('<')/('>')
+# abaixo: sem isso, ">= 0.1 - < 1" cai no ramo '>' isolado e '_texto_para_float("=
+# 0.1 - < 1")' falha, perdendo o teto. '=?' aceita tanto o operador estrito
+# quanto o 'ou-igual', mesmo vocabulário que o resto do módulo já reconhece.
+_FAIXA_COMPOSTA = re.compile(r"^>=?\s*([\d.,]+)\s*[-–]\s*<=?\s*([\d.,]+)$")
+
 
 def _texto_para_float(token: str) -> Optional[float]:
     token_normalizado = token.strip().replace(",", ".")
@@ -125,10 +134,22 @@ def parsear_faixa(texto: str) -> Optional[FaixaConcentracao]:
     Âncoras (D-ARQ-43 P2, medição 003.AN/AS): '0,2 – 0,05' -> (0.2, 0.05);
     '00 – 10' -> (0.0, 10.0); '00 – 0,5' -> (0.0, 0.5);
     '0,01 – 0,008' -> (0.01, 0.008) — pares invertidos saem invertidos.
+
+    Faixa dupla-desigualdade (achado real, dazomete/DESMOLD SIKA): '>= 0.1 - < 1'
+    -> (0.1, 1.0) — checada antes das semi-abertas simples abaixo, senão o '>='
+    inicial cai no ramo de piso isolado e perde o teto.
     """
     bruto = texto.strip()
     if not bruto:
         return None
+
+    composta = _FAIXA_COMPOSTA.match(bruto)
+    if composta is not None:
+        minimo = _texto_para_float(composta.group(1))
+        maximo = _texto_para_float(composta.group(2))
+        if minimo is None or maximo is None:
+            return None
+        return FaixaConcentracao(minimo=minimo, maximo=maximo)
 
     if bruto.startswith("<"):
         teto = _texto_para_float(bruto[1:])
