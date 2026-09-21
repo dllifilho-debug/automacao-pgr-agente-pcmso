@@ -161,6 +161,17 @@ def test_faixas_semiabertas_e_endash_sao_aprovadas() -> None:
         assert pendencias == ()
 
 
+def test_faixas_reais_sem_hifen_sao_aprovadas() -> None:
+    # DT-(sessão branch docs/003fi-achado-gate-forma-faixa)-01: antes do
+    # fallback de _SEPARADOR_FAIXA, estes 3 blocos reais reprovavam no gate
+    # de forma (bloqueante) mesmo com CAS/nome íntegros.
+    for faixa in ("15 19", "30 70", "35 a 50"):
+        bloco = BlocoVerbatim(faixa=faixa, membros=(MembroVerbatim(cas="1-2-3", nome="X"),))
+        aprovados, pendencias = gate_forma([bloco])
+        assert aprovados == (bloco,)
+        assert pendencias == ()
+
+
 # ---------------------------------------------------------------------------
 # Integração (marcador requer_pdfs; espelha test_extrair_texto_fds.py).
 # Composição fim-a-fim (transcrever_fds -> gate_forma -> montar_fds ->

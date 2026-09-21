@@ -134,3 +134,38 @@ def test_parsear_faixa_nao_ordena_par_invertido() -> None:
     assert faixa is not None
     assert faixa.minimo is not None and faixa.maximo is not None
     assert faixa.minimo > faixa.maximo
+
+
+# ---------------------------------------------------------------------------
+# parsear_faixa — fallback de separador (DT-(sessão branch
+# docs/003fi-achado-gate-forma-faixa)-01). Os 3 casos abaixo são reais, medidos
+# via extrair_texto_fds sobre o acervo (Água Sanitária Zulu, Adesivo PVC Tigre,
+# Impermeabilizante) — pdfplumber perde o hífen visual da tabela na extração
+# por posição. Reversão nomeada: reverter _SEPARADOR_FAIXA_FALLBACK (ou
+# esvaziar o fallback em parsear_faixa) derruba exatamente estes 3 testes,
+# sem tocar nenhum outro caso desta suíte.
+# ---------------------------------------------------------------------------
+
+
+def test_parsear_faixa_fallback_espaco_puro_hipoclorito() -> None:
+    assert parsear_faixa("15 19") == FaixaConcentracao(minimo=15.0, maximo=19.0)
+
+
+def test_parsear_faixa_fallback_espaco_puro_acetona() -> None:
+    assert parsear_faixa("30 70") == FaixaConcentracao(minimo=30.0, maximo=70.0)
+
+
+def test_parsear_faixa_fallback_literal_a_asfalto() -> None:
+    assert parsear_faixa("35 a 50") == FaixaConcentracao(minimo=35.0, maximo=50.0)
+
+
+def test_parsear_faixa_fallback_nao_compete_com_hifen() -> None:
+    # Hífen presente vence o fallback por construção (fallback só roda quando
+    # o separador primário não acha 2 partes) — não uma coincidência de valor.
+    assert parsear_faixa("0,2 – 0,05") == FaixaConcentracao(minimo=0.2, maximo=0.05)
+
+
+def test_parsear_faixa_fallback_nao_resgata_lixo_sem_espaco() -> None:
+    # "indisponível" não tem espaço nem hífen — fallback não acha 2 partes,
+    # continua None. Confirma que o fallback não amplia demais.
+    assert parsear_faixa("indisponível") is None
