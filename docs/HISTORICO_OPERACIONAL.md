@@ -9099,3 +9099,107 @@ delta **+5** exato contra o Baseline anterior (1287). `mypy --strict` alvo canô
 limpo, 49 arquivos. `test_gerar_indice_darq.py`: 6 passed. Commit local pendente no
 momento deste registro. **Push pendente de autorização por turno (CLAUDE.md)** —
 mesma regra da fatia anterior, aplicada de novo.
+
+**Correção retroativa (mesma conversa, adiante).** Commit local feito (`e13ebb3`), push
+autorizado, PR #355 aberta e mergeada pelo Diovanni (`1f4e3f9`). Ver bloco seguinte para
+o 2º achado da mesma classe, desta vez do acervo Aurora.
+
+## Sessão (branch `claude/nice-fermat-xahkji`, número não atribuído) — 21/09/2026 — CONHECIMENTO → IMPLEMENTAÇÃO: 2ª leva da mesma DT, faixa composta assimétrica
+
+**Origem.** Mesma conversa, pós-merge do PR #355. Diovanni subiu mais FDS reais ao
+acervo — desta vez de outro PGR/cliente ("CMO Residencial Aurora"), commit `683f5f7`
+(`Add files via upload`) — e pediu para conferir contra o gate atualizado.
+
+**Branch reaberta de novo.** `claude/nice-fermat-xahkji` já tinha PR própria mergeada
+(#355) antes desta continuação — reiniciada mais uma vez de `origin/main`
+(`git checkout -B claude/nice-fermat-xahkji origin/main`), mesma instrução operacional
+das duas vezes anteriores.
+
+**Dedup por hash antes de examinar (mesmo método de 003fh).** `sha256sum` nos PDFs do
+acervo achou **8 pares byte-idênticos** entre o que o Aurora subiu e o que já existia do
+Verdes Mares (mesmos documentos, RÓTULOS de GHE diferentes — ex. `DESMOL - (GHE 05
+CARPINTARIA).pdf` == `DESMOL - (GHE 04 e 05 - Carpintaria).pdf`) — reduz o exame a
+**4 arquivos de conteúdo genuinamente novo**: `2.014 - FISQP BAUTECH DESMOLDANTE OL`,
+`ESMALTE SINTÉTICO- PINTURA(...)- PINTOR.doc`, `Fundo Zarcão- PINTURA ESMALTE
+SINTÉTICO- PINTOR.pdf`, `fispq-quim-sol-alif-aguarras-mineral.pdf`.
+
+**Achado — faixa composta ASSIMÉTRICA, classe irmã da v207/dazomete, não coberta por
+ela.** `extrair_texto_fds` sobre `Fundo Zarcão-...-PINTOR.pdf` (determinístico, sem
+LLM — mesmo método das duas fatias anteriores, achado direto do texto bruto antes de
+qualquer transcrição) mostra `"Destilados de Petróleo levemente tratados com
+hidrogênio 10 - <50 64742-47-8"`. Faixa `"10 - <50"`: hífen presente, mas só o TETO
+tem operador (`"<50"`) — o piso é número puro (`"10"`). O `_FAIXA_COMPOSTA` da v207
+(`^>=?...<=?...$`, ambos os lados obrigatórios) não casa essa forma — `re.match`
+falha o padrão inteiro, cai no split antigo, que também falha porque
+`_texto_para_float("<50")` não converte. Testado com `parsear_faixa` real: `None`
+antes do fix desta sessão. As outras linhas da mesma tabela (`"0,10 – 0,3"` etc., MEK/
+octoatos/xileno) já passam normalmente (en-dash simples, sem operador) — achado
+isolado nessa 1ª linha da tabela. Verificado também nos outros 3 arquivos novos:
+nenhum outro padrão inédito (`10 – 20`/`%` já esperado — LLM strip de unidade,
+comportamento já assumido; `0 - 100`/`<0,1` já cobertos pelos fixes anteriores).
+
+**Implementação — mesma sessão, sem handoff, generaliza o regex da v207.**
+`_FAIXA_COMPOSTA` de `^>=?\s*([\d.,]+)\s*[-–]\s*<=?\s*([\d.,]+)$` para
+`^(?:>=?)?\s*([\d.,]+)\s*[-–]\s*(?:<=?)?\s*([\d.,]+)$` — cada operador agora
+INDEPENDENTEMENTE opcional (antes: os dois obrigatórios). Gate por substring
+(`">" in bruto or "<" in bruto`) antes de tentar o regex — sem ele, o regex
+generalizado casaria QUALQUER par hífen-separado (inclusive sem operador nenhum),
+competindo com o caminho antigo bem testado; com o gate, o caminho sem operador
+segue 100% intocado, mesmo princípio já usado no fallback de espaço/`" a "` (v206).
+LLM/prompt intocados; `gate_forma` não muda.
+
+**Testes — 3 novos.** `test_parsear_faixa_composta_assimetrica_so_teto_real`
+(`"10 - <50"` → `(10.0, 50.0)`, o caso real medido), `test_parsear_faixa_composta_
+assimetrica_so_piso` (`">10 - 50"` → `(10.0, 50.0)`, espelho simétrico ao achado mas
+com o piso — mesma classe de forma, não medido em FDS real mas coberto pelo mesmo
+regex, registrado como tal) — os 2 em `test_transcricao_fds.py`;
+`test_faixa_composta_assimetrica_real_e_aprovada` em `test_transcritor_fds.py`, o
+bloco real completo (CAS 64742-47-8, "Destilados de Petróleo...") aprovado no
+`gate_forma`. Comentário do teste "não rouba semi-abertas simples" (v207) corrigido
+de passagem — dizia "a faixa composta exige AMBOS os lados", o que deixou de ser
+verdade; reescrito para descrever a condição real (separador + dois números).
+
+**Varredura inversa `[MEDIDO]`.** Reversão nomeada: reverter só o regex para a forma
+simétrica antiga (`^>=?...<=?...$`), mantendo o gate por substring e os testes
+intactos. Derruba exatamente **3 dos 3** testes novos desta leva; os 5 testes da v207
+(dazomete, ambos os lados) permanecem verdes — discriminante correto, a generalização
+não quebrou o caso simétrico que a motivou. Nenhum teste pré-existente da suíte se
+move. Restaurado em seguida, suíte volta a verde.
+
+**Verificação.** Recorte que cobre os derivados tocados (mesmos 11 arquivos das duas
+fatias anteriores): **164 passed, 3 skipped** (161 da v207 + 3 novos). `mypy --strict`
+alvo canônico: limpo, **49 arquivos**, delta-zero.
+
+**Deslize de processo, auto-reportado — índice D-ARQ não regenerado no primeiro passe.**
+Ao adicionar a linha v208 em `DECISOES_ARQUITETURAIS.md`, esqueci de rodar
+`python -m scripts.gerar_indice_darq` antes da suíte completa — exatamente a cláusula
+fixa do CLAUDE.md ("sessão que toca DECISOES_ARQUITETURAIS.md regenera INDICE_DARQ.md"),
+com precedente nomeado de custar duas sessões (`c89f569`/003.EF, `973a343`/003.EG). A
+1ª corrida da suíte completa (747.58s) pegou o defeito: **2 failed** —
+`test_gerar_indice_darq.py::test_indice_em_disco_nao_divergiu` e
+`test_medir_painel.py::test_medir_indice_darq_sincronizado_com_o_disco` — 1293 passed,
+6 skipped. Corrigido (`scripts.gerar_indice_darq` rodado, índice v207→v208), os 2 testes
+voltam a passar isoladamente (15 passed nos dois arquivos), suíte completa refeita do
+zero com árvore parada de novo.
+
+Suíte completa, corrida limpa (`agente_medico/tests/ tests/`, árvore parada):
+**1295 passed, 6 skipped, 0 failed**, 747.13s. Delta **+3** exato contra o Baseline da
+parte 2 (`1292`) — os 3 testes novos desta parte, nenhum removido/renomeado.
+
+**Números clínicos — nenhum se move.** Nenhuma `R-*` criada, alterada ou depreciada;
+nenhum `.yaml` de vocabulário tocado — mesma classe de decisão das duas fatias
+anteriores (D-ARQ-85 cl.1).
+
+**Docs.** `PENDENCIAS_CLINICAS.md`: nota adicional na MESMA entrada da DT da v207
+(2ª leva, achado→causa raiz→fix→varredura inversa, sem DT nova — é a mesma classe de
+padrão, só generalizada). `DECISOES_ARQUITETURAIS.md` v207→**v208** (nota de
+aplicação em D-ARQ-34 P1, nenhuma cláusula alterada); `INDICE_DARQ.md` regenerado
+(85 decisões, contagem intacta). `PAINEL_ESTADO.md`: Baseline re-tirado de novo
+(D-ARQ-85 cl.2) + nota de não-re-tiragem dos três números clínicos.
+`PROTOCOLO_AGENTE_MEDICO.md` não tocado (segue v94).
+
+**Status.** Suíte completa medida (corrida limpa, pós-correção do índice): **1295 passed,
+6 skipped, 0 failed**, 747.13s — delta +3 exato contra o Baseline da parte 2 (1292).
+`mypy --strict` alvo canônico limpo, 49 arquivos. `test_gerar_indice_darq.py`+
+`test_medir_painel.py`: 15 passed. Commit local pendente no momento deste registro.
+Push depende de autorização por turno (mesma regra das duas fatias anteriores).

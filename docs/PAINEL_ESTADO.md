@@ -96,7 +96,37 @@
 > discriminantes) na mesma sessão, sem handoff. Detalhe em `PENDENCIAS_CLINICAS.md` (DT
 > criada e resolvida na mesma entrada) e HISTORICO_OPERACIONAL.md (bloco desta sessão).
 
-**Baseline `[MEDIDO — 21/09/2026, parte 2]`:** branch `claude/nice-fermat-xahkji` sobre
+> **Tiragem desta sessão, parte 3 `[MEDIDO — 21/09/2026]` (mesma branch
+> `claude/nice-fermat-xahkji`, continuação pós-merge do PR #355; IMPLEMENTAÇÃO — faixa
+> composta assimétrica, 2ª leva da mesma DT da parte 2).** **Não re-tirada** — mesma
+> decisão, mesma prova (`D-ARQ-85` cl.1). Diovanni subiu mais FDS reais (PGR "CMO
+> Residencial Aurora") — dedup por hash achou 8 duplicatas do Verdes Mares, 4 arquivos de
+> conteúdo genuinamente novo. `Fundo Zarcão-...-PINTOR.pdf` reprovava "Destilados de
+> Petróleo" (`faixa='10 - <50'`) — faixa composta com operador só de UM lado (o teto), que
+> o `_FAIXA_COMPOSTA` da parte 2 (exigia os dois lados) não cobria. Regex generalizado para
+> operador opcional em cada lado independentemente, gated por presença de `'<'`/`'>'` na
+> string. Fix + 3 testes + varredura inversa (3/3) na mesma sessão. Detalhe em
+> `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
+> desta sessão).
+
+**Baseline `[MEDIDO — 22/09/2026, parte 3]`:** branch `claude/nice-fermat-xahkji` sobre
+`main 1f4e3f9` (merge do PR #355 — faixa dupla-desigualdade simétrica; esta sessão
+IMPLEMENTOU um 3º fix na mesma área/mesma DT, código de produção tocado de novo; branch
+restaurada de `origin/main` outra vez porque a PR anterior da mesma branch, #355, também já
+estava mergeada) · **1295 passed, 6 skipped, 0 failed** *(MEDIDO nesta sessão, árvore
+parada, 747.13s — delta **+3** exato contra o Baseline da parte 2 — 1292 — os 3 testes
+novos desta parte)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** *(MEDIDO nesta
+sessão, delta-zero)* · PROTOCOLO v94 (inalterado) · DECISOES v207→**v208** (nota de
+aplicação em D-ARQ-34 P1, nenhuma cláusula alterada; índice D-ARQ regenerado, 85 decisões,
+contagem intacta).
+
+**Deslize de processo, auto-reportado.** A 1ª tentativa de medir a suíte completa desta
+parte (747.58s) achou **2 failed** — índice D-ARQ não regenerado antes da corrida
+(esqueci `python -m scripts.gerar_indice_darq` após escrever a linha v208; cláusula fixa
+do CLAUDE.md, precedente `c89f569`/003.EF e `973a343`/003.EG). Corrigido (índice
+regenerado v207→v208) e suíte refeita do zero, limpa — o número acima é da 2ª corrida.
+
+**Baseline da parte 2 `[MEDIDO — 21/09/2026, parte 2]`:** branch `claude/nice-fermat-xahkji` sobre
 `main b75388d` (merge do PR #354 — fix do separador de faixa; esta sessão IMPLEMENTOU um 2º
 fix na mesma área, código de produção tocado de novo; branch restaurada de `origin/main`
 outra vez porque a PR anterior da mesma branch, #354, também já estava mergeada) ·

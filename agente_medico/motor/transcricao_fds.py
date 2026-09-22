@@ -97,13 +97,18 @@ _SEPARADOR_FAIXA = re.compile(r"[-–]")
 _SEPARADOR_FAIXA_FALLBACK = re.compile(r"\s+a\s+|\s+", re.IGNORECASE)
 
 # Achado real (DESMOLD SIKA, dazomete 533-74-4, sessão claude/nice-fermat-xahkji
-# pós-#354): faixa dupla-desigualdade — ">= 0.1 - < 1" — não é min/máx solto, é
-# dois operadores (D-ARQ-34 P1 já trata '<'/'>' isolados; aqui os dois aparecem
-# juntos, separados por hífen/en-dash). Checado ANTES de startswith('<')/('>')
-# abaixo: sem isso, ">= 0.1 - < 1" cai no ramo '>' isolado e '_texto_para_float("=
-# 0.1 - < 1")' falha, perdendo o teto. '=?' aceita tanto o operador estrito
-# quanto o 'ou-igual', mesmo vocabulário que o resto do módulo já reconhece.
-_FAIXA_COMPOSTA = re.compile(r"^>=?\s*([\d.,]+)\s*[-–]\s*<=?\s*([\d.,]+)$")
+# pós-#354; estendido com achado do acervo Aurora, mesma sessão pós-#355 —
+# "Destilados de Petróleo", Fundo Zarcão/Esmalte Sintético Pintura: '10 - <50',
+# só o teto tem operador): faixa composta com operador de desigualdade em
+# QUALQUER um dos dois lados — '>= 0.1 - < 1' (os dois), '10 - <50' (só o teto).
+# D-ARQ-34 P1 já trata '<'/'>' isolados; aqui um ou ambos aparecem junto de um
+# separador hífen/en-dash. Checado ANTES de startswith('<')/('>') abaixo: sem
+# isso, ">= 0.1 - < 1" cai no ramo '>' isolado e perde o teto. Gate por
+# substring ('<'/'>' em bruto) antes de tentar o regex — mantém o caminho
+# antigo intocado para o caso comum sem operador (não compete com ele, mesmo
+# princípio do fallback de separador acima). '=?' aceita operador estrito ou
+# 'ou-igual', mesmo vocabulário que o resto do módulo já reconhece.
+_FAIXA_COMPOSTA = re.compile(r"^(?:>=?)?\s*([\d.,]+)\s*[-–]\s*(?:<=?)?\s*([\d.,]+)$")
 
 
 def _texto_para_float(token: str) -> Optional[float]:
@@ -135,21 +140,24 @@ def parsear_faixa(texto: str) -> Optional[FaixaConcentracao]:
     '00 – 10' -> (0.0, 10.0); '00 – 0,5' -> (0.0, 0.5);
     '0,01 – 0,008' -> (0.01, 0.008) — pares invertidos saem invertidos.
 
-    Faixa dupla-desigualdade (achado real, dazomete/DESMOLD SIKA): '>= 0.1 - < 1'
-    -> (0.1, 1.0) — checada antes das semi-abertas simples abaixo, senão o '>='
-    inicial cai no ramo de piso isolado e perde o teto.
+    Faixa composta com operador de desigualdade (achado real): '>= 0.1 - < 1'
+    -> (0.1, 1.0), dazomete/DESMOLD SIKA, os dois lados; '10 - <50' -> (10.0, 50.0),
+    Destilados de Petróleo/Fundo Zarcão (acervo Aurora), só o teto — checada antes
+    das semi-abertas simples abaixo, senão o operador inicial (quando presente)
+    cai no ramo isolado e perde o outro lado.
     """
     bruto = texto.strip()
     if not bruto:
         return None
 
-    composta = _FAIXA_COMPOSTA.match(bruto)
-    if composta is not None:
-        minimo = _texto_para_float(composta.group(1))
-        maximo = _texto_para_float(composta.group(2))
-        if minimo is None or maximo is None:
-            return None
-        return FaixaConcentracao(minimo=minimo, maximo=maximo)
+    if ">" in bruto or "<" in bruto:
+        composta = _FAIXA_COMPOSTA.match(bruto)
+        if composta is not None:
+            minimo = _texto_para_float(composta.group(1))
+            maximo = _texto_para_float(composta.group(2))
+            if minimo is None or maximo is None:
+                return None
+            return FaixaConcentracao(minimo=minimo, maximo=maximo)
 
     if bruto.startswith("<"):
         teto = _texto_para_float(bruto[1:])
