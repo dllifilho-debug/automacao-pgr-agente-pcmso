@@ -195,7 +195,27 @@ def test_parsear_faixa_composta_aceita_teto_ou_igual() -> None:
 
 
 def test_parsear_faixa_composta_nao_rouba_semi_abertas_simples() -> None:
-    # ">" /"<" isolados (sem o segundo operador) continuam pelo ramo antigo —
-    # a faixa composta exige AMBOS os lados, não intercepta o caso simples.
+    # ">"/"<" isolados (sem separador nem segundo número) continuam pelo ramo
+    # antigo — a faixa composta exige um separador hífen/en-dash entre dois
+    # números, não intercepta o caso de um único número com operador.
     assert parsear_faixa("> 1") == FaixaConcentracao(minimo=1.0, maximo=None)
     assert parsear_faixa("< 5") == FaixaConcentracao(minimo=None, maximo=5.0)
+
+
+# ---------------------------------------------------------------------------
+# parsear_faixa — faixa composta ASSIMÉTRICA: só um lado tem operador (achado
+# real, acervo Aurora, "Destilados de Petróleo"/Fundo Zarcão-Pintura Esmalte
+# Sintético, sessão claude/nice-fermat-xahkji pós-#355). Texto exato medido
+# via extrair_texto_fds sobre o PDF real. Reversão nomeada: reverter o gate
+# ">" in bruto or "<" in bruto (ou devolver _FAIXA_COMPOSTA ao formato
+# simétrico ">=?...<=?...") derruba exatamente estes 2 testes, sem tocar os
+# casos simétricos (dazomete) nem o caminho antigo sem operador.
+# ---------------------------------------------------------------------------
+
+
+def test_parsear_faixa_composta_assimetrica_so_teto_real() -> None:
+    assert parsear_faixa("10 - <50") == FaixaConcentracao(minimo=10.0, maximo=50.0)
+
+
+def test_parsear_faixa_composta_assimetrica_so_piso() -> None:
+    assert parsear_faixa(">10 - 50") == FaixaConcentracao(minimo=10.0, maximo=50.0)

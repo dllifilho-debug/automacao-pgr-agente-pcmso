@@ -184,6 +184,24 @@ def test_faixa_dupla_desigualdade_real_e_aprovada() -> None:
     assert pendencias == ()
 
 
+def test_faixa_composta_assimetrica_real_e_aprovada() -> None:
+    # Achado real (Fundo Zarcão - PINTURA ESMALTE SINTÉTICO - PINTOR, acervo
+    # Aurora): faixa '10 - <50' (só o teto com operador) reprovava no gate
+    # antes de _FAIXA_COMPOSTA aceitar operador em qualquer um dos dois lados.
+    bloco = BlocoVerbatim(
+        faixa="10 - <50",
+        membros=(
+            MembroVerbatim(
+                cas="64742-47-8",
+                nome="Destilados de Petróleo levemente tratados com hidrogênio",
+            ),
+        ),
+    )
+    aprovados, pendencias = gate_forma([bloco])
+    assert aprovados == (bloco,)
+    assert pendencias == ()
+
+
 # ---------------------------------------------------------------------------
 # Integração (marcador requer_pdfs; espelha test_extrair_texto_fds.py).
 # Composição fim-a-fim (transcrever_fds -> gate_forma -> montar_fds ->
