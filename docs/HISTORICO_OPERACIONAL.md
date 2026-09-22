@@ -9269,8 +9269,15 @@ desfazer uma mutação de teste reverteu as 27 edições não commitadas de `age
 inteiras (arquivo nunca tinha sido commitado nesta sessão) — refeitas integralmente,
 conferidas por contagem (`grep -c`) e parse YAML antes de prosseguir. Lição: mutação de
 teste em arquivo não commitado deve rodar sobre cópia isolada, nunca `git checkout` no
-arquivo real. Suíte completa: [A MEDIR — em execução no momento deste commit; número
-real entra em commit de acompanhamento].
+arquivo real. Suíte completa (`agente_medico/tests/ tests/`, árvore parada, medida após
+o commit `7921f7f`): **1296 passed, 6 skipped, 2 failed**, 799.55s — delta **+3** exato
+contra o Baseline anterior (1293 passed, mesmos 2 failed): os 3 testes novos, nenhum
+removido/renomeado. Os 2 failed são ambiente (`libreoffice-writer` ausente antes do
+`apt-get install` desta sessão — instalado depois, mas a corrida completa não foi
+refeita 3ª vez só por isso; mesma classe já registrada em sessões anteriores, confirmado
+não relacionado a esta mudança: nenhum arquivo tocado nesta sessão pertence a
+`scripts/varrer_acervo_lgpd.py`/`tests/test_varrer_acervo_lgpd.py`/
+`tests/test_cobertura_varrer_acervo.py`).
 
 **Git.** `agente_medico/protocolo/vocabulario/agentes.yaml` (+27 campos),
 `agente_medico/tests/test_vocabulario.py` (+3 testes), `docs/DECISOES_ARQUITETURAIS.md`
