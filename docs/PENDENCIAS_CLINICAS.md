@@ -1137,6 +1137,9 @@ resolve.** Porto Araras I, GHE CARPINTARIA: o PGR escreve `Poeira da madeira` (c
 (D-ARQ-64). O gabarito pede espirometria e RX tórax OIT para carpinteiro e meio oficial (4 células)
 e o motor não emite, com a pendência visível. Candidato: alias `poeira da madeira` em `termos:` de
 `poeira_de_madeira` (forma, mesma classe de 003.FH/003.FL), não implementado. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+**Implementado (mesma branch, pós-merge do PR #361):** `termos: ["Poeira da madeira"]` em
+`poeira_de_madeira`; resolve `EXATA`. Na remedição, carpinteiro e meio oficial de Porto Araras
+batem com o gabarito (espirometria e RX tórax OIT).
 ### DT-003EJ-02 — Perna `Ausente` absorvida por `ou` verdadeiro não gera pendência; matriz vai a VÁLIDA com lacuna ambiental real ainda visível em `predicados_avaliados` `[RESOLVIDA — D-ARQ-71, 003.EK]`
 
 **Origem:** 003.EJ, medição do Fascino — GHE-16 muda de `PARCIAL` para `VÁLIDA` ao resolver o alias de vibração mão-braço (D-ARQ-70), sem previsão do Arquiteto.
@@ -3099,7 +3102,7 @@ encadeado depois de `avaliar_segmentacao` em `avaliar_estrutura`; detalhe em `D-
 gate acusa o GHE 14 de Porto Araras (teste real com `monkeypatch`). No acervo atual, 0 desfecho
 muda.
 
-### DH-(sessão `claude/hopeful-newton-yjv3k7`)-01 — `comparar_matriz_gabarito` produz divergência falsa em 3 casos medidos `[ABERTA — higiene de instrumento]`
+### DH-(sessão `claude/hopeful-newton-yjv3k7`)-01 — `comparar_matriz_gabarito` produz divergência falsa em 3 casos medidos `[RESOLVIDA — mesma branch, pós-merge do PR #361]`
 
 **Origem.** Comparação Porto Araras I e Vila Brasil Escritório × gabarito (mesma branch,
 23/09/2026). 21 de 74 células divergentes são do instrumento, não do motor `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`:
@@ -3113,6 +3116,15 @@ muda.
   (12 divergências de momento). Correção candidata: aceitar espaço como separador de momento.
 
 Não mexe em conduta; distorce a leitura da fila clínica.
+
+**Resolução (mesma branch, pós-merge do PR #361, 23/09/2026).** As três correções candidatas
+implementadas: `_chaves_por_ocorrencia` (cargo repetido ganha o ordinal da ocorrência nos dois
+lados; contagens diferentes deixam o cargo sem par, visível), entrada `rx de coluna lombo sacra`
+em `_ALIAS_GRAFIA`, e `_momentos_do_rotulo` em `scripts/medir_audiometria_dem.py` (espaço vale
+como separador só se todo token for momento; compartilhado com o instrumento de DEM). Remedição:
+Porto Araras **100%** de identidade de exame (383/383; restam as 24 de periodicidade do RX,
+`DT-003EC-01`); Vila Brasil 95,2% (338/355), 0 divergência de momento, 17 subemissões — todas
+reais e já classificadas. 4 testes novos + 1 do alias abaixo, varredura inversa 5/5.
 
 ### DT-(sessão `claude/hopeful-newton-yjv3k7`)-02 — Termo de risco "produto + agente" não resolve (`Adesivo CPVC Ciclohexanona`) `[ABERTA — vocabulário, não-bloqueante]`
 

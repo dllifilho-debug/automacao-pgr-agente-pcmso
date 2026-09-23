@@ -196,3 +196,21 @@ def test_celulas_logicas_evita_zerar_audiometria_em_tabela_mesclada(tmp_path: Pa
         Momento.MR,
         Momento.DEM,
     }
+
+
+def test_virgula_esquecida_entre_momentos_e_lida() -> None:
+    # Reversão que mata: tirar o ramo de tokens por espaço de
+    # `_momentos_do_rotulo`. Gabarito Vila Brasil Escritório 26.08.26:
+    # "ECG (ADM PER, MRO)" era lido como só MR (12 divergências falsas).
+    assert parsear_momentos("ECG (ADM PER, MRO)") == frozenset(
+        {Momento.ADM, Momento.PER, Momento.MR}
+    )
+    assert rotulos_nao_reconhecidos("ECG (ADM PER, MRO)") == frozenset()
+
+
+def test_token_desconhecido_colado_nao_arrasta_momento_valido() -> None:
+    # Reversão que mata: trocar `all(...)` por `any(...)` em `_momentos_do_rotulo`
+    # — "ADM FOO" passaria a render ADM e sairia de não reconhecidos.
+    assert parsear_momentos("X (ADM FOO, MRO)") == frozenset({Momento.MR})
+    assert rotulos_nao_reconhecidos("X (ADM FOO, MRO)") == frozenset({"ADM FOO"})
+

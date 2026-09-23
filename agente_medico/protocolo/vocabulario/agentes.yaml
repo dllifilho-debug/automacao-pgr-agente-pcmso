@@ -237,6 +237,9 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: false
     protocolos_especiais: [R-RX-03, R-ESP-03]
+    # "da" em vez de "de": grafia do PGR Porto Araras I, GHE CARPINTARIA —
+    # fuzzy_recusado (D-ARQ-64) sem o alias. DT-003EJ-01, nota de 23/09/2026.
+    termos: ["Poeira da madeira"]
     # DT-003EJ-01 (RESOLVIDA): agente identificável, mas fora dos dois quadros do
     # Anexo III NR-07 — não é sílica/asbesto/carvão mineral (Quadro 1) nem PNOS
     # (Quadro 2, "não especificado de outra maneira"; madeira TEM nome próprio).

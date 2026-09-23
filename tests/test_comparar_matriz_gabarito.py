@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -17,6 +18,7 @@ from scripts.comparar_matriz_gabarito import (
     ConversaoIndisponivel,
     comparar,
     converter_para_docx,
+    extrair_motor,
     gerar_relatorio,
     linhas_escopo,
     normalizar_cargo,
@@ -171,3 +173,30 @@ def test_relatorio_carrega_o_escopo_de_cada_numero() -> None:
 
     relatorio = gerar_relatorio(c, Path("pgr.pdf"), Path("gabarito.doc"))
     assert "pgr.pdf" in relatorio and "gabarito.doc" in relatorio
+
+
+def test_grafia_lombo_sacra_sem_hifen_resolve_slug() -> None:
+    """R — apagar a entrada "rx de coluna lombo sacra" de `_ALIAS_GRAFIA` mata
+    este teste. Grafia do gabarito Porto Araras 1 (06.07.26); sem o alias, 1
+    superemissão + 1 subemissão falsas no operador de cremalheira."""
+    mapa = {"rx coluna lombo-sacra": "rx_coluna_lombo_sacra"}
+    bruta = extrair_forma_periodicidade("RX de Coluna Lombo Sacra (ADM, PER, MRO)", mapa)
+    assert resolver_slug(bruta, mapa).exame == "rx_coluna_lombo_sacra"
+
+
+def test_cargo_em_dois_ghes_nao_sobrescreve_a_primeira_ocorrencia() -> None:
+    """R — voltar `extrair_motor` a um dict chaveado só pelo cargo (última
+    ocorrência sobrescreve) mata este teste. Medido em Porto Araras I:
+    `estagiário` em ADMINISTRAÇÃO e em SESMT, 7 subemissões falsas."""
+    administracao = SimpleNamespace(
+        linhas=(SimpleNamespace(exame="exame_clinico"),), cargos=("Estagiário",)
+    )
+    sesmt = SimpleNamespace(
+        linhas=(SimpleNamespace(exame="exame_clinico"), SimpleNamespace(exame="audiometria")),
+        cargos=("Estagiário",),
+    )
+    motor = extrair_motor([administracao, sesmt])  # type: ignore[list-item]
+    assert set(motor) == {"estagiário [1/2]", "estagiário [2/2]"}
+    assert set(motor["estagiário [1/2]"]) == {"exame_clinico"}
+    assert set(motor["estagiário [2/2]"]) == {"exame_clinico", "audiometria"}
+

@@ -61,3 +61,23 @@ Artefatos do instrumento (21 células):
 
 **Nenhuma lacuna silenciosa.** Toda subemissão real tem pendência nomeada no GHE ou no documento
 (`vocabulario_ausente`, `fuzzy_recusado`), e as matrizes saem PARCIAL.
+
+## Remedição após alias + correções do instrumento
+
+`[MEDIDO — 23/09/2026, mesma branch, sobre main 182a473 + alias "Poeira da madeira" + 3 correções
+de `DH-(sessão claude/hopeful-newton-yjv3k7)-01`]`
+
+| | Porto Araras | Vila Brasil |
+|---|---|---|
+| cargos pareados | 42 | 74 |
+| células do gabarito reproduzidas | **383/383 (100%)** | 338/355 (95,2%) |
+| superemissão | 0 | 0 |
+| subemissão | 0 | 17 |
+| divergência de momentos | 0 | 0 |
+| divergência de periodicidade | 24 (RX OIT, `DT-003EC-01`) | 8 (RX OIT, `DT-003EC-01`) |
+
+Porto Araras: o `estagiário` fica sem par dos dois lados (motor lê um deles como `Estagiario.`;
+1 ocorrência × 2 no gabarito) — explícito em "não parearam", não mais subemissão falsa. Vila
+Brasil: as 17 subemissões restantes são as 10 da classe (4) de `DT-003EB-01`, as 6 do termo
+"produto + agente" e a 1 de `Produtos DomissanItários`.
+

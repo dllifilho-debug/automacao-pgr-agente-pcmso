@@ -109,7 +109,20 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
-**Baseline `[MEDIDO — 23/09/2026, gate de numeração]`:** branch `claude/hopeful-newton-yjv3k7`
+**Baseline `[MEDIDO — 23/09/2026, alias + instrumento]`:** branch `claude/hopeful-newton-yjv3k7`
+sobre `main 182a473` (merge do PR #361; alias `Poeira da madeira` em `agentes.yaml` `termos:` +
+3 correções de `comparar_matriz_gabarito`/`medir_audiometria_dem`) · **1317 passed, 6 skipped,
+0 failed** *(MEDIDO, árvore parada, 680.22s — 1312 + 5 testes novos)* · `mypy --strict` alvo
+canônico **limpo, 49 arquivos** · PROTOCOLO v94 e DECISOES v211 inalterados. Três números
+clínicos **não movidos por esta sessão**, medido nos dois lados: `python -m scripts.medir_painel`
+em `main 182a473` (worktree isolado) e no working tree final dá o mesmo `regras 25/44 (57%)`,
+`cas 78/108 (72%)`, `índice sincronizado` — alias é forma, não slug (D-ARQ-85 cl.1).
+**`[BLOQUEADOR — reportado, não ajustado]`** a tabela "Os três números" e as tiragens acima ainda
+citam `cas 50/80`; o instrumento dá `78/108` já em `182a473`, antes desta sessão (slugs de
+composição-de-FDS de `DT-003M-02(A)`, 1ª e 2ª levas, segundo o comentário do guard de inventário
+em `test_resolvedor_termos.py`). Re-tirada da tabela é decisão do Arquiteto.
+
+**Baseline anterior `[MEDIDO — 23/09/2026, gate de numeração]`:** branch `claude/hopeful-newton-yjv3k7`
 sobre `main 85003bc` (merge do PR #359; IMPLEMENTAÇÃO — gate de número de GHE saltado) ·
 **1312 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 840.72s — 1307 + 5 testes novos)* ·
 `mypy --strict` alvo canônico **limpo, 49 arquivos** · PROTOCOLO v94 (inalterado) · DECISOES

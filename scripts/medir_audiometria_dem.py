@@ -71,6 +71,22 @@ def _remover_sufixo_periodicidade(rotulo: str) -> str:
     return rotulo[: match.start()].strip()
 
 
+def _momentos_do_rotulo(rotulo: str) -> frozenset[Momento] | None:
+    """Momentos de um rótulo já separado por vírgula; None se não reconhecido.
+    Vírgula esquecida entre dois rótulos ("ECG (ADM PER, MRO)", gabarito
+    Vila Brasil Escritório 26.08.26) vale só quando TODO token separado por
+    espaço é momento — "ADM PER" vira {ADM, PER}; "PER 24 meses" continua
+    pelo corte de sufixo de periodicidade."""
+    candidato = _remover_sufixo_periodicidade(rotulo)
+    momento = _ROTULO_PARA_MOMENTO.get(candidato)
+    if momento is not None:
+        return frozenset({momento})
+    tokens = candidato.split()
+    if len(tokens) > 1 and all(t in _ROTULO_PARA_MOMENTO for t in tokens):
+        return frozenset(_ROTULO_PARA_MOMENTO[t] for t in tokens)
+    return None
+
+
 def parsear_momentos(celula: str) -> frozenset[Momento]:
     """Extrai os `Momento` reconhecidos do último grupo entre parênteses de
     uma célula de exame já isolada a uma linha (ex.: "Audiometria (ADM, PER,
@@ -83,10 +99,7 @@ def parsear_momentos(celula: str) -> frozenset[Momento]:
         return frozenset()
     momentos: set[Momento] = set()
     for rotulo in grupos[-1].split(","):
-        candidato = _remover_sufixo_periodicidade(rotulo.strip())
-        momento = _ROTULO_PARA_MOMENTO.get(candidato)
-        if momento is not None:
-            momentos.add(momento)
+        momentos |= _momentos_do_rotulo(rotulo.strip()) or frozenset()
     return frozenset(momentos)
 
 
@@ -104,8 +117,7 @@ def rotulos_nao_reconhecidos(celula: str) -> frozenset[str]:
         rotulo_stripped = rotulo.strip()
         if not rotulo_stripped:
             continue
-        candidato = _remover_sufixo_periodicidade(rotulo_stripped)
-        if candidato not in _ROTULO_PARA_MOMENTO:
+        if _momentos_do_rotulo(rotulo_stripped) is None:
             nao_reconhecidos.add(rotulo_stripped)
     return frozenset(nao_reconhecidos)
 
