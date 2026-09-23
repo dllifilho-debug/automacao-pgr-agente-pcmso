@@ -9379,3 +9379,37 @@ alvo canônico: limpo, 49 arquivos. Índice D-ARQ regenerado após a linha v210.
 **Próxima.** A declarar. Candidatas: gate de número de GHE saltado; `DT-003FG-01` (implementar
 o sinal como defesa ou dispensar); comparar a matriz de exames de Porto Araras e Vila Brasil
 contra os gabaritos (`[A MEDIR]`).
+
+## Sessão (branch `claude/hopeful-newton-yjv3k7`, continuação pós-merge do PR #359) — 23/09/2026 — IMPLEMENTAÇÃO: gate de número de GHE saltado
+
+**Origem.** Diovanni mergeou o PR #359 e mandou seguir com o gate proposto em
+`DT-(sessão claude/hopeful-newton-yjv3k7)-01`. Branch recriada de `origin/main 85003bc`.
+
+**Desenho.** `avaliar_numeracao_ghe(paginas)`, função pura em `motor/extracao_pgr.py`: números
+de todos os cabeçalhos reconhecidos por `eh_cabecalho_ghe` (conjunto, então cabeçalho repetido não
+conta); falta algum de 1 ao máximo → `Pendencia` bloqueante `numeracao_ghe_lacunar`, motivo com
+os números ausentes. Encadeado depois de `avaliar_segmentacao` no ramo 1 de `avaliar_estrutura`,
+para R78 e Floramazônia manterem o diagnóstico de segmentação. `avaliar_segmentacao`/
+`_avaliar_spans` intocados.
+
+**Medido.** Nos 29 PGRs do acervo (texto de `extrair_texto_pgr`): lacuna só em R78 e
+Floramazônia, ambos já `segmentacao_implausivel` — **0 desfecho de `avaliar_estrutura` muda**.
+
+**Testes.** 5 novos em `test_extracao_pgr.py`: lacuna vira pendência bloqueante; cabeçalho
+repetido não é lacuna; `avaliar_estrutura` encadeia o gate; segmentação precede numeração; caso
+real de Porto Araras com a forma 6 retirada por `monkeypatch` (reproduz o estado pré-PR #359, o
+gate acusa o GHE 14). Um teste passou na 1ª corrida pelo motivo errado — `_construir_paginas` é
+1-based e `{0: …}` descartava o `GHE 01` —, pego na releitura e corrigido antes da varredura.
+Varredura inversa (backup + `cp`): V1 gate sempre `None` (3 vermelhos), V2 contar cabeçalhos com
+repetição (1), V3 tirar o encadeamento (1), V4 inverter a ordem (1). **5/5 discriminantes.**
+Módulos que exercitam `avaliar_estrutura`/`preparar_ghes` (`test_extracao_pgr`,
+`test_orquestracao_pgr`, `test_web_matriz`, `test_documento_matriz`): 183 passed, nenhum teste
+existente alterado.
+
+**Verificação.** Suíte completa (árvore parada): **1312 passed, 6 skipped, 0 failed**, 840.72s —
+1307 + 5. `mypy --strict` alvo canônico: limpo, 49 arquivos. `DECISOES` v210→v211, índice
+regenerado.
+
+**Próxima.** A declarar. Restam da mesma frente: `DT-003FG-01` (implementar o sinal de nome
+truncado como defesa ou dispensar) e a matriz de exames de Porto Araras/Vila Brasil contra os
+gabaritos (`[A MEDIR]`).

@@ -4,11 +4,13 @@ from pathlib import Path
 
 import pytest
 
+from agente_medico.motor import extracao_pgr
 from agente_medico.motor.extracao_pgr import (
     _reconhece_funcao_grid_perigo_risco_fragmentado,
     _reconhece_lotacao_escala_qtd,
     avaliar_estrutura,
     avaliar_familia,
+    avaliar_numeracao_ghe,
     avaliar_segmentacao,
     detectar_psicossocial,
     eh_ancora_card_cargo,
@@ -950,3 +952,70 @@ def test_detectar_psicossocial_marcador_na_segunda_pagina() -> None:
 
 def test_detectar_psicossocial_paginas_vazias() -> None:
     assert detectar_psicossocial(["", "", ""]) is False
+
+
+# ---------------------------------------------------------------------------
+# Gate de número de GHE saltado (avaliar_numeracao_ghe) — defesa contra forma
+# de cabeçalho desconhecida; casos reais em DT-(sessão
+# claude/hopeful-newton-yjv3k7)-01.
+# ---------------------------------------------------------------------------
+
+
+def test_numeracao_ghe_lacuna_vira_pendencia_bloqueante() -> None:
+    # Reversão que mata: avaliar_numeracao_ghe devolver None sempre.
+    pendencia = avaliar_numeracao_ghe(["GHE 01 - A\nGHE 03 - C"])
+    assert pendencia is not None
+    assert pendencia.tipo == "numeracao_ghe_lacunar"
+    assert pendencia.bloqueante
+    assert "(2)" in pendencia.motivo
+
+
+def test_numeracao_ghe_cabecalho_repetido_nao_e_lacuna() -> None:
+    # Reversão que mata: comparar o nº de cabeçalhos (com repetição) ao maior
+    # número — continuação de página repete o cabeçalho (PGR Vistamérica
+    # Ver.02: 50 cabeçalhos, 19 GHEs).
+    assert avaliar_numeracao_ghe(["GHE 01 - A\nGHE 02 - B", "GHE 02 - B\nGHE 03 - C"]) is None
+
+
+def test_avaliar_estrutura_encadeia_gate_de_numeracao() -> None:
+    # Reversão que mata: tirar `or avaliar_numeracao_ghe(paginas)` do ramo 1
+    # de avaliar_estrutura.
+    rota, pendencia = avaliar_estrutura(_construir_paginas(3, {1: "GHE 01 - A", 3: "GHE 03 - C"}))
+    assert rota == "ghe"
+    assert pendencia is not None
+    assert pendencia.tipo == "numeracao_ghe_lacunar"
+
+
+def test_avaliar_estrutura_segmentacao_precede_numeracao() -> None:
+    # Reversão que mata: inverter a ordem para
+    # `avaliar_numeracao_ghe(...) or avaliar_segmentacao(...)` — R78 e
+    # Floramazônia trocariam de diagnóstico.
+    rota, pendencia = avaliar_estrutura(_construir_paginas(20, {5: "GHE 3"}))
+    assert rota == "ghe"
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
+
+
+CAMINHO_PGR_PORTO_ARARAS = Path(
+    "matrizes_originais/PGR — PORTO ARARAS I SPE EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf"
+)
+
+
+def test_numeracao_ghe_pega_porto_araras_real_sem_a_forma_6(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reproduz o estado pré-PR #359 (reconhecedor da forma 6 ausente): o gate
+    # tem de acusar o GHE 14 que sumia sem pendência. Reversão que mata:
+    # avaliar_numeracao_ghe devolver None sempre.
+    paginas_reais = extrair_texto_pgr(CAMINHO_PGR_PORTO_ARARAS)
+    monkeypatch.setattr(
+        extracao_pgr,
+        "_RECONHECEDORES_GHE",
+        tuple(
+            r
+            for r in extracao_pgr._RECONHECEDORES_GHE
+            if r is not extracao_pgr._reconhece_cabecalho_ghe_separador_antes_do_numero
+        ),
+    )
+    pendencia = avaliar_numeracao_ghe(paginas_reais)
+    assert pendencia is not None
+    assert "(14)" in pendencia.motivo
+

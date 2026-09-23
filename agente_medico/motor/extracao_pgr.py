@@ -595,7 +595,7 @@ def avaliar_estrutura(paginas: Sequence[str]) -> tuple[Rota, Pendencia | None]:
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
 
     if any(eh_cabecalho_ghe(linha) for linha in linhas):
-        return "ghe", avaliar_segmentacao(paginas)
+        return "ghe", avaliar_segmentacao(paginas) or avaliar_numeracao_ghe(paginas)
 
     if any(eh_ancora_card_cargo(linha) for linha in linhas):
         return "card", _avaliar_spans(paginas, eh_ancora_card_cargo, "card(s) cargo-based")
@@ -677,6 +677,46 @@ def _avaliar_spans(
         )
 
     return None
+
+
+def avaliar_numeracao_ghe(paginas: Sequence[str]) -> Pendencia | None:
+    """Gate de número de GHE saltado: todo número de 1 ao maior número
+    reconhecido tem de aparecer em algum cabeçalho. Cabeçalho repetido
+    (continuação de página) não é defeito.
+
+    Defesa contra forma de cabeçalho desconhecida: quando eh_cabecalho_ghe
+    falha numa forma nova, as duas rotas (parsear_arquivo e
+    recortar_blocos_ghe) usam o mesmo reconhecedor, concordam na contagem
+    errada e o GHE some sem pendência — medido em Porto Araras I (13 -> 15)
+    e Vila Brasil Escritório (só 23-26), DT-(sessão
+    claude/hopeful-newton-yjv3k7)-01. Varredura dos 29 PGRs do acervo com o
+    repertório atual: lacuna só em R78 e Floramazônia, ambos já barrados
+    antes por avaliar_segmentacao. Um adendo legítimo que traga só GHEs
+    altos também bloqueia: falso-positivo aceito por desenho (revisão
+    humana, anti-supressão vence — mesma escolha dos limiares acima)."""
+    numeros = {
+        int(m.group())
+        for pagina in paginas
+        for linha in pagina.splitlines()
+        if eh_cabecalho_ghe(linha) and (m := re.search(r"\d+", linha))
+    }
+    if not numeros:
+        return None
+    faltantes = [n for n in range(1, max(numeros) + 1) if n not in numeros]
+    if not faltantes:
+        return None
+    return Pendencia(
+        tipo="numeracao_ghe_lacunar",
+        destinatario="extracao",
+        motivo=(
+            f"Numeração de GHE com lacuna: {len(faltantes)} número(s) ausente(s) "
+            f"entre 1 e {max(numeros)} ({', '.join(str(n) for n in faltantes)}) — "
+            f"cabeçalho em forma não reconhecida ou GHE ausente do documento"
+        ),
+        bloqueante=True,
+        regra_origem="D-ARQ-57",
+        ghe_id=None,
+    )
 
 
 def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
