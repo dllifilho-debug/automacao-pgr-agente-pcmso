@@ -9413,3 +9413,38 @@ regenerado.
 **Próxima.** A declarar. Restam da mesma frente: `DT-003FG-01` (implementar o sinal de nome
 truncado como defesa ou dispensar) e a matriz de exames de Porto Araras/Vila Brasil contra os
 gabaritos (`[A MEDIR]`).
+
+## Sessão (branch `claude/hopeful-newton-yjv3k7`, continuação pós-merge do PR #360) — 23/09/2026 — MEDIÇÃO: matriz de Porto Araras I e Vila Brasil Escritório × gabarito
+
+**Origem.** Diovanni mergeou o PR #360 e mandou seguir com a matriz dos dois PGRs, `[A MEDIR]` em
+`DT-(sessão claude/hopeful-newton-yjv3k7)-01`. Branch recriada de `origin/main c1acdd8`. Sessão
+só de medição e docs: nenhum código, teste ou `.yaml` tocado.
+
+**Método.** `scripts/comparar_matriz_gabarito.py` (D-ARQ-62). Envelope do topo montado a partir do
+texto do PDF e serializado por `serializar_envelope`; confirmação preenchida na sessão — validade =
+fim da vigência (o resolvedor não converte `MM/AAAA – MM/AAAA`), assinatura assumida `true`
+(imagem). Declarado no relatório como **não** confirmação-RT.
+
+**Medido.** Porto Araras 96,8% (368/380) e Vila Brasil 95,1% (329/346) das células do gabarito
+reproduzidas; as duas matrizes PARCIAL. 74 células divergentes classificadas: 32 RX tórax OIT
+24M × 12M (`DT-003EC-01`), 21 artefato do instrumento (DH nova), 10 acuidade/audiometria em GHE
+só postural/trânsito (`DT-003EB-01` classe 4), 6 biomarcadores de solvente por termo "produto +
+agente" não resolvido (DT nova), 4 carpintaria por alias `Poeira da madeira` ausente (nota em
+`DT-003EJ-01`), 1 espirometria por `Produtos DomissanItários` não resolvido. **Nenhuma lacuna
+silenciosa**: toda subemissão real tem pendência nomeada. Relatório:
+`docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`.
+
+**Correção interna, auto-reportada.** O 1º rascunho do relatório dizia "mesma médica" na linha de
+`DT-003EC-01`; não medido (o gabarito do Fascino aberto nesta sessão é da Dra. Carolini).
+Removido antes de gravar as notas.
+
+**Docs.** `PENDENCIAS_CLINICAS.md`: notas em `DT-003EC-01`, `DT-003EB-01`, `DT-003BV-01`,
+`DT-003EJ-01` e na DT da sessão; novas `DH-(sessão claude/hopeful-newton-yjv3k7)-01` (instrumento)
+e `DT-(sessão claude/hopeful-newton-yjv3k7)-02` (termo produto + agente). Relatório novo em
+`docs/referencia/`. `DECISOES`/`PROTOCOLO`/`PAINEL` não tocados. Suíte: código idêntico ao de
+`ccffb99` (1312 passed, 6 skipped, 0 failed, medido na sessão anterior); recorte dos testes que
+leem os docs rodado nesta.
+
+**Próxima.** A declarar. Candidatas baratas: alias `poeira da madeira` (+4 células, forma) e as 3
+correções do instrumento (−21 divergências falsas). Maiores: `DT-(…)-02` (produto + agente) e as
+perguntas de CONHECIMENTO de `DT-003EC-01`/`DT-003EB-01`.
