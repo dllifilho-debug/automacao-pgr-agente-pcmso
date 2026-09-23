@@ -81,3 +81,23 @@ Porto Araras: o `estagiário` fica sem par dos dois lados (motor lê um deles co
 Brasil: as 17 subemissões restantes são as 10 da classe (4) de `DT-003EB-01`, as 6 do termo
 "produto + agente" e a 1 de `Produtos DomissanItários`.
 
+## Remedição após os aliases "produto + componente" e MEK
+
+`[MEDIDO — 23/09/2026, mesma branch, sobre main 619a6ef + 12 aliases (`DT-(sessão
+claude/hopeful-newton-yjv3k7)-02`) + 2 correções de grafia do instrumento]`
+
+| | Porto Araras | Vila Brasil |
+|---|---|---|
+| cargos pareados | 45 (pintor, encanador e meio oficial hidráulico passam a parear) | 74 |
+| identidade de exame | 383/383 (100%) | 342/355 (96,3%) |
+| superemissão | 1 (`acido_butoxiacetico_urina`, pintor — `DT-003EB-02`) | 0 |
+| subemissão | 0 | 13 |
+| divergência de periodicidade | 27, todas RX OIT (`DT-003EC-01`) | 8, todas RX OIT |
+
+Vila Brasil, 13 subemissões: 10 da classe (4) de `DT-003EB-01`, 2 de fenol urinário (bisfenol e
+polímero de fenol, deliberadamente sem alias) e 1 de `Produtos DomissanItários`.
+
+Fascino (sem gabarito rodado aqui; pipeline antes × depois, envelope de medição): **+1 linha**,
+`mek_urina` 6M no GHE PINTURA; nenhum status muda. O gabarito do Fascino não pede MEK para o
+pintor — `DT-003EB-02`.
+

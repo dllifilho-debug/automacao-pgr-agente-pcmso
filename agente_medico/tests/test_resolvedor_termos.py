@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_154_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_166_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -51,7 +51,9 @@ def test_indice_real_tem_154_entradas(indice_real: IndiceTermos) -> None:
     # forma. Guard de inventário movido junto com o dado, lição de 003.CV/003.DM.
     # 153 -> 154 (branch `claude/hopeful-newton-yjv3k7`): +1 alias, "Poeira da madeira"
     # em `poeira_de_madeira`, achado da comparação PGR Porto Araras I × gabarito.
-    assert len(indice_real.slug_por_forma) == 154
+    # 154 -> 166 (mesma branch): +12 aliases "produto + componente" e grafias de MEK,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02 (aliases por termo, decisão do Diovanni).
+    assert len(indice_real.slug_por_forma) == 166
 
 
 def test_poeira_da_madeira_resolve_exato(indice_real: IndiceTermos) -> None:
@@ -380,6 +382,10 @@ def test_vigia_pares_fuzzy_chaves_longas(indice_real: IndiceTermos) -> None:
         # aceito no gabarito, não bloqueia; se algum dia alguém marcar fuzzy_permitido
         # nesse par, esta proximidade já está documentada aqui.
         frozenset({"silicato_dicalcico", "silicato_tricalcico"}),
+        # DT-(sessão claude/hopeful-newton-yjv3k7)-02: o mesmo par, agora pelos aliases
+        # "Cimento Silicato dicálcico/tricálcico" (PGR Vila Brasil Escritório). Mesmos
+        # dois slugs, ainda sem `fuzzy_permitido` — revisado e aceito pelo mesmo motivo.
+        frozenset({"cimento_silicato_dicalcico", "cimento_silicato_tricalcico"}),
     }
     assert pares == gabarito
 
@@ -748,3 +754,32 @@ def test_r_pgr_07_par_de_sufixo_de_postura_resolve_exata_nas_duas_grafias(
         assert resolucao.confianca == Confianca.EXATA, grafia
         assert resolucao.slug == "postura_inadequada", grafia
         assert resolucao.pendencia is None, grafia
+
+
+@pytest.mark.parametrize(
+    "termo,slug_esperado",
+    [
+        ("Argamassa Cimento Portland", "cimento_portland"),
+        ("Cimento Aluminato tricálcico", "aluminato_tricalcico"),
+        ("Cimento Carbonato de cálcio", "carbonato_de_calcio"),
+        ("Cimento Ferro- aluminato de cálcio", "ferro_aluminato_de_calcio"),
+        ("Cimento Óxido de cálcio (livre)", "oxido_de_calcio"),
+        ("Cimento Óxido de magnésio (livre)", "oxido_de_magnesio"),
+        ("Cimento Silicato dicálcico", "silicato_dicalcico"),
+        ("Cimento Silicato tricálcico", "silicato_tricalcico"),
+        ("Adesivo CPVC Ciclohexanona", "ciclohexanona"),
+        ("Adesivo CPVC Metiletilcetona", "metil_etil_cetona"),
+        ("Metiletilcetona", "metil_etil_cetona"),
+        ("Massa acriílica - Hidróxido de amônia \x0024°Be\x00", "hidroxido_de_amonia"),
+    ],
+)
+def test_produto_mais_componente_resolve_por_alias(
+    indice_real: IndiceTermos, termo: str, slug_esperado: str
+) -> None:
+    # Verbatim dos PGRs Vila Brasil Escritório e Fascino (DT-(sessão
+    # claude/hopeful-newton-yjv3k7)-02). Reversão que mata cada caso: tirar o
+    # termo correspondente do `termos:` do slug em agentes.yaml.
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == slug_esperado
+

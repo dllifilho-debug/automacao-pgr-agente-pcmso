@@ -62,7 +62,11 @@ _RAIZ = Path(__file__).resolve().parents[1]
 # acervo: entre parênteses em linha própria, e após hífen na mesma linha
 # ("Operador de Betoneiro- veja com a Segurança..."). Sem este corte o cargo não
 # pareia e a divergência aparece como cargo ausente, que é falso.
-_ANOTACAO_COLADA = re.compile(r"\s*[-–(]\s*(?:incluir|veja|obs)\b.*$", re.IGNORECASE | re.DOTALL)
+# Terceira forma (Porto Araras 1, 06.07.26): a anotação vem em linha própria sem
+# parêntese nem hífen ("Pintor\nIncluir no WORD do PCMSO...").
+_ANOTACAO_COLADA = re.compile(
+    r"(?:\s*[-–(]|\s*\n)\s*(?:incluir|veja|obs)\b.*$", re.IGNORECASE | re.DOTALL
+)
 
 _PADRAO_GHE = re.compile(r"^\s*(?:GHE|SETOR)\b", re.IGNORECASE)
 _RODAPE = re.compile(
@@ -91,6 +95,9 @@ _ALIAS_GRAFIA = {
     "rx da coluna lombo-sacra": "rx coluna lombo-sacra",
     "rx de coluna lombo-sacra": "rx coluna lombo-sacra",
     "rx de coluna lombo sacra": "rx coluna lombo-sacra",
+    "metil-etil-cetona": "metil-etil-cetona (mek) na urina",
+    "metil etil cetona": "metil-etil-cetona (mek) na urina",
+    "metil-etil-cetona na urina": "metil-etil-cetona (mek) na urina",
     "av. medica de saude mental": "avaliacao medica de saude mental",
 }
 

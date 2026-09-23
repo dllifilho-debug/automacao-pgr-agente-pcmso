@@ -200,3 +200,23 @@ def test_cargo_em_dois_ghes_nao_sobrescreve_a_primeira_ocorrencia() -> None:
     assert set(motor["estagiário [1/2]"]) == {"exame_clinico"}
     assert set(motor["estagiário [2/2]"]) == {"exame_clinico", "audiometria"}
 
+
+def test_anotacao_em_linha_propria_sem_separador_e_cortada() -> None:
+    """R — voltar `_ANOTACAO_COLADA` a exigir hífen ou parêntese mata este teste.
+    Forma do gabarito Porto Araras 1 (06.07.26): "Pintor\\nIncluir no WORD..." —
+    sem o corte, pintor, encanador e meio oficial hidráulico ficavam sem par."""
+    assert normalizar_cargo("Pintor\nIncluir no WORD do PCMSO risco classificado como baixo") == "pintor"
+
+
+def test_grafias_de_mek_do_gabarito_resolvem_para_mek_urina() -> None:
+    """R — apagar as entradas de MEK de `_ALIAS_GRAFIA` mata este teste. Grafias
+    medidas nos gabaritos Porto Araras 1 e Vila Brasil (2 super + 2 sub falsas)."""
+    mapa = {"metil-etil-cetona (mek) na urina": "mek_urina"}
+    for grafia in (
+        "Metil-etil-cetona (PER 6 meses)",
+        "Metil Etil Cetona (PER 6 meses)",
+        "Metil-etil-cetona na urina (PER 6 meses)",
+    ):
+        bruta = extrair_forma_periodicidade(grafia, mapa)
+        assert resolver_slug(bruta, mapa).exame == "mek_urina", grafia
+
