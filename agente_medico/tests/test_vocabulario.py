@@ -94,6 +94,47 @@ def test_vocabulario_agentes_inclui_solventes_fds_t65() -> None:
         assert agentes[slug]["is_carcinogeno_iarc"] is False
 
 
+def test_vocabulario_agentes_enquadramento_3048_bate_anexo_iv() -> None:
+    # Dado só (DT-003BA-01 reaberta parcialmente, sem consumidor no motor) — texto
+    # oficial Decreto 3.048/1999 Anexo IV (planalto.gov.br, conferido 22/09/2026).
+    # Reversão: alterar código/tempo de qualquer entrada abaixo, ou remover o campo.
+    p = carregar(PROTOCOLO_DIR)
+    agentes = p.vocabulario.agentes
+    esperados = {
+        "benzeno": {"codigo": "1.0.3", "tempo_exposicao": "25 anos"},
+        "asbesto": {"codigo": "1.0.2", "tempo_exposicao": "20 anos"},
+        "silica": {"codigo": "1.0.18", "tempo_exposicao": "25 anos"},
+        "ruido": {"codigo": "2.0.1", "tempo_exposicao": "25 anos"},
+        "tdi": {"codigo": "1.0.19", "tempo_exposicao": "25 anos"},
+    }
+    for slug, esperado in esperados.items():
+        assert agentes[slug]["enquadramento_3048"] == esperado, slug
+
+
+def test_vocabulario_agentes_enquadramento_3048_nao_inventa_para_tolueno_e_xileno() -> None:
+    # Regressão do erro medido no motor legado (modules/agente_medico_ia.py): tolueno
+    # e xileno eram gravados como item 1.0.19 do Anexo IV — o item literal só cita
+    # "diisocianato de tolueno (TDI)" (slug próprio `tdi`), não tolueno/xileno puros.
+    # Reversão: gravar um código não-null em qualquer um dos dois.
+    p = carregar(PROTOCOLO_DIR)
+    agentes = p.vocabulario.agentes
+    assert agentes["tolueno"]["enquadramento_3048"] is None
+    assert agentes["xileno"]["enquadramento_3048"] is None
+
+
+def test_vocabulario_agentes_enquadramento_3048_tem_forma_valida() -> None:
+    # Guarda de forma: todo valor não-null é {codigo, tempo_exposicao}, ambos string
+    # não-vazia. Reversão: qualquer entrada com chave faltando ou valor vazio.
+    p = carregar(PROTOCOLO_DIR)
+    for slug, dados in p.vocabulario.agentes.items():
+        enq = dados.get("enquadramento_3048")
+        if enq is None:
+            continue
+        assert set(enq.keys()) == {"codigo", "tempo_exposicao"}, slug
+        assert enq["codigo"].strip(), slug
+        assert enq["tempo_exposicao"].strip(), slug
+
+
 def test_carregar_falha_quando_regra_referencia_slug_inexistente(tmp_path: Path) -> None:
     """
     Cria um protocolo temporário com regra referenciando exame que não

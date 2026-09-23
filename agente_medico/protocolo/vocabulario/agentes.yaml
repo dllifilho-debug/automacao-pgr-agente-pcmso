@@ -28,6 +28,14 @@ agentes:
     # predicado `altura` False em 16/16 GHEs, R-PKG-ATIVCRIT nunca disparou, 175 células do
     # gabarito assinado não emitidas. Ver docs/referencia/MEDICAO_003FF_par_T65.md §3.]
     termos: ["Trabalho em Altura", "Queda em altura"]  # NR-35 (título) e item 35.2.1
+  # enquadramento_3048: código + tempo de exposição do Decreto 3.048/1999, Anexo IV
+  # ("Classificação dos Agentes Nocivos"), quando o agente consta literalmente na
+  # tabela — dado de referência previdenciária, sem consumidor no motor (DT-003BA-01
+  # segue de pé para a frente de emissão; esta reabertura é só o dado, autorizada
+  # pelo Diovanni em 22/09/2026). null = conferido contra o Anexo IV e ausente da
+  # tabela — não inferir por analogia de classe química.
+  # [DERIVADO — Decreto 3.048/1999, Anexo IV, texto compilado, planalto.gov.br/
+  # ccivil_03/decreto/d3048compilado.htm, conferido 22/09/2026]
   vibracao_corpo_inteiro:
     tipo_ibe: null
     cas: null
@@ -35,6 +43,7 @@ agentes:
     tem_lt: true
     protocolos_especiais: [R-VIB-01]
     termos: ["Vibrações de Corpo Inteiro", "VCI"]
+    enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # item único "Vibrações" — Decreto não distingue VCI/VMB nem usa limiar numérico
   motorista_equipamento_pesado:
     tipo_ibe: null
     cas: null
@@ -48,12 +57,14 @@ agentes:
     tem_lt: true
     protocolos_especiais: []
     termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)"]
+    enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # mesmo item único de vibracao_corpo_inteiro
   vibracao:
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}
   tolueno:
     tipo_ibe: EE
     cas: "108-88-3"
@@ -61,6 +72,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: null  # conferido: tolueno puro NÃO consta no Anexo IV (só "diisocianato de tolueno (TDI)", item 1.0.19 — ver slug tdi)
   # termos: aliases de resolução (D-ARQ-50 Parte 2, motor/resolvedor_termos.py).
   # Tier 1 = grafia literal da substância na fonte normativa própria do agente:
   # Anexo I da NR-07 (Quadros 1 e 2, Portaria MTP 567/2022) para agentes de
@@ -87,6 +99,7 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Xilenos"]
+    enquadramento_3048: null  # conferido: xileno não consta no Anexo IV
   estireno:
     tipo_ibe: EE
     cas: "100-42-5"
@@ -94,6 +107,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal
   n_hexano:
     tipo_ibe: EE
     cas: "110-54-3"
@@ -101,6 +115,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("mercaptanos, n-hexano")
   dissulfeto_de_carbono:
     tipo_ibe: EE
     cas: "75-15-0"
@@ -109,6 +124,7 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Sulfeto de carbono"]
+    enquadramento_3048: {codigo: "1.0.11", tempo_exposicao: "25 anos"}  # item próprio, literal
   tricloroetileno:
     tipo_ibe: EE
     cas: "79-01-6"
@@ -116,6 +132,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: null  # conferido: tricloroetileno não consta no Anexo IV
   monoxido_de_carbono:
     tipo_ibe: EE
     cas: "630-08-0"
@@ -123,6 +140,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: null  # conferido: monóxido de carbono não consta no Anexo IV
   cianeto_de_hidrogenio:
     tipo_ibe: null
     cas: "74-90-8"
@@ -138,6 +156,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: {codigo: "1.0.8", tempo_exposicao: "25 anos"}  # literal ("Chumbo e seus compostos tóxicos")
   mercurio:
     tipo_ibe: EE
     cas: "7439-97-6"
@@ -146,6 +165,7 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Mercúrio metálico"]
+    enquadramento_3048: {codigo: "1.0.15", tempo_exposicao: "25 anos"}  # literal
   arsenio:
     tipo_ibe: EE
     cas: "7440-38-2"
@@ -154,6 +174,7 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Arsênico"]   # [INTERPRETADO — recorte do literal]
+    enquadramento_3048: {codigo: "1.0.1", tempo_exposicao: "25 anos"}  # literal
   manganes:
     tipo_ibe: null
     cas: "7439-96-5"
@@ -161,6 +182,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: {codigo: "1.0.14", tempo_exposicao: "25 anos"}  # literal
   silica:
     tipo_ibe: null
     cas: "14808-60-7"
@@ -183,12 +205,14 @@ agentes:
     # cobre duas grafias. Sem o casefold cai só a caixa-alta; sem o NFKD cai só a forma sem
     # acento. O par sufixo de `postura_inadequada` não é desta classe — ver lá.]
     termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável"]
+    enquadramento_3048: {codigo: "1.0.18", tempo_exposicao: "25 anos"}  # literal ("Sílica livre")
   asbesto:
     tipo_ibe: null
     cas: "1332-21-4"
     is_carcinogeno_iarc: true
     tem_lt: true
     protocolos_especiais: [R-RX-01]
+    enquadramento_3048: {codigo: "1.0.2", tempo_exposicao: "20 anos"}  # literal — único item do bloco químico com tempo diferente de 25 anos
   poeira_nao_classificada:
     tipo_ibe: null
     cas: null
@@ -273,6 +297,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "2.0.1", tempo_exposicao: "25 anos"}  # literal, mesmo limiar NEN>85dB(A) de classificacao_ruido.py
   espaco_confinado:
     tipo_ibe: null
     cas: null
@@ -300,6 +325,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     fuzzy_permitido: true
+    enquadramento_3048: {codigo: "3.0.1", tempo_exposicao: "25 anos"}  # bloco biológico único do Anexo IV
   piso_escorregadio:
     tipo_ibe: null
     cas: null
@@ -681,6 +707,7 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: false
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.17", tempo_exposicao: "25 anos"}  # alínea b) "misturas asfálticas contendo hidrocarbonetos policíclicos", literal
   ferro:
     # FDS Eletrodo 60.13 (fds_originais/FDS MONTADOR DE ESTRUTURAS METÁLICAS.pdf), >50%
     # (ferro elementar do arame de solda). is_carcinogeno_iarc=false [DERIVADO — não
@@ -742,6 +769,7 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: null
     protocolos_especiais: [R-PKG-BZ]
+    enquadramento_3048: {codigo: "1.0.3", tempo_exposicao: "25 anos"}  # literal
   cadmio:
     # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): cádmio e comp. inorgânicos → cádmio na urina
     # is_carcinogeno_iarc=true (IARC grupo 1); inerte no motor atual (só Componente-FDS consome);
@@ -751,6 +779,7 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: false
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.6", tempo_exposicao: "25 anos"}  # literal
   fluoretos:
     # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): flúor, HF e fluoretos inorgânicos → fluoreto urinário
     tipo_ibe: SC
@@ -776,6 +805,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     termos: ["Cromo hexavalente (compostos solúveis)"]
+    enquadramento_3048: {codigo: "1.0.10", tempo_exposicao: "25 anos"}  # ressalva: o Decreto não distingue valência ("Cromo e seus compostos tóxicos") — a NR-07 distingue, o Decreto não
   cobalto:             # R-BIO-04, Quadro 1 (IBE/EE): cobalto e comp. inorg. → cobalto na urina
     tipo_ibe: EE
     cas: "7440-48-4"
@@ -839,6 +869,7 @@ agentes:
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
     termos: ["1,3 butadieno"]
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("1-3 butadieno")
   hdi:
     tipo_ibe: EE
     cas: "822-06-0"
@@ -874,6 +905,7 @@ agentes:
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
     termos: ["Tolueno diisocianato"]   # [INTERPRETADO — recorte do literal]
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("diisocianato de tolueno (TDI)") — distinto do slug tolueno, que NÃO consta
   butoxietanol_2:
     tipo_ibe: EE
     cas: "111-76-2"
@@ -887,6 +919,7 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.8", tempo_exposicao: "25 anos"}  # alínea d) do item 1.0.8, literal
   ciclohexanona:
     tipo_ibe: EE
     cas: "108-94-1"
@@ -899,6 +932,7 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    enquadramento_3048: null  # conferido: clorobenzeno não consta no Anexo IV (item 1.0.9 "Cloro" lista organoclorados/PCB/VCM/policloropreno/clorofórmio/tetracloreto de carbono — não clorobenzeno)
   etoxietanol:
     tipo_ibe: EE
     cas: null   # CAS ausente no Anexo I [INCERTO — não inventar]
@@ -956,6 +990,7 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo II, literal
   tetracloroetileno:
     tipo_ibe: EE
     cas: "127-18-4"

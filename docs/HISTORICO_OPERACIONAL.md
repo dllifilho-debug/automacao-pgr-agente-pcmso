@@ -9203,3 +9203,90 @@ aplicação em D-ARQ-34 P1, nenhuma cláusula alterada); `INDICE_DARQ.md` regene
 `mypy --strict` alvo canônico limpo, 49 arquivos. `test_gerar_indice_darq.py`+
 `test_medir_painel.py`: 15 passed. Commit local pendente no momento deste registro.
 Push depende de autorização por turno (mesma regra das duas fatias anteriores).
+
+## Sessão (branch `claude/vigilant-faraday-d8a4wn`, número não atribuído) — 22/09/2026 — CONHECIMENTO → ARQUITETURA → DADO: reabertura parcial de `DT-003BA-01` (Decreto 3.048/1999 Anexo IV — só dado)
+
+**Origem.** Diovanni pediu para estudar `modules/` (motor legado) e identificar ideias
+aproveitáveis para o motor novo, mesmo sabendo que a execução legada errava. Cruzamento
+contra os docs vivos mostrou que a maior parte já tinha veredito registrado (003.F/003.G,
+"leitura do legado como norma, não portar — D-ARQ-09"): `modulo_engenharia.py` já virou
+D-ARQ-33/34/36 (motor irmão + gate-CAS); `modulo_auditor_v1_1.py` confirmado paradigma
+oposto (cargo→matriz); `agente_medico_ia.py` (hardcode serralheiro→cromo) já marcado
+obsoleto em `PROTOCOLO_AGENTE_MEDICO.md` R-GHE-05. Duas ideias ficaram genuinamente
+abertas para sessão futura (`DT-003FG-01` — detector de distribuição suspeita de cargos
+por GHE; achado novo `agente_medico_nr7.py::auditar_exames_ghe` — auto-auditoria matriz
+gerada×esperada), registradas mas **não tocadas nesta sessão**, por pedido explícito do
+Diovanni ("vamos fazendo um por vez").
+
+**Foco escolhido.** Diovanni apontou `modules/modulo_esocial_xml.py` de memória
+("comparava Decreto 3.048 e NR-07"), mas o cruzamento real mostrou que a comparação
+mora em `modulo_engenharia.py::DICIONARIO_CAS`/`DICIONARIO_FIS_BIO` — uma ficha por
+agente com 5 colunas simultâneas (`nr15_lt`, `nr09_acao`, `nr07_ibe`, `dec_3048`,
+`esocial_24`). A ponte FDS↔NR-07↔matriz de exames (o que Diovanni queria entender) já
+está construída no motor novo (`tipo_ibe`/`ibmp`/`momento_coleta`, D-ARQ-33/34/36,
+R-BIO-04) — confirmado rodando a suíte completa nesta sessão: **1293 passed, 6 skipped,
+2 failed** (os 2 falhos são ambiente, `libreoffice-writer` ausente no container antes de
+`apt-get install`, mesma classe já registrada em sessões anteriores; zero falha em
+qualquer teste de `resolvedor.py`/`materialidade.py`/`composicao.py`/`estagios/riscos.py`).
+O que faltava era só a coluna previdenciária (Dec. 3.048) — Diovanni autorizou reabrir
+essa fatia específica de `DT-003BA-01`, mantendo eSocial/colunas de engenharia FORA
+(a DT original segue de pé para essas duas).
+
+**Bloqueio de rede e contorno.** Egresso desta sessão bloqueia `planalto.gov.br`/
+`gov.br` por política de organização (`EGRESS_BLOCKED`, dois domínios testados, não
+contornado — reportado, não insistido, por instrução do runbook do proxy). Diovanni
+subiu o PDF oficial (Decreto 3.048/1999, texto compilado, recortado só no Anexo IV —
+9 páginas) pelo upload do chat; lido com `Read` (pages), após instalar `poppler-utils`
+(pacote ausente no container, mesma classe de gap de ambiente do `pdfplumber`/
+`streamlit`, também instalados nesta sessão).
+
+**Achado — o `dec_3048` do legado errava.** Cruzamento item a item do Anexo IV oficial
+contra os 27 slugs do vocabulário que citam agente nomeado: tolueno e xileno eram
+gravados pelo legado como item "1.0.19, 25 anos" — o item 1.0.19 (Grupo I) cita
+literalmente "diisocianato de tolueno (TDI)", não tolueno/xileno puros (slug `tdi`
+recebe o enquadramento correto). `dissulfeto_de_carbono` era "Não Enquadrado" no
+legado; consta literalmente no item 1.0.11. `vibracao_mao_braco`/
+`vibracao_corpo_inteiro` — o legado tratava como itens distintos com limiar NR-15
+(m/s²); o Decreto tem um item único "2.0.2 Vibrações", sem distinguir localização
+nem citar limiar numérico (só a atividade "perfuratrizes e marteletes pneumáticos”).
+Detalhe completo (tabela dos 27 slugs, código, tempo, ressalvas) na nota de aplicação
+em `D-ARQ-12`, `DECISOES_ARQUITETURAIS.md`.
+
+**Decisão de escopo.** Campo `enquadramento_3048` em `agentes.yaml` — **dado puro, sem
+consumidor no motor**: nenhum campo novo em `Risco`, nenhuma emissão, nenhuma `R-*`
+tocada. Mesma disciplina de D-ARQ-33 (dado entra, consumidor é decisão futura separada).
+
+**Verificação.** Recorte tocado (`test_vocabulario.py`+`test_resolvedor.py`+
+`test_protocolo_carregamento.py`+`test_predicados.py`+`test_hidratacao.py`): **118
+passed**. `test_gerar_indice_darq.py`: 6 passed (índice regenerado). `mypy --strict`
+alvo canônico: limpo, 49 arquivos, delta-zero. 3 testes novos com reversão nomeada
+(`test_vocabulario.py`): valores fixos por amostra, regressão específica tolueno/
+xileno=null (mata se qualquer um receber código não-null), guarda de forma. Varredura
+inversa executada em cópia isolada (`/tmp`, nunca no arquivo real) — mutar
+`tolueno.enquadramento_3048` para não-null derruba exatamente o teste de regressão
+esperado. **Incidente de processo, auto-reportado:** um `git checkout --` usado para
+desfazer uma mutação de teste reverteu as 27 edições não commitadas de `agentes.yaml`
+inteiras (arquivo nunca tinha sido commitado nesta sessão) — refeitas integralmente,
+conferidas por contagem (`grep -c`) e parse YAML antes de prosseguir. Lição: mutação de
+teste em arquivo não commitado deve rodar sobre cópia isolada, nunca `git checkout` no
+arquivo real. Suíte completa (`agente_medico/tests/ tests/`, árvore parada, medida após
+o commit `7921f7f`): **1296 passed, 6 skipped, 2 failed**, 799.55s — delta **+3** exato
+contra o Baseline anterior (1293 passed, mesmos 2 failed): os 3 testes novos, nenhum
+removido/renomeado. Os 2 failed são ambiente (`libreoffice-writer` ausente antes do
+`apt-get install` desta sessão — instalado depois, mas a corrida completa não foi
+refeita 3ª vez só por isso; mesma classe já registrada em sessões anteriores, confirmado
+não relacionado a esta mudança: nenhum arquivo tocado nesta sessão pertence a
+`scripts/varrer_acervo_lgpd.py`/`tests/test_varrer_acervo_lgpd.py`/
+`tests/test_cobertura_varrer_acervo.py`).
+
+**Git.** `agente_medico/protocolo/vocabulario/agentes.yaml` (+27 campos),
+`agente_medico/tests/test_vocabulario.py` (+3 testes), `docs/DECISOES_ARQUITETURAIS.md`
+(nota de aplicação em D-ARQ-12 + changelog v209), `docs/INDICE_DARQ.md` (regenerado),
+este bloco. `PENDENCIAS_CLINICAS.md` não tocado (DT-003BA-01 vive em
+`DECISOES_ARQUITETURAIS.md`, não lá). `PROTOCOLO_AGENTE_MEDICO.md` não tocado — nenhuma
+regra clínica criada/alterada. Push depende de autorização explícita por turno.
+
+**Próxima.** A declarar pelo Diovanni. Candidatas registradas nesta sessão: `DT-003FG-01`
+(detector de distribuição suspeita de cargos por GHE) e o achado novo de
+`agente_medico_nr7.py::auditar_exames_ghe` (auto-auditoria matriz gerada×esperada) —
+ambas explicitamente adiadas, "uma de cada vez".
