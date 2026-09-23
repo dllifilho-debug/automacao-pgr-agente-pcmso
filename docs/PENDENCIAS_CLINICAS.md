@@ -2363,7 +2363,7 @@ de risco).
 `vocabulario_ausente` que suprime exame — o segundo é decidível: o predicado que ficou `False`
 por termo não resolvido é rastreável. Nomeada por `R-PGR-07` (003.FF), que expõe sem resolver.
 
-### DT-003FG-01 — Detector de distribuição suspeita de cargos por GHE `[ABERTA — ideia medida, não-bloqueante]`
+### DT-003FG-01 — Detector de distribuição suspeita de cargos por GHE `[ABERTA — MEDIDA 23/09/2026: critérios herdados refutados, substituto proposto; decisão do Arquiteto]`
 
 **Origem.** `modules/modulo_pcmso.py` em `origin/claude/eloquent-mcnulty-e0cdc2`, commit `43a61bf`
 (07/05/2026), na linhagem de história desconexa varrida por `DH-003FE-02`. Confirmado ausente de
@@ -2390,6 +2390,37 @@ distribuição presente e implausível**: um parse que atribui todos os cargos a
 sem pendência. Se entrar, entra medido contra o acervo pareado (qual o maior nº de cargos por GHE
 observado num gabarito assinado? qual a taxa real de GHEs com lista idêntica?), não com os
 limiares 10 e 30% herdados, que não têm proveniência conhecida. Faceta de `DT-003L-01`.
+
+**Medição `[MEDIDO — 23/09/2026, branch claude/hopeful-newton-yjv3k7, sobre main 9782074]`.**
+Relatório completo, com método e números por arquivo:
+`docs/referencia/MEDICAO_DT003FG01_distribuicao_cargos_ghe.md`. Nenhum código tocado.
+
+- **Critério (a) ≥ 10 cargos/GHE — REFUTADO.** Nas 16 matrizes assinadas de layout `GHE NN`,
+  máximo **19** cargos/GHE e **4 de 16** matrizes com algum GHE ≥ 10, todos administrativos
+  legítimos (Vila Brasil ADMINISTRAÇÃO 01 = 19; Porto Araras 1 ADMINISTRAÇÃO = 16; Dinamica
+  ADMINISTRAÇÃO = 15). Em 5 das 18 matrizes de layout `SETOR:` o agrupamento é plano (28 a 63
+  cargos): a matriz assinada nem sempre é organizada por GHE.
+- **Critério (b) > 30% dos GHEs com lista idêntica — não discrimina.** Máximo assinado **28,6%**
+  (CMO Vistamerica, 8/28), 25,6% (CMO Varandas Bueno). Repetição legítima: produção dividida em
+  GHEs por frente, mesmos cargos. Folga de 1,4 p.p. até o limiar herdado.
+- **Lado do motor.** Rota determinística (`preparar_ghes`, clientes offline) sobre 29 PGRs do
+  acervo: 26 bloqueiam antes da distribuição (14 `familia_nao_medida`→LLM, 8
+  `segmentacao_implausivel`, 3 `pgr_cargo_based`, 1 rota card) e **3 atravessam** (Fascino, Vila
+  Brasil Escritório, Porto Araras I). O "tudo num balde" que motivou a DT já é coberto, na
+  **segmentação**, pelo gate anti-Vistamérica (D-ARQ-57 peça 2): a transcrição é por bloco.
+- **O que discrimina de fato (n pequeno).** Porto Araras atravessa **com parse errado** (DT nova
+  abaixo). Dois sinais separam esse parse ruim dos bons e dos gabaritos:
+  cargo terminado em preposição (gabaritos **0/1421**; Fascino+Vila Brasil **0/46**; Porto Araras
+  **26/51**) e cargo repetido no mesmo GHE (gabaritos **1** — duplicata real do documento humano;
+  bons **0**; Porto Araras **6**). **Limite:** n = 1 parse ruim e n = 2 bons. Não pega
+  truncamento sem preposição final (`Analista`, `Vigia`) nem GHE perdido.
+
+**Proposta para decisão do Arquiteto.** Descartar (a) e (b) como critérios. Se o detector entrar,
+ele entra como **sinal de truncamento de nome de cargo** (preposição final e/ou repetição no mesmo
+GHE → `Pendencia` nomeada), não como sinal de distribuição. É forma de parse, não regra clínica
+(sem `R-*`). A reversão que deixaria o teste vermelho é remover o predicado da composição de
+pendências de `preparar_ghes`; o caso real é Porto Araras. A DT não fecha por esta nota:
+fecha pela decisão (implementar o sinal substituto ou `DISPENSADA`, com o motivo).
 
 ### DH-003FH-01 — `D-ARQ-84` cl.1(c) não foi aplicada a três blocos de sessão consecutivos `[ABERTA — higiene de método]`
 
@@ -2969,3 +3000,38 @@ Os 3 casos reais viraram fixture direta, sem dado inventado: `parsear_faixa("15 
 **Nota (mesma sessão, achado do acervo Aurora pós-PR #355) — a exigência de "ambos os lados" era estreita demais, corrigida na mesma DT.** Diovanni subiu FDS reais de outro PGR ("CMO Residencial Aurora") ao acervo (`fds_originais/`, commit `683f5f7`). `extrair_texto_fds` sobre `Fundo Zarcão- PINTURA ESMALTE SINTÉTICO- PINTOR.pdf` mostra `"Destilados de Petróleo levemente tratados com hidrogênio 10 - <50 64742-47-8"` — faixa `"10 - <50"`: hífen presente, mas só o TETO tem operador (`"<50"`), o piso é número puro (`"10"`). O regex original (`^>=?...<=?...$`, ambos obrigatórios) não casava — `_texto_para_float("10 ")` funcionava mas o resto da string não batia o padrão inteiro, devolvendo `None` sem sequer tentar o split. Generalizado para `^(?:>=?)?\s*([\d.,]+)\s*[-–]\s*(?:<=?)?\s*([\d.,]+)$` — cada lado com operador **opcional independente** — e a checagem só entra quando `">" in bruto or "<" in bruto` (gate por substring, barato), preservando intocado o caminho antigo para o caso sem nenhum operador (mesmo princípio "não competir com o separador primário" já usado no fallback de espaço/`" a "`). 2 testes unitários novos (`"10 - <50"` → `(10.0, 50.0)`; `">10 - 50"` → `(10.0, 50.0)`, simétrico ao achado mas com piso — não medido em FDS real, mas mesma classe de forma, coberto pelo mesmo regex) + 1 no gate com o bloco real completo (CAS 64742-47-8). Varredura inversa: reverter só o regex para a forma simétrica antiga derruba exatamente os 3 testes novos desta nota, preserva os 5 da 1ª leva (dazomete) e todo o resto da suíte.
 
 **Status:** RESOLVIDA (as duas levas). `[MEDIDO — recorte `test_transcricao_fds.py`+`test_transcritor_fds.py`+`test_montagem_verbatim.py`+`test_revisao_verbatim.py`+`test_orquestracao_fds.py`+`test_transcritor_gemini.py`+`test_cli_fds.py`+`test_web_fds.py`+`test_web_matriz.py`+`test_composicao_propaga_pendencias.py`+`test_integracao_composicao_fase_c.py`: 164 passed, 3 skipped; varredura inversa da 1ª leva 4/5 e da 2ª leva 3/3 discriminantes confirmados; `mypy --strict` alvo canônico limpo; suíte completa em `docs/HISTORICO_OPERACIONAL.md` (bloco desta sessão)]`
+
+### DT-(sessão `claude/hopeful-newton-yjv3k7`)-01 — Porto Araras I atravessa a rota determinística com GHE perdido e cargos truncados, sem pendência `[ABERTA — achado medido, anti-supressão]`
+
+**Origem.** Medição de `DT-003FG-01` (mesma sessão). `preparar_ghes` com clientes offline sobre
+`matrizes_originais/PGR — PORTO ARARAS I SPE EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf` (par 6 de
+`PAREAMENTO_ACERVO.md`, confiança ALTA) devolve 15 GHEs, 51 cargos e **nenhuma pendência**.
+Conferido contra o texto do PDF (`pdfplumber`, 102 páginas) e contra o gabarito pareado
+(`MATRIZ DE EXAMES(ATUALIZAÇÃO)PORTO ARARAS 1 … 06.07.26`).
+
+**Medido.**
+- **(a) GHE perdido, sem sinal.** O PDF tem 16 cabeçalhos de GHE; `GHE - 14 PINTURA` (pág. 66,
+  cargo `Pintor`) tem o número depois do hífen. `eh_cabecalho_ghe("GHE - 14 PINTURA")` → `False`;
+  `"GHE 13 - INSTALAÇÕES HIDROSSANITÁRIAS"` e `"GHE 15 - PORTARIA"` → `True`. As duas rotas
+  (`parsear_arquivo` e `recortar_blocos_ghe`) usam o mesmo reconhecedor, então as duas contam 15,
+  `len(candidatos) == len(blocos)` passa e a rota determinística é aceita. O `Pintor` — no
+  gabarito com acetona, tolueno, metiletilcetona e xileno — sai da matriz sem pendência. É a
+  classe D-ARQ-22 / anti-supressão (D-ARQ-31/35): trabalhador sem matriz, documento com aparência
+  de completo.
+- **(b) Nomes de cargo truncados.** 26/51 cargos terminam em preposição (`Operador de`,
+  `Meio Oficial de`, `Encarregado de` ×5, `Técnico de Segurança do`, …), outros saem cortados sem
+  preposição (`Analista`, `Engenheiro`, `Vigia` ×2). O parser da família Consciente lê a
+  continuação pela banda `x0` medida no Fascino (D-ARQ-65 cl.5); a geometria de Porto Araras
+  difere. Mesma classe de `DH-003EW-02` (TOCTAO), com uma diferença: lá o sanity-check recusava a
+  família, aqui não recusa.
+
+**Não medido nesta sessão `[A MEDIR]`:** o que a matriz final de Porto Araras emite a jusante
+(exige envelope do topo; `comparar_matriz_gabarito` não foi rodado); se `"GHE - NN"` aparece em
+outros PGRs do acervo; a geometria da célula de cargo de Porto Araras.
+
+**O que a resolução exige.** Duas decisões separadas, do Arquiteto: (1) reconhecedor para
+`"GHE - NN TÍTULO"` em `_RECONHECEDORES_GHE` (extensão medida, molde DT-003CM-01), ou gate que
+detecte número de GHE saltado (13 → 15) como pendência; (2) Porto Araras vira família medida
+(molde D-ARQ-65) ou passa a ser recusado como o TOCTAO. O sinal substituto proposto em
+`DT-003FG-01` teria bloqueado (b), **não** (a).
+

@@ -9290,3 +9290,43 @@ regra clínica criada/alterada. Push depende de autorização explícita por tur
 (detector de distribuição suspeita de cargos por GHE) e o achado novo de
 `agente_medico_nr7.py::auditar_exames_ghe` (auto-auditoria matriz gerada×esperada) —
 ambas explicitamente adiadas, "uma de cada vez".
+
+## Sessão (branch `claude/hopeful-newton-yjv3k7`, número não atribuído) — 23/09/2026 — MEDIÇÃO: `DT-003FG-01` (distribuição de cargos por GHE) contra o acervo
+
+**Origem.** Diovanni escolheu `DT-003FG-01` entre as duas candidatas deixadas pela sessão
+`claude/vigilant-faraday-d8a4wn`, com a instrução "começa pela medição". Branch sobre `main
+9782074` (merge do PR #357). Sessão só de medição e docs: nenhum código de produção, teste ou
+`.yaml` tocado.
+
+**Ambiente.** Container sem `pdfplumber`/`python-docx`/`libreoffice-writer`: instalados
+(`pip install -r requirements.txt -r requirements-dev.txt`, depois de reinstalar `cryptography`
+fora do pacote Debian; `apt-get install libreoffice-writer`). Mesma classe de lacuna de ambiente
+já registrada nas sessões anteriores.
+
+**Medido.** Relatório completo em `docs/referencia/MEDICAO_DT003FG01_distribuicao_cargos_ghe.md`.
+- Gabaritos: 41 Word → 34 matrizes (6 não-matriz excluídas, 1 duplicata), 455 grupos, 1421 cargos.
+  Critério (a) herdado (≥ 10 cargos/GHE) **refutado**: máximo 19 em layout GHE, 4/16 matrizes
+  corretas disparariam. Critério (b) (> 30% listas idênticas) **não discrimina**: máximo assinado
+  28,6%, repetição legítima (produção por frente).
+- Motor (rota determinística, clientes offline, 29 PGRs): 26 bloqueiam antes, 3 atravessam.
+  **Porto Araras I atravessa com parse errado e sem pendência** — GHE `GHE - 14 PINTURA` não
+  reconhecido (cargo `Pintor` some) e 26/51 cargos truncados. Registrado como
+  `DT-(sessão claude/hopeful-newton-yjv3k7)-01`.
+- Sinais que discriminam no acervo medido: cargo terminado em preposição (0/1421 gabarito, 0/46
+  parses bons, 26/51 Porto Araras) e cargo repetido no mesmo GHE (1, 0, 6). n = 1 parse ruim.
+
+**Correção interna, auto-reportada.** A 1ª tabulação usou o parser da 1ª passada, sem o conserto
+do layout GPL (1ª coluna vazia) nem a deduplicação, e deu 1228 cargos / 360 grupos / 15 grupos
+≥ 10. Os números corretos (1421 / 455 / 19) foram recalculados com o parser corrigido antes de ir
+para os docs. As conclusões não mudam.
+
+**Docs.** `PENDENCIAS_CLINICAS.md`: nota de medição e proposta em `DT-003FG-01` (header
+atualizado, segue ABERTA até a decisão) e DT nova `DT-(sessão claude/hopeful-newton-yjv3k7)-01`.
+Relatório novo em `docs/referencia/`. `DECISOES_ARQUITETURAIS.md`, `PROTOCOLO_AGENTE_MEDICO.md` e
+`PAINEL_ESTADO.md` não tocados: nenhuma decisão, regra ou número clínico se move (D-ARQ-85
+cl.1). A tabela do painel não foi re-tirada.
+
+**Próxima.** Decisão do Arquiteto/Diovanni: (1) `DT-003FG-01`: implementar o sinal substituto
+(truncamento de nome de cargo) ou dispensar; (2) `DT-(sessão claude/hopeful-newton-yjv3k7)-01`:
+reconhecedor `"GHE - NN"` / gate de número de GHE saltado e o destino da família Porto Araras.
+Pela gravidade (cargo exposto a solvente some sem sinal), a (2) vem antes da (1).
