@@ -3008,7 +3008,7 @@ Os 3 casos reais viraram fixture direta, sem dado inventado: `parsear_faixa("15 
 
 **Status:** RESOLVIDA (as duas levas). `[MEDIDO — recorte `test_transcricao_fds.py`+`test_transcritor_fds.py`+`test_montagem_verbatim.py`+`test_revisao_verbatim.py`+`test_orquestracao_fds.py`+`test_transcritor_gemini.py`+`test_cli_fds.py`+`test_web_fds.py`+`test_web_matriz.py`+`test_composicao_propaga_pendencias.py`+`test_integracao_composicao_fase_c.py`: 164 passed, 3 skipped; varredura inversa da 1ª leva 4/5 e da 2ª leva 3/3 discriminantes confirmados; `mypy --strict` alvo canônico limpo; suíte completa em `docs/HISTORICO_OPERACIONAL.md` (bloco desta sessão)]`
 
-### DT-(sessão `claude/hopeful-newton-yjv3k7`)-01 — Porto Araras I atravessa a rota determinística com GHE perdido e cargos truncados, sem pendência `[RESOLVIDA — IMPLEMENTAÇÃO, mesma branch, 23/09/2026; gate de número saltado segue como proposta]`
+### DT-(sessão `claude/hopeful-newton-yjv3k7`)-01 — Porto Araras I atravessa a rota determinística com GHE perdido e cargos truncados, sem pendência `[RESOLVIDA — IMPLEMENTAÇÃO, mesma branch, 23/09/2026; gate de número saltado IMPLEMENTADO em seguida]`
 
 **Origem.** Medição de `DT-003FG-01` (mesma sessão). `preparar_ghes` com clientes offline sobre
 `matrizes_originais/PGR — PORTO ARARAS I SPE EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf` (par 6 de
@@ -3063,4 +3063,11 @@ detecte número de GHE saltado (13 → 15) como pendência; (2) Porto Araras vir
   e Floramazônia, já bloqueados por `segmentacao_implausivel`: zero bloqueio novo no acervo. É
   defesa para forma futura desconhecida (o reconhecedor falha e as duas rotas concordam no erro).
   Decisão do Arquiteto.
+
+**Nota (mesma branch, pós-merge do PR #359, 23/09/2026) — gate implementado.** Diovanni mandou
+seguir com o gate. `avaliar_numeracao_ghe` (pendência bloqueante `numeracao_ghe_lacunar`),
+encadeado depois de `avaliar_segmentacao` em `avaliar_estrutura`; detalhe em `D-ARQ-57`
+(andamento) e no HISTORICO. Reproduzindo o estado pré-PR #359 (forma 6 fora do repertório), o
+gate acusa o GHE 14 de Porto Araras (teste real com `monkeypatch`). No acervo atual, 0 desfecho
+muda.
 
