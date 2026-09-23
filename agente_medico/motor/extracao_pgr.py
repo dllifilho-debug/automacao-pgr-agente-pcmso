@@ -104,9 +104,27 @@ def _reconhece_cabecalho_informacoes_cargos_funcoes(linha: str) -> bool:
     ) is not None
 
 
+def _reconhece_cabecalho_ghe_separador_antes_do_numero(linha: str) -> bool:
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-01: separador ENTRE "GHE" e o
+    # número, título obrigatório — "GHE - 14 PINTURA" (Porto Araras I, pág. 66)
+    # e "GHE\x00 01 \x00 ADMINISTRAÇÃO 01" (Vila Brasil Escritório, GHEs 01–22,
+    # glifo-hífen como NUL, mesma classe de 003.DS). Sem esta forma os dois
+    # documentos perdiam 1 e 22 GHEs sem pendência. Separada da forma padrão
+    # porque lá título sem separador ("GHE 22 SECONC") não é cabeçalho;
+    # aqui o separador antes do número já ancora a linha. Varredura dos 43 PDFs
+    # do acervo: só casa os 23 cabeçalhos-alvo nos PGRs.
+    linha_normalizada = linha.strip()
+    if len(linha_normalizada) > 80:
+        return False
+    return re.fullmatch(
+        r"GHE\s*[-\x00]\s*\d+(?:\s*[-\x00]\s*|\s+)\S.*", linha_normalizada
+    ) is not None
+
+
 _RECONHECEDORES_GHE: tuple[Callable[[str], bool], ...] = (
     _reconhece_cabecalho_ghe_padrao,
     _reconhece_cabecalho_informacoes_cargos_funcoes,
+    _reconhece_cabecalho_ghe_separador_antes_do_numero,
 )
 
 
@@ -116,7 +134,7 @@ def eh_cabecalho_ghe(linha: str) -> bool:
     repertório _RECONHECEDORES_GHE casar a linha.
 
     Substitui a âncora fixa _ANCORA_GHE = "SETOR/FUNÇÃO" (n=1, medição
-    003.BM/003.BL). O repertório hoje cobre 5 formas de cabeçalho:
+    003.BM/003.BL). O repertório hoje cobre 6 formas de cabeçalho:
     1. "GHE 12" (Viverde)
     2. "GHE 12 - TÍTULO" (Vistamérica/CMO/Seconci/TPB/AURO)
     3. "INVENTÁRIO DE RISCO GHE 12" (ALT T65/EURO)
@@ -133,6 +151,9 @@ def eh_cabecalho_ghe(linha: str) -> bool:
        (avaliar_segmentacao: bloco 2 mede 41,7% > _LIMIAR_DENSIDADE_PCT) —
        revisão humana BY DESIGN, mesma classe do Cjr (decisão 003.DD,
        V2 de 003.DC), não um bug a corrigir.
+    6. "GHE - 14 TÍTULO" / "GHE\x00 01 \x00 TÍTULO" (Porto Araras I, Vila
+       Brasil Escritório) — separador antes do número, título obrigatório;
+       DT-(sessão claude/hopeful-newton-yjv3k7)-01.
 
     Estruturado como tupla de funções linha->bool em disjunção para
     extensão futura (novas formas de cabeçalho) sem tocar o consumidor

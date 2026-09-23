@@ -363,3 +363,105 @@ def test_invariante_fechamento_237_linhas_de_risco(ghes_fascino: tuple[GHEVerbat
     divergência é BLOQUEADOR (reportar o par, não ajustar)."""
     total = sum(len(g.riscos) for g in ghes_fascino)
     assert total == 237
+
+
+# ---------------------------------------------------------------------------
+# DT-(sessão claude/hopeful-newton-yjv3k7)-01 — separador antes do número no
+# cabeçalho, cargo sem CBO e CBO no meio da entrada. Verbatim de Porto Araras I
+# e Vila Brasil Escritório.
+# ---------------------------------------------------------------------------
+
+
+def _pagina_com_celula_cargo(
+    cabecalho: tuple[str, ...], valor: tuple[str, ...]
+) -> tuple[PalavraPDF, ...]:
+    ancora = tuple(_p(t, 10.0 + 20.0 * i, 10.0) for i, t in enumerate(cabecalho))
+    celula = tuple(_p(t, 279.2 + 30.0 * i, 50.0) for i, t in enumerate(valor))
+    return (
+        *ancora,
+        _p("PERIGO", 113.1, 20.0),
+        _p("GRUPO", 57.0, 25.0),
+        _p("FONTE", 177.5, 25.0),
+        _p("AGRAVO", 296.8, 25.0),
+        _p("Cargo", 58.5, 50.0),
+        _p("/", 68.0, 50.0),
+        _p("Função", 72.0, 50.0),
+        *celula,
+    )
+
+
+def test_titulo_com_separador_antes_do_numero() -> None:
+    # Reversão que mata: tirar o fallback _PADRAO_TITULO_ANCORA_SEPARADOR_ANTES
+    # de _extrair_titulo_ancora (nome sai "").
+    pagina = _pagina_com_celula_cargo(("GHE", "-", "14", "PINTURA"), ("Pintor",))
+    ghes = parsear_paginas([pagina])
+    assert [g.nome for g in ghes] == ["PINTURA"]
+
+
+def test_cargo_sem_cbo_preserva_ultima_palavra() -> None:
+    # Reversão que mata: voltar a cauda CBO para a corrida final de
+    # [\d\x00\s-]+ (casa espaço puro e corta "Diurno"/"Noturno").
+    pagina = _pagina_com_celula_cargo(
+        ("GHE", "15", "-", "PORTARIA"), ("Vigia", "Diurno,", "Vigia", "Noturno")
+    )
+    assert parsear_paginas([pagina])[0].cargos == ("Vigia Diurno", "Vigia Noturno")
+
+
+def test_cbo_no_meio_da_entrada_separa_dois_cargos() -> None:
+    # Reversão que mata: usar só o trecho antes do 1º CBO de cada entrada
+    # (_PADRAO_CBO.split(entrada)[:1]) — "Coordenador de Marketing" some.
+    pagina = _pagina_com_celula_cargo(
+        ("GHE\x00", "04", "\x00", "MARKETING"),
+        ("Analista", "de", "Produtos", "SR", "l", "\x001423\x0030\x00", "Coordenador", "de", "Marketing"),
+    )
+    assert parsear_paginas([pagina])[0].cargos == (
+        "Analista de Produtos SR l",
+        "Coordenador de Marketing",
+    )
+
+
+def test_trecho_sem_letra_apos_cbo_nao_vira_cargo() -> None:
+    # Reversão que mata: filtrar só nome vazio (`if nome`) — o "." final após
+    # o CBO (GHE OPERAÇÃO DE GRUA do Fascino) vira cargo.
+    pagina = _pagina_com_celula_cargo(
+        ("GHE", "14", "-", "GRUA"), ("Operador", "de", "grua", "\x007151\x0015\x00.")
+    )
+    assert parsear_paginas([pagina])[0].cargos == ("Operador de grua",)
+
+
+CAMINHO_PDF_PORTO_ARARAS = Path(
+    "matrizes_originais/PGR — PORTO ARARAS I SPE EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf"
+)
+CAMINHO_PDF_VILA_BRASIL = Path(
+    "matrizes_originais/PGR ADENDO - VILA BRASIL ESCRITORIO 25.08.26.pdf"
+)
+
+
+@pytest.mark.skipif(not CAMINHO_PDF_PORTO_ARARAS.exists(), reason="PDF Porto Araras ausente")
+def test_porto_araras_real_16_ghes_52_cargos_sem_truncamento() -> None:
+    # Reversões que matam: tirar o reconhecedor de separador-antes-do-número de
+    # _RECONHECEDORES_GHE (15 GHEs, PINTURA some); voltar a cauda CBO antiga
+    # (26 cargos terminados em preposição, "Operador de").
+    ghes = parsear_arquivo(CAMINHO_PDF_PORTO_ARARAS)
+    assert len(ghes) == 16
+    assert next(g for g in ghes if g.nome == "PINTURA").cargos == ("Pintor",)
+    cargos = [c for g in ghes for c in g.cargos]
+    assert len(cargos) == 52
+    assert "Operador de Betoneira" in cargos
+    assert not [c for c in cargos if c.rsplit(" ", 1)[-1] in {"de", "do", "da", "em"}]
+
+
+@pytest.mark.skipif(not CAMINHO_PDF_VILA_BRASIL.exists(), reason="PDF Vila Brasil ausente")
+def test_vila_brasil_real_26_ghes_86_cargos() -> None:
+    # Reversões que matam: tirar o reconhecedor de separador-antes-do-número
+    # (só GHEs 23-26 sobram); usar só o trecho antes do 1º CBO (FINANCEIRO
+    # cai para 1 cargo e o total para < 86).
+    ghes = parsear_arquivo(CAMINHO_PDF_VILA_BRASIL)
+    assert len(ghes) == 26
+    assert sum(len(g.cargos) for g in ghes) == 86
+    assert next(g for g in ghes if g.nome == "FINANCEIRO").cargos == (
+        "Gerente de Desenvolvimento Imobiliário",
+        "Gerente Jurídico",
+        "Assistente Financeiro",
+        "Coordenador de Crédito Imobiliário",
+    )

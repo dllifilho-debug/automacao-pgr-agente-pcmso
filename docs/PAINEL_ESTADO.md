@@ -109,6 +109,14 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 23/09/2026]`:** branch `claude/hopeful-newton-yjv3k7` sobre `main 365b571`
+(merge do PR #358; IMPLEMENTAÇÃO — forma 6 do repertório GHE + separação de cargos por CBO, fecha
+`DT-(sessão claude/hopeful-newton-yjv3k7)-01`) · **1307 passed, 6 skipped, 0 failed** *(MEDIDO,
+árvore parada, 853.93s — 1296 + 9 testes novos + 2 que falhavam por ambiente)* · `mypy --strict`
+alvo canônico **limpo, 49 arquivos** · PROTOCOLO v94 (inalterado) · DECISOES v209→**v210**
+(andamento em D-ARQ-57; índice regenerado, 85 decisões). Três números clínicos **não
+re-tirados**: nenhuma `R-*` nem `.yaml` tocado (D-ARQ-85 cl.1).
+
 **Baseline `[MEDIDO — 22/09/2026, parte 3]`:** branch `claude/nice-fermat-xahkji` sobre
 `main 1f4e3f9` (merge do PR #355 — faixa dupla-desigualdade simétrica; esta sessão
 IMPLEMENTOU um 3º fix na mesma área/mesma DT, código de produção tocado de novo; branch
