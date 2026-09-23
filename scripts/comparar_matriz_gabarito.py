@@ -34,6 +34,7 @@ import subprocess
 import sys
 import tempfile
 import unicodedata
+from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -89,6 +90,7 @@ _ALIAS_GRAFIA = {
     "rx de torax oit": "rx torax oit",
     "rx da coluna lombo-sacra": "rx coluna lombo-sacra",
     "rx de coluna lombo-sacra": "rx coluna lombo-sacra",
+    "rx de coluna lombo sacra": "rx coluna lombo-sacra",
     "av. medica de saude mental": "avaliacao medica de saude mental",
 }
 
@@ -135,12 +137,28 @@ def _celulas_logicas(celulas: Sequence[object]) -> list[str]:
     return vistos
 
 
+def _chaves_por_ocorrencia(nomes: Sequence[str]) -> list[str]:
+    """Cargo que aparece em mais de um GHE ganha o ordinal da ocorrência
+    ("estagiário [2/2]"). Sem isto a última ocorrência sobrescrevia as
+    anteriores e a comparação cruzava GHEs diferentes — 7 subemissões falsas
+    medidas em Porto Araras I (estagiário em ADMINISTRAÇÃO e em SESMT).
+    Contagens diferentes entre os lados deixam o cargo sem par, visível em
+    "cargos que não parearam": ambíguo nunca vira divergência."""
+    total = Counter(nomes)
+    vistos: Counter[str] = Counter()
+    chaves: list[str] = []
+    for nome in nomes:
+        vistos[nome] += 1
+        chaves.append(nome if total[nome] == 1 else f"{nome} [{vistos[nome]}/{total[nome]}]")
+    return chaves
+
+
 def extrair_gabarito(
     caminho_docx: Path, mapa_nomes: Mapping[str, str]
 ) -> dict[str, dict[str, FormaPeriodicidade]]:
     """cargo normalizado → slug de exame → forma medida na célula."""
     documento = Document(str(caminho_docx))
-    fora: dict[str, dict[str, FormaPeriodicidade]] = {}
+    ocorrencias: list[tuple[str, dict[str, FormaPeriodicidade]]] = []
     for tabela in documento.tables:
         for linha in tabela.rows:
             celulas = _celulas_logicas(linha.cells)
@@ -155,8 +173,9 @@ def extrair_gabarito(
             ]
             if not formas:
                 continue
-            fora[normalizar_cargo(cargo_bruto)] = {f.exame: f for f in formas}
-    return fora
+            ocorrencias.append((normalizar_cargo(cargo_bruto), {f.exame: f for f in formas}))
+    chaves = _chaves_por_ocorrencia([nome for nome, _ in ocorrencias])
+    return {chave: dados for chave, (_, dados) in zip(chaves, ocorrencias)}
 
 
 def resolver_slug(
@@ -190,13 +209,14 @@ def _normalizar_grafia(texto: str) -> str:
 def extrair_motor(matrizes: Iterable[MatrizGHE]) -> dict[str, dict[str, object]]:
     """cargo normalizado → slug de exame → ExameEmitido. Expansão GHE→cargo por
     herança pura (R-GHE-01), igual a `montar_documento` — não recalcula."""
-    fora: dict[str, dict[str, object]] = {}
+    ocorrencias: list[tuple[str, dict[str, object]]] = []
     for matriz in matrizes:
         por_slug = {linha.exame: linha for linha in matriz.linhas}
         for cargo in matriz.cargos:
             nome = getattr(cargo, "nome", cargo)
-            fora[normalizar_cargo(str(nome))] = dict(por_slug)
-    return fora
+            ocorrencias.append((normalizar_cargo(str(nome)), dict(por_slug)))
+    chaves = _chaves_por_ocorrencia([nome for nome, _ in ocorrencias])
+    return {chave: dados for chave, (_, dados) in zip(chaves, ocorrencias)}
 
 
 @dataclass(frozen=True)

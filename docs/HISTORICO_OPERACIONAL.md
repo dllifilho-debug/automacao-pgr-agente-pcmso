@@ -9448,3 +9448,34 @@ leem os docs rodado nesta.
 **Próxima.** A declarar. Candidatas baratas: alias `poeira da madeira` (+4 células, forma) e as 3
 correções do instrumento (−21 divergências falsas). Maiores: `DT-(…)-02` (produto + agente) e as
 perguntas de CONHECIMENTO de `DT-003EC-01`/`DT-003EB-01`.
+
+## Sessão (branch `claude/hopeful-newton-yjv3k7`, continuação pós-merge do PR #361) — 23/09/2026 — DADO + INSTRUMENTO: alias `Poeira da madeira` e 3 correções do comparador
+
+**Origem.** Diovanni mergeou o PR #361 e mandou seguir com o alias e as correções do instrumento
+(`DT-003EJ-01` nota; `DH-(sessão claude/hopeful-newton-yjv3k7)-01`). Branch recriada de
+`origin/main 182a473`.
+
+**Implementado.**
+- `agentes.yaml`: `termos: ["Poeira da madeira"]` em `poeira_de_madeira` (forma, classe 003.FH/FL).
+  Guard de inventário 153 → 154 formas, movido junto com o dado (e renomeado `_154_`).
+- `scripts/comparar_matriz_gabarito.py`: `_chaves_por_ocorrencia` em `extrair_gabarito` e
+  `extrair_motor`; alias `rx de coluna lombo sacra`.
+- `scripts/medir_audiometria_dem.py`: `_momentos_do_rotulo`, usado por `parsear_momentos` e
+  `rotulos_nao_reconhecidos` (espaço como separador só se todo token for momento).
+
+**Remedição.** Porto Araras 100% (383/383), só as 24 de periodicidade do RX (`DT-003EC-01`);
+Vila Brasil 95,2% (338/355), 0 divergência de momento, 17 subemissões reais já classificadas.
+Detalhe em `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md` (seção nova).
+
+**Testes.** 5 novos, cada um com reversão nomeada; varredura inversa (backup + `cp`) 5/5: A1 tira o
+`termos:` (2 vermelhos: o teste novo e o guard), A2 tira o alias de grafia (1), A3 volta
+`extrair_motor` a sobrescrever (1), A4 tira o ramo de tokens (1), A5 troca `all` por `any` (1).
+
+**Verificação.** Suíte completa (árvore parada): **1317 passed, 6 skipped, 0 failed**, 680.22s —
+1312 + 5. `mypy --strict` alvo canônico: limpo, 49 arquivos. `medir_painel` idêntico em `182a473`
+e no working tree final (`regras 25/44`, `cas 78/108`); a tabela do painel ainda diz `cas 50/80`
+— divergência anterior a esta sessão, reportada no PAINEL, não ajustada.
+
+**Próxima.** A declarar. Restam: `DT-(sessão claude/hopeful-newton-yjv3k7)-02` (termo "produto +
+agente"), `DT-003FG-01` (sinal de nome truncado: implementar ou dispensar), re-tirada da tabela do
+painel, e as perguntas de CONHECIMENTO de `DT-003EC-01`/`DT-003EB-01`.

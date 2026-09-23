@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_153_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_154_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -49,7 +49,19 @@ def test_indice_real_tem_153_entradas(indice_real: IndiceTermos) -> None:
     # das 11 FDS reais por-cargo do acervo (água sanitária, asfalto, eletrodo de
     # solda). Cada slug novo entra sem `termos:`, o próprio slug normaliza como 1
     # forma. Guard de inventário movido junto com o dado, lição de 003.CV/003.DM.
-    assert len(indice_real.slug_por_forma) == 153
+    # 153 -> 154 (branch `claude/hopeful-newton-yjv3k7`): +1 alias, "Poeira da madeira"
+    # em `poeira_de_madeira`, achado da comparação PGR Porto Araras I × gabarito.
+    assert len(indice_real.slug_por_forma) == 154
+
+
+def test_poeira_da_madeira_resolve_exato(indice_real: IndiceTermos) -> None:
+    # Grafia do PGR Porto Araras I (GHE CARPINTARIA). Reversão que mata: tirar
+    # `termos: ["Poeira da madeira"]` de `poeira_de_madeira` em agentes.yaml —
+    # volta a fuzzy_recusado (distância 1, slug fora da allowlist D-ARQ-64).
+    resolucao = resolver_termo("Poeira da madeira", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "poeira_de_madeira"
+    assert resolucao.pendencia is None
 
 
 # ---------------------------------------------------------------------------
