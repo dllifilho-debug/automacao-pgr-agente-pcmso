@@ -550,6 +550,12 @@ Refinamentos aos passos da migração desta DT:
 
 **Status:** ABERTA. Não-bloqueante. Cruza D-ARQ-53 P3/P4. Faceta "de" FECHADA em 003.DU; mm/aaaa e método seguem abertos.
 
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — forma nova medida: faixa de
+vigência.** Porto Araras I e Vila Brasil Escritório trazem `Vigência: 04/2026 – 04/2027` /
+`07/2026 – 07/2027`; `resolver_validade` devolve `data = null` e `proposta = null` para a
+candidata. Não é silêncio (o RT recebe a candidata explícita e digita a data), mas é mais um
+caso da faceta `mm/aaaa`, agora como intervalo. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
 ---
 
 ### DT-003CB-01 — `Quantificacao.valor` de ruído não discrimina NEN vs. SPL pontual/pico `[ABERTA — irmã de DT-002V-01]`
@@ -709,6 +715,14 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 
 **Status:** REENQUADRADA, não fechada. Resíduo (classe 4) exige sessão CONHECIMENTO com gate D-ARQ-63 e 2º PGR no acervo antes de tocar R-PSY-01 ou criar regra nova.
 
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — classe (4) ganha 2º PGR.** Vila
+Brasil Escritório: 4 GHEs que o PGR declara só com risco postural, piso irregular, trânsito ou
+violência (DIREÇÃO, VIGILÂNCIA, PLANEJAMENTO, PATRIMÔNIO) recebem no gabarito acuidade visual
+(6 cargos) e audiometria (4 cargos); o motor emite só o pacote base e marca os cargos com
+`vocabulario_ausente` (sem riscos implícitos). 10 células. Distingue a leitura em aberto da nota
+003.ED: aqui o PGR **declara** riscos, e nenhum deles pede esses exames — classe (4), conceito
+ausente, não lacuna de vocabulário. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
 **Nota (003.ED).** Classe (2) perdeu a maior fatia: o alias de altura fechou 16 GHEs × 5
 exames = 80 células, com cruzamento nominal contra o gabarito sem falso positivo nem falso
 negativo. Classe (4) inalterada. Achado novo a medir: **GHE-19 (Vendas) tem `ctx.riscos == []`**
@@ -746,6 +760,11 @@ a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, 
 **Nota (sessão atual, branch `claude/festive-gates-soy0fr`) — gatilho de reabertura satisfeito: 2º PGR independente com a mesma divergência.** Comparação nova, PGR(ADENDO) CMO Residencial Aurora Lago das Rosas 27.08.26 × gabarito RQ.61 assinado (Dra. Patrícia Montalvo Moraes — mesma médica do caso-âncora Fascino, empresa e data distintas). `[MEDIDO — PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf]`: o documento não contém nenhuma medição quantitativa (0 ocorrências de `mg/m³`, `dB(A)` ou `ppm` no PDF inteiro; 62 ocorrências do aviso de template "⚠ Avaliação ainda qualitativa... apague este aviso", nunca substituído) — mesma classe do caso-âncora ("PGR não traz quantificação"). `[MEDIDO — MATRIZ DE EXAMES(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf]`: o gabarito assinado prescreve RX Tórax OIT em **12 meses** nos GHEs de sílica sem medição — mesmo valor do caso-âncora Fascino, mesma divergência contra R-RX-01-sem (24M). O app (rota 100% LLM) emite 24M nesses GHEs, coerente com R-RX-01-sem. Isto satisfaz o gatilho de reabertura nomeado acima e na nota 003.EH ("2º PGR atualizado no acervo, não n=1") com uma segunda empresa/PGR independente — mesma médica, mesma conduta conservadora, dois documentos distintos. **Não implementado nesta sessão**: divergência entre medição real (12M, gabarito) e valor esperado da regra (24M, R-RX-01-sem) é bloqueador nomeado — decisão do Arquiteto/Dra. Carolini sobre se "sem medição" deveria rotear a 12M em vez de 24M, não ajuste unilateral de código para bater com o gabarito.
 
 **Status:** ABERTA. Não-bloqueante — nenhuma regra alterada por esta DT; questão de método, agora com gatilho de reabertura satisfeito, para sessão CONHECIMENTO com a Dra. Carolini.
+
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — 3º e 4º PGR com a mesma divergência.**
+Porto Araras I (24 células) e Vila Brasil Escritório (8 células): motor 24M, gabarito 12M, em todo
+GHE onde os dois emitem RX tórax OIT. Os dois gabaritos são assinados pela Dra. Patrícia Montalvo
+Moraes. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`. Nada alterado; reforça o gatilho de reabertura já satisfeito.
 
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
@@ -1111,6 +1130,13 @@ Duas ressalvas medidas, não decisivas para a leitura acima mas registradas por 
 
 **Status:** RESOLVIDA.
 
+
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — grafia `Poeira da madeira` não
+resolve.** Porto Araras I, GHE CARPINTARIA: o PGR escreve `Poeira da madeira` (com "da").
+`fuzzy_recusado` — distância 1 de `poeira_de_madeira`, slug fora da allowlist `fuzzy_permitido`
+(D-ARQ-64). O gabarito pede espirometria e RX tórax OIT para carpinteiro e meio oficial (4 células)
+e o motor não emite, com a pendência visível. Candidato: alias `poeira da madeira` em `termos:` de
+`poeira_de_madeira` (forma, mesma classe de 003.FH/003.FL), não implementado. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
 ### DT-003EJ-02 — Perna `Ausente` absorvida por `ou` verdadeiro não gera pendência; matriz vai a VÁLIDA com lacuna ambiental real ainda visível em `predicados_avaliados` `[RESOLVIDA — D-ARQ-71, 003.EK]`
 
 **Origem:** 003.EJ, medição do Fascino — GHE-16 muda de `PARCIAL` para `VÁLIDA` ao resolver o alias de vibração mão-braço (D-ARQ-70), sem previsão do Arquiteto.
@@ -3059,6 +3085,8 @@ detecte número de GHE saltado (13 → 15) como pendência; (2) Porto Araras vir
   `CBO`) e `Business Partner - RH \x002524` (código cortado na célula do PDF). Ficam visíveis.
 - **Não medido `[A MEDIR]`:** a matriz de exames que Porto Araras e Vila Brasil emitem a jusante
   (exige envelope do topo; `comparar_matriz_gabarito` não rodado).
+  **Medido depois (mesma branch, 23/09/2026):** 96,8% e 95,1% das células do gabarito reproduzidas;
+  nenhuma lacuna silenciosa. Classificação em `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`.
 - **Gate de número de GHE saltado — proposta, não implementado.** Pós-fix, só dispararia em R78
   e Floramazônia, já bloqueados por `segmentacao_implausivel`: zero bloqueio novo no acervo. É
   defesa para forma futura desconhecida (o reconhecedor falha e as duas rotas concordam no erro).
@@ -3070,4 +3098,32 @@ encadeado depois de `avaliar_segmentacao` em `avaliar_estrutura`; detalhe em `D-
 (andamento) e no HISTORICO. Reproduzindo o estado pré-PR #359 (forma 6 fora do repertório), o
 gate acusa o GHE 14 de Porto Araras (teste real com `monkeypatch`). No acervo atual, 0 desfecho
 muda.
+
+### DH-(sessão `claude/hopeful-newton-yjv3k7`)-01 — `comparar_matriz_gabarito` produz divergência falsa em 3 casos medidos `[ABERTA — higiene de instrumento]`
+
+**Origem.** Comparação Porto Araras I e Vila Brasil Escritório × gabarito (mesma branch,
+23/09/2026). 21 de 74 células divergentes são do instrumento, não do motor `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`:
+- **Cargo repetido em dois GHEs.** `extrair_gabarito` e `extrair_motor` chaveiam por cargo; o
+  último GHE sobrescreve o anterior. `estagiário` (ADMINISTRAÇÃO e SESMT, Porto Araras) gera 7
+  subemissões falsas. Correção candidata: chave (GHE, cargo), ou comparar o conjunto de exames de
+  todas as ocorrências.
+- **Grafia de exame sem alias.** `rx de coluna lombo sacra` não casa `rx_coluna_lombo_sacra`
+  (1 super + 1 sub). Correção candidata: entrada em `_ALIAS_GRAFIA`.
+- **Momentos sem vírgula no gabarito.** `ECG (ADM PER, MRO)` (Vila Brasil) é lido como só `MRO`
+  (12 divergências de momento). Correção candidata: aceitar espaço como separador de momento.
+
+Não mexe em conduta; distorce a leitura da fila clínica.
+
+### DT-(sessão `claude/hopeful-newton-yjv3k7`)-02 — Termo de risco "produto + agente" não resolve (`Adesivo CPVC Ciclohexanona`) `[ABERTA — vocabulário, não-bloqueante]`
+
+**Origem.** Vila Brasil Escritório, GHEs INSTALAÇÕES HIDROSSANITÁRIAS e ASSISTÊNCIA TÉCNICA
+MANUTENÇÃO ENERGIZADA: o PGR declara o agente como `Adesivo CPVC Ciclohexanona` e `Adesivo CPVC
+Metiletilcetona` — nome do produto colado ao do agente. `vocabulario_ausente` (visível). O
+gabarito pede ciclohexanol na urina, fenol na urina e MEK na urina para encanador e instalador
+(6 células) e o motor não emite. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
+**O que a resolução exige.** Decidir entre alias por termo inteiro (frágil: um por produto) ou
+extração do agente dentro do termo (reconhecer slug conhecido como sufixo). É o mesmo eixo de
+"produto × agente" do casamento FDS↔PGR (`DT-(sessão claude/nice-ptolemy-wxk1wo)-01`), pelo lado do
+PGR. Antes de decidir, medir quantos termos do acervo têm essa forma.
 
