@@ -9510,3 +9510,21 @@ A 1ª corrida pegou o T7 (1 failed, 1330 passed); a corrida limpa é a 2ª. `myp
 
 **Próxima.** A declarar. Restam: re-tirada da tabela do painel (`cas`), `DT-003FG-01`, e as
 perguntas de CONHECIMENTO de `DT-003EC-01`, `DT-003EB-01` classe (4) e `DT-003EB-02`.
+
+## Sessão (branch `claude/hopeful-newton-yjv3k7`, continuação pós-merge do PR #363) — 23/09/2026 — CONHECIMENTO: três decisões clínicas do Diovanni, medidas antes de implementar
+
+**Origem.** Respostas do Diovanni às três perguntas pendentes: (1) `DT-003EC-01` — "12M o motivo
+deve ser a sílica qualitativa"; (2) `DT-003EB-01` classe (4) — "o cargo deve ser motorista, tem
+que ver na descrição do cargo"; (3) `DT-003EB-02` — "segue o da Dra. Carolini". Branch recriada
+de `origin/main 7dbe93e`. Sessão de medição e docs; nenhum código tocado.
+
+**Medido.** (1) Confirmado nos 4 pares: sílica sempre qualitativa (P×S), gabarito 12M em 100% dos
+GHEs com sílica (PA 27/27, VB 8/8); ressalva: 24M em 15/34 matrizes sem PGR completo para conferir.
+(2) Explica 2 de 4 GHEs de Vila Brasil (motorista pela descrição; patrimônio pelo risco de
+trânsito); vigia e planejamento não. (3) Nível de risco presente na linha do agente em 100% das
+linhas medidas; parser não o extrai.
+
+**Docs.** Notas de decisão + medição em `DT-003EC-01`, `DT-003EB-01` e `DT-003EB-02`.
+
+**Próxima.** Implementação, uma por vez, na ordem a declarar pelo Diovanni. As três mudam
+`PROTOCOLO`/`regras.yaml` (R-RX-01, R-VIS-01/R-AUD, R-BIO-04) — gate D-ARQ-63.
