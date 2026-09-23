@@ -190,6 +190,10 @@ def test_recorte_topo_ancora_na_primeira_linha_devolve_vazio() -> None:
         "GHE 01 \x00 ENGENHARIA",  # forma dominante (17 de 19)
         "GHE 16\x00 PINTURA",  # sem espaço antes do NUL (forma real)
         "GHE 10 \x00 INSTALAÇÕES HIDRO\x00SANITÁRIAS",  # NUL embutido no título, preservado
+        # Separador ANTES do número, DT-(sessão claude/hopeful-newton-yjv3k7)-01:
+        # verbatim real de Porto Araras I (pág. 66) e Vila Brasil Escritório (GHEs 01-22).
+        "GHE - 14 PINTURA",
+        "GHE\x00 01 \x00 ADMINISTRAÇÃO 01",
     ],
 )
 def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
@@ -209,6 +213,9 @@ def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
         # 003.DS (PGR Fascino): armadilhas do separador U+0000.
         "GHE\x00 TÉCNICO ADM / OPERACIONAL",  # GHE sem número -> DT-003DS-01 (deferido)
         "GHE Grupo Homogêneo de Exposição: trabalhadores com perfil de exposição similar a determinados agentes",  # linha-glossário (102 char, guard de 80 rejeita)
+        # Separador antes do número exige título separado do número: sem isto
+        # o \d+ recua e o último dígito vira "título".
+        "GHE - 14",
     ],
 )
 def test_eh_cabecalho_ghe_rejeita_armadilhas_medidas(linha: str) -> None:

@@ -2422,6 +2422,13 @@ GHE → `Pendencia` nomeada), não como sinal de distribuição. É forma de par
 pendências de `preparar_ghes`; o caso real é Porto Araras. A DT não fecha por esta nota:
 fecha pela decisão (implementar o sinal substituto ou `DISPENSADA`, com o motivo).
 
+**Nota (mesma branch, 23/09/2026).** O parse ruim que motivou o sinal substituto (Porto Araras)
+foi consertado na causa — `_separar_nome_cbo` cortava a última palavra de cargo sem CBO
+(`DT-(sessão claude/hopeful-newton-yjv3k7)-01`, RESOLVIDA). Pós-fix, o sinal de preposição final
+e o de cargo repetido no mesmo GHE dão **0** nos três PGRs que atravessam a rota determinística.
+O sinal perdeu o único caso positivo medido; a decisão (implementar como defesa ou `DISPENSADA`)
+segue com o Arquiteto.
+
 ### DH-003FH-01 — `D-ARQ-84` cl.1(c) não foi aplicada a três blocos de sessão consecutivos `[ABERTA — higiene de método]`
 
 **Origem:** sessão 003.FH, conferência dos blocos 003.FE/FF/FG do `HISTORICO_OPERACIONAL.md`.
@@ -3001,7 +3008,7 @@ Os 3 casos reais viraram fixture direta, sem dado inventado: `parsear_faixa("15 
 
 **Status:** RESOLVIDA (as duas levas). `[MEDIDO — recorte `test_transcricao_fds.py`+`test_transcritor_fds.py`+`test_montagem_verbatim.py`+`test_revisao_verbatim.py`+`test_orquestracao_fds.py`+`test_transcritor_gemini.py`+`test_cli_fds.py`+`test_web_fds.py`+`test_web_matriz.py`+`test_composicao_propaga_pendencias.py`+`test_integracao_composicao_fase_c.py`: 164 passed, 3 skipped; varredura inversa da 1ª leva 4/5 e da 2ª leva 3/3 discriminantes confirmados; `mypy --strict` alvo canônico limpo; suíte completa em `docs/HISTORICO_OPERACIONAL.md` (bloco desta sessão)]`
 
-### DT-(sessão `claude/hopeful-newton-yjv3k7`)-01 — Porto Araras I atravessa a rota determinística com GHE perdido e cargos truncados, sem pendência `[ABERTA — achado medido, anti-supressão]`
+### DT-(sessão `claude/hopeful-newton-yjv3k7`)-01 — Porto Araras I atravessa a rota determinística com GHE perdido e cargos truncados, sem pendência `[RESOLVIDA — IMPLEMENTAÇÃO, mesma branch, 23/09/2026; gate de número saltado segue como proposta]`
 
 **Origem.** Medição de `DT-003FG-01` (mesma sessão). `preparar_ghes` com clientes offline sobre
 `matrizes_originais/PGR — PORTO ARARAS I SPE EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf` (par 6 de
@@ -3034,4 +3041,26 @@ outros PGRs do acervo; a geometria da célula de cargo de Porto Araras.
 detecte número de GHE saltado (13 → 15) como pendência; (2) Porto Araras vira família medida
 (molde D-ARQ-65) ou passa a ser recusado como o TOCTAO. O sinal substituto proposto em
 `DT-003FG-01` teria bloqueado (b), **não** (a).
+
+**Resolução `[MEDIDO — 23/09/2026, mesma branch, sobre main 365b571]`.** Detalhe em `D-ARQ-57`
+(andamento desta sessão) e no HISTORICO.
+- **(a) resolvida e ampliada.** A varredura dos 43 PDFs achou um 2º caso da mesma forma, maior:
+  Vila Brasil Escritório tinha `GHE\x00 01 \x00 ADMINISTRAÇÃO 01` … `GHE\x00 22`, e o motor
+  reconhecia só os GHEs 23–26 (**22 de 26 GHEs perdidos**, 4 GHEs e 5 cargos sem pendência).
+  Forma 6 em `_RECONHECEDORES_GHE`; título por padrão espelho.
+- **(b) resolvida — a causa não era geometria.** O nome inteiro já está na linha do rótulo;
+  `_separar_nome_cbo` cortava a última palavra de todo cargo sem CBO (a "cauda" casava espaço
+  puro). Trocado por `_PADRAO_CBO`, que também separa dois cargos unidos só pelo CBO (Vila
+  Brasil, vírgula ausente).
+- **Medido pós-fix.** Porto Araras 16 GHEs / 52 cargos; Vila Brasil 26 / 86 — contagens iguais
+  às dos gabaritos pareados, nomes divergentes só por grafia humana (acento, `I`×`l`, anotação da
+  médica). Fascino idêntico ao estado anterior (19 / 41, mesmos nomes).
+- **Resíduo, do próprio documento:** `Analista jurídico júnior \x00CBO` (o PDF traz o literal
+  `CBO`) e `Business Partner - RH \x002524` (código cortado na célula do PDF). Ficam visíveis.
+- **Não medido `[A MEDIR]`:** a matriz de exames que Porto Araras e Vila Brasil emitem a jusante
+  (exige envelope do topo; `comparar_matriz_gabarito` não rodado).
+- **Gate de número de GHE saltado — proposta, não implementado.** Pós-fix, só dispararia em R78
+  e Floramazônia, já bloqueados por `segmentacao_implausivel`: zero bloqueio novo no acervo. É
+  defesa para forma futura desconhecida (o reconhecedor falha e as duas rotas concordam no erro).
+  Decisão do Arquiteto.
 

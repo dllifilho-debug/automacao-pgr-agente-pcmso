@@ -9330,3 +9330,52 @@ cl.1). A tabela do painel não foi re-tirada.
 (truncamento de nome de cargo) ou dispensar; (2) `DT-(sessão claude/hopeful-newton-yjv3k7)-01`:
 reconhecedor `"GHE - NN"` / gate de número de GHE saltado e o destino da família Porto Araras.
 Pela gravidade (cargo exposto a solvente some sem sinal), a (2) vem antes da (1).
+
+## Sessão (branch `claude/hopeful-newton-yjv3k7`, continuação pós-merge do PR #358) — 23/09/2026 — IMPLEMENTAÇÃO: fecha `DT-(sessão claude/hopeful-newton-yjv3k7)-01` (Porto Araras I + Vila Brasil Escritório)
+
+**Origem.** Diovanni mergeou o PR #358 e mandou seguir com Porto Araras. Branch recriada de
+`origin/main 365b571` (a PR anterior da mesma branch já estava mergeada).
+
+**Medido antes de codar.**
+- Varredura de linhas "quase-cabeçalho" (começam com `GHE`, ≤ 80 caracteres, não reconhecidas)
+  nos 29 PGRs: além de `GHE - 14 PINTURA` (Porto Araras), **Vila Brasil Escritório tinha 22
+  cabeçalhos `GHE\x00 NN \x00 TÍTULO` perdidos** — o motor via 4 de 26 GHEs, sem pendência.
+- Reconhecedor candidato varrido contra os 43 PDFs de `matrizes_originais/` (todos os PDFs de
+  teste moram lá): só casa os 23 cabeçalhos-alvo nos PGRs (e 1 linha de uma matriz em PDF, que
+  não passa pelo parser de PGR).
+- Gate de número de GHE saltado, com o reconhecedor novo: dispararia só em R78 e Floramazônia,
+  já bloqueados por `segmentacao_implausivel`. Não implementado — decisão do Arquiteto.
+- **Causa da truncagem ≠ geometria.** O x0 da continuação bate a banda do valor; o nome inteiro
+  já está na linha do rótulo. `_separar_nome_cbo` usava a corrida final de `[\d\x00\s-]+` como
+  cauda CBO — espaço casava, e todo cargo sem CBO perdia a última palavra.
+
+**Implementado.** `extracao_pgr.py`: `_reconhece_cabecalho_ghe_separador_antes_do_numero` (forma 6).
+`parser_familia_consciente.py`: `_PADRAO_TITULO_ANCORA_SEPARADOR_ANTES` e `_PADRAO_CBO`
+(substitui `_PADRAO_CAUDA_CBO`/`_separar_nome_cbo`; CBO também separa entradas; trecho sem letra
+descartado). 1º rascunho da regex do reconhecedor aceitava `"GHE - 14"` (o `\d+` recuava e o "4"
+virava título) — pego no teste manual, corrigido antes do teste; virou caso de rejeição.
+1º passe da separação regrediu o Fascino (42 cargos, um `"."` final após o CBO do GHE OPERAÇÃO DE
+GRUA) — pego na comparação contra o estado anterior, corrigido pelo filtro de trecho sem letra.
+
+**Resultado.** Porto Araras 16 GHEs / 52 cargos; Vila Brasil 26 / 86 — iguais aos gabaritos
+pareados, divergência de nome só por grafia humana. Fascino idêntico (19 / 41).
+
+**Testes e varredura inversa.** 9 testes novos, cada um com reversão nomeada no comentário. Seis
+reversões aplicadas isoladamente sobre cópia de backup (restauração por `cp` + `diff`, nunca
+`git checkout` em arquivo não commitado — lição da sessão anterior): R1 tira o reconhecedor da
+tupla (6 vermelhos), R2 volta a regex do 1º rascunho (1), R3 tira o fallback de título (3), R4
+volta a cauda CBO antiga (4), R5 usa só o trecho antes do 1º CBO (2), R6 filtra só nome vazio
+(2, incl. `test_fascino_total_41_cargos_real`). **9/9 discriminantes.** A 1ª tentativa de R4
+teve erro de coleta (mutação com sintaxe quebrada) e foi refeita com a função antiga inteira.
+
+**Verificação.** Suíte completa (`agente_medico/tests/ tests/`, árvore parada): **1307 passed,
+6 skipped, 0 failed**, 853.93s. Reconciliação: 1296 (baseline de `7921f7f`) + 9 novos + 2 que
+falhavam só por ambiente (`libreoffice-writer`, instalado nesta sessão) = 1307. `mypy --strict`
+alvo canônico: limpo, 49 arquivos. Índice D-ARQ regenerado após a linha v210.
+
+**Docs.** `DECISOES` v209→v210 (andamento em D-ARQ-57), `INDICE_DARQ.md`, `PENDENCIAS_CLINICAS.md`
+(DT RESOLVIDA + nota em DT-003FG-01), `PAINEL_ESTADO.md` (Baseline), este bloco.
+
+**Próxima.** A declarar. Candidatas: gate de número de GHE saltado; `DT-003FG-01` (implementar
+o sinal como defesa ou dispensar); comparar a matriz de exames de Porto Araras e Vila Brasil
+contra os gabaritos (`[A MEDIR]`).
