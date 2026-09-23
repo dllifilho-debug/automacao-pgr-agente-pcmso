@@ -731,6 +731,17 @@ negativo. Classe (4) inalterada. Achado novo a medir: **GHE-19 (Vendas) tem `ctx
 a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, para classe (2)
 (lacuna de vocabulário). `[A MEDIR — não concluir sem medir]`
 
+
+**Decisão clínica (Diovanni, 23/09/2026) + medição — "o cargo deve ser motorista, tem que ver
+na descrição do cargo".** Classe (4) de Vila Brasil, medido no bloco inteiro de cada GHE
+`[MEDIDO — mesma branch]`: **DIREÇÃO** (Motorista MG) — a descrição diz "dirigem e manobram
+veículos", risco "trânsito" declarado → confirma (acuidade + audiometria, 2 células).
+**PATRIMÔNIO** — descrição sem direção, mas risco "Bater contra ou ser atingido por (trânsito) —
+deslocamento em via pública" → compatível (2 células). **VIGILÂNCIA** (acuidade, 2 células) e
+**PLANEJAMENTO** (acuidade + audiometria, 4 células) — nenhum termo de direção nem de trânsito no
+bloco: a hipótese não os explica. Implementação candidata: condução de veículo (descrição do cargo
+ou risco de trânsito) → acuidade visual + audiometria; vigia e planejamento seguem classe (4)
+abertos.
 ### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[ABERTA — 003.EB]`
 
 **Origem:** Sessão 003.EB (25/07/2026), mesmo diff acima.
@@ -753,6 +764,16 @@ gabarito **pede** `Metil-etil-cetona (PER 6 meses)`. Mesma anotação de risco b
 opostas entre as duas médicas. Porto Araras também mostra `acido_butoxiacetico_urina` emitido para
 o pintor onde a médica anotou 2-butoxietanol como "irrelevante". A pergunta de método desta DT
 fica mais nítida, não resolvida. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
+**Decisão clínica (Diovanni, 23/09/2026): segue a conduta da Dra. Carolini** — risco classificado
+como baixo no PGR → indicador biológico **não** é emitido; só menção documental no PCMSO.
+Medição de viabilidade `[MEDIDO — mesma branch]`: o nível de risco (P×S →
+IRRELEVANTE/BAIXO/MODERADO/ALTO) está na própria linha do agente químico em 100% das linhas
+medidas (Fascino 6 BAIXO; Porto Araras 6 BAIXO + 1 IRRELEVANTE; Aurora 5 BAIXO + 2 MODERADO). O
+parser **não** extrai esse nível hoje (`RiscoVerbatim` = agente, quantificação, fonte). A
+implementação exige: campo de nível na extração (rota determinística e transcritor LLM),
+hidratação até `RiscoPGR`, e gate em `R-BIO-04`; mais a forma de saída da "menção documental".
+Ainda não implementado.
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[ABERTA — 003.EC, não-bloqueante]`
 
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
@@ -776,6 +797,22 @@ Porto Araras I (24 células) e Vila Brasil Escritório (8 células): motor 24M, 
 GHE onde os dois emitem RX tórax OIT. Os dois gabaritos são assinados pela Dra. Patrícia Montalvo
 Moraes. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`. Nada alterado; reforça o gatilho de reabertura já satisfeito.
 
+
+**Decisão clínica (Diovanni, 23/09/2026) + medição — "12M o motivo deve ser a sílica
+qualitativa".** Medido `[MEDIDO — branch claude/hopeful-newton-yjv3k7, sobre main 7dbe93e]`: nos
+4 PGRs pareados (Fascino, Aurora, Porto Araras I, Vila Brasil) a sílica é avaliada
+**qualitativamente** (matriz P×S AIHA na própria linha — "4 1 BAIXO", "3 2 MODERADO" — com
+"avaliação qualitativa — resultado quantitativo pendente de medição"); o motor lê como
+`silica_asbesto_sem_medicao` e emite 24M. Em Porto Araras e Vila Brasil, **todo** GHE com RX 24M
+no motor declara sílica, e o gabarito dá 12M em 100% deles (27/27 e 8/8); GHEs com poeira não
+sílica (madeira, PNOS) saem 60M e batem. **Ressalva medida:** 24M aparece em 15 das 34 matrizes
+assinadas do acervo (ENGESEG, GPL R78, Horus, Reserva 0028, Dinâmica, Floramazônia, Flamboyant…),
+às vezes junto de 12M na mesma matriz; nenhuma tem PGR completo no acervo para conferir o estado
+da sílica. Na Floramazônia, 12M cai nos GHEs de sílica (betoneira, produção, cremalheira) e 24M em
+armação e carpintaria — compatível com a hipótese, não prova. **Implementação candidata:** ramo
+"sílica com avaliação qualitativa" → 12M, distinto de "sem avaliação" (24M, texto literal do
+Anexo III da NR-07), `[INTERPRETADO — conduta das médicas nos 4 pares, decisão do Diovanni]`.
+Exige distinguir, na extração, qualitativa × sem avaliação — hoje não distinguido.
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
 D-ARQ-63 (003.DX) mediu 49% do DECISOES_ARQUITETURAIS.md como diário — acreção pós-decisão
