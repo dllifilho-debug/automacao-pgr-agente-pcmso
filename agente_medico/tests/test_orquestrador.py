@@ -767,30 +767,31 @@ def test_ghe_com_unico_termo_fuzzy_recusado_nao_sai_valida() -> None:
     assert matriz.status == "BLOQUEADA"
 
 
-def test_metiletilcetona_grafia_nua_recusa_fuzzy_e_ghe_nao_sai_valida(
+def test_grafia_real_recusada_por_fuzzy_e_ghe_nao_sai_valida(
     indice_real: IndiceTermos,
 ) -> None:
     # T7 (003.FC) — caso-âncora real da Emenda 003.FC, contra o índice real de
-    # agentes.yaml, não um RiscoPGR fabricado. `agentes.yaml:186` tem
-    # "Metiletilcetona (MEK)" como alias EXATO de metil_etil_cetona, mas essa
-    # forma normaliza para "metiletilcetona_mek" — distinta de "metiletilcetona"
-    # (grafia nua, sem "(MEK)"). O alias não cobre a grafia nua: ela recusa por
-    # fuzzy (distância 2, slug fora de fuzzy_permitido), exatamente o caso que
-    # a Emenda 003.FC nomeia. Reversão que mata — devolver "fuzzy_recusado" ao
-    # frozenset CAUSAS_ACERTO_NAO_RESOLUCAO em orquestrador.py.
-    resolucao = resolver_termo("Metiletilcetona", indice_real)
+    # agentes.yaml, não um RiscoPGR fabricado. A testemunha original era
+    # "Metiletilcetona" (grafia nua, sem "(MEK)"); ela ganhou alias em `termos:`
+    # (DT-(sessão claude/hopeful-newton-yjv3k7)-02) — o remédio que a própria
+    # emenda prescreve ("admitir a grafia em termos: sob D-ARQ-70"). A testemunha
+    # passa a ser "Maganês", outra grafia real do PGR Fascino ainda recusada por
+    # fuzzy (distância 1 de manganes, slug fora de fuzzy_permitido). Reversão que
+    # mata — devolver "fuzzy_recusado" ao frozenset CAUSAS_ACERTO_NAO_RESOLUCAO em
+    # orquestrador.py.
+    resolucao = resolver_termo("Maganês", indice_real)
     assert resolucao.confianca == Confianca.NAO_RESOLVIDO
     assert resolucao.slug is None
     assert resolucao.pendencia is not None
     assert resolucao.pendencia.tipo == "fuzzy_recusado"
     assert resolucao.pendencia.regra_origem == "D-ARQ-64"
-    assert "metil_etil_cetona" in resolucao.pendencia.motivo
-    assert "2" in resolucao.pendencia.motivo
+    assert "manganes" in resolucao.pendencia.motivo
+    assert "1" in resolucao.pendencia.motivo
 
     ghe_verbatim = GHEVerbatim(
         nome="Teste",
         cargos=(),
-        riscos=(RiscoVerbatim(agente="Metiletilcetona", quantificacao="", fonte_geradora=""),),
+        riscos=(RiscoVerbatim(agente="Maganês", quantificacao="", fonte_geradora=""),),
     )
     ghe_pgr, _ = hidratar_ghe(ghe_verbatim, indice_real, posicao=1)
     assert ghe_pgr.riscos[0].agente is None

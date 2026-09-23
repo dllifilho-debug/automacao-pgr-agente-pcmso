@@ -9479,3 +9479,34 @@ e no working tree final (`regras 25/44`, `cas 78/108`); a tabela do painel ainda
 **Próxima.** A declarar. Restam: `DT-(sessão claude/hopeful-newton-yjv3k7)-02` (termo "produto +
 agente"), `DT-003FG-01` (sinal de nome truncado: implementar ou dispensar), re-tirada da tabela do
 painel, e as perguntas de CONHECIMENTO de `DT-003EC-01`/`DT-003EB-01`.
+
+## Sessão (branch `claude/hopeful-newton-yjv3k7`, continuação pós-merge do PR #362) — 23/09/2026 — MEDIÇÃO → DADO: `DT-(sessão claude/hopeful-newton-yjv3k7)-02` (termo "produto + agente")
+
+**Origem.** Diovanni mergeou o PR #362 e mandou seguir com a DT. Branch recriada de
+`origin/main 619a6ef`.
+
+**Medido primeiro.** 93 termos distintos não resolvidos nos 3 PGRs da rota determinística; 17
+contêm forma conhecida. Extração genérica erraria 3 com confiança (fenol em polímero/bisfenol,
+vibração genérica). A 1ª varredura deu 0 contenções por erro meu: `\W` como fronteira, mas as
+formas normalizadas usam `_` (que é `\w`) — refeita com `_` como fronteira antes de concluir.
+Decisão levada ao Diovanni com as três opções; escolhida **aliases por termo**.
+
+**Implementado.** 12 aliases em `agentes.yaml` (7 `Cimento <componente>`, argamassa, 2 CPVC,
+`Metiletilcetona`, massa acrílica). Instrumento: anotação em linha própria e grafias de MEK.
+**Conflito com teste existente, resolvido pela própria decisão:** T7
+(`test_orquestrador.py`, Emenda 003.FC) usava `Metiletilcetona` como testemunha real de
+`fuzzy_recusado`; a D-ARQ-82 emendada prescreve o alias como remédio — testemunha trocada para
+`Maganês` (real, Fascino, ainda `fuzzy_recusado`), checagem e reversão iguais, reversão
+reaplicada e medida (derruba T6 e T7). Nota de aplicação em D-ARQ-82.
+
+**Efeito.** Vila Brasil 96,3%; Porto Araras 100% com 45 pareados; Fascino +1 linha (`mek_urina`
+PINTURA, gabarito não pede — `DT-003EB-02`, que ganha nota com os dois sentidos entre as médicas).
+
+**Verificação.** 14 testes novos (12 parametrizados + 2 do instrumento) + T7; varredura inversa
+15/15 (cada alias retirado derruba o seu caso e o guard; os silicatos derrubam também o vigia
+fuzzy). Suíte completa (árvore parada): **1331 passed, 6 skipped, 0 failed**, 707.38s — 1317 + 14.
+A 1ª corrida pegou o T7 (1 failed, 1330 passed); a corrida limpa é a 2ª. `mypy --strict`: limpo,
+49 arquivos. Índice D-ARQ regenerado (v212).
+
+**Próxima.** A declarar. Restam: re-tirada da tabela do painel (`cas`), `DT-003FG-01`, e as
+perguntas de CONHECIMENTO de `DT-003EC-01`, `DT-003EB-01` classe (4) e `DT-003EB-02`.

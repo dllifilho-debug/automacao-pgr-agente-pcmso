@@ -743,6 +743,16 @@ a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, 
 
 **Status:** ABERTA. Formalização exige sessão CONHECIMENTO com gate D-ARQ-63 antes de alterar R-BIO-04.
 
+
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — dois casos em sentidos opostos.**
+Com o alias `Metiletilcetona` (`DT-(sessão claude/hopeful-newton-yjv3k7)-02`), o motor passa a
+emitir `mek_urina` para o pintor nos dois PGRs com a grafia no GHE PINTURA. Fascino (gabarito da
+Dra. Carolini, anotação "risco baixo no PGR"): o gabarito **não** pede MEK — superemissão desta
+DT. Porto Araras I (gabarito da Dra. Patrícia, anotação "risco classificado como baixo"): o
+gabarito **pede** `Metil-etil-cetona (PER 6 meses)`. Mesma anotação de risco baixo, condutas
+opostas entre as duas médicas. Porto Araras também mostra `acido_butoxiacetico_urina` emitido para
+o pintor onde a médica anotou 2-butoxietanol como "irrelevante". A pergunta de método desta DT
+fica mais nítida, não resolvida. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[ABERTA — 003.EC, não-bloqueante]`
 
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
@@ -3117,6 +3127,12 @@ muda.
 
 Não mexe em conduta; distorce a leitura da fila clínica.
 
+**Nota (mesma branch, pós-merge do PR #362) — mais duas formas, mesma classe.** Anotação da médica
+em linha própria sem parêntese nem hífen (`Pintor\nIncluir no WORD…`, Porto Araras — pintor,
+encanador e meio oficial hidráulico ficavam sem par) e grafias de MEK do gabarito
+(`Metil-etil-cetona`, `Metil Etil Cetona`, `Metil-etil-cetona na urina`). Corrigidas em
+`_ANOTACAO_COLADA` e `_ALIAS_GRAFIA`; 2 testes com reversão nomeada.
+
 **Resolução (mesma branch, pós-merge do PR #361, 23/09/2026).** As três correções candidatas
 implementadas: `_chaves_por_ocorrencia` (cargo repetido ganha o ordinal da ocorrência nos dois
 lados; contagens diferentes deixam o cargo sem par, visível), entrada `rx de coluna lombo sacra`
@@ -3126,7 +3142,7 @@ Porto Araras **100%** de identidade de exame (383/383; restam as 24 de periodici
 `DT-003EC-01`); Vila Brasil 95,2% (338/355), 0 divergência de momento, 17 subemissões — todas
 reais e já classificadas. 4 testes novos + 1 do alias abaixo, varredura inversa 5/5.
 
-### DT-(sessão `claude/hopeful-newton-yjv3k7`)-02 — Termo de risco "produto + agente" não resolve (`Adesivo CPVC Ciclohexanona`) `[ABERTA — vocabulário, não-bloqueante]`
+### DT-(sessão `claude/hopeful-newton-yjv3k7`)-02 — Termo de risco "produto + agente" não resolve (`Adesivo CPVC Ciclohexanona`) `[RESOLVIDA — aliases por termo, mesma branch, pós-merge do PR #362]`
 
 **Origem.** Vila Brasil Escritório, GHEs INSTALAÇÕES HIDROSSANITÁRIAS e ASSISTÊNCIA TÉCNICA
 MANUTENÇÃO ENERGIZADA: o PGR declara o agente como `Adesivo CPVC Ciclohexanona` e `Adesivo CPVC
@@ -3138,4 +3154,27 @@ gabarito pede ciclohexanol na urina, fenol na urina e MEK na urina para encanado
 extração do agente dentro do termo (reconhecer slug conhecido como sufixo). É o mesmo eixo de
 "produto × agente" do casamento FDS↔PGR (`DT-(sessão claude/nice-ptolemy-wxk1wo)-01`), pelo lado do
 PGR. Antes de decidir, medir quantos termos do acervo têm essa forma.
+
+**Medição (mesma branch, pós-merge do PR #362, 23/09/2026).** Nos 3 PGRs que atravessam a rota
+determinística (Fascino, Porto Araras I, Vila Brasil Escritório), 93 termos distintos não
+resolvidos; 17 contêm uma forma conhecida do vocabulário como trecho de palavra inteira. Extração
+genérica do agente de dentro do termo acertaria 14 e **erraria 3 com confiança**: `Polímero de
+fenol` e `4,4-(1-metiletilideno)bis(fenol)` (bisfenol A) virariam `fenol` → fenol urinário emitido
+errado; `Vibração localizada (mão e braço)` viraria `vibracao` genérico. Classe D-ARQ-22. Além
+disso, `Metiletilcetona` (sem "(MEK)") não resolvia nem sozinho — `fuzzy_recusado` nos 3 PGRs.
+
+**Decisão (Diovanni): aliases por termo.** 12 formas em `termos:` de `agentes.yaml`: `Argamassa
+Cimento Portland` e 7 `Cimento <componente>` (Vila Brasil), `Adesivo CPVC Ciclohexanona`, `Adesivo
+CPVC Metiletilcetona`, `Metiletilcetona`, `Massa acriílica - Hidróxido de amônia 24°Be` (Fascino).
+Fora, de propósito: `Cimento Sulfato de cálcio` (não há slug `sulfato_de_calcio`), `Polímero de
+fenol` e o bisfenol (não são fenol livre). Seguem como `vocabulario_ausente` visível. Guard de
+inventário 154 → 166; o vigia de pares fuzzy (DT-003DM-01) pegou o par novo
+`cimento_silicato_dicalcico`/`…_tricalcico`, revisado e aceito (mesmos slugs do par já aceito).
+
+**Efeito medido.** Vila Brasil: ciclohexanol urinário volta para encanador e instalador; MEK
+urinário também (o gabarito escreve `Metil-etil-cetona` — alias de grafia no instrumento).
+Identidade de exame 96,3% (342/355); restam 13 subemissões, 10 da classe (4) de `DT-003EB-01`, 2
+de fenol urinário (bisfenol/polímero, fora de propósito) e 1 de `Produtos DomissanItários`. Porto
+Araras: pintor passa a ter MEK urinário, como o gabarito pede. Fascino: +1 linha (`mek_urina` no
+GHE PINTURA), onde o gabarito não pede — caso de `DT-003EB-02`. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
 

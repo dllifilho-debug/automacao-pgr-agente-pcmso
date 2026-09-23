@@ -109,7 +109,16 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
-**Baseline `[MEDIDO — 23/09/2026, alias + instrumento]`:** branch `claude/hopeful-newton-yjv3k7`
+**Baseline `[MEDIDO — 23/09/2026, aliases produto + agente]`:** branch `claude/hopeful-newton-yjv3k7`
+sobre `main 619a6ef` (merge do PR #362; 12 aliases em `agentes.yaml` `termos:`, 2 correções de
+grafia no comparador, testemunha do T7 trocada) · **1331 passed, 6 skipped, 0 failed** *(MEDIDO,
+árvore parada, 707.38s — 1317 + 14 testes novos)* · `mypy --strict` alvo canônico **limpo, 49
+arquivos** · PROTOCOLO v94 (inalterado) · DECISOES v211→**v212** (nota de aplicação em D-ARQ-82;
+índice regenerado, 85 decisões). `medir_painel`: `regras 25/44`, `cas 78/108`, `índice
+sincronizado` — iguais à tiragem anterior (alias é forma, não slug; D-ARQ-85 cl.1). O bloqueador
+`cas 50/80` × `78/108` da tabela segue reportado, não ajustado.
+
+**Baseline anterior `[MEDIDO — 23/09/2026, alias + instrumento]`:** branch `claude/hopeful-newton-yjv3k7`
 sobre `main 182a473` (merge do PR #361; alias `Poeira da madeira` em `agentes.yaml` `termos:` +
 3 correções de `comparar_matriz_gabarito`/`medir_audiometria_dem`) · **1317 passed, 6 skipped,
 0 failed** *(MEDIDO, árvore parada, 680.22s — 1312 + 5 testes novos)* · `mypy --strict` alvo

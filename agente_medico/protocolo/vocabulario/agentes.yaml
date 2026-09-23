@@ -270,7 +270,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
-    termos: ["Metiletilcetona (MEK)"]
+    # "Metiletilcetona" sem o sufixo (MEK) (PGRs Fascino, Porto Araras I, Vila Brasil) e com o
+    # produto na frente (Vila Brasil) — DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Metiletilcetona (MEK)", "Metiletilcetona", "Adesivo CPVC Metiletilcetona"]
   cloreto_de_hidrogenio:
     tipo_ibe: null
     cas: "7647-01-0"
@@ -489,6 +491,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Argamassa Cimento Portland"]
   silicato_tricalcico:
     # FDS Cimento Ciplan, componente 20-70%. is_carcinogeno_iarc=false [DERIVADO — não
     # encontrado nas Monografias IARC; sem avaliação individual].
@@ -497,6 +502,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Silicato tricálcico"]
   silicato_dicalcico:
     # FDS Cimento Ciplan, componente 10-60%. is_carcinogeno_iarc=false [DERIVADO — não
     # encontrado nas Monografias IARC; sem avaliação individual].
@@ -505,6 +513,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Silicato dicálcico"]
   ferro_aluminato_de_calcio:
     # FDS Cimento Ciplan, componente 5-15%. is_carcinogeno_iarc=false [DERIVADO — não
     # encontrado nas Monografias IARC; sem avaliação individual].
@@ -513,6 +524,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Ferro- aluminato de cálcio"]
   aluminato_tricalcico:
     # FDS Cimento Ciplan, componente 1-15%. CAS CORRIGIDO — a FDS real declara "1242-78-3",
     # que FALHA o dígito verificador (cas_bem_formado, D-ARQ-33 cl.3); o CAS Registry correto
@@ -526,6 +540,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Aluminato tricálcico"]
   carbonato_de_calcio:
     # FDS Cimento Ciplan, componente 0-5%. is_carcinogeno_iarc=false [DERIVADO — IARC/ACGIH:
     # não classificado; calcário/carbonato de cálcio mineral].
@@ -534,6 +551,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Carbonato de cálcio"]
   oxido_de_magnesio:
     # FDS Cimento Ciplan, componente 0-4%. is_carcinogeno_iarc=false [DERIVADO — não
     # encontrado nas Monografias IARC; sem avaliação individual].
@@ -542,6 +562,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Óxido de magnésio (livre)"]
   oxido_de_calcio:
     # FDS Cimento Ciplan, componente 0-0,2% (cal virgem). is_carcinogeno_iarc=false
     # [DERIVADO — IARC/ACGIH: não classificado; a preocupação de carcinogenicidade em
@@ -551,6 +574,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Óxido de cálcio (livre)"]
   oxido_de_ferro_amarelo:
     # FDS Tinta Acrílica (fds_originais/tinta_acrilica.pdf), pigmento 1-3%. is_carcinogeno_iarc=false
     # [DERIVADO — IARC/ACGIH/NTP/OSHA: não classificado — Pigment Yellow 42].
@@ -578,6 +604,9 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR Fascino (Consciente SPE 0030), grafia do PGR com o erro "acriílica"; \x00 some na normalização) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Massa acriílica - Hidróxido de amônia 24°Be"]
   copolimero_de_pvc:
     # FDS Adesivo PVC Incolor Tigre (fds_originais/270 -FISPQ -  Adesivo PVC Incolor Tigre.pdf),
     # componente 15-35%. is_carcinogeno_iarc=false [DERIVADO — IARC Monografia Vol.19 (1979),
@@ -929,6 +958,9 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Adesivo CPVC Ciclohexanona"]
   clorobenzeno:
     tipo_ibe: EE
     cas: "108-90-7"
