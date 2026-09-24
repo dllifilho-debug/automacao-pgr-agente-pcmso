@@ -109,6 +109,15 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 24/09/2026, nível P×S na rota LLM]`:** branch `claude/eager-fermat-txbn7h`
+sobre `main 5540c15` (merge do PR #369; IMPLEMENTAÇÃO — rota LLM transcreve S·P·NÍVEL, guarda
+determinística restringe à escala P×S) · **1364 passed, 6 skipped, 0 failed** *(MEDIDO, árvore
+parada, 691.15s — 1358 + 6 testes novos)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** ·
+PROTOCOLO v98→**v99** (notas de aplicação, sem regra nova) · DECISOES v214→**v215** (nota em
+D-ARQ-49; índice regenerado, 85 decisões). `medir_painel`: `regras 26/45`, `cas 78/109`, `índice
+sincronizado` — inalterados (D-ARQ-85 cl.1). Guarda medida no acervo: 109/109 blocos P×S aceitos,
+0/318 de escore somado. Saída real do Gemini `[A MEDIR]` (sem chave no container).
+
 **Tiragem `[MEDIDO — 24/09/2026, conferência NR-07]` (branch `claude/eager-fermat-txbn7h` sobre
 `main ee241f6`; CONHECIMENTO — docs-only).** Fecha os dois `[A CONFERIR — D-ARQ-69]` de R-BIO-05 e
 R-RX-01-qual contra o PDF da NR-07 fornecido pelo Diovanni (cabeçalho até Portaria MTP 567/2022).
