@@ -9683,3 +9683,37 @@ Escala de escore aberta como `DT-(sessão claude/eager-fermat-txbn7h)-01` (decis
 **Próxima.** Medir a transcrição real num PGR P×S (Aurora Lago das Rosas tem gabarito) depois do
 deploy; `DT-(sessão claude/eager-fermat-txbn7h)-01`; vigia e planejamento (`DT-003EB-01`).
 
+## Sessão (branch `claude/determined-fermi-xxah3h`) — 24/09/2026 — MEDIÇÃO: saída real do Gemini com a regra 6b (Aurora Lago das Rosas)
+
+**Origem.** Diovanni rodou no app, após deploy a partir de `main c1b760e` (PRs #368/#369/#370), o
+`PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf` e anexou a matriz gerada
+(`matriz_8.docx`, sha256 `02193aee…f24f5`) e a tela exportada em PDF (30 p., sha256
+`37d77cf9…542ee`). Fecha o `[A MEDIR]` da sessão anterior. Sessão só de docs.
+
+**Método.** Leitura por tabela do `.docx` (python-docx) contra o texto do gabarito
+`matrizes_originais/MATRIZ DE EXAMES(ADENDO)…27.08.26.pdf` (pdfplumber), pareando GHE e cargo.
+Script descartável no scratchpad, não versionado: `comparar_matriz_gabarito` roda o motor pela
+rota offline e não consegue reproduzir a saída do Gemini — a entrada aqui é a matriz do app.
+
+**Medido.** (1) RX Tórax OIT: PER 12M em 03, 05, 08, 13, 14, 15, 16, 18, 22; 60M em 01, 02, 04,
+06, 07, 09, 10, 11, 12, 21; ausente em 17, 19, 20 — 22/22 GHEs e 59/59 cargos iguais ao gabarito.
+Sem medição quantitativa no PGR, o 12M só sai de `R-RX-01-qual`: o Gemini devolveu o nível P×S.
+(2) Nenhuma observação de risco irrelevante no `.docx` nem na tela; no PGR, 71 linhas `Químico`,
+41 BAIXO e 30 MODERADO, zero IRRELEVANTE. (3) Achado: GHE 11, acetona BAIXO, a Dra. Patrícia
+omite o indicador e anota "classificação baixo no PGR para Acetona"; o app emite (R-BIO-05 só
+dispensa IRRELEVANTE). Registrado em `DT-003EB-02`; decisão clínica, não alterado.
+
+**Fora do escopo, registrado para a fila.** A comparação célula a célula também mostra
+divergências em outros exames (GHEs 11, 12, 16, 18, 19, 20, 21, 22): Exame Clínico PER 6M,
+Acuidade Visual com DEM, RX coluna lombo-sacra no GHE 12, indicadores do serralheiro/pintor/
+impermeabilização (Mn, COHb, cobalto, TCA, t,t-muconico, reticulócitos). Contagem do script
+descartável `[A MEDIR]` com instrumento versionado — grafias do gabarito não normalizadas.
+
+**Verificação.** Nenhum código, teste ou `.yaml` tocado; `DECISOES` não tocado. Recorte: testes que
+leem `PENDENCIAS_CLINICAS.md`/`HISTORICO_OPERACIONAL.md` e o acervo
+(`test_particao_pendencias`, `test_varrer_acervo_lgpd`, `test_cobertura_varrer_acervo`): **34
+passed**. Os 2 de LibreOffice falharam antes na árvore limpa (ambiente, `libreoffice-writer`
+ausente); passaram após `apt-get install`.
+
+**Próxima.** A declarar: decisão clínica sobre BAIXO em R-BIO-05 à luz do GHE 11 do Aurora;
+`DT-(sessão claude/eager-fermat-txbn7h)-01`; vigia e planejamento (`DT-003EB-01`).

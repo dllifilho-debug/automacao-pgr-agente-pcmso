@@ -820,6 +820,19 @@ MTP 567/2022): o **7.5.12 "b"** torna os exames laboratoriais obrigatórios *"qu
 exposições ocupacionais acima dos níveis de ação determinados na NR-09 ou se a classificação de
 riscos do PGR indicar"* — R-BIO-05 é compatível com a norma. Detalhe e trecho literal em
 PROTOCOLO §5.9 (v98).
+
+**Nota (branch `claude/determined-fermi-xxah3h`, 24/09/2026) — Aurora: a Dra. Patrícia dispensa
+o indicador em BAIXO.** Matriz do app pós-deploy (rota LLM) × gabarito RQ.61 do Aurora Lago das
+Rosas 27.08.26. No GHE 11 (Instalações Hidro-sanitárias) o PGR classifica Acetona como **BAIXO**
+(P1×S3) e MEK, Ciclohexanona e THF como **MODERADO**. O gabarito pede MEK, ciclohexanol e THF
+(PER 6M) e **omite a acetona**, com anotação manuscrita *"classificação baixo no PGR para
+Acetona"* nos 3 cargos. O app emite `Acetona na urina (PER 6 meses)` nos 3 — correto sob R-BIO-05
+(só IRRELEVANTE dispensa), superemissão contra o gabarito. É contraexemplo da medição que motivou
+"só IRRELEVANTE" ("a Dra. Patrícia pede o indicador em BAIXO em 10/10 células"): a mesma médica,
+num PGR posterior, dispensa em BAIXO e anota o motivo. Nenhum químico do Aurora está em
+IRRELEVANTE (71 linhas `Químico`: 41 BAIXO, 30 MODERADO), então R-BIO-05 não dispara e nenhuma
+observação sai — como esperado. **Não alterado:** o corte BAIXO×IRRELEVANTE é decisão clínica do
+Diovanni `[MEDIDO — branch claude/determined-fermi-xxah3h]`.
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
@@ -884,6 +897,14 @@ dois ramos lidos em 003.EH, sem ramo qualitativo. Detalhe em PROTOCOLO §5.4 (v9
 **Nota (mesma branch, 24/09/2026) — item (b) parcialmente fechado.** A rota LLM passa a extrair a
 avaliação nos PGRs de escala P×S (5 do acervo, 109 blocos); nos de escore somado segue ausente,
 por guarda determinística — ver `DT-(sessão claude/eager-fermat-txbn7h)-01`. Rota card segue sem.
+**Nota (branch `claude/determined-fermi-xxah3h`, 24/09/2026) — `[A MEDIR]` da rota LLM fechado
+no Aurora.** Matriz gerada no app pós-deploy de `main c1b760e` (Gemini, prompt com regra 6b) ×
+gabarito da Dra. Patrícia: RX Tórax OIT **PER 12 meses** exatamente nos GHEs 03, 05, 08, 13, 14,
+15, 16, 18 e 22 (27 cargos), **60 meses** nos GHEs 01, 02, 04, 06, 07, 09, 10, 11, 12 e 21, sem RX
+em 17, 19 e 20 — **22/22 GHEs e 59/59 cargos idênticos ao gabarito** na periodicidade do RX. O
+PGR não tem medição quantitativa, então o 12M só pode vir de `R-RX-01-qual`: o Gemini devolveu o
+nível P×S nas linhas de sílica e a guarda de escala o aceitou. A antiga divergência 24M×12M do
+Aurora (nota da branch `claude/festive-gates-soy0fr` acima) está fechada.
 
 ### DT-(sessão claude/eager-fermat-txbn7h)-01 — PGRs de escore somado (Trivial…Intolerável) não têm nível P×S: R-RX-01-qual e R-BIO-05 não se aplicam `[ABERTA — decisão clínica]`
 
