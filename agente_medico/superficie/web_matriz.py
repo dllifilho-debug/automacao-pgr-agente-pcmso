@@ -31,8 +31,10 @@ from agente_medico.adaptadores.orquestracao_pgr import preparar_pgr_hidratado
 from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini
 from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
+from agente_medico.motor.composicao import resolver_composicao
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.protocolo import Protocolo, carregar
+from agente_medico.motor.resolvedor import construir_indice_cas
 from agente_medico.motor.tipos import (
     FDS,
     PGR,
@@ -56,6 +58,8 @@ from agente_medico.superficie.documento_matriz import (
 
 __all__ = [
     "CacheMatrizes",
+    "ComponenteAnexado",
+    "ProdutoAnexado",
     "TranscritorGemini",
     "anexar_produto_e_reprocessar",
     "calcular_chave_cache",
@@ -63,11 +67,14 @@ __all__ = [
     "executar_rota_determinista",
     "executar_rota_determinista_cacheada",
     "gerar_documento",
+    "ghes_com_produto",
+    "listar_produtos_anexados",
     "montar_envelope",
     "montar_fds",
     "pagina_matriz",
     "preparar_composicao",
     "preparar_composicao_cacheada",
+    "remover_produto_e_reprocessar",
 ]
 
 
@@ -308,7 +315,33 @@ def anexar_produto_e_reprocessar(
         else ghe
         for ghe in cache.pgr_hidratado.ghes
     )
-    pgr_atualizado = dataclasses.replace(cache.pgr_hidratado, ghes=ghes_novos)
+    return _reprocessar(cache, protocolo, dataclasses.replace(cache.pgr_hidratado, ghes=ghes_novos))
+
+
+def remover_produto_e_reprocessar(
+    cache: CacheMatrizes,
+    protocolo: Protocolo,
+    ghe_id: str,
+    nome_produto: str,
+) -> CacheMatrizes:
+    """Inverso de anexar_produto_e_reprocessar: tira do GHE `ghe_id` todo
+    produto chamado `nome_produto` e roda processar_pgr de novo, sem PDF/LLM.
+    Os demais GHEs ficam intactos, mesmo com produto de mesmo nome.
+    Precondição (responsabilidade da casca): cache.pgr_hidratado is not None."""
+    assert cache.pgr_hidratado is not None
+    ghes_novos = tuple(
+        dataclasses.replace(
+            ghe,
+            produtos_quimicos=tuple(p for p in ghe.produtos_quimicos if p.nome != nome_produto),
+        )
+        if ghe.id == ghe_id
+        else ghe
+        for ghe in cache.pgr_hidratado.ghes
+    )
+    return _reprocessar(cache, protocolo, dataclasses.replace(cache.pgr_hidratado, ghes=ghes_novos))
+
+
+def _reprocessar(cache: CacheMatrizes, protocolo: Protocolo, pgr_atualizado: PGR) -> CacheMatrizes:
     resultado = processar_pgr(pgr_atualizado, protocolo)
     return dataclasses.replace(
         cache,
@@ -316,6 +349,53 @@ def anexar_produto_e_reprocessar(
         matrizes=tuple(resultado.matrizes),
         status=resultado.status,
         pendencias_globais=tuple(resultado.pendencias_globais),
+    )
+
+
+@dataclass(frozen=True)
+class ComponenteAnexado:
+    """Componente de FDS como o motor o resolveu: `agente` é o slug do
+    vocabulário, ou None quando o CAS não está lá (vira pendência, não risco)."""
+
+    cas: str
+    nome: str
+    agente: str | None
+
+
+@dataclass(frozen=True)
+class ProdutoAnexado:
+    ghe_id: str
+    ghe_nome: str
+    nome: str
+    componentes: tuple[ComponenteAnexado, ...]
+
+
+def ghes_com_produto(pgr: PGR, nome_produto: str) -> tuple[str, ...]:
+    """IDs dos GHEs que já têm um produto com este nome — base do status da
+    FDS na tela e da recusa de anexo duplicado."""
+    return tuple(
+        ghe.id for ghe in pgr.ghes if any(p.nome == nome_produto for p in ghe.produtos_quimicos)
+    )
+
+
+def listar_produtos_anexados(pgr: PGR, protocolo: Protocolo) -> tuple[ProdutoAnexado, ...]:
+    """Produtos anexados por GHE, com cada componente já resolvido pelo mesmo
+    resolver_composicao que processar_pgr usa — a tela mostra o agente que o
+    motor de fato enxergou, não a transcrição crua da FDS."""
+    pgr_resolvido, _ = resolver_composicao(pgr, construir_indice_cas(protocolo.vocabulario.agentes))
+    return tuple(
+        ProdutoAnexado(
+            ghe_id=ghe.id,
+            ghe_nome=ghe.nome,
+            nome=produto.nome,
+            componentes=tuple(
+                ComponenteAnexado(cas=c.cas, nome=c.nome, agente=c.agente)
+                for c in produto.fds.composicao
+            ),
+        )
+        for ghe in pgr_resolvido.ghes
+        for produto in ghe.produtos_quimicos
+        if produto.fds is not None
     )
 
 
@@ -361,9 +441,12 @@ def pagina_matriz() -> None:
         _protocolo_padrao,
         anexar_produto_e_reprocessar,
         executar_rota_determinista_cacheada,
+        ghes_com_produto,
+        listar_produtos_anexados,
         montar_envelope,
         montar_fds,
         preparar_composicao_cacheada,
+        remover_produto_e_reprocessar,
     )
 
     st.title("Matriz de Exames — PCMSO")
@@ -426,13 +509,54 @@ def pagina_matriz() -> None:
                 key=f"nome_produto_{arquivo_fds.name}",
             )
             if st.button("Anexar ao GHE selecionado", key=f"anexar_fds_{arquivo_fds.name}"):
-                protocolo = _protocolo_padrao()
-                fds_extraida = montar_fds(blocos_fds)
-                cache = anexar_produto_e_reprocessar(
-                    cache, protocolo, ghe_escolhido, nome_produto, fds_extraida
+                if ghe_escolhido in ghes_com_produto(cache.pgr_hidratado, nome_produto):
+                    st.warning(
+                        f"'{nome_produto}' já está anexado ao GHE {ghe_escolhido} — nada foi alterado."
+                    )
+                else:
+                    protocolo = _protocolo_padrao()
+                    fds_extraida = montar_fds(blocos_fds)
+                    cache = anexar_produto_e_reprocessar(
+                        cache, protocolo, ghe_escolhido, nome_produto, fds_extraida
+                    )
+                    st.session_state["web_matriz_cache"] = cache
+                    st.success(f"Produto '{nome_produto}' anexado ao GHE {ghe_escolhido}.")
+            # Lido DEPOIS do clique: no rerun do próprio "Anexar" o status já
+            # reflete o anexo — antes, a única confirmação era o st.success,
+            # que some na interação seguinte.
+            assert cache.pgr_hidratado is not None
+            anexada_em = ghes_com_produto(cache.pgr_hidratado, nome_produto)
+            if anexada_em:
+                st.caption(f"Status: anexada a {', '.join(anexada_em)}.")
+            else:
+                st.caption("Status: ainda não anexada a nenhum GHE.")
+
+    if arquivo is not None and cache is not None and cache.pgr_hidratado is not None:
+        st.subheader("Produtos anexados")
+        # listar_produtos_anexados carrega o protocolo; sem produto não há o que resolver.
+        produtos_anexados = (
+            listar_produtos_anexados(cache.pgr_hidratado, _protocolo_padrao())
+            if any(ghe.produtos_quimicos for ghe in cache.pgr_hidratado.ghes)
+            else ()
+        )
+        if not produtos_anexados:
+            st.caption("Nenhum produto anexado.")
+        for produto_anexado in produtos_anexados:
+            st.write(
+                f"**{produto_anexado.ghe_id} — {produto_anexado.ghe_nome}** · {produto_anexado.nome}"
+            )
+            for componente in produto_anexado.componentes:
+                agente = componente.agente or "não reconhecido no vocabulário"
+                st.write(f"- CAS {componente.cas or '—'} | {componente.nome} → {agente}")
+            if st.button(
+                "Remover",
+                key=f"remover_{produto_anexado.ghe_id}_{produto_anexado.nome}",
+            ):
+                cache = remover_produto_e_reprocessar(
+                    cache, _protocolo_padrao(), produto_anexado.ghe_id, produto_anexado.nome
                 )
                 st.session_state["web_matriz_cache"] = cache
-                st.success(f"Produto '{nome_produto}' anexado ao GHE {ghe_escolhido}.")
+                st.rerun()
 
     if arquivo is None:
         st.session_state.pop("web_matriz_cache", None)

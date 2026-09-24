@@ -109,6 +109,15 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 24/09/2026, painel de produtos anexados]`:** branch
+`claude/determined-fermi-xxah3h` sobre `main bc2c54a` (merge do PR #371; IMPLEMENTAÇÃO de
+superfície — fatia A de `DT-(sessão claude/determined-fermi-xxah3h)-01`) · **1369 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada,
+778.61s — 1364 + 5 testes novos)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** ·
+PROTOCOLO e DECISOES inalterados. `medir_painel`: `regras 26/45`, `cas 78/109`, `índice
+sincronizado` — inalterados; três números clínicos **não re-tirados** (D-ARQ-85 cl.1): nenhuma
+`R-*` nem `.yaml` tocados. Entre o baseline anterior e este, o PR #371 (só docs, medição do Gemini
+no Aurora) mergeou sem bloco próprio — suíte não afetada.
+
 **Baseline `[MEDIDO — 24/09/2026, nível P×S na rota LLM]`:** branch `claude/eager-fermat-txbn7h`
 sobre `main 5540c15` (merge do PR #369; IMPLEMENTAÇÃO — rota LLM transcreve S·P·NÍVEL, guarda
 determinística restringe à escala P×S) · **1364 passed, 6 skipped, 0 failed** *(MEDIDO, árvore

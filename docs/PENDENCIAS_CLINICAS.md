@@ -3357,3 +3357,27 @@ sequência e pode bater no RPM do nível gratuito — espaçamento/backoff em 42
 resposta (por minuto × por dia), então a tela não diz ao RT se basta esperar. (c) O nível
 gratuito (20 RPD por modelo Flash, painel do AI Studio em 24/09/2026) não comporta um dia normal
 de PGR + FDS — decisão de faturamento é do Diovanni.
+
+
+### DT-(sessão `claude/determined-fermi-xxah3h`)-01 — Produtos de FDS anexados não aparecem na tela da matriz `[ABERTA — fatia A implementada, 24/09/2026]`
+
+**Origem.** Diovanni, depois de rodar o Aurora Lago das Rosas com 16 FDS: "não consegui enxergar
+elas". Medido na tela exportada: a confirmação "Produto X anexado ao GHE Y" só aparece no rerun do
+próprio clique e some na interação seguinte; nenhuma lista de anexos por GHE; as pendências de
+Fase C citam CAS das FDS sem dizer de qual produto/GHE. A FDS de aguarrás (benzeno <0,1%) aparece
+com o seletor em GHE-16 (Serralheria), mas a aguarrás está no GHE 18 (Pintura) do PGR — o motor
+emite ácido t,t-mucônico ao serralheiro (o gabarito não pede) e não ao pintor (o gabarito pede).
+Com o anexo visível, o operador teria visto.
+
+**Fatia A (implementada, mesma branch).** Status por FDS lido depois do clique ("anexada a
+GHE-xx" / "ainda não anexada"); recusa de anexo duplicado (mesmo nome no mesmo GHE); painel
+"Produtos anexados" com cada componente como `resolver_composicao` o resolve (CAS → slug ou "não
+reconhecido no vocabulário") e botão Remover (`remover_produto_e_reprocessar`, sem PDF/LLM).
+
+**Resta.** (B) origem do exame na revisão ("via FDS X, componente Y") — o `Motivo` de
+`stage_5_emissao` não carrega o produto hoje (`risco_origem=None`), então é mudança de motor, não
+só de tela; (C) anexos que sobrevivem a reprocessamento (a chave do cache inclui o envelope —
+trocar validade/assinatura refaz o PGR hidratado sem os produtos, sem aviso; leitura de código,
+`[A MEDIR]`) e FDS em mais de um GHE — muda o contrato de `CacheMatrizes` (D-ARQ-49 Parte 2
+fatia 2b), exige nota de decisão antes.
+

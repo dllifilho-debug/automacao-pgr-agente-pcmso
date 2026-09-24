@@ -9717,3 +9717,25 @@ ausente); passaram após `apt-get install`.
 
 **Próxima.** A declarar: decisão clínica sobre BAIXO em R-BIO-05 à luz do GHE 11 do Aurora;
 `DT-(sessão claude/eager-fermat-txbn7h)-01`; vigia e planejamento (`DT-003EB-01`).
+
+## Sessão (branch `claude/determined-fermi-xxah3h`, continuação pós-merge do PR #371) — 24/09/2026 — IMPLEMENTAÇÃO: painel de produtos anexados (fatia A de `DT-(sessão claude/determined-fermi-xxah3h)-01`)
+
+**Origem.** Diovanni não conseguiu ver as FDS anexadas na tela da matriz (Aurora, 16 FDS). Das 5
+melhorias propostas, ordem acordada: PR A (status + painel), PR B (origem na revisão + Decreto
+3.048 na revisão), PR C (anexos persistentes + multi-GHE, com nota D-ARQ antes). Branch recriada
+de `origin/main bc2c54a`.
+
+**Implementado.** Núcleo puro em `superficie/web_matriz.py`: `ghes_com_produto`,
+`listar_produtos_anexados` (componente resolvido pelo mesmo `resolver_composicao` do motor),
+`remover_produto_e_reprocessar`; `anexar_produto_e_reprocessar` e o remover passam a dividir
+`_reprocessar`. Casca: status por FDS depois do clique, recusa de duplicata com aviso, painel
+"Produtos anexados" com Remover (`st.rerun` depois de gravar o cache). Nenhuma regra clínica,
+`.yaml`, tipo do motor ou D-ARQ tocado.
+
+**Verificação.** 5 testes novos em `test_web_matriz.py`; varredura inversa em cópia isolada, 6
+reversões (listar sem resolver; remover ignorando `ghe_id`; remover sem reprocessar; status antes
+do clique; sem checagem de duplicata; Remover sem gravar `session_state`) — cada teste novo morre
+com a sua. Suíte completa (árvore parada): **1369 passed, 6 skipped, 0 failed** (778.61s), +5
+exato contra 1364. `mypy --strict` alvo canônico limpo, 49 arquivos.
+
+**Próxima.** PR B, depois do merge deste.
