@@ -36,6 +36,7 @@ from agente_medico.motor.protocolo import Protocolo, carregar
 from agente_medico.motor.tipos import (
     FDS,
     PGR,
+    BlocoVerbatim,
     EnvelopeConfirmado,
     GHEVerbatim,
     MatrizGHE,
@@ -43,6 +44,7 @@ from agente_medico.motor.tipos import (
     ProdutoQuimico,
 )
 from agente_medico.motor.transcricao_fds import montar_fds
+from agente_medico.motor.transcritor_fds import TranscritorLLM
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
 from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
@@ -65,6 +67,7 @@ __all__ = [
     "montar_fds",
     "pagina_matriz",
     "preparar_composicao",
+    "preparar_composicao_cacheada",
 ]
 
 
@@ -316,6 +319,32 @@ def anexar_produto_e_reprocessar(
     )
 
 
+ComposicaoFDS = tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]
+
+
+def preparar_composicao_cacheada(
+    caminho: Path,
+    conteudo: bytes,
+    cliente: TranscritorLLM,
+    cache: dict[str, ComposicaoFDS],
+) -> ComposicaoFDS:
+    """preparar_composicao memoizado pelo hash do CONTEÚDO da FDS. Sem isto a
+    casca re-transcrevia TODAS as FDS enviadas a cada rerun do Streamlit
+    (qualquer widget, inclusive o clique em "Anexar") — N chamadas LLM por
+    interação, 429 da cascata inteira, e no rerun do clique a composição
+    vinha vazia, o botão não era renderizado e o anexo se perdia.
+    `transcricao_indisponivel_fds` é falha transitória de invocação (cota,
+    rede) e NÃO é memoizada — o próximo rerun tenta de novo; composição
+    extraída e `composicao_ausente_fds` são determinísticas sobre o conteúdo."""
+    chave = hashlib.sha256(conteudo).hexdigest()
+    if chave in cache:
+        return cache[chave]
+    resultado = preparar_composicao(caminho, cliente)
+    if not any(p.tipo == "transcricao_indisponivel_fds" for p in resultado[1]):
+        cache[chave] = resultado
+    return resultado
+
+
 def pagina_matriz() -> None:
     import tempfile
     from pathlib import Path
@@ -334,7 +363,7 @@ def pagina_matriz() -> None:
         executar_rota_determinista_cacheada,
         montar_envelope,
         montar_fds,
-        preparar_composicao,
+        preparar_composicao_cacheada,
     )
 
     st.title("Matriz de Exames — PCMSO")
@@ -357,13 +386,17 @@ def pagina_matriz() -> None:
     arquivos_fds = st.file_uploader(
         "PDF(s) da FDS/FISPQ", type="pdf", accept_multiple_files=True, key="fds_avulsas"
     )
+    cache_fds: dict[str, ComposicaoFDS] = st.session_state.setdefault("web_matriz_cache_fds", {})
     for arquivo_fds in arquivos_fds or ():
         st.write(f"**{arquivo_fds.name}**")
         with tempfile.TemporaryDirectory() as tmp_fds:
             caminho_fds = Path(tmp_fds) / arquivo_fds.name
-            caminho_fds.write_bytes(arquivo_fds.getvalue())
+            conteudo_fds = arquivo_fds.getvalue()
+            caminho_fds.write_bytes(conteudo_fds)
             with st.spinner(f"Lendo composição de {arquivo_fds.name}..."):
-                blocos_fds, pendencias_fds = preparar_composicao(caminho_fds, TranscritorGemini())
+                blocos_fds, pendencias_fds = preparar_composicao_cacheada(
+                    caminho_fds, conteudo_fds, TranscritorGemini(), cache_fds
+                )
         for bloco_fds in blocos_fds:
             st.write(f"Faixa: {bloco_fds.faixa}")
             for membro in bloco_fds.membros:

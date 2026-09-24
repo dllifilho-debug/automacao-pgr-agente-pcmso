@@ -40,6 +40,7 @@ from agente_medico.superficie.web_matriz import (
     gerar_documento,
     montar_envelope,
     pagina_matriz,
+    preparar_composicao_cacheada,
 )
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
@@ -792,3 +793,104 @@ def test_pagina_matriz_fds_anexada_persiste_entre_reruns_sem_chamada_ia(
     assert cache_rerun.pgr_hidratado.ghes[0].produtos_quimicos != ()
     assert "tolueno" in cache_rerun.matrizes[0].riscos_resolvidos
     assert cache_rerun.chamadas_ia == 0
+
+
+# ---------------------------------------------------------------------------
+# Memoização da transcrição de FDS por conteúdo — antes, cada rerun do
+# Streamlit re-transcrevia todas as FDS (HTTP 429 em produção) e o clique em
+# "Anexar" se perdia quando a cota estourava no rerun do próprio clique.
+# ---------------------------------------------------------------------------
+
+_PENDENCIA_429 = Pendencia(
+    tipo="transcricao_indisponivel_fds",
+    destinatario="extracao",
+    motivo="cascata Gemini sem resposta íntegra (200 + STOP) — HTTP 429",
+    bloqueante=True,
+    regra_origem="D-ARQ-47",
+)
+
+
+def test_preparar_composicao_cacheada_nao_retranscreve_mesmo_conteudo(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # Reversão que mata: remover o `if chave in cache: return cache[chave]`
+    # de preparar_composicao_cacheada — a 2ª chamada com os mesmos bytes
+    # invocaria o transcritor de novo (chamadas == 2).
+    chamadas: list[Path] = []
+
+    def _preparar_espiao(caminho: Path, cliente: Any) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        chamadas.append(caminho)
+        return (_FDS_TOLUENO,), ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_composicao", _preparar_espiao)
+    cache: dict[str, Any] = {}
+    primeira = preparar_composicao_cacheada(tmp_path / "a.pdf", b"fds", object(), cache)  # type: ignore[arg-type]
+    segunda = preparar_composicao_cacheada(tmp_path / "b.pdf", b"fds", object(), cache)  # type: ignore[arg-type]
+
+    assert len(chamadas) == 1
+    assert primeira == segunda == ((_FDS_TOLUENO,), ())
+
+
+def test_preparar_composicao_cacheada_nao_memoiza_falha_de_invocacao(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # Reversão que mata: memoizar incondicionalmente (remover o guard de
+    # `transcricao_indisponivel_fds`) — o 429 ficaria gravado e a 2ª chamada
+    # devolveria a pendência em vez de tentar de novo e obter a composição.
+    respostas = iter([((), (_PENDENCIA_429,)), ((_FDS_TOLUENO,), ())])
+
+    def _preparar_falso(caminho: Path, cliente: Any) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        return next(respostas)
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_composicao", _preparar_falso)
+    cache: dict[str, Any] = {}
+    primeira = preparar_composicao_cacheada(tmp_path / "a.pdf", b"fds", object(), cache)  # type: ignore[arg-type]
+    segunda = preparar_composicao_cacheada(tmp_path / "a.pdf", b"fds", object(), cache)  # type: ignore[arg-type]
+
+    assert primeira == ((), (_PENDENCIA_429,))
+    assert segunda == ((_FDS_TOLUENO,), ())
+
+
+def test_pagina_matriz_anexar_fds_nao_retranscreve_e_sobrevive_a_429(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reproduz o caso de produção (PGR CMO Aurora, 23/09/2026): cota estoura
+    # depois da 1ª leitura. Reversão que mata: a casca voltar a chamar
+    # preparar_composicao direto, ou não persistir o cache de FDS em
+    # st.session_state (dict novo a cada rerun) — o rerun do clique
+    # re-transcreve, recebe o 429, o botão some e o produto não é anexado.
+    pgr_sintetico = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-18", nome="PINTURA", cargos=("Pintor",)))
+
+    def _preparar_pgr_falso(*args: Any, **kwargs: Any) -> tuple[PGR, tuple[Pendencia, ...]]:
+        return pgr_sintetico, ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_pgr_falso)
+    chamadas: list[str] = []
+
+    def _preparar_composicao_com_cota(
+        caminho: Path, cliente: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        chamadas.append(caminho.name)
+        if len(chamadas) > 2:
+            return (), (_PENDENCIA_429,)
+        return (_FDS_TOLUENO,), ()
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_composicao", _preparar_composicao_com_cota
+    )
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    at.file_uploader[1].set_value(
+        [("f0.pdf", b"fds zero", "application/pdf"), ("f1.pdf", b"fds um", "application/pdf")]
+    ).run()
+    assert not at.exception
+    assert chamadas == ["f0.pdf", "f1.pdf"]
+
+    at.button(key="anexar_fds_f0.pdf").click().run()
+    assert not at.exception
+
+    assert chamadas == ["f0.pdf", "f1.pdf"]
+    produtos = at.session_state["web_matriz_cache"].pgr_hidratado.ghes[0].produtos_quimicos
+    assert [produto.nome for produto in produtos] == ["f0"]

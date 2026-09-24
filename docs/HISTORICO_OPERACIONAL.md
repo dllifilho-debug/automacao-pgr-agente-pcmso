@@ -9528,3 +9528,25 @@ linhas medidas; parser não o extrai.
 
 **Próxima.** Implementação, uma por vez, na ordem a declarar pelo Diovanni. As três mudam
 `PROTOCOLO`/`regras.yaml` (R-RX-01, R-VIS-01/R-AUD, R-BIO-04) — gate D-ARQ-63.
+
+## Sessão (branch `claude/inspiring-turing-0ylkmk`) — 24/09/2026 — IMPLEMENTAÇÃO: memoização da transcrição de FDS na tela da matriz (429 em produção)
+
+**Origem.** Teste do Diovanni com o app (PGR CMO Aurora + ~17 FDS): 429 na cascata Gemini inteira
+e falha ao vincular FDS ao GHE. Branch sobre `main 0eef391` (merge do PR #364).
+
+**Causa e fix.** Ver `DT-(sessão claude/inspiring-turing-0ylkmk)-01`: a casca re-transcrevia
+todas as FDS a cada rerun; `preparar_composicao_cacheada` memoiza por hash do conteúdo, sem
+memoizar `transcricao_indisponivel_fds`.
+
+**Medido.** Suíte completa (`agente_medico/tests/ tests/`, árvore parada): **1334 passed, 6
+skipped, 0 failed** (682.35s) — delta +3 exato contra 1331 (os 3 testes novos). `mypy --strict`
+alvo canônico: limpo, **49 arquivos**. Varredura inversa 3/3. Três números clínicos não
+re-tirados: nenhuma `R-*` nem `.yaml` tocado (D-ARQ-85 cl.1). `DECISOES` não tocado.
+
+**Ambiente.** O hook `.claude/hooks/session-start.sh` falhou neste container: `pip install
+cffi cryptography` → "Cannot uninstall cryptography 41.0.7, RECORD file not found" (pacote do
+Debian); `set -e` abortou antes de `requirements-dev.txt`, sessão abriu sem `streamlit`/`pytest`.
+Contornado à mão com `--ignore-installed`; o hook não foi alterado nesta sessão.
+
+**Próxima.** A declarar: as três decisões clínicas pendentes (R-RX-01, R-VIS-01/R-AUD, R-BIO-04)
+e os itens (a)-(c) da DT acima.

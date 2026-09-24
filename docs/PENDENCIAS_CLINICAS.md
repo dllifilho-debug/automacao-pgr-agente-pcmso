@@ -3215,3 +3215,33 @@ de fenol urinário (bisfenol/polímero, fora de propósito) e 1 de `Produtos Dom
 Araras: pintor passa a ter MEK urinário, como o gabarito pede. Fascino: +1 linha (`mek_urina` no
 GHE PINTURA), onde o gabarito não pede — caso de `DT-003EB-02`. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
 
+
+### DT-(sessão `claude/inspiring-turing-0ylkmk`)-01 — Tela da matriz re-transcreve todas as FDS a cada rerun: 429 na cascata inteira e o "Anexar ao GHE" se perde `[RESOLVIDA — IMPLEMENTAÇÃO, mesma sessão, 24/09/2026]`
+
+**Origem.** Teste do Diovanni em produção (PGR CMO Aurora + ~17 FDS, 23-24/09/2026): FDS com
+`transcricao_indisponivel_fds` — HTTP 429 nos três modelos da cascata — e o anexo de `Fundo
+Zarcão` ao GHE-18 não acontecia. Painel do AI Studio (nível gratuito, capturas do Diovanni): ~600
+requisições no dia, ~400 delas 429; pico RPM 23/15 no Flash Lite, RPD 23/20 nos dois Flash.
+
+**Causa.** `pagina_matriz` chamava `preparar_composicao(..., TranscritorGemini())` para cada FDS
+enviada em **todo** rerun do Streamlit (qualquer widget: selectbox de GHE, nome do produto,
+clique em "Anexar", submit do formulário). N FDS × até 3 modelos por interação; os próprios 429
+contam na janela por minuto, então a cota não se recuperava enquanto a tela era usada. No rerun
+do clique, a composição voltava vazia (429), o bloco `if ... and blocos_fds:` não renderizava o
+botão e o clique era descartado. Reproduzido com `AppTest` (3 FDS: upload 3 chamadas, clique +3;
+com 429 no 2º rerun, produto não anexado e botão ausente). Os testes existentes não pegavam:
+mockavam `preparar_composicao` com retorno fixo, sem contar chamadas por rerun.
+
+**Fix.** `preparar_composicao_cacheada` (núcleo puro de `superficie/web_matriz.py`): memoiza por
+SHA-256 do conteúdo da FDS num dict em `st.session_state["web_matriz_cache_fds"]`.
+`transcricao_indisponivel_fds` (falha transitória de invocação) **não** é memoizada — o rerun
+seguinte tenta de novo; composição extraída e `composicao_ausente_fds` são determinísticas sobre
+o conteúdo e são. 3 testes, varredura inversa 3/3 discriminantes (reversões: remover o lookup;
+memoizar incondicionalmente; dict novo por rerun / casca chamando `preparar_composicao` direto).
+
+**Fora do escopo, a decidir.** (a) Upload de muitas FDS de uma vez ainda dispara N chamadas em
+sequência e pode bater no RPM do nível gratuito — espaçamento/backoff em 429 muda a decisão
+"sem retry por modelo" de D-ARQ-47/48. (b) O motivo do 429 não carrega o `quotaId` do corpo da
+resposta (por minuto × por dia), então a tela não diz ao RT se basta esperar. (c) O nível
+gratuito (20 RPD por modelo Flash, painel do AI Studio em 24/09/2026) não comporta um dia normal
+de PGR + FDS — decisão de faturamento é do Diovanni.
