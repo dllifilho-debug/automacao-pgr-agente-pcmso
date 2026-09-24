@@ -68,6 +68,23 @@ regras:
     base_normativa: "Protocolo Dra. Carolini — rastreio de comorbidade para atividade crítica"
     status: VALIDADO
 
+  - id: R-PKG-TRANSITO
+    quando: transito_via_publica
+    emite:
+      - {exame: acuidade_visual, periodicidade_meses: 12, momentos: [adm, per, MR]}
+      - {exame: audiometria,     periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "DT-003EB-01 classe (4) — PGR declara o risco 'Bater contra ou ser
+      atingido por (trânsito)' (deslocamento/condução em via pública) -> acuidade visual +
+      audiometria 12M adm/per/MR. [INTERPRETADO — prioridade na revisão de saída]: decisão do
+      Diovanni (24/09/2026) sobre precedente medido — Patrícia, Vila Brasil Escritório
+      26/08/26 (DIREÇÃO 'conduz carro de pequeno porte'; PATRIMÔNIO 'dirige veículos leves') e
+      Carolini, SPE 0030 Fascino 08/07/26 (VENDAS): 3/3 GHEs com o risco recebem os dois
+      exames; 0 dos outros 58 GHEs dos 3 PGRs pareados. Sem âncora em NR. Gatilho é o risco de
+      trânsito declarado, não o cargo, e o veículo é leve — distinção das regras de motorista
+      e de equipamento pesado registrada no PROTOCOLO §6. Viés declarado (D-ARQ-81 cl.1):
+      construção civil, 2 médicas, n=3 GHEs."
+    status: INTERPRETADO
+
   - id: R-VIB-01
     quando: vibracao_corpo_inteiro
     emite:

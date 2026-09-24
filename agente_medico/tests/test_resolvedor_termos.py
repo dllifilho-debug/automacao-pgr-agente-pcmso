@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_166_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_168_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -53,7 +53,10 @@ def test_indice_real_tem_166_entradas(indice_real: IndiceTermos) -> None:
     # em `poeira_de_madeira`, achado da comparação PGR Porto Araras I × gabarito.
     # 154 -> 166 (mesma branch): +12 aliases "produto + componente" e grafias de MEK,
     # DT-(sessão claude/hopeful-newton-yjv3k7)-02 (aliases por termo, decisão do Diovanni).
-    assert len(indice_real.slug_por_forma) == 166
+    # 166 -> 168 (branch `claude/inspiring-turing-0ylkmk`): +1 slug `transito_via_publica`
+    # e +1 termo "Bater contra ou ser atingido por (trânsito)" (DT-003EB-01 classe 4,
+    # R-PKG-TRANSITO).
+    assert len(indice_real.slug_por_forma) == 168
 
 
 def test_poeira_da_madeira_resolve_exato(indice_real: IndiceTermos) -> None:

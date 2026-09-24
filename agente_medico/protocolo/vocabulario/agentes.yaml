@@ -50,6 +50,19 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-AUD-01, R-VIS-01]
+  transito_via_publica:
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: [R-PKG-TRANSITO]
+    # Perigo de acidente: deslocamento/condução em via pública. Só a frase completa entra —
+    # "trânsito" sozinho aparece no acervo em sentido de circulação a pé ("Evitar o trânsito
+    # em corredores", "Trânsito sobre terrenos acidentados") e superemitiria.
+    # [MEDIDO — 24/09/2026, parser_familia_consciente: PGR ADENDO VILA BRASIL ESCRITORIO
+    # 25.08.26 (GHEs DIREÇÃO e PATRIMÔNIO) e PGR CONSCIENTE SPE 0030 FASCINO 15.07.26 (GHE
+    # VENDAS), 3 ocorrências; mesma grafia no texto dos PGR Seconci R02AA REV3/REV4 (rota LLM).]
+    termos: ["Bater contra ou ser atingido por (trânsito)"]
   vibracao_mao_braco:
     tipo_ibe: null
     cas: null

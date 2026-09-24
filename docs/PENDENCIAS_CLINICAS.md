@@ -742,6 +742,21 @@ deslocamento em via pública" → compatível (2 células). **VIGILÂNCIA** (acu
 bloco: a hipótese não os explica. Implementação candidata: condução de veículo (descrição do cargo
 ou risco de trânsito) → acuidade visual + audiometria; vigia e planejamento seguem classe (4)
 abertos.
+
+**Implementação parcial (branch `claude/inspiring-turing-0ylkmk`, 24/09/2026) — `R-PKG-TRANSITO`.**
+Sinal escolhido pelo Diovanni entre três medidos: **risco de trânsito declarado**
+("Bater contra ou ser atingido por (trânsito)", slug novo `transito_via_publica`, só a frase
+completa). Medido nos 3 PGRs pareados: 3/3 GHEs com o risco recebem acuidade + audiometria no
+gabarito (DIREÇÃO e PATRIMÔNIO de Vila Brasil, VENDAS do Fascino), 0/58 dos demais. "Ver na
+descrição do cargo" acertava só a DIREÇÃO e dava falso positivo por "dirigem"/"conduzir" em 4
+GHEs — descartado. **Fecha o achado 003.ED do GHE-19 (Vendas):** o PGR **declara** o risco, e o
+termo não resolvia porque o parser colava a legenda "(P × S)" no último risco do bloco —
+corrigido (linha que começa na banda GRUPO sem ser categoria encerra o risco; no acervo
+determinístico inteiro, só esse risco mudou). Efeito `[MEDIDO — comparar_matriz_gabarito, antes =
+worktree main 5977bf5]`: subemissão 13→9 (Vila Brasil), 9→5 (Fascino), Porto Araras inalterado,
+zero superemissão nova. 4 testes (`test_pkg_transito.py`), varredura inversa 4/4. **Seguem
+abertos na classe (4):** VIGILÂNCIA (acuidade, 2 células) e PLANEJAMENTO (acuidade +
+audiometria, 4 células) de Vila Brasil — sem trânsito nem direção no bloco.
 ### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[ABERTA — 003.EB]`
 
 **Origem:** Sessão 003.EB (25/07/2026), mesmo diff acima.
