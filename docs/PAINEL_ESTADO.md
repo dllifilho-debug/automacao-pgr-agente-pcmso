@@ -109,7 +109,17 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
-**Baseline `[MEDIDO — 24/09/2026, cache de FDS na tela]`:** branch `claude/inspiring-turing-0ylkmk`
+**Baseline `[MEDIDO — 24/09/2026, R-RX-01-qual]`:** branch `claude/inspiring-turing-0ylkmk` sobre
+`main cadcd33` (merge do PR #365; IMPLEMENTAÇÃO — ramo `R-RX-01-qual`, sílica com avaliação
+qualitativa P×S → RX OIT 12M, fecha `DT-003EC-01`) · **1343 passed, 6 skipped, 0 failed**
+*(MEDIDO, árvore parada, 718.53s — 1334 + 9 testes novos)* · `mypy --strict` alvo canônico
+**limpo, 49 arquivos** · PROTOCOLO v94→**v95** · DECISOES v212→**v213** (notas em D-ARQ-19 e
+D-ARQ-49; índice regenerado, 85 decisões). `medir_painel`: `regras 25/44`, `cas 78/108`, `índice
+sincronizado` — `regras` não move porque `R-RX-01-qual` é entrada de implementação da mesma ID
+clínica `R-RX-01` (D-ARQ-20), não regra nova. O bloqueador `cas 50/80` × `78/108` da tabela segue
+reportado, não ajustado.
+
+**Baseline anterior `[MEDIDO — 24/09/2026, cache de FDS na tela]`:** branch `claude/inspiring-turing-0ylkmk`
 sobre `main 0eef391` (merge do PR #364; memoização da transcrição de FDS em `web_matriz.py`, fecha
 `DT-(sessão claude/inspiring-turing-0ylkmk)-01`) · **1334 passed, 6 skipped, 0 failed** *(MEDIDO,
 árvore parada, 682.35s — 1331 + 3 testes novos)* · `mypy --strict` alvo canônico **limpo, 49

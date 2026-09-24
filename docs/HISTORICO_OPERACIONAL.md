@@ -9550,3 +9550,31 @@ Contornado à mão com `--ignore-installed`; o hook não foi alterado nesta sess
 
 **Próxima.** A declarar: as três decisões clínicas pendentes (R-RX-01, R-VIS-01/R-AUD, R-BIO-04)
 e os itens (a)-(c) da DT acima.
+
+## Sessão (branch `claude/inspiring-turing-0ylkmk`, continuação pós-merge do PR #365) — 24/09/2026 — IMPLEMENTAÇÃO: `R-RX-01-qual` (sílica qualitativa → RX OIT 12M)
+
+**Origem.** Ordem do Diovanni: implementar a decisão clínica de 23/09 em `DT-003EC-01`. Branch
+recriada de `origin/main cadcd33`. Gate de abertura: PROTOCOLO v94 integral; ÍNDICE v212
+integral; transversais D-ARQ-{06,09,22} integrais; eixo RX/Quadro 1 = D-ARQ-{19,20,68,69,81}
+integrais; eixo extração/hidratação = D-ARQ-{49,51,65} só nos trechos de contrato.
+
+**Medido antes de codar.** `parsear_arquivo` devolvia `quantificacao=""` em todas as linhas de
+sílica dos 3 PGRs da família Consciente — a avaliação não chegava ao motor. As linhas trazem
+S·P·NÍVEL (matriz P×S); posição das colunas varia por documento (S@437/402/473), a ordem não.
+
+**Implementado.** `RiscoVerbatim.avaliacao_qualitativa` (banda calibrada por bloco) →
+`hidratacao.parsear_nivel_risco` → `RiscoPGR.nivel_risco` → `Risco.nivel_risco` (Fase A) →
+primitivo `silica_qualitativa` → `R-RX-01-qual` (12M, `[INTERPRETADO]`).
+`silica_asbesto_sem_medicao` passa a excluir o caso. Asbesto e rotas LLM/card fora, declarados.
+
+**Medido.** Captura 587/587 linhas de risco. `comparar_matriz_gabarito` antes (worktree
+`cadcd33`) × depois: RX 24M×12M 27→0 (Porto Araras I), 8→0 (Vila Brasil), 31→0 (Fascino); demais
+células idênticas. 9 testes novos, varredura inversa 11 reversões, todas discriminantes. Suíte
+completa (árvore parada): **1343 passed, 6 skipped, 0 failed** (718.53s), +9 exato contra 1334.
+`mypy --strict` alvo canônico limpo, 49 arquivos. `medir_painel` inalterado (`regras 25/44`).
+
+**Não feito.** Conferência do Quadro 1 vigente (D-ARQ-69): `www.gov.br` negado pela política de
+rede — vale a de 003.EH, marcada `[A CONFERIR]`.
+
+**Próxima.** A declarar: `DT-003EB-01` classe (4) (motorista), `DT-003EB-02` (IBE em risco
+baixo — extração do nível já existe na rota determinística), rota LLM extrair avaliação.

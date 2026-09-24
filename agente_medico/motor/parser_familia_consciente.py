@@ -258,18 +258,75 @@ def _localizar_cabecalho_tabela(
     return grupo_x, agente_x, fonte_x, agravo_x
 
 
+def _localizar_colunas_avaliacao(
+    linhas: Sequence[_Linha],
+) -> Optional[tuple[float, float]]:
+    """(início, fim) em x0 das colunas S·P·NÍVEL DE RISCO da avaliação
+    qualitativa P×S, calibradas no cabeçalho DESTE bloco (DT-003EC-01).
+    Início = x0 de "S" na linha GRUPO/FONTE/AGRAVO; fim = x0 do primeiro
+    "MEDIDAS" à direita de "P" nas linhas de cabeçalho (antes do 1º token de
+    categoria). Medido nos 3 PGRs da família: S@437/MEDIDAS@541 (Porto
+    Araras I), S@402/MEDIDAS@506 (Vila Brasil Escritório), S@473/MEDIDAS@578
+    na linha PERIGO (Fascino) — a posição varia por documento, a ordem não.
+    None se não localizável: avaliação fica "" (ausente), nunca erro — o
+    bloco segue válido para agente/fonte."""
+    idx_primeira_categoria = next(
+        (
+            k
+            for k, linha in enumerate(linhas)
+            if linha.palavras and linha.palavras[0].text in _TOKENS_CATEGORIA
+        ),
+        len(linhas),
+    )
+    cabecalho = linhas[:idx_primeira_categoria]
+    linha_grupo = next(
+        (
+            linha
+            for linha in cabecalho
+            if {"GRUPO", "FONTE", "AGRAVO"} <= {p.text for p in linha.palavras}
+        ),
+        None,
+    )
+    if linha_grupo is None:
+        return None
+    s_x = next((p.x0 for p in linha_grupo.palavras if p.text == "S"), None)
+    p_x = next((p.x0 for p in linha_grupo.palavras if p.text == "P"), None)
+    if s_x is None or p_x is None or p_x <= s_x:
+        return None
+    medidas_x = min(
+        (p.x0 for linha in cabecalho for p in linha.palavras if p.text == "MEDIDAS" and p.x0 > p_x),
+        default=None,
+    )
+    if medidas_x is None:
+        return None
+    return s_x, medidas_x
+
+
 def _banda(
-    x0: float, agente_x: float, fonte_x: float, agravo_x: float
+    x0: float,
+    agente_x: float,
+    fonte_x: float,
+    agravo_x: float,
+    avaliacao: Optional[tuple[float, float]] = None,
 ) -> Optional[str]:
     if agente_x - _TOLERANCIA_COLUNA_PT <= x0 < fonte_x - _TOLERANCIA_COLUNA_PT:
         return "agente"
     if fonte_x - _TOLERANCIA_COLUNA_PT <= x0 < agravo_x - _TOLERANCIA_COLUNA_PT:
         return "fonte"
+    if (
+        avaliacao is not None
+        and avaliacao[0] - _TOLERANCIA_COLUNA_PT <= x0 < avaliacao[1] - _TOLERANCIA_COLUNA_PT
+    ):
+        return "avaliacao"
     return None
 
 
 def _extrair_riscos(
-    linhas: Sequence[_Linha], agente_x: float, fonte_x: float, agravo_x: float
+    linhas: Sequence[_Linha],
+    agente_x: float,
+    fonte_x: float,
+    agravo_x: float,
+    avaliacao: Optional[tuple[float, float]] = None,
 ) -> tuple[RiscoVerbatim, ...]:
     """Uma RiscoVerbatim por linha iniciada por token de categoria
     (FISICO|QUIMICO|ERGONOMICO|ACIDENTE|BIOLOGICO) na banda GRUPO.
@@ -284,6 +341,10 @@ def _extrair_riscos(
     curto (ex.: GHE 01 "Ruido") segue continuando várias linhas além do
     fim do agente — por isso o span do risco não termina quando uma banda
     específica pára, só quando NENHUMA das duas tem conteúdo na linha.
+
+    avaliacao_qualitativa agrega a banda S·P·NÍVEL (DT-003EC-01) dentro do
+    MESMO span — ela não estende o span: linha só com conteúdo de avaliação
+    não conta como continuação, para não mudar o recorte de agente/fonte.
     """
     riscos: list[RiscoVerbatim] = []
     i = 0
@@ -295,6 +356,7 @@ def _extrair_riscos(
             continue
         agente_palavras: list[str] = []
         fonte_palavras: list[str] = []
+        avaliacao_palavras: list[str] = []
         j = i
         while j < n:
             linha_j = linhas[j]
@@ -303,16 +365,20 @@ def _extrair_riscos(
                 if primeira_j is not None and primeira_j.text in _TOKENS_CATEGORIA:
                     break
             tem_conteudo = False
+            avaliacao_linha: list[str] = []
             for p in linha_j.palavras:
-                banda = _banda(p.x0, agente_x, fonte_x, agravo_x)
+                banda = _banda(p.x0, agente_x, fonte_x, agravo_x, avaliacao)
                 if banda == "agente":
                     agente_palavras.append(p.text)
                     tem_conteudo = True
                 elif banda == "fonte":
                     fonte_palavras.append(p.text)
                     tem_conteudo = True
+                elif banda == "avaliacao":
+                    avaliacao_linha.append(p.text)
             if j != i and not tem_conteudo:
                 break
+            avaliacao_palavras.extend(avaliacao_linha)
             j += 1
         riscos.append(
             RiscoVerbatim(
@@ -321,6 +387,7 @@ def _extrair_riscos(
                 # nas 237 linhas-de-risco dos 19 blocos (003.DZ).
                 quantificacao="",
                 fonte_geradora=" ".join(fonte_palavras).strip(),
+                avaliacao_qualitativa=" ".join(avaliacao_palavras).strip(),
             )
         )
         i = j
@@ -354,7 +421,9 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
             "Consciente/Fascino (D-ARQ-65 fatia 1)"
         )
 
-    riscos = _extrair_riscos(linhas_bloco, agente_x, fonte_x, agravo_x)
+    riscos = _extrair_riscos(
+        linhas_bloco, agente_x, fonte_x, agravo_x, _localizar_colunas_avaliacao(linhas_bloco)
+    )
     return GHEVerbatim(nome=nome, cargos=cargos, riscos=riscos)
 
 

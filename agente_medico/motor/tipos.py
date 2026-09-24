@@ -30,6 +30,10 @@ class RiscoPGR:
     # risco para o selo VÁLIDA discriminar acerto do motor de lacuna real. None quando
     # agente resolveu (agente is not None).
     causa_nao_resolucao: Optional[str] = None
+    # Nível da avaliação qualitativa P×S do próprio PGR para este risco
+    # ("IRRELEVANTE"/"BAIXO"/"MODERADO"/"ALTO"/"CRÍTICO"); None quando o documento
+    # não traz a avaliação na linha do risco. Consumidor: R-RX-01-qual (DT-003EC-01).
+    nivel_risco: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -108,6 +112,10 @@ class RiscoVerbatim:
     agente: str
     quantificacao: str
     fonte_geradora: str
+    # Colunas S·P·NÍVEL da avaliação qualitativa na linha do risco, verbatim
+    # ("4 1 BAIXO (4)"); "" quando ausente ou não extraída pela rota. Parse do
+    # nível é resolver-side (hidratacao.py), como quantificacao — DT-003EC-01.
+    avaliacao_qualitativa: str = ""
 
 
 @dataclass(frozen=True)
@@ -229,6 +237,9 @@ class Risco:
     materialidade: Optional[Materialidade] = None
     is_carcinogeno_iarc: bool = False
     is_sensibilizante: bool = False
+    # Copiado de RiscoPGR.nivel_risco na Fase A; riscos implícitos (Fase B) e de
+    # composição (Fase C) não têm avaliação do PGR — ficam None (DT-003EC-01).
+    nivel_risco: Optional[str] = None
 
 
 @dataclass(frozen=True)

@@ -117,12 +117,15 @@ def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausent
         # R-RX-01 / NR-07 Anexo III Quadro 1, ramo "Empresas sem avaliações
         # quantitativas" (Portaria MTP 567/2022): sem laudo é faixa válida, não
         # pendência — os dois ramos do Quadro 1 são exaustivos.
+        # R-RX-01-qual (DT-003EC-01): dentro desse ramo, sílica com avaliação
+        # qualitativa P×S declarada na linha do risco é estado próprio
+        # (apenas_qualitativa). Só sílica — asbesto sem medição nem decisão.
         return Quantificacao(
             valor=None,
             unidade=None,
             relacao_LT=None,
             pct_LT=None,
-            apenas_qualitativa=False,
+            apenas_qualitativa=risco.agente == "silica" and risco.nivel_risco is not None,
             sem_avaliacao_quantitativa=True,
         )
     if (
@@ -200,7 +203,18 @@ def _silica_asbesto_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
         return r
-    return r.sem_avaliacao_quantitativa
+    return r.sem_avaliacao_quantitativa and not r.apenas_qualitativa
+
+
+@primitivo("silica_qualitativa")
+def _silica_qualitativa(ctx: GHEContext) -> ResultadoPredicado:
+    """R-RX-01-qual (DT-003EC-01): sílica sem avaliação quantitativa, com
+    avaliação qualitativa P×S no PGR. Disjunto de silica_asbesto_sem_medicao
+    por construção — os dois leem o mesmo helper e partem por apenas_qualitativa."""
+    r = _helper_silica_asbesto(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.sem_avaliacao_quantitativa and r.apenas_qualitativa
 
 
 @primitivo("silica_asbesto_leo_ate_10")
