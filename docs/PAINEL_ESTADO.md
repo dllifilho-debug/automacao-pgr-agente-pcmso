@@ -109,7 +109,14 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
-**Baseline `[MEDIDO — 23/09/2026, aliases produto + agente]`:** branch `claude/hopeful-newton-yjv3k7`
+**Baseline `[MEDIDO — 24/09/2026, cache de FDS na tela]`:** branch `claude/inspiring-turing-0ylkmk`
+sobre `main 0eef391` (merge do PR #364; memoização da transcrição de FDS em `web_matriz.py`, fecha
+`DT-(sessão claude/inspiring-turing-0ylkmk)-01`) · **1334 passed, 6 skipped, 0 failed** *(MEDIDO,
+árvore parada, 682.35s — 1331 + 3 testes novos)* · `mypy --strict` alvo canônico **limpo, 49
+arquivos** · PROTOCOLO v94 e DECISOES v212 inalterados. Três números clínicos não re-tirados:
+nenhuma `R-*` nem `.yaml` tocado (D-ARQ-85 cl.1).
+
+**Baseline anterior `[MEDIDO — 23/09/2026, aliases produto + agente]`:** branch `claude/hopeful-newton-yjv3k7`
 sobre `main 619a6ef` (merge do PR #362; 12 aliases em `agentes.yaml` `termos:`, 2 correções de
 grafia no comparador, testemunha do T7 trocada) · **1331 passed, 6 skipped, 0 failed** *(MEDIDO,
 árvore parada, 707.38s — 1317 + 14 testes novos)* · `mypy --strict` alvo canônico **limpo, 49
