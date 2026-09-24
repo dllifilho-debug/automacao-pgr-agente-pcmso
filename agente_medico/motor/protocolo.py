@@ -6,6 +6,8 @@ from typing import Any
 
 import yaml
 
+from agente_medico.motor.tipos import NIVEIS_RISCO_PXS
+
 
 @dataclass(frozen=True)
 class Vocabulario:
@@ -73,6 +75,7 @@ def carregar(diretorio: Path | str) -> Protocolo:
             regimes[yaml_file.stem] = _load_yaml(yaml_file) or {}
 
     _validar_exames_em_regras(vocabulario.exames, regras)
+    _validar_mencao_documental(vocabulario.agentes, regras)
 
     return Protocolo(
         vocabulario=vocabulario,
@@ -96,3 +99,33 @@ def _validar_exames_em_regras(
                     f"Exame '{slug}' referenciado pela regra '{regra_id}' não existe no vocabulário.\n"
                     f"Slugs disponíveis: {slugs_disponiveis}"
                 )
+
+
+def _validar_mencao_documental(
+    agentes: dict[str, Any], regras: list[dict[str, Any]]
+) -> None:
+    """`mencao_documental` (R-BIO-05) troca o exame por menção quando todo risco
+    do agente vem com nível P×S listado — só faz sentido se `quando` é o próprio
+    slug do agente, e só com níveis que o parser produz."""
+    for regra in regras:
+        mencao = regra.get("mencao_documental")
+        if mencao is None:
+            continue
+        regra_id = regra.get("id", "<sem id>")
+        if not isinstance(mencao, dict) or set(mencao) != {"regra", "niveis_risco"}:
+            raise ValueError(
+                f"Regra '{regra_id}': mencao_documental exige exatamente as chaves "
+                f"'regra' e 'niveis_risco', recebido {mencao!r}"
+            )
+        quando = regra.get("quando")
+        if not isinstance(quando, str) or quando not in agentes:
+            raise ValueError(
+                f"Regra '{regra_id}': mencao_documental exige 'quando' igual a um slug "
+                f"de agente do vocabulário, recebido {quando!r}"
+            )
+        niveis = mencao["niveis_risco"]
+        if not isinstance(niveis, list) or not niveis or not set(niveis) <= set(NIVEIS_RISCO_PXS):
+            raise ValueError(
+                f"Regra '{regra_id}': niveis_risco deve ser lista não-vazia de "
+                f"{list(NIVEIS_RISCO_PXS)}, recebido {niveis!r}"
+            )

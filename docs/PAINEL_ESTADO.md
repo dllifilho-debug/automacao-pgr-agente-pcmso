@@ -109,7 +109,18 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
-**Baseline `[MEDIDO — 24/09/2026, R-PKG-TRANSITO]`:** branch `claude/inspiring-turing-0ylkmk` sobre
+**Baseline `[MEDIDO — 24/09/2026, R-BIO-05]`:** branch `claude/eager-fermat-txbn7h` sobre
+`main 657ccda` (merge do PR #367; IMPLEMENTAÇÃO — `R-BIO-05`, risco IRRELEVANTE no PGR troca o
+indicador IBE/EE por menção documental, fecha `DT-003EB-02`) · **1358 passed, 6 skipped, 0 failed**
+*(MEDIDO, árvore parada, 724.85s — 1347 + 11 testes novos)* · `mypy --strict` alvo canônico
+**limpo, 49 arquivos** · PROTOCOLO v96→**v97** · DECISOES v213→**v214** (notas em D-ARQ-59 e
+D-ARQ-73; índice regenerado, 85 decisões). `medir_painel`: **`regras 26/45`** (R-BIO-05 é header
+novo e está materializada — soma ao numerador e ao denominador), `cas 78/109`, `índice
+sincronizado`. Escopo reduzido de BAIXO+IRRELEVANTE para só IRRELEVANTE por decisão do Diovanni,
+depois da medição contra os 3 gabaritos (detalhe em `DT-003EB-02`). O bloqueador `cas 50/80` ×
+`78/109` da tabela segue reportado, não ajustado.
+
+**Baseline anterior `[MEDIDO — 24/09/2026, R-PKG-TRANSITO]`:** branch `claude/inspiring-turing-0ylkmk` sobre
 `main 5977bf5` (merge do PR #366; IMPLEMENTAÇÃO — `R-PKG-TRANSITO`, risco de trânsito → acuidade +
 audiometria 12M, parte de `DT-003EB-01` classe 4; fix da legenda colada ao último risco no parser)
 · **1347 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 701.35s — 1343 + 4 testes novos; guarda de inventário 166→168 renomeada, não é teste novo)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** · PROTOCOLO v95→**v96** ·

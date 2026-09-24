@@ -11,11 +11,13 @@ from agente_medico.motor.predicados import (
 )
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import (
+    NIVEIS_RISCO_PXS,
     Ausente,
     ExameEmitido,
     GHEContext,
     Momento,
     Motivo,
+    Observacao,
     Pendencia,
 )
 
@@ -75,6 +77,21 @@ def _emitir_regra(
         )
 
 
+def _nivel_dispensa(regra: dict[str, Any], ctx: GHEContext) -> str | None:
+    """R-BIO-05 (DT-003EB-02, [INTERPRETADO]): o nível P×S que troca o exame por
+    menção documental, ou None se a regra deve emitir. Dispensa só quando TODO
+    risco do agente traz nível listado em `niveis_risco` — nível ausente (rota
+    sem avaliação, risco implícito, composição de FDS) ou acima da lista emite."""
+    mencao = regra.get("mencao_documental")
+    if mencao is None:
+        return None
+    niveis = [r.nivel_risco for r in ctx.riscos if r.agente == regra["quando"]]
+    permitidos = set(mencao["niveis_risco"])
+    if not niveis or not all(n in permitidos for n in niveis):
+        return None
+    return max((str(n) for n in niveis), key=NIVEIS_RISCO_PXS.index)
+
+
 def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]:
     """
     Para cada regra em protocolo.regras:
@@ -90,8 +107,10 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
             e anexar Pendencia(tipo="predicado_ausente_presumido", bloqueante=False) por
             primitivo presumido.
           - Caso contrário → adiciona Pendencia(bloqueante=True) ao ctx.pendencias e não emite
+      5. Se True e a regra tem `mencao_documental` (R-BIO-05) e todo risco do agente
+         traz nível P×S listado → não emite; anexa Observacao a ctx.observacoes.
     Retorna lista de ExameEmitido na ordem em que foram emitidos.
-    Não muta ctx exceto ctx.pendencias.
+    Não muta ctx exceto ctx.pendencias e ctx.observacoes.
     """
     emitidos: list[ExameEmitido] = []
 
@@ -147,6 +166,19 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
             continue
 
         if not resultado:
+            continue
+
+        nivel = _nivel_dispensa(regra, ctx)
+        if nivel is not None:
+            ctx.observacoes.append(
+                Observacao(
+                    regra_id=str(regra["id"]),
+                    regra_dispensa=str(regra["mencao_documental"]["regra"]),
+                    agente=str(regra["quando"]),
+                    nivel_risco=nivel,
+                    exames_dispensados=tuple(str(item["exame"]) for item in regra["emite"]),
+                )
+            )
             continue
 
         _emitir_regra(regra, ctx, protocolo, emitidos)
