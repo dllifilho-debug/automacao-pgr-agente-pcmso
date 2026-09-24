@@ -109,6 +109,15 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Tiragem `[MEDIDO — 24/09/2026, conferência NR-07]` (branch `claude/eager-fermat-txbn7h` sobre
+`main ee241f6`; CONHECIMENTO — docs-only).** Fecha os dois `[A CONFERIR — D-ARQ-69]` de R-BIO-05 e
+R-RX-01-qual contra o PDF da NR-07 fornecido pelo Diovanni (cabeçalho até Portaria MTP 567/2022).
+**Não re-tirada** (D-ARQ-85 cl.1): nenhuma `R-*` criada, alterada ou depreciada, nenhum código,
+teste ou `.yaml` tocado; PROTOCOLO v97→**v98** (só procedência), DECISOES v214 inalterado. Suíte
+completa **não re-rodada** — recorte que cobre os derivados tocados (todo teste que lê
+PROTOCOLO/regras/PENDENCIAS/HISTORICO/PAINEL): **359 passed**, 237.09s. Baseline de suíte segue o
+de R-BIO-05 abaixo (1358/6/0 em código idêntico).
+
 **Baseline `[MEDIDO — 24/09/2026, R-BIO-05]`:** branch `claude/eager-fermat-txbn7h` sobre
 `main 657ccda` (merge do PR #367; IMPLEMENTAÇÃO — `R-BIO-05`, risco IRRELEVANTE no PGR troca o
 indicador IBE/EE por menção documental, fecha `DT-003EB-02`) · **1358 passed, 6 skipped, 0 failed**

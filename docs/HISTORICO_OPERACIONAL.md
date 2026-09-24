@@ -9636,3 +9636,27 @@ Suíte completa (árvore parada): **1358 passed, 6 skipped, 0 failed** (724.85s)
 **Próxima.** A declarar: vigia e planejamento (classe 4 residual de `DT-003EB-01`), rota LLM
 extraindo `nivel_risco`, conferência NR-07 para R-BIO-05/R-RX-01-qual.
 
+## Sessão (branch `claude/eager-fermat-txbn7h`, continuação pós-merge do PR #368) — 24/09/2026 — CONHECIMENTO: conferência da NR-07 para R-BIO-05 e R-RX-01-qual
+
+**Origem.** Diovanni forneceu o PDF da NR-07 (`nr-07-atualizada-2022-1_4.pdf`, 39 p., sha256
+`f27b63bbe7cc1532810911d9fa5a56409ec955ab41e0d8eb66cd7869be938b63`; cabeçalho lista alterações
+até a Portaria MTP 567/2022), para fechar os dois `[A CONFERIR — D-ARQ-69]` deixados pelo
+bloqueio de `www.gov.br`. Branch recriada de `origin/main ee241f6`. Sessão só de docs.
+
+**Conferido.** (1) R-BIO-05: 7.5.12 "b" condiciona a obrigatoriedade dos exames laboratoriais à
+classificação de riscos do PGR (ou exposição acima do nível de ação) — regra compatível com a
+norma; `[INTERPRETADO]` mantido porque o corte em IRRELEVANTE não é literal. Corrigida no corpo a
+leitura de 7.5.15 (exime momentos adm/RT/MR/dem; a periodicidade semestral é do 7.5.13). Efeito
+lateral registrado: R-BIO-04 emite acima do mínimo normativo quando o PGR classifica o risco
+como baixo — mais protetivo, não contrário. (2) R-RX-01-qual: Quadro 1 do Anexo III idêntico à
+leitura de 003.EH; 12M abaixo do ramo sem-avaliação.
+
+**Limite declarado.** O PDF prova o texto até a 567/2022; se houve alteração posterior da NR-07,
+só a listagem oficial atualizada diria — não verificável daqui.
+
+**Verificação.** Nenhum código, teste ou `.yaml` tocado; `DECISOES` não tocado. Recorte: testes
+que leem `PROTOCOLO_AGENTE_MEDICO.md`/`regras.yaml` (ver PAINEL).
+
+**Próxima.** A declarar: vigia e planejamento (classe 4 residual de `DT-003EB-01`), rota LLM
+extraindo `nivel_risco`.
+

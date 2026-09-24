@@ -813,6 +813,13 @@ solicitado: <exame>"). Escopo: 42 `R-BIO-04-*` do Quadro 1 (IBE/EE); Quadro 2 fo
 continua sem `nivel_risco` — ali o indicador sai sempre (lado protetivo). NR-07 vigente não
 conferida (gov.br negado pela rede) `[A CONFERIR — D-ARQ-69]`. 11 testes
 (`test_bio_risco_irrelevante.py`), varredura inversa 14 reversões, 11/11 testes discriminantes.
+
+**Nota (mesma branch, pós-merge do PR #368, 24/09/2026) — `[A CONFERIR]` acima fechado.** NR-07
+conferida no PDF fornecido pelo Diovanni (`nr-07-atualizada-2022-1_4.pdf`, cabeçalho até Portaria
+MTP 567/2022): o **7.5.12 "b"** torna os exames laboratoriais obrigatórios *"quando houver
+exposições ocupacionais acima dos níveis de ação determinados na NR-09 ou se a classificação de
+riscos do PGR indicar"* — R-BIO-05 é compatível com a norma. Detalhe e trecho literal em
+PROTOCOLO §5.9 (v98).
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
@@ -871,6 +878,9 @@ LLM e card não extraem a avaliação (`avaliacao_qualitativa=""`), então PGR q
 Consciente segue 24M para sílica — Aurora Lago das Rosas passa pela rota LLM e não foi medido
 aqui `[A MEDIR]`; (c) conferência do texto vigente do Quadro 1 exigida por D-ARQ-69 não
 refeita nesta sessão (`www.gov.br` negado pela política de rede) — vale a de 003.EH `[A CONFERIR]`.
+**Nota (branch `claude/eager-fermat-txbn7h`, 24/09/2026) — item (c) fechado.** Quadro 1 do Anexo III
+conferido no PDF da NR-07 fornecido pelo Diovanni (cabeçalho até Portaria MTP 567/2022): mesmos
+dois ramos lidos em 003.EH, sem ramo qualitativo. Detalhe em PROTOCOLO §5.4 (v98).
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
 D-ARQ-63 (003.DX) mediu 49% do DECISOES_ARQUITETURAIS.md como diário — acreção pós-decisão
