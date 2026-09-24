@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import dataclasses
+import re
 from collections.abc import Sequence
 from typing import Protocol
 
@@ -44,6 +46,27 @@ class TranscritorGHEEmLote(Protocol):
     def transcrever_lote(self, blocos: Sequence[str]) -> tuple[GHEVerbatim, ...]: ...
 
 
+# Escala P×S (Irrelevante/Baixo/Moderado/Alto/Crítico) — a única que
+# parsear_nivel_risco lê e sobre a qual R-RX-01-qual/R-BIO-05 foram decididas.
+# Medido nos 17 PGRs da rota LLM do acervo (24/09/2026): os 5 de escala P×S
+# trazem a legenda ("Irrelevante") em 100% dos blocos; os outros (escore
+# somado, Trivial…Intolerável) em nenhum — e neles o padrão "S P NÍVEL"
+# casaria 13–65 falsos níveis por PGR ("5 40 Moderado").
+_LEGENDA_PXS = re.compile(r"(?i)\birrelevante\b")
+
+
+def _restringir_avaliacao_a_escala_pxs(bloco: str, ghe: GHEVerbatim) -> GHEVerbatim:
+    """Descarta avaliacao_qualitativa transcrita de bloco fora da escala P×S —
+    o prompt pede o mesmo, esta é a garantia determinística. Descartar leva
+    nivel_risco a None, que emite (lado protetivo de R-BIO-05/R-RX-01-sem)."""
+    if _LEGENDA_PXS.search(bloco):
+        return ghe
+    if not any(r.avaliacao_qualitativa for r in ghe.riscos):
+        return ghe
+    riscos = tuple(dataclasses.replace(r, avaliacao_qualitativa="") for r in ghe.riscos)
+    return dataclasses.replace(ghe, riscos=riscos)
+
+
 def transcrever_ghes(
     blocos: Sequence[str], cliente: TranscritorGHE
 ) -> tuple[GHEVerbatim, ...]:
@@ -58,8 +81,10 @@ def transcrever_ghes(
     suspensório sobre o contrato duro do cliente de lote (o alinhamento
     bloco<->GHE nunca pode quebrar em silêncio, classe D-ARQ-22). Sem
     transcrever_lote, cai no caminho unitário de sempre: delega bloco a
-    bloco, na ordem, sem retry/telemetria. Saída é CANDIDATA: a admissão
-    fica para fatia futura (revisão a jusante).
+    bloco, na ordem, sem retry/telemetria. Nos dois caminhos, a
+    avaliacao_qualitativa só sobrevive em bloco da escala P×S
+    (_restringir_avaliacao_a_escala_pxs, DT-003EC-01/DT-003EB-02). Saída é
+    CANDIDATA: a admissão fica para fatia futura (revisão a jusante).
     """
     em_lote = getattr(cliente, "transcrever_lote", None)
     if callable(em_lote):
@@ -69,8 +94,11 @@ def transcrever_ghes(
                 f"transcritor em lote devolveu {len(resultado)} GHEs para "
                 f"{len(blocos)} blocos — alinhamento quebrado"
             )
-        return resultado
-    return tuple(cliente.transcrever(bloco) for bloco in blocos)
+    else:
+        resultado = tuple(cliente.transcrever(bloco) for bloco in blocos)
+    return tuple(
+        _restringir_avaliacao_a_escala_pxs(bloco, ghe) for bloco, ghe in zip(blocos, resultado)
+    )
 
 
 def gate_forma_ghe(

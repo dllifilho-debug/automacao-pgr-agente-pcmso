@@ -9660,3 +9660,26 @@ que leem `PROTOCOLO_AGENTE_MEDICO.md`/`regras.yaml` (ver PAINEL).
 **Próxima.** A declarar: vigia e planejamento (classe 4 residual de `DT-003EB-01`), rota LLM
 extraindo `nivel_risco`.
 
+## Sessão (branch `claude/eager-fermat-txbn7h`, continuação pós-merge do PR #369) — 24/09/2026 — IMPLEMENTAÇÃO: rota LLM extrai o nível P×S
+
+**Origem.** Ordem do Diovanni: rota LLM extraindo o nível de risco (R-RX-01-qual e R-BIO-05 só
+valiam na família Consciente). Branch recriada de `origin/main 5540c15`.
+
+**Medido antes de codar.** Dos 29 PGRs do acervo, 17 caem na rota LLM. Duas escalas: 5 com matriz
+P×S (legenda "Irrelevante" em 100% dos blocos, mesmo formato "S P NÍVEL" do Consciente) e 12 com
+escore somado (Trivial…Intolerável), onde o padrão S·P·NÍVEL casaria 13–65 falsos níveis por PGR.
+
+**Implementado.** Regra 6b nos dois prompts de `transcritor_gemini_pgr` (+ exceção na regra 7);
+`_ghe_de_dict` lê o campo; guarda `_restringir_avaliacao_a_escala_pxs` em `transcrever_ghes`
+(nível só sobrevive em bloco com a legenda P×S). Guarda medida: 109/109 aceitos, 0/318 rejeitados.
+Escala de escore aberta como `DT-(sessão claude/eager-fermat-txbn7h)-01` (decisão clínica).
+
+**Verificação.** 6 testes (`test_nivel_risco_rota_llm.py`), varredura inversa 6/6. Suíte completa
+(árvore parada): **1364 passed, 6 skipped, 0 failed** (691.15s), +6 exato. `mypy --strict` limpo,
+49 arquivos. Índice D-ARQ regenerado (v215).
+
+**Não feito.** Saída real do Gemini com o prompt novo `[A MEDIR]` — sem chave de API no container.
+
+**Próxima.** Medir a transcrição real num PGR P×S (Aurora Lago das Rosas tem gabarito) depois do
+deploy; `DT-(sessão claude/eager-fermat-txbn7h)-01`; vigia e planejamento (`DT-003EB-01`).
+

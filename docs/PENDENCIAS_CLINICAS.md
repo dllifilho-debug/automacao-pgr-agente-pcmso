@@ -881,6 +881,29 @@ refeita nesta sessão (`www.gov.br` negado pela política de rede) — vale a de
 **Nota (branch `claude/eager-fermat-txbn7h`, 24/09/2026) — item (c) fechado.** Quadro 1 do Anexo III
 conferido no PDF da NR-07 fornecido pelo Diovanni (cabeçalho até Portaria MTP 567/2022): mesmos
 dois ramos lidos em 003.EH, sem ramo qualitativo. Detalhe em PROTOCOLO §5.4 (v98).
+**Nota (mesma branch, 24/09/2026) — item (b) parcialmente fechado.** A rota LLM passa a extrair a
+avaliação nos PGRs de escala P×S (5 do acervo, 109 blocos); nos de escore somado segue ausente,
+por guarda determinística — ver `DT-(sessão claude/eager-fermat-txbn7h)-01`. Rota card segue sem.
+
+### DT-(sessão claude/eager-fermat-txbn7h)-01 — PGRs de escore somado (Trivial…Intolerável) não têm nível P×S: R-RX-01-qual e R-BIO-05 não se aplicam `[ABERTA — decisão clínica]`
+
+**Origem.** Implementação da extração do nível na rota LLM (24/09/2026). Medido nos 17 PGRs do
+acervo que caem na rota LLM: 5 usam a matriz P×S (Irrelevante/Baixo/Moderado/Alto/Crítico,
+legenda em 100% dos blocos) e 12 usam escore somado multifatorial com classes
+Trivial/Tolerável/Moderado/Substancial/Intolerável (Viverde V02, Vistamerica Ver.02, Seconci
+REV3/REV4, AURO, ALT T65, EURO Setor C, CMO Ver.02 e os PCMSO Vistamerica/R78/Envolt). Nesses 12
+o padrão S·P·NÍVEL do parser casaria 13–65 falsos níveis por PGR (ex.: "… 5 40 Moderado", onde
+40 é escore e Moderado é classe de outra escala) — por isso a guarda descarta o nível fora da
+escala P×S.
+
+**Pergunta clínica.** As decisões de R-RX-01-qual (sílica qualitativa → RX 12M) e R-BIO-05
+(IRRELEVANTE dispensa IBE/EE) foram tomadas sobre a escala P×S. Valem para a escala de escore?
+Em particular: (1) sílica com classificação de escore declarada conta como "avaliação
+qualitativa" para o RX 12M? (2) "Trivial" equivale a "Irrelevante" para dispensar o indicador?
+Sem decisão, a rota segue o lado protetivo: RX 24M (R-RX-01-sem) e indicador emitido.
+
+**Status:** ABERTA. Não-bloqueante.
+
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
 D-ARQ-63 (003.DX) mediu 49% do DECISOES_ARQUITETURAIS.md como diário — acreção pós-decisão

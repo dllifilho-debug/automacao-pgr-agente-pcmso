@@ -59,15 +59,21 @@ converta unidade, NÃO arredonde.
 6. fonte_geradora = texto cru da coluna "Fonte geradora" daquele código de atividade (ex.: \
 "Thinner/Zarcão e tinta esmalte sintético", "Manuseio serra circular, Furadeira"). Deixe "" quando a \
 coluna estiver ausente ou ilegível para aquele código.
-7. RUÍDO — NÃO transcreva: o grid de classificação de risco (colunas de letras/números \
-I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
+6b. avaliacao_qualitativa = texto cru das colunas "S", "P" e "NÍVEL DE RISCO" da linha do risco, nessa \
+ordem e separados por espaço (ex.: "1 4 MODERADO", "1 1 IRRELEVANTE"), SOMENTE quando o bloco usa a \
+matriz P×S cuja legenda é Irrelevante/Baixo/Moderado/Alto/Crítico. Deixe "" em qualquer outro caso — \
+inclusive quando a classificação usa escore somado ou classes como Trivial/Tolerável/Substancial/\
+Intolerável. NÃO calcule nem deduza o nível: só copie o que está na linha.
+7. RUÍDO — NÃO transcreva (exceto o que a regra 6b pede): o grid de classificação de risco (colunas de \
+letras/números I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
 EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/rodapé repetido de página \
 (razão social, CNPJ, "INVENTÁRIO E CLASSIFICAÇÃO DOS RISCOS OCUPACIONAIS", numeração de página) e o \
 "Escore de risco (ER)" de fechamento do bloco.
 
 Retorne APENAS JSON válido, sem markdown, sem texto adicional, neste formato exato:
 {{"nome": "Pintura", "cargos": ["pintor", "meio oficial de pintor", "servente"], "riscos": \
-[{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão"}}]}}
+[{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão", \
+"avaliacao_qualitativa": ""}}]}}
 
 Texto do bloco GHE:
 {bloco}
@@ -81,6 +87,7 @@ def _ghe_de_dict(dados: dict[str, Any]) -> GHEVerbatim:
             agente=str(risco_raw.get("agente", "") or ""),
             quantificacao=str(risco_raw.get("quantificacao", "") or ""),
             fonte_geradora=str(risco_raw.get("fonte_geradora", "") or ""),
+            avaliacao_qualitativa=str(risco_raw.get("avaliacao_qualitativa", "") or ""),
         )
         for risco_raw in dados.get("riscos", []) or []
     )
@@ -142,8 +149,13 @@ converta unidade, NÃO arredonde.
 6. fonte_geradora = texto cru da coluna "Fonte geradora" daquele código de atividade (ex.: \
 "Thinner/Zarcão e tinta esmalte sintético", "Manuseio serra circular, Furadeira"). Deixe "" quando a \
 coluna estiver ausente ou ilegível para aquele código.
-7. RUÍDO — NÃO transcreva: o grid de classificação de risco (colunas de letras/números \
-I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
+6b. avaliacao_qualitativa = texto cru das colunas "S", "P" e "NÍVEL DE RISCO" da linha do risco, nessa \
+ordem e separados por espaço (ex.: "1 4 MODERADO", "1 1 IRRELEVANTE"), SOMENTE quando o bloco usa a \
+matriz P×S cuja legenda é Irrelevante/Baixo/Moderado/Alto/Crítico. Deixe "" em qualquer outro caso — \
+inclusive quando a classificação usa escore somado ou classes como Trivial/Tolerável/Substancial/\
+Intolerável. NÃO calcule nem deduza o nível: só copie o que está na linha.
+7. RUÍDO — NÃO transcreva (exceto o que a regra 6b pede): o grid de classificação de risco (colunas de \
+letras/números I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
 EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/rodapé repetido de página \
 (razão social, CNPJ, "INVENTÁRIO E CLASSIFICAÇÃO DOS RISCOS OCUPACIONAIS", numeração de página) e o \
 "Escore de risco (ER)" de fechamento do bloco.
@@ -152,7 +164,8 @@ Retorne APENAS um array JSON válido, sem markdown, sem texto adicional, com EXA
 bloco, NA MESMA ORDEM dos blocos abaixo (posição 1 do array = BLOCO 1, posição 2 = BLOCO 2, e assim por \
 diante), neste formato exato:
 [{{"nome": "Pintura", "cargos": ["pintor", "meio oficial de pintor", "servente"], "riscos": \
-[{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão"}}]}}]
+[{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão", \
+"avaliacao_qualitativa": ""}}]}}]
 
 Blocos GHE:
 {blocos}
