@@ -9603,3 +9603,36 @@ Achado do instrumento registrado no PAINEL: regex de ID não casa `R-PKG-*`; cit
 `R-VIS-01` no YAML inflava o numerador — retirada.
 
 **Próxima.** A declarar: vigia e planejamento (classe 4 residual), `DT-003EB-02`, rota LLM.
+
+## Sessão (branch `claude/eager-fermat-txbn7h`) — 24/09/2026 — IMPLEMENTAÇÃO: `R-BIO-05` (DT-003EB-02, risco irrelevante dispensa IBE/EE)
+
+**Origem.** Ordem do Diovanni: item 1 da lista de pendências (`DT-003EB-02`), menção documental
+como observação na linha do agente. Branch sobre `main 657ccda` (merge do PR #367). Gate de
+abertura: PROTOCOLO v96 integral; ÍNDICE v213 integral; transversais D-ARQ-{06,09,22} integrais;
+eixo biomonitoramento/saída = D-ARQ-{58,59,69,81} integrais, D-ARQ-{63,73} nos trechos de
+contrato.
+
+**Implementado.** Chave de dado `mencao_documental` nas 42 `R-BIO-04-*` do Quadro 1; desvio
+`_nivel_dispensa` em `stage_5_emissao` (dispensa só se todo risco do agente traz nível listado);
+`Observacao` em `MatrizGHE.observacoes`; célula no documento e linha na revisão; validação no
+carregador.
+
+**Bloqueador no meio da sessão.** Com BAIXO+IRRELEVANTE (decisão de 23/09), o comparador deu
+superemissão 7→0 (Fascino) e 1→0 (Porto Araras I), mas subemissão 0→6 (Porto Araras I) e 9→13
+(Vila Brasil): a Dra. Patrícia pede o indicador em BAIXO em 10/10 células. Parado e reportado;
+commit WIP local `53a652f`, sem push. Diovanni decidiu: só IRRELEVANTE.
+
+**Medido (escopo final).** Porto Araras superemissão 1→0; Fascino e Vila Brasil idênticos. 11
+testes (`test_bio_risco_irrelevante.py`), varredura inversa 14 reversões, 11/11 discriminantes.
+Suíte completa (árvore parada): **1358 passed, 6 skipped, 0 failed** (724.85s), +11 exato.
+`mypy --strict` limpo, 49 arquivos. `medir_painel`: `regras 26/45`, `cas 78/109`.
+
+**Ambiente.** Hook de sessão falhou de novo (`cryptography` do Debian); instalado à mão com
+`--ignore-installed` + `libreoffice-writer` via apt.
+
+**Não feito.** Conferência da NR-07 vigente (D-ARQ-69): `www.gov.br` negado pela rede
+`[A CONFERIR]`. Rota LLM segue sem `nivel_risco`.
+
+**Próxima.** A declarar: vigia e planejamento (classe 4 residual de `DT-003EB-01`), rota LLM
+extraindo `nivel_risco`, conferência NR-07 para R-BIO-05/R-RX-01-qual.
+

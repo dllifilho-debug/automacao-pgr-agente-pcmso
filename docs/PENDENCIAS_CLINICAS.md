@@ -757,7 +757,7 @@ worktree main 5977bf5]`: subemissão 13→9 (Vila Brasil), 9→5 (Fascino), Port
 zero superemissão nova. 4 testes (`test_pkg_transito.py`), varredura inversa 4/4. **Seguem
 abertos na classe (4):** VIGILÂNCIA (acuidade, 2 células) e PLANEJAMENTO (acuidade +
 audiometria, 4 células) de Vila Brasil — sem trânsito nem direção no bloco.
-### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[ABERTA — 003.EB]`
+### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/eager-fermat-txbn7h, 24/09/2026: R-BIO-05, só IRRELEVANTE]`
 
 **Origem:** Sessão 003.EB (25/07/2026), mesmo diff acima.
 
@@ -794,6 +794,25 @@ Ainda não implementado.
 passa a existir por causa de `DT-003EC-01`: `RiscoPGR.nivel_risco`/`Risco.nivel_risco` são
 populados pela rota determinística (família Consciente). Faltam a rota LLM, o gate em `R-BIO-04`
 e a forma de saída da "menção documental".
+
+**Resolução (branch `claude/eager-fermat-txbn7h`, 24/09/2026) — `R-BIO-05`, dispensa só em
+IRRELEVANTE.** Implementada primeiro como decidido em 23/09 (dispensa em BAIXO e IRRELEVANTE,
+menção como observação na linha do cargo) e medida contra os 3 gabaritos antes de entregar
+(`comparar_matriz_gabarito`, `main 657ccda` × working tree): superemissão 7→0 (Fascino) e 1→0
+(Porto Araras I), mas **subemissão 0→6 (Porto Araras I) e 9→13 (Vila Brasil)**. A nota acima
+subestimava a divergência: a Dra. Patrícia pede o indicador com risco BAIXO em **10/10** células
+medidas (acetona, tolueno, xileno, MEK, ciclohexanona), não só no MEK de um pintor. Reportado
+como bloqueador; **decisão do Diovanni (24/09/2026): dispensa só em IRRELEVANTE**, o único nível
+em que as duas médicas concordam (Porto Araras I, 2-butoxietanol do pintor). Efeito final: Porto
+Araras superemissão 1→0; Fascino e Vila Brasil idênticos. As 7 células do Fascino (conduta da
+Dra. Carolini em risco BAIXO) seguem como superemissão, declarada em R-BIO-05.
+
+Forma de saída: `Observacao` em `MatrizGHE.observacoes`, renderizada na célula do cargo depois
+dos exames ("Obs.: risco irrelevante no PGR para <agente> — incluir menção no PCMSO; não
+solicitado: <exame>"). Escopo: 42 `R-BIO-04-*` do Quadro 1 (IBE/EE); Quadro 2 fora. Rota LLM
+continua sem `nivel_risco` — ali o indicador sai sempre (lado protetivo). NR-07 vigente não
+conferida (gov.br negado pela rede) `[A CONFERIR — D-ARQ-69]`. 11 testes
+(`test_bio_risco_irrelevante.py`), varredura inversa 14 reversões, 11/11 testes discriminantes.
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
