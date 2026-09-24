@@ -151,8 +151,29 @@ regras:
         periodicidade_meses: 24
         periodicidade_apos_15a: 12
         momentos: [adm, per, MR, dem]
-    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto sem avaliação quantitativa; 24M, encurta para 12M após 15 anos (corte no agendador, D-ARQ-19); demissional se último > 1 ano"
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto sem avaliação quantitativa; 24M, encurta para 12M após 15 anos (corte no agendador, D-ARQ-19); demissional se último > 1 ano. Sílica com avaliação qualitativa P×S no PGR sai deste ramo para R-RX-01-qual (DT-003EC-01); aqui fica o PGR silencioso e o asbesto."
     status: VALIDADO
+
+  - id: R-RX-01-qual
+    quando: silica_qualitativa
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 12
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "DT-003EC-01 — sílica sem avaliação quantitativa, COM avaliação
+      qualitativa P×S na linha do risco no PGR -> 12M constante. [INTERPRETADO —
+      prioridade na revisão de saída]: decisão do Diovanni (23/09/2026) sobre a
+      conduta convergente das médicas nos 4 pares medidos — Patrícia (Porto Araras I
+      06/07/26, 27/27 GHEs com sílica; Vila Brasil Escritório 26/08/26, 8/8) e
+      Carolini (SPE 0030 Fascino 08/07/26). NÃO é [DERIVADO — NR]: o literal do
+      Quadro 1 do Anexo III da NR-07 (Portaria MTP 567/2022, conferido em 003.EH) tem
+      dois ramos e põe avaliação só qualitativa no ramo 'sem avaliações quantitativas'
+      (24M, R-RX-01-sem); 12M é intervalo MENOR que o do ramo, mais protetivo, não
+      contrário. Viés declarado (D-ARQ-81 cl.1): construção civil, 2 médicas; 24M
+      aparece em 15/34 matrizes do acervo sem PGR para conferir o estado da sílica.
+      Só sílica: asbesto qualitativo segue em R-RX-01-sem (sem medição nem decisão)."
+    status: INTERPRETADO
 
   - id: R-RX-01-baixa
     quando: silica_asbesto_leo_10_50

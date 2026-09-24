@@ -774,7 +774,12 @@ parser **não** extrai esse nível hoje (`RiscoVerbatim` = agente, quantificaç�
 implementação exige: campo de nível na extração (rota determinística e transcritor LLM),
 hidratação até `RiscoPGR`, e gate em `R-BIO-04`; mais a forma de saída da "menção documental".
 Ainda não implementado.
-### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[ABERTA — 003.EC, não-bloqueante]`
+
+**Nota (branch `claude/inspiring-turing-0ylkmk`, 24/09/2026).** Metade da extração exigida acima
+passa a existir por causa de `DT-003EC-01`: `RiscoPGR.nivel_risco`/`Risco.nivel_risco` são
+populados pela rota determinística (família Consciente). Faltam a rota LLM, o gate em `R-BIO-04`
+e a forma de saída da "menção documental".
+### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
 
@@ -813,6 +818,25 @@ armação e carpintaria — compatível com a hipótese, não prova. **Implement
 "sílica com avaliação qualitativa" → 12M, distinto de "sem avaliação" (24M, texto literal do
 Anexo III da NR-07), `[INTERPRETADO — conduta das médicas nos 4 pares, decisão do Diovanni]`.
 Exige distinguir, na extração, qualitativa × sem avaliação — hoje não distinguido.
+
+**Resolução (branch `claude/inspiring-turing-0ylkmk`, 24/09/2026) — `R-RX-01-qual` implementado.**
+Sinal de "avaliação qualitativa" = colunas S·P·NÍVEL DE RISCO preenchidas na linha do risco
+(matriz P×S). Extração: `RiscoVerbatim.avaliacao_qualitativa` (banda calibrada por bloco em
+`parser_familia_consciente`, 587/587 linhas de risco capturadas nos 3 PGRs da família) →
+`RiscoPGR.nivel_risco` (`hidratacao.parsear_nivel_risco`; "NÃO DEFINIDO" = não avaliado, sem
+pendência; texto não reconhecido = `avaliacao_qualitativa_nao_parseada` não-bloqueante) →
+`Risco.nivel_risco` (Fase A) → primitivo `silica_qualitativa`, disjunto de
+`silica_asbesto_sem_medicao`. Regra `R-RX-01-qual`: 12M constante `[adm, per, MR, dem]`,
+`[INTERPRETADO — prioridade na revisão de saída]`. 9 testes novos
+(`test_rx_silica_qualitativa.py`), varredura inversa 11 reversões / 9 testes, todas
+discriminantes. Efeito medido `[MEDIDO — comparar_matriz_gabarito, antes = worktree main
+cadcd33]`: divergência RX 24M×12M **27 → 0** (Porto Araras I), **8 → 0** (Vila Brasil),
+**31 → 0** (Fascino); nenhuma outra célula mudou nos três pares.
+**Fica aberto, declarado:** (a) asbesto qualitativo segue 24M — sem caso nem decisão; (b) rotas
+LLM e card não extraem a avaliação (`avaliacao_qualitativa=""`), então PGR que não é da família
+Consciente segue 24M para sílica — Aurora Lago das Rosas passa pela rota LLM e não foi medido
+aqui `[A MEDIR]`; (c) conferência do texto vigente do Quadro 1 exigida por D-ARQ-69 não
+refeita nesta sessão (`www.gov.br` negado pela política de rede) — vale a de 003.EH `[A CONFERIR]`.
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
 D-ARQ-63 (003.DX) mediu 49% do DECISOES_ARQUITETURAIS.md como diário — acreção pós-decisão
