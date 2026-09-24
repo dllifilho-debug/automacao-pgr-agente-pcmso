@@ -109,7 +109,19 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
-**Baseline `[MEDIDO — 24/09/2026, R-RX-01-qual]`:** branch `claude/inspiring-turing-0ylkmk` sobre
+**Baseline `[MEDIDO — 24/09/2026, R-PKG-TRANSITO]`:** branch `claude/inspiring-turing-0ylkmk` sobre
+`main 5977bf5` (merge do PR #366; IMPLEMENTAÇÃO — `R-PKG-TRANSITO`, risco de trânsito → acuidade +
+audiometria 12M, parte de `DT-003EB-01` classe 4; fix da legenda colada ao último risco no parser)
+· **1347 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 701.35s — 1343 + 4 testes novos; guarda de inventário 166→168 renomeada, não é teste novo)* · `mypy --strict` alvo canônico **limpo, 49 arquivos** · PROTOCOLO v95→**v96** ·
+DECISOES v213 inalterado. `medir_painel`: `regras 25/44`, `cas 78/109` (+1 slug sem CAS,
+`transito_via_publica`), `índice sincronizado`. **Achado do instrumento, não corrigido:** o regex de
+ID (`R-[A-Z]+-[0-9]+`) não casa `R-PKG-*` — nenhum dos pacotes (`ATIVCRIT`, `SOLD`, `BZ`,
+`TRANSITO`…) entra no numerador nem no denominador de `regras`; e uma citação em prosa de
+`R-VIS-01` na `base_normativa` fez o numerador subir para 26 sem materialização — citação
+retirada do YAML, mesma classe de `DH-003EC-01(b)`. O bloqueador `cas 50/80` × `78/109` da tabela
+segue reportado, não ajustado.
+
+**Baseline anterior `[MEDIDO — 24/09/2026, R-RX-01-qual]`:** branch `claude/inspiring-turing-0ylkmk` sobre
 `main cadcd33` (merge do PR #365; IMPLEMENTAÇÃO — ramo `R-RX-01-qual`, sílica com avaliação
 qualitativa P×S → RX OIT 12M, fecha `DT-003EC-01`) · **1343 passed, 6 skipped, 0 failed**
 *(MEDIDO, árvore parada, 718.53s — 1334 + 9 testes novos)* · `mypy --strict` alvo canônico

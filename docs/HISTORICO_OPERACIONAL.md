@@ -9578,3 +9578,28 @@ rede — vale a de 003.EH, marcada `[A CONFERIR]`.
 
 **Próxima.** A declarar: `DT-003EB-01` classe (4) (motorista), `DT-003EB-02` (IBE em risco
 baixo — extração do nível já existe na rota determinística), rota LLM extrair avaliação.
+
+## Sessão (branch `claude/inspiring-turing-0ylkmk`, continuação pós-merge do PR #366) — 24/09/2026 — IMPLEMENTAÇÃO: `R-PKG-TRANSITO` (DT-003EB-01 classe 4, motorista)
+
+**Origem.** Ordem do Diovanni: implementar a classe (4) de `DT-003EB-01` (motorista). Branch
+recriada de `origin/main 5977bf5`.
+
+**Medido antes de codar.** Três sinais candidatos nos 3 PGRs pareados (61 GHEs): descrição do
+cargo (só DIREÇÃO, com falso positivo "dirigem"/"conduzir" em 4 GHEs), cargo "motorista" (só
+DIREÇÃO), risco "Bater contra ou ser atingido por (trânsito)" (DIREÇÃO, PATRIMÔNIO, VENDAS — 3/3
+com acuidade + audiometria no gabarito, 0 falso positivo). Diovanni escolheu o risco de trânsito.
+
+**Implementado.** Slug `transito_via_publica` (só a frase completa; "trânsito" sozinho aparece no
+acervo como circulação a pé). Regra `R-PKG-TRANSITO` (§6, `[INTERPRETADO]`): acuidade visual +
+audiometria 12M adm/per/MR. Fix no parser: linha que começa na banda GRUPO sem ser categoria
+encerra o risco — a legenda "(P × S)" colava no último risco do GHE VENDAS do Fascino; no acervo
+determinístico inteiro (8 PGRs), só esse risco mudou.
+
+**Medido.** `comparar_matriz_gabarito` antes (worktree `5977bf5`) × depois: subemissão 13→9 (Vila
+Brasil), 9→5 (Fascino), Porto Araras inalterado, zero superemissão nova. 4 testes, varredura
+inversa 4/4. Suíte completa (árvore parada): **1347 passed, 6 skipped, 0 failed** (701.35s), +4
+exato. `mypy --strict` limpo, 49 arquivos. `medir_painel`: `regras 25/44`, `cas 78/109`.
+Achado do instrumento registrado no PAINEL: regex de ID não casa `R-PKG-*`; citação em prosa de
+`R-VIS-01` no YAML inflava o numerador — retirada.
+
+**Próxima.** A declarar: vigia e planejamento (classe 4 residual), `DT-003EB-02`, rota LLM.

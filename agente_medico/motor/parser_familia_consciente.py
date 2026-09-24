@@ -327,6 +327,7 @@ def _extrair_riscos(
     fonte_x: float,
     agravo_x: float,
     avaliacao: Optional[tuple[float, float]] = None,
+    grupo_x: Optional[float] = None,
 ) -> tuple[RiscoVerbatim, ...]:
     """Uma RiscoVerbatim por linha iniciada por token de categoria
     (FISICO|QUIMICO|ERGONOMICO|ACIDENTE|BIOLOGICO) na banda GRUPO.
@@ -345,6 +346,12 @@ def _extrair_riscos(
     avaliacao_qualitativa agrega a banda S·P·NÍVEL (DT-003EC-01) dentro do
     MESMO span — ela não estende o span: linha só com conteúdo de avaliação
     não conta como continuação, para não mudar o recorte de agente/fonte.
+
+    Fim da tabela: linha cuja 1ª palavra cai na banda GRUPO sem ser token de
+    categoria ("Legenda (P × S)", "NOTA 1") encerra o risco — a coluna GRUPO
+    só carrega categoria. Sem isso, o último risco do bloco absorvia a
+    legenda quando ela vinha colada, sem linha vazia de separação (Fascino,
+    GHE VENDAS: "Bater contra ou ser atingido por (trânsito) S Irrelevante...").
     """
     riscos: list[RiscoVerbatim] = []
     i = 0
@@ -363,6 +370,12 @@ def _extrair_riscos(
             if j != i:
                 primeira_j = linha_j.palavras[0] if linha_j.palavras else None
                 if primeira_j is not None and primeira_j.text in _TOKENS_CATEGORIA:
+                    break
+                if (
+                    primeira_j is not None
+                    and grupo_x is not None
+                    and abs(primeira_j.x0 - grupo_x) <= _TOLERANCIA_COLUNA_PT
+                ):
                     break
             tem_conteudo = False
             avaliacao_linha: list[str] = []
@@ -422,7 +435,12 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
         )
 
     riscos = _extrair_riscos(
-        linhas_bloco, agente_x, fonte_x, agravo_x, _localizar_colunas_avaliacao(linhas_bloco)
+        linhas_bloco,
+        agente_x,
+        fonte_x,
+        agravo_x,
+        _localizar_colunas_avaliacao(linhas_bloco),
+        grupo_x,
     )
     return GHEVerbatim(nome=nome, cargos=cargos, riscos=riscos)
 
