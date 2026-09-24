@@ -18,7 +18,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
-from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento
+from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Observacao
 
 # D-ARQ-73: rótulo de apresentação por Momento (escritório) — MR->MRO, RT->RET,
 # os demais idênticos ao enum. D-ARQ-67: guardado por teste computado do dado
@@ -146,11 +146,26 @@ def _formatar_celula(exame: ExameEmitido, exames_vocab: dict[str, Any]) -> str:
     return _sanitizar(f"{nome_exibicao} ({_formatar_momentos(exame, mostrar)})")
 
 
+def _formatar_observacao(obs: Observacao, exames_vocab: dict[str, Any]) -> str:
+    # Forma da anotação do gabarito Fascino ("Incluir no word do PCMSO, risco
+    # baixo no PGR para acetona e metiletilcetona"), uma por agente.
+    exames = ", ".join(
+        exames_vocab.get(slug, {}).get("nome_exibicao", slug) for slug in obs.exames_dispensados
+    )
+    agente = obs.agente.replace("_", " ")
+    return _sanitizar(
+        f"Obs.: risco {obs.nivel_risco.lower()} no PGR para {agente} — incluir menção "
+        f"no PCMSO; não solicitado: {exames}"
+    )
+
+
 def _celulas_da_matriz(
     matriz: MatrizGHE, exames_vocab: dict[str, Any]
 ) -> tuple[str, ...]:
     ordenadas = sorted(matriz.linhas, key=lambda e: _chave_ordem_exame(e.exame, exames_vocab))
-    return tuple(_formatar_celula(e, exames_vocab) for e in ordenadas)
+    return tuple(_formatar_celula(e, exames_vocab) for e in ordenadas) + tuple(
+        _formatar_observacao(o, exames_vocab) for o in matriz.observacoes
+    )
 
 
 def montar_documento(

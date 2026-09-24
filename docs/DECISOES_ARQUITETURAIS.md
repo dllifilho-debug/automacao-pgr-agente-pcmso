@@ -2287,6 +2287,16 @@ Ninguém re-mediu entre 003.BP e 003.DM. A garantia seguiu sendo citada como se 
 
 `[DERIVADO — regras.yaml; D-ARQ-58; PROTOCOLO §5.9; D-ARQ-38 003.CT/CW; princípio D-ARQ-54 P3]`. Sem código.
 
+**Nota de aplicação (branch `claude/eager-fermat-txbn7h`, 24/09/2026 — `R-BIO-05`, `DT-003EB-02`).**
+A exceção por nível de risco entrou como **dado por regra**, não como estágio: chave
+`mencao_documental: {regra, niveis_risco}` nas 42 `R-BIO-04-*` do Quadro 1, lida por um desvio
+genérico em `stage_5_emissao` que só vale para regra cujo `quando` é slug de agente (o
+carregador recusa o resto). Mesma razão 3 desta decisão: o escopo (quais regras, quais níveis)
+fica em `regras.yaml`, auditável por regra, e nenhum Quadro é derivado em código. O custo
+Quadro-wide (42 linhas iguais) é o que o steelman acima previu; o guardião é
+`test_mencao_documental_so_nas_regras_do_quadro_1`, computado de `tipo_ibe`. Nenhuma cláusula
+alterada.
+
 ## D-ARQ-60 — Reconciliação nome-de-exibição §5.9 → slug canônico mora no guardião (registro explícito), não no doc; §5.9 é fonte humana, `regras.yaml` a chave de máquina
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003.CY). Materializa o teste de consistência `§5.9`↔`regras.yaml` proposto em D-ARQ-59. Autorização para virar D-ARQ ratificada pelo Diovanni.
@@ -3083,6 +3093,15 @@ varredura inversa. Verificação visual: pipeline real (PDF Fascino, 19 GHEs) re
 e convertido a PDF via `soffice --headless`, páginas inspecionadas como imagem — sem defeito de
 layout introduzido. Nenhuma `R-*` criada, alterada ou depreciada; `PROTOCOLO_AGENTE_MEDICO.md`
 inalterado (não há regra clínica tocada).
+
+**Nota de aplicação (branch `claude/eager-fermat-txbn7h`, 24/09/2026 — `R-BIO-05`).** A célula
+do cargo ganha um segundo tipo de item: depois dos exames, uma observação por agente cujo
+indicador foi dispensado por risco baixo no PGR (`MatrizGHE.observacoes`, produzida pelo motor).
+Forma copiada da anotação da Dra. Carolini no gabarito Fascino ("Incluir no word do PCMSO, risco
+baixo no PGR para …"). `montar_documento` continua sem lógica de domínio — só formata o que a
+matriz traz; os dois renderizadores herdam a célula sem mudança. O instrumento
+`comparar_matriz_gabarito` lê `matriz.linhas`, não as células, e não vê a observação. Nenhuma
+cláusula alterada.
 
 ## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico
 
@@ -4312,3 +4331,4 @@ Sessão 003.FD (22/08/2026). `[META — decisão de processo. Não toca motor ne
 | v211 | 23/09/2026 | Mesma branch (`claude/hopeful-newton-yjv3k7`, pós-merge do PR #359; IMPLEMENTAÇÃO — autorizada pelo Diovanni): **Andamento em `D-ARQ-57`** (mesma ID, nenhuma cláusula alterada) — gate de número de GHE saltado (`avaliar_numeracao_ghe`, pendência bloqueante `numeracao_ghe_lacunar`), encadeado depois de `avaliar_segmentacao`. 0 desfecho muda nos 29 PGRs do acervo. 5 testes novos (`test_extracao_pgr.py`), varredura inversa 5/5. Suíte completa (árvore parada): **1312 passed, 6 skipped, 0 failed**, 840.72s. `mypy --strict` alvo canônico: limpo, **49 arquivos**. PROTOCOLO inalterado, segue **v94**; decisões inalteradas em **85**. Índice D-ARQ regenerado. |
 | v212 | 23/09/2026 | Mesma branch (`claude/hopeful-newton-yjv3k7`, pós-merge do PR #362; DADO — `DT-(sessão claude/hopeful-newton-yjv3k7)-02`, aliases por termo, decisão do Diovanni): **Nota de aplicação em `D-ARQ-82`** (mesma ID, nenhuma cláusula alterada) — alias `Metiletilcetona` aplicado como remédio da Emenda 003.FC; testemunha do T7 trocada para `Maganês`. 12 aliases "produto + componente"/MEK em `agentes.yaml` (154 → 166 formas), 2 correções de grafia no instrumento. 14 testes novos + T7 com testemunha nova; varredura inversa 15/15. Suíte completa (árvore parada): **1331 passed, 6 skipped, 0 failed**, 707.38s. `mypy --strict` alvo canônico: limpo, **49 arquivos**. PROTOCOLO inalterado, segue **v94**; decisões inalteradas em **85**. Índice D-ARQ regenerado. |
 | v213 | 24/09/2026 | Branch `claude/inspiring-turing-0ylkmk` (IMPLEMENTAÇÃO — `DT-003EC-01`, decisão do Diovanni): **Nota de aplicação em `D-ARQ-19`** (`apenas_qualitativa` ganha produtor real para sílica; ramo sem-avaliação partido em `silica_asbesto_sem_medicao`/`silica_qualitativa`) e **nota em `D-ARQ-49`** (campo aditivo `RiscoVerbatim.avaliacao_qualitativa`, só rota determinística). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v94→**v95** (`R-RX-01-qual`). Índice D-ARQ regenerado. |
+| v214 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — `DT-003EB-02`, decisão do Diovanni de 23/09/2026): **Nota de aplicação em `D-ARQ-59`** (exceção por nível como chave de dado nas 42 `R-BIO-04-*` do Quadro 1) e **nota em `D-ARQ-73`** (observação de menção documental na célula do cargo). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v96→**v97** (`R-BIO-05`). Índice D-ARQ regenerado. |

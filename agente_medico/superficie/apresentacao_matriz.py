@@ -66,6 +66,13 @@ def renderizar_matriz(matriz: MatrizGHE) -> list[str]:
     linhas.append(f"- riscos_resolvidos: {riscos_fmt}")
     predicados_fmt = "; ".join(f"{nome}={valor}" for nome, valor in matriz.predicados_avaliados)
     linhas.append(f"- predicados_avaliados: {predicados_fmt}")
+    if matriz.observacoes:
+        linhas.append("- observações (menção documental, exame não emitido):")
+        for o in matriz.observacoes:
+            linhas.append(
+                f"  - `{o.agente}` risco {o.nivel_risco} → {', '.join(o.exames_dispensados)} "
+                f"não emitido ({o.regra_id}, {o.regra_dispensa})"
+            )
     if matriz.pendencias:
         linhas.append("- pendências da matriz:")
         for p in matriz.pendencias:

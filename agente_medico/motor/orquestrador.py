@@ -171,6 +171,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     nome_ghe=ctx.pgr_ghe.nome,
                     cargos=ctx.pgr_ghe.cargos,
                 )
+        matriz.observacoes = tuple(ctx.observacoes)
         matrizes.append(matriz)
 
     houve_bloqueio = any(m.status in {"PARCIAL", "BLOQUEADA"} for m in matrizes)

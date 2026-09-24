@@ -301,6 +301,23 @@ class Pendencia:
     exames_alvo: tuple[str, ...] = ()  # D-ARQ-31 fatia 3: slugs que a pendência pode escalar; casa contra ExameEmitido.exame na anexação
 
 
+# Níveis da matriz P×S como parsear_nivel_risco os devolve (DT-003EC-01), em
+# ordem crescente de risco.
+NIVEIS_RISCO_PXS: tuple[str, ...] = ("IRRELEVANTE", "BAIXO", "MODERADO", "ALTO", "CRÍTICO")
+
+
+@dataclass(frozen=True)
+class Observacao:
+    """Menção documental no lugar de um exame (R-BIO-05, DT-003EB-02): a regra
+    `regra_id` casou, mas o PGR classifica o risco do agente em `nivel_risco`
+    e os exames de `exames_dispensados` não são solicitados."""
+    regra_id: str
+    regra_dispensa: str
+    agente: str
+    nivel_risco: str
+    exames_dispensados: tuple[str, ...]
+
+
 @dataclass
 class GHEContext:
     pgr_ghe: GHEPGR
@@ -308,6 +325,7 @@ class GHEContext:
     predicados: dict[str, Union[bool, Ausente]] = field(default_factory=dict)
     regime: Optional[str] = None
     pendencias: list[Pendencia] = field(default_factory=list)
+    observacoes: list[Observacao] = field(default_factory=list)
 
 
 @dataclass
@@ -331,6 +349,7 @@ class MatrizGHE:
     # ctx.pgr_ghe — MatrizGHE não ganhou lógica nova, só passa o dado adiante.
     nome_ghe: str = ""
     cargos: tuple[str, ...] = ()
+    observacoes: tuple[Observacao, ...] = ()
 
 
 @dataclass
