@@ -9990,3 +9990,17 @@ logo abaixo do header de `DT-003EC-01`, e não dentro de `DT-003EB-02`.
 
 **Verificação.** `python -m pytest tests/test_gerar_indice_darq.py`: 6 passed. Recorte dos testes
 que leem docs e acervo: ver PAINEL (Baseline desta sessão).
+
+## Sessão (branch `claude/hopeful-ramanujan-rbgh4s`, continuação pós-merge do PR #381) — 25/09/2026 — ARQUITETURA: ratificação de `D-ARQ-86`
+
+**Origem.** Diovanni: *"ratifico todas as suas sugestões para as perguntas Q1 a Q4"*.
+
+**Registrado.** `D-ARQ-86` passa a DECISÃO DE ARQUITETURA ratificada, com parágrafo "Ratificação":
+Q1 MODERADO+ emite mesmo com medição baixa; Q2 qualquer data, data na observação; Q3 estado da
+sessão; Q4 ACGIH só com fonte citada por agente. `DECISOES v218→v219`, `INDICE_DARQ.md`
+regenerado. Nenhum código, teste ou `.yaml` tocado.
+
+**Próxima.** Fatia 1 de `D-ARQ-86`, depois do DADO (LT do Anexo 11 nos agentes com R-BIO-04),
+conferido contra a pasta de NRs que o Diovanni vai versionar no repositório.
+
+**Verificação.** Ver PAINEL (Baseline desta sessão).

@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v218 · 86 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v219 · 86 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -93,4 +93,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v218 · 86 decisões
 | D-ARQ-83 | Termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para NÃO resolver, com pendência de causa e destinatário próprios |  | 4036 | 9623 |
 | D-ARQ-84 | Conferência factual é obrigação sem declaração; julgamento permanece gate declarado — os dois instrumentos separam-se pela natureza da falha, não pelo momento | DECISÃO DE MÉTODO (META) | 4085 | 10201 |
 | D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4134 | 4834 |
-| D-ARQ-86 | Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação | ARQUITETURA PROPOSTA — aguarda ratificação do Diovanni | 4168 | 8793 |
+| D-ARQ-86 | Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (25/09/2026), com Q1–Q4 resolvidas (ver "Ratificação" abaixo) | 4168 | 9784 |
