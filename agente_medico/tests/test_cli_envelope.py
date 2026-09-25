@@ -79,7 +79,7 @@ def test_data_invalida_reprompta_ate_iso_valida() -> None:
     entrada = io.StringIO("31/12/2026\n2026-12-31\ns\n")
     saida = io.StringIO()
 
-    volta = revisar_envelope(ida, entrada, saida)
+    volta = revisar_envelope(ida, entrada, saida, hoje=date(2027, 1, 1))
     confirmado = desserializar_confirmacao(volta)
 
     assert confirmado.validade == date(2026, 12, 31)
@@ -175,3 +175,37 @@ def test_gabarito_viverde_fim_a_fim() -> None:
 
     assert confirmado.validade == date(2023, 2, 1)
     assert confirmado.assinatura_engenheiro is True
+
+
+def test_emissao_futura_digitada_reprompta() -> None:
+    # Reversão que mata: _prompt_validade voltar a só `date.fromisoformat` — o
+    # vencimento digitado (2027-04-01) seria aceito e R-PGR-06 não dispararia.
+    entrada = io.StringIO("2027-04-01\n2026-09-01\ns\n")
+    saida = io.StringIO()
+
+    volta = revisar_envelope(_ida_padrao(), entrada, saida, hoje=date(2026, 9, 25))
+
+    assert desserializar_confirmacao(volta).validade == date(2026, 9, 1)
+    assert "Data de emissão no futuro" in saida.getvalue()
+
+
+def test_proposta_futura_aceita_com_enter_reprompta() -> None:
+    # Reversão que mata: o Enter devolver a proposta sem passar por
+    # validar_data_emissao — proposta futura (capa com data errada) passaria.
+    entrada = io.StringIO("\n2025-01-10\ns\n")
+    saida = io.StringIO()
+
+    volta = revisar_envelope(_ida_padrao(), entrada, saida, hoje=date(2025, 1, 15))
+
+    assert desserializar_confirmacao(volta).validade == date(2025, 1, 10)
+    assert "Data de emissão no futuro: '2025-02-01'" in saida.getvalue()
+
+
+def test_prompt_pede_a_data_de_emissao_do_pgr() -> None:
+    # Reversão que mata: o prompt voltar a dizer "Validade" — foi o rótulo que
+    # levou o vencimento a ser digitado no lugar da emissão (Aurora, 25/09/2026).
+    saida = io.StringIO()
+
+    revisar_envelope(_ida_padrao(), io.StringIO("\ns\n"), saida, hoje=date(2026, 9, 25))
+
+    assert "Data de emissão do PGR [Enter mantém: 2025-02-01]" in saida.getvalue()

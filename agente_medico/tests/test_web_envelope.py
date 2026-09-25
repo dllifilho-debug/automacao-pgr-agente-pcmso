@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from streamlit.testing.v1 import AppTest
 
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao, serializar_envelope
 from agente_medico.motor.tipos import CandidataValidade, EnvelopeVerbatim
+from agente_medico.superficie.apresentacao import EmissaoFuturaError
 from agente_medico.superficie.web_envelope import montar_volta_envelope, pagina_envelope
 
 _ENVELOPE_VIVERDE_GABARITO = EnvelopeVerbatim(
@@ -99,3 +100,40 @@ def test_pagina_envelope_validade_invalida_mostra_erro() -> None:
     assert not at.exception
     assert at.error
     assert not at.code
+
+
+def test_montar_volta_envelope_recusa_emissao_no_futuro() -> None:
+    # Reversão que mata: montar_volta_envelope voltar a só `date.fromisoformat`
+    # — o vencimento passaria e R-PGR-06 não dispararia.
+    import json
+
+    dados = json.loads(_ida_viverde())
+
+    with pytest.raises(EmissaoFuturaError):
+        montar_volta_envelope(dados, "2027-04-01", True, hoje=date(2026, 9, 25))
+
+
+def test_pagina_envelope_emissao_no_futuro_mostra_erro_proprio_e_nao_emite() -> None:
+    # Reversão que mata: a casca não tratar EmissaoFuturaError antes do
+    # `except ValueError` genérico — a tela mandaria "usar o formato ISO".
+    at = AppTest.from_function(pagina_envelope)
+    at.run()
+
+    at.text_area[0].set_value(_ida_viverde()).run()
+    at.text_input[0].set_value((date.today() + timedelta(days=200)).isoformat()).run()
+    at.radio[0].set_value("s").run()
+    at.button[0].click().run()
+
+    assert not at.exception
+    assert any("Data de emissão no futuro" in e.value for e in at.error)
+    assert not at.code
+
+
+def test_pagina_envelope_pede_a_data_de_emissao_do_pgr() -> None:
+    # Reversão que mata: voltar o rótulo para "Validade".
+    at = AppTest.from_function(pagina_envelope)
+    at.run()
+    at.text_area[0].set_value(_ida_viverde()).run()
+
+    assert not at.exception
+    assert at.text_input[0].label == "Data de emissão do PGR (AAAA-MM-DD)"

@@ -51,6 +51,7 @@ from agente_medico.motor.tipos import (
 from agente_medico.motor.transcricao_fds import montar_fds
 from agente_medico.motor.transcritor_fds import TranscritorLLM
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
+from agente_medico.superficie.apresentacao import EmissaoFuturaError, validar_data_emissao
 from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
     DocumentoMatriz,
@@ -83,23 +84,14 @@ __all__ = [
 ]
 
 
-class EmissaoFuturaError(ValueError):
-    """Data de emissão do PGR posterior a hoje."""
-
-
 def montar_envelope(
     validade_iso: str, assinatura: bool, hoje: date | None = None
 ) -> EnvelopeConfirmado:
     """Mesmo espelho de mensagem que montar_volta_envelope (web_envelope.py):
-    ValueError na validade malformada, nunca coagida silenciosamente.
-
-    `validade` é a DATA DE EMISSÃO do PGR: R-PGR-06 (NR-01, revisão da avaliação
-    de riscos a cada 2 anos) conta os 2 anos a partir dela. Data futura é quase
-    sempre o vencimento digitado no lugar da emissão e, aceita, desligaria o gate
-    (hoje - validade < 0 nunca chega a 730 dias) — medido no Aurora, 25/09/2026."""
-    validade = date.fromisoformat(validade_iso)
-    if validade > (hoje if hoje is not None else date.today()):
-        raise EmissaoFuturaError(validade_iso)
+    ValueError na validade malformada, nunca coagida silenciosamente;
+    EmissaoFuturaError para emissão posterior a hoje (R-PGR-06 —
+    validar_data_emissao)."""
+    validade = validar_data_emissao(validade_iso, hoje)
     return EnvelopeConfirmado(validade=validade, assinatura_engenheiro=assinatura)
 
 
@@ -593,8 +585,11 @@ def pagina_matriz() -> None:
     )
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
-    from agente_medico.superficie.web_matriz import (
+    from agente_medico.superficie.apresentacao import (
+        MENSAGEM_EMISSAO_FUTURA,
         EmissaoFuturaError,
+    )
+    from agente_medico.superficie.web_matriz import (
         TranscritorGemini,
         _protocolo_padrao,
         agentes_mensuraveis,
@@ -945,7 +940,7 @@ def pagina_matriz() -> None:
                 st.markdown("**Responsáveis**")
                 responsavel_preenchimento = st.text_input("Responsável pelo preenchimento")
                 medico_validador = st.text_input("Médica validadora")
-                data_pgr = st.text_input("Data do PGR")
+                data_pgr = st.text_input("Data do PGR no rodapé (texto livre)")
 
             with col_pgr:
                 st.markdown("**Dados do PGR**")
@@ -964,10 +959,7 @@ def pagina_matriz() -> None:
         try:
             envelope = montar_envelope(validade, assinatura)
         except EmissaoFuturaError:
-            etapa_pgr.error(
-                f"Data de emissão no futuro: {validade!r}. Informe a data em que o PGR foi "
-                "emitido, não a de vencimento (R-PGR-06)."
-            )
+            etapa_pgr.error(MENSAGEM_EMISSAO_FUTURA.format(validade))
             bloqueio = "corrija a data de emissão do PGR na etapa 1"
             return
         except ValueError:
