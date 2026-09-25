@@ -10254,3 +10254,45 @@ ENERGIZADA") — leitura do PGR, fora do escopo visual.
 
 **Suíte completa (árvore parada).** **1432 passed, 6 skipped, 0 failed** (899.29s), +2 exato sobre
 1430.
+
+## Sessão (branch `claude/jolly-wozniak-iz0ley`) — 25/09/2026 — IMPLEMENTAÇÃO: médico coordenador e CRM obrigatórios; NUL no nome do GHE
+
+**Origem.** Ordem do Diovanni: começar pelas duas pendências sem decisão clínica. Branch criada de
+`origin/main a4f2d83`.
+
+**1. Médico coordenador e CRM obrigatórios.** `responsavel_pcmso_incompleto` (`web_matriz.py`)
+devolve os campos que faltam: médico em branco, CRM sem nenhum dígito. A tela para antes do
+envelope e do parse — nenhum PDF é processado sem o médico responsável (NR-7). Não é regra
+clínica: nenhum `R-*` criado. Só a tela web monta `CabecalhoDocumento`; o dataclass não valida,
+para não quebrar testes de motor que passam cabeçalho vazio.
+
+**2. NUL no nome do GHE.** Medido no PDF do Vila Brasil Escritório (p. 58, imagem recortada): o
+`\x00` de "MANUTENÇÃO \x00 ENERGIZADA" é o hífen da fonte `Inter-Thin` sem mapeamento Unicode — o
+mesmo glifo do separador "GHE 23 - …". Mas o NUL não é sempre hífen: nos testes do parser ele
+também é parêntese (`\x0024°Be\x00`, CBO `\x004121\x0005\x00`). Regra adotada em
+`nome_ghe_exibicao` (`documento_matriz.py`): NUL entre espaços → " - "; qualquer outro NUL segue
+removido, como o `_sanitizar` já fazia. `MatrizGHE.nome_ghe` e `GHEPGR.nome` seguem verbatim
+(DH-003EG-01: sanitizar na renderização, não no dado). Aplicada no documento (DOCX/HTML) e nas
+quatro telas que mostravam o nome cru: vínculo FDS→GHE, produtos anexados, GHE das avaliações
+quantitativas e expander da revisão. Antes, o DOCX saía "MANUTENÇÃO  ENERGIZADA" (espaço duplo) e
+a tela mostrava o NUL.
+
+**Testes.** Novos: `test_responsavel_pcmso_incompleto` (4 casos), 
+`test_sem_medico_coordenador_e_crm_nao_processa_o_pgr`, `test_nome_ghe_exibicao` (2 casos),
+`test_docx_mostra_hifen_no_nome_do_ghe_com_nul`, `test_tela_mostra_hifen_no_nome_do_ghe_com_nul`.
+Varredura inversa: 4 reversões na trava (tirar checagem do médico; do CRM; "dígito" → "não vazio";
+tirar a trava da página) e 8 no NUL (só remover; todo NUL → hífen; documento com `_sanitizar`;
+documento verbatim; cada uma das 4 telas) — 12/12 mortas. Existentes alterados só no preparo:
+5 fluxos AppTest que clicam em "Gerar matriz" (`_submeter_formulario`, data inválida,
+`test_rx_medicao_poeira`, `test_bio_medicao_quantitativa`, `test_revisao_origem`) passam a
+preencher médico e CRM; nenhuma asserção mudou. O de data inválida precisava disso para não
+parar na trava nova e passar sem testar a data.
+
+**Varredura do acervo (`matrizes_originais/*.pdf`, títulos de GHE com NUL).** Vila Brasil GHE 23
+`MANUTENÇÃO \x00 ENERGIZADA` (entre espaços → hífen); Fascino e Verde Maris `HIDRO\x00SANITÁRIAS`
+(colado → removido); Verde Maris `ELÉTRICA \x00CIRCUITOS ENERGIZADOS\x00` e `…DESENERGIZADOS\x00`
+— aqui o NUL são parênteses; colado, é removido, e a regra não inventa hífen. "Todo NUL → hífen"
+erraria esses dois títulos.
+
+**Verificação.** Suíte completa (árvore parada): **1441 passed, 6 skipped, 0 failed** (901.46s),
++9 exato sobre 1432. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.

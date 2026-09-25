@@ -81,6 +81,7 @@ __all__ = [
     "preparar_composicao",
     "preparar_composicao_cacheada",
     "remover_produto_e_reprocessar",
+    "responsavel_pcmso_incompleto",
 ]
 
 
@@ -93,6 +94,18 @@ def montar_envelope(
     validar_data_emissao)."""
     validade = validar_data_emissao(validade_iso, hoje)
     return EnvelopeConfirmado(validade=validade, assinatura_engenheiro=assinatura)
+
+
+def responsavel_pcmso_incompleto(medico_coordenador: str, crm: str) -> tuple[str, ...]:
+    """Campos do médico responsável pelo PCMSO que impedem gerar o documento
+    (NR-7: o PCMSO tem médico responsável identificado). CRM sem nenhum dígito
+    conta como ausente — não há número de registro a conferir."""
+    faltando: list[str] = []
+    if not medico_coordenador.strip():
+        faltando.append("Médico coordenador")
+    if not any(c.isdigit() for c in crm):
+        faltando.append("CRM")
+    return tuple(faltando)
 
 
 def gerar_documento(
@@ -581,6 +594,7 @@ def pagina_matriz() -> None:
     from agente_medico.superficie.documento_matriz import (
         CabecalhoDocumento,
         RodapeDocumento,
+        nome_ghe_exibicao,
         renderizar_docx,
     )
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
@@ -604,6 +618,7 @@ def pagina_matriz() -> None:
         registrar_medicao_e_reprocessar,
         remover_medicao_e_reprocessar,
         remover_produto_e_reprocessar,
+        responsavel_pcmso_incompleto,
     )
 
     st.title("Matriz de Exames — PCMSO")
@@ -787,7 +802,9 @@ def pagina_matriz() -> None:
                         st.info("Gere a matriz para vincular esta FDS a um GHE.")
                     if cache_vinculo is not None and cache_vinculo.pgr_hidratado is not None and blocos_fds:
                         ghes_pgr = cache_vinculo.pgr_hidratado.ghes
-                        rotulos_ghe = {ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in ghes_pgr}
+                        rotulos_ghe = {
+                            ghe.id: f"{ghe.id} — {nome_ghe_exibicao(ghe.nome)}".strip(" —") for ghe in ghes_pgr
+                        }
                         # Sem GHE pré-marcado: o selectbox anterior sempre tinha um valor, e
                         # o clique anexava em algum GHE mesmo sem escolha consciente.
                         ghes_escolhidos = st.multiselect(
@@ -829,7 +846,8 @@ def pagina_matriz() -> None:
                         st.caption("Nenhum produto anexado.")
                     for produto_anexado in produtos_anexados:
                         st.write(
-                            f"**{produto_anexado.ghe_id} — {produto_anexado.ghe_nome}** · {produto_anexado.nome}"
+                            f"**{produto_anexado.ghe_id} — {nome_ghe_exibicao(produto_anexado.ghe_nome)}**"
+                            f" · {produto_anexado.nome}"
                         )
                         for componente in produto_anexado.componentes:
                             agente = componente.agente or "não reconhecido no vocabulário"
@@ -853,7 +871,8 @@ def pagina_matriz() -> None:
                         "a medição define a periodicidade do RX OIT (NR-07 Anexo III)."
                     )
                     rotulos_medicao = {
-                        ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in cache_vinculo.pgr_hidratado.ghes
+                        ghe.id: f"{ghe.id} — {nome_ghe_exibicao(ghe.nome)}".strip(" —")
+                        for ghe in cache_vinculo.pgr_hidratado.ghes
                     }
                     col_agente, col_laudo = st.columns(2)
                     with col_agente:
@@ -962,6 +981,15 @@ def pagina_matriz() -> None:
             enviado = st.form_submit_button("Gerar matriz", type="primary")
 
         if not enviado and cache is None:
+            return
+
+        faltando_responsavel = responsavel_pcmso_incompleto(medico_coordenador, crm)
+        if faltando_responsavel:
+            etapa_pgr.error(
+                "Preencha " + " e ".join(faltando_responsavel)
+                + " antes de gerar a matriz — o documento do PCMSO sai com o médico responsável."
+            )
+            bloqueio = "preencha médico coordenador e CRM na etapa 1"
             return
 
         try:
@@ -1113,7 +1141,7 @@ def pagina_matriz() -> None:
                     cache.matrizes, cache.exames_vocab, _protocolo_padrao().vocabulario.agentes
                 )
                 for revisao in revisoes:
-                    with st.expander(f"GHE {revisao.ghe_id} {revisao.nome_ghe}".strip()):
+                    with st.expander(f"GHE {revisao.ghe_id} {nome_ghe_exibicao(revisao.nome_ghe)}".strip()):
                         # Tabela em markdown, não st.table: st.table importa pandas no
                         # primeiro render da sessão (medido: +9 s a frio no container).
                         st.markdown(tabela_markdown(revisao))
