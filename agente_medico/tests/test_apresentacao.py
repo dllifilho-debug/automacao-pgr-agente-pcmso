@@ -2,16 +2,19 @@ from __future__ import annotations
 
 import io
 import json
+from datetime import date
 from typing import Any, TextIO
 
 import pytest
 
 from agente_medico.superficie.apresentacao import (
     ArtefatoIdaIlegivel,
+    EmissaoFuturaError,
     carregar_artefato_ida,
     conduzir_revisao,
     ler_resposta,
     prompt_enter_mantem,
+    validar_data_emissao,
 )
 
 
@@ -72,3 +75,13 @@ def test_conduzir_revisao_self_check_e_chamado_com_a_volta_serializada() -> None
 
     assert chamadas == [volta]
     assert json.loads(volta) == {"a": 1, "b": "editado"}
+
+
+def test_validar_data_emissao_recusa_futuro_e_aceita_hoje() -> None:
+    # Reversões que matam: (1) tirar a checagem `emissao > hoje` — o vencimento
+    # digitado passaria e R-PGR-06 não dispararia; (2) trocar `>` por `>=` — a
+    # emissão de hoje seria recusada.
+    hoje = date(2026, 9, 25)
+    with pytest.raises(EmissaoFuturaError):
+        validar_data_emissao("2026-09-26", hoje)
+    assert validar_data_emissao("2026-09-25", hoje) == hoje

@@ -10192,3 +10192,32 @@ unidade + tela; `>` → `>=` → só unidade; exceção caindo no `except ValueE
 rótulo antigo → teste do rótulo + localizador do reprocesso. Testes de tela 86 passed (83 + 3);
 `mypy --strict` alvo canônico limpo, 51 arquivos. Suíte completa (árvore parada): **1423 passed,
 6 skipped, 0 failed** (892.60s), +3 exato sobre 1420.
+
+## Sessão (branch `feat/envelopes-emissao-20260925`) — 25/09/2026 — IMPLEMENTAÇÃO: data de emissão do PGR nas superfícies do envelope (R-PGR-06)
+
+**Origem.** Continuação do PR #388: `web_envelope.py` e `cli_envelope.py` pediam "Validade" e
+aceitavam data futura, com a mesma consequência (R-PGR-06 conta 2 anos a partir da emissão; data
+futura nunca chega a 730 dias). Branch criada de `origin/main 40778ef`. As candidatas e a proposta
+do envelope são mês-ano da capa do PGR (`resolvedor_topo.py`, 1º dia do mês) — semântica de
+emissão, coerente com o motor; o defeito era só de superfície.
+
+**Implementado.** A checagem sai de `web_matriz.py` para `superficie/apresentacao.py`
+(`validar_data_emissao`, `EmissaoFuturaError`, `MENSAGEM_EMISSAO_FUTURA`), compartilhada pelas três
+superfícies; `web_matriz` reexporta `EmissaoFuturaError` (mesma classe). `web_envelope`:
+`montar_volta_envelope` com `hoje` injetável recusa emissão futura; a página trata o erro com
+mensagem própria e não emite; rótulo "Data de emissão do PGR (AAAA-MM-DD)"; subtítulo "Candidatas
+de data de emissão (capa do PGR)". `cli_envelope`: `revisar_envelope(..., hoje=None)`; o prompt
+pede "Data de emissão do PGR"; data futura re-pergunta — **inclusive a proposta aceita com Enter**
+(capa com data errada). Na tela da matriz, o campo do rodapé "Data do PGR" virou "Data do PGR no
+rodapé (texto livre)", para não se confundir com a emissão. Motor e regra clínica intocados.
+
+**Testes.** 7 novos (1 em `test_apresentacao`, 3 em `test_web_envelope`, 3 em `test_cli_envelope`).
+Existente alterado: só `test_data_invalida_reprompta_ate_iso_valida` ganhou `hoje=date(2027, 1, 1)`
+(usava 2026-12-31, futuro); datas e asserções mantidas. Varredura inversa 8/8: sem a checagem →
+os 7 que dependem dela (apresentação, envelopes web e CLI, matriz); `>` → `>=` → apresentação +
+unidade da matriz; `montar_volta_envelope` só com `fromisoformat` → só a unidade web; página sem
+tratar `EmissaoFuturaError` → só o teste da página; rótulo web antigo → só o do rótulo; CLI só com
+`fromisoformat` → digitada + proposta; Enter devolvendo a proposta sem validar → só o da proposta;
+prompt "Validade" → só o do prompt. Testes afetados 117 passed; `mypy --strict` alvo canônico limpo,
+51 arquivos. Suíte completa (árvore parada): **1430 passed, 6 skipped, 0 failed** (926.03s), +7
+exato sobre 1423.

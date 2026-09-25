@@ -17,8 +17,33 @@ import argparse
 import json
 import sys
 from collections.abc import Callable, Sequence
+from datetime import date
 from pathlib import Path
 from typing import Any, TextIO
+
+MENSAGEM_EMISSAO_FUTURA = (
+    "Data de emissão no futuro: {!r}. Informe a data em que o PGR foi emitido, "
+    "não a de vencimento (R-PGR-06)."
+)
+
+
+class EmissaoFuturaError(ValueError):
+    """Data de emissão do PGR posterior a hoje."""
+
+
+def validar_data_emissao(texto_iso: str, hoje: date | None = None) -> date:
+    """Data de emissão do PGR em ISO -> date. ValueError se malformada;
+    EmissaoFuturaError se posterior a `hoje` (default: date.today()).
+
+    R-PGR-06 (NR-01, revisão da avaliação de riscos a cada 2 anos) conta os 2
+    anos a partir da EMISSÃO. Data futura é quase sempre o vencimento digitado
+    no lugar dela e, aceita, desligaria o gate (hoje - emissão < 0 nunca chega a
+    730 dias) — medido no Aurora, 25/09/2026. Compartilhado pela tela da matriz
+    e pelas duas superfícies do envelope."""
+    emissao = date.fromisoformat(texto_iso)
+    if emissao > (hoje if hoje is not None else date.today()):
+        raise EmissaoFuturaError(texto_iso)
+    return emissao
 
 
 class ArtefatoIdaIlegivel(ValueError):
