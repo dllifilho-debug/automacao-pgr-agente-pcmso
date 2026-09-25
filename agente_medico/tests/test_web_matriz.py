@@ -1046,8 +1046,8 @@ def test_segundo_clique_em_anexar_nao_duplica_o_produto(monkeypatch: pytest.Monk
 
 
 def test_painel_lista_o_produto_anexado_e_remove_pelo_botao(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Reversão que mata: não gravar o cache em st.session_state antes do
-    # st.rerun() do "Remover" — o rerun relê o cache antigo e o produto volta.
+    # Reversão que mata: o callback _remover não gravar o cache em
+    # st.session_state — o rerun relê o cache antigo e o produto volta.
     at = _pagina_com_fds_enviada(monkeypatch)
     assert "Nenhum produto anexado." in _captions(at)
 
@@ -1234,3 +1234,29 @@ def test_fds_antes_de_gerar_a_matriz_diz_como_vincular(monkeypatch: pytest.Monke
     depois = _pagina_com_fds_enviada(monkeypatch, escolher_ghe=False)
     assert aviso not in [i.value for i in depois.info]
     assert depois.multiselect(key="ghe_destino_fds.pdf") is not None
+
+
+def test_anexo_e_processado_antes_do_rerun_e_vale_para_fds_acima(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Clique perdido em produção (Aurora, 25/09/2026): com o anexo inline, o
+    # clique só era processado quando o rerun chegava ao botão. O callback
+    # on_click roda ANTES do rerun — observável aqui: duas FDS com o mesmo nome
+    # de produto (caso real "CIMENTO….PDF"/"CIMENTO….pdf"); anexar pela 2ª já
+    # muda o status da 1ª, renderizada acima, no mesmo rerun.
+    # Reversão que mata: voltar o anexo para dentro de `if st.button(...)` — a
+    # 1ª FDS diria "ainda não anexada" no rerun do clique.
+    at = _pagina_com_fds_enviada(monkeypatch, escolher_ghe=False)
+    at.file_uploader[1].set_value(
+        [
+            ("cimento.PDF", b"um", "application/pdf"),
+            ("cimento.pdf", b"dois", "application/pdf"),
+        ]
+    ).run()
+    at.multiselect(key="ghe_destino_cimento.pdf").set_value(["GHE-01"]).run()
+
+    at.button(key="anexar_fds_cimento.pdf").click().run()
+    assert not at.exception
+
+    assert _captions(at).count("Status: anexada a GHE-01.") == 2
+

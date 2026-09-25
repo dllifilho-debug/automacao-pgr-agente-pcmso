@@ -835,6 +835,17 @@ observação sai — como esperado. **Não alterado:** o corte BAIXO×IRRELEVANT
 Diovanni `[MEDIDO — branch claude/determined-fermi-xxah3h]`.
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
+**Nota (mesma branch, 25/09/2026) — 2º GHE do Aurora com dispensa em BAIXO.** Matriz_9 do app ×
+gabarito: no GHE 18 PINTURA, a anotação dos 3 cargos diz *"Inserir no Word do PCMSO risco
+ocupacional baixo no PGR para Octoato de Cobalto, Thinner Acetona, Thinner Metiletilcetona,
+Thinner Tolueno e Xileno"* — todos BAIXO no PGR — e o gabarito não pede ácido metil-hipúrico,
+ortocresol, MEK nem acetona. O app emite ácido metil-hipúrico (origem na revisão: `xileno ← PGR
+(nível BAIXO) | FDS — componente Xileno do produto Fundo Zarcão`). Exceções no mesmo GHE: pede
+t,t-mucônico (benzeno das FDS de aguarrás — cancerígeno, regime do Anexo V) e **cobalto na urina**
+apesar de citar o octoato de cobalto na anotação de risco baixo (contradição interna do gabarito).
+Somado ao GHE 11: 2 GHEs, 5 agentes do Quadro 1 dispensados em BAIXO pela mesma médica num PGR de
+27/08/26. Decisão do Diovanni `[MEDIDO — branch claude/determined-fermi-xxah3h]`.
+
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
 
 **Situação.** O gabarito dá RX Tórax OIT em **12M em 14 GHEs** e **60M em GHE-08 (poeira de madeira)** e **GHE-09 (poeiras respiráveis/metálicas)**. O 60M casa com PNOS/Quadro 2 (faixa "sem avaliação quantitativa" → 60M, já implementada). O **12M NÃO casa com R-RX-01**: 12M é a faixa >100% LEO do Quadro 1 (sílica/asbesto), e "sem avaliação quantitativa" prescreve **24M** `[DERIVADO — NR-7 Anexo III Quadro 1]` — não 12M. O PGR não traz quantificação para esses GHEs.
