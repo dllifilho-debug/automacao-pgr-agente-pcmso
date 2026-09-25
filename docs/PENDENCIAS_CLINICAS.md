@@ -3359,7 +3359,7 @@ gratuito (20 RPD por modelo Flash, painel do AI Studio em 24/09/2026) não compo
 de PGR + FDS — decisão de faturamento é do Diovanni.
 
 
-### DT-(sessão `claude/determined-fermi-xxah3h`)-01 — Produtos de FDS anexados não aparecem na tela da matriz `[ABERTA — fatia A implementada, 24/09/2026]`
+### DT-(sessão `claude/determined-fermi-xxah3h`)-01 — Produtos de FDS anexados não aparecem na tela da matriz `[ABERTA — fatias A e B implementadas, 25/09/2026]`
 
 **Origem.** Diovanni, depois de rodar o Aurora Lago das Rosas com 16 FDS: "não consegui enxergar
 elas". Medido na tela exportada: a confirmação "Produto X anexado ao GHE Y" só aparece no rerun do
@@ -3380,4 +3380,12 @@ só de tela; (C) anexos que sobrevivem a reprocessamento (a chave do cache inclu
 trocar validade/assinatura refaz o PGR hidratado sem os produtos, sem aviso; leitura de código,
 `[A MEDIR]`) e FDS em mais de um GHE — muda o contrato de `CacheMatrizes` (D-ARQ-49 Parte 2
 fatia 2b), exige nota de decisão antes.
+
+**Fatia B (implementada, mesma branch, pós-merge do PR #372).** Seção "Revisão — origem dos
+exames" na tela, fora do documento assinado: por GHE, exame × regra × status × origem. Origem vem
+de `Motivo.risco_origem`, que o motor passa a preencher nas regras de agente direto (R-BIO-04-*),
+com todas as fontes do agente (PGR com nível, FDS com produto, cargo) — decisão do Diovanni entre
+três caminhos; regra composta mostra o predicado. Mesma seção lista o enquadramento de cada agente
+no Decreto 3.048/1999, Anexo IV (`enquadramento_3048`, D-ARQ-12), com "sem enquadramento
+conferido" distinto de "não consta (conferido)". Resta a fatia C.
 

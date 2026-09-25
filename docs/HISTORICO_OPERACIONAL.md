@@ -9739,3 +9739,31 @@ com a sua. Suíte completa (árvore parada): **1369 passed, 6 skipped, 0 failed*
 exato contra 1364. `mypy --strict` alvo canônico limpo, 49 arquivos.
 
 **Próxima.** PR B, depois do merge deste.
+
+## Sessão (branch `claude/determined-fermi-xxah3h`, continuação pós-merge do PR #372) — 25/09/2026 — IMPLEMENTAÇÃO: revisão com origem dos exames e Decreto 3.048 (fatia B de `DT-(sessão claude/determined-fermi-xxah3h)-01`)
+
+**Origem.** PR B do plano acordado. Branch recriada de `origin/main e9962a6`. Decisão do Diovanni
+(pergunta nesta sessão): origem do exame só nas regras de agente direto — sem mexer em
+`predicados.avaliar`, recorte que 003.EG deixou fora.
+
+**Implementado.** Motor: `_risco_origem` em `estagios/emissao.py` preenche `Motivo.risco_origem`
+quando o `quando` é o slug de um agente de `ctx.riscos` (`"xileno ← PGR (nível BAIXO) | FDS —
+componente Xileno do produto Fundo Zarcão"`); composto e primitivo seguem `None`. Superfície:
+módulo puro novo `superficie/revisao_matriz.py` (`montar_revisao`, `enquadramento_3048`,
+`tabela_markdown`); seção de revisão por GHE em `pagina_matriz`, em markdown. Docs: notas de
+aplicação em D-ARQ-22 Parte B e D-ARQ-12 (DECISOES v216), PROTOCOLO v100 (DH-003ED-01 faceta
+`risco_origem` fechada no recorte atômico), índice regenerado.
+
+**Falha única não reproduzida.** Na 1ª rodada de `test_web_matriz.py` depois de pôr a revisão na
+tela, 1 teste falhou (`test_pendencias_globais_aparecem_antes_das_de_extracao`) e o arquivo levou
+19,8 s contra ~10 s; 12 rodadas seguintes passaram, inclusive com `__pycache__` apagado. Traceback
+não guardado. Hipótese, não medida: `st.table` importou pandas pela 1ª vez no container dentro de
+um `AppTest.run()` de 3 s. Removido na origem — a tabela virou markdown, sem pandas no caminho.
+
+**Verificação.** 5 testes (`test_revisao_origem.py`); varredura inversa em cópia isolada, 7
+reversões, 5/5 discriminantes. Suíte completa (árvore parada): **1374 passed, 6 skipped, 0
+failed** (721.83s), +5 exato contra 1369. `mypy --strict` alvo canônico limpo, **50 arquivos**
+(+1: `revisao_matriz.py`). `test_gerar_indice_darq.py`: 6 passed. `medir_painel` inalterado.
+
+**Próxima.** PR C (anexos que sobrevivem a reprocessamento + FDS em mais de um GHE), com nota de
+decisão em D-ARQ-49 antes do código, depois do merge deste.

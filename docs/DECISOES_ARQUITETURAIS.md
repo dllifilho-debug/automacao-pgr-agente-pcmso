@@ -502,6 +502,19 @@ perna vencedora de um predicado composto) mudaria a assinatura da função, usad
 — avaliado e deixado fora desta sessão. Detalhe em PROTOCOLO DH-003ED-01 (PARCIALMENTE
 RESOLVIDA, faceta `risco_origem` ABERTA) e HISTORICO 003.EG.
 
+**Nota de aplicação (branch `claude/determined-fermi-xxah3h`, 25/09/2026) — faceta `risco_origem`, recorte atômico.**
+Decisão do Diovanni entre três caminhos (só regras de agente / caso geral / só tela): o motor
+passa a preencher `Motivo.risco_origem` **apenas** quando o `quando` da regra é o próprio slug de
+um agente presente em `ctx.riscos` (hoje, as 42 `R-BIO-04-*`) — `_risco_origem` em
+`estagios/emissao.py`. Formato: `"<agente> ← <fonte> | <fonte>"`, uma entrada por fonte distinta
+(`PGR (nível X)`, `FDS — componente C do produto P`, `derivado do cargo K`). Não toca
+`predicados.avaliar` nem `tipos.py`: o recorte que 003.EG deixou fora (rastro do átomo vencedor de
+predicado composto) **segue fora** — regras compostas e primitivos (RX de sílica, pacotes,
+`todo_trabalhador`) continuam com `risco_origem=None`, e a revisão mostra o predicado. Consumidor:
+a revisão da tela web (`superficie/revisao_matriz.py`), fora do documento assinado. Motivação
+medida: Aurora Lago das Rosas, aguarrás anexada ao GHE errado gerou ácido t,t-mucônico ao
+serralheiro sem que a tela dissesse de onde. Nenhuma `R-*` criada ou alterada.
+
 **Base.** Sessão 002.M (28/05/2026). Decisão de metodologia — sem caso-âncora de código.
 
 ---
@@ -658,6 +671,13 @@ DT-003BA-01: fronteira de produto — colunas previdenciária (Dec 3.048), eSoci
 27 slugs cobertos (22 enquadrados, 5 conferidos e ausentes — não inferidos): `arsenio` 1.0.1, `asbesto` 1.0.2 (20 anos, única exceção ao piso de 25), `benzeno` 1.0.3, `cadmio` 1.0.6, `chumbo`/`chumbo_tetraetila` 1.0.8, `cromo_hexavalente` 1.0.10 (ressalva: Decreto não distingue valência), `dissulfeto_de_carbono` 1.0.11, `manganes` 1.0.14, `mercurio` 1.0.15, `asfalto` 1.0.17, `silica` 1.0.18, `estireno`/`n_hexano`/`tdi`/`butadieno_13`/`oxido_de_etileno` 1.0.19 (Grupos I/II), `ruido` 2.0.1, `vibracao`/`vibracao_corpo_inteiro`/`vibracao_mao_braco` 2.0.2, `microrganismos` 3.0.1; `tolueno`, `xileno`, `tricloroetileno`, `monoxido_de_carbono`, `clorobenzeno` → `null`, conferidos e ausentes do Anexo IV.
 
 Teste-por-dado com reversão nomeada: `test_vocabulario.py::test_vocabulario_agentes_enquadramento_3048_bate_anexo_iv` (amostra de 5 valores fixos), `..._nao_inventa_para_tolueno_e_xileno` (regressão específica do erro do legado) e `..._tem_forma_valida` (guarda de forma sobre as 27 entradas). Nenhuma `R-*` criada, alterada ou depreciada. `PROTOCOLO_AGENTE_MEDICO.md` não tocado. Índice D-ARQ regenerado.
+
+**Nota de aplicação (branch `claude/determined-fermi-xxah3h`, 25/09/2026) — primeiro consumidor, só na revisão.**
+`enquadramento_3048` passa a ser lido pela revisão da tela web (`superficie/revisao_matriz.py`),
+por agente de `riscos_resolvidos`, fora do documento assinado e fora do motor — nenhum campo novo
+em `Risco`, nenhuma emissão. Três estados distintos na tela: chave ausente → "sem enquadramento
+conferido"; `null` → "não consta no Anexo IV (conferido)"; valor → "item X — N anos". Coluna na
+matriz assinada e frente de emissão (PPP/LTCAT, eSocial Tab 24) seguem fora (`DT-003BA-01`).
 
 ---
 
@@ -4342,3 +4362,4 @@ Sessão 003.FD (22/08/2026). `[META — decisão de processo. Não toca motor ne
 | v213 | 24/09/2026 | Branch `claude/inspiring-turing-0ylkmk` (IMPLEMENTAÇÃO — `DT-003EC-01`, decisão do Diovanni): **Nota de aplicação em `D-ARQ-19`** (`apenas_qualitativa` ganha produtor real para sílica; ramo sem-avaliação partido em `silica_asbesto_sem_medicao`/`silica_qualitativa`) e **nota em `D-ARQ-49`** (campo aditivo `RiscoVerbatim.avaliacao_qualitativa`, só rota determinística). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v94→**v95** (`R-RX-01-qual`). Índice D-ARQ regenerado. |
 | v214 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — `DT-003EB-02`, decisões do Diovanni de 23/09 e 24/09/2026 — dispensa só em IRRELEVANTE): **Nota de aplicação em `D-ARQ-59`** (exceção por nível como chave de dado nas 42 `R-BIO-04-*` do Quadro 1) e **nota em `D-ARQ-73`** (observação de menção documental na célula do cargo). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v96→**v97** (`R-BIO-05`). Índice D-ARQ regenerado. |
 | v215 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — rota LLM extrai o nível P×S): **Nota de aplicação em `D-ARQ-49`** (campo `avaliacao_qualitativa` preenchido pela rota LLM na escala P×S; guarda determinística em `transcrever_ghes`; coluna de nível sai do ruído da C3 de `D-ARQ-50`). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v98→**v99**. Índice D-ARQ regenerado. |
+| v216 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — revisão na tela): **Nota de aplicação em `D-ARQ-22` Parte B** (`Motivo.risco_origem` preenchido só em regra de agente direto; caso geral segue fora, DH-003ED-01) e **em `D-ARQ-12`** (`enquadramento_3048` ganha o primeiro consumidor, só na revisão da tela). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v99→**v100**. Índice D-ARQ regenerado. |

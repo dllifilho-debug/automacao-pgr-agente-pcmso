@@ -109,6 +109,15 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 25/09/2026, revisão com origem dos exames]`:** branch
+`claude/determined-fermi-xxah3h` sobre `main e9962a6` (merge do PR #372; IMPLEMENTAÇÃO — fatia B
+de `DT-(sessão claude/determined-fermi-xxah3h)-01`) · **1374 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 721.83s — 1369 + 5 testes
+novos)* · `mypy --strict` alvo canônico **limpo, 50 arquivos** (+1, `superficie/revisao_matriz.py`)
+· PROTOCOLO v99→**v100** · DECISOES v215→**v216** (notas em D-ARQ-22 e D-ARQ-12; índice
+regenerado, 85 decisões). `medir_painel`: `regras 26/45`, `cas 78/109`, `índice sincronizado` —
+inalterados; três números clínicos não re-tirados (D-ARQ-85 cl.1): nenhuma `R-*` nem `.yaml`
+tocados.
+
 **Baseline `[MEDIDO — 24/09/2026, painel de produtos anexados]`:** branch
 `claude/determined-fermi-xxah3h` sobre `main bc2c54a` (merge do PR #371; IMPLEMENTAÇÃO de
 superfície — fatia A de `DT-(sessão claude/determined-fermi-xxah3h)-01`) · **1369 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada,
