@@ -1340,3 +1340,30 @@ def test_anexo_e_processado_antes_do_rerun_e_vale_para_fds_acima(
 
     assert _captions(at).count("Status: anexada a GHE-01.") == 2
 
+
+
+def test_etapa_2_mostra_vinculo_e_produtos_no_rerun_do_clique_em_gerar(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: desenhar a etapa 2 no ponto antigo do fluxo, antes do
+    # processamento, com o cache lido no topo — no rerun do próprio clique em
+    # Gerar matriz ainda não haveria seletor de GHEs nem painel de produtos.
+    pgr_sintetico = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)))
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado",
+        lambda *a, **k: (pgr_sintetico, ()),
+    )
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_composicao",
+        lambda *a, **k: ((_FDS_TOLUENO,), ()),
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+
+    _submeter_formulario(at)
+
+    assert not at.exception
+    assert at.multiselect(key="ghe_destino_fds.pdf") is not None
+    assert "Nenhum produto anexado." in _captions(at)
+    assert "Gere a matriz para vincular esta FDS a um GHE." not in [i.value for i in at.info]

@@ -185,3 +185,15 @@ def test_tela_recusa_silica_sem_quartzo(monkeypatch: pytest.MonkeyPatch) -> None
 
     assert at.session_state["web_matriz_cache"].medicoes == ()
     assert [w.value for w in at.warning] == ["Sílica: informe o % de quartzo do laudo (NR-15 Anexo 12)."]
+
+
+def test_medicao_registrada_mostra_a_fracao_como_na_tela(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: exibir `fracao.value` na lista de medições — sairia o
+    # valor interno "respiravel", sem acento, diferente do seletor "Respirável".
+    at = _pagina_com_silica(monkeypatch)
+    at.number_input(key="medicao_quartzo").set_value(5.0)
+    at.button(key="registrar_medicao").click().run()
+    assert not at.exception
+
+    textos = [m.value for m in at.markdown]
+    assert any("(respirável, 5% quartzo)" in t for t in textos)

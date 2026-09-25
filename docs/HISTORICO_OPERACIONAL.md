@@ -10221,3 +10221,36 @@ tratar `EmissaoFuturaError` → só o teste da página; rótulo web antigo → s
 prompt "Validade" → só o do prompt. Testes afetados 117 passed; `mypy --strict` alvo canônico limpo,
 51 arquivos. Suíte completa (árvore parada): **1430 passed, 6 skipped, 0 failed** (926.03s), +7
 exato sobre 1423.
+
+## Sessão (branch `feat/ui-matriz-etapa2-20260925`) — 25/09/2026 — IMPLEMENTAÇÃO: sessão visual final da tela da matriz
+
+**Origem.** Pendências visuais do PR #386, a pedido do Diovanni ("sessão visual final"). Branch
+criada de `origin/main 552be01`. Escopo só de tela; decisões clínicas (cobalto, R-BIO-05 em BAIXO,
+R-CLI-02, benzeno < 1 %) e obrigatoriedade de médico coordenador/CRM ficam fora.
+
+**1. Etapa 2 completa no rerun do clique em Gerar matriz.** O vínculo FDS→GHE, "Produtos anexados"
+e "Avaliações quantitativas" liam o cache no topo do script e só apareciam na interação seguinte
+(pré-existente ao #386). Agora a etapa é desenhada por `_renderizar_vinculos`, chamada no `finally`
+com o cache deste rerun (`st.session_state`); posição na tela, keys e textos inalterados. Efeito
+colateral correto: num rerun de PGR rejeitado o cache é removido e a etapa 2 não oferece vínculo.
+
+**2. Fração na lista de medições.** A lista mostrava o valor interno ("respiravel"); passa a
+"respirável"/"total", como o seletor.
+
+**Testes.** 2 novos: `test_etapa_2_mostra_vinculo_e_produtos_no_rerun_do_clique_em_gerar`
+(reversão: desenhar a etapa 2 no ponto antigo, antes do processamento → só ele vermelho; os outros
+86 seguem verdes, o que confirma que o resto do comportamento não mudou) e
+`test_medicao_registrada_mostra_a_fracao_como_na_tela` (reversão: `fracao.value` → só ele
+vermelho). Nenhum teste existente alterado. Testes de tela 88 passed; `mypy --strict` alvo
+canônico limpo, 51 arquivos.
+
+**Conferência manual (Playwright contra `app_matriz_local.py`, PGR Vila Brasil real, rota
+determinística).** 6/6: etapa 2 completa no próprio clique (53 s de parse); no GHE-12, sílica mostra
+Fração e % de quartzo, é recusada sem quartzo e registrada com "(respirável, 5% quartzo)"; poeira
+não classificada mostra a legenda de fração respirável, sem campo de quartzo, e é registrada.
+Fecha o NÃO VERIFICADO de sílica/PNOS no navegador (PR #386). Achado de passagem, não tratado: o
+nome do GHE-23 do Vila Brasil vem com caractere nulo ("ASSISTENCIA TECNICA MANUTENÇÃO \x00
+ENERGIZADA") — leitura do PGR, fora do escopo visual.
+
+**Suíte completa (árvore parada).** **1432 passed, 6 skipped, 0 failed** (899.29s), +2 exato sobre
+1430.
