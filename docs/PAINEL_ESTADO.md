@@ -109,6 +109,15 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 25/09/2026, D-ARQ-86]`:** branch `claude/hopeful-ramanujan-rbgh4s` sobre
+`main 6bf4ec7` (merge do PR #380; ARQUITETURA, docs-only — `D-ARQ-86` PROPOSTA) · suíte completa
+**não re-tirada**: nenhum código, teste ou `.yaml` tocado; recorte dos derivados tocados
+(`test_gerar_indice_darq`, `test_medir_painel`, `test_particao_pendencias`,
+`test_varrer_acervo_lgpd`, `test_cobertura_varrer_acervo`): **47 passed, 2 failed** — os 2 de
+LibreOffice, pré-existentes na árvore limpa (ambiente) · `mypy` não re-tirado (sem código) ·
+PROTOCOLO v103 inalterado · DECISOES v217→**v218** (86 decisões). `medir_painel`: `regras 28/45`,
+`cas 78/109`, `índice sincronizado` — inalterados.
+
 **Baseline `[MEDIDO — 25/09/2026, R-CLI-03]`:** branch `claude/determined-fermi-xxah3h` sobre
 `main 894f32b` (merge do PR #377; IMPLEMENTAÇÃO — `R-CLI-03`; `R-CLI-02` bloqueada por medição) ·
 **1389 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 796.39s — 1386 + 3)* · `mypy --strict`

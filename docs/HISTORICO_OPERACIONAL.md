@@ -9961,3 +9961,32 @@ pendente).
 que leem os docs e o acervo (`test_particao_pendencias`, `test_varrer_acervo_lgpd`,
 `test_cobertura_varrer_acervo`): **32 passed, 2 failed** — os 2 de LibreOffice, que falham igual na
 árvore limpa (ambiente: filtro Writer ausente neste container; `apt-get install` não concluiu).
+
+## Sessão (branch `claude/hopeful-ramanujan-rbgh4s`, continuação pós-merge do PR #380) — 25/09/2026 — ARQUITETURA: `D-ARQ-86` (medição quantitativa informada na tela)
+
+**Origem.** Diovanni pediu "implementa a R-BIO-05 em BAIXO". Antes de implementar, reapresentada
+a medição de 24/09 que motivou "só IRRELEVANTE" (Porto Araras I 0→6 e Vila Brasil 9→13 exames
+faltando com BAIXO). Diovanni pediu parecer como médico do trabalho, com fontes oficiais.
+
+**Parecer.** Não estender a dispensa a BAIXO sem medição. Medido no PGR do Aurora: 101 linhas
+*"Avaliação ainda qualitativa — resultado quantitativo pendente de medição"* e nenhum valor em
+ppm/mg/m³, inclusive acetona (GHE 11) e xileno (GHE 18). NR-07 7.5.12 "b" (texto conferido em
+sessão anterior, Portaria MTP 567/2022) condiciona o exame a exposição acima do nível de ação
+**ou** à classificação do PGR; sem valor, a primeira condição não é demonstrável. NR-09 (nível de
+ação = 50% do limite) veio de busca: `www.gov.br` bloqueado pela rede `[A CONFERIR]`.
+
+**Proposta do Diovanni, formalizada.** Campo na tela para as avaliações quantitativas que a
+equipe recebe ou pede ao elaborador do PGR. Leitura de código antes de propor: `Quantificacao`,
+`parsear_quantificacao`, `classificar_ruido`, `leo_resolver` e R-RX-01 por `pct_LT` já existem —
+falta só a entrada. Achado de leitura: R-AUD-04 emite audiometria para todo trabalhador, então a
+medição de ruído só troca a presunção por decisão medida (fatia de menor valor, corrigindo o que
+foi dito ao Diovanni no turno anterior).
+
+**Registrado.** `D-ARQ-86` (ARQUITETURA PROPOSTA, 8 cláusulas, 3 fatias, questões Q1–Q4),
+`DECISOES v217→v218`, `INDICE_DARQ.md` regenerado (86 decisões). Nota em `DT-003EB-02`. R-BIO-05
+inalterada; nenhum código, teste ou `.yaml` tocado. Achado de passagem, não corrigido: a nota
+"2º GHE do Aurora com dispensa em BAIXO" (sessão `claude/determined-fermi-xxah3h`) ficou gravada
+logo abaixo do header de `DT-003EC-01`, e não dentro de `DT-003EB-02`.
+
+**Verificação.** `python -m pytest tests/test_gerar_indice_darq.py`: 6 passed. Recorte dos testes
+que leem docs e acervo: ver PAINEL (Baseline desta sessão).
