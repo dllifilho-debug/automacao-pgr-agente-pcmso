@@ -10287,3 +10287,12 @@ documento verbatim; cada uma das 4 telas) — 12/12 mortas. Existentes alterados
 `test_rx_medicao_poeira`, `test_bio_medicao_quantitativa`, `test_revisao_origem`) passam a
 preencher médico e CRM; nenhuma asserção mudou. O de data inválida precisava disso para não
 parar na trava nova e passar sem testar a data.
+
+**Varredura do acervo (`matrizes_originais/*.pdf`, títulos de GHE com NUL).** Vila Brasil GHE 23
+`MANUTENÇÃO \x00 ENERGIZADA` (entre espaços → hífen); Fascino e Verde Maris `HIDRO\x00SANITÁRIAS`
+(colado → removido); Verde Maris `ELÉTRICA \x00CIRCUITOS ENERGIZADOS\x00` e `…DESENERGIZADOS\x00`
+— aqui o NUL são parênteses; colado, é removido, e a regra não inventa hífen. "Todo NUL → hífen"
+erraria esses dois títulos.
+
+**Verificação.** Suíte completa (árvore parada): **1441 passed, 6 skipped, 0 failed** (901.46s),
++9 exato sobre 1432. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
