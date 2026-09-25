@@ -6,6 +6,19 @@ PENDENCIAS_CLINICAS.md),
 (3) qualquer cache. Nunca afirmar número de sessão, D-ARQ, hash ou contagem de testes
 de memória — ler do disco.
 
+## Decisão clínica (quem decide e com base em quê)
+
+Decisão clínica é tomada na sessão: Claude propõe, Diovanni opina e decide. As médicas não
+validam antes; validam **depois**, revisando a matriz gerada, e as correções delas voltam como
+entrada de uma sessão seguinte. Nunca propor roteiro, entrevista ou "perguntar à Dra." como
+passo para destravar uma regra (erro repetido em 25/09/2026, pós-PR #391).
+
+A fonte segue a hierarquia de D-ARQ-22 Parte A (PROTOCOLO, "Convenções de status"), parando no
+primeiro nível que resolver: (1) norma vigente conferida no Gov.br/MTE ou NHO da Fundacentro;
+(2) matriz ou anotação das médicas no acervo, como precedente; (3) analogia com regra
+`[VALIDADO]`; (4) nenhuma resolve → `[INTERPRETADO]`, que a revisão de saída olha primeiro. A
+fonte vai no marcador da regra.
+
 ## Verificação (regras duras, sem exceção por conveniência)
 
 - Nenhum prompt ou sessão dispensa a suíte. Se a suíte inteira é cara (DH-003EC-02: ~79% do
