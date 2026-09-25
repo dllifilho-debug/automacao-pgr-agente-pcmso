@@ -10135,3 +10135,31 @@ nesta imagem: o pip não desinstala o `cryptography` do apt (RECORD ausente); co
 ambiente com `--ignore-installed`. (3) Pré-existente: no rerun do próprio "Gerar matriz", a etapa 2
 ainda não mostra produtos anexados nem medições (leem o cache do topo); aparecem na interação
 seguinte.
+
+## Sessão (branch `feat/ambiente-deps-20260925`) — 25/09/2026 — AMBIENTE: piso de streamlit, hook de sessão e referência do mypy
+
+**Origem.** Três achados da sessão `feat/ui-matriz-etapas-20260925`, juntados a pedido do
+Diovanni. Branch criada de `origin/main a00c13b` (pós-merge do PR #386).
+
+**1. Piso de streamlit 1.42.0 → 1.56.0.** O piso de 003.ES media só `st.login`; o gate de
+D-ARQ-76 lê `st.user` e os testes de casca usam `AppTest.file_uploader`. Medido por versão em
+venv isolado: `st.user` a partir de 1.45.0; `AppTest.file_uploader` a partir de 1.56.0. Testes de
+tela (83, incluindo `test_rx_medicao_poeira`): **83/83 em 1.56.0**; em 1.45.0, 60 passed e 23
+failed (todos `file_uploader`). Diovanni escolheu 1.56.0 (opção A) sobre 1.45.0 no app + 1.56.0 só
+nos testes. `requirements.txt` e o comentário de `requirements-dev.txt` atualizados; o comentário
+do extra `[auth]` corrigido (em 1.56.0 declara só `Authlib>=1.3.2`, sem `httpx`). O guarda
+`test_piso_de_streamlit_garante_st_login` virou `test_piso_de_streamlit_e_o_medido`, travando
+(1, 56, 0) — alterado de propósito, com reversão nomeada (piso de volta a 1.42.0 → só ele
+vermelho, conferido). Nota de aplicação em `D-ARQ-75` (DECISOES v222→v223), `INDICE_DARQ.md`
+regenerado, `test_gerar_indice_darq.py` verde. Versão instalada pelo Streamlit Community Cloud:
+`[A MEDIR]`.
+
+**2. Hook de sessão.** `.claude/hooks/session-start.sh` abortava no primeiro `pip install`
+("Cannot uninstall cryptography 41.0.7, RECORD file not found"); agora instala `cffi` e
+`cryptography` com `--ignore-installed`. Teste novo R8
+(`test_hook_instala_cryptography_por_cima_do_pacote_do_apt`); reversão (tirar a flag) → só ele
+vermelho, conferido. O hook corrigido rodou até o fim neste container, mas o `cryptography` daqui
+já tinha sido reinstalado pelo pip — a prova em imagem limpa (sessão nova) fica `[A MEDIR]`.
+
+**3. CLAUDE.md.** Referência do mypy no alvo canônico: 48 → **51 arquivos**, medido nesta sessão;
+atribuídos dois dos três acréscimos (`motor/medicoes.py`, `superficie/revisao_matriz.py`).

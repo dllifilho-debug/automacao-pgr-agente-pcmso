@@ -34,5 +34,6 @@ types-requests
 # Versões sob as quais a medição de 10/09/2026 foi tirada, para reprodução:
 # pytest 9.1.1 · mypy 2.3.1 · coverage 7.16.0 · types-PyYAML 6.0.12.20260906 ·
 # types-requests 2.33.0.20260906. Sem piso travado: nenhuma dessas versões tem
-# significado normativo como o `streamlit>=1.42.0` de `requirements.txt`, que
-# marca a introdução de `st.login`.
+# significado normativo como o `streamlit>=1.56.0` de `requirements.txt`, que
+# marca a menor versão em que app e testes de casca rodam (D-ARQ-75, nota de
+# 25/09/2026).

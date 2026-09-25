@@ -216,3 +216,21 @@ def test_hook_e_settings_nao_estao_ignorados_pelo_git() -> None:
         assert resultado.returncode != 0, (
             f"{relativo} está ignorado pelo .gitignore — instrumento fora do git"
         )
+
+
+def test_hook_instala_cryptography_por_cima_do_pacote_do_apt() -> None:
+    """R8 — tirar `--ignore-installed` da instalação de `cryptography` no hook
+    mata este teste.
+
+    O `cryptography` do apt nesta imagem não tem arquivo RECORD, e o pip, sem a
+    flag, tenta desinstalá-lo antes de instalar: "Cannot uninstall cryptography
+    41.0.7, RECORD file not found". Com `set -e` o hook aborta nessa linha, e a
+    sessão abre sem pytest nem streamlit (medido em 25/09/2026).
+    """
+    instalacoes = [
+        linha for linha in _linhas_de_comando("pip install") if "cryptography" in linha.split()
+    ]
+    assert instalacoes, "nenhum `pip install` do hook instala cryptography"
+    assert all("--ignore-installed" in linha.split() for linha in instalacoes), (
+        f"`pip install` de cryptography sem --ignore-installed: {instalacoes}"
+    )

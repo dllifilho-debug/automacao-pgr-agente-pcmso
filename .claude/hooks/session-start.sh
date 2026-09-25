@@ -25,7 +25,11 @@ cd "${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 # `import pdfplumber` morre com `pyo3_runtime.PanicException` antes de chegar
 # ao `pdfminer`. O pip considera o requisito satisfeito pela versão do apt e
 # não a substitui, então a instalação precisa ser explícita e vir antes.
-python -m pip install --quiet --timeout 120 --retries 5 cffi cryptography
+# `--ignore-installed`: sem ele o pip tenta desinstalar o pacote do apt e morre
+# em "Cannot uninstall cryptography 41.0.7, RECORD file not found" — o hook
+# inteiro abortava ali (`set -e`) e a sessão abria sem pytest nem streamlit
+# (medido em 25/09/2026, branch feat/ui-matriz-etapas-20260925).
+python -m pip install --quiet --timeout 120 --retries 5 --ignore-installed cffi cryptography
 
 python -m pip install --quiet --timeout 120 --retries 5 -r requirements-dev.txt
 
