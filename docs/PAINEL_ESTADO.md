@@ -112,7 +112,7 @@
 **Baseline `[MEDIDO — 25/09/2026, R-BIO-03]`:** branch `claude/determined-fermi-xxah3h` sobre
 `main f683462` (merge do PR #376; IMPLEMENTAÇÃO — `R-BIO-03` materializada) · **1386 passed, 6
 skipped, 0 failed** *(MEDIDO, árvore parada, 801.99s — 1382 + 4)* · `mypy --strict` alvo canônico
-**limpo, 50 arquivos** · PROTOCOLO v100→**v101** · DECISOES v217 inalterado. `medir_painel`:
+**limpo, 50 arquivos** · PROTOCOLO v100→**v102** (v101 implementação; v102 conferência NR-15 Anexo 12) · DECISOES v217 inalterado. `medir_painel`:
 **`regras 27/45`** (era 26/45 — `R-BIO-03` passa a existir em `regras.yaml`), `cas 78/109`,
 `índice sincronizado`. A tabela "Os três números" **não é re-tirada** — segue o bloqueador já
 registrado acima (re-tirada é decisão do Arquiteto); o movimento fica declarado aqui.

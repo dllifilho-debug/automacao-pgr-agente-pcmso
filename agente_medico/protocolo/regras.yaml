@@ -338,8 +338,13 @@ regras:
     base_normativa: "Protocolo Dra. Carolini R-BIO-03 [VALIDADO] — qualquer exposição
       confirmada a manganês → manganês no sangue semestral em adm + per + MR,
       independente do LT. Manganês não consta no Anexo I (Quadros 1 e 2) da NR-07
-      (Portaria MTP 567/2022), por isso fica fora de R-BIO-04 e de R-BIO-05. O protocolo
-      cita a NR-15 como base; o item exato da NR-15 [A CONFERIR — D-ARQ-69]. Momentos e
+      (Portaria MTP 567/2022), por isso fica fora de R-BIO-04 e de R-BIO-05. Base conferida
+      [DERIVADO]: NR-15 Anexo 12, 'Manganês e seus compostos' (Portaria DNSST 08/1992),
+      item 7 — obrigatório a todo exposto, 'independentemente dos limites de tolerância',
+      exames pré-admissionais e periódicos (6 meses a anual na superfície) e 'análises
+      biológicas de sangue'; item 2 inclui 'fabricação e uso de eletrodos de solda'.
+      [INTERPRETADO]: o analito (Mn no sangue), o 6M fixo e o momento MR são conduta do
+      protocolo — a norma fala em análise de sangue, faixa 6-12M e adm/per. Momentos e
       periodicidade conferidos contra o gabarito Aurora Lago das Rosas 27.08.26 (Dra.
       Patrícia, GHE 16 SERRALHERIA: 'Manganês no sangue (ADM, PER 6 meses, MRO)')."
     status: VALIDADO

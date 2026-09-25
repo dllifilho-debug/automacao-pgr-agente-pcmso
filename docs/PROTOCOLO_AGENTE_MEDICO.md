@@ -585,9 +585,27 @@ Qualquer exposição confirmada a Mn → **manganês sanguíneo semestral em adm
 > **Nota de implementação (branch `claude/determined-fermi-xxah3h`, 25/09/2026 — mesma ID,
 > conteúdo inalterado).** Materializada em `regras.yaml` (`quando: manganes`, exame novo
 > `manganes_sangue` "Manganês no sangue", 6M, `[adm, per, MR]`). Até aqui era `[VALIDADO]` só no
-> texto (DT-003EO-03). Fora de R-BIO-04/R-BIO-05: Mn não está no Anexo I da NR-07. Item da NR-15
-> citado como base `[A CONFERIR — D-ARQ-69]` (`www.gov.br` bloqueado nesta sessão). Não inclui
+> texto (DT-003EO-03). Fora de R-BIO-04/R-BIO-05: Mn não está no Anexo I da NR-07. Não inclui
 > R-CLI-03 (clínico semestral), que segue sem materialização. Caso de conferência: Aurora GHE 16.
+>
+> **Conferência normativa (D-ARQ-69, mesma data).** Anexos 11, 12, 13, 13-A e 14 da NR-15
+> fornecidos pelo Diovanni (PDFs do MTE; Anexo 12 sha256 `b3320b6f19d67e9e…`). Base encontrada:
+> **NR-15 Anexo 12, "Manganês e seus compostos"** (incluído pela Portaria DNSST n.º 08/1992),
+> **item 7** — *"precauções de ordem médica e de higiene … de caráter obrigatório para todos os
+> trabalhadores expostos às operações com manganês e seus compostos, independentemente dos limites
+> de tolerância terem sido ultrapassados ou não"*: *"Exames médicos pré-admissionais e
+> periódicos"*; *"Exames periódicos de acordo com os tipos de atividades de cada trabalhador,
+> variando de períodos de 3 (três) a 6 (seis) meses para os trabalhos do subsolo e de 6 (seis)
+> meses a anualmente para os trabalhadores de superfície"*; *"Análises biológicas de sangue"*.
+> Item 2: LT de fumos 1 mg/m³ inclui *"fabricação e uso de eletrodos de solda"*. Leitura:
+> "independente do LT" e "adm + per" são **[DERIVADO — literal]**; o analito (manganês no
+> sangue), o 6M fixo (ponta protetiva da faixa 6-12M da superfície) e o momento MR são
+> **[INTERPRETADO]** — conduta do protocolo dentro do que a norma permite. Anexos 11, 13-A e 14
+> não citam manganês; o Anexo 13 traz a linha "Operações com manganês…" marcada como excluída
+> pela Portaria 8/1992 (a matéria migrou para o Anexo 12). Efeito lateral: o item 7 também dá
+> base literal para exame clínico periódico semestral a exposto a Mn — sustenta R-CLI-03, ainda
+> não materializada. Limite declarado: o PDF prova o texto da versão fornecida; alteração
+> posterior só a listagem oficial vigente diria.
 
 #### R-BIO-04 — Matriz temporal por Quadro do Anexo I (NR-07) `[DERIVADO — NR-07 Anexo I + itens 7.5.13/7.5.15/7.5.19.4/7.5.19.5, Portaria MTP 567/2022, texto oficial MTE]`
 
@@ -972,3 +990,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v99 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — extração, sem regra nova): nota de aplicação em **`R-RX-01`** (§5.4, ramo `R-RX-01-qual`) e em **`R-BIO-05`** (§5.9) — a rota LLM passa a extrair o nível P×S, restrito por guarda determinística a blocos da escala P×S (109/109 aceitos, 0/318 de escore somado rejeitados, medido no acervo). Nenhuma `R-*` criada, alterada ou depreciada. Escala de escore somado aberta em `DT-(sessão claude/eager-fermat-txbn7h)-01`. |
 | v100 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — rastreabilidade, sem regra nova): **DH-003ED-01, faceta `risco_origem`: fechada no recorte atômico** — `Motivo.risco_origem` preenchido quando o `quando` da regra é o slug do agente (as `R-BIO-04-*`), com todas as fontes do agente no GHE (PGR com nível, FDS com produto, cargo). Predicado composto segue sem origem (exigiria mudar `predicados.avaliar`); faceta permanece ABERTA para esse caso. Decisão do Diovanni. Nenhuma `R-*` criada, alterada ou depreciada. Detalhe em DECISOES v216 (D-ARQ-22 Parte B). |
 | v101 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO, ordem do Diovanni): **`R-BIO-03` materializada** (§5.9, mesma ID, conteúdo inalterado) — regra em `regras.yaml` e exame `manganes_sangue` em `exames.yaml`. Base NR-15 do protocolo `[A CONFERIR — D-ARQ-69]`. R-CLI-02/R-CLI-03 seguem só em texto (DT-003EO-03). |
+| v102 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (CONHECIMENTO — conferência normativa, D-ARQ-69): **`R-BIO-03`** (§5.9) — `[A CONFERIR]` fechado contra a NR-15 Anexo 12 ('Manganês e seus compostos', Portaria DNSST 08/1992, item 7), PDFs fornecidos pelo Diovanni. Adm/per e 'independente do LT' literais; analito, 6M fixo e MR interpretados. Conteúdo da regra inalterado. |

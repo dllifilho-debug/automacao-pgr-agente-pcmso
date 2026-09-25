@@ -1401,7 +1401,8 @@ só a de materialização descrita acima: `R-BIO-03` `[VALIDADO]` no PROTOCOLO, 
 materializada: regra em `regras.yaml` e slug `manganes_sangue` em `exames.yaml` (PROTOCOLO v101).
 O restante desta DT continua ABERTO: `R-CLI-02`/`R-CLI-03` (clínico semestral) seguem só em texto, e
 o Fascino segue sem resolver manganês pela grafia "Maganês" (DT-003EQ-02). Base NR-15 de R-BIO-03
-`[A CONFERIR — D-ARQ-69]`.
+conferida: Anexo 12, "Manganês e seus compostos", item 7 (PROTOCOLO v102) — o mesmo item sustenta o
+clínico semestral de R-CLI-03.
 
 ### DT-003EO-04 — `GHEPGR.cargos` chega como 1 string por GHE do parser da família Consciente; a expansão GHE→cargo de D-ARQ-73 não separa cargos reais `[FECHADA — 003.EP]`
 

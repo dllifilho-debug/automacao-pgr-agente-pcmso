@@ -9875,3 +9875,18 @@ guardião de inventário que exige atualização deliberada do conjunto ao entra
 
 **Próxima.** A declarar: `R-CLI-02`/`R-CLI-03` (clínico semestral), decisão de BAIXO em R-BIO-05,
 conferência NR-15 para R-BIO-03.
+
+## Sessão (mesma branch, PR #377 aberto) — 25/09/2026 — CONHECIMENTO: conferência da NR-15 para `R-BIO-03`
+
+**Origem.** Diovanni forneceu os Anexos 11, 12, 13, 13-A e 14 da NR-15 (PDFs do MTE) para fechar o
+`[A CONFERIR — D-ARQ-69]` da R-BIO-03. Anexo 12 sha256 `b3320b6f19d67e9e80002b12152f8b971994af6b25c78b903c87ac691c470fb0`.
+
+**Conferido.** Base = NR-15 Anexo 12, "Manganês e seus compostos" (Portaria DNSST 08/1992), item 7:
+obrigatório a todo exposto independentemente do LT — exames pré-admissionais e periódicos (6 meses a
+anual na superfície; 3 a 6 no subsolo) e "análises biológicas de sangue"; item 2 cita eletrodos de
+solda (LT de fumos 1 mg/m³). Adm/per e "independente do LT" literais; analito, 6M fixo e MR
+interpretados. Anexos 11, 13-A e 14 sem manganês; Anexo 13 com a linha excluída em 1992. O item 7
+também sustenta literalmente o clínico periódico semestral (R-CLI-03, não materializada).
+
+**Registrado.** `base_normativa` de R-BIO-03 em `regras.yaml` e nota na regra (PROTOCOLO v102).
+Conteúdo da regra inalterado.
