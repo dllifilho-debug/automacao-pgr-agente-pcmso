@@ -7,20 +7,24 @@
 # Guardado por agente_medico/tests/test_requirements_app.py — não editar à mão
 # sem rodar esse teste.
 
-# Piso 1.42.0 = versão que introduz st.login (fatia 2 de 003.ES).
-# Fonte: docs.streamlit.io/develop/quick-reference/release-notes/2025
+# Piso 1.56.0 = menor versão em que tudo o que o repositório testa passa
+# (medido em 25/09/2026, nota de aplicação em D-ARQ-75). O piso anterior,
+# 1.42.0, era a introdução de st.login (003.ES), mas o gate de D-ARQ-76 lê
+# `st.user` (existe só a partir de 1.45.0) e os testes de casca usam
+# `AppTest.file_uploader` (só a partir de 1.56.0).
 #
 # O extra `[auth]` NÃO é opcional aqui: `st.login()` levanta
 # StreamlitMissingAuthlibError sem ele, e o gate de D-ARQ-76 é o primeiro
-# clique do app. O extra puxa `Authlib>=1.3.2` e `httpx>=0.24.1`, os pisos que
-# o próprio streamlit declara — preferido a fixá-los à mão, que duplicaria o
-# contrato da plataforma neste arquivo.
+# clique do app. Em 1.56.0 o extra puxa `Authlib>=1.3.2` (em 1.42.0 puxava
+# também `httpx>=0.24.1`), os pisos que o próprio streamlit declara —
+# preferido a fixá-los à mão, que duplicaria o contrato da plataforma neste
+# arquivo.
 #
 # Por que a varredura AST de 003.ES não pegou: `authlib` não é importado por
 # nenhum arquivo deste repositório. É dependência de runtime do streamlit,
 # carregada por `st.login()`, e por isso invisível a um instrumento que deriva
 # o manifesto dos imports. Medido em produção (11/09/2026), não em teste.
-streamlit[auth]>=1.42.0,<2.0.0
+streamlit[auth]>=1.56.0,<2.0.0
 # Piso 0.11.9 = versão medida no host onde Page.flush_cache/Page.close foram
 # confirmados presentes (003.ET fatia 2).
 pdfplumber>=0.11.9

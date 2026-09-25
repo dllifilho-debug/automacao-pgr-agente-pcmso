@@ -3377,6 +3377,19 @@ custou dois comandos de medição, e foi disparada por uma pergunta do Diovanni 
 revisão do Arquiteto. Regra derivada: número de consumo que vai fundamentar decisão de
 arquitetura exige a pergunta pela causa antes de virar premissa.
 
+**Nota de aplicação — 25/09/2026 (branch `feat/ambiente-deps-20260925`). O piso de streamlit
+sobe de 1.42.0 para 1.56.0.** O piso de 003.ES media só a introdução de `st.login`, mas o gate de
+D-ARQ-76 lê `st.user`, e os testes de casca usam `AppTest.file_uploader` — nenhum dos dois existe
+em 1.42.0 (só `st.experimental_user`). Medição por versão em ambiente isolado: `st.user` aparece
+em **1.45.0**; `AppTest.file_uploader` em **1.56.0**. Os 83 testes de tela (casca da matriz,
+entrypoint, FDS, revisão, medições) passam **83/83 em 1.56.0**; em 1.45.0, 60 passam e 23 falham,
+todos por `AttributeError: 'AppTest' object has no attribute 'file_uploader'`; em 1.42.0, na
+`main` pré-merge do PR #386, 24 de 73 falhavam (20 por `file_uploader`, 4 por `st.user`)
+`[MEDIDO — 25/09/2026]`. Piso escolhido pelo Diovanni: **1.56.0**, a menor versão em que tudo o
+que o repositório testa passa — piso abaixo disso seria número que nenhum teste confirma. O
+guarda `test_piso_de_streamlit_e_o_medido` trava o valor exato. Versão efetivamente instalada
+pelo Streamlit Community Cloud: `[A MEDIR]`. Nenhuma cláusula alterada; nenhuma `R-*` tocada.
+
 ## D-ARQ-76 — O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir
 
 **Status:** DECISÃO DE ARQUITETURA
@@ -4485,3 +4498,4 @@ Efeito lateral registrado, não aplicado: o 9.6.1 "c" dá literal ao nível de a
 | v220 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (CONHECIMENTO — conferência normativa, docs-only): **nota em `D-ARQ-86`** (mesma ID, nenhuma cláusula alterada) — `[A CONFERIR]` da NR-09 fechado nos PDFs oficiais de `normas/`: 9.6.1 "b" (nível de ação químico = metade do LT) e "c" (ruído = metade da dose), 9.6.1.1 (ACGIH); NR-07 7.5.12 "b" reconferido; LT do Anexo 11 da NR-15 conferidos para 9 solventes. |
 | v221 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — fatia 1 de `D-ARQ-86`): **nota de aplicação em `D-ARQ-86`** (mesma ID, nenhuma cláusula alterada) — `lt_nr15` em 28 agentes; R-BIO-05 em BAIXO com medição abaixo do nível de ação em 21 regras (7 cancerígenos excluídos por decisão do Diovanni); painel de medições na tela com procedência de laudo; 3 pares determinísticos idênticos à `main`. |
 | v222 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-86`): **nota de aplicação em `D-ARQ-86`** (mesma ID, nenhuma cláusula alterada) — medição de sílica e PNOS na tela decide a faixa de R-RX-01; asbesto fora por decisão do Diovanni (resolver sem LEO, 0/29 PGRs), aberta `DT-(sessão claude/hopeful-ramanujan-rbgh4s)-01`. |
+| v223 | 25/09/2026 | Branch `feat/ambiente-deps-20260925` (AMBIENTE — dependências): **nota de aplicação em `D-ARQ-75`** (mesma ID, nenhuma cláusula alterada) — piso de streamlit 1.42.0 → 1.56.0, medido por versão (`st.user` em 1.45.0, `AppTest.file_uploader` em 1.56.0; 83/83 testes de tela em 1.56.0). |

@@ -103,17 +103,21 @@ def test_nada_declarado_a_mais_do_que_o_importado() -> None:
     assert not a_mais, f"declarado em requirements-app.txt mas não importado: {a_mais}"
 
 
-def test_piso_de_streamlit_garante_st_login() -> None:
+def test_piso_de_streamlit_e_o_medido() -> None:
+    # Reversão que mata: voltar o piso para 1.42.0 (ou qualquer valor abaixo de
+    # 1.56.0) — versão em que `st.user` (gate de D-ARQ-76) ou
+    # `AppTest.file_uploader` (testes de casca) não existem. Valor exato, não >=:
+    # subir o piso também tem de ser medido (D-ARQ-75, nota de 25/09/2026).
     declaradas = _distribuicoes_declaradas()
     linha = declaradas[_normalizar("streamlit")]
     trecho = linha.split(">=", 1)[1].split(",", 1)[0].strip()
     piso = tuple(int(parte) for parte in trecho.split("."))
-    assert piso == (1, 42, 0), f"piso de streamlit é {piso}, esperado (1, 42, 0)"
+    assert piso == (1, 56, 0), f"piso de streamlit é {piso}, esperado (1, 56, 0)"
 
 
 def test_piso_de_pdfplumber_garante_close_e_flush_cache() -> None:
-    # Diferente do piso de streamlit (1.42.0 é a versão exata que introduz
-    # st.login — snapshot com significado normativo), 0.11.9 é só a versão
+    # Diferente do piso de streamlit (1.56.0 é a versão exata medida em que app
+    # e testes de casca rodam — snapshot com significado normativo), 0.11.9 é só a versão
     # medida no host onde Page.close/Page.flush_cache foram confirmados
     # presentes (003.ET fatia 2). Não há razão para travar o piso exato:
     # >= mantém a garantia que importa (ninguém baixa o pin abaixo da versão
