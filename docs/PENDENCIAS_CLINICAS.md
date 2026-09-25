@@ -3431,7 +3431,7 @@ herda anexos; anexo de GHE que sumiu no reparse é avisado uma vez. FDS pode ir 
 refaz o PGR hidratado sem o produto (`test_anexo_sobrevive_ao_reprocessamento_do_mesmo_pdf`).
 
 
-### DT-(sessão `claude/determined-fermi-xxah3h`)-02 — FDS fora do formato NBR 14725: composição não localizada (Eletrodo E-6013 Gerdau) `[ABERTA — decisão de dado]`
+### DT-(sessão `claude/determined-fermi-xxah3h`)-02 — FDS fora do formato NBR 14725: composição não localizada (Eletrodo E-6013 Gerdau) `[DECIDIDA — caminho (a), Diovanni, 25/09/2026; aguarda a FDS do fornecedor]`
 
 **Origem.** Tela do app em produção (Aurora, 25/09/2026): `FISPQ Eletrodos E 6013 ( Gerdau) - (GHE
 14 - SERRALHERIA).pdf` → `composicao_ausente_fds`. Arquivo no acervo (`fds_originais/`).
@@ -3453,4 +3453,9 @@ soldagem. O manganês já está no PGR (GHE 16), então esta ficha não destrava
 (b) âncora adicional "SUBSTANCIAS PERIGOSAS" restrita a título de seção numerado — n=1, documento
 fora da norma, e a tabela mistura % em peso com OSHA PEL (risco de o transcritor pegar a coluna
 errada). Recomendação: (a). Decisão do Diovanni.
+
+**Decisão (Diovanni, 25/09/2026).** Caminho (a): pedir ao fornecedor a FDS do eletrodo no formato
+NBR 14725. Nenhuma mudança no app; a âncora de composição fica como está (D-ARQ-47). A DT fecha
+quando a FDS nova passar pela tela com a composição extraída — até lá, a pendência
+`composicao_ausente_fds` desse arquivo é esperada.
 
