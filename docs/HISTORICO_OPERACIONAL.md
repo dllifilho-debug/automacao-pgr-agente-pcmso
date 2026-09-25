@@ -10060,3 +10060,53 @@ cancerígeno (varredura: chave no estireno e chave faltando no fenol, 2/2 pegas)
 teve o texto-âncora ajustado. 2ª suíte completa (árvore parada): **1409 passed, 6 skipped, 0
 failed** (719.24s), +20 exato contra 1389. `mypy --strict` alvo canônico: limpo, **51 arquivos**
 (+1: `motor/medicoes.py`).
+
+## Sessão (branch `feat/ui-matriz-etapas-20260925`) — 25/09/2026 — IMPLEMENTAÇÃO: reorganização visual de `pagina_matriz` em etapas
+
+**Origem.** Pedido do Diovanni: tela da matriz com muito espaço vazio, uploads pouco destacados e
+sem orientação de sequência. Mudança só de apresentação — sem D-ARQ (nenhuma decisão
+arquitetural nova); regras, keys, textos comparados por teste e fluxos preservados. Branch criada
+de `origin/main c62dc86`.
+
+**Implementado.** `pagina_matriz()` (`web_matriz.py`) passa a criar as etapas no topo, na ordem de
+leitura, e preenchê-las na ordem de execução de sempre (callbacks, leitura do cache e returns
+antecipados intocados): indicador de etapas; 1. PGR e identificação (formulário em 3 colunas,
+"Gerar matriz" primário; spinner, rejeição R-PGR-01/R-PGR-06, parse falho, documento sem linha de
+cargo e anexos descartados aparecem logo abaixo do botão); 2. FDS/FISPQ e medições (opcional; cada
+FDS num expander de rótulo fixo; medição em 2 colunas); 3. Conferência (pendências globais
+primeiro, Elo B; pendências de extração num expander com contagem); 4. Matriz e downloads (DOCX e
+HTML no topo). Etapas indisponíveis são uma linha compacta com a próxima ação, preenchida num
+`finally` para refletir o rerun corrente. Componentes todos nativos; nenhum CSS.
+
+**Bloqueio no meio.** O layout aprovado derrubou `test_aviso_de_anexo_descartado_aparece_uma_vez`:
+ele achava a validade por `text_input[len-1]` com matriz gerada e FDS anexada, quando os campos
+de FDS e medição ficam abaixo do formulário. Reportado; Diovanni escolheu manter o layout e
+autorizou trocar só essa seleção — o campo não tem `key`, então passou a ser localizado pelo
+rótulo (único). Asserções do teste inalteradas.
+
+**Verificação.** Linha de base (`c62dc86`, árvore parada): 1409 passed, 6 skipped; 73 testes de
+tela; `mypy --strict` alvo canônico limpo, 51 arquivos. Final (árvore parada): **1411 passed, 6
+skipped, 0 failed** (910.17s), +2 exato; 75 testes de tela; mypy limpo, 51 arquivos. 2 testes
+novos em `test_web_matriz.py`; varredura inversa 3/3 (legendas das etapas 3/4 removidas → só
+`test_etapas_indisponiveis_dizem_a_proxima_acao_sem_pgr`; indicador preenchido antes do
+processamento → só `test_indicador_de_etapas_reflete_a_matriz_no_rerun_do_clique`; sem limpar
+`anexos_descartados` → só o teste ajustado). O 6º skip é
+`test_transcritor_gemini_pgr.py::test_transcricao_ao_vivo_bloco_pintura_thinner_zarcao` (ao vivo,
+sem `CHAVE_API_GOOGLE`). Conferência manual (Playwright contra `app_matriz_local.py`, PGR Fascino
+real): rejeição sem assinatura visível abaixo do botão e sem download; matriz gerada; DOCX/HTML
+baixados sem reparse (2,6 s); medição registrada e removida no GHE-16; FDS real (Ciplan) mostra a
+pendência `transcricao_indisponivel_fds`; sem rolagem horizontal a 390 px. Vínculo real de FDS a
+GHE: NÃO VERIFICADO no navegador (sem chave da API), coberto pelos AppTest com leitura simulada.
+Cobertos só por AppTest, NÃO VERIFICADOS no navegador: várias FDS ao mesmo tempo (expanders
+fechados), remoção de produto anexado, parse total falho e documento sem linha de cargo. Sem
+cobertura nenhuma, NÃO VERIFICADOS: o aviso positivo de leitura por IA (`chamadas_ia > 0`; o
+AppTest só cobre a ausência) e a renderização visual em Streamlit 1.42.0 (checada só por
+assinatura de API).
+
+**Achados, não tratados aqui.** (1) Piso `streamlit[auth]>=1.42.0` não sustenta o app: no 1.42.0
+não existe `st.user` (usado em `app_matriz.py`) e o `AppTest` não tem `file_uploader` — na
+`main`, 24 dos 73 testes de tela falham nessa versão. (2) `.claude/hooks/session-start.sh` falha
+nesta imagem: o pip não desinstala o `cryptography` do apt (RECORD ausente); contornado no
+ambiente com `--ignore-installed`. (3) Pré-existente: no rerun do próprio "Gerar matriz", a etapa 2
+ainda não mostra produtos anexados nem medições (leem o cache do topo); aparecem na interação
+seguinte.

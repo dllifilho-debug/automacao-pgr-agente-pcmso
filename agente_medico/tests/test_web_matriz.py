@@ -557,6 +557,37 @@ def test_zero_chamadas_ia_nao_mostra_aviso_de_procedencia(
     assert not any("lido(s) por IA" in t for t in textos)
 
 
+def test_etapas_indisponiveis_dizem_a_proxima_acao_sem_pgr() -> None:
+    # Reversão que mata: tirar do `finally` de pagina_matriz as legendas das
+    # etapas 3 e 4 — sem PGR, as etapas somem sem dizer o que fazer.
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+
+    assert not at.exception
+    legendas = [c.value for c in at.caption]
+    assert "**3. Conferência — pendências** · envie o PDF do PGR na etapa 1." in legendas
+    assert "**4. Matriz e downloads** · envie o PDF do PGR na etapa 1." in legendas
+
+
+def test_indicador_de_etapas_reflete_a_matriz_no_rerun_do_clique(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: preencher o indicador antes do processamento (fora do
+    # `finally`) — no rerun do próprio clique em Gerar matriz ele mostraria a
+    # etapa 4 ainda pendente.
+    exame = ExameEmitido(exame="exame_clinico", periodicidade_meses=12, momentos={Momento.ADM})
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=("Cargo Teste",))
+    _mockar_parse_deterministico(monkeypatch, Resultado(status="OK", matrizes=[matriz]))
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+
+    assert not at.exception
+    textos = [el.value for el in at.markdown]
+    assert "✅ **4. Matriz e downloads**" in textos
+
+
 # ---------------------------------------------------------------------------
 # FDS/FISPQ avulsa (fatia "só FDS") — upload opcional, independente do PGR.
 # ---------------------------------------------------------------------------
@@ -1205,7 +1236,8 @@ def test_aviso_de_anexo_descartado_aparece_uma_vez(monkeypatch: pytest.MonkeyPat
     at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
     at.button(key="anexar_fds_fds.pdf").click().run()
 
-    at.text_input[len(at.text_input) - 1].set_value("2027-06-30").run()
+    validade = next(t for t in at.text_input if t.label == "Validade do PGR (AAAA-MM-DD)")
+    validade.set_value("2027-06-30").run()
     assert any("fds (GHE-01)" in w.value for w in at.warning)
 
     at.run()
