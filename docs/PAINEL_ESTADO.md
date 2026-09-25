@@ -109,6 +109,14 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 25/09/2026, conferência NR-09/Anexo 11]`:** branch
+`claude/hopeful-ramanujan-rbgh4s` sobre `main 6d7ad56` (PDFs das NRs em `normas/`; CONHECIMENTO,
+docs-only) · suíte completa **não re-tirada** (nenhum código, teste ou `.yaml` tocado); recorte
+(`test_gerar_indice_darq`, `test_medir_painel`, `test_particao_pendencias`,
+`test_varrer_acervo_lgpd`, `test_cobertura_varrer_acervo`): **49 passed, 0 failed** · PROTOCOLO
+v103 inalterado · DECISOES v219→**v220**. `medir_painel`: `regras 28/45`, `cas 78/109`, `índice
+sincronizado` — inalterados.
+
 **Baseline `[MEDIDO — 25/09/2026, D-ARQ-86 ratificada]`:** branch `claude/hopeful-ramanujan-rbgh4s`
 sobre `main fec52aa` (merge do PR #381; ARQUITETURA, docs-only) · suíte completa **não re-tirada**
 (nenhum código, teste ou `.yaml` tocado); recorte dos derivados tocados (`test_gerar_indice_darq`,
