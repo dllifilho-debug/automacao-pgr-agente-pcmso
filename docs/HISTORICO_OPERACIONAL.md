@@ -10021,3 +10021,42 @@ de `.pdf`, sufixos `(3)`, data no nome); duas versões da NR-01 (2024 e 2025) e 
 2026); faltam NR-15 Anexos 1 (ruído) e 3 (calor) e as NHOs da Fundacentro.
 
 **Verificação.** Ver PAINEL (Baseline desta sessão).
+
+## Sessão (branch `claude/hopeful-ramanujan-rbgh4s`, continuação pós-merge do PR #383) — 25/09/2026 — IMPLEMENTAÇÃO: fatia 1 de `D-ARQ-86` (R-BIO-05 em BAIXO com medição)
+
+**Origem.** Ordem do Diovanni: "pode começar a fatia 1 da D-ARQ-86". Branch recriada de
+`origin/main 686a6bc`.
+
+**Decisão clínica tomada no meio (Diovanni).** Dos 28 agentes da família R-BIO-04 com LT no
+Anexo 11, 7 são cancerígenos IARC 1/2A (gabarito 003.DP): tricloroetileno, 1,3-butadieno, óxido
+de etileno, diclorometano, estireno, dimetilformamida, tetracloroetileno. Perguntado se entram na
+dispensa por medição: **excluídos** — recebem o indicador com qualquer medição. Achado de
+passagem: `is_carcinogeno_iarc` de `agentes.yaml` diverge do 003.DP para esses agentes, então a
+exclusão ficou por regra, não derivada do campo.
+
+**Implementado.** Dado: `lt_nr15` em 28 agentes (conferidos linha a linha no PDF do Anexo 11 de
+`normas/`); chave `niveis_com_medicao_abaixo_acao: [BAIXO]` em 21 `R-BIO-04-*`. Código:
+`ProcedenciaMedicao`, `MedicaoInformada`, `Quantificacao.procedencia`, `Observacao.medicao`;
+`limite_quimico`/`avaliar_medicao_quimica` (nível de ação = 50% do LT, por unidade);
+`_dispensa_por_medicao` na emissão (vale a maior medição; risco sem nível só coberto se vier de
+composição de FDS); `motor/medicoes.py` (`aplicar_medicoes`, pendências `medicao_divergente` e
+`medicao_sem_risco`); validação de `lt_nr15` e da chave nova no carregador; painel "Avaliações
+quantitativas" na tela (laudo e data obrigatórios; uma medição por GHE e agente; reaplicada em
+reprocessamento do mesmo PDF, nunca herdada por PDF diferente); célula do documento e revisão com
+a medição. PROTOCOLO v103→v104 (emenda em R-BIO-05), DECISOES v220→v221 (nota em `D-ARQ-86`),
+`INDICE_DARQ.md` regenerado, nota em `DT-003EB-02`.
+
+**Medido.** 3 pares determinísticos (Fascino, Porto Araras I, Vila Brasil), script no
+scratchpad sobre as funções de `comparar_matriz_gabarito`, worktree `origin/main` × árvore: saída
+**idêntica** (resumo do comparador e exames/observações por GHE) — nenhum traz medição de químico.
+Efeito real depende de laudo informado `[A MEDIR — primeiro uso em produção]`.
+
+**Verificação.** 20 testes novos (`test_bio_medicao_quantitativa.py`). Varredura inversa: 22
+reversões nomeadas, 22/22 pegas, 20/20 testes discriminantes. 1ª suíte completa: 2 failed, ambos
+guardiões da decisão anterior em `test_bio_risco_irrelevante.py` — um fixava o dicionário exato de
+`mencao_documental` (só IRRELEVANTE), o outro procurava a linha antiga do tolueno. Atualizados de
+propósito: o guardião agora exige a chave nova exatamente nos 21 agentes com LT e sem
+cancerígeno (varredura: chave no estireno e chave faltando no fenol, 2/2 pegas); o do tolueno só
+teve o texto-âncora ajustado. 2ª suíte completa (árvore parada): **1409 passed, 6 skipped, 0
+failed** (719.24s), +20 exato contra 1389. `mypy --strict` alvo canônico: limpo, **51 arquivos**
+(+1: `motor/medicoes.py`).

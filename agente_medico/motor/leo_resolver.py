@@ -3,9 +3,9 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass
-from typing import Callable
+from typing import Any, Callable, Mapping
 
-from agente_medico.motor.tipos import CenarioExposicao, CenarioNormativo, Fracao
+from agente_medico.motor.tipos import CenarioExposicao, CenarioNormativo, Fracao, Quantificacao
 
 
 @dataclass(frozen=True)
@@ -155,4 +155,55 @@ def resolve_leo(
         fonte_normativa=(
             f"LEO indefinido: agente={agente} fracao={fracao.value} cenario={cenario.value}"
         ),
+    )
+
+
+# D-ARQ-86 cl.5 — agentes químicos do Quadro 1 da NR-07. O LT é dado do
+# vocabulário (`lt_nr15` em agentes.yaml, NR-15 Anexo 11 Quadro n.º 1), por
+# unidade: a medição em ppm compara com o LT em ppm, a em mg/m³ com o LT em mg/m³.
+NIVEL_ACAO_PCT_LT = 50.0  # NR-09 9.6.1 "b": nível de ação químico = metade do LT
+
+_CHAVE_LT_POR_UNIDADE = {"ppm": "ppm", "mg/m3": "mg_m3"}
+
+
+@dataclass(frozen=True)
+class AvaliacaoLimiteQuimico:
+    valor: float
+    unidade: str
+    limite: float
+    pct_limite: float
+    fonte_normativa: str
+
+    @property
+    def abaixo_nivel_acao(self) -> bool:
+        return self.pct_limite < NIVEL_ACAO_PCT_LT
+
+
+def limite_quimico(
+    agente: str, unidade: str, agentes_vocab: Mapping[str, Any]
+) -> tuple[float, str] | None:
+    """(LT, fonte) do agente na unidade da medição, ou None quando o vocabulário
+    não traz LT nessa unidade — sem LT não há decisão quantitativa (cl.5)."""
+    lt = (agentes_vocab.get(agente) or {}).get("lt_nr15")
+    chave = _CHAVE_LT_POR_UNIDADE.get(unidade)
+    if not isinstance(lt, dict) or chave is None or lt.get(chave) is None:
+        return None
+    return float(lt[chave]), str(lt["fonte"])
+
+
+def avaliar_medicao_quimica(
+    agente: str, q: Quantificacao, agentes_vocab: Mapping[str, Any]
+) -> AvaliacaoLimiteQuimico | None:
+    if q.apenas_qualitativa or q.valor is None or q.unidade is None:
+        return None
+    limite = limite_quimico(agente, q.unidade, agentes_vocab)
+    if limite is None:
+        return None
+    lt, fonte = limite
+    return AvaliacaoLimiteQuimico(
+        valor=q.valor,
+        unidade=q.unidade,
+        limite=lt,
+        pct_limite=q.valor / lt * 100.0,
+        fonte_normativa=fonte,
     )

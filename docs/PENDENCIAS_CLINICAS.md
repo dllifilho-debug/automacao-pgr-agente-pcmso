@@ -843,6 +843,14 @@ não é demonstrável. R-BIO-05 inalterada. Proposta registrada em `D-ARQ-86` (A
 medição informada na tela por (GHE, agente) com procedência de laudo, e dispensa em BAIXO só com
 medição abaixo do nível de ação. Aguarda ratificação e as questões Q1–Q4 da decisão.
 
+**Nota (mesma branch, 25/09/2026, pós-merge do PR #383) — fatia 1 de `D-ARQ-86` implementada.**
+R-BIO-05 dispensa em BAIXO quando há medição do agente abaixo do nível de ação (metade do LT da
+NR-15 Anexo 11), informada na tela com laudo ou transcrita do PGR; sem medição, BAIXO emite. 21
+agentes; os 7 cancerígenos IARC 1/2A com LT ficam fora (decisão do Diovanni). O conflito entre as
+condutas das médicas passa a se resolver por evidência: com laudo abaixo do nível de ação, a
+matriz segue o Aurora; sem laudo, segue Porto Araras I e Vila Brasil. Os 3 pares determinísticos
+não mudam (sem medição de químico).
+
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
 **Nota (mesma branch, 25/09/2026) — 2º GHE do Aurora com dispensa em BAIXO.** Matriz_9 do app ×

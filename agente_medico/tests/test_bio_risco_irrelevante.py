@@ -117,7 +117,7 @@ def test_observacao_carrega_o_maior_nivel_dispensado(tmp_path: Path) -> None:
     regras = tmp_path / "protocolo" / "regras.yaml"
     shutil.copytree(_PROTOCOLO_DIR, tmp_path / "protocolo")
     texto = regras.read_text(encoding="utf-8")
-    alvo = "    quando: tolueno\n    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}"
+    alvo = "    quando: tolueno\n    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]"
     assert alvo in texto
     regras.write_text(
         texto.replace(alvo, alvo.replace("[IRRELEVANTE]", "[IRRELEVANTE, BAIXO]")), encoding="utf-8"
@@ -130,23 +130,53 @@ def test_observacao_carrega_o_maior_nivel_dispensado(tmp_path: Path) -> None:
     assert [o.nivel_risco for o in ctx.observacoes] == ["BAIXO"]
 
 
+_CANCERIGENOS_COM_LT = {
+    "tricloroetileno",
+    "butadieno_13",
+    "oxido_de_etileno",
+    "diclorometano",
+    "estireno",
+    "dimetilformamida",
+    "tetracloroetileno",
+}
+
+
 def test_mencao_documental_so_nas_regras_do_quadro_1(proto: Protocolo) -> None:
-    # Escopo da decisão: IBE/EE (Quadro 1), só IRRELEVANTE. O Quadro 2 (IBE/SC,
-    # significado clínico) segue emitindo em qualquer nível. Computado do dado
+    # Escopo da decisão: IBE/EE (Quadro 1); sem medição, só IRRELEVANTE. O Quadro 2
+    # (IBE/SC, significado clínico) segue emitindo em qualquer nível. Emenda
+    # D-ARQ-86: BAIXO com medição abaixo do nível de ação só nos agentes com LT
+    # na NR-15 que não são cancerígenos IARC 1/2A (21). Computado do dado
     # (D-ARQ-67). Reversão que mata: tirar a chave de qualquer R-BIO-04 EE,
-    # pô-la numa R-BIO-04 SC, ou acrescentar BAIXO a qualquer niveis_risco.
+    # pô-la numa R-BIO-04 SC, acrescentar BAIXO a qualquer niveis_risco, ou pôr
+    # niveis_com_medicao_abaixo_acao num cancerígeno ou em agente sem LT.
     agentes = proto.vocabulario.agentes
     bio04 = [r for r in proto.regras if str(r["id"]).startswith("R-BIO-04-")]
     com_chave = {r["id"] for r in bio04 if "mencao_documental" in r}
     ee = {r["id"] for r in bio04 if agentes[r["quando"]].get("tipo_ibe") == "EE"}
+    com_medicao = {
+        r["quando"]
+        for r in bio04
+        if "niveis_com_medicao_abaixo_acao" in r.get("mencao_documental", {})
+    }
+    esperados = {
+        r["quando"]
+        for r in bio04
+        if r["id"] in ee
+        and "lt_nr15" in agentes[r["quando"]]
+        and r["quando"] not in _CANCERIGENOS_COM_LT
+    }
 
     assert com_chave == ee
     assert len(ee) == 42
     assert all(
-        r["mencao_documental"] == {"regra": "R-BIO-05", "niveis_risco": ["IRRELEVANTE"]}
+        r["mencao_documental"]["regra"] == "R-BIO-05"
+        and r["mencao_documental"]["niveis_risco"] == ["IRRELEVANTE"]
+        and r["mencao_documental"].get("niveis_com_medicao_abaixo_acao", ["BAIXO"]) == ["BAIXO"]
         for r in bio04
         if "mencao_documental" in r
     )
+    assert com_medicao == esperados
+    assert len(com_medicao) == 21
 
 
 def _protocolo_com_regra_extra(tmp_path: Path, regra_yaml: str) -> Path:

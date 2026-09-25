@@ -7,6 +7,17 @@ from typing import Literal, Optional, Union
 
 
 @dataclass(frozen=True)
+class ProcedenciaMedicao:
+    """De onde veio o valor medido (D-ARQ-86 cl.3): a dispensa por medição
+    precisa ser rastreável até o laudo na revisão e no documento."""
+    origem: Literal["informada", "pgr"]
+    laudo: str
+    data: date
+    metodo: str = ""
+    informante: str = ""
+
+
+@dataclass(frozen=True)
 class Quantificacao:
     valor: Optional[float]
     unidade: Optional[str]
@@ -16,6 +27,7 @@ class Quantificacao:
     sem_avaliacao_quantitativa: bool = False
     pct_quartzo: Optional[float] = None  # denominador da fórmula do Anexo 12 NR-15 (D-ARQ-24 / R-RX-01)
     fracao: Optional[Fracao] = None  # R-RX-01 / D-ARQ-24: fração da medição (respirável/total), decide fórmula Anexo 12 NR-15
+    procedencia: Optional[ProcedenciaMedicao] = None  # D-ARQ-86 cl.3; None = valor transcrito do PGR sem laudo identificado
 
 
 @dataclass(frozen=True)
@@ -316,6 +328,20 @@ class Observacao:
     agente: str
     nivel_risco: str
     exames_dispensados: tuple[str, ...]
+    # D-ARQ-86 cl.6: medição abaixo do nível de ação que sustenta a dispensa em
+    # BAIXO, já descrita com valor, % do LT e laudo. None = dispensa só pelo nível.
+    medicao: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class MedicaoInformada:
+    """Avaliação quantitativa digitada na tela para (GHE, agente) — D-ARQ-86 cl.1.
+    `unidade` segue a normalização de quantificacao.py ("ppm", "mg/m3")."""
+    ghe_id: str
+    agente: str
+    valor: float
+    unidade: str
+    procedencia: ProcedenciaMedicao
 
 
 @dataclass

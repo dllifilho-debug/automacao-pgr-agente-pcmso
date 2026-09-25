@@ -33,6 +33,8 @@ from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiC
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.composicao import resolver_composicao
 from agente_medico.motor.entrada import processar_pgr
+from agente_medico.motor.leo_resolver import limite_quimico
+from agente_medico.motor.medicoes import aplicar_medicoes
 from agente_medico.motor.protocolo import Protocolo, carregar
 from agente_medico.motor.resolvedor import construir_indice_cas
 from agente_medico.motor.tipos import (
@@ -42,6 +44,7 @@ from agente_medico.motor.tipos import (
     EnvelopeConfirmado,
     GHEVerbatim,
     MatrizGHE,
+    MedicaoInformada,
     Pendencia,
     ProdutoQuimico,
 )
@@ -229,7 +232,10 @@ class CacheMatrizes:
     consome para plugar um ProdutoQuimico sem reprocessar PDF/LLM.
     `anexos_descartados` (GHE, produto): anexos do cache anterior que não
     puderam ser reaplicados depois de um reparse do MESMO PDF porque o GHE não
-    existe mais — a casca avisa uma vez e limpa."""
+    existe mais — a casca avisa uma vez e limpa. `medicoes` (D-ARQ-86 cl.8):
+    avaliações quantitativas informadas na tela; ficam FORA de pgr_hidratado e
+    são reaplicadas a cada processar_pgr, então remover uma medição devolve o
+    valor do PGR."""
 
     chave: str
     matrizes: tuple[MatrizGHE, ...] | None
@@ -240,6 +246,7 @@ class CacheMatrizes:
     chamadas_ia: int
     pgr_hidratado: PGR | None
     anexos_descartados: tuple[tuple[str, str], ...] = ()
+    medicoes: tuple[MedicaoInformada, ...] = ()
 
 
 def calcular_chave_cache(conteudo_pdf: bytes, envelope: EnvelopeConfirmado) -> str:
@@ -278,6 +285,9 @@ def executar_rota_determinista_cacheada(
     chave_atual = calcular_chave_cache(conteudo_pdf, envelope)
     if cache is None or deve_reprocessar(chave_atual, cache.chave):
         anteriores = _produtos_a_carregar(cache, chave_atual)
+        medicoes_anteriores = (
+            cache.medicoes if cache is not None and _mesmo_pdf(cache.chave, chave_atual) else ()
+        )
         pgr_hidratado, matrizes, exames_vocab, pendencias, status, pendencias_globais, chamadas_ia = (
             _rodar_parse_deterministico(caminho_pdf, envelope)
         )
@@ -293,6 +303,12 @@ def executar_rota_determinista_cacheada(
         )
         if anteriores and cache.pgr_hidratado is not None and cache.status != "REJEITADO":
             cache = _reaplicar_produtos(cache, _protocolo_padrao(), anteriores)
+        if medicoes_anteriores and cache.pgr_hidratado is not None and cache.status != "REJEITADO":
+            cache = _reprocessar(
+                dataclasses.replace(cache, medicoes=medicoes_anteriores),
+                _protocolo_padrao(),
+                cache.pgr_hidratado,
+            )
 
     if cache.matrizes is None:
         return None, None, cache.pendencias, cache
@@ -410,14 +426,61 @@ def remover_produto_e_reprocessar(
 
 
 def _reprocessar(cache: CacheMatrizes, protocolo: Protocolo, pgr_atualizado: PGR) -> CacheMatrizes:
-    resultado = processar_pgr(pgr_atualizado, protocolo)
+    pgr_com_medicoes, pendencias_medicao = aplicar_medicoes(
+        pgr_atualizado, cache.medicoes, protocolo.vocabulario.agentes
+    )
+    resultado = processar_pgr(pgr_com_medicoes, protocolo)
     return dataclasses.replace(
         cache,
         pgr_hidratado=pgr_atualizado,
         matrizes=tuple(resultado.matrizes),
         status=resultado.status,
-        pendencias_globais=tuple(resultado.pendencias_globais),
+        pendencias_globais=(*resultado.pendencias_globais, *pendencias_medicao),
     )
+
+
+def registrar_medicao_e_reprocessar(
+    cache: CacheMatrizes, protocolo: Protocolo, medicao: MedicaoInformada
+) -> CacheMatrizes:
+    """D-ARQ-86 cl.1: uma medição por (GHE, agente) — a nova substitui a anterior.
+    Precondição (responsabilidade da casca): cache.pgr_hidratado is not None."""
+    assert cache.pgr_hidratado is not None
+    outras = tuple(
+        m for m in cache.medicoes if (m.ghe_id, m.agente) != (medicao.ghe_id, medicao.agente)
+    )
+    return _reprocessar(
+        dataclasses.replace(cache, medicoes=(*outras, medicao)), protocolo, cache.pgr_hidratado
+    )
+
+
+def remover_medicao_e_reprocessar(
+    cache: CacheMatrizes, protocolo: Protocolo, ghe_id: str, agente: str
+) -> CacheMatrizes:
+    assert cache.pgr_hidratado is not None
+    restantes = tuple(m for m in cache.medicoes if (m.ghe_id, m.agente) != (ghe_id, agente))
+    return _reprocessar(
+        dataclasses.replace(cache, medicoes=restantes), protocolo, cache.pgr_hidratado
+    )
+
+
+def agentes_mensuraveis(pgr: PGR, ghe_id: str, protocolo: Protocolo) -> dict[str, tuple[str, ...]]:
+    """Agentes do GHE (riscos do PGR) com LT da NR-15 no vocabulário → unidades
+    aceitas. Agente fora daqui não recebe medição na tela: sem risco no PGR a
+    medição não teria onde entrar, e sem LT não decide nada (D-ARQ-86 cl.5)."""
+    agentes_vocab = protocolo.vocabulario.agentes
+    ghe = next((g for g in pgr.ghes if g.id == ghe_id), None)
+    if ghe is None:
+        return {}
+    mensuraveis: dict[str, tuple[str, ...]] = {}
+    for risco in ghe.riscos:
+        if risco.agente is None or risco.agente in mensuraveis:
+            continue
+        unidades = tuple(
+            u for u in ("ppm", "mg/m3") if limite_quimico(risco.agente, u, agentes_vocab) is not None
+        )
+        if unidades:
+            mensuraveis[risco.agente] = unidades
+    return mensuraveis
 
 
 @dataclass(frozen=True)
@@ -505,11 +568,12 @@ def pagina_matriz() -> None:
         RodapeDocumento,
         renderizar_docx,
     )
-    from agente_medico.motor.tipos import BlocoVerbatim
+    from agente_medico.motor.tipos import BlocoVerbatim, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.web_matriz import (
         TranscritorGemini,
         _protocolo_padrao,
+        agentes_mensuraveis,
         anexar_produto_em_ghes,
         executar_rota_determinista_cacheada,
         ghes_com_produto,
@@ -517,6 +581,8 @@ def pagina_matriz() -> None:
         montar_envelope,
         montar_fds,
         preparar_composicao_cacheada,
+        registrar_medicao_e_reprocessar,
+        remover_medicao_e_reprocessar,
         remover_produto_e_reprocessar,
     )
 
@@ -576,6 +642,49 @@ def pagina_matriz() -> None:
             return
         st.session_state["web_matriz_cache"] = remover_produto_e_reprocessar(
             atual, _protocolo_padrao(), ghe_id, nome
+        )
+
+    def _registrar_medicao() -> None:
+        atual: CacheMatrizes | None = st.session_state.get("web_matriz_cache")
+        if atual is None or atual.pgr_hidratado is None:
+            return
+        ghe_id: str = st.session_state["medicao_ghe"]
+        agente: str = st.session_state["medicao_agente"]
+        valor: float = st.session_state["medicao_valor"]
+        laudo: str = st.session_state["medicao_laudo"].strip()
+        if valor <= 0 or not laudo:
+            st.session_state["medicao_mensagem"] = (
+                "warning",
+                "Informe valor maior que zero e a identificação do laudo.",
+            )
+            return
+        medicao = MedicaoInformada(
+            ghe_id=ghe_id,
+            agente=agente,
+            valor=valor,
+            unidade=st.session_state[f"medicao_unidade_{agente}"],
+            procedencia=ProcedenciaMedicao(
+                origem="informada",
+                laudo=laudo,
+                data=st.session_state["medicao_data"],
+                metodo=st.session_state["medicao_metodo"].strip(),
+                informante=st.session_state["medicao_informante"].strip(),
+            ),
+        )
+        st.session_state["web_matriz_cache"] = registrar_medicao_e_reprocessar(
+            atual, _protocolo_padrao(), medicao
+        )
+        st.session_state["medicao_mensagem"] = (
+            "success",
+            f"Medição de {agente} registrada em {ghe_id}.",
+        )
+
+    def _remover_medicao(ghe_id: str, agente: str) -> None:
+        atual: CacheMatrizes | None = st.session_state.get("web_matriz_cache")
+        if atual is None or atual.pgr_hidratado is None:
+            return
+        st.session_state["web_matriz_cache"] = remover_medicao_e_reprocessar(
+            atual, _protocolo_padrao(), ghe_id, agente
         )
 
     for arquivo_fds in arquivos_fds or ():
@@ -659,6 +768,62 @@ def pagina_matriz() -> None:
                 key=f"remover_{produto_anexado.ghe_id}_{produto_anexado.nome}",
                 on_click=_remover,
                 args=(produto_anexado.ghe_id, produto_anexado.nome),
+            )
+
+    if arquivo is not None and cache is not None and cache.pgr_hidratado is not None:
+        # D-ARQ-86: medição informada por (GHE, agente). Sem medição a matriz não muda.
+        st.subheader("Avaliações quantitativas")
+        st.caption(
+            "Valor representativo do laudo (média ou CLSC) de um agente químico no GHE. "
+            "Com risco BAIXO no PGR e medição abaixo do nível de ação (metade do LT da "
+            "NR-15, NR-09 9.6.1), o indicador biológico vira menção no PCMSO. "
+            "Cancerígenos sempre recebem o indicador."
+        )
+        rotulos_medicao = {
+            ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in cache.pgr_hidratado.ghes
+        }
+        ghe_medicao = st.selectbox(
+            "GHE",
+            options=list(rotulos_medicao),
+            format_func=lambda gid: rotulos_medicao[gid],
+            key="medicao_ghe",
+        )
+        mensuraveis = agentes_mensuraveis(cache.pgr_hidratado, ghe_medicao, _protocolo_padrao())
+        if not mensuraveis:
+            st.caption("Nenhum agente deste GHE tem limite no Anexo 11 da NR-15.")
+        else:
+            agente_medicao = st.selectbox(
+                "Agente", options=list(mensuraveis), key="medicao_agente"
+            )
+            st.selectbox(
+                "Unidade",
+                options=list(mensuraveis[agente_medicao]),
+                format_func=lambda u: "mg/m³" if u == "mg/m3" else u,
+                key=f"medicao_unidade_{agente_medicao}",
+            )
+            st.number_input("Valor medido", min_value=0.0, format="%.4f", key="medicao_valor")
+            st.date_input("Data da medição", format="DD/MM/YYYY", key="medicao_data")
+            st.text_input("Laudo (número ou elaborador)", key="medicao_laudo")
+            st.text_input("Método (ex.: NHO-08)", key="medicao_metodo")
+            st.text_input("Informado por", key="medicao_informante")
+            st.button("Registrar medição", key="registrar_medicao", on_click=_registrar_medicao)
+        mensagem_medicao = st.session_state.pop("medicao_mensagem", None)
+        if mensagem_medicao is not None:
+            tipo_msg, texto_msg = mensagem_medicao
+            (st.success if tipo_msg == "success" else st.warning)(texto_msg)
+        for medicao_registrada in cache.medicoes:
+            unidade_exibida = "mg/m³" if medicao_registrada.unidade == "mg/m3" else medicao_registrada.unidade
+            st.write(
+                f"**{medicao_registrada.ghe_id}** · {medicao_registrada.agente}: "
+                f"{medicao_registrada.valor:g} {unidade_exibida} — laudo "
+                f"{medicao_registrada.procedencia.laudo}, "
+                f"{medicao_registrada.procedencia.data:%d/%m/%Y}"
+            )
+            st.button(
+                "Remover",
+                key=f"remover_medicao_{medicao_registrada.ghe_id}_{medicao_registrada.agente}",
+                on_click=_remover_medicao,
+                args=(medicao_registrada.ghe_id, medicao_registrada.agente),
             )
 
     if arquivo is None:
