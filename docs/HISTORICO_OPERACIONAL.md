@@ -10004,3 +10004,20 @@ regenerado. Nenhum código, teste ou `.yaml` tocado.
 conferido contra a pasta de NRs que o Diovanni vai versionar no repositório.
 
 **Verificação.** Ver PAINEL (Baseline desta sessão).
+
+## Sessão (branch `claude/hopeful-ramanujan-rbgh4s`, continuação pós-merge do PR #382) — 25/09/2026 — CONHECIMENTO: conferência da NR-09 e do Anexo 11 para `D-ARQ-86`
+
+**Origem.** Diovanni versionou os PDFs oficiais das NRs em `normas/` (commits `5bc7e30`, `6d7ad56`)
+e pediu a conferência.
+
+**Conferido.** NR-09 2026 (alterações até a Portaria MTE 105/2026), item 9.6.1: "b" nível de ação
+químico = metade do LT; "c" ruído = metade da dose; 9.6.1.1 ACGIH na falta de LT da NR-15. NR-07
+7.5.12 "b" reconferido (mesmo PDF, sha256 `f27b63bb…`). NR-15 Anexo 11, Quadro n.º 1: 9 solventes
+conferidos contra o gabarito 003.DP, todos iguais. Registrado como nota em `D-ARQ-86` (v220),
+`INDICE_DARQ.md` regenerado. Nenhum código, teste ou `.yaml` tocado.
+
+**Achados sobre a pasta `normas/`, não alterados.** Nomes fora da convenção do README (espaço antes
+de `.pdf`, sufixos `(3)`, data no nome); duas versões da NR-01 (2024 e 2025) e da NR-10 (2019 e
+2026); faltam NR-15 Anexos 1 (ruído) e 3 (calor) e as NHOs da Fundacentro.
+
+**Verificação.** Ver PAINEL (Baseline desta sessão).
