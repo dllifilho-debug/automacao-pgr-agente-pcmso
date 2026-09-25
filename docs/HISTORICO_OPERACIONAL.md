@@ -9814,3 +9814,34 @@ existe em `regras.yaml` nem o exame em `exames.yaml` — 2º caso real.
 
 **Verificação.** Suíte completa (árvore parada): **1381 passed, 6 skipped, 0 failed** (821.48s),
 +1 exato contra 1380. `mypy --strict` alvo canônico limpo, 50 arquivos. `medir_painel` inalterado.
+
+## Sessão (branch `claude/determined-fermi-xxah3h`, continuação pós-merge do PR #375) — 25/09/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: matriz_9 do Aurora × gabarito; clique perdido no "Anexar"
+
+**Medição (matriz_9 do app, pós-deploy dos PRs #372–#374).** Script descartável (mesmo método do
+bloco da medição do Gemini; grafias do gabarito não normalizadas — contagem é tendência, não
+número exato): exame a mais 12→6, periodicidade divergente 35→32, exame faltando 28→28, células
+iguais 493→496. O ganho é o GHE 16: com a aguarrás fora da Serralheria somem t,t-mucônico,
+reticulócitos e hemograma 6M. RX 22/22 mantido. Painel, status por FDS e revisão com origem e
+Decreto 3.048 funcionando com dado real. Nomes de GHE vieram sem o prefixo "GHE 01 -" (variação
+do Gemini entre execuções; não afeta exames).
+
+**Achado clínico (registrado em `DT-003EB-02`).** GHE 18 PINTURA: a Dra. Patrícia anota "risco
+ocupacional baixo no PGR para Octoato de Cobalto, Thinner Acetona, Thinner Metiletilcetona,
+Thinner Tolueno e Xileno" e não pede os indicadores do Quadro 1 desses agentes — 2º GHE do Aurora
+com dispensa em BAIXO. Exceções no mesmo GHE: pede t,t-mucônico (benzeno, cancerígeno) e cobalto
+na urina apesar de citar o cobalto na anotação.
+
+**Clique perdido.** A aguarrás estava com GHE-18 marcado e "ainda não anexada"; Diovanni confirmou
+ter clicado, e um novo clique anexou. `AppTest` com a mesma sequência anexa normalmente — o caminho
+de código funciona. Hipótese não medida: rerun interrompido (página lenta, usuário já no widget
+seguinte) antes de o script chegar ao botão. Correção pedida pelo Diovanni: "Anexar" e "Remover"
+em `on_click` (o Streamlit roda o callback antes do rerun). O `AppTest` não simula a interrupção;
+a confirmação real é o uso em produção.
+
+**Verificação.** 1 teste novo (duas FDS com o mesmo nome de produto, caso real `CIMENTO….PDF`/
+`.pdf`: anexar pela 2ª muda o status da 1ª no mesmo rerun — só com callback); comentário de
+reversão do teste do "Remover" atualizado. Varredura inversa 2/2 (código inline da `main`;
+`_remover` sem gravar o cache). Os testes de tela pegaram um `NameError` em anotação do callback
+(o `AppTest` copia só o corpo da função, sem `from __future__ import annotations`) — corrigido com
+import local. Suíte completa (árvore parada): **1382 passed, 6 skipped, 0 failed** (801.36s), +1
+exato. `mypy --strict` alvo canônico limpo, 50 arquivos.

@@ -505,6 +505,7 @@ def pagina_matriz() -> None:
         RodapeDocumento,
         renderizar_docx,
     )
+    from agente_medico.motor.tipos import BlocoVerbatim
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.web_matriz import (
         TranscritorGemini,
@@ -540,6 +541,43 @@ def pagina_matriz() -> None:
         "PDF(s) da FDS/FISPQ", type="pdf", accept_multiple_files=True, key="fds_avulsas"
     )
     cache_fds: dict[str, ComposicaoFDS] = st.session_state.setdefault("web_matriz_cache_fds", {})
+
+    # Anexar/Remover rodam em on_click: o Streamlit executa o callback ANTES do
+    # rerun. Inline, o clique só era processado quando o script chegava ao
+    # botão — se o rerun era interrompido antes (página lenta com 16 FDS e o
+    # usuário já mexendo no widget seguinte), o clique se perdia sem aviso
+    # (medido em produção, Aurora, 25/09/2026: aguarrás não anexada).
+    def _anexar(nome_arquivo: str, blocos: tuple[BlocoVerbatim, ...]) -> None:
+        atual: CacheMatrizes | None = st.session_state.get("web_matriz_cache")
+        if atual is None or atual.pgr_hidratado is None:
+            return
+        escolhidos: list[str] = st.session_state.get(f"ghe_destino_{nome_arquivo}", [])
+        nome: str = st.session_state.get(f"nome_produto_{nome_arquivo}", Path(nome_arquivo).stem)
+        ja_anexada = set(ghes_com_produto(atual.pgr_hidratado, nome))
+        repetidos = [g for g in escolhidos if g in ja_anexada]
+        novos = [g for g in escolhidos if g not in ja_anexada]
+        mensagens: list[tuple[str, str]] = []
+        if not escolhidos:
+            mensagens.append(("warning", "Escolha ao menos um GHE antes de anexar."))
+        if repetidos:
+            mensagens.append(
+                ("warning", f"'{nome}' já está anexado a {', '.join(repetidos)} — mantido como está.")
+            )
+        if novos:
+            st.session_state["web_matriz_cache"] = anexar_produto_em_ghes(
+                atual, _protocolo_padrao(), novos, nome, montar_fds(blocos)
+            )
+            mensagens.append(("success", f"Produto '{nome}' anexado a {', '.join(novos)}."))
+        st.session_state[f"anexo_mensagens_{nome_arquivo}"] = mensagens
+
+    def _remover(ghe_id: str, nome: str) -> None:
+        atual: CacheMatrizes | None = st.session_state.get("web_matriz_cache")
+        if atual is None or atual.pgr_hidratado is None:
+            return
+        st.session_state["web_matriz_cache"] = remover_produto_e_reprocessar(
+            atual, _protocolo_padrao(), ghe_id, nome
+        )
+
     for arquivo_fds in arquivos_fds or ():
         st.write(f"**{arquivo_fds.name}**")
         with tempfile.TemporaryDirectory() as tmp_fds:
@@ -584,25 +622,14 @@ def pagina_matriz() -> None:
                 value=Path(arquivo_fds.name).stem,
                 key=f"nome_produto_{arquivo_fds.name}",
             )
-            if st.button("Anexar aos GHEs selecionados", key=f"anexar_fds_{arquivo_fds.name}"):
-                ja_anexada = set(ghes_com_produto(cache.pgr_hidratado, nome_produto))
-                repetidos = [g for g in ghes_escolhidos if g in ja_anexada]
-                novos = [g for g in ghes_escolhidos if g not in ja_anexada]
-                if not ghes_escolhidos:
-                    st.warning("Escolha ao menos um GHE antes de anexar.")
-                if repetidos:
-                    st.warning(
-                        f"'{nome_produto}' já está anexado a {', '.join(repetidos)} — mantido como está."
-                    )
-                if novos:
-                    cache = anexar_produto_em_ghes(
-                        cache, _protocolo_padrao(), novos, nome_produto, montar_fds(blocos_fds)
-                    )
-                    st.session_state["web_matriz_cache"] = cache
-                    st.success(f"Produto '{nome_produto}' anexado a {', '.join(novos)}.")
-            # Lido DEPOIS do clique: no rerun do próprio "Anexar" o status já
-            # reflete o anexo — antes, a única confirmação era o st.success,
-            # que some na interação seguinte.
+            st.button(
+                "Anexar aos GHEs selecionados",
+                key=f"anexar_fds_{arquivo_fds.name}",
+                on_click=_anexar,
+                args=(arquivo_fds.name, blocos_fds),
+            )
+            for tipo, texto in st.session_state.pop(f"anexo_mensagens_{arquivo_fds.name}", []):
+                (st.success if tipo == "success" else st.warning)(texto)
             assert cache.pgr_hidratado is not None
             anexada_em = ghes_com_produto(cache.pgr_hidratado, nome_produto)
             if anexada_em:
@@ -627,15 +654,12 @@ def pagina_matriz() -> None:
             for componente in produto_anexado.componentes:
                 agente = componente.agente or "não reconhecido no vocabulário"
                 st.write(f"- CAS {componente.cas or '—'} | {componente.nome} → {agente}")
-            if st.button(
+            st.button(
                 "Remover",
                 key=f"remover_{produto_anexado.ghe_id}_{produto_anexado.nome}",
-            ):
-                cache = remover_produto_e_reprocessar(
-                    cache, _protocolo_padrao(), produto_anexado.ghe_id, produto_anexado.nome
-                )
-                st.session_state["web_matriz_cache"] = cache
-                st.rerun()
+                on_click=_remover,
+                args=(produto_anexado.ghe_id, produto_anexado.nome),
+            )
 
     if arquivo is None:
         st.session_state.pop("web_matriz_cache", None)
