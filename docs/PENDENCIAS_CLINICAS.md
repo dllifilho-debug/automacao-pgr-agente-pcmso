@@ -1404,6 +1404,15 @@ o Fascino segue sem resolver manganês pela grafia "Maganês" (DT-003EQ-02). Bas
 conferida: Anexo 12, "Manganês e seus compostos", item 7 (PROTOCOLO v102) — o mesmo item sustenta o
 clínico semestral de R-CLI-03.
 
+**Nota (mesma branch, pós-merge do PR #377, 25/09/2026) — R-CLI-03 materializada; R-CLI-02 bloqueada
+por medição.** `R-CLI-03` entra em `regras.yaml` (clínico 6M para Mn, NR-15 Anexo 12 item 7).
+`R-CLI-02` foi implementada e medida: nos 3 pares determinísticos, +5 divergências de
+periodicidade (clínico 6M onde a Dra. Patrícia pede 12M — Porto Araras I GHE-13/14, Vila Brasil
+GHE-23/26, todos com agentes do Anexo I em BAIXO/IRRELEVANTE), nenhuma corrigida — retirada. No
+Aurora a mesma médica pede 6M nos GHEs 11 (Quadro 1 MODERADO), 16 (Mn), 18/22 (benzeno) e 21
+(tricloroetileno). Decisão clínica do Diovanni: qual gatilho do semestral (Mn / cancerígeno / nível
+MODERADO+). Fascino (armador/serralheiro 6M) segue dependente de DT-003EQ-02 ("Maganês").
+
 ### DT-003EO-04 — `GHEPGR.cargos` chega como 1 string por GHE do parser da família Consciente; a expansão GHE→cargo de D-ARQ-73 não separa cargos reais `[FECHADA — 003.EP]`
 
 **Origem:** 003.EO, fatia 4 — medição contra o Fascino real (achado fora do previsto pela EMENDA 1); quantificado nas EMENDAs 3 e 4.

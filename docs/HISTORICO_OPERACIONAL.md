@@ -9890,3 +9890,27 @@ também sustenta literalmente o clínico periódico semestral (R-CLI-03, não ma
 
 **Registrado.** `base_normativa` de R-BIO-03 em `regras.yaml` e nota na regra (PROTOCOLO v102).
 Conteúdo da regra inalterado.
+
+## Sessão (branch `claude/determined-fermi-xxah3h`, continuação pós-merge do PR #377) — 25/09/2026 — IMPLEMENTAÇÃO: `R-CLI-03`; `R-CLI-02` bloqueada por medição
+
+**Origem.** Ordem do Diovanni: implementar R-CLI-02 e R-CLI-03 (clínico semestral). Branch recriada
+de `origin/main 894f32b`.
+
+**Medido antes de fechar.** A consolidação (D-ARQ-39) já une momentos e fica com a menor
+periodicidade — basta emitir `exame_clinico` 6M `[per]`. R-CLI-02 implementada com primitivo novo
+(`tipo_ibe` presente — 47 agentes, conferidos contra as 46 R-BIO-04 + benzeno) e medida nos 3 pares
+determinísticos com `comparar_matriz_gabarito`: **+5 divergências de periodicidade, 0 corrigidas**
+(Porto Araras I GHE-13/14 e Vila Brasil GHE-23/26: clínico 12M no gabarito, agentes do Anexo I todos
+BAIXO/IRRELEVANTE). Aurora, mesma médica: 6M em GHE 11 (MODERADO), 16 (Mn), 18/22 (benzeno), 21
+(tricloroetileno). Bloqueador (CLAUDE.md: medição × regra esperada): R-CLI-02 e o primitivo
+retirados, reportado ao Diovanni com a hipótese (Mn / cancerígeno / MODERADO+), não implementada.
+
+**Implementado.** `R-CLI-03` em `regras.yaml` (`quando: manganes`, clínico 6M `[per]`, base NR-15
+Anexo 12 item 7). PROTOCOLO v103: nota de implementação em R-CLI-03 e nota de medição em R-CLI-02.
+Nota em DT-003EO-03.
+
+**Verificação.** 3 testes em `test_bio_manganes.py` (clínico 6M com os 5 momentos; xileno BAIXO
+mantém 12M; célula do documento); varredura inversa 3 reversões, 3/3. 3 pares determinísticos:
+saída idêntica à `main`. Suíte completa (árvore parada): **1389 passed, 6 skipped, 0 failed**
+(796.39s), +3 exato. `mypy --strict` alvo canônico limpo, 50 arquivos. `medir_painel`: `regras
+27/45 → 28/45`.

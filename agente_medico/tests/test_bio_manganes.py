@@ -89,3 +89,41 @@ def test_documento_mostra_a_grafia_do_gabarito(proto: Protocolo) -> None:
 
     (linha,) = doc.blocos[0].linhas
     assert "Manganês no sangue (ADM, PER 6 meses, MRO)" in linha.celulas
+
+
+def test_manganes_torna_o_clinico_semestral_sem_perder_momentos(proto: Protocolo) -> None:
+    # R-CLI-03 (NR-15 Anexo 12 item 7). Reversões que matam: tirar R-CLI-03 de
+    # regras.yaml (clínico fica 12M, só R-CLI-01); trocar periodicidade_meses
+    # para 12.
+    matriz = _matriz(proto, _risco("manganes", "MODERADO"))
+
+    (clinico,) = [e for e in matriz.linhas if e.exame == "exame_clinico"]
+    assert clinico.periodicidade_meses == 6
+    assert clinico.momentos == {Momento.ADM, Momento.PER, Momento.MR, Momento.RT, Momento.DEM}
+    assert [m.regra_id for m in clinico.motivos] == ["R-CLI-01", "R-CLI-03"]
+
+
+def test_agente_do_anexo_i_sem_manganes_mantem_clinico_anual(proto: Protocolo) -> None:
+    # R-CLI-02 fica fora (medido: Porto Araras I e Vila Brasil pedem clínico
+    # anual com solventes do Quadro 1 em nível BAIXO). Reversão que mata:
+    # R-CLI-03 disparar por qualquer agente biomonitorado (`quando` trocado por
+    # um predicado de Anexo I ou por todo_trabalhador).
+    matriz = _matriz(proto, _risco("xileno", "BAIXO"))
+
+    (clinico,) = [e for e in matriz.linhas if e.exame == "exame_clinico"]
+    assert clinico.periodicidade_meses == 12
+
+
+def test_documento_mostra_clinico_semestral_como_no_gabarito(proto: Protocolo) -> None:
+    # Aurora GHE 16: "Exame Clínico (ADM, PER 6 meses, MRO, RET, DEM)".
+    # Reversão que mata: R-CLI-03 emitir periodicidade 12 — a célula perde o
+    # "PER 6 meses".
+    doc = montar_documento(
+        [_matriz(proto, _risco("manganes", "MODERADO"))],
+        proto.vocabulario.exames,
+        CabecalhoDocumento("", "", "", "", "", ""),
+        RodapeDocumento("", "", ""),
+    )
+
+    (linha,) = doc.blocos[0].linhas
+    assert "Exame Clínico (ADM, PER 6 meses, MRO, RET, DEM)" in linha.celulas
