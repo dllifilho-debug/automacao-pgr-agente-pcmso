@@ -24,7 +24,7 @@ import hashlib
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence
 
 from agente_medico.adaptadores.orquestracao_fds import preparar_composicao
 from agente_medico.adaptadores.orquestracao_pgr import preparar_pgr_hidratado
@@ -590,6 +590,7 @@ def pagina_matriz() -> None:
         EmissaoFuturaError,
     )
     from agente_medico.superficie.web_matriz import (
+        CacheMatrizes,
         TranscritorGemini,
         _protocolo_padrao,
         agentes_mensuraveis,
@@ -626,6 +627,7 @@ def pagina_matriz() -> None:
     caixa_matriz: DeltaGenerator | None = None
     matriz_gerada = False
     bloqueio: str | None = None
+    renderizar_vinculos: Callable[[CacheMatrizes | None], None] | None = None
 
     with etapa_pgr:
         st.subheader("1. PGR e identificação do documento")
@@ -746,178 +748,184 @@ def pagina_matriz() -> None:
                 atual, _protocolo_padrao(), ghe_id, agente
             )
 
-        for arquivo_fds in arquivos_fds or ():
-            with etapa_fds:
-                with tempfile.TemporaryDirectory() as tmp_fds:
-                    caminho_fds = Path(tmp_fds) / arquivo_fds.name
-                    conteudo_fds = arquivo_fds.getvalue()
-                    caminho_fds.write_bytes(conteudo_fds)
-                    with st.spinner(f"Lendo composição de {arquivo_fds.name}..."):
-                        blocos_fds, pendencias_fds = preparar_composicao_cacheada(
-                            caminho_fds, conteudo_fds, TranscritorGemini(), cache_fds
+        # Desenhada no `finally`, com o cache DESTE rerun: lida no topo, a etapa 2
+        # só mostrava vínculo, produtos e medições na interação seguinte ao clique
+        # em Gerar matriz. A posição na tela é a do container etapa_fds.
+        def _renderizar_vinculos(cache_vinculo: CacheMatrizes | None) -> None:
+            for arquivo_fds in arquivos_fds or ():
+                with etapa_fds:
+                    with tempfile.TemporaryDirectory() as tmp_fds:
+                        caminho_fds = Path(tmp_fds) / arquivo_fds.name
+                        conteudo_fds = arquivo_fds.getvalue()
+                        caminho_fds.write_bytes(conteudo_fds)
+                        with st.spinner(f"Lendo composição de {arquivo_fds.name}..."):
+                            blocos_fds, pendencias_fds = preparar_composicao_cacheada(
+                                caminho_fds, conteudo_fds, TranscritorGemini(), cache_fds
+                            )
+                    # Rótulo fixo: rótulo que muda (ex.: com o status do anexo) faz o
+                    # Streamlit tratar o expander como outro elemento e fechá-lo no
+                    # rerun do próprio clique em Anexar.
+                    expander_fds = st.expander(arquivo_fds.name, expanded=len(arquivos_fds) == 1)
+                with expander_fds:
+                    for bloco_fds in blocos_fds:
+                        st.write(f"Faixa: {bloco_fds.faixa}")
+                        for membro in bloco_fds.membros:
+                            frases_h = ", ".join(membro.frases_h) or "—"
+                            st.write(f"- CAS {membro.cas} | {membro.nome} | H: {frases_h}")
+                    for p in pendencias_fds:
+                        st.write(f"- `{p.tipo}`: {p.motivo}")
+
+                    # Casamento manual FDS<->produto (D-ARQ-49 Parte 2 fatia 2b, decisão
+                    # ratificada v199/v200: RT escolhe o GHE e nomeia o produto na tela —
+                    # NUNCA extração automática por fonte_geradora/agente/heurística,
+                    # descartada por medição real contra o PGR Fascino). Só aparece com
+                    # PGR já carregado (cache_vinculo.pgr_hidratado not None) e composição extraída
+                    # (blocos_fds não-vazio) — sem PGR, comportamento idêntico ao de hoje.
+                    # A lista de GHEs só existe depois do parse do PGR (Gerar matriz). Sem
+                    # este aviso a FDS aparecia sem nenhuma forma de vínculo e sem dizer por quê.
+                    if blocos_fds and (cache_vinculo is None or cache_vinculo.pgr_hidratado is None):
+                        st.info("Gere a matriz para vincular esta FDS a um GHE.")
+                    if cache_vinculo is not None and cache_vinculo.pgr_hidratado is not None and blocos_fds:
+                        ghes_pgr = cache_vinculo.pgr_hidratado.ghes
+                        rotulos_ghe = {ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in ghes_pgr}
+                        # Sem GHE pré-marcado: o selectbox anterior sempre tinha um valor, e
+                        # o clique anexava em algum GHE mesmo sem escolha consciente.
+                        ghes_escolhidos = st.multiselect(
+                            f"Anexar {arquivo_fds.name} a quais GHEs?",
+                            options=list(rotulos_ghe),
+                            format_func=lambda gid: rotulos_ghe[gid],
+                            key=f"ghe_destino_{arquivo_fds.name}",
                         )
-                # Rótulo fixo: rótulo que muda (ex.: com o status do anexo) faz o
-                # Streamlit tratar o expander como outro elemento e fechá-lo no
-                # rerun do próprio clique em Anexar.
-                expander_fds = st.expander(arquivo_fds.name, expanded=len(arquivos_fds) == 1)
-            with expander_fds:
-                for bloco_fds in blocos_fds:
-                    st.write(f"Faixa: {bloco_fds.faixa}")
-                    for membro in bloco_fds.membros:
-                        frases_h = ", ".join(membro.frases_h) or "—"
-                        st.write(f"- CAS {membro.cas} | {membro.nome} | H: {frases_h}")
-                for p in pendencias_fds:
-                    st.write(f"- `{p.tipo}`: {p.motivo}")
+                        nome_produto = st.text_input(
+                            "Nome do produto",
+                            value=Path(arquivo_fds.name).stem,
+                            key=f"nome_produto_{arquivo_fds.name}",
+                        )
+                        st.button(
+                            "Anexar aos GHEs selecionados",
+                            key=f"anexar_fds_{arquivo_fds.name}",
+                            on_click=_anexar,
+                            args=(arquivo_fds.name, blocos_fds),
+                        )
+                        for tipo, texto in st.session_state.pop(f"anexo_mensagens_{arquivo_fds.name}", []):
+                            (st.success if tipo == "success" else st.warning)(texto)
+                        assert cache_vinculo.pgr_hidratado is not None
+                        anexada_em = ghes_com_produto(cache_vinculo.pgr_hidratado, nome_produto)
+                        if anexada_em:
+                            st.caption(f"Status: anexada a {', '.join(anexada_em)}.")
+                        else:
+                            st.caption("Status: ainda não anexada a nenhum GHE.")
 
-                # Casamento manual FDS<->produto (D-ARQ-49 Parte 2 fatia 2b, decisão
-                # ratificada v199/v200: RT escolhe o GHE e nomeia o produto na tela —
-                # NUNCA extração automática por fonte_geradora/agente/heurística,
-                # descartada por medição real contra o PGR Fascino). Só aparece com
-                # PGR já carregado (cache.pgr_hidratado not None) e composição extraída
-                # (blocos_fds não-vazio) — sem PGR, comportamento idêntico ao de hoje.
-                # A lista de GHEs só existe depois do parse do PGR (Gerar matriz). Sem
-                # este aviso a FDS aparecia sem nenhuma forma de vínculo e sem dizer por quê.
-                if blocos_fds and (cache is None or cache.pgr_hidratado is None):
-                    st.info("Gere a matriz para vincular esta FDS a um GHE.")
-                if cache is not None and cache.pgr_hidratado is not None and blocos_fds:
-                    ghes_pgr = cache.pgr_hidratado.ghes
-                    rotulos_ghe = {ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in ghes_pgr}
-                    # Sem GHE pré-marcado: o selectbox anterior sempre tinha um valor, e
-                    # o clique anexava em algum GHE mesmo sem escolha consciente.
-                    ghes_escolhidos = st.multiselect(
-                        f"Anexar {arquivo_fds.name} a quais GHEs?",
-                        options=list(rotulos_ghe),
-                        format_func=lambda gid: rotulos_ghe[gid],
-                        key=f"ghe_destino_{arquivo_fds.name}",
+            if arquivo is not None and cache_vinculo is not None and cache_vinculo.pgr_hidratado is not None:
+                with etapa_fds:
+                    st.markdown("#### Produtos anexados")
+                    # listar_produtos_anexados carrega o protocolo; sem produto não há o que resolver.
+                    produtos_anexados = (
+                        listar_produtos_anexados(cache_vinculo.pgr_hidratado, _protocolo_padrao())
+                        if any(ghe.produtos_quimicos for ghe in cache_vinculo.pgr_hidratado.ghes)
+                        else ()
                     )
-                    nome_produto = st.text_input(
-                        "Nome do produto",
-                        value=Path(arquivo_fds.name).stem,
-                        key=f"nome_produto_{arquivo_fds.name}",
-                    )
-                    st.button(
-                        "Anexar aos GHEs selecionados",
-                        key=f"anexar_fds_{arquivo_fds.name}",
-                        on_click=_anexar,
-                        args=(arquivo_fds.name, blocos_fds),
-                    )
-                    for tipo, texto in st.session_state.pop(f"anexo_mensagens_{arquivo_fds.name}", []):
-                        (st.success if tipo == "success" else st.warning)(texto)
-                    assert cache.pgr_hidratado is not None
-                    anexada_em = ghes_com_produto(cache.pgr_hidratado, nome_produto)
-                    if anexada_em:
-                        st.caption(f"Status: anexada a {', '.join(anexada_em)}.")
-                    else:
-                        st.caption("Status: ainda não anexada a nenhum GHE.")
+                    if not produtos_anexados:
+                        st.caption("Nenhum produto anexado.")
+                    for produto_anexado in produtos_anexados:
+                        st.write(
+                            f"**{produto_anexado.ghe_id} — {produto_anexado.ghe_nome}** · {produto_anexado.nome}"
+                        )
+                        for componente in produto_anexado.componentes:
+                            agente = componente.agente or "não reconhecido no vocabulário"
+                            st.write(f"- CAS {componente.cas or '—'} | {componente.nome} → {agente}")
+                        st.button(
+                            "Remover",
+                            key=f"remover_{produto_anexado.ghe_id}_{produto_anexado.nome}",
+                            on_click=_remover,
+                            args=(produto_anexado.ghe_id, produto_anexado.nome),
+                        )
 
-        if arquivo is not None and cache is not None and cache.pgr_hidratado is not None:
-            with etapa_fds:
-                st.markdown("#### Produtos anexados")
-                # listar_produtos_anexados carrega o protocolo; sem produto não há o que resolver.
-                produtos_anexados = (
-                    listar_produtos_anexados(cache.pgr_hidratado, _protocolo_padrao())
-                    if any(ghe.produtos_quimicos for ghe in cache.pgr_hidratado.ghes)
-                    else ()
-                )
-                if not produtos_anexados:
-                    st.caption("Nenhum produto anexado.")
-                for produto_anexado in produtos_anexados:
-                    st.write(
-                        f"**{produto_anexado.ghe_id} — {produto_anexado.ghe_nome}** · {produto_anexado.nome}"
+            if arquivo is not None and cache_vinculo is not None and cache_vinculo.pgr_hidratado is not None:
+                # D-ARQ-86: medição informada por (GHE, agente). Sem medição a matriz não muda.
+                with etapa_fds:
+                    st.markdown("#### Avaliações quantitativas")
+                    st.caption(
+                        "Valor representativo do laudo (média ou CLSC) de um agente no GHE. Químico: "
+                        "com risco BAIXO no PGR e medição abaixo do nível de ação (metade do LT da "
+                        "NR-15, NR-09 9.6.1), o indicador biológico vira menção no PCMSO; "
+                        "cancerígenos sempre recebem o indicador. Sílica e poeira não classificada: "
+                        "a medição define a periodicidade do RX OIT (NR-07 Anexo III)."
                     )
-                    for componente in produto_anexado.componentes:
-                        agente = componente.agente or "não reconhecido no vocabulário"
-                        st.write(f"- CAS {componente.cas or '—'} | {componente.nome} → {agente}")
-                    st.button(
-                        "Remover",
-                        key=f"remover_{produto_anexado.ghe_id}_{produto_anexado.nome}",
-                        on_click=_remover,
-                        args=(produto_anexado.ghe_id, produto_anexado.nome),
-                    )
-
-        if arquivo is not None and cache is not None and cache.pgr_hidratado is not None:
-            # D-ARQ-86: medição informada por (GHE, agente). Sem medição a matriz não muda.
-            with etapa_fds:
-                st.markdown("#### Avaliações quantitativas")
-                st.caption(
-                    "Valor representativo do laudo (média ou CLSC) de um agente no GHE. Químico: "
-                    "com risco BAIXO no PGR e medição abaixo do nível de ação (metade do LT da "
-                    "NR-15, NR-09 9.6.1), o indicador biológico vira menção no PCMSO; "
-                    "cancerígenos sempre recebem o indicador. Sílica e poeira não classificada: "
-                    "a medição define a periodicidade do RX OIT (NR-07 Anexo III)."
-                )
-                rotulos_medicao = {
-                    ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in cache.pgr_hidratado.ghes
-                }
-                col_agente, col_laudo = st.columns(2)
-                with col_agente:
-                    ghe_medicao = st.selectbox(
-                        "GHE",
-                        options=list(rotulos_medicao),
-                        format_func=lambda gid: rotulos_medicao[gid],
-                        key="medicao_ghe",
-                    )
-                mensuraveis = agentes_mensuraveis(cache.pgr_hidratado, ghe_medicao, _protocolo_padrao())
-                if not mensuraveis:
-                    st.caption("Nenhum agente deste GHE tem limite no Anexo 11 da NR-15.")
-                else:
+                    rotulos_medicao = {
+                        ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in cache_vinculo.pgr_hidratado.ghes
+                    }
+                    col_agente, col_laudo = st.columns(2)
                     with col_agente:
-                        agente_medicao = st.selectbox(
-                            "Agente", options=list(mensuraveis), key="medicao_agente"
+                        ghe_medicao = st.selectbox(
+                            "GHE",
+                            options=list(rotulos_medicao),
+                            format_func=lambda gid: rotulos_medicao[gid],
+                            key="medicao_ghe",
                         )
-                        st.selectbox(
-                            "Unidade",
-                            options=list(mensuraveis[agente_medicao]),
-                            format_func=lambda u: "mg/m³" if u == "mg/m3" else u,
-                            key=f"medicao_unidade_{agente_medicao}",
-                        )
-                        st.number_input("Valor medido", min_value=0.0, format="%.4f", key="medicao_valor")
-                        if agente_medicao == "silica":
+                    mensuraveis = agentes_mensuraveis(cache_vinculo.pgr_hidratado, ghe_medicao, _protocolo_padrao())
+                    if not mensuraveis:
+                        st.caption("Nenhum agente deste GHE tem limite no Anexo 11 da NR-15.")
+                    else:
+                        with col_agente:
+                            agente_medicao = st.selectbox(
+                                "Agente", options=list(mensuraveis), key="medicao_agente"
+                            )
                             st.selectbox(
-                                "Fração",
-                                options=[Fracao.RESPIRAVEL.value, Fracao.TOTAL.value],
-                                format_func=lambda f: "Respirável" if f == Fracao.RESPIRAVEL.value else "Total",
-                                key="medicao_fracao",
+                                "Unidade",
+                                options=list(mensuraveis[agente_medicao]),
+                                format_func=lambda u: "mg/m³" if u == "mg/m3" else u,
+                                key=f"medicao_unidade_{agente_medicao}",
                             )
-                            st.number_input(
-                                "% de quartzo (sílica livre cristalizada)",
-                                min_value=0.0,
-                                max_value=100.0,
-                                format="%.2f",
-                                key="medicao_quartzo",
-                            )
-                        elif agente_medicao == "poeira_nao_classificada":
-                            st.caption("Poeira não classificada: fração respirável (NR-07 Anexo III, Quadro 2).")
-                    with col_laudo:
-                        st.date_input("Data da medição", format="DD/MM/YYYY", key="medicao_data")
-                        st.text_input("Laudo (número ou elaborador)", key="medicao_laudo")
-                        st.text_input("Método (ex.: NHO-08)", key="medicao_metodo")
-                        st.text_input("Informado por", key="medicao_informante")
-                    st.button("Registrar medição", key="registrar_medicao", on_click=_registrar_medicao)
-                mensagem_medicao = st.session_state.pop("medicao_mensagem", None)
-                if mensagem_medicao is not None:
-                    tipo_msg, texto_msg = mensagem_medicao
-                    (st.success if tipo_msg == "success" else st.warning)(texto_msg)
-                for medicao_registrada in cache.medicoes:
-                    unidade_exibida = "mg/m³" if medicao_registrada.unidade == "mg/m3" else medicao_registrada.unidade
-                    detalhe_poeira = ""
-                    if medicao_registrada.fracao is not None:
-                        detalhe_poeira = f" ({medicao_registrada.fracao.value}"
-                        if medicao_registrada.pct_quartzo is not None:
-                            detalhe_poeira += f", {medicao_registrada.pct_quartzo:g}% quartzo"
-                        detalhe_poeira += ")"
-                    st.write(
-                        f"**{medicao_registrada.ghe_id}** · {medicao_registrada.agente}: "
-                        f"{medicao_registrada.valor:g} {unidade_exibida}{detalhe_poeira} — laudo "
-                        f"{medicao_registrada.procedencia.laudo}, "
-                        f"{medicao_registrada.procedencia.data:%d/%m/%Y}"
-                    )
-                    st.button(
-                        "Remover",
-                        key=f"remover_medicao_{medicao_registrada.ghe_id}_{medicao_registrada.agente}",
-                        on_click=_remover_medicao,
-                        args=(medicao_registrada.ghe_id, medicao_registrada.agente),
-                    )
+                            st.number_input("Valor medido", min_value=0.0, format="%.4f", key="medicao_valor")
+                            if agente_medicao == "silica":
+                                st.selectbox(
+                                    "Fração",
+                                    options=[Fracao.RESPIRAVEL.value, Fracao.TOTAL.value],
+                                    format_func=lambda f: "Respirável" if f == Fracao.RESPIRAVEL.value else "Total",
+                                    key="medicao_fracao",
+                                )
+                                st.number_input(
+                                    "% de quartzo (sílica livre cristalizada)",
+                                    min_value=0.0,
+                                    max_value=100.0,
+                                    format="%.2f",
+                                    key="medicao_quartzo",
+                                )
+                            elif agente_medicao == "poeira_nao_classificada":
+                                st.caption("Poeira não classificada: fração respirável (NR-07 Anexo III, Quadro 2).")
+                        with col_laudo:
+                            st.date_input("Data da medição", format="DD/MM/YYYY", key="medicao_data")
+                            st.text_input("Laudo (número ou elaborador)", key="medicao_laudo")
+                            st.text_input("Método (ex.: NHO-08)", key="medicao_metodo")
+                            st.text_input("Informado por", key="medicao_informante")
+                        st.button("Registrar medição", key="registrar_medicao", on_click=_registrar_medicao)
+                    mensagem_medicao = st.session_state.pop("medicao_mensagem", None)
+                    if mensagem_medicao is not None:
+                        tipo_msg, texto_msg = mensagem_medicao
+                        (st.success if tipo_msg == "success" else st.warning)(texto_msg)
+                    for medicao_registrada in cache_vinculo.medicoes:
+                        unidade_exibida = "mg/m³" if medicao_registrada.unidade == "mg/m3" else medicao_registrada.unidade
+                        detalhe_poeira = ""
+                        if medicao_registrada.fracao is not None:
+                            detalhe_poeira = " (" + ("respirável" if medicao_registrada.fracao is Fracao.RESPIRAVEL else "total")
+                            if medicao_registrada.pct_quartzo is not None:
+                                detalhe_poeira += f", {medicao_registrada.pct_quartzo:g}% quartzo"
+                            detalhe_poeira += ")"
+                        st.write(
+                            f"**{medicao_registrada.ghe_id}** · {medicao_registrada.agente}: "
+                            f"{medicao_registrada.valor:g} {unidade_exibida}{detalhe_poeira} — laudo "
+                            f"{medicao_registrada.procedencia.laudo}, "
+                            f"{medicao_registrada.procedencia.data:%d/%m/%Y}"
+                        )
+                        st.button(
+                            "Remover",
+                            key=f"remover_medicao_{medicao_registrada.ghe_id}_{medicao_registrada.agente}",
+                            on_click=_remover_medicao,
+                            args=(medicao_registrada.ghe_id, medicao_registrada.agente),
+                        )
+
+        renderizar_vinculos = _renderizar_vinculos
 
         if arquivo is None:
             st.session_state.pop("web_matriz_cache", None)
@@ -1115,6 +1123,8 @@ def pagina_matriz() -> None:
     finally:
         # Preenchido por último (inclusive após os returns antecipados) para
         # refletir o estado deste rerun, não o do anterior.
+        if renderizar_vinculos is not None:
+            renderizar_vinculos(st.session_state.get("web_matriz_cache"))
         if bloqueio is not None:
             pendente = f"bloqueada: {bloqueio}."
         elif arquivo is None:
