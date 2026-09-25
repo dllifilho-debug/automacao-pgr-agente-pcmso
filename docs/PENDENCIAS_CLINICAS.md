@@ -3477,3 +3477,18 @@ NBR 14725. Nenhuma mudança no app; a âncora de composição fica como está (D
 quando a FDS nova passar pela tela com a composição extraída — até lá, a pendência
 `composicao_ausente_fds` desse arquivo é esperada.
 
+### DT-(sessão `claude/hopeful-ramanujan-rbgh4s`)-01 — Asbesto sem LEO no resolver: medição de asbesto não decide a faixa de R-RX-01 `[ABERTA — sem caso real]`
+
+**Origem.** Fatia 2 de `D-ARQ-86` (25/09/2026). O texto ratificado previa sílica, PNOS e asbesto;
+o Diovanni decidiu implementar só sílica e PNOS.
+
+**Causa medida.** `leo_resolver._PRECEDENCIA` só tem sílica e PNOS; `_helper_silica_asbesto`
+(`predicados.py`) só calcula `pct_LT` com `pct_quartzo`, que o asbesto não tem. Medição de asbesto
+com valor cai no ramo (d) → `Ausente`. O LEO é o LT do Anexo 12 da NR-15, item 12: **2,0 f/cm³**
+para fibras respiráveis de crisotila (conferido no PDF `normas/nr-15-anexo-12 (3).pdf`).
+
+**Por que não agora.** Asbesto aparece em 0 dos 29 PGRs do acervo como agente de GHE (só em texto
+padrão sobre asbestose). Incluir exigiria registro no resolver, mudança na condição do helper de
+R-RX-01 e unidade f/cm³ na tela, sem nenhum caso para conferir.
+
+**Reabre quando** um PGR real trouxer asbesto como agente de exposição.

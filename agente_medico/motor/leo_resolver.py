@@ -207,3 +207,23 @@ def avaliar_medicao_quimica(
         pct_limite=q.valor / lt * 100.0,
         fonte_normativa=fonte,
     )
+
+
+def pct_leo_poeira(
+    agente: str, q: Quantificacao, cenario: CenarioExposicao | None
+) -> float | None:
+    """% do LEO de uma medição de sílica ou PNOS (D-ARQ-86 fatia 2), pela mesma
+    regra dos helpers de R-RX-01 em predicados.py: sílica exige fração e
+    %quartzo; PNOS assume respirável (D-ARQ-29). None quando falta dado."""
+    if q.apenas_qualitativa or q.valor is None:
+        return None
+    if agente == SILICA:
+        if q.fracao is None or q.pct_quartzo is None:
+            return None
+        fracao = q.fracao
+    elif agente == PNOS:
+        fracao = q.fracao if q.fracao is not None else Fracao.RESPIRAVEL
+    else:
+        return None
+    leo = resolve_leo(agente, fracao, classifica_cenario(cenario), q.pct_quartzo).leo
+    return None if leo is None else q.valor / leo * 100.0

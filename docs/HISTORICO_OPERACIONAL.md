@@ -10060,3 +10060,28 @@ cancerígeno (varredura: chave no estireno e chave faltando no fenol, 2/2 pegas)
 teve o texto-âncora ajustado. 2ª suíte completa (árvore parada): **1409 passed, 6 skipped, 0
 failed** (719.24s), +20 exato contra 1389. `mypy --strict` alvo canônico: limpo, **51 arquivos**
 (+1: `motor/medicoes.py`).
+
+## Sessão (branch `claude/hopeful-ramanujan-rbgh4s`, continuação pós-merge do PR #384) — 25/09/2026 — IMPLEMENTAÇÃO: fatia 2 de `D-ARQ-86` (medição de sílica e PNOS → RX OIT)
+
+**Origem.** Ordem do Diovanni: "pode começar a fatia 2 da D-ARQ-86". Branch recriada de
+`origin/main c62dc86`.
+
+**Medido antes de implementar.** O motor já decide as faixas de R-RX-01 por `pct_LT`; falta só o
+canal. O LEO-resolver não tem asbesto e o helper de R-RX-01 exige %quartzo; asbesto aparece em
+0/29 PGRs do acervo como agente de GHE. Reportado; **Diovanni decidiu: só sílica e PNOS**. Aberta
+`DT-(sessão claude/hopeful-ramanujan-rbgh4s)-01`. Fórmulas da sílica conferidas no PDF do Anexo 12
+em `normas/` (8/(%q+2) respirável, 24/(%q+3) total); asbesto 2,0 f/cm³ (item 12).
+
+**Implementado.** `MedicaoInformada.fracao`/`pct_quartzo`; `pct_leo_poeira` no resolver (usado na
+divergência PGR × laudo); painel com fração e %quartzo para sílica (quartzo obrigatório) e PNOS
+fixo em respirável; origem do RX na revisão com a medição e o laudo (`_AGENTE_DA_FAIXA`,
+`_descrever_quantificacao`). PROTOCOLO v104→v105 (nota em R-RX-01), DECISOES v221→v222 (nota em
+`D-ARQ-86`), `INDICE_DARQ.md` regenerado.
+
+**Medido.** 3 pares determinísticos, `origin/main` × árvore: saída idêntica, inclusive a origem na
+revisão (acrescentada ao dump nesta fatia).
+
+**Verificação.** 8 testes novos (`test_rx_medicao_poeira.py`); varredura inversa 9 reversões, 9/9
+pegas, 8/8 testes discriminantes (um teste de PNOS nomeava reversão vaga e foi reescrito para a
+origem da revisão antes da varredura). Suíte completa (árvore parada): **1417 passed, 6 skipped, 0
+failed** (722.25s), +8 exato contra 1409. `mypy --strict` alvo canônico limpo, 51 arquivos.

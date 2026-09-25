@@ -10,8 +10,15 @@ import dataclasses
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from agente_medico.motor.leo_resolver import avaliar_medicao_quimica
-from agente_medico.motor.tipos import PGR, MedicaoInformada, Pendencia, Quantificacao, RiscoPGR
+from agente_medico.motor.leo_resolver import avaliar_medicao_quimica, pct_leo_poeira
+from agente_medico.motor.tipos import (
+    PGR,
+    CenarioExposicao,
+    MedicaoInformada,
+    Pendencia,
+    Quantificacao,
+    RiscoPGR,
+)
 
 
 def _quantificacao(medicao: MedicaoInformada) -> Quantificacao:
@@ -21,13 +28,22 @@ def _quantificacao(medicao: MedicaoInformada) -> Quantificacao:
         relacao_LT=None,
         pct_LT=None,
         apenas_qualitativa=False,
+        pct_quartzo=medicao.pct_quartzo,
+        fracao=medicao.fracao,
         procedencia=medicao.procedencia,
     )
 
 
-def _pct(agente: str, q: Quantificacao, agentes_vocab: Mapping[str, Any]) -> float | None:
+def _pct(
+    agente: str,
+    q: Quantificacao,
+    agentes_vocab: Mapping[str, Any],
+    cenario: CenarioExposicao | None,
+) -> float | None:
     avaliacao = avaliar_medicao_quimica(agente, q, agentes_vocab)
-    return None if avaliacao is None else avaliacao.pct_limite
+    if avaliacao is not None:
+        return avaliacao.pct_limite
+    return pct_leo_poeira(agente, q, cenario)
 
 
 def _escolher(
@@ -35,6 +51,7 @@ def _escolher(
     informada: Quantificacao,
     ghe_id: str,
     agentes_vocab: Mapping[str, Any],
+    cenario: CenarioExposicao | None,
 ) -> tuple[Quantificacao, Pendencia | None]:
     """cl.4: valor do PGR e valor informado divergentes → pendência e fica o
     maior em % do LT (lado protetivo). Sem LT para comparar, fica o informado."""
@@ -44,8 +61,8 @@ def _escolher(
         return informada, None
     if (do_pgr.valor, do_pgr.unidade) == (informada.valor, informada.unidade):
         return informada, None
-    pct_pgr = _pct(risco.agente, do_pgr, agentes_vocab)
-    pct_informada = _pct(risco.agente, informada, agentes_vocab)
+    pct_pgr = _pct(risco.agente, do_pgr, agentes_vocab, cenario)
+    pct_informada = _pct(risco.agente, informada, agentes_vocab, cenario)
     escolhida = (
         do_pgr
         if pct_pgr is not None and (pct_informada is None or pct_pgr > pct_informada)
@@ -95,7 +112,9 @@ def aplicar_medicoes(
             if risco.agente != medicao.agente:
                 novos.append(risco)
                 continue
-            escolhida, pendencia = _escolher(risco, informada, medicao.ghe_id, agentes_vocab)
+            escolhida, pendencia = _escolher(
+                risco, informada, medicao.ghe_id, agentes_vocab, ghes[indice].cenario
+            )
             if pendencia is not None:
                 pendencias.append(pendencia)
             novos.append(dataclasses.replace(risco, quantificacao=escolhida))
