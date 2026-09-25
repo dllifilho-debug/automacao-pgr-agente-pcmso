@@ -11,9 +11,8 @@
 # ordem de exibição — por isso o campo é opcional: só os slugs medidos na
 # sequência majoritária de 17/19 GHEs do gabarito Fascino (08/07/26) o
 # carregam; os demais saem depois, em ordem alfabética de slug (fallback do
-# emissor, não deste arquivo). "Manganês no sangue" apareceu no gabarito mas
-# não tem slug no vocabulário (DT-003EI-01: pacote serralheiro/armador não
-# materializado) — não inventado aqui.
+# emissor, não deste arquivo). "Manganês no sangue" (manganes_sangue) entrou
+# com R-BIO-03 (25/09/2026), grafia do gabarito Aurora Lago das Rosas.
 
 exames:
   exame_clinico:
@@ -122,6 +121,11 @@ exames:
     nome_exibicao: "Metil-etil-cetona (MEK) na urina"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
+
+  manganes_sangue:
+    nome_exibicao: "Manganês no sangue"
+    categoria: laboratorial
+    fonte_matriz: "R-BIO-03 — manganês, fora do Anexo I da NR-07"
 
   carboxihemoglobina:
     nome_exibicao: "Carboxihemoglobina no sangue"
