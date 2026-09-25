@@ -1379,6 +1379,13 @@ batem com o gabarito (espirometria e RX tórax OIT).
 
 **Status:** ABERTA. Não-bloqueante. Resolve-se junto com DT-003EI-01 (materializar o pacote Mn — o slug de manganês é a peça que falta primeiro).
 
+**Nota (branch `claude/determined-fermi-xxah3h`, 25/09/2026) — 2º caso real, Aurora.** O PGR do
+Aurora Lago das Rosas traz `Químico Manganês — Fumos e gases de soldagem`, nível MODERADO, no GHE
+16 SERRALHERIA; o gabarito da Dra. Patrícia pede `Manganês no sangue (ADM, PER 6 meses, MRO)` aos
+3 cargos, e o app não emite nada. Aqui o agente resolve (`manganes`, CAS 7439-96-5) — a lacuna é
+só a de materialização descrita acima: `R-BIO-03` `[VALIDADO]` no PROTOCOLO, sem entrada em
+`regras.yaml`, sem slug de exame em `exames.yaml` `[VERIFICADO — grep, mesma data]`.
+
 ### DT-003EO-04 — `GHEPGR.cargos` chega como 1 string por GHE do parser da família Consciente; a expansão GHE→cargo de D-ARQ-73 não separa cargos reais `[FECHADA — 003.EP]`
 
 **Origem:** 003.EO, fatia 4 — medição contra o Fascino real (achado fora do previsto pela EMENDA 1); quantificado nas EMENDAs 3 e 4.
@@ -3395,4 +3402,28 @@ herda anexos; anexo de GHE que sumiu no reparse é avisado uma vez. FDS pode ir 
 (multiselect sem default — o clique não anexa sem escolha). Nota em D-ARQ-49 (DECISOES v217). O
 `[A MEDIR]` da perda de anexos ficou medido por teste: sem a reaplicação, trocar só a validade
 refaz o PGR hidratado sem o produto (`test_anexo_sobrevive_ao_reprocessamento_do_mesmo_pdf`).
+
+
+### DT-(sessão `claude/determined-fermi-xxah3h`)-02 — FDS fora do formato NBR 14725: composição não localizada (Eletrodo E-6013 Gerdau) `[ABERTA — decisão de dado]`
+
+**Origem.** Tela do app em produção (Aurora, 25/09/2026): `FISPQ Eletrodos E 6013 ( Gerdau) - (GHE
+14 - SERRALHERIA).pdf` → `composicao_ausente_fds`. Arquivo no acervo (`fds_originais/`).
+
+**Causa medida.** O documento é uma "Ficha de Segurança de Produto" da Gerdau, não uma FDS no
+formato NBR 14725: não tem a seção "3. Composição e informações sobre os ingredientes". A tabela
+de substâncias está em "2. SUBSTÂNCIAS PERIGOSAS" (CAS, OSHA PEL, % em peso, peso específico) e
+a seção seguinte é "3. PROPRIEDADES FÍSICO–QUÍMICAS". `_ANCORA_COMPOSICAO` ("COMPOSICAO E
+INFORMACOES SOBRE", derivada de n=6 FDS NBR 14725) não casa em nenhuma linha → `None` →
+pendência bloqueante. É o comportamento desenhado (D-ARQ-47: sem região, nunca o documento
+inteiro como fallback), não defeito.
+
+**O que a ficha traz.** Manganês 7439-96-5, dióxido de titânio 13463-67-7, ferro 7439-89-6,
+carbonato de cálcio 1317-65-3, zircônio 12166-47-1 — materiais formados na decomposição durante a
+soldagem. O manganês já está no PGR (GHE 16), então esta ficha não destrava a lacuna de
+`DT-003EO-03`.
+
+**Caminhos.** (a) Pedir ao fornecedor a FDS no formato NBR 14725 — nenhuma mudança no app;
+(b) âncora adicional "SUBSTANCIAS PERIGOSAS" restrita a título de seção numerado — n=1, documento
+fora da norma, e a tabela mistura % em peso com OSHA PEL (risco de o transcritor pegar a coluna
+errada). Recomendação: (a). Decisão do Diovanni.
 

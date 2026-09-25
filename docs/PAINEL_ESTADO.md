@@ -109,6 +109,12 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 25/09/2026, aviso de vínculo FDS↔GHE]`:** branch
+`claude/determined-fermi-xxah3h` sobre `main ec0575c` (merge do PR #374; IMPLEMENTAÇÃO de
+superfície) · **1381 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 821.48s — 1380 + 1)*
+· `mypy --strict` alvo canônico **limpo, 50 arquivos** · PROTOCOLO v100 e DECISOES v217
+inalterados. `medir_painel`: `regras 26/45`, `cas 78/109`, `índice sincronizado` — inalterados.
+
 **Baseline `[MEDIDO — 25/09/2026, anexos persistentes e multi-GHE]`:** branch
 `claude/determined-fermi-xxah3h` sobre `main 48ea7ec` (merge do PR #373; IMPLEMENTAÇÃO — fatia C,
 fecha `DT-(sessão claude/determined-fermi-xxah3h)-01`) · **1380 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 695.74s — 1374 + 6

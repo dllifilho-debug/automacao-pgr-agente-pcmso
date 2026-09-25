@@ -532,9 +532,9 @@ def pagina_matriz() -> None:
 
     st.subheader("FDS/FISPQ dos produtos químicos (opcional)")
     st.caption(
-        "Funciona com ou sem o PGR acima — extrai CAS e frases-H de cada FDS enviada. "
-        "Com um PGR já carregado, é possível escolher o GHE e o nome do produto "
-        "para anexar a composição extraída (D-ARQ-49 Parte 2 fatia 2b)."
+        "Extrai CAS e frases-H de cada FDS enviada, com ou sem PGR. Para vincular uma "
+        "FDS a GHEs: 1) envie o PGR e clique em Gerar matriz; 2) volte aqui — cada FDS "
+        "passa a mostrar a escolha de GHEs e o botão Anexar (D-ARQ-49 Parte 2 fatia 2b)."
     )
     arquivos_fds = st.file_uploader(
         "PDF(s) da FDS/FISPQ", type="pdf", accept_multiple_files=True, key="fds_avulsas"
@@ -564,6 +564,10 @@ def pagina_matriz() -> None:
         # descartada por medição real contra o PGR Fascino). Só aparece com
         # PGR já carregado (cache.pgr_hidratado not None) e composição extraída
         # (blocos_fds não-vazio) — sem PGR, comportamento idêntico ao de hoje.
+        # A lista de GHEs só existe depois do parse do PGR (Gerar matriz). Sem
+        # este aviso a FDS aparecia sem nenhuma forma de vínculo e sem dizer por quê.
+        if blocos_fds and (cache is None or cache.pgr_hidratado is None):
+            st.info("Gere a matriz para vincular esta FDS a um GHE.")
         if cache is not None and cache.pgr_hidratado is not None and blocos_fds:
             ghes_pgr = cache.pgr_hidratado.ghes
             rotulos_ghe = {ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in ghes_pgr}
