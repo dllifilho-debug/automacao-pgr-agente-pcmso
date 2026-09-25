@@ -62,6 +62,7 @@ __all__ = [
     "ProdutoAnexado",
     "TranscritorGemini",
     "anexar_produto_e_reprocessar",
+    "anexar_produto_em_ghes",
     "calcular_chave_cache",
     "deve_reprocessar",
     "executar_rota_determinista",
@@ -225,7 +226,10 @@ class CacheMatrizes:
     fatia 2b, campo aditivo, molde chamadas_ia) é o PGR hidratado por
     preparar_pgr_hidratado — também NÃO entra em calcular_chave_cache (é
     resultado do parse, não identidade dele); anexar_produto_e_reprocessar o
-    consome para plugar um ProdutoQuimico sem reprocessar PDF/LLM."""
+    consome para plugar um ProdutoQuimico sem reprocessar PDF/LLM.
+    `anexos_descartados` (GHE, produto): anexos do cache anterior que não
+    puderam ser reaplicados depois de um reparse do MESMO PDF porque o GHE não
+    existe mais — a casca avisa uma vez e limpa."""
 
     chave: str
     matrizes: tuple[MatrizGHE, ...] | None
@@ -235,6 +239,7 @@ class CacheMatrizes:
     pendencias_globais: tuple[Pendencia, ...]
     chamadas_ia: int
     pgr_hidratado: PGR | None
+    anexos_descartados: tuple[tuple[str, str], ...] = ()
 
 
 def calcular_chave_cache(conteudo_pdf: bytes, envelope: EnvelopeConfirmado) -> str:
@@ -265,9 +270,14 @@ def executar_rota_determinista_cacheada(
     incondicionalmente — mesmo no cache-hit, cabeçalho/rodapé ATUAIS valem,
     nunca os do momento em que o cache foi gravado. Devolve sempre o
     CacheMatrizes vigente (novo, no miss; o mesmo, no hit) para a casca
-    persistir em st.session_state."""
+    persistir em st.session_state.
+
+    No miss com o MESMO PDF (só o envelope mudou), os produtos anexados no
+    cache anterior são reaplicados ao PGR recém-hidratado — antes sumiam sem
+    aviso. PDF diferente é outro documento: nada é carregado."""
     chave_atual = calcular_chave_cache(conteudo_pdf, envelope)
     if cache is None or deve_reprocessar(chave_atual, cache.chave):
+        anteriores = _produtos_a_carregar(cache, chave_atual)
         pgr_hidratado, matrizes, exames_vocab, pendencias, status, pendencias_globais, chamadas_ia = (
             _rodar_parse_deterministico(caminho_pdf, envelope)
         )
@@ -281,11 +291,55 @@ def executar_rota_determinista_cacheada(
             chamadas_ia=chamadas_ia,
             pgr_hidratado=pgr_hidratado,
         )
+        if anteriores and cache.pgr_hidratado is not None and cache.status != "REJEITADO":
+            cache = _reaplicar_produtos(cache, _protocolo_padrao(), anteriores)
 
     if cache.matrizes is None:
         return None, None, cache.pendencias, cache
     doc, html = gerar_documento(cache.matrizes, cache.exames_vocab, cabecalho, rodape)
     return doc, html, cache.pendencias, cache
+
+
+def _mesmo_pdf(chave_a: str, chave_b: str) -> bool:
+    return chave_a.split(":", 1)[0] == chave_b.split(":", 1)[0]
+
+
+def _produtos_a_carregar(
+    cache: CacheMatrizes | None, chave_atual: str
+) -> tuple[tuple[str, ProdutoQuimico], ...]:
+    if cache is None or cache.pgr_hidratado is None or not _mesmo_pdf(cache.chave, chave_atual):
+        return ()
+    return tuple(
+        (ghe.id, produto) for ghe in cache.pgr_hidratado.ghes for produto in ghe.produtos_quimicos
+    )
+
+
+def _reaplicar_produtos(
+    cache: CacheMatrizes,
+    protocolo: Protocolo,
+    produtos: tuple[tuple[str, ProdutoQuimico], ...],
+) -> CacheMatrizes:
+    assert cache.pgr_hidratado is not None
+    ids = {ghe.id for ghe in cache.pgr_hidratado.ghes}
+    ghes_novos = tuple(
+        dataclasses.replace(
+            ghe,
+            produtos_quimicos=(
+                *ghe.produtos_quimicos,
+                *(produto for ghe_id, produto in produtos if ghe_id == ghe.id),
+            ),
+        )
+        for ghe in cache.pgr_hidratado.ghes
+    )
+    reprocessado = _reprocessar(
+        cache, protocolo, dataclasses.replace(cache.pgr_hidratado, ghes=ghes_novos)
+    )
+    return dataclasses.replace(
+        reprocessado,
+        anexos_descartados=tuple(
+            (ghe_id, produto.nome) for ghe_id, produto in produtos if ghe_id not in ids
+        ),
+    )
 
 
 def anexar_produto_e_reprocessar(
@@ -307,11 +361,25 @@ def anexar_produto_e_reprocessar(
     pgr_hidratado e os campos derivados de Resultado (matrizes/status/
     pendencias_globais) mudam. Precondição (responsabilidade da casca):
     cache.pgr_hidratado is not None."""
+    return anexar_produto_em_ghes(cache, protocolo, (ghe_id,), nome_produto, fds)
+
+
+def anexar_produto_em_ghes(
+    cache: CacheMatrizes,
+    protocolo: Protocolo,
+    ghe_ids: Sequence[str],
+    nome_produto: str,
+    fds: FDS,
+) -> CacheMatrizes:
+    """Mesmo contrato de anexar_produto_e_reprocessar para N GHEs de uma vez
+    (FDS "GHE 04 e 05"), com um único processar_pgr. Filtrar GHE que já tem o
+    produto é responsabilidade da casca (ghes_com_produto)."""
     assert cache.pgr_hidratado is not None
     produto = ProdutoQuimico(nome=nome_produto, fds=fds)
+    destinos = set(ghe_ids)
     ghes_novos = tuple(
         dataclasses.replace(ghe, produtos_quimicos=(*ghe.produtos_quimicos, produto))
-        if ghe.id == ghe_id
+        if ghe.id in destinos
         else ghe
         for ghe in cache.pgr_hidratado.ghes
     )
@@ -426,6 +494,7 @@ def preparar_composicao_cacheada(
 
 
 def pagina_matriz() -> None:
+    import dataclasses
     import tempfile
     from pathlib import Path
 
@@ -440,7 +509,7 @@ def pagina_matriz() -> None:
     from agente_medico.superficie.web_matriz import (
         TranscritorGemini,
         _protocolo_padrao,
-        anexar_produto_e_reprocessar,
+        anexar_produto_em_ghes,
         executar_rota_determinista_cacheada,
         ghes_com_produto,
         listar_produtos_anexados,
@@ -498,8 +567,10 @@ def pagina_matriz() -> None:
         if cache is not None and cache.pgr_hidratado is not None and blocos_fds:
             ghes_pgr = cache.pgr_hidratado.ghes
             rotulos_ghe = {ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in ghes_pgr}
-            ghe_escolhido = st.selectbox(
-                f"Anexar {arquivo_fds.name} a qual GHE?",
+            # Sem GHE pré-marcado: o selectbox anterior sempre tinha um valor, e
+            # o clique anexava em algum GHE mesmo sem escolha consciente.
+            ghes_escolhidos = st.multiselect(
+                f"Anexar {arquivo_fds.name} a quais GHEs?",
                 options=list(rotulos_ghe),
                 format_func=lambda gid: rotulos_ghe[gid],
                 key=f"ghe_destino_{arquivo_fds.name}",
@@ -509,19 +580,22 @@ def pagina_matriz() -> None:
                 value=Path(arquivo_fds.name).stem,
                 key=f"nome_produto_{arquivo_fds.name}",
             )
-            if st.button("Anexar ao GHE selecionado", key=f"anexar_fds_{arquivo_fds.name}"):
-                if ghe_escolhido in ghes_com_produto(cache.pgr_hidratado, nome_produto):
+            if st.button("Anexar aos GHEs selecionados", key=f"anexar_fds_{arquivo_fds.name}"):
+                ja_anexada = set(ghes_com_produto(cache.pgr_hidratado, nome_produto))
+                repetidos = [g for g in ghes_escolhidos if g in ja_anexada]
+                novos = [g for g in ghes_escolhidos if g not in ja_anexada]
+                if not ghes_escolhidos:
+                    st.warning("Escolha ao menos um GHE antes de anexar.")
+                if repetidos:
                     st.warning(
-                        f"'{nome_produto}' já está anexado ao GHE {ghe_escolhido} — nada foi alterado."
+                        f"'{nome_produto}' já está anexado a {', '.join(repetidos)} — mantido como está."
                     )
-                else:
-                    protocolo = _protocolo_padrao()
-                    fds_extraida = montar_fds(blocos_fds)
-                    cache = anexar_produto_e_reprocessar(
-                        cache, protocolo, ghe_escolhido, nome_produto, fds_extraida
+                if novos:
+                    cache = anexar_produto_em_ghes(
+                        cache, _protocolo_padrao(), novos, nome_produto, montar_fds(blocos_fds)
                     )
                     st.session_state["web_matriz_cache"] = cache
-                    st.success(f"Produto '{nome_produto}' anexado ao GHE {ghe_escolhido}.")
+                    st.success(f"Produto '{nome_produto}' anexado a {', '.join(novos)}.")
             # Lido DEPOIS do clique: no rerun do próprio "Anexar" o status já
             # reflete o anexo — antes, a única confirmação era o st.success,
             # que some na interação seguinte.
@@ -616,6 +690,13 @@ def pagina_matriz() -> None:
             doc, html, pendencias, cache = executar_rota_determinista_cacheada(
                 caminho_pdf, conteudo_pdf, envelope, cabecalho, rodape, cache
             )
+
+        if cache.anexos_descartados:
+            st.warning(
+                "PGR reprocessado: anexos não reaplicados porque o GHE não existe mais — "
+                + "; ".join(f"{nome} ({ghe_id})" for ghe_id, nome in cache.anexos_descartados)
+            )
+            cache = dataclasses.replace(cache, anexos_descartados=())
 
         # Elo A (003.EQ emenda 3): gate eliminatório (R-PGR-01/R-PGR-06) é
         # parada dura — Resultado(status="REJEITADO", matrizes=[]) tem

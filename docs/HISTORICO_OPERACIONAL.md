@@ -9767,3 +9767,30 @@ failed** (721.83s), +5 exato contra 1369. `mypy --strict` alvo canônico limpo, 
 
 **Próxima.** PR C (anexos que sobrevivem a reprocessamento + FDS em mais de um GHE), com nota de
 decisão em D-ARQ-49 antes do código, depois do merge deste.
+
+## Sessão (branch `claude/determined-fermi-xxah3h`, continuação pós-merge do PR #373) — 25/09/2026 — IMPLEMENTAÇÃO: anexos persistentes e multi-GHE (fatia C, fecha `DT-(sessão claude/determined-fermi-xxah3h)-01`)
+
+**Origem.** PR C do plano acordado; Diovanni liberou sem revisão prévia da nota. Branch recriada de
+`origin/main 48ea7ec`.
+
+**Implementado (só `superficie/web_matriz.py`).** No miss de `executar_rota_determinista_cacheada`,
+produtos do cache anterior são reaplicados se o digest do PDF é o mesmo (`_mesmo_pdf`,
+`_produtos_a_carregar`, `_reaplicar_produtos`); GHE ausente no reparse vai para o campo aditivo
+`CacheMatrizes.anexos_descartados`, avisado uma vez pela casca. `anexar_produto_em_ghes` (N GHEs,
+um `processar_pgr`); `anexar_produto_e_reprocessar` passa a delegar a ela. Casca: `st.multiselect`
+sem default no lugar do `st.selectbox`, avisos para "nenhum GHE" e "já anexado". Nota de aplicação
+em D-ARQ-49 (DECISOES v217), índice regenerado.
+
+**Testes existentes adaptados.** 5 testes de tela clicavam "Anexar" confiando no valor sempre
+presente do selectbox; passam a marcar o GHE antes. Nenhuma asserção de resultado mudou. Em
+`test_pagina_matriz_anexar_fds_nao_retranscreve_e_sobrevive_a_429` o GHE do PGR sintético é GHE-18
+— o selectbox o escolhia sozinho.
+
+**Verificação.** 6 testes novos; varredura inversa em cópia isolada, 6 reversões. A 1ª rodada deu
+5/6: o teste de "sem escolha de GHE" zerava a seleção na mão, e a reversão "default = 1º GHE" não o
+derrubava — reescrito para clicar sem tocar no multiselect; 6/6 depois. Suíte completa (árvore
+parada): **1380 passed, 6 skipped, 0 failed** (695.74s), +6 exato contra 1374. `mypy --strict`
+alvo canônico limpo, 50 arquivos. `medir_painel` inalterado.
+
+**Próxima.** A declarar. Pendentes de decisão clínica: BAIXO em R-BIO-05 (acetona do Aurora),
+manganês (GHE 16) e cobalto (GHE 18) sem emissão no Aurora.
