@@ -3359,7 +3359,7 @@ gratuito (20 RPD por modelo Flash, painel do AI Studio em 24/09/2026) não compo
 de PGR + FDS — decisão de faturamento é do Diovanni.
 
 
-### DT-(sessão `claude/determined-fermi-xxah3h`)-01 — Produtos de FDS anexados não aparecem na tela da matriz `[ABERTA — fatias A e B implementadas, 25/09/2026]`
+### DT-(sessão `claude/determined-fermi-xxah3h`)-01 — Produtos de FDS anexados não aparecem na tela da matriz `[RESOLVIDA — IMPLEMENTAÇÃO, fatias A, B e C, 25/09/2026]`
 
 **Origem.** Diovanni, depois de rodar o Aurora Lago das Rosas com 16 FDS: "não consegui enxergar
 elas". Medido na tela exportada: a confirmação "Produto X anexado ao GHE Y" só aparece no rerun do
@@ -3388,4 +3388,11 @@ com todas as fontes do agente (PGR com nível, FDS com produto, cargo) — decis
 três caminhos; regra composta mostra o predicado. Mesma seção lista o enquadramento de cada agente
 no Decreto 3.048/1999, Anexo IV (`enquadramento_3048`, D-ARQ-12), com "sem enquadramento
 conferido" distinto de "não consta (conferido)". Resta a fatia C.
+
+**Fatia C (implementada, mesma branch, pós-merge do PR #373) — DT resolvida.** Produtos anexados
+são reaplicados quando o mesmo PDF é reprocessado (troca de validade/assinatura); PDF diferente não
+herda anexos; anexo de GHE que sumiu no reparse é avisado uma vez. FDS pode ir para vários GHEs
+(multiselect sem default — o clique não anexa sem escolha). Nota em D-ARQ-49 (DECISOES v217). O
+`[A MEDIR]` da perda de anexos ficou medido por teste: sem a reaplicação, trocar só a validade
+refaz o PGR hidratado sem o produto (`test_anexo_sobrevive_ao_reprocessamento_do_mesmo_pdf`).
 

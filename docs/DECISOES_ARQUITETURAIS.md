@@ -853,6 +853,28 @@ Regressão Viverde tri-estado (a entrega que fecha o arco; o auditor é a rede e
 
 `[META — decisão de processo. Não toca motor nem protocolo clínico.]`
 
+
+**Nota de aplicação (branch `claude/determined-fermi-xxah3h`, 25/09/2026) — anexos sobrevivem a
+reprocessamento; FDS em mais de um GHE (fatia C de `DT-(sessão claude/determined-fermi-xxah3h)-01`).**
+Três mudanças no contrato da fatia 2b, sem cláusula alterada:
+1. **Reaplicação no reparse do mesmo PDF.** A chave de `CacheMatrizes` inclui o envelope; trocar
+   validade/assinatura refazia `preparar_pgr_hidratado` e o PGR hidratado nascia sem os produtos, sem
+   aviso. Agora, no miss de `executar_rota_determinista_cacheada`, se o digest do PDF é o mesmo da
+   chave anterior (`_mesmo_pdf`), os produtos do cache anterior são reaplicados por `ghe_id`
+   (`_reaplicar_produtos`, um `processar_pgr`). **PDF diferente não herda nada** — é outro
+   documento. Fonte única de verdade continua `pgr_hidratado.ghes[].produtos_quimicos`; nenhum
+   registro paralelo de anexos.
+2. **Anexo descartado é dito.** GHE que não existe mais no reparse (IDs podem mudar na rota LLM)
+   vai para o campo aditivo `CacheMatrizes.anexos_descartados: tuple[(ghe_id, produto)]`; a casca
+   avisa uma vez e limpa. Mantém a postura D-ARQ-22: nada some sem sinal.
+3. **Multi-GHE sem default.** `st.selectbox` (sempre com valor — o clique anexava em algum GHE
+   mesmo sem escolha) vira `st.multiselect` vazio; `anexar_produto_em_ghes` anexa a N GHEs num
+   único `processar_pgr` (FDS "GHE 04 e 05"). GHE que já tem o produto é recusado com aviso. O
+   casamento continua **manual** (v199/v200) — nenhuma sugestão por nome de arquivo: no Aurora o
+   arquivo diz "GHE 08 Hidro-sanitárias" e o PGR numera esse GHE como 11.
+Custo declarado: reparse do mesmo PDF pela rota LLM re-transcreve (comportamento anterior,
+inalterado). Nenhuma `R-*` criada ou alterada; motor intocado (só `superficie/web_matriz.py`).
+
 ---
 
 ## D-ARQ-33 — Lado-engenheiro é motor irmão de resolução de composição química; conduta permanece no lado-médico
@@ -4363,3 +4385,4 @@ Sessão 003.FD (22/08/2026). `[META — decisão de processo. Não toca motor ne
 | v214 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — `DT-003EB-02`, decisões do Diovanni de 23/09 e 24/09/2026 — dispensa só em IRRELEVANTE): **Nota de aplicação em `D-ARQ-59`** (exceção por nível como chave de dado nas 42 `R-BIO-04-*` do Quadro 1) e **nota em `D-ARQ-73`** (observação de menção documental na célula do cargo). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v96→**v97** (`R-BIO-05`). Índice D-ARQ regenerado. |
 | v215 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — rota LLM extrai o nível P×S): **Nota de aplicação em `D-ARQ-49`** (campo `avaliacao_qualitativa` preenchido pela rota LLM na escala P×S; guarda determinística em `transcrever_ghes`; coluna de nível sai do ruído da C3 de `D-ARQ-50`). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v98→**v99**. Índice D-ARQ regenerado. |
 | v216 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — revisão na tela): **Nota de aplicação em `D-ARQ-22` Parte B** (`Motivo.risco_origem` preenchido só em regra de agente direto; caso geral segue fora, DH-003ED-01) e **em `D-ARQ-12`** (`enquadramento_3048` ganha o primeiro consumidor, só na revisão da tela). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v99→**v100**. Índice D-ARQ regenerado. |
+| v217 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — tela da matriz): **Nota de aplicação em `D-ARQ-49`** (fatia C de `DT-(sessão claude/determined-fermi-xxah3h)-01`) — produtos anexados reaplicados no reparse do mesmo PDF, campo aditivo `CacheMatrizes.anexos_descartados`, multi-GHE sem default. Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO inalterado (v100). Índice D-ARQ regenerado. |

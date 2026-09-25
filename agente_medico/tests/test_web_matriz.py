@@ -34,6 +34,7 @@ from agente_medico.superficie.web_matriz import (
     CacheMatrizes,
     _TranscritorContado,
     anexar_produto_e_reprocessar,
+    anexar_produto_em_ghes,
     deve_reprocessar,
     executar_rota_determinista,
     executar_rota_determinista_cacheada,
@@ -778,6 +779,7 @@ def test_pagina_matriz_fds_anexada_persiste_entre_reruns_sem_chamada_ia(
     at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
     assert not at.exception
 
+    at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
     at.button(key="anexar_fds_fds.pdf").click().run()
     assert not at.exception
 
@@ -890,6 +892,7 @@ def test_pagina_matriz_anexar_fds_nao_retranscreve_e_sobrevive_a_429(
     assert not at.exception
     assert chamadas == ["f0.pdf", "f1.pdf"]
 
+    at.multiselect(key="ghe_destino_f0.pdf").set_value(["GHE-18"]).run()
     at.button(key="anexar_fds_f0.pdf").click().run()
     assert not at.exception
 
@@ -981,9 +984,10 @@ def test_remover_produto_e_reprocessar_tira_so_do_ghe_escolhido_e_refaz_a_matriz
     assert "tolueno" in _matriz_do_ghe(cache, "GHE-02").riscos_resolvidos
 
 
-def _pagina_com_fds_enviada(monkeypatch: pytest.MonkeyPatch) -> AppTest:
+def _pagina_com_fds_enviada(monkeypatch: pytest.MonkeyPatch, escolher_ghe: bool = True) -> AppTest:
     """PGR sintético de 1 GHE processado de verdade (processar_pgr sem mock) e
-    uma FDS de tolueno enviada, ainda não anexada."""
+    uma FDS de tolueno enviada, ainda não anexada; com `escolher_ghe`, GHE-01
+    já marcado no multiselect."""
     pgr_sintetico = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)))
 
     def _preparar_falso(*args: Any, **kwargs: Any) -> tuple[PGR, tuple[Pendencia, ...]]:
@@ -1002,6 +1006,8 @@ def _pagina_com_fds_enviada(monkeypatch: pytest.MonkeyPatch) -> AppTest:
     at.run()
     _submeter_formulario(at)
     at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+    if escolher_ghe:
+        at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
     assert not at.exception
     return at
 
@@ -1036,7 +1042,7 @@ def test_segundo_clique_em_anexar_nao_duplica_o_produto(monkeypatch: pytest.Monk
 
     cache = at.session_state["web_matriz_cache"]
     assert len(cache.pgr_hidratado.ghes[0].produtos_quimicos) == 1
-    assert any("já está anexado ao GHE GHE-01" in w.value for w in at.warning)
+    assert any("já está anexado a GHE-01" in w.value for w in at.warning)
 
 
 def test_painel_lista_o_produto_anexado_e_remove_pelo_botao(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1058,4 +1064,150 @@ def test_painel_lista_o_produto_anexado_e_remove_pelo_botao(monkeypatch: pytest.
     assert "tolueno" not in cache.matrizes[0].riscos_resolvidos
     assert "Nenhum produto anexado." in _captions(at)
     assert "Status: ainda não anexada a nenhum GHE." in _captions(at)
+
+
+# ---------------------------------------------------------------------------
+# Anexos que sobrevivem a reprocessamento e FDS em mais de um GHE (fatia C de
+# DT-(sessão claude/determined-fermi-xxah3h)-01, nota em D-ARQ-49). Antes, a
+# chave do cache incluía o envelope: trocar validade/assinatura refazia o PGR
+# hidratado sem os produtos, sem aviso.
+# ---------------------------------------------------------------------------
+
+
+def _parse_em_sequencia(monkeypatch: pytest.MonkeyPatch, *pgrs: PGR) -> None:
+    """preparar_pgr_hidratado devolve um PGR por chamada, na ordem dada;
+    processar_pgr roda de verdade (a Fase C precisa promover o componente)."""
+    fila = list(pgrs)
+
+    def _preparar_falso(*args: Any, **kwargs: Any) -> tuple[PGR, tuple[Pendencia, ...]]:
+        return fila.pop(0), ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_falso)
+
+
+def _envelope(validade: date) -> EnvelopeConfirmado:
+    return EnvelopeConfirmado(validade=validade, assinatura_engenheiro=True)
+
+
+def _rodar(conteudo: bytes, validade: date, cache: CacheMatrizes | None) -> CacheMatrizes:
+    _doc, _html, _pend, novo = executar_rota_determinista_cacheada(
+        Path("pgr.pdf"), conteudo, _envelope(validade), _cabecalho(), _rodape(), cache
+    )
+    return novo
+
+
+def _com_tolueno_no_ghe_01(cache: CacheMatrizes) -> CacheMatrizes:
+    return anexar_produto_e_reprocessar(
+        cache, carregar(_PROTOCOLO_DIR), "GHE-01", "Tinta", montar_fds((_FDS_TOLUENO,))
+    )
+
+
+def test_anexo_sobrevive_ao_reprocessamento_do_mesmo_pdf(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: tirar a chamada a _reaplicar_produtos do miss de
+    # executar_rota_determinista_cacheada — trocar só a validade refaz o PGR
+    # hidratado sem o produto, como antes.
+    ghe = _ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",))
+    _parse_em_sequencia(monkeypatch, _pgr_sintetico(ghe), _pgr_sintetico(ghe))
+    cache = _com_tolueno_no_ghe_01(_rodar(b"mesmo pdf", date(2026, 12, 31), None))
+
+    cache = _rodar(b"mesmo pdf", date(2027, 6, 30), cache)
+
+    assert cache.pgr_hidratado is not None
+    assert [p.nome for p in cache.pgr_hidratado.ghes[0].produtos_quimicos] == ["Tinta"]
+    assert cache.matrizes is not None
+    assert "tolueno" in cache.matrizes[0].riscos_resolvidos
+    assert cache.anexos_descartados == ()
+
+
+def test_pdf_diferente_nao_herda_anexos(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: tirar a checagem _mesmo_pdf de _produtos_a_carregar —
+    # a FDS de uma obra passaria para o PGR de outra.
+    ghe = _ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",))
+    _parse_em_sequencia(monkeypatch, _pgr_sintetico(ghe), _pgr_sintetico(ghe))
+    cache = _com_tolueno_no_ghe_01(_rodar(b"pgr da obra A", date(2026, 12, 31), None))
+
+    cache = _rodar(b"pgr da obra B", date(2026, 12, 31), cache)
+
+    assert cache.pgr_hidratado is not None
+    assert cache.pgr_hidratado.ghes[0].produtos_quimicos == ()
+
+
+def test_anexo_de_ghe_que_sumiu_no_reparse_vira_descartado(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: _reaplicar_produtos não preencher anexos_descartados —
+    # o produto do GHE-01 sumiria sem aviso quando o reparse (rota LLM) devolve
+    # outros IDs de GHE.
+    _parse_em_sequencia(
+        monkeypatch,
+        _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",))),
+        _pgr_sintetico(_ghe_pgr(ghe_id="GHE-18", nome="Pintura", cargos=("Pintor",))),
+    )
+    cache = _com_tolueno_no_ghe_01(_rodar(b"mesmo pdf", date(2026, 12, 31), None))
+
+    cache = _rodar(b"mesmo pdf", date(2027, 6, 30), cache)
+
+    assert cache.anexos_descartados == (("GHE-01", "Tinta"),)
+
+
+def test_anexar_produto_em_ghes_anexa_em_todos_os_escolhidos() -> None:
+    # Reversão que mata: trocar `ghe.id in destinos` por comparação com o 1º
+    # GHE da lista — a FDS "GHE 04 e 05" só chegaria ao 04.
+    protocolo = carregar(_PROTOCOLO_DIR)
+    cache = _cache_com(
+        _pgr_sintetico(
+            _ghe_pgr(ghe_id="GHE-04", nome="Carpintaria", cargos=("Carpinteiro",)),
+            _ghe_pgr(ghe_id="GHE-05", nome="Produção", cargos=("Pedreiro",)),
+            _ghe_pgr(ghe_id="GHE-06", nome="SESMT", cargos=("Técnico",)),
+        )
+    )
+
+    cache = anexar_produto_em_ghes(
+        cache, protocolo, ("GHE-04", "GHE-05"), "Desmol", montar_fds((_FDS_TOLUENO,))
+    )
+
+    assert cache.pgr_hidratado is not None
+    assert [len(g.produtos_quimicos) for g in cache.pgr_hidratado.ghes] == [1, 1, 0]
+    assert "tolueno" in _matriz_do_ghe(cache, "GHE-05").riscos_resolvidos
+
+
+def test_anexar_sem_escolher_ghe_nao_anexa_em_lugar_nenhum(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: dar ao multiselect um default (ex. o 1º GHE, como o
+    # selectbox antigo) — o clique anexaria sem escolha consciente do RT.
+    at = _pagina_com_fds_enviada(monkeypatch, escolher_ghe=False)
+
+    at.button(key="anexar_fds_fds.pdf").click().run()
+    assert not at.exception
+
+    assert at.session_state["web_matriz_cache"].pgr_hidratado.ghes[0].produtos_quimicos == ()
+    assert any("Escolha ao menos um GHE" in w.value for w in at.warning)
+
+
+def test_aviso_de_anexo_descartado_aparece_uma_vez(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: a casca não limpar anexos_descartados depois de avisar
+    # — o aviso reapareceria em todo rerun seguinte.
+    _parse_em_sequencia(
+        monkeypatch,
+        _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",))),
+        _pgr_sintetico(_ghe_pgr(ghe_id="GHE-18", nome="Pintura", cargos=("Pintor",))),
+    )
+
+    def _preparar_composicao_falso(
+        *args: Any, **kwargs: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        return (_FDS_TOLUENO,), ()
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_composicao", _preparar_composicao_falso
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+    at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
+    at.button(key="anexar_fds_fds.pdf").click().run()
+
+    at.text_input[len(at.text_input) - 1].set_value("2027-06-30").run()
+    assert any("fds (GHE-01)" in w.value for w in at.warning)
+
+    at.run()
+    assert not any("fds (GHE-01)" in w.value for w in at.warning)
 
