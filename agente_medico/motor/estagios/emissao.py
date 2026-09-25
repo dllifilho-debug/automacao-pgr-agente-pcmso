@@ -19,6 +19,7 @@ from agente_medico.motor.tipos import (
     Motivo,
     Observacao,
     Pendencia,
+    Risco,
 )
 
 _MOMENTOS: dict[str, Momento] = {m.name: m for m in Momento}
@@ -31,6 +32,29 @@ def _converter_momento(raw: str, regra_id: str, exame: str) -> Momento:
             f"Momento inválido '{raw}' na regra '{regra_id}', exame '{exame}'"
         )
     return _MOMENTOS[key]
+
+
+def _descrever_fonte(risco: Risco) -> str:
+    if risco.fonte == "explicito":
+        descricao = "PGR" if risco.nivel_risco is None else f"PGR (nível {risco.nivel_risco})"
+        return descricao if risco.detalhe is None else f"{descricao}; {risco.detalhe}"
+    if risco.fonte == "quimico_composicao":
+        return f"FDS — {risco.detalhe}"
+    return risco.detalhe or risco.fonte
+
+
+def _risco_origem(regra: dict[str, Any], ctx: GHEContext) -> str | None:
+    """D-ARQ-22 Parte B, faceta `risco_origem` (DH-003ED-01), recorte atômico:
+    só a regra cujo `quando` é o próprio slug do agente (R-BIO-04-*) sabe de
+    qual risco veio sem rastrear o átomo dentro de `predicados.avaliar`.
+    Composto ou primitivo que não é agente do GHE → None, como antes."""
+    quando = regra["quando"]
+    if not isinstance(quando, str):
+        return None
+    fontes = list(dict.fromkeys(_descrever_fonte(r) for r in ctx.riscos if r.agente == quando))
+    if not fontes:
+        return None
+    return f"{quando} ← " + " | ".join(fontes)
 
 
 def _emitir_regra(
@@ -56,7 +80,7 @@ def _emitir_regra(
     motivo = Motivo(
         regra_id=str(regra["id"]),
         predicado=predicado_str,
-        risco_origem=None,
+        risco_origem=_risco_origem(regra, ctx),
         detalhe=f"Emitido por regra {regra['id']}",
         status_regra=regra.get("status"),
     )

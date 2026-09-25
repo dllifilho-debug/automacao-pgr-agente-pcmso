@@ -436,6 +436,7 @@ def pagina_matriz() -> None:
         RodapeDocumento,
         renderizar_docx,
     )
+    from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.web_matriz import (
         TranscritorGemini,
         _protocolo_padrao,
@@ -686,6 +687,20 @@ def pagina_matriz() -> None:
         st.subheader(f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip())
         for linha in bloco.linhas:
             st.write(f"**{linha.cargo}**: {', '.join(linha.celulas)}")
+
+    if cache.matrizes:
+        st.subheader("Revisão — origem dos exames (não entra no documento)")
+        revisoes = montar_revisao(
+            cache.matrizes, cache.exames_vocab, _protocolo_padrao().vocabulario.agentes
+        )
+        for revisao in revisoes:
+            with st.expander(f"GHE {revisao.ghe_id} {revisao.nome_ghe}".strip()):
+                # Tabela em markdown, não st.table: st.table importa pandas no
+                # primeiro render da sessão (medido: +9 s a frio no container).
+                st.markdown(tabela_markdown(revisao))
+                st.caption("Decreto 3.048/1999, Anexo IV — referência previdenciária, não exame.")
+                for enq in revisao.enquadramentos:
+                    st.write(f"- {enq.agente}: {enq.enquadramento}")
 
     st.download_button("Baixar HTML", html, file_name="matriz.html", mime="text/html")
     if docx_bytes is not None:
