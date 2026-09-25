@@ -109,6 +109,12 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 25/09/2026, D-ARQ-86 fatia 2]`:** branch `claude/hopeful-ramanujan-rbgh4s`
+sobre `main c62dc86` (merge do PR #384; IMPLEMENTAÇÃO — medição de sílica e PNOS decide o RX OIT)
+· **1417 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 722.25s — 1409 + 8)* · `mypy
+--strict` alvo canônico **limpo, 51 arquivos** · PROTOCOLO v104→**v105** · DECISOES v221→**v222**.
+`medir_painel`: `regras 28/45`, `cas 78/109`, `índice sincronizado` — inalterados.
+
 **Baseline `[MEDIDO — 25/09/2026, D-ARQ-86 fatia 1]`:** branch `claude/hopeful-ramanujan-rbgh4s`
 sobre `main 686a6bc` (merge do PR #383; IMPLEMENTAÇÃO — R-BIO-05 em BAIXO com medição abaixo do
 nível de ação) · **1409 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 719.24s — 1389 + 20)*

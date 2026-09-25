@@ -36,27 +36,55 @@ def _converter_momento(raw: str, regra_id: str, exame: str) -> Momento:
     return _MOMENTOS[key]
 
 
+def _descrever_quantificacao(risco: Risco) -> str:
+    """D-ARQ-86 cl.3: a medição que decide o exame aparece na revisão com o laudo."""
+    q = risco.quantificacao
+    if q is None or q.valor is None or q.apenas_qualitativa:
+        return ""
+    unidade = "mg/m³" if q.unidade == "mg/m3" else (q.unidade or "")
+    texto = f"; medição {_numero(q.valor)} {unidade}".rstrip()
+    if q.procedencia is not None:
+        texto += f" (laudo {q.procedencia.laudo}, {q.procedencia.data:%d/%m/%Y})"
+    return texto
+
+
 def _descrever_fonte(risco: Risco) -> str:
     if risco.fonte == "explicito":
         descricao = "PGR" if risco.nivel_risco is None else f"PGR (nível {risco.nivel_risco})"
+        descricao += _descrever_quantificacao(risco)
         return descricao if risco.detalhe is None else f"{descricao}; {risco.detalhe}"
     if risco.fonte == "quimico_composicao":
         return f"FDS — {risco.detalhe}"
     return risco.detalhe or risco.fonte
 
 
+# Faixas de R-RX-01 decididas por medição (D-ARQ-86 fatia 2): o primitivo lê um
+# agente só, então a origem é rastreável sem abrir predicados.avaliar.
+_AGENTE_DA_FAIXA: dict[str, str] = {
+    "silica_asbesto_leo_ate_10": "silica",
+    "silica_asbesto_leo_10_50": "silica",
+    "silica_asbesto_leo_50_100": "silica",
+    "silica_asbesto_leo_acima_100": "silica",
+    "pnos_leo_ate_10": "poeira_nao_classificada",
+    "pnos_leo_10_100": "poeira_nao_classificada",
+    "pnos_leo_acima_100": "poeira_nao_classificada",
+}
+
+
 def _risco_origem(regra: dict[str, Any], ctx: GHEContext) -> str | None:
     """D-ARQ-22 Parte B, faceta `risco_origem` (DH-003ED-01), recorte atômico:
-    só a regra cujo `quando` é o próprio slug do agente (R-BIO-04-*) sabe de
-    qual risco veio sem rastrear o átomo dentro de `predicados.avaliar`.
-    Composto ou primitivo que não é agente do GHE → None, como antes."""
+    só a regra cujo `quando` é o próprio slug do agente (R-BIO-04-*), ou uma
+    faixa de R-RX-01 por medição, sabe de qual risco veio sem rastrear o átomo
+    dentro de `predicados.avaliar`. Composto ou primitivo que não é agente do
+    GHE → None, como antes."""
     quando = regra["quando"]
     if not isinstance(quando, str):
         return None
-    fontes = list(dict.fromkeys(_descrever_fonte(r) for r in ctx.riscos if r.agente == quando))
+    agente = _AGENTE_DA_FAIXA.get(quando, quando)
+    fontes = list(dict.fromkeys(_descrever_fonte(r) for r in ctx.riscos if r.agente == agente))
     if not fontes:
         return None
-    return f"{quando} ← " + " | ".join(fontes)
+    return f"{agente} ← " + " | ".join(fontes)
 
 
 def _emitir_regra(

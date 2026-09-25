@@ -342,6 +342,10 @@ class MedicaoInformada:
     valor: float
     unidade: str
     procedencia: ProcedenciaMedicao
+    # Poeira (fatia 2): fração decide a fórmula do LT; %quartzo é o denominador
+    # do Anexo 12 da NR-15 para sílica. Químicos deixam os dois em None.
+    fracao: Optional[Fracao] = None
+    pct_quartzo: Optional[float] = None
 
 
 @dataclass
