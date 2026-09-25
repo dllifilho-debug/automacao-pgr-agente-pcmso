@@ -9914,3 +9914,50 @@ mantém 12M; célula do documento); varredura inversa 3 reversões, 3/3. 3 pares
 saída idêntica à `main`. Suíte completa (árvore parada): **1389 passed, 6 skipped, 0 failed**
 (796.39s), +3 exato. `mypy --strict` alvo canônico limpo, 50 arquivos. `medir_painel`: `regras
 27/45 → 28/45`.
+
+## Sessão (branch `claude/hopeful-ramanujan-rbgh4s`) — 25/09/2026 — MEDIÇÃO: matriz_10 do Aurora × gabarito (pós R-BIO-03/R-CLI-03)
+
+**Origem.** Diovanni rodou o Aurora Lago das Rosas no app pós-deploy dos PRs #376–#378 e anexou
+`matriz_10_aurora_app.docx` (sha256 `21362cb8…67f0`) e duas telas em PDF: sem vínculo FDS↔GHE
+(57 p., `e33d0819…67f0`) e com vínculo (66 p., `68a2c226…c8d0`). Sequência que funcionou no app:
+PGR → gerar matriz → anexar FDS → esperar subir → vincular GHE. O `.docx` corresponde à tela com
+vínculo (aguarrás e Fundo Zarcão anexados a GHE-18; adesivos CPVC Aquatherm e PVC azul a GHE-11;
+Desmol CD e Desmold Sika a GHE-04). Sessão só de docs.
+
+**Método.** Script descartável no scratchpad: gabarito PDF por `pdfplumber.extract_tables`, app por
+`python-docx`, pareamento por (nº do GHE, cargo); células passam por `segmentar_exames` +
+`extrair_forma_periodicidade` + `resolver_slug` do instrumento versionado. Alias manual de grafia
+(Metiletilcetona, Tetrahidrofurano, t,t-mucônico, "Carbxihemoglobina") e de cargo ("Sevente",
+"Meânico", "Aux. Adm de obras" — grafias do próprio PGR). Método diferente do da matriz_9: a
+contagem da base (6/32/28) **não é comparável 1:1**.
+
+**Medido.** 59 cargos de cada lado; 2 sem par (gabarito: Encarregado de Encanador no GHE 07, fora
+da lista "Função / Cargo" do PGR; app: Mestre de Obras no GHE 15, presente na lista do PGR).
+Exame a mais **6**, periodicidade/momento divergente **31** (28 reais — 3 são artefato do
+comparador: "Metil-etil-cetona (MEK) na urina" tem parêntese interno), exame faltando **20**,
+células iguais **530**.
+
+- **Esperado, confirmado.** GHE 16: Manganês no sangue (ADM, PER 6 meses, MRO) e Exame Clínico
+  (ADM, PER 6 meses, MRO, RET, DEM) nos 3 cargos, iguais ao gabarito. GHE 18 (aguarrás anexada):
+  t,t-mucônico (PER 6 meses), Reticulócitos (ADM, PER 6 meses, MRO, DEM) e Hemograma (ADM, PER 6
+  meses, MRO, DEM) nos 3 cargos.
+- **A mais (6), todos BAIXO no PGR — decisão R-BIO-05 em BAIXO pendente.** Acetona na urina no GHE
+  11 (acetona do adesivo PVC azul anexado); ácido metil-hipúrico no GHE 18 (xileno do Fundo Zarcão).
+- **Divergentes reais (28).** Clínico 6M no gabarito × 12M no app: GHEs 11, 18, 21, 22 (12
+  células — gatilho da R-CLI-02 pendente). Acuidade Visual com DEM no gabarito: GHEs 16, 18, 20, 21,
+  22 (13 células). Hemograma 6M no GHE 22 (3).
+- **Faltando (20).** Cobalto na urina GHE 18 (3 — cobalto fora do vocabulário, pendente);
+  Carboxihemoglobina GHE 16 (3) e GHE 22 (3); t,t-mucônico e Reticulócitos no GHE 22 (6);
+  Ac. tricloroacético GHE 21 (3 — PGR do GHE 21 sem solvente clorado); RX coluna lombo-sacra GHE
+  12 (1); Acuidade Visual GHE 19 (1).
+
+**Achado de passagem (não implementado).** GHE 22 IMPERMEABILIZAÇÃO: PGR traz Asfalto e Cimento
+Asfáltico em BAIXO, sem FDS anexada; a Dra. Patrícia aplica o regime do benzeno (t,t-mucônico,
+reticulócitos, hemograma 6M, COHb, clínico 6M) — 12 das 48 divergências vêm desse GHE. Eletrodo
+E-6013 segue `composicao_ausente_fds` (`DT-(sessão claude/determined-fermi-xxah3h)-02`, decisão
+pendente).
+
+**Verificação.** Nenhum código, teste ou `.yaml` tocado; `DECISOES` não tocado. Recorte: testes
+que leem os docs e o acervo (`test_particao_pendencias`, `test_varrer_acervo_lgpd`,
+`test_cobertura_varrer_acervo`): **32 passed, 2 failed** — os 2 de LibreOffice, que falham igual na
+árvore limpa (ambiente: filtro Writer ausente neste container; `apt-get install` não concluiu).
