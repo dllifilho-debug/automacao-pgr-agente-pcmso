@@ -4165,6 +4165,68 @@ Sessão 003.FD (22/08/2026). `[META — decisão de processo. Não toca motor ne
 
 ---
 
+## D-ARQ-86 — Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação
+
+**Status:** ARQUITETURA PROPOSTA — aguarda ratificação do Diovanni. Sem código nesta sessão. Nenhuma R-* criada, alterada ou depreciada; a emenda de R-BIO-05 da cl.6 só entra no PROTOCOLO na fatia 1, depois de ratificada.
+
+Sessão branch `claude/hopeful-ramanujan-rbgh4s` (25/09/2026). Pedido do Diovanni: campo para inserir as avaliações quantitativas que a equipe já recebe (ruído, poeira, vibração, químicos) ou pede a quem elaborou o PGR.
+
+**Contexto.**
+
+- **Conflito clínico sem saída pelo dado atual.** R-BIO-05 dispensa o indicador do Quadro 1 só em IRRELEVANTE (decisão de 24/09/2026, `DT-003EB-02`). Em BAIXO os gabaritos divergem: a Dra. Patrícia pede o indicador em 10/10 células no Porto Araras I e no Vila Brasil, e o dispensa no Aurora (acetona no GHE 11, xileno no GHE 18) `[MEDIDO — DT-003EB-02 e HISTORICO, matriz_10]`. A dispensa em todo BAIXO piora 2 dos 3 gabaritos medidos.
+- **O BAIXO desses PGRs é estimativa, não medição.** PGR do Aurora: 101 linhas com *"⚠ Avaliação ainda qualitativa — resultado quantitativo pendente de medição"*, zero valores em ppm ou mg/m³, inclusive nas linhas de acetona (GHE 11) e xileno (GHE 18) `[MEDIDO — 25/09/2026, pdfplumber sobre o PDF do acervo]`.
+- **Norma.** NR-07 item 7.5.12 "b": exames laboratoriais obrigatórios *"quando houver exposições ocupacionais acima dos níveis de ação determinados na NR-09 ou se a classificação de riscos do PGR indicar"* `[DERIVADO — PDF fornecido pelo Diovanni, alterações até a Portaria MTP 567/2022; PROTOCOLO §5.9]`. NR-09: nível de ação de agente químico = metade do limite de exposição (disposição transitória; item 9.6.1 já citado em `D-ARQ-24`) `[A CONFERIR — www.gov.br bloqueado pela rede nesta sessão]`. Sem medição, a primeira condição do 7.5.12 "b" não é demonstrável.
+- **O motor já consome medição; falta a entrada.** Existem `Quantificacao` (`valor`, `unidade`, `relacao_LT`, `pct_LT`, `fracao`, `pct_quartzo`), `parsear_quantificacao` (dB(A), mg/m³, ppm), `classificar_ruido` (R-RUIDO-01), `leo_resolver` (sílica, PNOS, asbesto — `D-ARQ-24`), a família R-RX-01 roteada por `pct_LT` e `_nivel_dispensa` em `stage_5_emissao`. A única fonte de `Quantificacao` hoje é o texto do PGR.
+
+**Decisão — oito cláusulas.**
+
+**cl.1 — Canal.** A tela da matriz ganha o painel "Avaliações quantitativas": uma linha por (GHE, agente). Agente escolhido do vocabulário (slug, `D-ARQ-12`), nunca texto livre. Campos obrigatórios: valor, unidade (lista fechada de `quantificacao.py`, mais f/cm³ para asbesto), data da medição e identificação do laudo (número ou elaborador). Opcionais conforme o agente: fração (poeira), %quartzo (sílica fora de mineração), método (NHO-01, NHO-08, NHO-03 etc.). O rótulo do valor diz o que ele é: valor representativo do laudo (NEN para ruído, CLSC ou média para químicos) — o motor não calcula estatística de amostra (`DT-002V-01`, `DT-003CB-01`).
+
+**cl.2 — Contrato.** A medição informada vira `Quantificacao` em todo `RiscoPGR` daquele agente no GHE, inclusive riscos de composição de FDS anexada. Entra pela mesma costura dos anexos (`D-ARQ-49`, `anexar_produto_e_reprocessar`): reaplicada sobre o PGR hidratado, sem reparse do PDF nem chamada a LLM. Motor e `tipos.PGR` não mudam de contrato além do campo aditivo da cl.3 — `D-ARQ-09` e `D-ARQ-25` preservados.
+
+**cl.3 — Procedência.** Campo aditivo opcional em `Quantificacao`: procedência (`origem` ∈ {pgr, informada}, laudo, data, método, quem informou). Toda observação ou motivo que decorra da medição carrega a procedência na revisão e no `.docx` (`D-ARQ-22` Parte B): a auditoria do PCMSO rastreia a dispensa até o laudo.
+
+**cl.4 — Conflito e recusa.** Valor do PGR e valor informado divergentes para o mesmo (GHE, agente): pendência não-bloqueante `medicao_divergente` e o motor usa o maior (lado protetivo). Unidade incompatível com o agente (ex.: dB(A) para xileno) é recusada na tela, não entra.
+
+**cl.5 — Nível de ação é dado.** O LEO-resolver (`D-ARQ-24`) ganha registros para os agentes do Quadro 1 da NR-07 pela posição (3) — LT da NR-15 Anexo 11, Quadro n.º 1 — tabelado em `agentes.yaml` com valor, unidade e fonte (valores já levantados em `docs/referencia/GABARITO_003DP_anexo11-12_iarc.md`, ex.: acetona 780 ppm, xileno 78 ppm, tolueno 78 ppm). Posição (4) ACGIH só com fonte citada por agente. Nível de ação = 50% do LEO; `pct_LT` = valor/LEO × 100. Agente sem LEO resolvido não tem decisão quantitativa e emite como hoje — benzeno (NR-15 Anexo 13-A, VRT, sem LT) fica fora por construção.
+
+**cl.6 — Regra clínica (emenda proposta de R-BIO-05).** Dispensa do indicador do Quadro 1 em BAIXO **só quando** existe medição do agente no GHE com `pct_LT` < 50 (abaixo do nível de ação). IRRELEVANTE segue dispensando sem medição (decisão de 24/09). MODERADO ou acima emite mesmo com medição baixa — a segunda condição do 7.5.12 "b" (a classificação do PGR indica). Forma no YAML, aditiva à chave existente: `mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}`. Observação: *"Obs.: risco baixo no PGR e medição abaixo do nível de ação para <agente> (<valor> <unidade>, <x>% do LT, laudo <id>, <data>) — incluir menção no PCMSO; não solicitado: <exame>"*.
+
+**cl.7 — Campo vazio é o comportamento de hoje.** Sem medição, nenhuma saída muda. A medição nunca amplia dispensa por ausência.
+
+**cl.8 — Persistência.** Fatia 1 guarda as medições no estado da sessão, com o mesmo mecanismo dos anexos (sobrevive a reprocessamento do mesmo PDF). Persistência por obra entre sessões fica fora desta decisão (questão aberta Q3).
+
+**Fatias.**
+
+1. **Químicos do Quadro 1 + emenda de R-BIO-05.** Pré-requisito de DADO: `lt_nr15` nos agentes com R-BIO-04, conferido contra o Anexo 11. Único efeito clínico novo desta decisão.
+2. **Sílica, PNOS e asbesto.** A família R-RX-01 já roteia por `pct_LT`; a fatia só liga o canal (com fração e %quartzo). Muda a periodicidade do RX OIT (NR-07 Anexo III, Quadro 1).
+3. **Ruído.** `ruido_acima_acao` já consome `relacao_LT`. Efeito medido na leitura do código: a audiometria sai para todo trabalhador por R-AUD-04, então a medição só troca a presunção (`predicado_ausente_presumido`) por decisão medida — valor baixo para a matriz.
+- **Fora:** vibração (NHO-09/NHO-10) e calor (NHO-06) — o protocolo não tem exame decidido por valor medido desses agentes.
+
+**Questões abertas para o Diovanni (não decididas aqui).**
+
+- **Q1 (clínica):** MODERADO com medição abaixo do nível de ação — emite (proposta da cl.6) ou dispensa?
+- **Q2 (clínica):** validade temporal da medição. Proposta da fatia 1: qualquer data é aceita e a data aparece na observação, para o RT julgar. Alternativa: prazo máximo (ex.: laudo anterior à vigência do PGR não dispensa).
+- **Q3 (produto):** persistir medições por obra entre sessões (hoje o app não usa banco na rota nova).
+- **Q4 (clínica):** aceitar ACGIH (posição 4) para agente do Quadro 1 sem LT na NR-15 (ex.: ciclohexanona, que o Anexo 11 não lista).
+
+**Consequência.**
+
+- Resolve o conflito de `DT-003EB-02` por evidência, não por escolha entre médicas: quem mandar laudo com valor baixo obtém a conduta do Aurora; quem não mandar mantém a de Porto Araras I e Vila Brasil.
+- Verificação exigida na fatia 1, com reversão nomeada por teste: sem medição → emite; BAIXO + 40% do LT → dispensa com observação e procedência; BAIXO + 60% → emite; MODERADO + 10% → emite; agente sem LEO → emite; unidade incompatível → recusa; PGR × informada divergentes → pendência e maior valor. Os 3 pares determinísticos (Fascino, Porto Araras I, Vila Brasil) não têm medição de químico — saída idêntica à `main` é a medição de não-regressão.
+- `agentes.yaml` passa a carregar LT numérico com fonte. Mudança de portaria no Anexo 11 vira mudança de dado, não de código (`D-ARQ-24`).
+
+**Fronteiras (não confundir).**
+
+- **`D-ARQ-24`** — estende a tabela de precedência para agentes químicos; não muda a cadeia nem o cenário.
+- **`D-ARQ-49`** — reusa a costura dos anexos; não cria rota de parse nova.
+- **`D-ARQ-22`** — a procedência é revisão de saída, não confiança no informante: valor digitado errado é erro do laudo, visível na célula.
+- **`DT-002V-01`** — o motor consome o valor representativo pronto do laudo; calcular CLSC a partir de amostras segue fora.
+
+**Base.** Sessão branch `claude/hopeful-ramanujan-rbgh4s`, 25/09/2026, ARQUITETURA. Fontes: NR-07 7.5.12 "b" (Portaria MTP 567/2022, PDF conferido em `claude/eager-fermat-txbn7h`); NR-09 nível de ação `[A CONFERIR]`; NR-15 Anexo 11 Quadro n.º 1 (via gabarito 003.DP, página oficial de NRs vigentes); NR-07 Anexos II e III. Leitura de código: `quantificacao.py`, `classificacao_ruido.py`, `leo_resolver.py`, `predicados.py` (`_ruido_acima_acao`), `estagios/emissao.py` (`_nivel_dispensa`), `regras.yaml` (R-AUD-01, R-AUD-04, R-BIO-04-*).
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -4386,3 +4448,4 @@ Sessão 003.FD (22/08/2026). `[META — decisão de processo. Não toca motor ne
 | v215 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — rota LLM extrai o nível P×S): **Nota de aplicação em `D-ARQ-49`** (campo `avaliacao_qualitativa` preenchido pela rota LLM na escala P×S; guarda determinística em `transcrever_ghes`; coluna de nível sai do ruído da C3 de `D-ARQ-50`). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v98→**v99**. Índice D-ARQ regenerado. |
 | v216 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — revisão na tela): **Nota de aplicação em `D-ARQ-22` Parte B** (`Motivo.risco_origem` preenchido só em regra de agente direto; caso geral segue fora, DH-003ED-01) e **em `D-ARQ-12`** (`enquadramento_3048` ganha o primeiro consumidor, só na revisão da tela). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v99→**v100**. Índice D-ARQ regenerado. |
 | v217 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — tela da matriz): **Nota de aplicação em `D-ARQ-49`** (fatia C de `DT-(sessão claude/determined-fermi-xxah3h)-01`) — produtos anexados reaplicados no reparse do mesmo PDF, campo aditivo `CacheMatrizes.anexos_descartados`, multi-GHE sem default. Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO inalterado (v100). Índice D-ARQ regenerado. |
+| v218 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (ARQUITETURA — pedido do Diovanni, docs-only): **D-ARQ-86 CRIADA, PROPOSTA** — medição quantitativa informada na tela por (GHE, agente) com procedência de laudo; LT do Anexo 11 da NR-15 como dado do LEO-resolver; emenda proposta de R-BIO-05 (dispensa em BAIXO só com medição abaixo do nível de ação). Três fatias (químicos; sílica/PNOS/asbesto; ruído) e quatro questões abertas. Nenhuma R-* alterada. |

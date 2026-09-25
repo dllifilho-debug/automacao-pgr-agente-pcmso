@@ -833,6 +833,16 @@ num PGR posterior, dispensa em BAIXO e anota o motivo. Nenhum químico do Aurora
 IRRELEVANTE (71 linhas `Químico`: 41 BAIXO, 30 MODERADO), então R-BIO-05 não dispara e nenhuma
 observação sai — como esperado. **Não alterado:** o corte BAIXO×IRRELEVANTE é decisão clínica do
 Diovanni `[MEDIDO — branch claude/determined-fermi-xxah3h]`.
+
+**Nota (branch `claude/hopeful-ramanujan-rbgh4s`, 25/09/2026) — BAIXO fica condicionado a medição.**
+Diovanni pediu a dispensa em BAIXO; reapresentada a medição de 24/09 (Porto Araras I e Vila Brasil
+pioram), ele pediu parecer clínico. Parecer: não dispensar em BAIXO sem medição — no Aurora o
+próprio PGR marca acetona e xileno como *"Avaliação ainda qualitativa — resultado quantitativo
+pendente de medição"*, e sem valor a primeira condição do NR-07 7.5.12 "b" (acima do nível de ação)
+não é demonstrável. R-BIO-05 inalterada. Proposta registrada em `D-ARQ-86` (ARQUITETURA PROPOSTA):
+medição informada na tela por (GHE, agente) com procedência de laudo, e dispensa em BAIXO só com
+medição abaixo do nível de ação. Aguarda ratificação e as questões Q1–Q4 da decisão.
+
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
 **Nota (mesma branch, 25/09/2026) — 2º GHE do Aurora com dispensa em BAIXO.** Matriz_9 do app ×
