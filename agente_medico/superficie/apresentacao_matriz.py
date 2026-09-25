@@ -69,9 +69,10 @@ def renderizar_matriz(matriz: MatrizGHE) -> list[str]:
     if matriz.observacoes:
         linhas.append("- observações (menção documental, exame não emitido):")
         for o in matriz.observacoes:
+            medicao = "" if o.medicao is None else f"; medição: {o.medicao}"
             linhas.append(
                 f"  - `{o.agente}` risco {o.nivel_risco} → {', '.join(o.exames_dispensados)} "
-                f"não emitido ({o.regra_id}, {o.regra_dispensa})"
+                f"não emitido ({o.regra_id}, {o.regra_dispensa}{medicao})"
             )
     if matriz.pendencias:
         linhas.append("- pendências da matriz:")

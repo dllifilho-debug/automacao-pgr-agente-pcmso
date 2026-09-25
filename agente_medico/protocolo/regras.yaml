@@ -344,6 +344,13 @@ regras:
   # mencao_documental troca o indicador por observação quando todo risco do
   # agente no GHE vem classificado IRRELEVANTE na matriz P×S do PGR. BAIXO
   # emite (decisão do Diovanni, 24/09/2026). Quadro 2 (IBE/SC) sem a chave.
+  # Emenda D-ARQ-86 (ratificada 25/09/2026): niveis_com_medicao_abaixo_acao
+  # dispensa em BAIXO só com medição do agente no GHE abaixo do nível de ação
+  # (NR-07 7.5.12 "b" c/c NR-09 9.6.1 "b": metade do LT da NR-15 Anexo 11).
+  # Sem medição, BAIXO emite. Só nos 21 agentes com lt_nr15 que não são
+  # cancerígenos IARC 1/2A; tricloroetileno, 1,3-butadieno, óxido de etileno,
+  # diclorometano, estireno, dimetilformamida e tetracloroetileno ficam sem a
+  # chave — cancerígeno recebe o indicador com qualquer medição (Diovanni, 25/09/2026).
   - id: R-BIO-03
     quando: manganes
     emite:
@@ -364,7 +371,7 @@ regras:
 
   - id: R-BIO-04-acetona
     quando: acetona
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acetona_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
@@ -384,7 +391,7 @@ regras:
 
   - id: R-BIO-04-dissulfeto_de_carbono
     quando: dissulfeto_de_carbono
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: ttca_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
@@ -404,7 +411,7 @@ regras:
 
   - id: R-BIO-04-mercurio
     quando: mercurio
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: mercurio_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
@@ -414,7 +421,7 @@ regras:
 
   - id: R-BIO-04-metil_etil_cetona
     quando: metil_etil_cetona
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: mek_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
@@ -424,7 +431,7 @@ regras:
 
   - id: R-BIO-04-monoxido_de_carbono
     quando: monoxido_de_carbono
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: carboxihemoglobina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
@@ -444,7 +451,7 @@ regras:
 
   - id: R-BIO-04-tolueno
     quando: tolueno
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: ortocresol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
@@ -464,7 +471,7 @@ regras:
 
   - id: R-BIO-04-xileno
     quando: xileno
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acido_metilhipurico, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
@@ -529,7 +536,7 @@ regras:
 
   - id: R-BIO-04-fenol
     quando: fenol
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: fenol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): fenol → fenol na urina. Momento [per], 6M."
@@ -537,7 +544,7 @@ regras:
 
   - id: R-BIO-04-metanol
     quando: metanol
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: metanol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): metanol → metanol na urina. Momento [per], 6M."
@@ -553,7 +560,7 @@ regras:
 
   - id: R-BIO-04-etilbenzeno
     quando: etilbenzeno
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acido_mandelico_fenilglioxilico, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etilbenzeno → soma dos ácidos mandélico e fenilglioxílico na urina (exame único, mesmo analito do estireno). Momento [per], 6M."
@@ -561,7 +568,7 @@ regras:
 
   - id: R-BIO-04-anilina
     quando: anilina
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): anilina → metahemoglobina no sangue (canônico entre 'OU'; p-aminofenol na urina é a alternativa) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
@@ -585,7 +592,7 @@ regras:
 
   - id: R-BIO-04-tricloroetano_111
     quando: tricloroetano_111
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acido_tricloroacetico, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 1,1,1-tricloroetano → ácido tricloroacético na urina (canônico entre 4 opções do Anexo; descartadas: ar exalado final, tricloroetanol total urina, tricloroetanol total sangue) [INTERPRETADO — escolha do canônico, revisão de saída]. Exame compartilhado com R-BIO-04-tricloroetileno (mesmo slug de exame). Momento [per], 6M."
@@ -609,7 +616,7 @@ regras:
 
   - id: R-BIO-04-metoxietanol_2
     quando: metoxietanol_2
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acido_metoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-metoxietanol → ácido 2-metoxiacético na urina. Exame compartilhado com R-BIO-04-metoxietilacetato_2 (mesmo metabólito urinário). Momento [per], 6M."
@@ -625,7 +632,7 @@ regras:
 
   - id: R-BIO-04-propanol_2
     quando: propanol_2
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acetona_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-propanol (isopropanol) → acetona na urina (metabólito comum). Exame compartilhado com R-BIO-04-acetona (mesmo slug de exame). Momento [per], 6M."
@@ -633,7 +640,7 @@ regras:
 
   - id: R-BIO-04-tdi
     quando: tdi
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: toluenodiamino_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): TDI (diisocianato de tolueno, isômeros 2,4 e 2,6) → isômeros 2,4 e 2,6 toluenodiamino na urina (soma dos isômeros). Agente-classe (2 CAS no Anexo; ver comentário em agentes.yaml). Momento [per], 6M."
@@ -641,7 +648,7 @@ regras:
 
   - id: R-BIO-04-butoxietanol_2
     quando: butoxietanol_2
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acido_butoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-butoxietanol → ácido butoxiacético na urina (BAA). Momento [per], 6M."
@@ -665,7 +672,7 @@ regras:
 
   - id: R-BIO-04-clorobenzeno
     quando: clorobenzeno
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: clorocatecol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): clorobenzeno → 4-clorocatecol na urina (canônico entre 2 opções do Anexo; descartada: p-clorofenol na urina) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
@@ -673,7 +680,7 @@ regras:
 
   - id: R-BIO-04-etoxietanol
     quando: etoxietanol
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acido_etoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etoxietanol (linha do Anexo: 'Etoxietanol e Etoxietilacetato') → ácido etoxiacético na urina. Exame compartilhado com R-BIO-04-etoxietilacetato (mesmo metabólito urinário; CAS do Anexo atribuído ao acetato, ver comentário em agentes.yaml). Momento [per], 6M."
@@ -681,7 +688,7 @@ regras:
 
   - id: R-BIO-04-etoxietilacetato
     quando: etoxietilacetato
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: acido_etoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etoxietilacetato → ácido etoxiacético na urina (mesmo metabólito do etoxietanol). Exame compartilhado com R-BIO-04-etoxietanol. Momento [per], 6M."
@@ -721,7 +728,7 @@ regras:
 
   - id: R-BIO-04-dimetilacetamida
     quando: dimetilacetamida
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: metilacetamida_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): N,N-dimetilacetamida → N-metilacetamida na urina. Momento [per], 6M."
@@ -753,7 +760,7 @@ regras:
 
   - id: R-BIO-04-tetrahidrofurano
     quando: tetrahidrofurano
-    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}
     emite:
       - {exame: tetrahidrofurano_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): tetrahidrofurano → tetrahidrofurano na urina. Momento [per], 6M."

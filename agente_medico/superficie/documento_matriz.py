@@ -153,6 +153,12 @@ def _formatar_observacao(obs: Observacao, exames_vocab: dict[str, Any]) -> str:
         exames_vocab.get(slug, {}).get("nome_exibicao", slug) for slug in obs.exames_dispensados
     )
     agente = obs.agente.replace("_", " ")
+    if obs.medicao is not None:
+        # D-ARQ-86 cl.6: a dispensa em BAIXO vem da medição, e a célula leva o laudo.
+        return _sanitizar(
+            f"Obs.: risco {obs.nivel_risco.lower()} no PGR e medição abaixo do nível de ação "
+            f"para {agente} ({obs.medicao}) — incluir menção no PCMSO; não solicitado: {exames}"
+        )
     return _sanitizar(
         f"Obs.: risco {obs.nivel_risco.lower()} no PGR para {agente} — incluir menção "
         f"no PCMSO; não solicitado: {exames}"

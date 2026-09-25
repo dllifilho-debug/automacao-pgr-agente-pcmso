@@ -75,6 +75,7 @@ def carregar(diretorio: Path | str) -> Protocolo:
             regimes[yaml_file.stem] = _load_yaml(yaml_file) or {}
 
     _validar_exames_em_regras(vocabulario.exames, regras)
+    _validar_lt_nr15(vocabulario.agentes)
     _validar_mencao_documental(vocabulario.agentes, regras)
 
     return Protocolo(
@@ -101,6 +102,27 @@ def _validar_exames_em_regras(
                 )
 
 
+def _validar_lt_nr15(agentes: dict[str, Any]) -> None:
+    """`lt_nr15` (D-ARQ-86 cl.5): LT da NR-15 por unidade, com fonte. Valor
+    malformado viraria dispensa de exame por conta errada — falha no carregamento."""
+    for slug, meta in agentes.items():
+        lt = (meta or {}).get("lt_nr15")
+        if lt is None:
+            continue
+        valores = [lt.get(c) for c in ("ppm", "mg_m3")] if isinstance(lt, dict) else []
+        if (
+            not isinstance(lt, dict)
+            or not set(lt) <= {"ppm", "mg_m3", "fonte"}
+            or not isinstance(lt.get("fonte"), str)
+            or not any(v is not None for v in valores)
+            or not all(v is None or (isinstance(v, (int, float)) and v > 0) for v in valores)
+        ):
+            raise ValueError(
+                f"Agente '{slug}': lt_nr15 exige 'fonte' e ao menos um de 'ppm'/'mg_m3' "
+                f"positivo, recebido {lt!r}"
+            )
+
+
 def _validar_mencao_documental(
     agentes: dict[str, Any], regras: list[dict[str, Any]]
 ) -> None:
@@ -112,10 +134,14 @@ def _validar_mencao_documental(
         if mencao is None:
             continue
         regra_id = regra.get("id", "<sem id>")
-        if not isinstance(mencao, dict) or set(mencao) != {"regra", "niveis_risco"}:
+        if (
+            not isinstance(mencao, dict)
+            or not {"regra", "niveis_risco"} <= set(mencao)
+            or not set(mencao) <= {"regra", "niveis_risco", "niveis_com_medicao_abaixo_acao"}
+        ):
             raise ValueError(
-                f"Regra '{regra_id}': mencao_documental exige exatamente as chaves "
-                f"'regra' e 'niveis_risco', recebido {mencao!r}"
+                f"Regra '{regra_id}': mencao_documental exige as chaves 'regra' e "
+                f"'niveis_risco' (e aceita 'niveis_com_medicao_abaixo_acao'), recebido {mencao!r}"
             )
         quando = regra.get("quando")
         if not isinstance(quando, str) or quando not in agentes:
@@ -123,9 +149,19 @@ def _validar_mencao_documental(
                 f"Regra '{regra_id}': mencao_documental exige 'quando' igual a um slug "
                 f"de agente do vocabulário, recebido {quando!r}"
             )
-        niveis = mencao["niveis_risco"]
-        if not isinstance(niveis, list) or not niveis or not set(niveis) <= set(NIVEIS_RISCO_PXS):
+        for chave in ("niveis_risco", "niveis_com_medicao_abaixo_acao"):
+            if chave not in mencao:
+                continue
+            niveis = mencao[chave]
+            if not isinstance(niveis, list) or not niveis or not set(niveis) <= set(NIVEIS_RISCO_PXS):
+                raise ValueError(
+                    f"Regra '{regra_id}': {chave} deve ser lista não-vazia de "
+                    f"{list(NIVEIS_RISCO_PXS)}, recebido {niveis!r}"
+                )
+        if "niveis_com_medicao_abaixo_acao" in mencao and not isinstance(
+            agentes[quando].get("lt_nr15"), dict
+        ):
             raise ValueError(
-                f"Regra '{regra_id}': niveis_risco deve ser lista não-vazia de "
-                f"{list(NIVEIS_RISCO_PXS)}, recebido {niveis!r}"
+                f"Regra '{regra_id}': niveis_com_medicao_abaixo_acao exige 'lt_nr15' no "
+                f"agente '{quando}' — sem LT não há nível de ação (D-ARQ-86 cl.5)"
             )
