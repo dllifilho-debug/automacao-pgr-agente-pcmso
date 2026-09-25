@@ -9794,3 +9794,23 @@ alvo canônico limpo, 50 arquivos. `medir_painel` inalterado.
 
 **Próxima.** A declarar. Pendentes de decisão clínica: BAIXO em R-BIO-05 (acetona do Aurora),
 manganês (GHE 16) e cobalto (GHE 18) sem emissão no Aurora.
+
+## Sessão (branch `claude/determined-fermi-xxah3h`, continuação pós-merge do PR #374) — 25/09/2026 — IMPLEMENTAÇÃO: aviso de vínculo FDS↔GHE antes de gerar a matriz
+
+**Origem.** Diovanni, no app pós-deploy: enviou PGR e FDS e não apareceu GHE para vincular. Medido
+na tela exportada: matriz não gerada → `cache.pgr_hidratado is None` → nenhum seletor, e o texto
+da seção dizia "com um PGR já carregado", o que induzia ao erro. Branch recriada de `origin/main
+ec0575c`.
+
+**Implementado.** `st.info("Gere a matriz para vincular esta FDS a um GHE.")` por FDS enquanto o
+PGR não foi processado; texto da seção reescrito com os 2 passos. 1 teste (antes: aviso sem
+multiselect; depois: sem aviso, com multiselect), varredura inversa 2/2.
+
+**Achados registrados, não implementados.** (1) `DT-(sessão claude/determined-fermi-xxah3h)-02`:
+a "FISPQ" do Eletrodo E-6013 Gerdau não segue NBR 14725 (tabela em "2. SUBSTÂNCIAS PERIGOSAS"),
+`composicao_ausente_fds` é o comportamento desenhado; recomendado pedir a FDS no formato da norma.
+(2) Nota em `DT-003EO-03`: manganês do GHE 16 do Aurora resolve, mas `R-BIO-03` `[VALIDADO]` não
+existe em `regras.yaml` nem o exame em `exames.yaml` — 2º caso real.
+
+**Verificação.** Suíte completa (árvore parada): **1381 passed, 6 skipped, 0 failed** (821.48s),
++1 exato contra 1380. `mypy --strict` alvo canônico limpo, 50 arquivos. `medir_painel` inalterado.

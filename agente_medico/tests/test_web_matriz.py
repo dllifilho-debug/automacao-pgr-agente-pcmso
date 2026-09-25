@@ -1211,3 +1211,26 @@ def test_aviso_de_anexo_descartado_aparece_uma_vez(monkeypatch: pytest.MonkeyPat
     at.run()
     assert not any("fds (GHE-01)" in w.value for w in at.warning)
 
+
+def test_fds_antes_de_gerar_a_matriz_diz_como_vincular(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Medido no app em produção (Aurora, 25/09/2026): PGR e FDS enviados, matriz
+    # ainda não gerada — nenhum seletor de GHE e nenhuma explicação.
+    # Reversões que matam: (1) tirar o st.info do ramo sem PGR processado — o
+    # aviso some antes de gerar; (2) mostrá-lo sem a condição — ele continua
+    # depois de gerar, quando o seletor já está na tela.
+    aviso = "Gere a matriz para vincular esta FDS a um GHE."
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_composicao",
+        lambda *a, **k: ((_FDS_TOLUENO,), ()),
+    )
+    antes = AppTest.from_function(pagina_matriz)
+    antes.run()
+    antes.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    antes.file_uploader[1].set_value([("fds.pdf", b"x", "application/pdf")]).run()
+    assert not antes.exception
+    assert aviso in [i.value for i in antes.info]
+    assert not antes.multiselect
+
+    depois = _pagina_com_fds_enviada(monkeypatch, escolher_ghe=False)
+    assert aviso not in [i.value for i in depois.info]
+    assert depois.multiselect(key="ghe_destino_fds.pdf") is not None
