@@ -46,6 +46,15 @@ def _sanitizar(texto: str) -> str:
     return texto.translate(_LIMPAR_CONTROLE)
 
 
+def nome_ghe_exibicao(nome: str) -> str:
+    """Nome do GHE para tela e documento; MatrizGHE.nome_ghe segue verbatim.
+    NUL entre espaços é o hífen separador que a fonte do PGR não mapeia para
+    Unicode (Vila Brasil GHE 23, "MANUTENÇÃO \\x00 ENERGIZADA" impresso
+    "MANUTENÇÃO - ENERGIZADA"); NUL colado em texto pode ser outro glifo
+    (parêntese no CBO) e só é removido."""
+    return _sanitizar(nome.replace(" \x00 ", " - "))
+
+
 # D-ARQ-73, nota de aplicação desta sessão: paleta reaproveitada de
 # `modules/modulo_pcmso.py::gerar_docx_rq61`
 # (v9.5, já em produção no legado) — não é identidade visual de terceiro, é só a
@@ -193,7 +202,7 @@ def montar_documento(
             LinhaCargo(cargo=_sanitizar(cargo), celulas=celulas) for cargo in matriz.cargos
         )
         blocos.append(
-            BlocoGHE(ghe_id=matriz.ghe_id, nome_ghe=_sanitizar(matriz.nome_ghe), linhas=linhas)
+            BlocoGHE(ghe_id=matriz.ghe_id, nome_ghe=nome_ghe_exibicao(matriz.nome_ghe), linhas=linhas)
         )
     return DocumentoMatriz(cabecalho=cabecalho, blocos=tuple(blocos), rodape=rodape)
 

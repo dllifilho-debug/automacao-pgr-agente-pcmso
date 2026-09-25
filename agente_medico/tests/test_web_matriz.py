@@ -45,6 +45,7 @@ from agente_medico.superficie.web_matriz import (
     pagina_matriz,
     preparar_composicao_cacheada,
     remover_produto_e_reprocessar,
+    responsavel_pcmso_incompleto,
 )
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
@@ -230,6 +231,8 @@ def test_pagina_matriz_validade_invalida_mostra_erro_e_nao_processa(
     at.run()
 
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste").run()
+    next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000").run()
 
     indice_validade = len(at.text_input) - 1
     at.text_input[indice_validade].set_value("31/12/2023").run()
@@ -337,6 +340,8 @@ _EMISSAO_RECENTE = (date.today() - timedelta(days=30)).isoformat()
 
 def _submeter_formulario(at: AppTest, validade: str = _EMISSAO_RECENTE) -> None:
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste").run()
+    next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000").run()
     indice_validade = len(at.text_input) - 1
     at.text_input[indice_validade].set_value(validade).run()
     at.checkbox[0].set_value(True).run()
@@ -360,6 +365,45 @@ def test_emissao_no_futuro_mostra_erro_proprio_e_nao_processa(
 
     assert not at.exception
     assert any("Data de emissão no futuro" in e.value for e in at.error)
+    assert chamadas == []
+
+
+@pytest.mark.parametrize(
+    ("medico", "crm", "faltando"),
+    [
+        # Reversão que mata: tirar a checagem do médico coordenador.
+        ("  ", "CRM-GO 14.949", ("Médico coordenador",)),
+        # Reversão que mata: tirar a checagem do CRM.
+        ("Dra. Teste", "", ("CRM",)),
+        # Reversão que mata: trocar "algum dígito" por "não vazio".
+        ("Dra. Teste", "CRM-GO", ("CRM",)),
+        ("Dra. Teste", "CRM-GO 14.949", ()),
+    ],
+)
+def test_responsavel_pcmso_incompleto(medico: str, crm: str, faltando: tuple[str, ...]) -> None:
+    assert responsavel_pcmso_incompleto(medico, crm) == faltando
+
+
+def test_sem_medico_coordenador_e_crm_nao_processa_o_pgr(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: remover a trava de responsavel_pcmso_incompleto da
+    # página — o PGR seria processado e o documento sairia sem médico responsável.
+    chamadas: list[int] = []
+
+    def _preparar_espiao(*args: Any, **kwargs: Any) -> None:
+        chamadas.append(1)
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_espiao)
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    at.text_input[len(at.text_input) - 1].set_value(_EMISSAO_RECENTE).run()
+    at.checkbox[0].set_value(True).run()
+    at.button[0].click().run()
+
+    assert not at.exception
+    assert any("Médico coordenador e CRM" in e.value for e in at.error)
     assert chamadas == []
 
 
@@ -1367,3 +1411,30 @@ def test_etapa_2_mostra_vinculo_e_produtos_no_rerun_do_clique_em_gerar(
     assert at.multiselect(key="ghe_destino_fds.pdf") is not None
     assert "Nenhum produto anexado." in _captions(at)
     assert "Gere a matriz para vincular esta FDS a um GHE." not in [i.value for i in at.info]
+
+
+def test_tela_mostra_hifen_no_nome_do_ghe_com_nul(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Vila Brasil GHE 23 (conferência Playwright, 25/09/2026): o NUL do nome
+    # aparecia na tela. Reversões que matam, uma por superfície — voltar ao
+    # nome verbatim em: (1) rótulos do vínculo FDS→GHE; (2) "Produtos
+    # anexados"; (3) GHE das avaliações quantitativas; (4) expander da revisão.
+    esperado = "GHE-01 — ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA"
+    nome = "ASSISTENCIA TECNICA MANUTENÇÃO \x00 ENERGIZADA"
+    pgr = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome=nome, cargos=("Eletricista",)))
+    _parse_em_sequencia(monkeypatch, pgr, pgr)
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_composicao", lambda *a, **k: ((_FDS_TOLUENO,), ())
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+    assert at.multiselect(key="ghe_destino_fds.pdf").options == [esperado]
+    at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
+    at.button(key="anexar_fds_fds.pdf").click().run()
+    assert not at.exception
+
+    assert any(m.value.startswith(f"**{esperado}**") for m in at.markdown)
+    assert at.selectbox(key="medicao_ghe").options == [esperado]
+    assert f"GHE GHE-01 {esperado.removeprefix('GHE-01 — ')}" in [e.label for e in at.expander]
+    assert not any("\x00" in m.value for m in at.markdown)

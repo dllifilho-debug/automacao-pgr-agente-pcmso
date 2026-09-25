@@ -19,6 +19,7 @@ from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
     RodapeDocumento,
     montar_documento,
+    nome_ghe_exibicao,
     renderizar_docx,
     renderizar_html,
 )
@@ -484,3 +485,37 @@ def test_pipeline_real_fascino_ate_documento_41_linhas_cargo() -> None:
         assert cargo_recuperado in cargos_extraidos
 
     assert all(linha.cargo != "" for bloco in doc.blocos for linha in bloco.linhas)
+
+
+# Vila Brasil GHE 23: o PDF imprime "MANUTENÇÃO - ENERGIZADA", mas o hífen da
+# fonte Inter-Thin sai do pdfplumber como NUL.
+_NOME_GHE_23 = "ASSISTENCIA TECNICA MANUTENÇÃO \x00 ENERGIZADA"
+
+
+@pytest.mark.parametrize(
+    ("nome", "exibido"),
+    [
+        # Reversão que mata: voltar a só remover o NUL — "MANUTENÇÃO  ENERGIZADA".
+        (_NOME_GHE_23, "ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA"),
+        # Reversão que mata: trocar todo NUL por hífen — NUL colado em texto não
+        # tem glifo conhecido (é parêntese no CBO "\x004121\x0005\x00").
+        ("INSTALAÇÕES HIDRO\x00SANITÁRIAS", "INSTALAÇÕES HIDROSANITÁRIAS"),
+    ],
+)
+def test_nome_ghe_exibicao(nome: str, exibido: str) -> None:
+    assert nome_ghe_exibicao(nome) == exibido
+
+
+def test_docx_mostra_hifen_no_nome_do_ghe_com_nul(tmp_path: Path) -> None:
+    # Reversões que matam: (1) montar_documento usar _sanitizar no nome — o
+    # título sai "MANUTENÇÃO  ENERGIZADA"; (2) passar o nome verbatim — o
+    # python-docx recusa o NUL (ValueError) e o download do Vila Brasil quebra.
+    matriz = MatrizGHE(
+        ghe_id="GHE 23", linhas=[_exame("exame_clinico")], nome_ghe=_NOME_GHE_23, cargos=("Eletricista",)
+    )
+    doc = montar_documento([matriz], carregar(_PROTOCOLO_DIR).vocabulario.exames, _cabecalho(), _rodape())
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    texto = "\n".join(par.text for par in DocxDocument(str(destino)).paragraphs)
+    assert "ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA" in texto
