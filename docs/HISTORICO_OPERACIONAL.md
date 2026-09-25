@@ -10163,3 +10163,32 @@ já tinha sido reinstalado pelo pip — a prova em imagem limpa (sessão nova) f
 
 **3. CLAUDE.md.** Referência do mypy no alvo canônico: 48 → **51 arquivos**, medido nesta sessão;
 atribuídos dois dos três acréscimos (`motor/medicoes.py`, `superficie/revisao_matriz.py`).
+
+## Sessão (branch `feat/validade-emissao-20260925`) — 25/09/2026 — IMPLEMENTAÇÃO: data de emissão do PGR na tela da matriz (R-PGR-06)
+
+**Origem.** Teste do Diovanni em produção (Aurora, matriz com FDS vinculadas): o campo "Validade
+do PGR (AAAA-MM-DD)" recebeu **2027-04-01**, o vencimento. R-PGR-06 (`motor/estagios/gates.py`)
+trata o campo como **data de emissão** (hoje − emissão ≥ 730 dias → bloqueante); com data futura a
+diferença é negativa e o gate nunca dispara. Opção B escolhida pelo Diovanni (rótulo + recusa de
+data futura); `web_envelope.py`/`cli_envelope.py`, com a mesma semântica, ficam para a próxima
+sessão. Branch criada de `origin/main ac22d7c`.
+
+**Implementado.** `montar_envelope` ganha `hoje` injetável e levanta `EmissaoFuturaError`
+(subclasse de `ValueError`) para emissão posterior a hoje; a casca mostra mensagem própria ("Data
+de emissão no futuro… não a de vencimento (R-PGR-06)") e não processa. Rótulo do campo:
+"Data de emissão do PGR (AAAA-MM-DD)", com legenda. Motor e regra clínica intocados — é validação
+de entrada; R-PGR-06 continua 2 anos a partir da emissão.
+
+**Testes existentes (só entradas; nenhuma asserção mudou).** Os testes preenchiam o campo com
+datas futuras (`_submeter_formulario` default "2026-12-31"; "2026-12-31" em
+`test_bio_medicao_quantitativa`, `test_revisao_origem`, `test_rx_medicao_poeira`; "2027-06-30" no
+reprocesso de `test_aviso_de_anexo_descartado_aparece_uma_vez`). Passaram a hoje − 30 dias
+(hoje − 60 no reprocesso), relativo para não envelhecer até R-PGR-06; o localizador por rótulo da
+linha do reprocesso acompanhou o rótulo novo; `test_montar_envelope_usa_a_validade_informada`
+ganhou `hoje=date(2030, 6, 1)`, mantendo a data de 2030 e a mesma reversão.
+
+**Verificação.** 3 testes novos em `test_web_matriz.py`. Varredura inversa 4/4: sem a checagem →
+unidade + tela; `>` → `>=` → só unidade; exceção caindo no `except ValueError` genérico → só tela;
+rótulo antigo → teste do rótulo + localizador do reprocesso. Testes de tela 86 passed (83 + 3);
+`mypy --strict` alvo canônico limpo, 51 arquivos. Suíte completa (árvore parada): **1423 passed,
+6 skipped, 0 failed** (892.60s), +3 exato sobre 1420.

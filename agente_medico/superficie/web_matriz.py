@@ -62,6 +62,7 @@ from agente_medico.superficie.documento_matriz import (
 __all__ = [
     "CacheMatrizes",
     "ComponenteAnexado",
+    "EmissaoFuturaError",
     "ProdutoAnexado",
     "TranscritorGemini",
     "anexar_produto_e_reprocessar",
@@ -82,10 +83,23 @@ __all__ = [
 ]
 
 
-def montar_envelope(validade_iso: str, assinatura: bool) -> EnvelopeConfirmado:
+class EmissaoFuturaError(ValueError):
+    """Data de emissão do PGR posterior a hoje."""
+
+
+def montar_envelope(
+    validade_iso: str, assinatura: bool, hoje: date | None = None
+) -> EnvelopeConfirmado:
     """Mesmo espelho de mensagem que montar_volta_envelope (web_envelope.py):
-    ValueError na validade malformada, nunca coagida silenciosamente."""
+    ValueError na validade malformada, nunca coagida silenciosamente.
+
+    `validade` é a DATA DE EMISSÃO do PGR: R-PGR-06 (NR-01, revisão da avaliação
+    de riscos a cada 2 anos) conta os 2 anos a partir dela. Data futura é quase
+    sempre o vencimento digitado no lugar da emissão e, aceita, desligaria o gate
+    (hoje - validade < 0 nunca chega a 730 dias) — medido no Aurora, 25/09/2026."""
     validade = date.fromisoformat(validade_iso)
+    if validade > (hoje if hoje is not None else date.today()):
+        raise EmissaoFuturaError(validade_iso)
     return EnvelopeConfirmado(validade=validade, assinatura_engenheiro=assinatura)
 
 
@@ -580,6 +594,7 @@ def pagina_matriz() -> None:
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.web_matriz import (
+        EmissaoFuturaError,
         TranscritorGemini,
         _protocolo_padrao,
         agentes_mensuraveis,
@@ -934,7 +949,11 @@ def pagina_matriz() -> None:
 
             with col_pgr:
                 st.markdown("**Dados do PGR**")
-                validade = st.text_input("Validade do PGR (AAAA-MM-DD)")
+                validade = st.text_input("Data de emissão do PGR (AAAA-MM-DD)")
+                st.caption(
+                    "Data em que o PGR foi emitido, não a de vencimento. PGR emitido há "
+                    "2 anos ou mais é rejeitado (R-PGR-06)."
+                )
                 assinatura = st.checkbox("Assinado por engenheiro de segurança")
 
             enviado = st.form_submit_button("Gerar matriz", type="primary")
@@ -944,9 +963,16 @@ def pagina_matriz() -> None:
 
         try:
             envelope = montar_envelope(validade, assinatura)
+        except EmissaoFuturaError:
+            etapa_pgr.error(
+                f"Data de emissão no futuro: {validade!r}. Informe a data em que o PGR foi "
+                "emitido, não a de vencimento (R-PGR-06)."
+            )
+            bloqueio = "corrija a data de emissão do PGR na etapa 1"
+            return
         except ValueError:
             etapa_pgr.error(f"Data inválida: {validade!r}. Use o formato ISO (AAAA-MM-DD).")
-            bloqueio = "corrija a validade do PGR na etapa 1"
+            bloqueio = "corrija a data de emissão do PGR na etapa 1"
             return
 
         cabecalho = CabecalhoDocumento(
