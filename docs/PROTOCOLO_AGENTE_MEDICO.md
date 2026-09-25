@@ -210,10 +210,28 @@ Exposição a agente biomonitorado do Anexo I (Quadro 1 ou Quadro 2) demanda cl�
 > **Changelog 003.AA (mesma ID — relabel sem mudança de saída).** "Anexo I / Anexo II" → "Quadro 1 / Quadro 2 do Anexo I" (567/2022; "Anexo II" da NR-07 é ruído, não químico-com-LT). O conjunto de agentes que dispara o semestral não muda → saída estável → ID preservada.
 > **Ressalva `[INTERPRETADO — prioridade na revisão de saída]`:** o semestral é conduta da Dra. Carolini, não a NR-07 — item 7.5.8 fixa clínico **anual** para exposto (menor a critério médico). A borda "carcinógeno só de Anexo V, sem indicador no Anexo I, dispara semestral?" não está cravada (fonte primária congelada desde 002.M) — inspecionar na revisão de saída.
 
+> **Medição contra gabaritos (branch `claude/determined-fermi-xxah3h`, 25/09/2026) — NÃO
+> materializada; bloqueador reportado ao Diovanni.** Implementada como "qualquer agente com
+> `tipo_ibe` → clínico 6M" e medida com `comparar_matriz_gabarito` nos 3 pares determinísticos: **+5
+> divergências de periodicidade, nenhuma corrigida** — Porto Araras I (06/07/26) GHE-13 encanador e
+> GHE-14 pintor/meio oficial, Vila Brasil (26/08/26) GHE-23 e GHE-26: gabarito da Dra. Patrícia com
+> clínico **12M**, agentes do Anexo I todos BAIXO/IRRELEVANTE no PGR, indicadores pedidos. No Aurora
+> (27/08/26), a mesma médica pede **6M** nos GHEs 11 (MEK/ciclohexanona/THF MODERADO), 16 (Mn), 18 e
+> 22 (benzeno, cancerígeno), 21 (TCA — tricloroetileno, cancerígeno). O texto desta regra não descreve
+> essa conduta. Retirada do PR; hipótese a decidir: semestral por Mn, por cancerígeno do Anexo I, ou
+> por agente do Anexo I em nível MODERADO+ — não medido além destes 9 GHEs.
+
 #### R-CLI-03 — Manganês fora do Anexo I `[VALIDADO]`
 O **manganês** é o único agente fora do Anexo I (Quadros 1 e 2) da NR-07 que dispara clínico semestral. Base: NR-15 — exposição a Mn exige avaliação biológica independente do limite de tolerância.
 
 > **Changelog 003.AA (mesma ID).** "fora dos Anexos I e II" → "fora do Anexo I (Quadros 1 e 2)": Mn não consta em nenhum Quadro do Anexo I; o antigo "Anexo II" era o balde químico-com-LT (vocabulário pré-567), hoje inexistente nesse sentido. Conteúdo inalterado. A unicidade sob o eixo novo segue `[VALIDADO]`; reconfirmar de passagem se algum agente de Anexo V a altera (`[INTERPRETADO — revisão de saída]`).
+
+> **Nota de implementação (branch `claude/determined-fermi-xxah3h`, 25/09/2026 — mesma ID, conteúdo
+> inalterado).** Materializada em `regras.yaml` (`quando: manganes`, `exame_clinico` 6M `[per]`); os
+> demais momentos vêm de R-CLI-01 e a consolidação (D-ARQ-39) fica com a menor periodicidade. Base
+> literal conferida na mesma sessão: NR-15 Anexo 12, "Manganês e seus compostos", item 7 — exames
+> periódicos *"de 6 (seis) meses a anualmente para os trabalhadores de superfície"*,
+> independentemente do LT `[DERIVADO]`; 6M fixo `[INTERPRETADO]`. Caso: Aurora GHE 16.
 
 #### R-CLI-04 — Risco físico isolado `[VALIDADO]`
 **Nenhum** risco físico (ruído, calor, vibração) isoladamente justifica clínico semestral. O default anual prevalece.
@@ -991,3 +1009,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v100 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — rastreabilidade, sem regra nova): **DH-003ED-01, faceta `risco_origem`: fechada no recorte atômico** — `Motivo.risco_origem` preenchido quando o `quando` da regra é o slug do agente (as `R-BIO-04-*`), com todas as fontes do agente no GHE (PGR com nível, FDS com produto, cargo). Predicado composto segue sem origem (exigiria mudar `predicados.avaliar`); faceta permanece ABERTA para esse caso. Decisão do Diovanni. Nenhuma `R-*` criada, alterada ou depreciada. Detalhe em DECISOES v216 (D-ARQ-22 Parte B). |
 | v101 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO, ordem do Diovanni): **`R-BIO-03` materializada** (§5.9, mesma ID, conteúdo inalterado) — regra em `regras.yaml` e exame `manganes_sangue` em `exames.yaml`. Base NR-15 do protocolo `[A CONFERIR — D-ARQ-69]`. R-CLI-02/R-CLI-03 seguem só em texto (DT-003EO-03). |
 | v102 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (CONHECIMENTO — conferência normativa, D-ARQ-69): **`R-BIO-03`** (§5.9) — `[A CONFERIR]` fechado contra a NR-15 Anexo 12 ('Manganês e seus compostos', Portaria DNSST 08/1992, item 7), PDFs fornecidos pelo Diovanni. Adm/per e 'independente do LT' literais; analito, 6M fixo e MR interpretados. Conteúdo da regra inalterado. |
+| v103 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO, ordem do Diovanni): **`R-CLI-03` materializada** (§4, mesma ID, conteúdo inalterado; base NR-15 Anexo 12 item 7). **`R-CLI-02` não materializada** — medida contra 3 gabaritos, +5 divergências (Porto Araras I, Vila Brasil com clínico anual em Quadro 1 BAIXO); bloqueador reportado, nota na regra. |

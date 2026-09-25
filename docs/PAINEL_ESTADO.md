@@ -109,6 +109,13 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 25/09/2026, R-CLI-03]`:** branch `claude/determined-fermi-xxah3h` sobre
+`main 894f32b` (merge do PR #377; IMPLEMENTAÇÃO — `R-CLI-03`; `R-CLI-02` bloqueada por medição) ·
+**1389 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 796.39s — 1386 + 3)* · `mypy --strict`
+alvo canônico **limpo, 50 arquivos** · PROTOCOLO v102→**v103** · DECISOES v217 inalterado.
+`medir_painel`: **`regras 28/45`** (era 27/45), `cas 78/109`, `índice sincronizado`. Tabela "Os três
+números" não re-tirada (mesmo bloqueador).
+
 **Baseline `[MEDIDO — 25/09/2026, R-BIO-03]`:** branch `claude/determined-fermi-xxah3h` sobre
 `main f683462` (merge do PR #376; IMPLEMENTAÇÃO — `R-BIO-03` materializada) · **1386 passed, 6
 skipped, 0 failed** *(MEDIDO, árvore parada, 801.99s — 1382 + 4)* · `mypy --strict` alvo canônico

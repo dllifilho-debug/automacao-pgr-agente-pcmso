@@ -10,6 +10,19 @@ regras:
       08/07/26, 19/19 GHEs em ADM/PER/MRO/RET/DEM]"
     status: VALIDADO
 
+  - id: R-CLI-03
+    quando: manganes
+    emite:
+      - {exame: exame_clinico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "Protocolo Dra. Carolini R-CLI-03 [VALIDADO] — manganês, único agente
+      fora do Anexo I da NR-07 que dispara clínico semestral. [DERIVADO]: NR-15 Anexo 12,
+      'Manganês e seus compostos' (Portaria DNSST 08/1992), item 7 — exames periódicos
+      obrigatórios a todo exposto independentemente do LT, 'de 6 (seis) meses a
+      anualmente para os trabalhadores de superfície'. [INTERPRETADO]: 6M fixo é a ponta
+      protetiva da faixa. Emite só o periódico 6M: os demais momentos vêm de R-CLI-01, e a
+      consolidação (D-ARQ-39) une os momentos e fica com a menor periodicidade."
+    status: VALIDADO
+
   - id: R-PSY-02
     quando: todo_trabalhador
     emite:
