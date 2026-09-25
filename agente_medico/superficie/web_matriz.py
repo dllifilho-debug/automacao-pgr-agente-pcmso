@@ -463,10 +463,18 @@ def remover_medicao_e_reprocessar(
     )
 
 
+AGENTES_POEIRA_MEDIVEIS: dict[str, tuple[str, ...]] = {
+    "silica": ("mg/m3",),
+    "poeira_nao_classificada": ("mg/m3",),
+}
+
+
 def agentes_mensuraveis(pgr: PGR, ghe_id: str, protocolo: Protocolo) -> dict[str, tuple[str, ...]]:
-    """Agentes do GHE (riscos do PGR) com LT da NR-15 no vocabulário → unidades
+    """Agentes do GHE (riscos do PGR) com LT da NR-15 no vocabulário, mais
+    sílica e PNOS (LEO do resolver, R-RX-01 — D-ARQ-86 fatia 2) → unidades
     aceitas. Agente fora daqui não recebe medição na tela: sem risco no PGR a
-    medição não teria onde entrar, e sem LT não decide nada (D-ARQ-86 cl.5)."""
+    medição não teria onde entrar, e sem LT não decide nada (D-ARQ-86 cl.5).
+    Asbesto fica fora: o resolver não tem o LEO dele (decisão do Diovanni)."""
     agentes_vocab = protocolo.vocabulario.agentes
     ghe = next((g for g in pgr.ghes if g.id == ghe_id), None)
     if ghe is None:
@@ -475,7 +483,7 @@ def agentes_mensuraveis(pgr: PGR, ghe_id: str, protocolo: Protocolo) -> dict[str
     for risco in ghe.riscos:
         if risco.agente is None or risco.agente in mensuraveis:
             continue
-        unidades = tuple(
+        unidades = AGENTES_POEIRA_MEDIVEIS.get(risco.agente) or tuple(
             u for u in ("ppm", "mg/m3") if limite_quimico(risco.agente, u, agentes_vocab) is not None
         )
         if unidades:
@@ -569,7 +577,7 @@ def pagina_matriz() -> None:
         RodapeDocumento,
         renderizar_docx,
     )
-    from agente_medico.motor.tipos import BlocoVerbatim, MedicaoInformada, ProcedenciaMedicao
+    from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.web_matriz import (
         TranscritorGemini,
@@ -683,6 +691,20 @@ def pagina_matriz() -> None:
                     "Informe valor maior que zero e a identificação do laudo.",
                 )
                 return
+            fracao: Fracao | None = None
+            pct_quartzo: float | None = None
+            if agente == "silica":
+                # Anexo 12 da NR-15: sem %quartzo não há LT; a fração escolhe a fórmula.
+                pct_quartzo = st.session_state["medicao_quartzo"]
+                if pct_quartzo is None or pct_quartzo <= 0:
+                    st.session_state["medicao_mensagem"] = (
+                        "warning",
+                        "Sílica: informe o % de quartzo do laudo (NR-15 Anexo 12).",
+                    )
+                    return
+                fracao = Fracao(st.session_state["medicao_fracao"])
+            elif agente == "poeira_nao_classificada":
+                fracao = Fracao.RESPIRAVEL
             medicao = MedicaoInformada(
                 ghe_id=ghe_id,
                 agente=agente,
@@ -695,6 +717,8 @@ def pagina_matriz() -> None:
                     metodo=st.session_state["medicao_metodo"].strip(),
                     informante=st.session_state["medicao_informante"].strip(),
                 ),
+                fracao=fracao,
+                pct_quartzo=pct_quartzo,
             )
             st.session_state["web_matriz_cache"] = registrar_medicao_e_reprocessar(
                 atual, _protocolo_padrao(), medicao
@@ -806,10 +830,11 @@ def pagina_matriz() -> None:
             with etapa_fds:
                 st.markdown("#### Avaliações quantitativas")
                 st.caption(
-                    "Valor representativo do laudo (média ou CLSC) de um agente químico no GHE. "
-                    "Com risco BAIXO no PGR e medição abaixo do nível de ação (metade do LT da "
-                    "NR-15, NR-09 9.6.1), o indicador biológico vira menção no PCMSO. "
-                    "Cancerígenos sempre recebem o indicador."
+                    "Valor representativo do laudo (média ou CLSC) de um agente no GHE. Químico: "
+                    "com risco BAIXO no PGR e medição abaixo do nível de ação (metade do LT da "
+                    "NR-15, NR-09 9.6.1), o indicador biológico vira menção no PCMSO; "
+                    "cancerígenos sempre recebem o indicador. Sílica e poeira não classificada: "
+                    "a medição define a periodicidade do RX OIT (NR-07 Anexo III)."
                 )
                 rotulos_medicao = {
                     ghe.id: f"{ghe.id} — {ghe.nome}".strip(" —") for ghe in cache.pgr_hidratado.ghes
@@ -837,6 +862,22 @@ def pagina_matriz() -> None:
                             key=f"medicao_unidade_{agente_medicao}",
                         )
                         st.number_input("Valor medido", min_value=0.0, format="%.4f", key="medicao_valor")
+                        if agente_medicao == "silica":
+                            st.selectbox(
+                                "Fração",
+                                options=[Fracao.RESPIRAVEL.value, Fracao.TOTAL.value],
+                                format_func=lambda f: "Respirável" if f == Fracao.RESPIRAVEL.value else "Total",
+                                key="medicao_fracao",
+                            )
+                            st.number_input(
+                                "% de quartzo (sílica livre cristalizada)",
+                                min_value=0.0,
+                                max_value=100.0,
+                                format="%.2f",
+                                key="medicao_quartzo",
+                            )
+                        elif agente_medicao == "poeira_nao_classificada":
+                            st.caption("Poeira não classificada: fração respirável (NR-07 Anexo III, Quadro 2).")
                     with col_laudo:
                         st.date_input("Data da medição", format="DD/MM/YYYY", key="medicao_data")
                         st.text_input("Laudo (número ou elaborador)", key="medicao_laudo")
@@ -849,9 +890,15 @@ def pagina_matriz() -> None:
                     (st.success if tipo_msg == "success" else st.warning)(texto_msg)
                 for medicao_registrada in cache.medicoes:
                     unidade_exibida = "mg/m³" if medicao_registrada.unidade == "mg/m3" else medicao_registrada.unidade
+                    detalhe_poeira = ""
+                    if medicao_registrada.fracao is not None:
+                        detalhe_poeira = f" ({medicao_registrada.fracao.value}"
+                        if medicao_registrada.pct_quartzo is not None:
+                            detalhe_poeira += f", {medicao_registrada.pct_quartzo:g}% quartzo"
+                        detalhe_poeira += ")"
                     st.write(
                         f"**{medicao_registrada.ghe_id}** · {medicao_registrada.agente}: "
-                        f"{medicao_registrada.valor:g} {unidade_exibida} — laudo "
+                        f"{medicao_registrada.valor:g} {unidade_exibida}{detalhe_poeira} — laudo "
                         f"{medicao_registrada.procedencia.laudo}, "
                         f"{medicao_registrada.procedencia.data:%d/%m/%Y}"
                     )
