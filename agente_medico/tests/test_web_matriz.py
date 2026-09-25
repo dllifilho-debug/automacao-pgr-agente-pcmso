@@ -38,9 +38,11 @@ from agente_medico.superficie.web_matriz import (
     executar_rota_determinista,
     executar_rota_determinista_cacheada,
     gerar_documento,
+    listar_produtos_anexados,
     montar_envelope,
     pagina_matriz,
     preparar_composicao_cacheada,
+    remover_produto_e_reprocessar,
 )
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
@@ -894,3 +896,166 @@ def test_pagina_matriz_anexar_fds_nao_retranscreve_e_sobrevive_a_429(
     assert chamadas == ["f0.pdf", "f1.pdf"]
     produtos = at.session_state["web_matriz_cache"].pgr_hidratado.ghes[0].produtos_quimicos
     assert [produto.nome for produto in produtos] == ["f0"]
+
+
+# ---------------------------------------------------------------------------
+# Visibilidade dos produtos anexados (medição Aurora Lago das Rosas, 24/09/2026:
+# 16 FDS enviadas, anexos invisíveis na tela, aguarrás no GHE errado sem que o
+# operador visse). Status por FDS, recusa de duplicata, painel com remoção.
+# ---------------------------------------------------------------------------
+
+_FDS_TOLUENO_E_NAFTA = BlocoVerbatim(
+    faixa="6-10%",
+    membros=(
+        MembroVerbatim(cas="108-88-3", nome="Tolueno", frases_h=()),
+        MembroVerbatim(cas="64742-82-1", nome="Nafta", frases_h=()),
+    ),
+)
+
+
+def _cache_com(pgr: PGR) -> CacheMatrizes:
+    protocolo = carregar(_PROTOCOLO_DIR)
+    return CacheMatrizes(
+        chave="chave-teste",
+        matrizes=(),
+        exames_vocab=protocolo.vocabulario.exames,
+        pendencias=(),
+        status="OK",
+        pendencias_globais=(),
+        chamadas_ia=0,
+        pgr_hidratado=pgr,
+    )
+
+
+def _matriz_do_ghe(cache: CacheMatrizes, ghe_id: str) -> MatrizGHE:
+    assert cache.matrizes is not None
+    return next(m for m in cache.matrizes if m.ghe_id == ghe_id)
+
+
+def test_listar_produtos_anexados_mostra_o_agente_que_o_motor_resolveu() -> None:
+    # Reversão que mata: listar lendo produto.fds.composicao do PGR sem passar
+    # por resolver_composicao — montar_fds entrega composicao VAZIA (só o
+    # verbatim), então o produto apareceria sem componente nenhum.
+    protocolo = carregar(_PROTOCOLO_DIR)
+    cache = anexar_produto_e_reprocessar(
+        _cache_com(_pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)))),
+        protocolo,
+        "GHE-01",
+        "Tinta",
+        montar_fds((_FDS_TOLUENO_E_NAFTA,)),
+    )
+    assert cache.pgr_hidratado is not None
+
+    (produto,) = listar_produtos_anexados(cache.pgr_hidratado, protocolo)
+
+    assert (produto.ghe_id, produto.ghe_nome, produto.nome) == ("GHE-01", "Pintura", "Tinta")
+    assert [(c.cas, c.agente) for c in produto.componentes] == [
+        ("108-88-3", "tolueno"),
+        ("64742-82-1", None),
+    ]
+
+
+def test_remover_produto_e_reprocessar_tira_so_do_ghe_escolhido_e_refaz_a_matriz() -> None:
+    # Reversões que matam: (1) ignorar ghe_id no filtro — o GHE-02 perderia o
+    # produto; (2) devolver o PGR mutado sem rodar processar_pgr de novo —
+    # "tolueno" continuaria em riscos_resolvidos do GHE-01.
+    protocolo = carregar(_PROTOCOLO_DIR)
+    fds = montar_fds((_FDS_TOLUENO,))
+    cache = _cache_com(
+        _pgr_sintetico(
+            _ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)),
+            _ghe_pgr(ghe_id="GHE-02", nome="Serralheria", cargos=("Serralheiro",)),
+        )
+    )
+    cache = anexar_produto_e_reprocessar(cache, protocolo, "GHE-01", "Tinta", fds)
+    cache = anexar_produto_e_reprocessar(cache, protocolo, "GHE-02", "Tinta", fds)
+    assert "tolueno" in _matriz_do_ghe(cache, "GHE-01").riscos_resolvidos
+
+    cache = remover_produto_e_reprocessar(cache, protocolo, "GHE-01", "Tinta")
+
+    assert cache.pgr_hidratado is not None
+    ghe1, ghe2 = cache.pgr_hidratado.ghes
+    assert ghe1.produtos_quimicos == ()
+    assert [p.nome for p in ghe2.produtos_quimicos] == ["Tinta"]
+    assert "tolueno" not in _matriz_do_ghe(cache, "GHE-01").riscos_resolvidos
+    assert "tolueno" in _matriz_do_ghe(cache, "GHE-02").riscos_resolvidos
+
+
+def _pagina_com_fds_enviada(monkeypatch: pytest.MonkeyPatch) -> AppTest:
+    """PGR sintético de 1 GHE processado de verdade (processar_pgr sem mock) e
+    uma FDS de tolueno enviada, ainda não anexada."""
+    pgr_sintetico = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)))
+
+    def _preparar_falso(*args: Any, **kwargs: Any) -> tuple[PGR, tuple[Pendencia, ...]]:
+        return pgr_sintetico, ()
+
+    def _preparar_composicao_falso(
+        *args: Any, **kwargs: Any
+    ) -> tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]:
+        return (_FDS_TOLUENO,), ()
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_falso)
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_composicao", _preparar_composicao_falso
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+    assert not at.exception
+    return at
+
+
+def _captions(at: AppTest) -> list[str]:
+    return [c.value for c in at.caption]
+
+
+def test_status_da_fds_reflete_o_anexo_no_rerun_do_clique_e_depois(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: calcular o status antes do tratamento do clique em
+    # "Anexar" — no rerun do próprio clique a tela diria "ainda não anexada".
+    at = _pagina_com_fds_enviada(monkeypatch)
+    assert "Status: ainda não anexada a nenhum GHE." in _captions(at)
+
+    at.button(key="anexar_fds_fds.pdf").click().run()
+    assert not at.exception
+    assert "Status: anexada a GHE-01." in _captions(at)
+
+    at.run()
+    assert "Status: anexada a GHE-01." in _captions(at)
+
+
+def test_segundo_clique_em_anexar_nao_duplica_o_produto(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: tirar a checagem ghes_com_produto antes de anexar — o
+    # 2º clique poria o mesmo produto duas vezes no GHE.
+    at = _pagina_com_fds_enviada(monkeypatch)
+    at.button(key="anexar_fds_fds.pdf").click().run()
+    at.button(key="anexar_fds_fds.pdf").click().run()
+    assert not at.exception
+
+    cache = at.session_state["web_matriz_cache"]
+    assert len(cache.pgr_hidratado.ghes[0].produtos_quimicos) == 1
+    assert any("já está anexado ao GHE GHE-01" in w.value for w in at.warning)
+
+
+def test_painel_lista_o_produto_anexado_e_remove_pelo_botao(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: não gravar o cache em st.session_state antes do
+    # st.rerun() do "Remover" — o rerun relê o cache antigo e o produto volta.
+    at = _pagina_com_fds_enviada(monkeypatch)
+    assert "Nenhum produto anexado." in _captions(at)
+
+    at.button(key="anexar_fds_fds.pdf").click().run()
+    textos = [m.value for m in at.markdown]
+    assert "**GHE-01 — Pintura** · fds" in textos
+    assert "- CAS 108-88-3 | Tolueno → tolueno" in textos
+
+    at.button(key="remover_GHE-01_fds").click().run()
+    assert not at.exception
+
+    cache = at.session_state["web_matriz_cache"]
+    assert cache.pgr_hidratado.ghes[0].produtos_quimicos == ()
+    assert "tolueno" not in cache.matrizes[0].riscos_resolvidos
+    assert "Nenhum produto anexado." in _captions(at)
+    assert "Status: ainda não anexada a nenhum GHE." in _captions(at)
+
