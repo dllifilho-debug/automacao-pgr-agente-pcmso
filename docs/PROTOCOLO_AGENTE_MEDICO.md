@@ -582,6 +582,13 @@ Todo exame de biomonitoramento de agente químico = **6 meses**. Sem exceção.
 #### R-BIO-03 — Manganês `[VALIDADO]`
 Qualquer exposição confirmada a Mn → **manganês sanguíneo semestral em adm + per + MR**. Base: NR-15, independente do LT.
 
+> **Nota de implementação (branch `claude/determined-fermi-xxah3h`, 25/09/2026 — mesma ID,
+> conteúdo inalterado).** Materializada em `regras.yaml` (`quando: manganes`, exame novo
+> `manganes_sangue` "Manganês no sangue", 6M, `[adm, per, MR]`). Até aqui era `[VALIDADO]` só no
+> texto (DT-003EO-03). Fora de R-BIO-04/R-BIO-05: Mn não está no Anexo I da NR-07. Item da NR-15
+> citado como base `[A CONFERIR — D-ARQ-69]` (`www.gov.br` bloqueado nesta sessão). Não inclui
+> R-CLI-03 (clínico semestral), que segue sem materialização. Caso de conferência: Aurora GHE 16.
+
 #### R-BIO-04 — Matriz temporal por Quadro do Anexo I (NR-07) `[DERIVADO — NR-07 Anexo I + itens 7.5.13/7.5.15/7.5.19.4/7.5.19.5, Portaria MTP 567/2022, texto oficial MTE]`
 
 Sucede R-BIO-02. O eixo do biomonitoramento químico é o **Quadro do Anexo I onde o indicador da substância está listado** (natureza do indicador: IBE/EE vs IBE/SC) — NÃO carcinogenicidade nem presença de LT.
@@ -964,3 +971,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v98 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (CONHECIMENTO — conferência normativa, D-ARQ-69): NR-07 conferida no PDF fornecido pelo Diovanni (cabeçalho até Portaria MTP 567/2022). **`R-BIO-05`**: `[A CONFERIR]` fechado — 7.5.12 "b" condiciona a obrigatoriedade dos exames laboratoriais à classificação de riscos do PGR; regra compatível com a norma, marcador `[INTERPRETADO]` mantido (o corte IRRELEVANTE não é literal); corrigida a leitura de 7.5.15 no corpo (exime momentos, não fixa obrigatoriedade). **`R-RX-01-qual`**: `[A CONFERIR]` fechado — Quadro 1 do Anexo III idêntico à leitura de 003.EH; 12M abaixo do ramo sem-avaliação (24M), `[INTERPRETADO]` mantido. Nenhuma regra criada, alterada ou depreciada; nenhum código tocado. |
 | v99 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — extração, sem regra nova): nota de aplicação em **`R-RX-01`** (§5.4, ramo `R-RX-01-qual`) e em **`R-BIO-05`** (§5.9) — a rota LLM passa a extrair o nível P×S, restrito por guarda determinística a blocos da escala P×S (109/109 aceitos, 0/318 de escore somado rejeitados, medido no acervo). Nenhuma `R-*` criada, alterada ou depreciada. Escala de escore somado aberta em `DT-(sessão claude/eager-fermat-txbn7h)-01`. |
 | v100 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — rastreabilidade, sem regra nova): **DH-003ED-01, faceta `risco_origem`: fechada no recorte atômico** — `Motivo.risco_origem` preenchido quando o `quando` da regra é o slug do agente (as `R-BIO-04-*`), com todas as fontes do agente no GHE (PGR com nível, FDS com produto, cargo). Predicado composto segue sem origem (exigiria mudar `predicados.avaliar`); faceta permanece ABERTA para esse caso. Decisão do Diovanni. Nenhuma `R-*` criada, alterada ou depreciada. Detalhe em DECISOES v216 (D-ARQ-22 Parte B). |
+| v101 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO, ordem do Diovanni): **`R-BIO-03` materializada** (§5.9, mesma ID, conteúdo inalterado) — regra em `regras.yaml` e exame `manganes_sangue` em `exames.yaml`. Base NR-15 do protocolo `[A CONFERIR — D-ARQ-69]`. R-CLI-02/R-CLI-03 seguem só em texto (DT-003EO-03). |

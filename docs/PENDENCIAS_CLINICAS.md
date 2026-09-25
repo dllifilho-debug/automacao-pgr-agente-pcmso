@@ -1397,6 +1397,12 @@ Aurora Lago das Rosas traz `Químico Manganês — Fumos e gases de soldagem`, n
 só a de materialização descrita acima: `R-BIO-03` `[VALIDADO]` no PROTOCOLO, sem entrada em
 `regras.yaml`, sem slug de exame em `exames.yaml` `[VERIFICADO — grep, mesma data]`.
 
+**Nota (mesma branch, pós-merge do PR #376, 25/09/2026) — parágrafo R-BIO-03 fechado.** `R-BIO-03`
+materializada: regra em `regras.yaml` e slug `manganes_sangue` em `exames.yaml` (PROTOCOLO v101).
+O restante desta DT continua ABERTO: `R-CLI-02`/`R-CLI-03` (clínico semestral) seguem só em texto, e
+o Fascino segue sem resolver manganês pela grafia "Maganês" (DT-003EQ-02). Base NR-15 de R-BIO-03
+`[A CONFERIR — D-ARQ-69]`.
+
 ### DT-003EO-04 — `GHEPGR.cargos` chega como 1 string por GHE do parser da família Consciente; a expansão GHE→cargo de D-ARQ-73 não separa cargos reais `[FECHADA — 003.EP]`
 
 **Origem:** 003.EO, fatia 4 — medição contra o Fascino real (achado fora do previsto pela EMENDA 1); quantificado nas EMENDAs 3 e 4.

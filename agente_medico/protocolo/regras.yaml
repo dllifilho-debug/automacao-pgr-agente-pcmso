@@ -331,6 +331,19 @@ regras:
   # mencao_documental troca o indicador por observação quando todo risco do
   # agente no GHE vem classificado IRRELEVANTE na matriz P×S do PGR. BAIXO
   # emite (decisão do Diovanni, 24/09/2026). Quadro 2 (IBE/SC) sem a chave.
+  - id: R-BIO-03
+    quando: manganes
+    emite:
+      - {exame: manganes_sangue, periodicidade_meses: 6, momentos: [adm, per, MR]}
+    base_normativa: "Protocolo Dra. Carolini R-BIO-03 [VALIDADO] — qualquer exposição
+      confirmada a manganês → manganês no sangue semestral em adm + per + MR,
+      independente do LT. Manganês não consta no Anexo I (Quadros 1 e 2) da NR-07
+      (Portaria MTP 567/2022), por isso fica fora de R-BIO-04 e de R-BIO-05. O protocolo
+      cita a NR-15 como base; o item exato da NR-15 [A CONFERIR — D-ARQ-69]. Momentos e
+      periodicidade conferidos contra o gabarito Aurora Lago das Rosas 27.08.26 (Dra.
+      Patrícia, GHE 16 SERRALHERIA: 'Manganês no sangue (ADM, PER 6 meses, MRO)')."
+    status: VALIDADO
+
   - id: R-BIO-04-acetona
     quando: acetona
     mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}

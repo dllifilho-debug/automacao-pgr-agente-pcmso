@@ -24,7 +24,7 @@ def test_vocabulario_exames_carrega_com_slugs_esperados() -> None:
         "acido_mandelico_fenilglioxilico", "mercurio_urina", "mek_urina",
         "carboxihemoglobina", "hexanodiona_urina", "ortocresol_urina",
         "acido_tricloroacetico", "acido_metilhipurico",
-        "chumbo_sangue", "ala_urinario",
+        "chumbo_sangue", "ala_urinario", "manganes_sangue",
         "cadmio_urina", "fluoreto_urinario", "acetilcolinesterase_eritrocitaria",
         "cromo_urina", "cobalto_urina", "fenol_urina", "metanol_urina",
         "diclorometano_urina", "metahemoglobina_sangue",

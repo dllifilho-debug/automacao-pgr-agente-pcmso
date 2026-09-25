@@ -9845,3 +9845,33 @@ reversão do teste do "Remover" atualizado. Varredura inversa 2/2 (código inlin
 (o `AppTest` copia só o corpo da função, sem `from __future__ import annotations`) — corrigido com
 import local. Suíte completa (árvore parada): **1382 passed, 6 skipped, 0 failed** (801.36s), +1
 exato. `mypy --strict` alvo canônico limpo, 50 arquivos.
+
+## Sessão (branch `claude/determined-fermi-xxah3h`, continuação pós-merge do PR #376) — 25/09/2026 — IMPLEMENTAÇÃO: `R-BIO-03` (manganês no sangue)
+
+**Origem.** Ordem do Diovanni. `R-BIO-03` era `[VALIDADO]` no PROTOCOLO desde a v2 e nunca foi
+materializada — faltava o slug de exame (DT-003EO-03). 2º caso real: Aurora GHE 16 SERRALHERIA,
+manganês MODERADO no PGR, gabarito pede "Manganês no sangue (ADM, PER 6 meses, MRO)", app não emitia.
+Branch recriada de `origin/main f683462`.
+
+**Implementado.** `regras.yaml`: `R-BIO-03`, `quando: manganes`, `manganes_sangue` 6M
+`[adm, per, MR]`, sem `mencao_documental` (Mn fora do Anexo I da NR-07 → fora de R-BIO-05).
+`exames.yaml`: `manganes_sangue` "Manganês no sangue" (grafia do gabarito Aurora). PROTOCOLO v101:
+nota de implementação na própria regra, conteúdo inalterado. Base NR-15 do protocolo
+`[A CONFERIR — D-ARQ-69]` — Diovanni vai fornecer a NR-15 (Anexo 12 é o candidato).
+
+**Medido.** Instrumento versionado (`comparar_matriz_gabarito`, funções chamadas por script no
+scratchpad sem envelope JSON) nos 3 pares determinísticos, worktree `origin/main` × árvore: saída
+**idêntica** — nenhum dos 3 resolve manganês hoje (Fascino escreve "Maganês", DT-003EQ-02). Efeito
+real só na rota LLM (Aurora), não reproduzível sem chave `[A MEDIR — próxima matriz do app]`.
+`medir_painel`: `regras 26/45 → 27/45`. Tabela "Os três números" não re-tirada — bloqueador já
+registrado no PAINEL ("re-tirada da tabela é decisão do Arquiteto"). Achado de passagem: o
+instrumento conta `R-CLI-02` em `regras.yaml`, mas é citação em comentário (classe DH-003EC-01(b)).
+
+**Verificação.** 4 testes (`test_bio_manganes.py`); varredura inversa 6 reversões de dado, 4/4
+discriminantes. 1ª suíte completa: 1 failed — `test_vocabulario_exames_carrega_com_slugs_esperados`,
+guardião de inventário que exige atualização deliberada do conjunto ao entrar slug; atualizado.
+2ª suíte completa (árvore parada): **1386 passed, 6 skipped, 0 failed** (801.99s), +4 exato contra
+1382. `mypy --strict` alvo canônico limpo, 50 arquivos.
+
+**Próxima.** A declarar: `R-CLI-02`/`R-CLI-03` (clínico semestral), decisão de BAIXO em R-BIO-05,
+conferência NR-15 para R-BIO-03.
