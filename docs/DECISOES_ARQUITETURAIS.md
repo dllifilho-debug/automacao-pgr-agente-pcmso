@@ -4167,7 +4167,7 @@ Sessão 003.FD (22/08/2026). `[META — decisão de processo. Não toca motor ne
 
 ## D-ARQ-86 — Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação
 
-**Status:** ARQUITETURA PROPOSTA — aguarda ratificação do Diovanni. Sem código nesta sessão. Nenhuma R-* criada, alterada ou depreciada; a emenda de R-BIO-05 da cl.6 só entra no PROTOCOLO na fatia 1, depois de ratificada.
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (25/09/2026), com Q1–Q4 resolvidas (ver "Ratificação" abaixo). Nenhuma fatia implementada; a emenda de R-BIO-05 da cl.6 entra no PROTOCOLO na fatia 1.
 
 Sessão branch `claude/hopeful-ramanujan-rbgh4s` (25/09/2026). Pedido do Diovanni: campo para inserir as avaliações quantitativas que a equipe já recebe (ruído, poeira, vibração, químicos) ou pede a quem elaborou o PGR.
 
@@ -4222,6 +4222,15 @@ Sessão branch `claude/hopeful-ramanujan-rbgh4s` (25/09/2026). Pedido do Diovann
 - **`D-ARQ-49`** — reusa a costura dos anexos; não cria rota de parse nova.
 - **`D-ARQ-22`** — a procedência é revisão de saída, não confiança no informante: valor digitado errado é erro do laudo, visível na célula.
 - **`DT-002V-01`** — o motor consome o valor representativo pronto do laudo; calcular CLSC a partir de amostras segue fora.
+
+**Ratificação (Diovanni, 25/09/2026, pós-merge do PR #381).** *"Ratifico todas as suas sugestões para as perguntas Q1 a Q4."* Resoluções, cada uma a sugestão já escrita nesta decisão:
+
+- **Q1:** MODERADO ou acima com medição abaixo do nível de ação **emite** o indicador (cl.6).
+- **Q2:** medição de **qualquer data** é aceita; a data sai na observação para o RT julgar. Sem prazo automático.
+- **Q3:** medições no **estado da sessão**, mesmo mecanismo dos anexos (cl.8). Persistência por obra entre sessões fica para decisão futura.
+- **Q4:** ACGIH (posição 4) **aceita** para agente sem LT na NR-15, **só com fonte citada por agente** — edição do TLV registrada no dado (cl.5). Agente sem fonte não entra na tabela e emite como hoje.
+
+Pré-requisito da fatia 1 (DADO): LT do Anexo 11 da NR-15 nos agentes com R-BIO-04, conferido contra o PDF oficial. O Diovanni vai versionar as NRs vigentes numa pasta própria do repositório; a conferência da NR-09 (nível de ação, hoje `[A CONFERIR]`) sai de lá.
 
 **Base.** Sessão branch `claude/hopeful-ramanujan-rbgh4s`, 25/09/2026, ARQUITETURA. Fontes: NR-07 7.5.12 "b" (Portaria MTP 567/2022, PDF conferido em `claude/eager-fermat-txbn7h`); NR-09 nível de ação `[A CONFERIR]`; NR-15 Anexo 11 Quadro n.º 1 (via gabarito 003.DP, página oficial de NRs vigentes); NR-07 Anexos II e III. Leitura de código: `quantificacao.py`, `classificacao_ruido.py`, `leo_resolver.py`, `predicados.py` (`_ruido_acima_acao`), `estagios/emissao.py` (`_nivel_dispensa`), `regras.yaml` (R-AUD-01, R-AUD-04, R-BIO-04-*).
 
@@ -4449,3 +4458,4 @@ Sessão branch `claude/hopeful-ramanujan-rbgh4s` (25/09/2026). Pedido do Diovann
 | v216 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — revisão na tela): **Nota de aplicação em `D-ARQ-22` Parte B** (`Motivo.risco_origem` preenchido só em regra de agente direto; caso geral segue fora, DH-003ED-01) e **em `D-ARQ-12`** (`enquadramento_3048` ganha o primeiro consumidor, só na revisão da tela). Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO v99→**v100**. Índice D-ARQ regenerado. |
 | v217 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — tela da matriz): **Nota de aplicação em `D-ARQ-49`** (fatia C de `DT-(sessão claude/determined-fermi-xxah3h)-01`) — produtos anexados reaplicados no reparse do mesmo PDF, campo aditivo `CacheMatrizes.anexos_descartados`, multi-GHE sem default. Nenhuma cláusula alterada; decisões inalteradas em **85**. PROTOCOLO inalterado (v100). Índice D-ARQ regenerado. |
 | v218 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (ARQUITETURA — pedido do Diovanni, docs-only): **D-ARQ-86 CRIADA, PROPOSTA** — medição quantitativa informada na tela por (GHE, agente) com procedência de laudo; LT do Anexo 11 da NR-15 como dado do LEO-resolver; emenda proposta de R-BIO-05 (dispensa em BAIXO só com medição abaixo do nível de ação). Três fatias (químicos; sílica/PNOS/asbesto; ruído) e quatro questões abertas. Nenhuma R-* alterada. |
+| v219 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (ARQUITETURA — ratificação, docs-only): **`D-ARQ-86` RATIFICADA** pelo Diovanni com Q1–Q4 resolvidas pelas sugestões da própria decisão (MODERADO+ emite com medição baixa; medição de qualquer data, data na observação; estado da sessão; ACGIH só com fonte citada por agente). Nenhuma fatia implementada. |
