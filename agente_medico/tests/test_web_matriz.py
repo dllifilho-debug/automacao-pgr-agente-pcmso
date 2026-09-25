@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import ast
 from collections.abc import Sequence
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +35,7 @@ from agente_medico.superficie.web_matriz import (
     _TranscritorContado,
     anexar_produto_e_reprocessar,
     anexar_produto_em_ghes,
+    EmissaoFuturaError,
     deve_reprocessar,
     executar_rota_determinista,
     executar_rota_determinista_cacheada,
@@ -127,7 +128,7 @@ def test_montar_envelope_usa_a_validade_informada() -> None:
     # Reversão que mata: trocar date.fromisoformat(validade_iso) por
     # date.today() — a validade cravada (2030-01-01, bem longe de "hoje")
     # deixaria de bater.
-    envelope = montar_envelope("2030-01-01", True)
+    envelope = montar_envelope("2030-01-01", True, hoje=date(2030, 6, 1))
     assert envelope.validade == date(2030, 1, 1)
     assert envelope.assinatura_engenheiro is True
 
@@ -138,6 +139,17 @@ def test_montar_envelope_recusa_validade_malformada() -> None:
     # levantar ValueError.
     with pytest.raises(ValueError):
         montar_envelope("31/12/2023", True)
+
+
+def test_montar_envelope_recusa_emissao_no_futuro() -> None:
+    # Reversões que matam: (1) tirar a checagem `validade > hoje` — o vencimento
+    # digitado no lugar da emissão (Aurora, 25/09/2026: 2027-04-01) volta a passar
+    # e R-PGR-06 nunca dispara; (2) trocar `>` por `>=` — a emissão de hoje seria
+    # recusada.
+    hoje = date(2026, 9, 25)
+    with pytest.raises(EmissaoFuturaError):
+        montar_envelope("2027-04-01", True, hoje=hoje)
+    assert montar_envelope("2026-09-25", True, hoje=hoje).validade == hoje
 
 
 def test_gerar_documento_expande_ghe_em_cargos() -> None:
@@ -318,12 +330,48 @@ def test_troca_de_cabecalho_regenera_documento_sem_reprocessar(
 # ---------------------------------------------------------------------------
 
 
-def _submeter_formulario(at: AppTest, validade: str = "2026-12-31") -> None:
+# Emissão relativa a hoje: data futura é recusada (EmissaoFuturaError) e data
+# fixa no passado envelheceria até cair em R-PGR-06.
+_EMISSAO_RECENTE = (date.today() - timedelta(days=30)).isoformat()
+
+
+def _submeter_formulario(at: AppTest, validade: str = _EMISSAO_RECENTE) -> None:
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
     indice_validade = len(at.text_input) - 1
     at.text_input[indice_validade].set_value(validade).run()
     at.checkbox[0].set_value(True).run()
     at.button[0].click().run()
+
+
+def test_emissao_no_futuro_mostra_erro_proprio_e_nao_processa(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversão que mata: tratar EmissaoFuturaError no `except ValueError`
+    # genérico da casca — a tela mandaria "usar o formato ISO", que não é o erro.
+    chamadas: list[int] = []
+
+    def _preparar_espiao(*args: Any, **kwargs: Any) -> None:
+        chamadas.append(1)
+
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_espiao)
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at, validade=(date.today() + timedelta(days=200)).isoformat())
+
+    assert not at.exception
+    assert any("Data de emissão no futuro" in e.value for e in at.error)
+    assert chamadas == []
+
+
+def test_campo_pede_a_data_de_emissao_do_pgr() -> None:
+    # Reversão que mata: voltar o rótulo para "Validade do PGR" — foi ele que
+    # levou o vencimento a ser digitado no lugar da emissão (Aurora, 25/09/2026).
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+
+    assert not at.exception
+    assert any(t.label == "Data de emissão do PGR (AAAA-MM-DD)" for t in at.text_input)
 
 
 def test_status_rejeitado_mostra_motivo_e_nao_oferece_download(
@@ -1236,8 +1284,8 @@ def test_aviso_de_anexo_descartado_aparece_uma_vez(monkeypatch: pytest.MonkeyPat
     at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
     at.button(key="anexar_fds_fds.pdf").click().run()
 
-    validade = next(t for t in at.text_input if t.label == "Validade do PGR (AAAA-MM-DD)")
-    validade.set_value("2027-06-30").run()
+    validade = next(t for t in at.text_input if t.label == "Data de emissão do PGR (AAAA-MM-DD)")
+    validade.set_value((date.today() - timedelta(days=60)).isoformat()).run()
     assert any("fds (GHE-01)" in w.value for w in at.warning)
 
     at.run()

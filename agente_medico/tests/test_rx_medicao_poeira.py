@@ -5,7 +5,7 @@ de código que o deixa vermelho."""
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -153,7 +153,7 @@ def _pagina_com_silica(monkeypatch: pytest.MonkeyPatch) -> AppTest:
     at = AppTest.from_function(pagina_matriz)
     at.run()
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
-    at.text_input[len(at.text_input) - 1].set_value("2026-12-31").run()
+    at.text_input[len(at.text_input) - 1].set_value((date.today() - timedelta(days=30)).isoformat()).run()
     at.checkbox[0].set_value(True).run()
     at.button[0].click().run()
     at.run()
