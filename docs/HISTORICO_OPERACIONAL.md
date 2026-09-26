@@ -10504,3 +10504,25 @@ discriminante) — refeita só no `Motivo`.
 exato sobre 1473. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` tocado → `INDICE_DARQ`
 regenerado e `tests/test_gerar_indice_darq.py` 6 passed. Saída da matriz (exames, periodicidades,
 momentos) inalterada por construção: só `Motivo` ganhou campos e a coluna Regra da revisão mudou de forma.
+
+## Sessão (branch `claude/cool-babbage-whh1zw`, pós-merge do PR #397) — 26/09/2026 — CONHECIMENTO: planilha da Dra. Patrícia atualizada e 22 matrizes de set/2026
+
+**Entrada.** Commit `d7a7612` do Diovanni: planilha "Matriz função-risco-exames — validado Dra. Patrícia
+06.2025" atualizada (mesmo nome; a antiga saiu no #396) e 22 matrizes `.doc` de set/2026.
+
+**Diff da planilha (célula a célula contra a versão do #396).** Só a aba "Periodicidade Exames" mudou:
+(1) espirometria 24M passou de "névoas, tintas, colas, impermeabilização" para o grupo PNOS/poeira
+metálica/fumos metálicos/espaço confinado; (2) linha nova de saúde mental para riscos psicossociais;
+(3) psicossocial restrito a altura com risco psicossocial e espaço confinado. Linhas de acuidade, COHb
+e manganês inalteradas.
+
+**Medição nas 22 matrizes (conversão LibreOffice em série, instrumento descartável no scratchpad).**
+Grua/minigrua: 0/18 cargos com DEM na acuidade. Serralheria/solda (26 cargos): espirometria 24M 26/26,
+manganês 26/26, COHb 22/26 (sem: Vistamerica GHE 17, Serrinha 201 GHE 13), acuidade com DEM 23/26 (sem:
+Vistamerica GHE 17). Psicossocial: as duas avaliações para quase todos os cargos em 16 documentos; dividem
+a Fazenda Santa Luzia e, em parte, as Engeseg; Serrinha 201 em cerca de metade; Casamerica e Casa
+Brasileira não medidos (formato). Primeira contagem dizia 18 documentos — corrigida antes do commit.
+
+**Registrado.** Precedente citado em `R-VIS-01-solda` e `R-PKG-SOLD-CO` (`regras.yaml` e PROTOCOLO v110,
+sem mudança de regra); nota da grua em §5.6. Decisões abertas: DT `claude/cool-babbage-whh1zw`-02
+(espirometria para fumos metálicos) e -03 (psicossocial).
