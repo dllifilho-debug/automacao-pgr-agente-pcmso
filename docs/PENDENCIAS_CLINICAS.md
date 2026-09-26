@@ -3561,7 +3561,7 @@ riscos); na rota por IA (Aurora e demais CMO) `[A MEDIR]`, sem chave no containe
 
 **Status:** ABERTA — não-bloqueante (a saída do Aurora GHE 16 é a mesma pelos dois gatilhos).
 
-### DT-(sessão `claude/cool-babbage-whh1zw`)-02 — Espirometria para fumos metálicos e poeira metálica: a planilha da Dra. Patrícia (versão atualizada) pede, o motor não tem regra `[ABERTA — decisão do Diovanni]`
+### DT-(sessão `claude/cool-babbage-whh1zw`)-02 — Espirometria para fumos metálicos e poeira metálica: a planilha da Dra. Patrícia (versão atualizada) pede, o motor não tem regra `[RESOLVIDA — R-ESP-04, solda; gesso e espaço confinado seguem abertos]`
 
 **Origem.** Planilha da Dra. Patrícia, versão atualizada (`d7a7612`, 26/09/2026), linha 61: o gatilho de
 "ESPIROMETRIA 24M (ADM, PER, MR, DEM)" mudou de "névoas/neblinas, tintas, colas, impermeabilização" para
@@ -3578,7 +3578,12 @@ PGR `[A MEDIR — nos PGRs do acervo]`.
 `fumos_metalicos`), espirometria 24M (adm, per, MR, dem). Gesso e espaço confinado ficam para medição
 própria.
 
-**Status:** ABERTA — decisão do Diovanni.
+**Decisão (Diovanni, 26/09/2026).** Conflito normativo reportado antes de implementar: NR-07 Anexo III
+item 3.2 (texto oficial em `normas/`) põe fumos metálicos entre os "outros agentes agressores
+pulmonares", com espirometria só se houver sinais ou sintomas — motivo da depreciação de R-ESP-01
+(003.EI). Opção (a) escolhida: `R-ESP-04` `[INTERPRETADO]` pelo 7.5.18, gatilho `solda_indicador`,
+com a ressalva do 3.2 no PROTOCOLO. **Status:** RESOLVIDA para solda; poeira de gesso e espaço
+confinado seguem sem regra, sem medição.
 
 ### DT-(sessão `claude/cool-babbage-whh1zw`)-03 — Avaliação psicossocial: planilha da Dra. Patrícia restringe, matrizes recentes dão a todos `[ABERTA — decisão do Diovanni]`
 
@@ -3595,4 +3600,7 @@ das linhas `[A MEDIR — quantas são cargo]`; Casamerica (obra nova) e o PCMSO 
 foram medidos pelo instrumento (formato). A matriz do Aurora (validação Dra.
 Carolini) dá as duas a todos. Precedentes de nível 2 em conflito.
 
-**Status:** ABERTA — decisão do Diovanni. Enquanto isso, `R-PSY-03` segue como está.
+**Decisão (Diovanni, 26/09/2026).** Manter `R-PSY-03` — segue a prática das matrizes recentes e do
+Aurora. A divergência com a planilha fica como prioridade na revisão de saída: se as médicas confirmarem
+a planilha, a correção volta como entrada e a regra muda. **Status:** DECIDIDA — aguarda revisão das
+médicas.

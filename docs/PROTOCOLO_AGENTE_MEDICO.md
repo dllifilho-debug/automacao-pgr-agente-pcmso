@@ -433,6 +433,23 @@ Cargo com exposição a poeira de madeira → espirometria **24 meses** em adm/p
 
 **Ressalva normativa.** O item 3.1 do Anexo III (base de R-ESP-02) dispara por "poeira mineral" — madeira é orgânica, fora do escopo textual da regra. ID separada de R-ESP-02 por mudança de escopo de substância (mineral → madeira), não faixa nova da mesma regra (mesmo critério de versionamento que separou R-RX-02 de R-RX-01). Mesmo par de PGRs de R-RX-03 (GHE-08 Carpintaria Fascino, GHE-04 Carpintaria Aurora), mesma médica, mesmo valor: Espirometria 24M nos dois. Parte da resolução de DT-003EJ-01 — ver R-RX-03 acima.
 
+#### R-ESP-04 — Espirometria na solda `[INTERPRETADO — prioridade na revisão de saída]`
+
+GHE com `solda_indicador` (manganês ou fumos metálicos) → espirometria **24 meses** em adm/per/MR/dem.
+
+**Ressalva normativa.** NR-07 Anexo III (texto oficial em `normas/nr-07-atualizada-2022-1 .pdf`): o item
+3.1 obriga espirometria para **poeiras minerais**; o item 3.2 manda os expostos a **outros agentes
+agressores pulmonares** fazerem espirometria **se desenvolverem sinais ou sintomas respiratórios**. Fumos
+metálicos caem no 3.2 — foi o motivo da depreciação de R-ESP-01 (003.EI). A norma define o mínimo e não
+proíbe mais: a regra entra pelo 7.5.18 (exame complementar a critério do médico), no molde de R-ESP-03.
+
+**Precedente.** Planilha da Dra. Patrícia, versão atualizada (set/2026), que passou a pedir espirometria 24M
+para "PNOS, poeira metálica… fumos metálicos"; 26/26 cargos de serralheria/solda com espirometria 24M
+(ADM, PER, MRO, DEM) nas 22 matrizes de set/2026. Diferença para R-ESP-01: gatilho restrito à solda, com
+precedente documentado, e sem a exceção por EPI. Nos casos em que o PGR da serralheria traz sílica (Aurora
+GHE 16, Fascino GHE 17) o exame já saía por R-ESP-02 e a consolidação une. Decisão do Diovanni
+(26/09/2026), opção (a) entre implementar ou manter só a leitura da 003.EI.
+
 ### 5.4 Raio-X de Tórax (OIT)
 
 #### R-RX-01 — RX de tórax OIT (sílica/asbesto e PNOS) `[VALIDADO]`
@@ -1136,3 +1153,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v108 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **exceção do soldador de `R-VIS-01` materializada** como `R-VIS-01-solda` (§5.6, mesma ID, conteúdo inalterado; gatilho `solda_indicador` = manganês ou fumos metálicos `[INTERPRETADO]`); **`R-VIS-03` CRIADA** (manta asfáltica a quente → acuidade com DEM, `[INTERPRETADO]`, RQ.61 Viverde GHE 09). **`R-VIS-02` materializada** (porteiro, primitivo `cargo_porteiro`; vigia fora — precedente dividido). Nenhuma NR exige acuidade para solda (NR-07 7.5.18). Fascino GHE-17: acuidade com DEM, igual ao gabarito. |
 | v109 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-SOLD-CO` CRIADA** (§6) — solda (`solda_indicador`, `[INTERPRETADO]`) → carboxihemoglobina 6M PER (NR-07 Anexo I Quadro 1, CO), precedente Aurora GHE 16 e Flamboyant GHE 17. Gatilho pela fonte geradora declarada fica como DT (o motor não lê o campo). |
 | v110 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (CONHECIMENTO — precedente, sem mudança de regra): planilha da Dra. Patrícia (versão atualizada, `d7a7612`) e 22 matrizes de set/2026 citadas como precedente em **`R-VIS-01-solda`** (§5.6), **`R-PKG-SOLD-CO`** (§6) e na nota "Fora do padrão" de §5.6 (grua sem DEM: 0/18 cargos). |
+| v111 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-ESP-04` CRIADA** (§5.3) — solda (`solda_indicador`) → espirometria 24M adm/per/MR/dem, `[INTERPRETADO]` via 7.5.18, com ressalva do Anexo III item 3.2; precedente planilha Patrícia atualizada e 26/26 serralherias de set/2026. **`R-PSY-03` mantida** apesar da planilha (ver DT `claude/cool-babbage-whh1zw`-03). |
