@@ -10526,3 +10526,29 @@ Brasileira não medidos (formato). Primeira contagem dizia 18 documentos — cor
 **Registrado.** Precedente citado em `R-VIS-01-solda` e `R-PKG-SOLD-CO` (`regras.yaml` e PROTOCOLO v110,
 sem mudança de regra); nota da grua em §5.6. Decisões abertas: DT `claude/cool-babbage-whh1zw`-02
 (espirometria para fumos metálicos) e -03 (psicossocial).
+
+## Sessão (branch `claude/cool-babbage-whh1zw`, pós-merge do PR #398) — 26/09/2026 — IMPLEMENTAÇÃO: espirometria na solda (`R-ESP-04`); `R-PSY-03` mantida
+
+**Decisões do Diovanni** sobre as DTs `claude/cool-babbage-whh1zw`-02 e -03, com recomendação do Claude.
+
+**Conflito reportado antes de implementar.** NR-07 Anexo III (PDF oficial em `normas/`): item 3.1 obriga
+espirometria para poeiras minerais; item 3.2 põe os outros agressores pulmonares — fumos metálicos entre
+eles — em espirometria só com sinais ou sintomas. Foi o que depreciou `R-ESP-01` (003.EI). A primeira
+recomendação ("risco baixo") não tinha visto isso; corrigida na conversa antes de qualquer código.
+Opção (a) escolhida: `R-ESP-04` `[INTERPRETADO]` via 7.5.18, gatilho `solda_indicador`, molde de `R-ESP-03`.
+
+**Implementado.** `R-ESP-04` em `regras.yaml`; PROTOCOLO v111 (§5.3, com a ressalva do 3.2). `R-PSY-03`
+mantida; a divergência com a planilha fica como prioridade na revisão de saída.
+
+**Efeito medido — 3 pares (worktree `origin/main d8610db` × árvore, em série).** Matrizes idênticas nos
+três. Única diferença: Fascino GHE-17, a espirometria (que já saía por `R-ESP-02`, sílica) ganha
+`R-ESP-04` como segundo motivo. No Aurora, GHE 16 idem (sílica no PGR) `[A MEDIR — próxima matriz do app]`.
+
+**Testes.** `test_esp_solda.py` (3 casos). Varredura inversa 4/4 (remover a regra, periodicidade 12,
+sem `dem`, `todo_trabalhador`).
+
+**Verificação.** Suíte completa (árvore parada): **1480 passed, 6 skipped, 0 failed** (735.19s), +3 exato
+sobre 1477. `mypy --strict` alvo canônico limpo, 51 arquivos. Uma primeira rodada foi interrompida e
+descartada: o HISTORICO foi escrito durante ela, violando a regra "medição nunca concorrente com escrita"
+(nenhum teste lê o arquivo — só comentários o citam —, mas o número ficaria sem proveniência). `DECISOES`
+não tocado.

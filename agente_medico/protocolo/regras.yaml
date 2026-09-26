@@ -355,6 +355,23 @@ regras:
     base_normativa: "Poeira de madeira → espirometria 24M. SEM âncora no item 3.1 do Anexo III (que dispara por 'poeira mineral' — madeira é orgânica, fora do escopo textual de R-ESP-02) — origem matriz Patrícia, não norma conferida [INTERPRETADO]. Mesmo par de PGRs de R-RX-03 (GHE-08 Carpintaria Fascino 15.07.26, GHE-04 Carpintaria Aurora 27.08.26), mesma médica, mesmo valor: ambos Espirometria 24M. ID separada de R-ESP-02 por mudança de escopo de substância (mineral -> madeira), não faixa da mesma regra."
     status: INTERPRETADO
 
+  - id: R-ESP-04
+    quando: solda_indicador
+    emite:
+      - exame: espirometria
+        periodicidade_meses: 24
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Solda → espirometria 24M. SEM âncora no item 3.1 do Anexo III da NR-07
+      (poeira mineral); fumos metálicos caem no item 3.2 (espirometria só com sinais ou sintomas
+      respiratórios) — o que levou à depreciação de R-ESP-01 (003.EI). Entra pelo 7.5.18 (a
+      critério do médico) [INTERPRETADO — prioridade na revisão de saída]: planilha Dra.
+      Patrícia, versão atualizada (set/2026: 'fumos metálicos, poeira metálica… → espirometria
+      24M ADM, PER, MR, DEM') e 26/26 cargos de serralheria/solda nas 22 matrizes de set/2026.
+      Gatilho `solda_indicador` [INTERPRETADO], o mesmo das demais regras de solda. Decisão do
+      Diovanni (26/09/2026)."
+    status: INTERPRETADO
+
   - id: R-RX-02
     quando: fumos_metalicos
     emite:
