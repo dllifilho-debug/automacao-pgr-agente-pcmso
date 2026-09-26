@@ -107,23 +107,29 @@ def _emitir_regra(
         )
 
     predicado_str = serializar_predicado(regra["quando"])
-    motivo = Motivo(
-        regra_id=str(regra["id"]),
-        predicado=predicado_str,
-        risco_origem=_risco_origem(regra, ctx),
-        detalhe=f"Emitido por regra {regra['id']}",
-        status_regra=regra.get("status"),
-    )
+    risco_origem = _risco_origem(regra, ctx)
+    base_normativa = regra.get("base_normativa")
 
     for item in regra["emite"]:
         momentos: set[Momento] = {
             _converter_momento(str(m), str(regra["id"]), str(item["exame"]))
             for m in item["momentos"]
         }
+        periodicidade = int(item["periodicidade_meses"])
+        motivo = Motivo(
+            regra_id=str(regra["id"]),
+            predicado=predicado_str,
+            risco_origem=risco_origem,
+            detalhe=f"Emitido por regra {regra['id']}",
+            status_regra=regra.get("status"),
+            periodicidade_meses=periodicidade,
+            momentos=frozenset(momentos),
+            base_normativa=str(base_normativa) if base_normativa is not None else None,
+        )
         emitidos.append(
             ExameEmitido(
                 exame=str(item["exame"]),
-                periodicidade_meses=int(item["periodicidade_meses"]),
+                periodicidade_meses=periodicidade,
                 momentos=momentos,
                 motivos=[motivo],
                 periodicidade_apos_15a=item.get("periodicidade_apos_15a"),
