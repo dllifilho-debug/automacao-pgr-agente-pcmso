@@ -47,6 +47,31 @@ def extrair_texto_pgr(caminho: Path) -> list[str]:
     return [page.extract_text() or "" for page in paginas_liberadas(caminho)]
 
 
+# R-PSY-03; NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal PGR-documenta-
+# psicossocial (GHEPGR.psicossocial, diferido em D-ARQ-49 P2, nunca extraído
+# até aqui). Marcadores e case-insensitive [INTERPRETADO — DT-(sessão não
+# numerada, branch claude/youthful-lamport-3kfkog)-01]: mesmos 3 termos que a
+# medição do PGR Hetrin 14/09 (197 páginas, zero ocorrência, matriz validada
+# sai sem psicossocial em 28/28 cargos) e do PGR CMO Varandas Flamboyant
+# 16/09 (marcador presente, matriz sai com psicossocial em todo GHE) usaram
+# para diferenciar os dois casos.
+_MARCADORES_PSICOSSOCIAL = (
+    "inventário de riscos psicossociais",
+    "copsoq",
+    "frprt",
+)
+
+
+def detectar_psicossocial(paginas: Sequence[str]) -> bool:
+    """Presença de ao menos 1 marcador do inventário de risco psicossocial
+    em qualquer página do PGR (R-PSY-03). Sinal de PGR inteiro, não por GHE
+    — não há, até a medição de origem, evidência de variação por GHE dentro
+    do mesmo documento; o chamador replica o resultado para todo GHEPGR do
+    PGR."""
+    texto = "\n".join(paginas).lower()
+    return any(marcador in texto for marcador in _MARCADORES_PSICOSSOCIAL)
+
+
 def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:
     linha_normalizada = linha.strip()
     if len(linha_normalizada) > 80:
@@ -79,9 +104,27 @@ def _reconhece_cabecalho_informacoes_cargos_funcoes(linha: str) -> bool:
     ) is not None
 
 
+def _reconhece_cabecalho_ghe_separador_antes_do_numero(linha: str) -> bool:
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-01: separador ENTRE "GHE" e o
+    # número, título obrigatório — "GHE - 14 PINTURA" (Porto Araras I, pág. 66)
+    # e "GHE\x00 01 \x00 ADMINISTRAÇÃO 01" (Vila Brasil Escritório, GHEs 01–22,
+    # glifo-hífen como NUL, mesma classe de 003.DS). Sem esta forma os dois
+    # documentos perdiam 1 e 22 GHEs sem pendência. Separada da forma padrão
+    # porque lá título sem separador ("GHE 22 SECONC") não é cabeçalho;
+    # aqui o separador antes do número já ancora a linha. Varredura dos 43 PDFs
+    # do acervo: só casa os 23 cabeçalhos-alvo nos PGRs.
+    linha_normalizada = linha.strip()
+    if len(linha_normalizada) > 80:
+        return False
+    return re.fullmatch(
+        r"GHE\s*[-\x00]\s*\d+(?:\s*[-\x00]\s*|\s+)\S.*", linha_normalizada
+    ) is not None
+
+
 _RECONHECEDORES_GHE: tuple[Callable[[str], bool], ...] = (
     _reconhece_cabecalho_ghe_padrao,
     _reconhece_cabecalho_informacoes_cargos_funcoes,
+    _reconhece_cabecalho_ghe_separador_antes_do_numero,
 )
 
 
@@ -91,7 +134,7 @@ def eh_cabecalho_ghe(linha: str) -> bool:
     repertório _RECONHECEDORES_GHE casar a linha.
 
     Substitui a âncora fixa _ANCORA_GHE = "SETOR/FUNÇÃO" (n=1, medição
-    003.BM/003.BL). O repertório hoje cobre 5 formas de cabeçalho:
+    003.BM/003.BL). O repertório hoje cobre 6 formas de cabeçalho:
     1. "GHE 12" (Viverde)
     2. "GHE 12 - TÍTULO" (Vistamérica/CMO/Seconci/TPB/AURO)
     3. "INVENTÁRIO DE RISCO GHE 12" (ALT T65/EURO)
@@ -108,6 +151,9 @@ def eh_cabecalho_ghe(linha: str) -> bool:
        (avaliar_segmentacao: bloco 2 mede 41,7% > _LIMIAR_DENSIDADE_PCT) —
        revisão humana BY DESIGN, mesma classe do Cjr (decisão 003.DD,
        V2 de 003.DC), não um bug a corrigir.
+    6. "GHE - 14 TÍTULO" / "GHE\x00 01 \x00 TÍTULO" (Porto Araras I, Vila
+       Brasil Escritório) — separador antes do número, título obrigatório;
+       DT-(sessão claude/hopeful-newton-yjv3k7)-01.
 
     Estruturado como tupla de funções linha->bool em disjunção para
     extensão futura (novas formas de cabeçalho) sem tocar o consumidor
@@ -218,6 +264,25 @@ def _reconhece_cargo_cbo(linha: str) -> bool:
 def _reconhece_funcao_grid_perigo_risco(linha: str) -> bool:
     linha_normalizada = linha.strip()
     return re.match(r"Função .*Perigo / Risco", linha_normalizada) is not None
+
+
+def _reconhece_funcao_grid_perigo_risco_fragmentado(linha_a: str, linha_b: str) -> bool:
+    """Variante fragmentada do cabeçalho grid AIHA (Hetrin/Serra Dourada;
+    medida na revisão de 14/09/2026 do PGR Hetrin — DT-(sessão não numerada,
+    branch claude/youthful-lamport-3kfkog)-02): o wrap de coluna do
+    pdfplumber quebra "Função"/"Perigo"/"Risco" em duas linhas físicas
+    adjacentes, intercaladas com palavras de outras colunas do cabeçalho
+    ("FUNÇÃO (quando MEIO DE" / "RISCO PERIGO/ RISCO TEMPO DE..."), e em
+    caixa alta — não casa mais `_reconhece_funcao_grid_perigo_risco`
+    (linha única, Título-Caso, forma medida em 003.CQ). `\\b` sobre as duas
+    linhas concatenadas evita falso-positivo em prosa no plural ("perigos e
+    riscos", "funções") — a fronteira de palavra falha logo após o 's'."""
+    par = f"{linha_a} {linha_b}"
+    return (
+        re.search(r"\bFunção\b", par, re.IGNORECASE) is not None
+        and re.search(r"\bPerigo\b", par, re.IGNORECASE) is not None
+        and re.search(r"\bRisco\b", par, re.IGNORECASE) is not None
+    )
 
 
 def _reconhece_lotacao_escala_qtd(linha: str) -> bool:
@@ -444,9 +509,17 @@ def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
 
     Mesmo achatamento por linhas dos irmãos (avaliar_segmentacao):
     documento é família cargo-based sse ZERO linhas casarem eh_cabecalho_ghe
-    E pelo menos 1 linha casar eh_sinal_cargo. Presença de QUALQUER âncora
-    GHE veta o diagnóstico (GHE-presente sempre vence) — mesmo se o
+    E pelo menos 1 linha (ou par de linhas adjacentes, grid AIHA
+    fragmentado — ver abaixo) casar sinal de cargo. Presença de QUALQUER
+    âncora GHE veta o diagnóstico (GHE-presente sempre vence) — mesmo se o
     documento também tiver sinais de cargo (ex.: boilerplate de assinatura).
+
+    Par de linhas adjacentes é checado à parte de eh_sinal_cargo
+    (_reconhece_funcao_grid_perigo_risco_fragmentado) porque o sinal
+    fragmentado do grid AIHA (Hetrin/Serra Dourada, revisão de 14/09/2026)
+    não cabe no contrato de linha única que os demais reconhecedores de
+    _RECONHECEDORES_CARGO compartilham — não altera esse contrato nem os
+    outros reconhecedores.
 
     Pendência tipo "pgr_cargo_based", sempre bloqueante (anti-supressão:
     D-ARQ-31/35 — nunca silêncio), regra_origem "D-ARQ-57", ghe_id=None.
@@ -457,6 +530,11 @@ def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
         return None
 
     n_sinais_cargo = sum(1 for linha in linhas if eh_sinal_cargo(linha))
+    n_sinais_cargo += sum(
+        1
+        for linha_a, linha_b in zip(linhas, linhas[1:])
+        if _reconhece_funcao_grid_perigo_risco_fragmentado(linha_a, linha_b)
+    )
     if n_sinais_cargo == 0:
         return None
 
@@ -517,7 +595,7 @@ def avaliar_estrutura(paginas: Sequence[str]) -> tuple[Rota, Pendencia | None]:
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
 
     if any(eh_cabecalho_ghe(linha) for linha in linhas):
-        return "ghe", avaliar_segmentacao(paginas)
+        return "ghe", avaliar_segmentacao(paginas) or avaliar_numeracao_ghe(paginas)
 
     if any(eh_ancora_card_cargo(linha) for linha in linhas):
         return "card", _avaliar_spans(paginas, eh_ancora_card_cargo, "card(s) cargo-based")
@@ -599,6 +677,46 @@ def _avaliar_spans(
         )
 
     return None
+
+
+def avaliar_numeracao_ghe(paginas: Sequence[str]) -> Pendencia | None:
+    """Gate de número de GHE saltado: todo número de 1 ao maior número
+    reconhecido tem de aparecer em algum cabeçalho. Cabeçalho repetido
+    (continuação de página) não é defeito.
+
+    Defesa contra forma de cabeçalho desconhecida: quando eh_cabecalho_ghe
+    falha numa forma nova, as duas rotas (parsear_arquivo e
+    recortar_blocos_ghe) usam o mesmo reconhecedor, concordam na contagem
+    errada e o GHE some sem pendência — medido em Porto Araras I (13 -> 15)
+    e Vila Brasil Escritório (só 23-26), DT-(sessão
+    claude/hopeful-newton-yjv3k7)-01. Varredura dos 29 PGRs do acervo com o
+    repertório atual: lacuna só em R78 e Floramazônia, ambos já barrados
+    antes por avaliar_segmentacao. Um adendo legítimo que traga só GHEs
+    altos também bloqueia: falso-positivo aceito por desenho (revisão
+    humana, anti-supressão vence — mesma escolha dos limiares acima)."""
+    numeros = {
+        int(m.group())
+        for pagina in paginas
+        for linha in pagina.splitlines()
+        if eh_cabecalho_ghe(linha) and (m := re.search(r"\d+", linha))
+    }
+    if not numeros:
+        return None
+    faltantes = [n for n in range(1, max(numeros) + 1) if n not in numeros]
+    if not faltantes:
+        return None
+    return Pendencia(
+        tipo="numeracao_ghe_lacunar",
+        destinatario="extracao",
+        motivo=(
+            f"Numeração de GHE com lacuna: {len(faltantes)} número(s) ausente(s) "
+            f"entre 1 e {max(numeros)} ({', '.join(str(n) for n in faltantes)}) — "
+            f"cabeçalho em forma não reconhecida ou GHE ausente do documento"
+        ),
+        bloqueante=True,
+        regra_origem="D-ARQ-57",
+        ghe_id=None,
+    )
 
 
 def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:

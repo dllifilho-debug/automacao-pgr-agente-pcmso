@@ -7,6 +7,17 @@ from typing import Literal, Optional, Union
 
 
 @dataclass(frozen=True)
+class ProcedenciaMedicao:
+    """De onde veio o valor medido (D-ARQ-86 cl.3): a dispensa por medição
+    precisa ser rastreável até o laudo na revisão e no documento."""
+    origem: Literal["informada", "pgr"]
+    laudo: str
+    data: date
+    metodo: str = ""
+    informante: str = ""
+
+
+@dataclass(frozen=True)
 class Quantificacao:
     valor: Optional[float]
     unidade: Optional[str]
@@ -16,6 +27,7 @@ class Quantificacao:
     sem_avaliacao_quantitativa: bool = False
     pct_quartzo: Optional[float] = None  # denominador da fórmula do Anexo 12 NR-15 (D-ARQ-24 / R-RX-01)
     fracao: Optional[Fracao] = None  # R-RX-01 / D-ARQ-24: fração da medição (respirável/total), decide fórmula Anexo 12 NR-15
+    procedencia: Optional[ProcedenciaMedicao] = None  # D-ARQ-86 cl.3; None = valor transcrito do PGR sem laudo identificado
 
 
 @dataclass(frozen=True)
@@ -30,6 +42,10 @@ class RiscoPGR:
     # risco para o selo VÁLIDA discriminar acerto do motor de lacuna real. None quando
     # agente resolveu (agente is not None).
     causa_nao_resolucao: Optional[str] = None
+    # Nível da avaliação qualitativa P×S do próprio PGR para este risco
+    # ("IRRELEVANTE"/"BAIXO"/"MODERADO"/"ALTO"/"CRÍTICO"); None quando o documento
+    # não traz a avaliação na linha do risco. Consumidor: R-RX-01-qual (DT-003EC-01).
+    nivel_risco: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -108,6 +124,10 @@ class RiscoVerbatim:
     agente: str
     quantificacao: str
     fonte_geradora: str
+    # Colunas S·P·NÍVEL da avaliação qualitativa na linha do risco, verbatim
+    # ("4 1 BAIXO (4)"); "" quando ausente ou não extraída pela rota. Parse do
+    # nível é resolver-side (hidratacao.py), como quantificacao — DT-003EC-01.
+    avaliacao_qualitativa: str = ""
 
 
 @dataclass(frozen=True)
@@ -229,6 +249,9 @@ class Risco:
     materialidade: Optional[Materialidade] = None
     is_carcinogeno_iarc: bool = False
     is_sensibilizante: bool = False
+    # Copiado de RiscoPGR.nivel_risco na Fase A; riscos implícitos (Fase B) e de
+    # composição (Fase C) não têm avaliação do PGR — ficam None (DT-003EC-01).
+    nivel_risco: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -290,6 +313,41 @@ class Pendencia:
     exames_alvo: tuple[str, ...] = ()  # D-ARQ-31 fatia 3: slugs que a pendência pode escalar; casa contra ExameEmitido.exame na anexação
 
 
+# Níveis da matriz P×S como parsear_nivel_risco os devolve (DT-003EC-01), em
+# ordem crescente de risco.
+NIVEIS_RISCO_PXS: tuple[str, ...] = ("IRRELEVANTE", "BAIXO", "MODERADO", "ALTO", "CRÍTICO")
+
+
+@dataclass(frozen=True)
+class Observacao:
+    """Menção documental no lugar de um exame (R-BIO-05, DT-003EB-02): a regra
+    `regra_id` casou, mas o PGR classifica o risco do agente em `nivel_risco`
+    e os exames de `exames_dispensados` não são solicitados."""
+    regra_id: str
+    regra_dispensa: str
+    agente: str
+    nivel_risco: str
+    exames_dispensados: tuple[str, ...]
+    # D-ARQ-86 cl.6: medição abaixo do nível de ação que sustenta a dispensa em
+    # BAIXO, já descrita com valor, % do LT e laudo. None = dispensa só pelo nível.
+    medicao: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class MedicaoInformada:
+    """Avaliação quantitativa digitada na tela para (GHE, agente) — D-ARQ-86 cl.1.
+    `unidade` segue a normalização de quantificacao.py ("ppm", "mg/m3")."""
+    ghe_id: str
+    agente: str
+    valor: float
+    unidade: str
+    procedencia: ProcedenciaMedicao
+    # Poeira (fatia 2): fração decide a fórmula do LT; %quartzo é o denominador
+    # do Anexo 12 da NR-15 para sílica. Químicos deixam os dois em None.
+    fracao: Optional[Fracao] = None
+    pct_quartzo: Optional[float] = None
+
+
 @dataclass
 class GHEContext:
     pgr_ghe: GHEPGR
@@ -297,6 +355,7 @@ class GHEContext:
     predicados: dict[str, Union[bool, Ausente]] = field(default_factory=dict)
     regime: Optional[str] = None
     pendencias: list[Pendencia] = field(default_factory=list)
+    observacoes: list[Observacao] = field(default_factory=list)
 
 
 @dataclass
@@ -320,6 +379,7 @@ class MatrizGHE:
     # ctx.pgr_ghe — MatrizGHE não ganhou lógica nova, só passa o dado adiante.
     nome_ghe: str = ""
     cargos: tuple[str, ...] = ()
+    observacoes: tuple[Observacao, ...] = ()
 
 
 @dataclass

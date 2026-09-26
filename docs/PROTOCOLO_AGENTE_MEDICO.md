@@ -204,16 +204,61 @@ Exame clínico **anual** é o piso — vale inclusive para administrativo sem ri
 > ADM/PER/MRO/RET/DEM]`. Quatro testes falha-sem/passa-com em `test_orquestrador.py`.
 > Conteúdo clínico inalterado.
 
-#### R-CLI-02 — Quadro 1 e Quadro 2 do Anexo I (NR-07) `[VALIDADO]`
+#### R-CLI-02 — Quadro 1 e Quadro 2 do Anexo I (NR-07) `[DEPRECATED — sucedida por R-CLI-05; critério "qualquer agente do Anexo I" refutado por medição]`
 Exposição a agente biomonitorado do Anexo I (Quadro 1 ou Quadro 2) demanda clínico **semestral**. Quando exposto a agentes de **ambos os Quadros**, registrar em **uma única linha** semestral (não duplicar).
 
 > **Changelog 003.AA (mesma ID — relabel sem mudança de saída).** "Anexo I / Anexo II" → "Quadro 1 / Quadro 2 do Anexo I" (567/2022; "Anexo II" da NR-07 é ruído, não químico-com-LT). O conjunto de agentes que dispara o semestral não muda → saída estável → ID preservada.
 > **Ressalva `[INTERPRETADO — prioridade na revisão de saída]`:** o semestral é conduta da Dra. Carolini, não a NR-07 — item 7.5.8 fixa clínico **anual** para exposto (menor a critério médico). A borda "carcinógeno só de Anexo V, sem indicador no Anexo I, dispara semestral?" não está cravada (fonte primária congelada desde 002.M) — inspecionar na revisão de saída.
 
+> **Medição contra gabaritos (branch `claude/determined-fermi-xxah3h`, 25/09/2026) — NÃO
+> materializada; bloqueador reportado ao Diovanni.** Implementada como "qualquer agente com
+> `tipo_ibe` → clínico 6M" e medida com `comparar_matriz_gabarito` nos 3 pares determinísticos: **+5
+> divergências de periodicidade, nenhuma corrigida** — Porto Araras I (06/07/26) GHE-13 encanador e
+> GHE-14 pintor/meio oficial, Vila Brasil (26/08/26) GHE-23 e GHE-26: gabarito da Dra. Patrícia com
+> clínico **12M**, agentes do Anexo I todos BAIXO/IRRELEVANTE no PGR, indicadores pedidos. No Aurora
+> (27/08/26), a mesma médica pede **6M** nos GHEs 11 (MEK/ciclohexanona/THF MODERADO), 16 (Mn), 18 e
+> 22 (benzeno, cancerígeno), 21 (TCA — tricloroetileno, cancerígeno). O texto desta regra não descreve
+> essa conduta. Retirada do PR; hipótese a decidir: semestral por Mn, por cancerígeno do Anexo I, ou
+> por agente do Anexo I em nível MODERADO+ — não medido além destes 9 GHEs.
+
 #### R-CLI-03 — Manganês fora do Anexo I `[VALIDADO]`
 O **manganês** é o único agente fora do Anexo I (Quadros 1 e 2) da NR-07 que dispara clínico semestral. Base: NR-15 — exposição a Mn exige avaliação biológica independente do limite de tolerância.
 
 > **Changelog 003.AA (mesma ID).** "fora dos Anexos I e II" → "fora do Anexo I (Quadros 1 e 2)": Mn não consta em nenhum Quadro do Anexo I; o antigo "Anexo II" era o balde químico-com-LT (vocabulário pré-567), hoje inexistente nesse sentido. Conteúdo inalterado. A unicidade sob o eixo novo segue `[VALIDADO]`; reconfirmar de passagem se algum agente de Anexo V a altera (`[INTERPRETADO — revisão de saída]`).
+
+> **Nota de implementação (branch `claude/determined-fermi-xxah3h`, 25/09/2026 — mesma ID, conteúdo
+> inalterado).** Materializada em `regras.yaml` (`quando: manganes`, `exame_clinico` 6M `[per]`); os
+> demais momentos vêm de R-CLI-01 e a consolidação (D-ARQ-39) fica com a menor periodicidade. Base
+> literal conferida na mesma sessão: NR-15 Anexo 12, "Manganês e seus compostos", item 7 — exames
+> periódicos *"de 6 (seis) meses a anualmente para os trabalhadores de superfície"*,
+> independentemente do LT `[DERIVADO]`; 6M fixo `[INTERPRETADO]`. Caso: Aurora GHE 16.
+
+#### R-CLI-05 — Clínico semestral: cancerígeno com indicador biológico ou agente do Anexo I MODERADO+ `[DERIVADO — matriz Dra. Patrícia, Aurora 27/08/26]`
+
+> **Correção de atribuição (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026, mesma ID, conteúdo
+> inalterado).** A matriz do Aurora (27/08/26) tem coordenação CRM-GO 14.949 (Dra. Patrícia) e
+> "Médico(a) Responsável pela validação: Carolini M. P. Lisita" — o precedente é das duas médicas.
+Sucede R-CLI-02. Clínico **semestral** (periódico 6M) quando o GHE tem:
+- **(a)** cancerígeno IARC 1/2A com indicador biológico no Anexo I da NR-07 (Quadro 1 ou 2), **em qualquer nível**: arsênio, benzeno, 1,3-butadieno, cádmio, cromo hexavalente, diclorometano, dimetilformamida, estireno, óxido de etileno, tetracloroetileno, tricloroetileno. Lista = gabarito 003.DP (`docs/referencia/GABARITO_003DP_anexo11-12_iarc.md`) ∩ agentes com indicador; chumbo e inseticidas inibidores da colinesterase ficaram ESCALAR no 003.DP e só entram por (b); **ou**
+- **(b)** agente com indicador biológico no Anexo I classificado **MODERADO ou acima** na avaliação P×S do PGR. Poeira/sílica sem indicador biológico não conta, em nenhum nível.
+
+Base: NR-07 fixa o clínico periódico anual e admite intervalo menor a critério do médico — a norma não crava gatilho para o semestral (nível 1 não resolve). Nível 2 (matriz como precedente, D-ARQ-22 Parte A): no Aurora a Dra. Patrícia pede 6M no GHE 11 (MEK, THF, ciclohexanona MODERADO) e no GHE 18 (benzeno da aguarrás); pede 12M onde os agentes do Anexo I são BAIXO/IRRELEVANTE (Porto Araras I 06/07/26, Vila Brasil 26/08/26) e onde só poeira/sílica é MODERADO (10 GHEs do Aurora, 8 de Porto Araras I, 6 de Vila Brasil, 2 do Fascino).
+
+> **Medição de decisão (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026).** A proposta inicial
+> "(b) qualquer químico MODERADO+" foi refutada: 6M indevido por sílica/poeira em Fascino (−3
+> células), Porto Araras I (−22), Vila Brasil (−8) e 10 GHEs do Aurora. Com (b) restrita a agente
+> com indicador biológico, os 3 pares determinísticos ficam idênticos à `main`. **Limite declarado:**
+> nesses 3 pares nem (a) nem (b) disparam — a evidência a favor é só o Aurora, avaliado à mão sobre o
+> inventário do PGR (rota LLM, não reproduzível offline). PGR sem nível P×S na linha do risco deixa
+> (b) sem disparar (12M, lado menos protetivo). Sem explicação no PGR: Aurora GHE 21 (TCA pedido
+> sem solvente clorado declarado) e GHE 22 (asfalto — decisão própria), Fascino GHE-09 (Armação).
+> `[INTERPRETADO — prioridade na revisão de saída]` para essas bordas.
+
+> **Nota de implementação (mesma branch).** `regras.yaml` `R-CLI-05`
+> (`quando: {ou: [cancerigeno_com_ibe, agente_ibe_moderado_ou_acima]}`, `exame_clinico` 6M
+> `[per]`, status `DERIVADO`); composto `cancerigeno_com_ibe` em `predicados_compostos.yaml`;
+> primitivo `agente_ibe_moderado_ou_acima` em `predicados.py`. Demais momentos vêm de R-CLI-01
+> (consolidação D-ARQ-39). Testes: `test_cli_semestral.py`.
 
 #### R-CLI-04 — Risco físico isolado `[VALIDADO]`
 **Nenhum** risco físico (ruído, calor, vibração) isoladamente justifica clínico semestral. O default anual prevalece.
@@ -382,6 +427,12 @@ Fora do escopo do motor (D-ARQ-09 — o motor é função pura sobre o PGR, não
 - 3.4 (alteração espirométrica → conduta) → condicionado a resultado; mesma classe de DT-002X-03.
 - 3.5 (pós-demissional asbesto, periodicidade igual à do RX) → DT-002X-02, já aberta.
 
+#### R-ESP-03 — Espirometria por exposição a poeira de madeira `[INTERPRETADO]`
+
+Cargo com exposição a poeira de madeira → espirometria **24 meses** em adm/per/MR/dem.
+
+**Ressalva normativa.** O item 3.1 do Anexo III (base de R-ESP-02) dispara por "poeira mineral" — madeira é orgânica, fora do escopo textual da regra. ID separada de R-ESP-02 por mudança de escopo de substância (mineral → madeira), não faixa nova da mesma regra (mesmo critério de versionamento que separou R-RX-02 de R-RX-01). Mesmo par de PGRs de R-RX-03 (GHE-08 Carpintaria Fascino, GHE-04 Carpintaria Aurora), mesma médica, mesmo valor: Espirometria 24M nos dois. Parte da resolução de DT-003EJ-01 — ver R-RX-03 acima.
+
 ### 5.4 Raio-X de Tórax (OIT)
 
 #### R-RX-01 — RX de tórax OIT (sílica/asbesto e PNOS) `[VALIDADO]`
@@ -399,11 +450,14 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 **Sílica / asbesto — SEM avaliação quantitativa** (canteiro sem laudo de higienista; caso mais comum):
 - adm + **24M** até 15 anos de exposição → 12M após.
 
+**Sílica — SEM avaliação quantitativa, COM avaliação qualitativa P×S no PGR** `[INTERPRETADO — prioridade na revisão de saída]` (DT-003EC-01):
+- adm + **12M** constante, `[adm, per, MR, dem]`. Ver "Nota de aplicação (DT-003EC-01)" abaixo.
+
 **PNOS** (poeiras de menor toxicidade), com ou sem medição:
 - adm + **60M**. Nunca 24M.
 
 **Notas:**
-- "Sem avaliação quantitativa" é estado distinto de "qualitativa": dispara **24M**, não 12M. Corrige A-VAL-06 (v2), que simplificou demais.
+- "Sem avaliação quantitativa" é estado distinto de "qualitativa": dispara **24M**, não 12M. Corrige A-VAL-06 (v2), que simplificou demais. **Desde DT-003EC-01** o motor distingue os dois estados na extração: PGR silencioso → 24M (R-RX-01-sem); sílica com avaliação qualitativa P×S declarada → 12M (R-RX-01-qual).
 - A periodicidade da **espirometria** (24M, R-ESP-02) é independente da do RX, apesar de os dois exames compartilharem o gatilho (poeira mineral, Anexo III). O RX roteia por faixa do Quadro 1 — 24M é a faixa sem-avaliação-quantitativa; a espirometria é 24M sempre, por força do item 3.1, que não roteia por faixa. Coincidência de valor em 24M, não dependência: quando o PGR traz medição, o RX muda de faixa e a espirometria não muda. `[003.EI]`
 - O corte de 15 anos é **tempo de exposição acumulado** → resolvido pelo agendador, não pelo motor (ver D-ARQ-19).
 
@@ -413,6 +467,7 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 |---|---|---|---|
 | R-RX-01-adm | silica_asbesto_leo_ate_10 | só admissional | — |
 | R-RX-01-sem | silica_asbesto_sem_medicao | 24M | → 12M |
+| R-RX-01-qual | silica_qualitativa | 12M | — |
 | R-RX-01-baixa | silica_asbesto_leo_10_50 | 60M | → 36M |
 | R-RX-01-media | silica_asbesto_leo_50_100 | 36M | → 24M |
 | R-RX-01-alta | silica_asbesto_leo_acima_100 | 12M | — |
@@ -455,13 +510,37 @@ Fronteira preservada: afirmação incompleta continua bloqueando (ramos (c)/(d) 
 
 Efeito medido (Fascino, `rodar-offline` @ `37cdda6`): 14 dos 19 GHEs passam a emitir `rx_torax_oit` 24M / `periodicidade_apos_15a` 12 / `[adm, per, MR, dem]` / `R-RX-01-sem`; pendências `predicado_ausente` de `silica_asbesto_*` 70 → 0; linhas de exame 104 → 118; status 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA → 2 / 16 / 1 (GHE-12 BLOQUEADA→PARCIAL, único a mudar).
 
+**Nota de aplicação (DT-003EC-01, mesma ID — ramo novo `R-RX-01-qual`).** `[INTERPRETADO — prioridade na revisão de saída]`
+
+*Conduta.* Sílica sem avaliação quantitativa **com** avaliação qualitativa P×S declarada pelo PGR na linha do risco → RX tórax OIT **12M** constante, `[adm, per, MR, dem]`. PGR silencioso segue em `R-RX-01-sem` (24M → 12M após 15 anos). Decisão do Diovanni em 23/09/2026 ("12M, o motivo deve ser a sílica qualitativa"), sobre a conduta convergente das médicas nos 4 pares pareados.
+
+*Por que não é `[DERIVADO]`.* O literal do Quadro 1 tem dois ramos exaustivos, e a avaliação só qualitativa cai no ramo "sem avaliações quantitativas" (24M). 12M é intervalo **menor** que o desse ramo: mais protetivo, não contrário ao Quadro. O fundamento é matriz-precedente, e pela cl.1 de D-ARQ-81 o viés vai declarado: construção civil, 2 médicas (Patrícia: Porto Araras I 06/07/26, Vila Brasil Escritório 26/08/26; Carolini: SPE 0030 Fascino 08/07/26); 24M aparece em 15 das 34 matrizes assinadas do acervo, sem PGR completo para conferir o estado da sílica. Não amplia universo (cl.1 c): mesmos trabalhadores, mesmo exame, intervalo menor. Conferência do texto vigente do Quadro 1 (D-ARQ-69) **refeita em 24/09/2026** no PDF `nr-07-atualizada-2022-1_4.pdf` fornecido pelo Diovanni em 24/09/2026 (39 p., sha256 `f27b63bb…938b63`; cabeçalho lista alterações até a Portaria MTP n.º 567, de 10/03/2022 — conferência contra o texto, não contra a listagem da página, per nota 003.FA de D-ARQ-69): Quadro 1 do Anexo III com os mesmos dois ramos lidos em 003.EH — "Empresas sem avaliações quantitativas: na admissão; a cada 2 anos até 15 anos de exposição, e, após, a cada ano; e na demissão, se o último exame foi realizado há mais de 1 ano". Nenhum ramo para avaliação qualitativa; 12M segue abaixo do intervalo do ramo aplicável (mais protetivo), marcador `[INTERPRETADO]` mantido.
+
+*Sinal de extração.* "Avaliação qualitativa" = colunas **S · P · NÍVEL DE RISCO** preenchidas na própria linha do risco (matriz P×S: Irrelevante/Baixo/Moderado/Alto/Crítico). Medido nos 3 PGRs da família Consciente: 587/587 linhas de risco com a banda capturada; toda linha de sílica com nível (BAIXO/MODERADO). Os PGRs declaram a leitura no próprio bloco — Porto Araras, NOTA 2: "até que seja executada a medição esta avaliação será qualitativa por julgamento técnico"; Vila Brasil, coluna AVALIAÇÃO QUANTITATIVA: "⚠ Avaliação ainda qualitativa — resultado quantitativo pendente de medição". "NÃO DEFINIDO" (8/172 em Porto Araras, só em "Ausência de agente nocivo") é declaração de não-avaliação, não nível.
+
+*Escopo.* Só sílica. Asbesto qualitativo segue em `R-RX-01-sem` — sem caso medido nem decisão. Só a rota determinística (`parser_familia_consciente`) extrai a avaliação; a rota LLM (`transcritor_gemini_pgr`) e a rota card deixam `avaliacao_qualitativa=""`, e a sílica ali segue em 24M — recorte declarado, não esquecido.
+
+**Nota de aplicação (24/09/2026, rota LLM).** A rota LLM (`transcritor_gemini_pgr`) passa a transcrever as colunas S·P·NÍVEL, e `transcrever_ghes` só as aceita de bloco cuja legenda é a escala P×S ("Irrelevante"): medido no acervo, 109/109 blocos dos 5 PGRs dessa escala na rota LLM (TOCTAO ALT 65, Verde Maris, Aurora Lago das Rosas, Vistamerica 2026-07-28, Maldi Entreverdes) e 0/318 dos 12 de escore somado (Trivial…Intolerável — Viverde, Seconci, AURO, ALT T65, EURO, Vistamerica Ver.02 e outros). Nessa escala o nível segue ausente e a regra não se aplica — equivalência entre as escalas é decisão clínica aberta (`DT-(sessão claude/eager-fermat-txbn7h)-01`). Rota card segue sem nível. Efeito sobre a transcrição real do Gemini `[A MEDIR]` (sem chave de API no container).
+
+*Efeito medido* (`scripts/comparar_matriz_gabarito`, antes = worktree `main cadcd33`, depois = working tree): divergência de periodicidade RX OIT 24M×12M **27 → 0** (Porto Araras I), **8 → 0** (Vila Brasil Escritório), **31 → 0** (Fascino); todas as demais células idênticas antes/depois nos três pares.
+
 Nota de procedência — LSC vs. CLSC. O literal do Quadro 1 é LSC ("Limite superior do intervalo de confiança da média aritmética estimada para uma distribuição lognormal com confiança estatística de 95%"). Este protocolo, D-ARQ-24, DT-002V-01 e DT-003CB-01 escrevem "CLSC" para a mesma grandeza, com definição idêntica. Rótulo divergente do texto oficial, semântica intacta; os sítios históricos ficam preservados para rastreabilidade.
+
+**Nota de aplicação — D-ARQ-86 fatia 2 (25/09/2026, IMPLEMENTAÇÃO).** Mesma ID, conteúdo inalterado. A medição de **sílica** (mg/m³, fração respirável ou total, %quartzo obrigatório) e de **poeira não classificada** (mg/m³, respirável) pode ser informada na tela ("Avaliações quantitativas", laudo e data obrigatórios) e entra como `Quantificacao` do risco do PGR — as faixas de R-RX-01 (Quadro 1) e R-RX-01-pnos-* (Quadro 2) passam a decidir pelo valor medido, com o LEO já existente no resolver (sílica: NR-15 Anexo 12, 8/(%quartzo+2) respirável e 24/(%quartzo+3) total, conferido no PDF `normas/nr-15-anexo-12 (3).pdf` em 25/09/2026; PNOS: ACGIH 3 mg/m³ via NR-09 9.6.1.1). A origem do RX na revisão mostra a medição e o laudo. **Asbesto fora** (decisão do Diovanni): o resolver não tem o LEO de 2,0 f/cm³ (Anexo 12, item 12) e o asbesto não aparece como agente em nenhum dos 29 PGRs do acervo. Efeito medido nos 3 pares determinísticos: saída idêntica à `main`.
 
 #### R-RX-02 — Fumos metálicos `[INTERPRETADO — prioridade na revisão de saída]`
 Cargo com exposição a fumos metálicos (incluindo soldador) → RX **60 meses** em adm/per/MR/dem.
 **Ressalva normativa (002.N):** o 60M NÃO tem âncora no Anexo III da NR-07 — fumos metálicos não são poeira mineral (Quadro 1) nem PNOS (Quadro 2). O valor provém da matriz Patrícia ou de analogia, não de norma vigente conferida. Além disso, DT-002K-02 (resolvida) firmou que o risco é por exposição real ao metal individual (Mn, Cr⁶⁺...), não pela categoria genérica "fumos metálicos". O roteamento correto de RX por fumos depende da decomposição em metais individuais — ver DT-D3-02. Até lá, R-RX-02 mantém o caso âncora (soldador) funcional, mas o 60M é [INTERPRETADO], não [VALIDADO].
 
 **Implementação (002.L0).** R-RX-02 passou a existir como regra executável em `regras.yaml` (`quando: fumos_metalicos → RX 60M`). Até a 002.L0 constava apenas como `protocolos_especiais` documental em `agentes.yaml`, sem regra correspondente — fumos metálicos não emitia RX no motor.
+
+#### R-RX-03 — Poeira de madeira `[INTERPRETADO]`
+
+Cargo com exposição a poeira de madeira → RX **60 meses** em adm/per/MR/dem.
+
+**Ressalva normativa.** O 60M NÃO tem âncora no Anexo III da NR-07 — poeira de madeira não é sílica/asbesto/carvão mineral (Quadro 1) nem PNOS (Quadro 2, "não especificado de outra maneira": madeira tem nome e classificação próprios, não é resíduo residual do Quadro). `is_carcinogeno_iarc: true` em `agentes.yaml` `[DERIVADO — IARC Monographs Vol. 62 (1995), "Wood Dust and Formaldehyde", Grupo 1; reafirmado no Vol. 100C (2012); fonte internacional, não gov.br/MTE — a NR-07/NHO brasileiras remetem carcinógenos ao Anexo V, sem lista própria]`. O valor 60M vem de matriz-precedente, não de norma brasileira conferida: medido em **2 PGRs independentes**, mesma médica (Dra. Patrícia Montalvo Moraes), mesmo cargo (Carpintaria) — GHE-08 (PGR CONSCIENTE SPE 0030 FASCINO, 15.07.26) e GHE-04 (PGR CMO Residencial Aurora Lago das Rosas, 27.08.26), ambos RX 60M. Sensibilização respiratória (asma ocupacional por poeiras de madeira) segue `[INCERTO — não conferido em fonte primária]`; não bloqueia esta regra porque o regime não depende dessa faceta.
+
+**Origem — DT-003EJ-01 (RESOLVIDA).** Aberta em 003.EJ pela ausência de RX em GHE-08 (Carpintaria) do Fascino: o motor não emitia porque "Poeira de madeira" ficava `vocabulario_ausente` (comportamento correto, por desenho, até a decisão de slug próprio ser tomada). Resolvida nesta implementação com o 2º PGR medido (Aurora) confirmando o mesmo valor da matriz humana — gatilho de reabertura satisfeito, ver `docs/PENDENCIAS_CLINICAS.md`.
 
 ### 5.5 ECG
 
@@ -484,8 +563,36 @@ Acuidade visual em **adm/per/MR** para toda atividade crítica:
 
 **Exceção do soldador:** soldador é o **único caso** que tem acuidade visual também **no demissional**.
 
+> **Nota de implementação (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026, mesma ID, conteúdo
+> inalterado) — exceção do soldador materializada como `R-VIS-01-solda`.** Acuidade visual 12M
+> `[adm, per, MR, dem]` quando o GHE tem `solda_indicador` (manganês ou fumos metálicos). Nenhuma NR
+> exige acuidade visual para solda — conferido nos textos oficiais do acervo (NR-01, 07, 10–13,
+> 15–18, 20, 33, 35; o único requisito de acuidade em exame é a NR-15 Anexo 6, mergulho). Base: NR-07
+> 7.5.18, risco que justifica = radiação não ionizante do arco (UV/IR). Precedente: PCMSO-modelo da
+> Dra. Carolini (SECONCI 05/2024: acuidade "para expostos a… solda"), RQ.61 Viverde GHE 10 com DEM e
+> 7/9 serralherias do acervo com DEM (sem DEM: as duas do Vistamerica). O gatilho por manganês é
+> `[INTERPRETADO]`: os PGRs não trazem "solda" como agente, e o manganês do eletrodo é o marcador que
+> resolve nos casos reais (Aurora GHE 16, Fascino GHE 17).
+
 #### R-VIS-02 — Porteiro `[VALIDADO]`
 Porteiro também recebe acuidade visual em **adm/per/MR**, **sem demissional**.
+
+> **Nota de implementação (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026, mesma ID, conteúdo
+> inalterado).** Materializada em `regras.yaml` com o primitivo `cargo_porteiro` (cargo do PGR
+> normalizado, "porteiro/porteira"): a Fase B só casa cargo pela chave exata do vocabulário e nunca
+> via "Porteiro". Caso: Aurora GHE 19 (matriz_11 do app sem acuidade; gabarito ADM, PER, MRO).
+> Precedente: 10/12 GHEs de portaria/vigia/controle de acesso com acuidade; PCMSO-modelo da Dra.
+> Carolini ("porteiros, vigias"). **Vigia fica fora**: precedente dividido — Vila Brasil GHE 18 e
+> Varandas Bueno GHE 24 com acuidade, Porto Araras I GHE 15 (Vigia Diurno/Noturno) sem.
+
+#### R-VIS-03 — Manta asfáltica a quente: acuidade visual também no demissional `[INTERPRETADO — prioridade na revisão de saída]`
+Acuidade visual 12M `[adm, per, MR, dem]` quando o GHE tem `cimento_asfaltico` (aplicação a quente,
+maçarico). Mesma lógica da solda — exposição ocular a chama e radiação IR; NR-07 7.5.18. A RQ.61
+Viverde (GHE 09, validada) e o Aurora (GHE 22) pedem DEM; Flamboyant 20, Vistamerica 20/21 e
+Varandas Bueno 18/38 não (2/7). Decisão do Diovanni (26/09/2026) pela matriz validada.
+
+**Fora do padrão, não seguido:** DEM de acuidade no Aurora 18 (pintura), 20 (grua) e 21 (manutenção)
+— nenhum modelo das coordenadoras nem outra matriz do acervo sustenta.
 
 ### 5.7 Avaliação Psicossocial
 
@@ -494,16 +601,29 @@ Porteiro também recebe acuidade visual em **adm/per/MR**, **sem demissional**.
 - **Trabalho em altura** → somente se houver **atividade crítica concomitante** (ex: operação de máquina pesada) **E** o PGR reconheça risco psicossocial
 - **Risco psicossocial classificado como moderado** (ou superior) no PGR → sempre, independente da atividade
 
-#### R-PSY-02 — Avaliação Psicossocial + Av. Médica de Saúde Mental, incondicional `[DERIVADO]`
-Todo trabalhador, sem condição de risco, recebe **Avaliação Psicossocial** e **Av. Médica de Saúde Mental**, 12 meses, em **adm/per/MR**.
+#### R-PSY-02 — Avaliação Psicossocial + Av. Médica de Saúde Mental, incondicional `[DEPRECATED — fundamento refutado por n=2 pós-protocolo-de-setembro/2026, sucedida por R-PSY-03]`
+Todo trabalhador, sem condição de risco, recebia **Avaliação Psicossocial** e **Av. Médica de Saúde Mental**, 12 meses, em **adm/per/MR**.
 
-**Base normativa** `[DERIVADO — texto oficial MTE, conferido 31/07/2026]`: NR-01 itens 1.5.3.1.4, 1.5.3.2.1 e 1.5.4.4.5.3 (redação dada pela Portaria MTE nº 1.419, de 27/08/2024; entrada em vigor em 26/05/2026 pela Portaria MTE nº 765, de 15/05/2025) obrigam **inventariar e gerenciar** o fator de risco psicossocial relacionado ao trabalho (FRPRT) — nenhum dos itens **prescreve exame**. A conduta (quais exames, qual periodicidade) é derivada da prática medida no corpus, não da norma.
+**Base normativa** `[DERIVADO — texto oficial MTE, conferido 31/07/2026]`: NR-01 itens 1.5.3.1.4, 1.5.3.2.1 e 1.5.4.4.5.3 (redação dada pela Portaria MTE nº 1.419, de 27/08/2024; entrada em vigor em 26/05/2026 pela Portaria MTE nº 765, de 15/05/2025) obrigam **inventariar e gerenciar** o fator de risco psicossocial relacionado ao trabalho (FRPRT) — nenhum dos itens **prescreve exame**. A conduta (quais exames, qual periodicidade) era derivada da prática medida no corpus, não da norma.
 
 **Medição do acervo** (`matrizes_originais/`, 31/07/2026): matrizes **anteriores** a 26/05/2026 (13 docs, 575 cargos) emitem Avaliação Psicossocial em 1% e Av. Saúde Mental em 0%; matrizes **posteriores** a 26/05/2026 (6 docs, 284 cargos, 5 clientes distintos, 2 médicas distintas — Carolini e Patrícia) emitem os dois em 99%. Confundidor "preferência da médica" testado e descartado: ambas assinam documentos dos dois lados do corte. Grafia medida nos 6 documentos pós-vigência: `Avaliação Psicossocial (ADM, PER, MRO)` e `Av. Médica de Saúde Mental (ADM, PER, MRO)`, 271 de 283 ocorrências cada; periodicidade explícita, quando aparece (13 ocorrências), é sempre 12 meses.
 
-**Por que incondicional, não condicionado à declaração no PGR:** desenho candidato (gatilho = inventário psicossocial presente no PGR) testado e refutado — o PGR "Ricco 2026 Administração" não declara FRPRT (0 ocorrências de "FRPRT"/"Inventário de Riscos Psicossociais") e sua matriz correspondente emite os dois exames em 100% dos 12 cargos mesmo assim. Silêncio documental não desobriga — mesma postura de D-ARQ-68.
+**Por que era incondicional, não condicionado à declaração no PGR:** desenho candidato (gatilho = inventário psicossocial presente no PGR) testado e refutado à época — o PGR "Ricco 2026 Administração" não declara FRPRT (0 ocorrências de "FRPRT"/"Inventário de Riscos Psicossociais") e sua matriz correspondente emitia os dois exames em 100% dos 12 cargos mesmo assim. Silêncio documental não desobrigava — mesma postura de D-ARQ-68.
 
-**Sucede R-PSY-01** (`[DEPRECATED]` acima): mudança de escopo de aplicação (condicionada → incondicional) exige ID nova; corpo de R-PSY-01 preservado por rastreabilidade histórica.
+**Sucede R-PSY-01** (`[DEPRECATED]` acima): mudança de escopo de aplicação (condicionada → incondicional) exigiu ID nova; corpo de R-PSY-01 preservado por rastreabilidade histórica.
+
+**Fundamento refutado (17/09/2026), sucedida por R-PSY-03.** 2 matrizes reais pós-protocolo-de-setembro/2026, desfechos opostos: Ricco Hetrin 14/09 (validada) sai com **zero** exame psicossocial em 28/28 cargos — PGR correspondente lido por completo (197 páginas), zero ocorrência de marcador de inventário psicossocial, inclusive no Pedreiro com risco de altura documentado no próprio PGR (refuta a hipótese de cascata por atividade crítica). CMO Residencial Varandas Flamboyant 16/09 (validada) sai incondicional em todo GHE, marcador presente no PGR. Confirmado pelo Diovanni: quem decide é o **engenheiro que elabora o PGR** (inclui ou não a seção de inventário psicossocial), não classificação de risco nem atividade — o corpus de 31/07/2026 que fundamentava a incondicionalidade estava medindo prática anterior a esta distinção ficar visível. Mesmo padrão de `D-ARQ-81`/`R-AUD-04` (precedente de corpus enviesado não amplia universo normativo), com uma diferença do molde da cl.2: aqui HÁ sucessora, porque a norma segue obrigando inventariar o FRPRT (não desaparece), só a condição de disparo do exame muda. Corpo preservado por rastreabilidade histórica.
+
+#### R-PSY-03 — Avaliação Psicossocial + Av. Médica de Saúde Mental, condicionada ao PGR `[INTERPRETADO]`
+Trabalhador de GHE cujo PGR documenta a seção de inventário de risco psicossocial (marcador "Inventário de Riscos Psicossociais"/COPSOQ/FRPRT, `detectar_psicossocial` em `extracao_pgr.py`) recebe **Avaliação Psicossocial** e **Av. Médica de Saúde Mental**, 12 meses, em **adm/per/MR** — mesma conduta de R-PSY-02, condição de disparo diferente.
+
+**Base normativa:** mesma de R-PSY-02 — NR-01 itens 1.5.3.1.4, 1.5.3.2.1 e 1.5.4.4.5.3, que obrigam inventariar/gerenciar o FRPRT sem prescrever exame.
+
+**Por que condicionada ao PGR, não mais incondicional:** ver "Fundamento refutado" em R-PSY-02, acima. A granularidade medida é por PGR inteiro — o sinal não varia por GHE dentro do mesmo documento nos 2 casos-âncora.
+
+**Risco residual, não resolvido `[INTERPRETADO — n=2, mesma classe de obra nos dois PGRs (construção civil)]`:** não sabemos ainda se a granularidade é sempre por PGR inteiro ou se pode variar por GHE quando o elaborador documenta parcialmente. Detalhe em `DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01`, `PENDENCIAS_CLINICAS.md`.
+
+**Sucede R-PSY-02** (`[DEPRECATED]` acima): mudança de escopo de aplicação (incondicional → condicionada) exige ID nova, mesma convenção de R-PSY-01→R-PSY-02.
 
 ### 5.8 Vibração
 
@@ -536,6 +656,31 @@ Todo exame de biomonitoramento de agente químico = **6 meses**. Sem exceção.
 
 #### R-BIO-03 — Manganês `[VALIDADO]`
 Qualquer exposição confirmada a Mn → **manganês sanguíneo semestral em adm + per + MR**. Base: NR-15, independente do LT.
+
+> **Nota de implementação (branch `claude/determined-fermi-xxah3h`, 25/09/2026 — mesma ID,
+> conteúdo inalterado).** Materializada em `regras.yaml` (`quando: manganes`, exame novo
+> `manganes_sangue` "Manganês no sangue", 6M, `[adm, per, MR]`). Até aqui era `[VALIDADO]` só no
+> texto (DT-003EO-03). Fora de R-BIO-04/R-BIO-05: Mn não está no Anexo I da NR-07. Não inclui
+> R-CLI-03 (clínico semestral), que segue sem materialização. Caso de conferência: Aurora GHE 16.
+>
+> **Conferência normativa (D-ARQ-69, mesma data).** Anexos 11, 12, 13, 13-A e 14 da NR-15
+> fornecidos pelo Diovanni (PDFs do MTE; Anexo 12 sha256 `b3320b6f19d67e9e…`). Base encontrada:
+> **NR-15 Anexo 12, "Manganês e seus compostos"** (incluído pela Portaria DNSST n.º 08/1992),
+> **item 7** — *"precauções de ordem médica e de higiene … de caráter obrigatório para todos os
+> trabalhadores expostos às operações com manganês e seus compostos, independentemente dos limites
+> de tolerância terem sido ultrapassados ou não"*: *"Exames médicos pré-admissionais e
+> periódicos"*; *"Exames periódicos de acordo com os tipos de atividades de cada trabalhador,
+> variando de períodos de 3 (três) a 6 (seis) meses para os trabalhos do subsolo e de 6 (seis)
+> meses a anualmente para os trabalhadores de superfície"*; *"Análises biológicas de sangue"*.
+> Item 2: LT de fumos 1 mg/m³ inclui *"fabricação e uso de eletrodos de solda"*. Leitura:
+> "independente do LT" e "adm + per" são **[DERIVADO — literal]**; o analito (manganês no
+> sangue), o 6M fixo (ponta protetiva da faixa 6-12M da superfície) e o momento MR são
+> **[INTERPRETADO]** — conduta do protocolo dentro do que a norma permite. Anexos 11, 13-A e 14
+> não citam manganês; o Anexo 13 traz a linha "Operações com manganês…" marcada como excluída
+> pela Portaria 8/1992 (a matéria migrou para o Anexo 12). Efeito lateral: o item 7 também dá
+> base literal para exame clínico periódico semestral a exposto a Mn — sustenta R-CLI-03, ainda
+> não materializada. Limite declarado: o PDF prova o texto da versão fornecida; alteração
+> posterior só a listagem oficial vigente diria.
 
 #### R-BIO-04 — Matriz temporal por Quadro do Anexo I (NR-07) `[DERIVADO — NR-07 Anexo I + itens 7.5.13/7.5.15/7.5.19.4/7.5.19.5, Portaria MTP 567/2022, texto oficial MTE]`
 
@@ -618,6 +763,32 @@ Mapa agente→biomarcador dos agentes do vocabulário (insumo para o emissor de 
 
 > **Changelog 003.DL (mesma ID — Quadro 1/EE lote 2, fecha o Quadro).** A família `R-BIO-04-<agente>` ganhou os 22 agentes restantes do Quadro 1 (IBE/EE), todos `[per]` 6M / um exame cada: 1,1,1-tricloroetano (ác. tricloroacético, canônico entre 4 opções, exame reusado de tricloroetileno), 1,3-butadieno, HDI, 2-metoxietanol + acetato de 2-metoxietila (par que converge no mesmo metabólito urinário), 2-propanol (acetona urina, exame reusado da acetona), TDI (agente-classe, 2 CAS no Anexo), 2-butoxietanol, chumbo tetraetila (chumbo urina — nota anti-confusão bilateral com R-BIO-04-chumbo, Quadro 2/SC, gravada nas duas `base_normativa`), ciclohexanona e clorobenzeno (canônico entre 2 opções cada), etoxietanol + etoxietilacetato (par convergente; CAS do etoxietanol ausente no Anexo, `null` explícito), furfural, metil-butil-cetona (2,5-hexanodiona, exame reusado do n-hexano), MIBK, N-metil-2-pirrolidona, N,N-dimetilacetamida, N,N-dimetilformamida (canônico entre 2 opções), óxido de etileno (adutos HEV), tetracloroetileno (canônico entre 2 opções) e tetrahidrofurano. Biomarcadores e opções descartadas conferidos linha a linha no texto oficial do Anexo I Quadro 1 (Portaria 567/2022, gov.br/MTE). **Quadro 1/EE fecha em 41/41; total de regras R-BIO-04 = 46.** `is_carcinogeno_iarc`/`tem_lt` gravados `null` explícito nos 22 (não verificados nesta sessão data-only — ver DT-003DL-01, varredura própria contra IARC Monographs + NR-15 Anexo 11). Mesma ID — família materializa R-BIO-04, sem regra nova. `[DERIVADO — NR-07 Anexo I Quadro 1, Portaria 567/2022, texto oficial MTE]`
 
+#### R-BIO-05 — Risco irrelevante no PGR dispensa o indicador IBE/EE: menção documental no lugar do exame `[INTERPRETADO — prioridade na revisão de saída]`
+
+Agente do **Quadro 1 (IBE/EE)** cujo risco o PGR classifica como **IRRELEVANTE** na avaliação qualitativa P×S da própria linha → o indicador biológico de R-BIO-04 **não é emitido**; a matriz leva, na linha do cargo, a observação *"risco irrelevante no PGR para <agente> — incluir menção no PCMSO; não solicitado: <exame>"*, uma por agente. **Risco BAIXO emite o indicador normalmente.**
+
+- **Condição de dispensa:** todo risco do agente no GHE traz nível IRRELEVANTE. Basta uma linha do mesmo agente em BAIXO ou acima, ou sem nível (PGR sem avaliação P×S, rota LLM/card, risco implícito, componente de FDS), para o indicador sair. Silêncio do PGR nunca vira dispensa.
+- **Escopo:** só Quadro 1 (IBE/EE, 42 regras `R-BIO-04-*`). O Quadro 2 (IBE/SC — chumbo, cádmio, fluoretos, inseticidas inibidores da colinesterase) segue emitindo em qualquer nível: ali o indicador tem significado clínico (7.5.19.5), e nenhum caso medido o dispensa. Fora também `R-BIO-03` (manganês, via NR-15) e `R-PKG-BZ` (benzeno, carcinógeno).
+
+**Origem.** `DT-003EB-02`. A decisão de 23/09/2026 ("segue o da Dra. Carolini", dispensa em risco baixo) foi implementada e medida contra os 3 gabaritos pareados antes de entrar: superemissão 7→0 (Fascino SPE 0030, Dra. Carolini, 08/07/26) e 1→0 (Porto Araras I), mas **subemissão 0→6 (Porto Araras I, Dra. Patrícia, 06/07/26) e 9→13 (Vila Brasil Escritório, Dra. Patrícia, 26/08/26)** — a Dra. Patrícia pede o indicador com risco BAIXO em 10/10 células medidas (acetona, tolueno, xileno, MEK, ciclohexanona; encanador, meio oficial hidráulico, pintor, instalador de manutenção). O nível IRRELEVANTE é o único em que as duas médicas concordam: Porto Araras I, pintor, 2-butoxietanol anotado "irrelevante", gabarito sem BAA. **Decisão do Diovanni (24/09/2026), sobre essa medição: dispensa só em IRRELEVANTE.**
+
+**Conduta da Dra. Carolini não reproduzida, declarada (D-ARQ-81 cl.1).** A anotação do gabarito Fascino — *"Encanador (Incluir no word do PCMSO, risco baixo no PGR para acetona e metiletilcetona)"*, *"Pintor (Incluir no word do PCMSO, risco baixo no PGR para destilados-petróleo, tolueno, metiletilcetona e xileno)"* — fica fora desta regra: nessas 7 células o motor emite o indicador e ela não. Entre as duas condutas, a regra fica com a que emite, que é a mais protetiva; as duas são compatíveis com o 7.5.12 "b" (ver abaixo). Viés: construção civil, 2 médicas, 3 PGRs pareados, n=1 caso de IRRELEVANTE.
+
+**Relação com a norma `[CONFERIDO — D-ARQ-69, 24/09/2026]`.** Conferida no PDF `nr-07-atualizada-2022-1_4.pdf` fornecido pelo Diovanni em 24/09/2026 (39 p., sha256 `f27b63bb…938b63`; cabeçalho lista alterações até a Portaria MTP n.º 567, de 10/03/2022 — conferência contra o texto, não contra a listagem da página, per nota 003.FA de D-ARQ-69). O literal que decide é o **7.5.12**: os exames complementares laboratoriais da NR *"são obrigatórios quando: a) o levantamento preliminar do PGR indicar a necessidade de medidas de prevenção imediatas; b) houver exposições ocupacionais acima dos níveis de ação determinados na NR-09 ou se a classificação de riscos do PGR indicar"*; e o **7.5.1**: *"O PCMSO deve ser elaborado considerando os riscos ocupacionais identificados e classificados pelo PGR"*. A norma, portanto, **condiciona** a obrigação do indicador à classificação do PGR — dispensar quando o PGR classifica o risco como irrelevante (e não há medição acima do nível de ação) é compatível com o texto, não abaixo dele. O 7.5.15 só exime o Quadro 1 dos momentos adm/RT/MR/dem; a periodicidade semestral vem do 7.5.13. A nota do Quadro 1 confirma a natureza do indicador: IBE/EE *"não têm caráter diagnóstico ou significado clínico"*, indicam *"a possibilidade de exposição acima dos limites de exposição ocupacional"*.
+
+*Por que segue `[INTERPRETADO]`, não `[DERIVADO]`.* A norma não diz **qual** nível da classificação "indica" o exame. Fixar o corte em IRRELEVANTE (e não em BAIXO) é leitura sobre o precedente das duas médicas, não literal. Consequência lateral registrada, não tratada aqui: pelo 7.5.12 "b", R-BIO-04 — que emite pela simples presença do agente — fica **acima** do mínimo normativo quando o PGR classifica o risco como baixo; é conduta mais protetiva, não contrária, e é a conduta da Dra. Patrícia.
+
+**Implementação.** Chave `mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}` nas 42 `R-BIO-04-*` do Quadro 1 (`regras.yaml`); desvio em `stage_5_emissao` (`_nivel_dispensa`, `motor/estagios/emissao.py`); `Observacao` em `MatrizGHE.observacoes` (`motor/tipos.py`); célula de observação em `documento_matriz.py` e linha na apresentação de revisão (`apresentacao_matriz.py`). O carregador recusa a chave em regra cujo `quando` não é slug de agente ou com nível que o parser não produz. Nível vem de `RiscoPGR.nivel_risco` — hoje só a rota determinística (família Consciente) o preenche (DT-003EC-01); nas demais rotas o indicador segue saindo. R-BIO-04 mantém ID e status: a família continua sendo a regra, esta é a exceção por nível.
+
+**Nota de aplicação (24/09/2026, rota LLM).** A rota LLM (`transcritor_gemini_pgr`) passa a transcrever as colunas S·P·NÍVEL, e `transcrever_ghes` só as aceita de bloco cuja legenda é a escala P×S ("Irrelevante"): medido no acervo, 109/109 blocos dos 5 PGRs dessa escala na rota LLM (TOCTAO ALT 65, Verde Maris, Aurora Lago das Rosas, Vistamerica 2026-07-28, Maldi Entreverdes) e 0/318 dos 12 de escore somado (Trivial…Intolerável — Viverde, Seconci, AURO, ALT T65, EURO, Vistamerica Ver.02 e outros). Nessa escala o nível segue ausente e a regra não se aplica — equivalência entre as escalas é decisão clínica aberta (`DT-(sessão claude/eager-fermat-txbn7h)-01`). Rota card segue sem nível. Efeito sobre a transcrição real do Gemini `[A MEDIR]` (sem chave de API no container).
+
+
+**Emenda D-ARQ-86 (25/09/2026, IMPLEMENTADA — ratificada pelo Diovanni) — BAIXO com medição abaixo do nível de ação.** Risco **BAIXO** no PGR **e** medição quantitativa do agente no GHE **abaixo do nível de ação** → mesma dispensa com menção documental, e a observação leva a medição: *"risco baixo no PGR e medição abaixo do nível de ação para <agente> (<valor>, <x>% do LT de <LT> — NR-15 Anexo 11; laudo <id>, <data>) — incluir menção no PCMSO; não solicitado: <exame>"*.
+- **Base `[DERIVADO]`:** NR-07 7.5.12 "b" (exame obrigatório acima do nível de ação **ou** quando a classificação do PGR indicar) c/c NR-09 9.6.1 "b" (nível de ação químico = metade do LT) e 9.6.1.1; LT do Quadro n.º 1 do Anexo 11 da NR-15 (`lt_nr15` em `agentes.yaml`, por unidade: ppm ou mg/m³). PDFs oficiais em `normas/`, conferidos em 25/09/2026.
+- **Condição:** todo risco classificado do agente em BAIXO ou IRRELEVANTE; risco sem nível só se vier de composição de FDS anexada (a medição ambiental cobre a fonte); a **maior** medição do agente no GHE < 50% do LT. Sem medição, BAIXO emite como antes. MODERADO ou acima emite com qualquer medição (Q1).
+- **Cancerígenos excluídos (decisão do Diovanni, 25/09/2026):** tricloroetileno, 1,3-butadieno, óxido de etileno, diclorometano, estireno, dimetilformamida e tetracloroetileno (IARC 1/2A, gabarito 003.DP) recebem o indicador com qualquer medição. A chave `niveis_com_medicao_abaixo_acao: [BAIXO]` está só nos **21** agentes com LT que não são cancerígenos; os outros 14 da família não têm LT no Anexo 11 e seguem sem decisão quantitativa.
+- **Medição:** vem do PGR (valor numérico transcrito) ou da tela (painel "Avaliações quantitativas", com laudo e data obrigatórios; `ProcedenciaMedicao`). PGR e tela divergentes → pendência `medicao_divergente` e vale o maior em % do LT.
+- **Implementação:** `_dispensa_por_medicao` em `motor/estagios/emissao.py`; `avaliar_medicao_quimica`/`limite_quimico` em `motor/leo_resolver.py`; `aplicar_medicoes` em `motor/medicoes.py`; painel e cache em `superficie/web_matriz.py`. Carregador recusa a chave em agente sem `lt_nr15` e `lt_nr15` malformado. Efeito medido nos 3 pares determinísticos (Fascino, Porto Araras I, Vila Brasil): saída **idêntica** à `main` — nenhum deles traz medição de químico.
 ---
 
 ## 6. PACOTES POR CARGO / ATIVIDADE
@@ -680,6 +851,54 @@ Pacotes são conjuntos pré-formalizados de exames que disparam em bloco quando 
 - Reticulócitos (adm/per/MR/dem)
 - Ácido trans-trans-mucônico semestral (per)
 
+### R-PKG-ASF — Pacote Asfalto (impermeabilização) `[DERIVADO — NR-07 Anexo V + 7/7 GHEs de impermeabilização com asfalto no acervo]`
+**Predicado:** `asfalto` ou `cimento_asfaltico` no GHE (declarado no PGR ou componente de FDS).
+
+**Exames:**
+- Exame clínico semestral (per; demais momentos por R-CLI-01)
+- Hemograma semestral (adm/per/MR/dem)
+
+**Base.** Asfalto/betume (CAS 8052-42-4) no inventário do PGR é substância cancerígena para a NR-07
+Anexo V (item 2.1; IARC Vol.103: betume oxidado + emissões Grupo 2A; NR-15 Anexo 13 "betume… substâncias
+cancerígenas afins"). Anexo V 4.1.1: exames complementares obrigatórios quando não há avaliação ambiental;
+3.1.1: buscar alterações clínicas ou laboratoriais. Sem indicador biológico no Anexo I, o hemograma entra
+pelo 7.5.18 (a critério do médico, tecnicamente justificado) e o clínico semestral pelo 7.5.8 II a 1
+("intervalos menores"). Precedente (D-ARQ-22 nível 2): clínico 6M e hemograma 6M em 7/7 GHEs de
+impermeabilização com asfalto — CMO Aurora (27/08/26), Varandas Flamboyant (16/09/26), Vistamerica
+(28/07/26 e 08/12/25), Varandas Bueno (11/08/25, 2 GHEs) e RQ.61 Viverde (06/03/25, validada).
+**Fora do pacote, por norma:** t,t-mucônico e reticulócitos são vigilância do benzeno (NR-07 Anexo V
+4.2.1 → IN 2/1995) e o regime exige benzeno ou mistura ≥1% (NR-15 Anexo 13-A item 2); asfalto não é.
+Pedidos nas matrizes CMO recentes (Aurora, Flamboyant, Vistamerica) — divergência consciente,
+`[INTERPRETADO — prioridade na revisão de saída]`. 1-hidroxipireno urinário (marcador de HPA) fica a
+critério do coordenador (7.5.18), não é padrão.
+
+### R-PKG-ASF-CO — Carboxihemoglobina na aplicação a quente `[DERIVADO — NR-07 Anexo I Quadro 1 + 7/7 GHEs de manta asfáltica]`
+**Predicado:** `cimento_asfaltico` (CAP/asfalto oxidado 95/30, aplicado a quente — caldeira a 180 °C e maçarico).
+
+**Exame:** Carboxihemoglobina semestral (per).
+
+**Base.** CO da combustão do maçarico e da caldeira; NR-07 Anexo I Quadro 1: monóxido de carbono →
+carboxihemoglobina. Os PGRs Viverde V02 e Vistamerica Ver.02 inventariam o CO da manta asfáltica
+(MODERADO) — ali R-BIO-04-monoxido_de_carbono já emite o exame; os PGRs CMO (Aurora 27/08/26,
+Vistamerica 28/07/26) descrevem caldeira e maçarico mas não inventariam o CO. Asfalto genérico
+(emulsão a frio) não dispara. Ressalva: o 7.5.18 pede risco classificado no PGR — a pendência ao
+elaborador "CO não inventariado" é DT própria.
+
+### R-PKG-SOLD-CO — Carboxihemoglobina na solda `[DERIVADO — NR-07 Anexo I Quadro 1 + serralherias CMO; gatilho INTERPRETADO]`
+**Predicado:** `solda_indicador` (manganês ou fumos metálicos no GHE — o mesmo de `R-VIS-01-solda`).
+
+**Exame:** Carboxihemoglobina semestral (per).
+
+**Base.** Soldagem a arco com eletrodo revestido e corte a quente geram CO; NR-07 Anexo I Quadro 1:
+monóxido de carbono → carboxihemoglobina. Precedente (D-ARQ-22 nível 2): COHb 6M PER na serralheria
+de CMO Aurora GHE 16 (27/08/26) e Varandas Flamboyant GHE 17 (16/09/26); Vistamerica GHE 18
+(08/12/25) sem. Nenhum dos PGRs CMO inventaria o CO (Aurora GHE 16: carbonato de cálcio, dióxido de
+titânio, ferro, manganês, zircônio, poeira, sílica — "fumos e gases de soldagem" do eletrodo E-6013).
+Quando o PGR inventaria o CO, `R-BIO-04-monoxido_de_carbono` emite o mesmo exame e a consolidação une.
+Gatilho `[INTERPRETADO — prioridade na revisão de saída]`: o motor não lê a fonte geradora (DT
+`claude/cool-babbage-whh1zw`-01); o manganês é marcador da atividade, não o risco. Ressalva do 7.5.18
+(risco classificado no PGR) igual à de `R-PKG-ASF-CO`.
+
 ### R-PKG-ARMADOR — Pacote Armador com Policorte `[VALIDADO]`
 **Predicado:** armador (construção civil) com exposição a policorte.
 
@@ -687,6 +906,21 @@ Pacotes são conjuntos pré-formalizados de exames que disparam em bloco quando 
 - RX tórax 60M (adm/per/MR/dem)
 - Espirometria 24M (adm/per/MR/dem)
 - Carboxihemoglobina semestral (per)
+
+### R-PKG-TRANSITO — Pacote Trânsito (deslocamento/condução em via pública) `[INTERPRETADO — prioridade na revisão de saída]`
+**Predicado:** o PGR declara o risco de acidente **"Bater contra ou ser atingido por (trânsito)"** (slug `transito_via_publica`, só a frase completa — "trânsito" sozinho aparece no acervo como circulação a pé e não entra).
+
+**Exames (12M em adm/per/MR):**
+- Acuidade visual
+- Audiometria
+
+**Origem.** `DT-003EB-01` classe (4). Decisão do Diovanni (24/09/2026), sobre medição: nos 3 PGRs pareados da família Consciente, **3/3 GHEs** que declaram o risco recebem os dois exames no gabarito — Vila Brasil Escritório (Dra. Patrícia, 26/08/26): DIREÇÃO ("conduz carro de pequeno porte") e PATRIMÔNIO ("dirige veículos leves"); Fascino SPE 0030 (Dra. Carolini, 08/07/26): VENDAS. Nenhum dos outros 58 GHEs recebe o par por esse motivo. A alternativa "ver na descrição do cargo" foi medida e descartada: acertava só a DIREÇÃO, e palavras como "dirigem"/"conduzir" davam falso positivo em FINANCEIRO, ADMINISTRAÇÃO, SUPERVISÃO e VENDAS.
+
+**Por que ID nova, não R-VIS-01/R-AUD-01.** R-VIS-01 lista "motorista" como atividade crítica e R-AUD-01 tem a perna `motorista_equipamento_pesado`, ambas `[VALIDADO]`. Aqui o gatilho é o **risco declarado**, não o cargo, e o veículo é leve — escopo diferente, ID nova (regra de versionamento do projeto).
+
+**Sem âncora normativa.** Nível 4 de D-ARQ-22. Viés declarado (D-ARQ-81 cl.1): construção civil, 2 médicas, n=3 GHEs. Não amplia universo definido por norma — nenhuma NR delimita acuidade/audiometria para condução de veículo leve.
+
+**Fora de escopo, aberto.** VIGILÂNCIA (acuidade) e PLANEJAMENTO (acuidade + audiometria) de Vila Brasil não têm risco de trânsito nem direção no bloco — seguem classe (4). Rota LLM (ex.: PGRs Seconci, mesma grafia no texto) depende de o transcritor emitir a frase completa `[A MEDIR]`.
 
 ### R-PKG-PORT — Pacote Porteiro `[VALIDADO]`
 **Predicado:** cargo "porteiro".
@@ -857,7 +1091,7 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v70 | 26/07/2026 | Sessão 003.ED (IMPLEMENTAÇÃO): nota de implementação em R-PKG-ATIVCRIT (mesma ID, §6) — alias Tier 1 `"Trabalho em Altura"` (NR-35 título + item 35.2.1, Portaria MTP 4.218/2022) e substituição do primitivo órfão `maquina_pesada` por `motorista_equipamento_pesado` (D-ARQ-67) em `atividade_critica`; efeito medido no Fascino: 16/19 GHEs passam a emitir R-PKG-ATIVCRIT, cruzamento nominal contra o gabarito com interseção 16 e conjuntos "só motor"/"só gabarito" vazios. Ressalva `[INTERPRETADO]` registrada — os dois rótulos ("máquina pesada" vs "motorista de equipamento pesado") não são declarados como o mesmo conceito pelo protocolo; consequência não exercitada por nenhum caso do acervo (0 GHEs via `motorista_equipamento_pesado`, 0 via `espaco_confinado`). **DT-003ED-01 CRIADA (ABERTA)** (§11) — grafia natural com preposição não resolve contra slug sem preposição (atinge R-VIB-01/02 e a perna de máquina pesada). **DH-003ED-01 CRIADA (ABERTA)** (§11) — relatório do harness não carrega slugs resolvidos nem o átomo do predicado composto disparador. **DT-003DV-01: observação de instrumento REFUTADA por medição** — o relatório TEM identidade por GHE. **DT-003EB-01: nota adicionada** — classe (2) perdeu a maior fatia; achado novo `[A MEDIR]` sobre GHE-19 (Vendas, `ctx.riscos == []`). Suíte 967→968 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commit `7b2e65d`. Nenhuma R-* criada/alterada; conteúdo clínico inalterado. |
 | v71 | 26/07/2026 | Sessão 003.EE (IMPLEMENTAÇÃO): **DT-003EE-01 CRIADA** (`ConflitoProtocolo` sem disparador após D-ARQ-39; decisão MANTER). Nota de aplicação 003.EE em R-GHE-03 — dedup compõe periodicidade por piso, mesma ID, sem mudança de semântica clínica. Nenhuma R-* criada ou alterada. Detalhe em DECISOES v153 e HISTORICO 003.EE. |
 | v72 | 26/07/2026 | Sessão 003.EF (IMPLEMENTAÇÃO): **DH-003EC-01 PARCIALMENTE RESOLVIDA** (§11) — facetas (a) cegueira a falha e (c) derivado sem vigilância FECHADAS (`medir_suite()` lê `returncode` e levanta em suíte vermelha; `INDICE_DARQ.md` regenerado e seu estado exposto como 4ª linha do painel); faceta (b) ID citado conta como implementado segue ABERTA. Nenhuma R-* nem D-ARQ criada/alterada. Sem código de motor. Detalhe em HISTORICO 003.EF. |
-| v73 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): **DH-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — facetas `riscos_resolvidos` (slugs por GHE) e `predicado` (expressão real, fim do literal `"<composto>"`) FECHADAS; faceta `risco_origem` segue ABERTA (exigiria mudar a assinatura de `predicados.avaliar`, recorte deixado fora por decisão do Arquiteto). **DT-003EG-01 CRIADA (ABERTA)** — audiometria emitida em 16/19 GHEs com motivo `R-PKG-ATIVCRIT` em 15 deles onde o gatilho clínico real é ruído bloqueado por `predicado_ausente` (exame certo, razão errada), só visível porque o motivo por linha passou a ser impresso. **DH-003EG-01 CRIADA (ABERTA — higiene de instrumento)** — 122 bytes NUL do verbatim do PGR vazam para `motivo` de pendências `vocabulario_ausente` no relatório, `grep` classifica-o como binário; `\r\n` recorrente (classe DH-003M-01). **DH-003EG-02 CRIADA (ABERTA — higiene de método)** — `relatorios/` inteiro fora do git (`.gitignore:26`), o diff motor×gabarito que pauta a fila desde D-ARQ-62 envelheceu 4 sessões sem sinal em `git log` (mesma classe de DT-003DX-02). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame (baseline 003.EB: 14 BLOQUEADA / 3 PARCIAL / 2 VÁLIDA, 7 linhas — divergência esperada, motor mudou em 4 sessões desde então). Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. Nenhuma R-* criada/alterada. Detalhe em DECISOES v155 e HISTORICO 003.EG. |
+| v73 | 27/07/2026 | Sessão 003.EG (IMPLEMENTAÇÃO): **DH-003ED-01 PARCIALMENTE RESOLVIDA** (§11) — facetas `riscos_resolvidos` (slugs por GHE) e `predicado` (expressão real, fim do literal `"<composto>"`) FECHADAS; faceta `risco_origem` segue ABERTA (exigiria mudar a assinatura de `predicados.avaliar`, recorte deixado fora por decisão do Arquiteto). **DT-003EG-01 CRIADA (ABERTA)** — audiometria emitida em 16/19 GHEs com motivo `R-PKG-ATIVCRIT` em 15 deles onde o gatilho clínico real é ruído bloqueado por `predicado_ausente` (exame certo, razão errada), só visível porque o motivo por linha passou a ser impresso. **DH-003EG-01 CRIADA (ABERTA — higiene de instrumento)** — 122 bytes NUL do verbatim do PGR vazam para `motivo` de pendências `vocabulario_ausente` no relatório, `grep` classifica-o como binário; `\r\n` recorrente (classe DH-003M-01). **DH-003EG-02 CRIADA (ABERTA — higiene de método)** — `relatorios/` inteiro fora do git (`.gitignore:42` — a linha citada na v73 era `:26`, âncora errada, corrigida na v92), o diff motor×gabarito que pauta a fila desde D-ARQ-62 envelheceu 4 sessões sem sinal em `git log` (mesma classe de DT-003DX-02). Medição Fascino (`5a2d15b`): 19 GHEs → 2 VÁLIDA / 15 PARCIAL / 2 BLOQUEADA, 104 linhas de exame (baseline 003.EB: 14 BLOQUEADA / 3 PARCIAL / 2 VÁLIDA, 7 linhas — divergência esperada, motor mudou em 4 sessões desde então). Suíte 977→982 passed, 6 skipped; `mypy --strict agente_medico/motor agente_medico/tests/invariantes.py` delta-zero. Commits `94a5720`, `76f1afa`, `5a2d15b`. Nenhuma R-* criada/alterada. Detalhe em DECISOES v155 e HISTORICO 003.EG. |
 | v74 | 27/07/2026 | Sessão 003.EG (EMENDA — correção de método): **DH-003EG-03 CRIADA (ABERTA)** (§11) — vigilância do `INDICE_DARQ` (003.EF) existe mas o ritual não a invoca em sessão docs-only; o commit `186150e` desta mesma sessão ficou defasado 94 linhas por a suíte ter sido dispensada por instrução ("docs-only"), corrigido em `973a343`; 2ª ocorrência da classe em 2 sessões (1ª: `c89f569`, 003.EF). Causa nomeada no Arquiteto, não no Code. Correção instalada: `CLAUDE.md` na raiz (NOVO) — regras de método versionadas e lidas pelo Code, endereça DT-003DX-02 — e `docs/RITUAL_FECHAMENTO.md` (NOVO) — checklist fixo de 7 passos que substitui redação livre do prompt de fechamento. Resíduo ABERTO: ambas dependem de leitura humana/agente, sem mecanismo que impeça 3ª ocorrência; hook de pre-commit é candidato, com ressalva de que `core.hooksPath` não é versionado. Suíte inalterada nesta emenda (nenhum código tocado). Detalhe em DECISOES v156 e HISTORICO 003.EG. |
 | v75 | 28/07/2026 | Sessão 003.EH (FECHAMENTO — docs): nota de aplicação em R-RX-01 (mesma ID — ausência de laudo é ramo do Quadro 1, não pendência; ponte `[INTERPRETADO]`; efeito medido 14/19, 70→0, 104→118, 2/16/1); nota de procedência LSC vs. CLSC. **DT-003EH-01 CRIADA (ABERTA)** e **DH-003EH-01 CRIADA (ABERTA)** (§11). Nota aditiva em DT-003EC-01 (divergência 24M×12M medida em 14 GHEs). **D-ARQ-68 CRIADA** em DECISOES v157. Nenhuma R-* criada ou alterada. Detalhe em HISTORICO 003.EH. |
 | v76 | 28/07/2026 | Sessão 003.EI (CONHECIMENTO — docs): **R-ESP-02 CRIADA** `[DERIVADO — NR-07 Anexo III item 3.1, Portaria MTP 567/2022]` — espirometria 24M (adm/per/MR/dem) por exposição a poeira mineral (sílica/asbesto/PNOS) do inventário do PGR, sem depender de quantificação; momentos MR/dem `[DERIVADO — matrizes Carolini 07/2026 e Patrícia 04/2025]`. **R-ESP-01 → DEPRECATED** (sucedida por R-ESP-02; default e exceção-EPI sem âncora no Anexo III vigente, itens 3.2/3.3 condicionam a sinal/sintoma). Call-site de R-PGR-03 (§2) reapontado para R-ESP-02. **DT-003EI-01 CRIADA (ABERTA)** (§11) — R-PKG-SOLD/R-PKG-ARMADOR prescrevem espirometria incondicional sob agentes do item 3.2 (condicionado a sintoma), não materializadas em `regras.yaml`. Detalhe em HISTORICO 003.EI. |
@@ -876,3 +1110,21 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v89 | 15/08/2026 | Sessão 003.EX fatias 0-1 (MEDIÇÃO + IMPLEMENTAÇÃO): **R-AUD-04 CRIADA** (§5.2) — audiometria como piso universal, 12M `[adm, per, MR, dem]`, incondicional via `todo_trabalhador` (D-ARQ-66); base normativa NR-07 Anexo II 4.1 `[DERIVADO]` crava 12M+adm+dem, universo estendido a todo trabalhador e MRO incluído são `[INTERPRETADO]`, apoiados em matriz-precedente (fatia 0: SPE 0030 41/41 audiometria, 38/41 DEM confirmado; RESERVA 0028 44/44, 42/42 confirmado + 2 indeterminados). `R-AUD-01`/`R-AUD-02` **não tocadas** — piso por baixo, molde `R-CLI-01`×`R-CLI-02`; dedup concatena motivos, não substitui. **`R-AUD-03` ganha marcador de fonte** `[DERIVADO — NR-07 Anexo II item 4.1.1]` (mesma ID, changelog). **DT-003EW-01 FECHADA** (`PENDENCIAS_CLINICAS.md`) — reenquadrada como resolução de saída, não da raiz (`ruido_acima_acao = Ausente` continua intacta). **DT-003EG-01 segue ABERTA**, nota aditiva — não agravada nem fechada (motivos concatenam). **DH-003EX-01 CRIADA (ABERTA)** — heurística de forma no extrator do gabarito (`medir_audiometria_dem.py`) assume no máximo 2 grupos após "Audiometria", não testada contra 3. Efeito medido no Fascino (`rodar-offline`, mesmo PDF/envelope de sessões anteriores): GHEs com audiometria **17/19 → 19/19** (medição fresca desta sessão — diverge do "16/19" herdado de `DT-003EG-01`; causa nomeável, não baseline cega: a diferença é GHE-12/Betoneira, que passou a emitir audiometria em 003.EJ por `R-VIB-02` — aliases de D-ARQ-70 destravaram a perna mão-braço; 16+1=17, divergência explicada); GHE-06 (Administração) e GHE-19 (Vendas) ganham a linha nova nesta sessão (as duas únicas sem audiometria antes de `R-AUD-04`); linhas de exame **171 → 173** (+2, exatamente GHE-06/GHE-19); linhas de audiometria com `DEM` **1/17 → 19/19**; status **3 VÁLIDA / 15 PARCIAL / 1 BLOQUEADA inalterado, confirmado GHE a GHE** (não só no agregado) — bate exatamente com a previsão D-ARQ-66 cl.2. 4 testes novos com reversão nomeada, varredura inversa 4/4 confirmada (`test_orquestrador.py`). 4 quebras legítimas de teste de integração corrigidas com explicação nomeada (não silenciadas): `test_rvib02_vmb_sozinho_emite_audiometria` (pré-dedup, duas entradas "audiometria" agora, busca deixa de usar `next()` sozinho), `test_execucao_dedup_audiometria_tres_motivos_sem_conflito` (3→4 motivos), `test_execucao_ototoxico_via_agente_status_ok_sem_r_aud_02` (renomeado — "sem demissional" deixou de ser observável via ausência de `DEM`; invariante real que o nome agora descreve — R-AUD-02 não dispara por ototóxico isolado — checado direto), `test_pipeline_gates_emissao_consolidacao_atividade_critica` (audiometria sai do loop genérico de momentos, ganha checagem própria). Suíte **1104→1108 passed, 6 skipped**; `mypy --strict` delta-zero, **48 arquivos**. Detalhe em HISTORICO 003.EX. |
 | v90 | 16/08/2026 | Sessão 003.EZ fatia 1 (ARQUITETURA + IMPLEMENTAÇÃO): **R-AUD-04 DEPRECATED** (§5.2) — fundamento refutado por `DT-003EY-01`/D-ARQ-81: 003.EY mediu 23 obras, universalidade em 7/23 (6/23 com piso `n_cargos ≥ 17`); as duas matrizes-precedente de 003.EX eram artefato de amostra, não convergência. Sem sucessora — o momento `DEM` que o piso cravava incondicional passa a sair pela presunção protetiva de `R-AUD-02` (D-ARQ-68 cl.5) quando o PGR está silencioso sobre a quantificação do ruído. **`R-AUD-01`/`R-AUD-02`**, changelog de mesma ID: perna do ruído ganha âncora `[DERIVADO — NR-07 Anexo II itens 2 e 4.1 "a"/"b"/"c"; momento MR por 7.5.6 "d" + 7.5.7, a contrario 7.5.15]`; pernas `motorista_equipamento_pesado`/`ototoxico`/`e(ruido, ototoxico, vibracao_qualquer)` seguem `[VALIDADO]` sem âncora; silêncio do PGR sobre a quantificação do ruído (NR-09 9.4.1/9.4.2, avaliação condicional) admite presunção protetiva declarada por primitivo (`quando_ausente: {presumir_true: [ruido_acima_acao]}`), regra marcada `[INTERPRETADO — prioridade na revisão de saída]` nesse trecho; a perna `e` de R-AUD-02 **não** entra na allowlist — ausência ali continua bloqueante. **`R-RUIDO-01`**, changelog de mesma ID: `[INCERTO]` de 003.CB **FECHADO** — nível de ação é **NR-09 9.6.1 "c"** (disposição transitória, definição em 9.6.1.2); a NR-09 vigente (Portaria MTE 105/29-01-2026) não tem Anexo de Ruído; limiares 80/85 dB(A) inalterados, nível de ação registrado como transitório (reabre com Anexo próprio). Motor: `predicados.pernas_ausentes` (irmã de `pernas_ausentes_absorvidas`, sem gate `alguma_true` no `ou`, coleta primitivo/composto string por si); `emissao.stage_5_emissao` aceita `quando_ausente: {presumir_true: [...]}` (emite + `Pendencia(tipo="predicado_ausente_presumido", bloqueante=False)` por primitivo presumido, ou bloqueia se algum nome ficar fora da lista ou o conjunto vier vazio); `orquestrador.executar` ganha guarda: matriz com pendência `predicado_ausente_presumido` (anexada ou solta) nunca sai `VÁLIDA`, cai para `PARCIAL`. 14 testes novos com reversão nomeada, varredura inversa 14/14 confirmada. Quebras legítimas corrigidas com explicação nomeada (não silenciadas), 8 previstas + 4 adicionais medidos na reconferência em `7c7ec10` (mesma classe — ruído sem quantificação deixou de ser "risco que nada determina"): `test_orquestrador.py::test_raud04_*` (3, morrem por desenho — R-AUD-04 retirado, não sucedido) e `test_raud04_nao_promove_bloqueada_para_parcial` (inverte, renomeado); `test_orquestrador.py::test_rcli01_unico_risco_bloqueado_com_clinico_presente_fecha_bloqueada` (troca ruído por vibração genérica, preserva o invariante original); `test_exposicao_fisica.py::test_raud01_ruido_sem_quantificacao_gera_pendencia_bloqueante` (renomeado, inverte), `test_execucao_dedup_audiometria_tres_motivos_sem_conflito` (4→3 motivos), `test_execucao_ototoxico_via_agente_status_ok_sem_r_aud_02` (renomeado de volta a `..._sem_demissional`), `test_rvib02_vmb_sozinho_emite_audiometria` (reverte para `next()` único); `test_integracao_002c.py::test_pipeline_gates_emissao_consolidacao_atividade_critica` (audiometria volta ao loop genérico); `test_regra_biomonitoramento.py::test_sem_agente_nao_emite_biomonitoramento` (checagem por família `R-BIO-04*`, não por linhas de risco genéricas); `test_integracao_viverde.py::test_integracao_viverde_pnos_roteia_sem_achatar` (Adm-03: pendência `predicado_ausente_presumido` não-bloqueante anexada à linha, matriz `PARCIAL`, em vez de pendência bloqueante). **Medição Fascino** (`rodar-offline`, árvore parada, `relatorios/003ez_fascino_rodar.md`, commit `d218556`): **17 GHEs declaram `ruido`, todos com `ruido_acima_acao = AUSENTE`**, e os **17** passam a carregar `R-AUD-01`/`R-AUD-02` na coluna de motivos da linha de audiometria — contra **1** na baseline 003.EX (fecha `DT-003EG-01` — raiz, não só manifestação). Os 2 GHEs restantes não declaram ruído: GHE-14 recebe audiometria por atividade crítica (sem `DEM`, correto) e GHE-19 não recebe audiometria. **17/18** linhas de audiometria com `DEM` (a exceção é GHE-14); pendências `predicado_ausente_presumido` **32** (16 GHEs × 2 regras — o 17º GHE com ruído, GHE-16, resolve por `perna_ausente_absorvida`/D-ARQ-71 cl.2, nota de fronteira em D-ARQ-68 cl.5); status **3 VÁLIDA / 16 PARCIAL / 0 BLOQUEADA** (de 3/15/1 na baseline 003.EX — o GHE antes BLOQUEADA moveu para PARCIAL sob presunção); linhas de exame **173 → 172 (−1)** contra `main` em `7c7ec10` (com `R-AUD-04` ativa) — decomposto: −2 (GHE-06 e GHE-19 perdem a linha que `R-AUD-04` emitia incondicionalmente) +1 (GHE-06 a reganha, agora derivada de risco, por `R-AUD-01`/`R-AUD-02` sob presunção); contra a baseline pré-`R-AUD-04` (171, 003.EH) o saldo é +1, pela mesma linha de GHE-06. Suíte **1137 passed, 6 skipped** (árvore parada); `mypy --strict` limpo, **48 arquivos** (alvo canônico, delta-zero). Detalhe em HISTORICO 003.EZ. |
 | v91 | 21/08/2026 | Sessão 003.FC (FECHAMENTO — higiene de documento): o H1 declarava "v2" enquanto a tabela de revisões estava em v90 — 88 versões de defasagem, achada quando o Crítico de IMPLEMENTAÇÃO declarou `PROTOCOLO v2` na linha de gate (leitura fiel de um título errado). Número removido do título; a versão passa a viver só na tabela, alinhando à convenção dos demais docs vivos. **DH-003FC-03** aberta e resolvida nesta sessão. Nenhuma R-* criada, alterada ou depreciada; nenhum conteúdo clínico tocado. |
+| v92 | 10/09/2026 | Correção de âncora (higiene de documento): a linha da **v73** citava `.gitignore:26` como o ponto que ignora `relatorios/`; a entrada está na **linha 42** — a 26 é linha de comentário sobre LGPD art. 5º II. A âncora vinha propagada desde 003.EG sem re-medição e o mesmo erro estava em `PENDENCIAS_CLINICAS.md` (`Situação` e nota de reincidência de `DH-003EG-02`) e no bloco 003.FJ de `HISTORICO_OPERACIONAL.md`, corrigidos em `0147e14`. `DH-003EG-02` segue **ABERTA**: `git ls-files relatorios/` continua vazio. Nenhuma `R-*` criada, alterada ou depreciada; nenhum conteúdo clínico tocado. |
+| v93 | 16/09/2026 | Sessão atual (branch `claude/festive-gates-soy0fr`, número não atribuído; IMPLEMENTAÇÃO): **`R-RX-03` CRIADA** (§5.4) e **`R-ESP-03` CRIADA** (§5.3) — poeira de madeira, agente identificável fora dos dois quadros do Anexo III NR-07 (não é sílica/asbesto/carvão do Quadro 1, nem PNOS do Quadro 2). RX 60M e Espirometria 24M, ambas `[INTERPRETADO]` — sem âncora normativa brasileira, origem IARC Monographs Vol. 62/1995 e 100C/2012 (Grupo 1, carcinogênico p/ humanos) + matriz-precedente: 2 PGRs independentes, mesma médica (Dra. Patrícia Montalvo Moraes), mesmo cargo (Carpintaria), mesmos valores — GHE-08 (PGR CONSCIENTE SPE 0030 FASCINO, 15.07.26) e GHE-04 (PGR CMO Residencial Aurora Lago das Rosas, 27.08.26). Novo agente `poeira_de_madeira` em `agentes.yaml` (`is_carcinogeno_iarc: true`, sem `termos:` — o próprio slug normaliza igual ao literal "Poeira de madeira" do PGR) e novo primitivo homônimo em `predicados.py`. **`DT-003EJ-01` RESOLVIDA** (`docs/PENDENCIAS_CLINICAS.md`) — decisão tomada (slug próprio, não `vocabulario_ausente`), autorizada pelo Diovanni após confirmação de que a validação humana das matrizes é reconferência linha a linha, não sign-off superficial. Sensibilização respiratória segue `[INCERTO]`, não bloqueia. 7 testes novos com reversão nomeada (varredura inversa 7/7 confirmada): 3 parametrizados de resolução de termo + guard de inventário (`test_resolvedor_termos.py`, 124→125) e 4 de emissão (`agente_medico/tests/test_poeira_de_madeira.py`, novo arquivo). Suíte **1233 passed, 6 skipped**; `mypy --strict` alvo canônico limpo, 48 arquivos, delta-zero. Detalhe em HISTORICO (bloco desta sessão). |
+| v94 | 17/09/2026 | Sessão atual (branch `claude/fervent-brown-7dcc0y`, número não atribuído; IMPLEMENTAÇÃO, autorizada pelo Diovanni): **`R-PSY-02` DEPRECATED** (§5.7) — fundamento refutado por n=2 pós-protocolo-de-setembro/2026 (Ricco Hetrin 14/09 × CMO Varandas Flamboyant 16/09, desfechos opostos), mesmo padrão de `D-ARQ-81`/`R-AUD-04`, exceto que HÁ sucessora. **`R-PSY-03` CRIADA** (§5.7) — mesma conduta (Avaliação Psicossocial + Av. Médica de Saúde Mental, 12M, adm/per/MR), `quando: psicossocial` em vez de `todo_trabalhador`. Extrator novo `detectar_psicossocial` (`extracao_pgr.py`) lê o texto cru do PGR por 3 marcadores ("Inventário de Riscos Psicossociais"/COPSOQ/FRPRT, case-insensitive) e popula `GHEPGR.psicossocial` (campo existente desde `D-ARQ-49` P2, nunca extraído — nota de aplicação em `D-ARQ-49`, `DECISOES_ARQUITETURAIS.md`); `hidratar_ghe`/`hidratar_pgr` ganham parâmetro `psicossocial: bool = False`; `processar_arquivo_pgr` roda uma 3ª leitura de `extrair_texto_pgr` sobre o mesmo arquivo (mesma classe da duplicação já documentada entre `preparar_envelope`/`preparar_ghes`). Primitivo `psicossocial` novo em `predicados.py`. `[INTERPRETADO]` — n=2, mesma classe de obra (construção civil); risco residual (granularidade por PGR inteiro vs. por GHE) não resolvido, registrado na DT. **`DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-01` RESOLVIDA** (`docs/PENDENCIAS_CLINICAS.md`). 13 testes novos com reversão nomeada, varredura inversa 13/13 confirmada (`test_extracao_pgr.py`/`test_hidratacao.py`/`test_predicados.py`/`test_orquestrador.py`); 2 quebras legítimas corrigidas com causa nomeada (`test_orquestrador.py`/`test_integracao_002c.py` — perdem as 2 linhas que só saíam por R-PSY-02 incondicional). Suíte **1247 passed, 6 skipped, 2 failed** (falhos são ambiente, `libreoffice-writer` ausente, pré-existente — não desta sessão), delta +13 sobre o baseline de PR #337 (1236); `mypy --strict` alvo canônico limpo, 48 arquivos, delta-zero. `PAINEL_ESTADO.md` re-tirado: regras 25/44 (57%), cas 50/80 (62%), inalterados (troca 1-por-1). Detalhe em HISTORICO (bloco desta sessão). |
+| v95 | 24/09/2026 | Sessão atual (branch `claude/inspiring-turing-0ylkmk`, número não atribuído; IMPLEMENTAÇÃO, decisão do Diovanni de 23/09/2026): **`R-RX-01` ganha o ramo `R-RX-01-qual`** (§5.4, mesma ID clínica, D-ARQ-20) — sílica sem avaliação quantitativa **com** avaliação qualitativa P×S no PGR → RX OIT 12M `[adm, per, MR, dem]`, `[INTERPRETADO — prioridade na revisão de saída]`. Fecha `DT-003EC-01`. Extração: campo verbatim `RiscoVerbatim.avaliacao_qualitativa` (banda S·P·NÍVEL, rota determinística) → `RiscoPGR.nivel_risco`/`Risco.nivel_risco`. Asbesto e rota LLM fora, declarados. Efeito medido: divergência RX 24M×12M 27→0 (Porto Araras I), 8→0 (Vila Brasil), 31→0 (Fascino). |
+| v96 | 24/09/2026 | Mesma branch (`claude/inspiring-turing-0ylkmk`, pós-merge do PR #366; IMPLEMENTAÇÃO, decisão do Diovanni de 24/09/2026): **`R-PKG-TRANSITO` CRIADA** (§6) — risco declarado "Bater contra ou ser atingido por (trânsito)" → acuidade visual + audiometria 12M adm/per/MR, `[INTERPRETADO]`. Slug novo `transito_via_publica` em `agentes.yaml`. Parte de `DT-003EB-01` classe (4): DIREÇÃO/PATRIMÔNIO (Vila Brasil) e VENDAS (Fascino); vigia e planejamento seguem abertos. Efeito medido: subemissão 13→9 (Vila Brasil), 9→5 (Fascino), Porto Araras inalterado, zero superemissão nova. |
+| v97 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO, decisões do Diovanni de 23/09 e 24/09/2026): **`R-BIO-05` CRIADA** (§5.9) — agente do Quadro 1 (IBE/EE) com todo risco classificado IRRELEVANTE na matriz P×S do PGR → indicador de R-BIO-04 não emitido; observação de menção documental na linha do cargo, uma por agente. BAIXO emite. `[INTERPRETADO]`, conferência da NR-07 vigente `[A CONFERIR — D-ARQ-69]` (gov.br negado pela rede). Fecha `DT-003EB-02`. Escopo reduzido de BAIXO+IRRELEVANTE para só IRRELEVANTE depois da medição: dispensar em BAIXO zerava a superemissão do Fascino (7) mas criava 10 subemissões nos gabaritos da Dra. Patrícia. Quadro 2 (IBE/SC), R-BIO-03 e R-PKG-BZ fora. Efeito medido (`comparar_matriz_gabarito`, `main 657ccda` × working tree): Porto Araras I superemissão **1→0** (BAA do pintor, GHE-14 vira observação); Fascino e Vila Brasil **idênticos** em todas as células; nenhuma subemissão nova. |
+| v98 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (CONHECIMENTO — conferência normativa, D-ARQ-69): NR-07 conferida no PDF fornecido pelo Diovanni (cabeçalho até Portaria MTP 567/2022). **`R-BIO-05`**: `[A CONFERIR]` fechado — 7.5.12 "b" condiciona a obrigatoriedade dos exames laboratoriais à classificação de riscos do PGR; regra compatível com a norma, marcador `[INTERPRETADO]` mantido (o corte IRRELEVANTE não é literal); corrigida a leitura de 7.5.15 no corpo (exime momentos, não fixa obrigatoriedade). **`R-RX-01-qual`**: `[A CONFERIR]` fechado — Quadro 1 do Anexo III idêntico à leitura de 003.EH; 12M abaixo do ramo sem-avaliação (24M), `[INTERPRETADO]` mantido. Nenhuma regra criada, alterada ou depreciada; nenhum código tocado. |
+| v99 | 24/09/2026 | Branch `claude/eager-fermat-txbn7h` (IMPLEMENTAÇÃO — extração, sem regra nova): nota de aplicação em **`R-RX-01`** (§5.4, ramo `R-RX-01-qual`) e em **`R-BIO-05`** (§5.9) — a rota LLM passa a extrair o nível P×S, restrito por guarda determinística a blocos da escala P×S (109/109 aceitos, 0/318 de escore somado rejeitados, medido no acervo). Nenhuma `R-*` criada, alterada ou depreciada. Escala de escore somado aberta em `DT-(sessão claude/eager-fermat-txbn7h)-01`. |
+| v100 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO — rastreabilidade, sem regra nova): **DH-003ED-01, faceta `risco_origem`: fechada no recorte atômico** — `Motivo.risco_origem` preenchido quando o `quando` da regra é o slug do agente (as `R-BIO-04-*`), com todas as fontes do agente no GHE (PGR com nível, FDS com produto, cargo). Predicado composto segue sem origem (exigiria mudar `predicados.avaliar`); faceta permanece ABERTA para esse caso. Decisão do Diovanni. Nenhuma `R-*` criada, alterada ou depreciada. Detalhe em DECISOES v216 (D-ARQ-22 Parte B). |
+| v101 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO, ordem do Diovanni): **`R-BIO-03` materializada** (§5.9, mesma ID, conteúdo inalterado) — regra em `regras.yaml` e exame `manganes_sangue` em `exames.yaml`. Base NR-15 do protocolo `[A CONFERIR — D-ARQ-69]`. R-CLI-02/R-CLI-03 seguem só em texto (DT-003EO-03). |
+| v102 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (CONHECIMENTO — conferência normativa, D-ARQ-69): **`R-BIO-03`** (§5.9) — `[A CONFERIR]` fechado contra a NR-15 Anexo 12 ('Manganês e seus compostos', Portaria DNSST 08/1992, item 7), PDFs fornecidos pelo Diovanni. Adm/per e 'independente do LT' literais; analito, 6M fixo e MR interpretados. Conteúdo da regra inalterado. |
+| v103 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO, ordem do Diovanni): **`R-CLI-03` materializada** (§4, mesma ID, conteúdo inalterado; base NR-15 Anexo 12 item 7). **`R-CLI-02` não materializada** — medida contra 3 gabaritos, +5 divergências (Porto Araras I, Vila Brasil com clínico anual em Quadro 1 BAIXO); bloqueador reportado, nota na regra. |
+| v104 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — `D-ARQ-86` fatia 1, ratificada): **emenda em `R-BIO-05`** (§5.9, mesma ID) — BAIXO dispensa o indicador do Quadro 1 só com medição do agente abaixo do nível de ação (NR-07 7.5.12 "b" c/c NR-09 9.6.1 "b"; LT da NR-15 Anexo 11); 21 agentes com LT, 7 cancerígenos IARC 1/2A excluídos por decisão do Diovanni. IRRELEVANTE inalterado. 3 pares determinísticos idênticos à `main`. |
+| v105 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — `D-ARQ-86` fatia 2): **nota de aplicação em `R-RX-01`** (§5.4, mesma ID, conteúdo inalterado) — medição de sílica (fração e %quartzo) e de PNOS informada na tela decide a faixa do RX OIT; origem na revisão com o laudo. Asbesto fora (decisão do Diovanni). 3 pares determinísticos idênticos à `main`. |
+| v106 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob a hierarquia D-ARQ-22): **`R-CLI-05` CRIADA** (§4) — clínico 6M por (a) cancerígeno IARC 1/2A com indicador biológico no Anexo I (lista 003.DP) ou (b) agente com indicador biológico MODERADO+ no PGR `[DERIVADO — matriz Patrícia, Aurora]`. **`R-CLI-02` DEPRECATED**, sucedida por `R-CLI-05` (critério "qualquer agente do Anexo I" refutado por medição). Alias `Maganês` em `manganes` (DT-003EQ-02, D-ARQ-70): Fascino GHE-17 passa a clínico 6M e manganês no sangue, iguais ao gabarito. |
+| v107 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-ASF` e `R-PKG-ASF-CO` CRIADAS** (§6) — asfalto/cimento asfáltico → clínico 6M e hemograma 6M (NR-07 Anexo V, 7.5.8, 7.5.18); cimento asfáltico (a quente) → carboxihemoglobina 6M (NR-07 Anexo I Quadro 1, CO). Sem t,t-mucônico/reticulócitos (NR-15 Anexo 13-A). Slug `cimento_asfaltico` com alias medido em 2 PGRs CMO. Nota de atribuição em `R-CLI-05` (Aurora: coordenação Dra. Patrícia, validação Dra. Carolini). |
+| v108 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **exceção do soldador de `R-VIS-01` materializada** como `R-VIS-01-solda` (§5.6, mesma ID, conteúdo inalterado; gatilho `solda_indicador` = manganês ou fumos metálicos `[INTERPRETADO]`); **`R-VIS-03` CRIADA** (manta asfáltica a quente → acuidade com DEM, `[INTERPRETADO]`, RQ.61 Viverde GHE 09). **`R-VIS-02` materializada** (porteiro, primitivo `cargo_porteiro`; vigia fora — precedente dividido). Nenhuma NR exige acuidade para solda (NR-07 7.5.18). Fascino GHE-17: acuidade com DEM, igual ao gabarito. |
+| v109 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-SOLD-CO` CRIADA** (§6) — solda (`solda_indicador`, `[INTERPRETADO]`) → carboxihemoglobina 6M PER (NR-07 Anexo I Quadro 1, CO), precedente Aurora GHE 16 e Flamboyant GHE 17. Gatilho pela fonte geradora declarada fica como DT (o motor não lê o campo). |

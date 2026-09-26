@@ -312,7 +312,7 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 ---
 
-### DT-003M-02 — Vocabulário (agentes.yaml) não cobre composição-de-FDS `[ABERTA — só (A) dado; (B) FECHADA por D-ARQ-56, 003.CK]`
+### DT-003M-02 — Vocabulário (agentes.yaml) não cobre composição-de-FDS `[(A) PARCIALMENTE RESOLVIDA — 28 slugs novos (19+9), sessões docs/003fg-.../docs/003fh-...; (B) FECHADA por D-ARQ-56, 003.CK]`
 
 **Origem:** Sessão 003.M (13/06/2026), medição da fixture-FDS sobre `agentes.yaml`.
 
@@ -341,7 +341,11 @@ Links `acrobat.adobe.com` (forma 1) aparecem em apenas 2 dos 15 PGRs — Shape 1
 
 **Sequência ratificada pelo Diovanni (003.CH):** (1) perigo-transcrição (recorte B de D-ARQ-42) → popula as flags e fecha DT-003T-01; (2) só então a reordenação do ramo-0 → fecha DT-003M-01 + DT-003M-02(B) juntas. A digitação de vocabulário (A) e a lista-de-inertes ficam sinalizadas como **paliativo** (enumeração paralela ao sinal que a FDS já carrega). `[INTERPRETADO — prioridade na revisão de saída]` na articulação "ausência de frase-H ⇒ inerte" (ancorada em R-FDS-06, sem norma literal).
 
-**Status:** ABERTA só em **(A)** (sessão de dado — vocabulário de FDS com proveniência). **(B) FECHADA (003.CK, D-ARQ-56, PR #192):** componente sem slug e sem frase-H declarada deixa de travar o GHE — pendência `materialidade_ausente` NÃO-bloqueante (inerte-declarado, R-FDS-06); frase-H não-mapeada mantém bloqueante (conservador-correto, D-ARQ-35). Cluster resolvido: DT-003T-01 fechada (003.CI/CJ), DT-003M-01 fechada (003.CK).
+**(A) parcialmente resolvida (sessão `docs/003fg-validacao-ao-vivo-fatia2b`, 20/09/2026) — sessão de dado, pedido do Diovanni.** 19 slugs novos em `agentes.yaml`, cobrindo os CAS reais das 6 FDS medidas no acervo (`fds_originais/`, validação ao vivo da fatia 2b) que ainda caíam em `vocabulario_ausente`: 8 do Cimento Ciplan (`cimento_portland`, `silicato_tricalcico`, `silicato_dicalcico`, `ferro_aluminato_de_calcio`, `aluminato_tricalcico`, `carbonato_de_calcio`, `oxido_de_magnesio`, `oxido_de_calcio`), 3 da Tinta Acrílica (`oxido_de_ferro_amarelo`, `silicato_de_aluminio_hidratado`, `hidroxido_de_amonia`), 3 do Adesivo PVC Tigre (`copolimero_de_pvc`, `branqueador_optico_fb184` — faltava na 1ª leva desta sessão, corrigido antes do commit) e 6 conservantes/biocidas da Textura Leinertex/Massa Corrida (`benzisotiazolinona`, `mistura_cmit_mit`, `diuron`, `carbendazim`, `n_octil_isotiazolinona`, `aguarras_mineral`). Fonte de `is_carcinogeno_iarc`: IARC Monographs "List of Classifications" (Grupo 1/2A/2B → true; Grupo 3/não avaliado → false), verificado via busca (domínio oficial `monographs.iarc.who.int` bloqueado pelo proxy de egresso desta sessão — cruzado via SDS de fabricante/PubChem/InChem/ChemicalBook). **Nenhum dos 19 é carcinógeno IARC** — achado coerente, não esperado nem forçado. `tem_lt=true` só em `hidroxido_de_amonia` (amônia no Quadro 1, Anexo 11 da NR-15); os demais `false`. **Achado colateral — 2 CAS malformados na FDS real (não do vocabulário):** a FDS da Ciplan declara aluminato tricálcico como `1242-78-3` e a FDS da Leinertex declara N-octil isotiazolinona como `26530-20-2` — ambos FALHAM o dígito verificador (`cas_bem_formado`), defeito de OCR/transcrição do PDF original. Usados os CAS corretos (`12042-78-3`/`26530-20-1`, dígito confere, fonte externa) para o slug; uma FDS real repetindo o CAS malformado continua caindo em `cas_invalido` — comportamento correto do gate (D-ARQ-36 ramo c), não bug, registrado em comentário no `agentes.yaml`. Cobertura CAS movida por `scripts/medir_painel`: **50/80 (62%) → 69/99 (70%)**. Guards de inventário atualizados com reversão nomeada: `test_indice_real_tem_125_entradas`→`test_indice_real_tem_144_entradas` (125→144, +19 slugs, cada um 1 forma sem `termos:`); `test_vigia_pares_fuzzy_chaves_longas` ganhou 1 par novo no gabarito (`silicato_dicalcico`/`silicato_tricalcico`, nenhum com `fuzzy_permitido`, revisado e aceito, mesma classe do par MEK/MBK já existente). Nenhuma `R-*` tocada — (A) é dado, não regra clínica; `materialidade()` já lê a flag do `Componente` (D-ARQ-34 P4), esses 19 slugs ficam prontos pra resolver via `gate_cas` na próxima FDS real que os declarar. **Restam candidatos não cobertos** desta mesma leva de FDS (entradas sem CAS único — "ND"/"NA"/"vários"/segredo industrial — ficam de fora por desenho, não são populáveis por slug) e todo o universo de FDS AINDA não medidas no acervo (as 11 FDS por-cargo do commit `96a15e9` não foram examinadas nesta sessão).
+
+**2ª leva (A) — sessão `docs/003fh-fds-por-cargo`, 20/09/2026, pedido do Diovanni.** Examinadas as 11 FDS reais por-cargo do acervo (commit `96a15e9`) — dedup por hash reduz a 8 documentos distintos: Adesivo PVC Tigre (Almoxarife/Encanador/Montador, MESMA composição já coberta na 1ª leva, nenhum CAS novo), Água Sanitária Zulu (Aux. Serviços Gerais/Serviços Gerais), Cimentcola Interno Quartzolit (Azulejista, cimento Portland já coberto), Desmoldante Concentrado (Carpinteiro, SEM composição declarada — "não apresenta ingredientes que contribuam para o perigo"), Impermeabilizante Asfáltico (Impermeabilizante/páginas 13+ de `FDS PINTOR.pdf`), Eletrodo 60.13 (Montador de Estruturas Metálicas/Soldador). **9 slugs novos**: `hipoclorito_de_sodio`, `carbonato_de_sodio` (Água Sanitária), `asfalto` (Impermeabilizante — **único carcinógeno IARC desta leva**: Grupo 2A/2B, Monografia Vol.103/2013, exposição ocupacional a betume oxidado/duro + emissões), `ferro`, `feldspato`, `silicato_de_potassio`, `bentonita`, `celulose`, `carbonato_de_potassio` (Eletrodo de solda). **Limitação medida:** as páginas 0-11 de `FDS PINTOR.pdf` (produto "BLASCOR", provável tinta) são PDF só-imagem — `pdfplumber` não extrai texto ali, sem composição legível nesta sessão (exigiria OCR, fora de escopo). Cobertura CAS: **69/99 (70%) → 78/108 (72%)**. Detalhe completo: `DECISOES_ARQUITETURAIS.md` v205 (nota de aplicação em `D-ARQ-36`).
+
+**Status:** (A) PARCIALMENTE RESOLVIDA — recorte medido (17 FDS do acervo entre as duas levas) coberto; universo maior de FDS reais segue aberto para sessões futuras conforme medição (nenhuma FDS nova conhecida no acervo no momento; `FDS PINTOR.pdf` págs. 0-11 pendente de OCR). **(B) FECHADA (003.CK, D-ARQ-56, PR #192):** componente sem slug e sem frase-H declarada deixa de travar o GHE — pendência `materialidade_ausente` NÃO-bloqueante (inerte-declarado, R-FDS-06); frase-H não-mapeada mantém bloqueante (conservador-correto, D-ARQ-35). Cluster resolvido: DT-003T-01 fechada (003.CI/CJ), DT-003M-01 fechada (003.CK).
 
 **Nota (003.CI).** O pré-requisito duro (perigo-transcrição) ganhou contrato em D-ARQ-55: o recorte B popula `is_sensibilizante` a partir da frase-H. (B) NÃO fecha nesta sessão — depende do **passo 2** (reordenação do ramo-0 de `materialidade()`/Fase C para honrar a flag antes do `agente is None`), que fecha (B) junto com DT-003M-01. (A) (digitar vocabulário de FDS) segue sessão de dado, sinalizada como paliativo. DT segue ABERTA.
 
@@ -546,6 +550,12 @@ Refinamentos aos passos da migração desta DT:
 
 **Status:** ABERTA. Não-bloqueante. Cruza D-ARQ-53 P3/P4. Faceta "de" FECHADA em 003.DU; mm/aaaa e método seguem abertos.
 
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — forma nova medida: faixa de
+vigência.** Porto Araras I e Vila Brasil Escritório trazem `Vigência: 04/2026 – 04/2027` /
+`07/2026 – 07/2027`; `resolver_validade` devolve `data = null` e `proposta = null` para a
+candidata. Não é silêncio (o RT recebe a candidata explícita e digita a data), mas é mais um
+caso da faceta `mm/aaaa`, agora como intervalo. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
 ---
 
 ### DT-003CB-01 — `Quantificacao.valor` de ruído não discrimina NEN vs. SPL pontual/pico `[ABERTA — irmã de DT-002V-01]`
@@ -705,6 +715,14 @@ Medição (Fascino, 19 GHEs, commit `1980a00`, relatório `relatorios/003dv_fasc
 
 **Status:** REENQUADRADA, não fechada. Resíduo (classe 4) exige sessão CONHECIMENTO com gate D-ARQ-63 e 2º PGR no acervo antes de tocar R-PSY-01 ou criar regra nova.
 
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — classe (4) ganha 2º PGR.** Vila
+Brasil Escritório: 4 GHEs que o PGR declara só com risco postural, piso irregular, trânsito ou
+violência (DIREÇÃO, VIGILÂNCIA, PLANEJAMENTO, PATRIMÔNIO) recebem no gabarito acuidade visual
+(6 cargos) e audiometria (4 cargos); o motor emite só o pacote base e marca os cargos com
+`vocabulario_ausente` (sem riscos implícitos). 10 células. Distingue a leitura em aberto da nota
+003.ED: aqui o PGR **declara** riscos, e nenhum deles pede esses exames — classe (4), conceito
+ausente, não lacuna de vocabulário. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
 **Nota (003.ED).** Classe (2) perdeu a maior fatia: o alias de altura fechou 16 GHEs × 5
 exames = 80 células, com cruzamento nominal contra o gabarito sem falso positivo nem falso
 negativo. Classe (4) inalterada. Achado novo a medir: **GHE-19 (Vendas) tem `ctx.riscos == []`**
@@ -713,7 +731,33 @@ negativo. Classe (4) inalterada. Achado novo a medir: **GHE-19 (Vendas) tem `ctx
 a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, para classe (2)
 (lacuna de vocabulário). `[A MEDIR — não concluir sem medir]`
 
-### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[ABERTA — 003.EB]`
+
+**Decisão clínica (Diovanni, 23/09/2026) + medição — "o cargo deve ser motorista, tem que ver
+na descrição do cargo".** Classe (4) de Vila Brasil, medido no bloco inteiro de cada GHE
+`[MEDIDO — mesma branch]`: **DIREÇÃO** (Motorista MG) — a descrição diz "dirigem e manobram
+veículos", risco "trânsito" declarado → confirma (acuidade + audiometria, 2 células).
+**PATRIMÔNIO** — descrição sem direção, mas risco "Bater contra ou ser atingido por (trânsito) —
+deslocamento em via pública" → compatível (2 células). **VIGILÂNCIA** (acuidade, 2 células) e
+**PLANEJAMENTO** (acuidade + audiometria, 4 células) — nenhum termo de direção nem de trânsito no
+bloco: a hipótese não os explica. Implementação candidata: condução de veículo (descrição do cargo
+ou risco de trânsito) → acuidade visual + audiometria; vigia e planejamento seguem classe (4)
+abertos.
+
+**Implementação parcial (branch `claude/inspiring-turing-0ylkmk`, 24/09/2026) — `R-PKG-TRANSITO`.**
+Sinal escolhido pelo Diovanni entre três medidos: **risco de trânsito declarado**
+("Bater contra ou ser atingido por (trânsito)", slug novo `transito_via_publica`, só a frase
+completa). Medido nos 3 PGRs pareados: 3/3 GHEs com o risco recebem acuidade + audiometria no
+gabarito (DIREÇÃO e PATRIMÔNIO de Vila Brasil, VENDAS do Fascino), 0/58 dos demais. "Ver na
+descrição do cargo" acertava só a DIREÇÃO e dava falso positivo por "dirigem"/"conduzir" em 4
+GHEs — descartado. **Fecha o achado 003.ED do GHE-19 (Vendas):** o PGR **declara** o risco, e o
+termo não resolvia porque o parser colava a legenda "(P × S)" no último risco do bloco —
+corrigido (linha que começa na banda GRUPO sem ser categoria encerra o risco; no acervo
+determinístico inteiro, só esse risco mudou). Efeito `[MEDIDO — comparar_matriz_gabarito, antes =
+worktree main 5977bf5]`: subemissão 13→9 (Vila Brasil), 9→5 (Fascino), Porto Araras inalterado,
+zero superemissão nova. 4 testes (`test_pkg_transito.py`), varredura inversa 4/4. **Seguem
+abertos na classe (4):** VIGILÂNCIA (acuidade, 2 células) e PLANEJAMENTO (acuidade +
+audiometria, 4 células) de Vila Brasil — sem trânsito nem direção no bloco.
+### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/eager-fermat-txbn7h, 24/09/2026: R-BIO-05, só IRRELEVANTE]`
 
 **Origem:** Sessão 003.EB (25/07/2026), mesmo diff acima.
 
@@ -725,7 +769,100 @@ a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, 
 
 **Status:** ABERTA. Formalização exige sessão CONHECIMENTO com gate D-ARQ-63 antes de alterar R-BIO-04.
 
-### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[ABERTA — 003.EC, não-bloqueante]`
+
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — dois casos em sentidos opostos.**
+Com o alias `Metiletilcetona` (`DT-(sessão claude/hopeful-newton-yjv3k7)-02`), o motor passa a
+emitir `mek_urina` para o pintor nos dois PGRs com a grafia no GHE PINTURA. Fascino (gabarito da
+Dra. Carolini, anotação "risco baixo no PGR"): o gabarito **não** pede MEK — superemissão desta
+DT. Porto Araras I (gabarito da Dra. Patrícia, anotação "risco classificado como baixo"): o
+gabarito **pede** `Metil-etil-cetona (PER 6 meses)`. Mesma anotação de risco baixo, condutas
+opostas entre as duas médicas. Porto Araras também mostra `acido_butoxiacetico_urina` emitido para
+o pintor onde a médica anotou 2-butoxietanol como "irrelevante". A pergunta de método desta DT
+fica mais nítida, não resolvida. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
+**Decisão clínica (Diovanni, 23/09/2026): segue a conduta da Dra. Carolini** — risco classificado
+como baixo no PGR → indicador biológico **não** é emitido; só menção documental no PCMSO.
+Medição de viabilidade `[MEDIDO — mesma branch]`: o nível de risco (P×S →
+IRRELEVANTE/BAIXO/MODERADO/ALTO) está na própria linha do agente químico em 100% das linhas
+medidas (Fascino 6 BAIXO; Porto Araras 6 BAIXO + 1 IRRELEVANTE; Aurora 5 BAIXO + 2 MODERADO). O
+parser **não** extrai esse nível hoje (`RiscoVerbatim` = agente, quantificação, fonte). A
+implementação exige: campo de nível na extração (rota determinística e transcritor LLM),
+hidratação até `RiscoPGR`, e gate em `R-BIO-04`; mais a forma de saída da "menção documental".
+Ainda não implementado.
+
+**Nota (branch `claude/inspiring-turing-0ylkmk`, 24/09/2026).** Metade da extração exigida acima
+passa a existir por causa de `DT-003EC-01`: `RiscoPGR.nivel_risco`/`Risco.nivel_risco` são
+populados pela rota determinística (família Consciente). Faltam a rota LLM, o gate em `R-BIO-04`
+e a forma de saída da "menção documental".
+
+**Resolução (branch `claude/eager-fermat-txbn7h`, 24/09/2026) — `R-BIO-05`, dispensa só em
+IRRELEVANTE.** Implementada primeiro como decidido em 23/09 (dispensa em BAIXO e IRRELEVANTE,
+menção como observação na linha do cargo) e medida contra os 3 gabaritos antes de entregar
+(`comparar_matriz_gabarito`, `main 657ccda` × working tree): superemissão 7→0 (Fascino) e 1→0
+(Porto Araras I), mas **subemissão 0→6 (Porto Araras I) e 9→13 (Vila Brasil)**. A nota acima
+subestimava a divergência: a Dra. Patrícia pede o indicador com risco BAIXO em **10/10** células
+medidas (acetona, tolueno, xileno, MEK, ciclohexanona), não só no MEK de um pintor. Reportado
+como bloqueador; **decisão do Diovanni (24/09/2026): dispensa só em IRRELEVANTE**, o único nível
+em que as duas médicas concordam (Porto Araras I, 2-butoxietanol do pintor). Efeito final: Porto
+Araras superemissão 1→0; Fascino e Vila Brasil idênticos. As 7 células do Fascino (conduta da
+Dra. Carolini em risco BAIXO) seguem como superemissão, declarada em R-BIO-05.
+
+Forma de saída: `Observacao` em `MatrizGHE.observacoes`, renderizada na célula do cargo depois
+dos exames ("Obs.: risco irrelevante no PGR para <agente> — incluir menção no PCMSO; não
+solicitado: <exame>"). Escopo: 42 `R-BIO-04-*` do Quadro 1 (IBE/EE); Quadro 2 fora. Rota LLM
+continua sem `nivel_risco` — ali o indicador sai sempre (lado protetivo). NR-07 vigente não
+conferida (gov.br negado pela rede) `[A CONFERIR — D-ARQ-69]`. 11 testes
+(`test_bio_risco_irrelevante.py`), varredura inversa 14 reversões, 11/11 testes discriminantes.
+
+**Nota (mesma branch, pós-merge do PR #368, 24/09/2026) — `[A CONFERIR]` acima fechado.** NR-07
+conferida no PDF fornecido pelo Diovanni (`nr-07-atualizada-2022-1_4.pdf`, cabeçalho até Portaria
+MTP 567/2022): o **7.5.12 "b"** torna os exames laboratoriais obrigatórios *"quando houver
+exposições ocupacionais acima dos níveis de ação determinados na NR-09 ou se a classificação de
+riscos do PGR indicar"* — R-BIO-05 é compatível com a norma. Detalhe e trecho literal em
+PROTOCOLO §5.9 (v98).
+
+**Nota (branch `claude/determined-fermi-xxah3h`, 24/09/2026) — Aurora: a Dra. Patrícia dispensa
+o indicador em BAIXO.** Matriz do app pós-deploy (rota LLM) × gabarito RQ.61 do Aurora Lago das
+Rosas 27.08.26. No GHE 11 (Instalações Hidro-sanitárias) o PGR classifica Acetona como **BAIXO**
+(P1×S3) e MEK, Ciclohexanona e THF como **MODERADO**. O gabarito pede MEK, ciclohexanol e THF
+(PER 6M) e **omite a acetona**, com anotação manuscrita *"classificação baixo no PGR para
+Acetona"* nos 3 cargos. O app emite `Acetona na urina (PER 6 meses)` nos 3 — correto sob R-BIO-05
+(só IRRELEVANTE dispensa), superemissão contra o gabarito. É contraexemplo da medição que motivou
+"só IRRELEVANTE" ("a Dra. Patrícia pede o indicador em BAIXO em 10/10 células"): a mesma médica,
+num PGR posterior, dispensa em BAIXO e anota o motivo. Nenhum químico do Aurora está em
+IRRELEVANTE (71 linhas `Químico`: 41 BAIXO, 30 MODERADO), então R-BIO-05 não dispara e nenhuma
+observação sai — como esperado. **Não alterado:** o corte BAIXO×IRRELEVANTE é decisão clínica do
+Diovanni `[MEDIDO — branch claude/determined-fermi-xxah3h]`.
+
+**Nota (branch `claude/hopeful-ramanujan-rbgh4s`, 25/09/2026) — BAIXO fica condicionado a medição.**
+Diovanni pediu a dispensa em BAIXO; reapresentada a medição de 24/09 (Porto Araras I e Vila Brasil
+pioram), ele pediu parecer clínico. Parecer: não dispensar em BAIXO sem medição — no Aurora o
+próprio PGR marca acetona e xileno como *"Avaliação ainda qualitativa — resultado quantitativo
+pendente de medição"*, e sem valor a primeira condição do NR-07 7.5.12 "b" (acima do nível de ação)
+não é demonstrável. R-BIO-05 inalterada. Proposta registrada em `D-ARQ-86` (ARQUITETURA PROPOSTA):
+medição informada na tela por (GHE, agente) com procedência de laudo, e dispensa em BAIXO só com
+medição abaixo do nível de ação. Aguarda ratificação e as questões Q1–Q4 da decisão.
+
+**Nota (mesma branch, 25/09/2026, pós-merge do PR #383) — fatia 1 de `D-ARQ-86` implementada.**
+R-BIO-05 dispensa em BAIXO quando há medição do agente abaixo do nível de ação (metade do LT da
+NR-15 Anexo 11), informada na tela com laudo ou transcrita do PGR; sem medição, BAIXO emite. 21
+agentes; os 7 cancerígenos IARC 1/2A com LT ficam fora (decisão do Diovanni). O conflito entre as
+condutas das médicas passa a se resolver por evidência: com laudo abaixo do nível de ação, a
+matriz segue o Aurora; sem laudo, segue Porto Araras I e Vila Brasil. Os 3 pares determinísticos
+não mudam (sem medição de químico).
+
+### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
+
+**Nota (mesma branch, 25/09/2026) — 2º GHE do Aurora com dispensa em BAIXO.** Matriz_9 do app ×
+gabarito: no GHE 18 PINTURA, a anotação dos 3 cargos diz *"Inserir no Word do PCMSO risco
+ocupacional baixo no PGR para Octoato de Cobalto, Thinner Acetona, Thinner Metiletilcetona,
+Thinner Tolueno e Xileno"* — todos BAIXO no PGR — e o gabarito não pede ácido metil-hipúrico,
+ortocresol, MEK nem acetona. O app emite ácido metil-hipúrico (origem na revisão: `xileno ← PGR
+(nível BAIXO) | FDS — componente Xileno do produto Fundo Zarcão`). Exceções no mesmo GHE: pede
+t,t-mucônico (benzeno das FDS de aguarrás — cancerígeno, regime do Anexo V) e **cobalto na urina**
+apesar de citar o octoato de cobalto na anotação de risco baixo (contradição interna do gabarito).
+Somado ao GHE 11: 2 GHEs, 5 agentes do Quadro 1 dispensados em BAIXO pela mesma médica num PGR de
+27/08/26. Decisão do Diovanni `[MEDIDO — branch claude/determined-fermi-xxah3h]`.
 
 **Origem:** Sessão 003.EC (26/07/2026), medição do gabarito `MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE 0030 LTDA 08.07.26.doc` (Fascino) contra R-RX-01/faixas de PNOS.
 
@@ -739,7 +876,83 @@ a acuidade para classe (4) (conceito ausente, n=1, não formalizar); a segunda, 
 
 **Correção 003.EJ (não apagar a nota 003.EH acima — D-ARQ-06, registro de erro).** A nota de 003.EH atribui a ausência de RX em GHE-08 e GHE-09 a "lacuna de vocabulário". Medido e derivado em 003.EJ, o diagnóstico é outro: **GHE-08** declara `Poeira de madeira` — agente identificável que não é sílica/asbesto/carvão (fora do Quadro 1, literal) e cujo enquadramento no Quadro 2 depende do rodapé (não sensibilizante, baixa toxicidade); **GHE-09** declara `Poeiras Respiráveis/Metálicas`, fração + categoria sem substância → R-PGR-05. Em nenhum dos dois a ausência de RX é lacuna de vocabulário. Ver DT-003EJ-01 (GHE-08) e a nota de aplicação 003.EJ em R-PGR-05 (GHE-09).
 
-**Status:** ABERTA. Não-bloqueante — nenhuma regra alterada por esta DT; questão de método para sessão CONHECIMENTO futura.
+**Nota (sessão atual, branch `claude/festive-gates-soy0fr`) — gatilho de reabertura satisfeito: 2º PGR independente com a mesma divergência.** Comparação nova, PGR(ADENDO) CMO Residencial Aurora Lago das Rosas 27.08.26 × gabarito RQ.61 assinado (Dra. Patrícia Montalvo Moraes — mesma médica do caso-âncora Fascino, empresa e data distintas). `[MEDIDO — PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf]`: o documento não contém nenhuma medição quantitativa (0 ocorrências de `mg/m³`, `dB(A)` ou `ppm` no PDF inteiro; 62 ocorrências do aviso de template "⚠ Avaliação ainda qualitativa... apague este aviso", nunca substituído) — mesma classe do caso-âncora ("PGR não traz quantificação"). `[MEDIDO — MATRIZ DE EXAMES(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf]`: o gabarito assinado prescreve RX Tórax OIT em **12 meses** nos GHEs de sílica sem medição — mesmo valor do caso-âncora Fascino, mesma divergência contra R-RX-01-sem (24M). O app (rota 100% LLM) emite 24M nesses GHEs, coerente com R-RX-01-sem. Isto satisfaz o gatilho de reabertura nomeado acima e na nota 003.EH ("2º PGR atualizado no acervo, não n=1") com uma segunda empresa/PGR independente — mesma médica, mesma conduta conservadora, dois documentos distintos. **Não implementado nesta sessão**: divergência entre medição real (12M, gabarito) e valor esperado da regra (24M, R-RX-01-sem) é bloqueador nomeado — decisão do Arquiteto/Dra. Carolini sobre se "sem medição" deveria rotear a 12M em vez de 24M, não ajuste unilateral de código para bater com o gabarito.
+
+**Status:** ABERTA. Não-bloqueante — nenhuma regra alterada por esta DT; questão de método, agora com gatilho de reabertura satisfeito, para sessão CONHECIMENTO com a Dra. Carolini.
+
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — 3º e 4º PGR com a mesma divergência.**
+Porto Araras I (24 células) e Vila Brasil Escritório (8 células): motor 24M, gabarito 12M, em todo
+GHE onde os dois emitem RX tórax OIT. Os dois gabaritos são assinados pela Dra. Patrícia Montalvo
+Moraes. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`. Nada alterado; reforça o gatilho de reabertura já satisfeito.
+
+
+**Decisão clínica (Diovanni, 23/09/2026) + medição — "12M o motivo deve ser a sílica
+qualitativa".** Medido `[MEDIDO — branch claude/hopeful-newton-yjv3k7, sobre main 7dbe93e]`: nos
+4 PGRs pareados (Fascino, Aurora, Porto Araras I, Vila Brasil) a sílica é avaliada
+**qualitativamente** (matriz P×S AIHA na própria linha — "4 1 BAIXO", "3 2 MODERADO" — com
+"avaliação qualitativa — resultado quantitativo pendente de medição"); o motor lê como
+`silica_asbesto_sem_medicao` e emite 24M. Em Porto Araras e Vila Brasil, **todo** GHE com RX 24M
+no motor declara sílica, e o gabarito dá 12M em 100% deles (27/27 e 8/8); GHEs com poeira não
+sílica (madeira, PNOS) saem 60M e batem. **Ressalva medida:** 24M aparece em 15 das 34 matrizes
+assinadas do acervo (ENGESEG, GPL R78, Horus, Reserva 0028, Dinâmica, Floramazônia, Flamboyant…),
+às vezes junto de 12M na mesma matriz; nenhuma tem PGR completo no acervo para conferir o estado
+da sílica. Na Floramazônia, 12M cai nos GHEs de sílica (betoneira, produção, cremalheira) e 24M em
+armação e carpintaria — compatível com a hipótese, não prova. **Implementação candidata:** ramo
+"sílica com avaliação qualitativa" → 12M, distinto de "sem avaliação" (24M, texto literal do
+Anexo III da NR-07), `[INTERPRETADO — conduta das médicas nos 4 pares, decisão do Diovanni]`.
+Exige distinguir, na extração, qualitativa × sem avaliação — hoje não distinguido.
+
+**Resolução (branch `claude/inspiring-turing-0ylkmk`, 24/09/2026) — `R-RX-01-qual` implementado.**
+Sinal de "avaliação qualitativa" = colunas S·P·NÍVEL DE RISCO preenchidas na linha do risco
+(matriz P×S). Extração: `RiscoVerbatim.avaliacao_qualitativa` (banda calibrada por bloco em
+`parser_familia_consciente`, 587/587 linhas de risco capturadas nos 3 PGRs da família) →
+`RiscoPGR.nivel_risco` (`hidratacao.parsear_nivel_risco`; "NÃO DEFINIDO" = não avaliado, sem
+pendência; texto não reconhecido = `avaliacao_qualitativa_nao_parseada` não-bloqueante) →
+`Risco.nivel_risco` (Fase A) → primitivo `silica_qualitativa`, disjunto de
+`silica_asbesto_sem_medicao`. Regra `R-RX-01-qual`: 12M constante `[adm, per, MR, dem]`,
+`[INTERPRETADO — prioridade na revisão de saída]`. 9 testes novos
+(`test_rx_silica_qualitativa.py`), varredura inversa 11 reversões / 9 testes, todas
+discriminantes. Efeito medido `[MEDIDO — comparar_matriz_gabarito, antes = worktree main
+cadcd33]`: divergência RX 24M×12M **27 → 0** (Porto Araras I), **8 → 0** (Vila Brasil),
+**31 → 0** (Fascino); nenhuma outra célula mudou nos três pares.
+**Fica aberto, declarado:** (a) asbesto qualitativo segue 24M — sem caso nem decisão; (b) rotas
+LLM e card não extraem a avaliação (`avaliacao_qualitativa=""`), então PGR que não é da família
+Consciente segue 24M para sílica — Aurora Lago das Rosas passa pela rota LLM e não foi medido
+aqui `[A MEDIR]`; (c) conferência do texto vigente do Quadro 1 exigida por D-ARQ-69 não
+refeita nesta sessão (`www.gov.br` negado pela política de rede) — vale a de 003.EH `[A CONFERIR]`.
+**Nota (branch `claude/eager-fermat-txbn7h`, 24/09/2026) — item (c) fechado.** Quadro 1 do Anexo III
+conferido no PDF da NR-07 fornecido pelo Diovanni (cabeçalho até Portaria MTP 567/2022): mesmos
+dois ramos lidos em 003.EH, sem ramo qualitativo. Detalhe em PROTOCOLO §5.4 (v98).
+**Nota (mesma branch, 24/09/2026) — item (b) parcialmente fechado.** A rota LLM passa a extrair a
+avaliação nos PGRs de escala P×S (5 do acervo, 109 blocos); nos de escore somado segue ausente,
+por guarda determinística — ver `DT-(sessão claude/eager-fermat-txbn7h)-01`. Rota card segue sem.
+**Nota (branch `claude/determined-fermi-xxah3h`, 24/09/2026) — `[A MEDIR]` da rota LLM fechado
+no Aurora.** Matriz gerada no app pós-deploy de `main c1b760e` (Gemini, prompt com regra 6b) ×
+gabarito da Dra. Patrícia: RX Tórax OIT **PER 12 meses** exatamente nos GHEs 03, 05, 08, 13, 14,
+15, 16, 18 e 22 (27 cargos), **60 meses** nos GHEs 01, 02, 04, 06, 07, 09, 10, 11, 12 e 21, sem RX
+em 17, 19 e 20 — **22/22 GHEs e 59/59 cargos idênticos ao gabarito** na periodicidade do RX. O
+PGR não tem medição quantitativa, então o 12M só pode vir de `R-RX-01-qual`: o Gemini devolveu o
+nível P×S nas linhas de sílica e a guarda de escala o aceitou. A antiga divergência 24M×12M do
+Aurora (nota da branch `claude/festive-gates-soy0fr` acima) está fechada.
+
+### DT-(sessão claude/eager-fermat-txbn7h)-01 — PGRs de escore somado (Trivial…Intolerável) não têm nível P×S: R-RX-01-qual e R-BIO-05 não se aplicam `[ABERTA — decisão clínica]`
+
+**Origem.** Implementação da extração do nível na rota LLM (24/09/2026). Medido nos 17 PGRs do
+acervo que caem na rota LLM: 5 usam a matriz P×S (Irrelevante/Baixo/Moderado/Alto/Crítico,
+legenda em 100% dos blocos) e 12 usam escore somado multifatorial com classes
+Trivial/Tolerável/Moderado/Substancial/Intolerável (Viverde V02, Vistamerica Ver.02, Seconci
+REV3/REV4, AURO, ALT T65, EURO Setor C, CMO Ver.02 e os PCMSO Vistamerica/R78/Envolt). Nesses 12
+o padrão S·P·NÍVEL do parser casaria 13–65 falsos níveis por PGR (ex.: "… 5 40 Moderado", onde
+40 é escore e Moderado é classe de outra escala) — por isso a guarda descarta o nível fora da
+escala P×S.
+
+**Pergunta clínica.** As decisões de R-RX-01-qual (sílica qualitativa → RX 12M) e R-BIO-05
+(IRRELEVANTE dispensa IBE/EE) foram tomadas sobre a escala P×S. Valem para a escala de escore?
+Em particular: (1) sílica com classificação de escore declarada conta como "avaliação
+qualitativa" para o RX 12M? (2) "Trivial" equivale a "Irrelevante" para dispensar o indicador?
+Sem decisão, a rota segue o lado protetivo: RX 24M (R-RX-01-sem) e indicador emitido.
+
+**Status:** ABERTA. Não-bloqueante.
 
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
@@ -959,7 +1172,7 @@ origem.
 
 **Origem:** 003.EG, ao abrir a sessão contra um diff desatualizado.
 
-**Situação.** `.gitignore:26` ignora `relatorios/` inteiro (`git ls-files relatorios/` = vazio).
+**Situação.** `.gitignore:42` ignora `relatorios/` inteiro (`git ls-files relatorios/` = vazio).
 O diff motor×gabarito é o instrumento que pauta a fila desde D-ARQ-62, e nada em `git log`
 denuncia um relatório vencido. Consequência medida: o último diff completo era de 003.EB
 (`6f29928`) e envelheceu 4 sessões — 003.EC/ED/EE/EF mudaram o motor sem que a evidência fosse
@@ -971,6 +1184,28 @@ bruto ignorado — o sumário é pequeno, revisável em PR, e denuncia idade por
 bruto continua grande e reproduzível sob demanda.
 
 **Status:** ABERTA. Não-bloqueante.
+
+**Reincidência medida (04/09/2026, sessão 003.FI) e endereçada em parte (003.FJ).** A varredura de
+dado pessoal que fechou `DH-003FH-02` e abriu `DH-003FI-01` rodou de `/tmp` num container remoto —
+`varrer.py` (4.669 B) e `passe3.py` (2.979 B) — e morreria com ele. Era a mesma classe desta DH:
+`DH-003FE-01` promete que a cláusula de reabertura é testável, e sem instrumento versionado a
+promessa não se cumpre.
+
+**Pago para este instrumento, não para a classe.** 003.FJ versiona
+`scripts/varrer_acervo_lgpd.py` com `tests/test_varrer_acervo_lgpd.py` (**30 testes** @ `3fb98e2`, reversão
+nomeada cada um, mais o portão `tests/test_cobertura_varrer_acervo.py` que trava **100% de
+cobertura** do script). Foram 10 na entrega inicial (`4c86f18`), 13 no
+1º gap (`cc62333`, destino do texto extraído), 14 no 3º (`9b0d496`, exclusão medida em vez de
+tamanho de lista), 16 no 4º (`4d85c35`, cinco classes coletadas que nenhuma saída lia) 19 no 5º
+(`b4580d5`, os três ramos de falha de `varrer()`) 21 no 6º (`dc77b28`, dois dos três ramos de
+`extrair_metadata_autoria`) e 30 + portão no fecho de classe (`3fb98e2`). **A DH segue ABERTA:** o diff motor×gabarito, que é o instrumento original desta dívida,
+continua em `relatorios/`, ignorado pelo `.gitignore:42`. Um instrumento a menos fora do git não
+fecha a dívida de todos eles.
+
+**Correção de âncora (10/09/2026).** A `Situação` e a nota acima citavam `.gitignore:26`; a entrada
+`relatorios/` está na **linha 42** — a 26 é linha de comentário. A âncora vinha propagada desde
+003.EG sem re-medição, e o mesmo erro estava no bloco 003.FJ de `HISTORICO_OPERACIONAL.md`. Nada
+mais da DH muda: `git ls-files relatorios/` segue vazio e a DH segue **ABERTA**.
 
 ### DH-003EG-03 — Derivado do `INDICE_DARQ` tem vigilância, mas o ritual não a invoca em sessão docs-only `[ABERTA — higiene de método]`
 
@@ -1060,7 +1295,7 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 
 **Status:** ABERTA. Não-bloqueante.
 
-### DT-003EJ-01 — `Poeira de madeira` é agente identificável fora dos dois quadros do Anexo III `[ABERTA — não-bloqueante]`
+### DT-003EJ-01 — `Poeira de madeira` é agente identificável fora dos dois quadros do Anexo III `[RESOLVIDA — R-RX-03/R-ESP-03, sessão atual]`
 
 **Origem:** 003.EJ, derivação da ausência de RX em GHE-08 (Carpintaria) do Fascino.
 
@@ -1070,6 +1305,29 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 
 **O que a resolução exige.** Conferir a classificação de carcinogenicidade e de sensibilização da poeira de madeira em fonte primária; decidir se madeira ganha slug próprio com regime próprio ou permanece `vocabulario_ausente` honesto. Não-bloqueante: hoje o motor não emite, que é o comportamento correto sob a derivação acima.
 
+**Nota (sessão atual, branch `claude/festive-gates-soy0fr`) — gatilho de reabertura satisfeito + faceta (b) parcialmente confirmada.** Comparação nova, PGR(ADENDO) CMO Residencial Aurora Lago das Rosas 27.08.26 (matriz do app × gabarito RQ.61 assinado pela Dra. Patrícia Montalvo Moraes) declara `Poeira de madeira` em **GHE 04 - Carpintaria** — mesma denominação de cargo do caso-âncora original (GHE-08 Carpintaria, Fascino). É o **2º PGR do acervo** com essa ocorrência, satisfazendo o gatilho de reabertura já nomeado acima. `[MEDIDO — PGR(ADENDO) CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf, página 30]`: o próprio PGR bruto lista, na coluna "Agravos à Saúde" da linha de `Poeira de madeira`, **"adenocarcinoma das vias respiratórias superiores"** — o elaborador já registra o efeito carcinogênico característico, sem que o motor hoje o capture. Metade da faceta (b) agora tem fonte primária: IARC Monographs Volume 62 (1995), *Wood Dust and Formaldehyde*, classifica pó de madeira em **Grupo 1** (carcinogênico para humanos, evidência suficiente em humanos), reafirmado no Volume 100C (2012), *Arsenic, Metals, Fibres, and Dusts* `[DERIVADO — IARC Monographs, consulta desta sessão; NÃO é gov.br/MTE nem Fundacentro — a NR-07/NHO brasileiras não têm lista própria de carcinógenos, remetem ao Anexo V; sinalizar a fonte como internacional se isso virar `is_carcinogeno_iarc: true` em `agentes.yaml`]`. A faceta de **sensibilização respiratória** (asma ocupacional por poeiras de madeira, ex. cedro/plicatic acid) segue `[INCERTO — não conferido em fonte primária nesta sessão]`. A decisão em aberto não muda: carcinogenicidade confirmada não define sozinha o regime (Quadro 1 do Anexo III é fechado a sílica/asbesto/carvão mineral por texto literal; carcinógeno fora desses três agentes vai para regime próprio do Anexo V, não para R-RX-01) — segue exigindo decisão do Arquiteto sobre slug próprio × regime, não implementado nesta sessão.
+
+**Nota (mesma sessão, branch `claude/festive-gates-soy0fr`) — periodicidade do RX deixa de ser amostra única (n=1 → n=2), mesmo valor.** `[MEDIDO — MATRIZ DE EXAMES(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf, página 3]`: o gabarito assinado (Dra. Patrícia Montalvo Moraes) prescreve, para os 3 cargos do GHE 04 - Carpintaria (Carpinteiro, Meio Oficial de Carpinteiro, Servente), **RX de Tórax OIT (ADM, PER 60 meses, MRO, DEM)** — o mesmo valor do caso-âncora original (GHE-08 Carpintaria, Fascino, também 60M). Duas PGRs independentes, mesma médica, mesmo cargo (Carpintaria), mesmo número: deixa de ser amostra única para propor 60M como periodicidade do eventual slug `poeira_de_madeira`, se e quando o Arquiteto decidir por slug próprio.
+
+Duas ressalvas medidas, não decisivas para a leitura acima mas registradas por rigor:
+
+1. **Réplica não é limpa 1:1.** O PGR bruto da Aurora (página 30) declara, no mesmo bloco de risco do GHE-04, **duas linhas químicas distintas** — `Poeira de madeira` e `Poeira respirável` (esta última é `fracao_sem_agente`, D-ARQ-83, sem substância própria) — coexistindo. O caso-âncora do Fascino (GHE-08) tinha só `Poeira de madeira`, isolada. O co-occurrence na Aurora não muda a leitura (o caso isolado do Fascino já bate em 60M sozinho), mas os dois casos não são réplicas idênticas.
+2. **Achado novo, faceta ainda não nomeada.** O mesmo gabarito prescreve Espirometria (ADM, PER 24 meses, MRO, DEM) para o mesmo GHE-04 — mas `R-ESP-02` (item 3.1, disparo incondicional) é ancorado em **poeira mineral** (sílica/asbesto/PNOS); poeira de madeira é orgânica, não mineral, e não está no escopo de substância de `R-ESP-02` como especificado hoje. Se a prescrição da Dra. Patrícia for tomada ao pé da letra, o regime do slug novo precisaria decidir também a espirometria, não só o RX — pergunta em aberto, não investigada além desta observação.
+
+**Resolução (mesma sessão, branch `claude/festive-gates-soy0fr`).** Decisão tomada pelo Diovanni: slug próprio, `poeira_de_madeira` em `agentes.yaml` (`is_carcinogeno_iarc: true`, IARC Grupo 1). Regime materializado em duas regras novas — `R-RX-03` (RX 60M) e `R-ESP-03` (Espirometria 24M, resolve de passagem a ressalva 2 acima) — ambas `[INTERPRETADO]`, ancoradas nos 2 PGRs medidos (Fascino GHE-08 + Aurora GHE-04), não em texto normativo brasileiro (que não cobre o agente). Autorização explícita: a implementação só avançou sem passar por sessão CONHECIMENTO com a Dra. Carolini porque o Diovanni confirmou que a validação humana de toda matriz antes de sair para o cliente é **reconferência linha a linha**, não sign-off superficial — o risco de uma regra `[INTERPRETADO]` errada não sai do app sem ser pega. A ressalva 1 (co-occurrence com `Poeira respirável`/`fracao_sem_agente` na Aurora) não afeta a implementação — `poeira_de_madeira` resolve por identidade própria, independente do que mais o GHE declara. Sensibilização respiratória (item (b) original) segue `[INCERTO — não conferido em fonte primária]`, registrado em `agentes.yaml`; não bloqueia porque o regime de R-RX-03/R-ESP-03 não depende dela.
+
+**Status:** RESOLVIDA.
+
+
+**Nota (branch `claude/hopeful-newton-yjv3k7`, 23/09/2026) — grafia `Poeira da madeira` não
+resolve.** Porto Araras I, GHE CARPINTARIA: o PGR escreve `Poeira da madeira` (com "da").
+`fuzzy_recusado` — distância 1 de `poeira_de_madeira`, slug fora da allowlist `fuzzy_permitido`
+(D-ARQ-64). O gabarito pede espirometria e RX tórax OIT para carpinteiro e meio oficial (4 células)
+e o motor não emite, com a pendência visível. Candidato: alias `poeira da madeira` em `termos:` de
+`poeira_de_madeira` (forma, mesma classe de 003.FH/003.FL), não implementado. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+**Implementado (mesma branch, pós-merge do PR #361):** `termos: ["Poeira da madeira"]` em
+`poeira_de_madeira`; resolve `EXATA`. Na remedição, carpinteiro e meio oficial de Porto Araras
+batem com o gabarito (espirometria e RX tórax OIT).
 ### DT-003EJ-02 — Perna `Ausente` absorvida por `ou` verdadeiro não gera pendência; matriz vai a VÁLIDA com lacuna ambiental real ainda visível em `predicados_avaliados` `[RESOLVIDA — D-ARQ-71, 003.EK]`
 
 **Origem:** 003.EJ, medição do Fascino — GHE-16 muda de `PARCIAL` para `VÁLIDA` ao resolver o alias de vibração mão-braço (D-ARQ-70), sem previsão do Arquiteto.
@@ -1149,6 +1407,35 @@ Reconciliar exige retaxonomizar os 49 exames e decidir se o eixo tem função �
 **Manganês não tem slug em `exames.yaml` — `R-BIO-03` `[VALIDADO]` não é materializável enquanto ele não existir** `[VERIFICADO — grep em `regras.yaml` e `exames.yaml` @ árvore de trabalho, 003.EO EMENDA 3]`. `manganes` não aparece em `regras.yaml` em nenhuma forma (nem `id:`, nem `emite`, nem `quando`), e não há slug de exame para "Manganês no sangue"/"Manganês sanguíneo" em `exames.yaml` (existe só como agente em `agentes.yaml`). R-BIO-03 (NR-15: qualquer exposição confirmada a Mn → manganês sanguíneo semestral em adm/per/MR, regra do protocolo desde a v2) **nunca foi materializada, e não é materializável enquanto o exame não existir no vocabulário** — mesma classe de achado de 003.EH sobre `R-RX-01-sem`. Popular o slug é pré-requisito de qualquer materialização do pacote Mn/serralheiro-armador, antes mesmo de `R-PKG-SOLD`/`R-PKG-ARMADOR` entrarem em `regras.yaml`.
 
 **Status:** ABERTA. Não-bloqueante. Resolve-se junto com DT-003EI-01 (materializar o pacote Mn — o slug de manganês é a peça que falta primeiro).
+
+**Nota (branch `claude/determined-fermi-xxah3h`, 25/09/2026) — 2º caso real, Aurora.** O PGR do
+Aurora Lago das Rosas traz `Químico Manganês — Fumos e gases de soldagem`, nível MODERADO, no GHE
+16 SERRALHERIA; o gabarito da Dra. Patrícia pede `Manganês no sangue (ADM, PER 6 meses, MRO)` aos
+3 cargos, e o app não emite nada. Aqui o agente resolve (`manganes`, CAS 7439-96-5) — a lacuna é
+só a de materialização descrita acima: `R-BIO-03` `[VALIDADO]` no PROTOCOLO, sem entrada em
+`regras.yaml`, sem slug de exame em `exames.yaml` `[VERIFICADO — grep, mesma data]`.
+
+**Nota (mesma branch, pós-merge do PR #376, 25/09/2026) — parágrafo R-BIO-03 fechado.** `R-BIO-03`
+materializada: regra em `regras.yaml` e slug `manganes_sangue` em `exames.yaml` (PROTOCOLO v101).
+O restante desta DT continua ABERTO: `R-CLI-02`/`R-CLI-03` (clínico semestral) seguem só em texto, e
+o Fascino segue sem resolver manganês pela grafia "Maganês" (DT-003EQ-02). Base NR-15 de R-BIO-03
+conferida: Anexo 12, "Manganês e seus compostos", item 7 (PROTOCOLO v102) — o mesmo item sustenta o
+clínico semestral de R-CLI-03.
+
+**Nota (mesma branch, pós-merge do PR #377, 25/09/2026) — R-CLI-03 materializada; R-CLI-02 bloqueada
+por medição.** `R-CLI-03` entra em `regras.yaml` (clínico 6M para Mn, NR-15 Anexo 12 item 7).
+`R-CLI-02` foi implementada e medida: nos 3 pares determinísticos, +5 divergências de
+periodicidade (clínico 6M onde a Dra. Patrícia pede 12M — Porto Araras I GHE-13/14, Vila Brasil
+GHE-23/26, todos com agentes do Anexo I em BAIXO/IRRELEVANTE), nenhuma corrigida — retirada. No
+Aurora a mesma médica pede 6M nos GHEs 11 (Quadro 1 MODERADO), 16 (Mn), 18/22 (benzeno) e 21
+(tricloroetileno). Decisão clínica do Diovanni: qual gatilho do semestral (Mn / cancerígeno / nível
+MODERADO+). Fascino (armador/serralheiro 6M) segue dependente de DT-003EQ-02 ("Maganês").
+
+**Nota (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026) — R-CLI-05 sucede R-CLI-02; Serralheria do
+Fascino resolvida.** Gatilho decidido sob D-ARQ-22 (nível 2, matriz do Aurora): cancerígeno IARC 1/2A
+com indicador biológico, ou agente com indicador biológico MODERADO+ (PROTOCOLO v106). DT-003EQ-02
+fechada pelo alias `Maganês`: Fascino GHE-17 em 6M, igual ao gabarito. **Resta aberto:** Fascino
+GHE-09 (Armação), 6M no gabarito sem manganês nem agente do Anexo I no PGR.
 
 ### DT-003EO-04 — `GHEPGR.cargos` chega como 1 string por GHE do parser da família Consciente; a expansão GHE→cargo de D-ARQ-73 não separa cargos reais `[FECHADA — 003.EP]`
 
@@ -1260,7 +1547,7 @@ GHE-03 é o caso originalmente medido em 003.DZ. **GHE-06 é um 2º caso, não c
 
 **Status:** ABERTA.
 
-### DT-003EQ-02 — `Maganês` recusado pelo fuzzy: custo clínico do D-ARQ-64 medido `[ABERTA — decisão de dado]`
+### DT-003EQ-02 — `Maganês` recusado pelo fuzzy: custo clínico do D-ARQ-64 medido `[FECHADA — branch claude/jolly-wozniak-iz0ley, 26/09/2026]`
 
 **Origem:** 003.EQ, rodada real do Fascino.
 
@@ -1270,7 +1557,16 @@ GHE-03 é o caso originalmente medido em 003.DZ. **GHE-06 é um 2º caso, não c
 
 **Caminho candidato.** Alias medido sob D-ARQ-70 (grafia de corpus + fonte dupla + teste anti-FP) — `Maganês` é grafia medida em documento real, não hipótese. Não mexer na allowlist: `manganes` é slug carregado por definição.
 
-**Status:** ABERTA — decisão do Arquiteto, fatia própria.
+**Fechamento (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026, decisão do Diovanni).** Alias
+`termos: ["Maganês"]` em `manganes` (D-ARQ-70 Tier 1-C): 1 ocorrência medida, p. 82 do PGR do
+Fascino, GHE 17 SERRALHERIA; âncora no literal "Manganês e seus compostos" da NR-15 Anexo 12.
+Allowlist intocada. Medido nos 3 pares (`main` × árvore): Fascino GHE-17 ganha clínico 6M e
+manganês no sangue, iguais ao gabarito; Porto Araras I e Vila Brasil idênticos. **Anti-FP (cl.1.iv)
+não virou teste:** "Magnésio"/"Magnesita" não resolvem para `manganes` nem com `fuzzy_permitido`
+ligado (distância 3 e 4), então o teste não teria reversão que o matasse (CLAUDE.md). O
+deslocamento de slug fica coberto pelo teste de resolução exata.
+
+**Status:** FECHADA.
 
 ### DT-003EQ-03 — `status == "PRELIMINAR"` não aparece na tela nem no documento `[ABERTA — não-bloqueante]`
 
@@ -2064,7 +2360,63 @@ redescoberta e re-litigada a cada varredura.
 **Reabre se:** o repositório deixar de ser privado, ou o acervo passar a conter dado de
 trabalhador (hoje não contém — medido: matriz de exames tem 0 ocorrências de CPF).
 
-### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[ABERTA — higiene de ambiente, não-bloqueante]`
+**Cláusula testada em 04/09/2026 (sessão 003.FI) — NÃO disparou. Segue DISPENSADA.**
+**Instrumento versionado em 003.FJ:** `python -m scripts.varrer_acervo_lgpd` reproduz esta
+verificação a partir do repositório — `83 de 83 extraídos, 7 CPFs distintos em 4 arquivos, 20 nomes
+de pessoa na metadata`, os mesmos números de 003.FI. Quem re-testar a cláusula roda o comando; não
+depende mais de reescrever a varredura.
+PR #322 levou `matrizes_originais/` de 17 para **83 arquivos**. Varredura post-hoc dos 83, com
+extração real de texto (pdfplumber; OOXML por `zipfile`; `.doc`/`.rtf` por LibreOffice headless):
+**83 de 83 extraídos, 0 escaneados, 0 não medidos.**
+
+- **Eixo que decide a cláusula — dado de TRABALHADOR: ausente.** 34 arquivos casaram marcador
+  (`ASO`, relação de empregados, `matrícula`, data de admissão, apto/inapto, prontuário) e o
+  contexto de cada classe foi lido: é integralmente **prosa de procedimento e campo em branco de
+  formulário** — *"Relação de empregados próprios, em planilha EXCEL, discriminando nome…"* é a
+  exigência que a empresa deve cumprir, não a lista; `"(Nome do funcionário)"` é lacuna em modelo de
+  placa de máquina; `"MATRÍCULA:"` é campo vazio de permissão de trabalho; `"prontuário médico
+  individual"` é o literal da NR-07 sendo citado. Nenhum ASO preenchido, nenhuma lista nominal,
+  nenhum resultado de exame ligado a pessoa. Contagem de marcador é forma; o contexto é a prova.
+- **Repositório segue privado**, 0 forks (medido pela API do GitHub) — a outra metade da cláusula.
+- **CPF com dígito verificador válido: 7 distintos, em 4 arquivos**, todos em página de assinatura
+  digital ou ficha de responsável técnico, sempre acompanhados de nome e e-mail corporativo:
+  `PGR VIVERDE V02` (`.pdf` e `.docx`), `PCMSO OBRA NOVA TOCTAO SPE_T65 [assinado].pdf` e
+  `PGR - Programa de Gerenciamento de Riscos 27.08.26.pdf`. São **signatários** — profissionais
+  assinando documento que já é assinado —, a mesma classe que sustentou a dispensa de 29/08.
+  O `17` do VIVERDE bate exato com a medição original: lá o número era de **ocorrências**, aqui os
+  **distintos** são 4. Mesma medição, contagem diferente — não é divergência.
+- **PIS/NIT: 1 real de 3 candidatos.** Descartados: número de série de calibrador de vazão
+  (`41461832041`) e ruído de texto invertido no `PGR_EBSERH_HUMAP.pdf`. O real é o NIT do
+  responsável técnico, junto do CPF dele.
+- **CRM em 11 arquivos, CREA em 13, e-mail em 29** — registro profissional e e-mail corporativo,
+  a faixa que o `.gitignore` já declara como dado pessoal comum de baixo risco.
+
+**Eixo novo, que não estava à vista quando a dispensa foi tomada — `DH-003FI-01`.**
+**64 dos 83 arquivos** carregam metadata de autoria, com **20 nomes de pessoa** distintos —
+cabeçalho OLE2 nos `.doc`/`.rtf`, `docProps/core.xml` nos `.docx`/`.xlsx`, dicionário de informações
+nos `.pdf`. Inclui as médicas do PCMSO, a equipe do escritório e engenheiros de terceiros. Não está
+no corpo do documento e sobrevive a qualquer redação de conteúdo. Não muda a classificação — dado
+pessoal comum de profissional, mesma faixa do CRM —, mas é achado de eixo distinto e tem DH própria.
+Números medidos sobre o escopo completo; ver `DH-003FI-01` e sua `Correção 003.FI-C2`.
+
+**Nota de instrumento, medida.** A primeira passada deu `ERRO_EXTRACAO` em **28 dos 83**, porque o
+container não tinha `libreoffice-writer`. **Composição dos 28, por extensão:** `.doc` **27 de 27** e
+`.rtf` **1 de 4** — `PCMSO (OBRA NOVA) PASSARELA ESTADIO SERRA DOURADA.rtf`. Os outros **3 `.rtf`**
+extraíram nessa mesma passada e saíram classificados `ACHADO`; RTF é parcialmente texto plano e não
+depende do filtro Writer do mesmo jeito que o OLE2 do `.doc`. Instalado o filtro e re-rodados os 28:
+**1 `ACHADO`, 27 limpos**. Fecha: `28 + 3 = 31` = `.doc` (27) + `.rtf` (4); e `31 + 38 .pdf +
+13 .docx + 1 .xlsx = 83`. Depois disso o `apt-get` quebrou `charset_normalizer` e matou a terceira
+passada em silêncio; reinstalado e re-rodado. **Varredura que não declara o que não conseguiu ler
+não é varredura.**
+
+> **Correção 003.FI-C5 (04/09/2026).** A redação anterior dizia `"28 dos 83 — todos os .doc e .rtf"`.
+> O **28 estava certo**; o descritor, não — `.doc` + `.rtf` são **31**, e a frase fazia o número não
+> reconciliar com partição medível alguma. **Nenhum arquivo ficou sem estado declarado:** os 3 `.rtf`
+> que a frase engolia saíram `ACHADO` no próprio passe 1, e a soma `83 = 28 erro + 32 achado +
+> 23 limpo` já fechava na saída bruta. O defeito era de reconstrutibilidade — um terceiro lendo só o
+> texto não conseguia refazer a conta —, não de cobertura. Achado pela 3ª rodada do `/critico`.
+
+### DH-003FE-02 — Branches remotas órfãs anteriores ao ritual `[FECHADA em 02/09/2026 — descarte executado]`
 
 **Medido (29/08/2026, primeira aplicação do passo 9 do ritual).** Restam no remoto
 `origin/claude/eloquent-mcnulty-e0cdc2` (`43a61bf`, 07/05/2026) e
@@ -2075,6 +2427,57 @@ não estarem mergeadas: podem carregar commit único, ou ser lixo de sessão aba
 **O que a resolução exige.** Inspecionar `git log main..origin/claude/<nome>` em cada uma e
 decidir: descartar (`push origin --delete`) ou recuperar o que houver. Não-bloqueante; o passo 9
 impede que o caso se repita daqui pra frente, mas não varre o passivo.
+
+**Resolução (02/09/2026).** Inspeção feita, com correção de método: `git log main..<branch>` dava
+297 e 293 commits, número enganoso — `git merge-base` retorna **vazio** nas duas. As branches não
+divergiram de `main`: têm **história desconexa**. Raiz comum entre elas é `6e98990`
+*"Add files via upload"* (03/04/2026); `main` tem três raízes, nenhuma delas. É a linha de
+desenvolvimento anterior à reconstrução do repositório — conteúdo migrado, história não.
+
+`quizzical` está contida em `eloquent` exceto por `tests/test_integracao_camada0.py`.
+
+**Diff de conteúdo.** O bruto (217 arquivos, 67.028 deleções) é ruído de fim de linha: a linhagem
+antiga é CRLF, `main` é LF. Com `--ignore-cr-at-eol --ignore-all-space` sobram **11 arquivos e
+~197 linhas**. Em todo arquivo compartilhado `main` está à frente — `modules/agente_medico_ia.py`
+dá **+6/−94** a favor de `main`, que tem `_CARGOS_ADMIN_TOKENS`, `_ALIASES_EXAME` e
+`_validacao_universal(..., is_admin=)`; as 6 linhas "únicas" da branch são a assinatura antiga da
+mesma função. As +53 de `utils/ia_client.py` são `print("[GEMINI DEBUG] ...", flush=True)`.
+
+**A linhagem antiga é regressão clínica, não reserva.** Em `modules/modulo_pcmso.py`,
+`NOTAS_RISCO_QUIMICO` pareia `serralheiro` / `Cromo hexavalente` com
+`"Carboxihemoglobina no Sangue"`; `main` grava `"Cromo na Urina"`. Carboxihemoglobina é o IBE de
+monóxido de carbono, não de Cr(VI) — `[CONFERIR NR-07 Anexo I Quadro 1, texto vigente em
+gov.br/MTE]`, embora o veredito não dependa da norma: `main` já grava o valor correto. Pior, a
+`quizzical` carrega `test_serralheiro_tem_carboxihemoglobina`, que **fixa o erro** — restaurar
+aquele dado reintroduziria a regressão com teste protegendo-a.
+
+**Único conteúdo ausente de `main`:** a heurística `_suspeitar_distribuicao_incorreta` (28 linhas
++ 3 testes), preservada como `DT-003FG-01`; `logo.png` (marca Seconci-GO, 146 KB — `main` não tem
+imagem nenhuma); e `testar_pcmso.py` (harness manual, superado pelas CLIs de `superficie/`).
+
+**Execução bloqueada.** Descarte decidido pelo Diovanni em 02/09/2026, mas
+`git push origin --delete` das duas retorna **HTTP 403** no container da sessão remota. Não é o
+proxy (`/__agentproxy/status` com `recentRelayFailures: []`) nem falta de rede: a mesma credencial
+criou branch e empurrou commits no mesmo turno. É escopo de credencial — o container empurra ref,
+não apaga ref. O GitHub MCP desta sessão também não expõe delete de branch (tem `create_branch`,
+não o inverso). Fica para execução manual do Diovanni:
+
+```
+git push origin --delete claude/eloquent-mcnulty-e0cdc2
+git push origin --delete claude/quizzical-rhodes-e3ae5f
+```
+
+Estado no fechamento: as duas seguem no remoto, em `43a61bf` (07/05/2026) e `d7cf602`
+(06/05/2026). Nada local a apagar — nunca existiram como branch local. A decisão está registrada
+e a única ideia recuperável já está em `DT-003FG-01`, então o delete não perde mais nada.
+
+**Execução concluída (02/09/2026).** O 403 era escopo da credencial do container, não do
+Diovanni: rodado no Claude Code local, `git push origin --delete` das duas teve sucesso.
+Confirmado por `git ls-remote origin` a partir do container — nenhuma referência às duas branches
+no remoto. Commits únicos nomeados antes do delete: `eloquent-mcnulty-e0cdc2` carregava 2
+(`c21e1ab` logging, `43a61bf` debug print swap), `quizzical-rhodes-e3ae5f` carregava 1 (`d7cf602`,
+sessão5 — validação e2e + bugfixes), consistente com a medição anterior desta DH (`quizzical`
+contida em `eloquent` exceto por `tests/test_integracao_camada0.py`).
 
 ### DT-003FE-01 — Segunda família de parser: âncora `GHE NN` (T65) `[REENQUADRADA — 003.FF; ver DT-003FF-01]`
 
@@ -2214,3 +2617,944 @@ de risco).
 **O que a resolução exige.** Distinguir `vocabulario_ausente` que só perde granularidade de
 `vocabulario_ausente` que suprime exame — o segundo é decidível: o predicado que ficou `False`
 por termo não resolvido é rastreável. Nomeada por `R-PGR-07` (003.FF), que expõe sem resolver.
+
+### DT-003FG-01 — Detector de distribuição suspeita de cargos por GHE `[ABERTA — MEDIDA 23/09/2026: critérios herdados refutados, substituto proposto; decisão do Arquiteto]`
+
+**Origem.** `modules/modulo_pcmso.py` em `origin/claude/eloquent-mcnulty-e0cdc2`, commit `43a61bf`
+(07/05/2026), na linhagem de história desconexa varrida por `DH-003FE-02`. Confirmado ausente de
+`main` (`git grep` vazio). Registrado aqui **antes** de a branch ser apagada, para a ideia não
+morrer com o código.
+
+**O que era.** `_suspeitar_distribuicao_incorreta(dados_ghe) -> bool`, 28 linhas, com dois
+critérios sobre a saída do distribuidor de cargos:
+
+- **(a)** algum GHE com **≥ 10 cargos** — sinal de fallback que despejou tudo num balde;
+- **(b)** **> 30% dos GHEs** com listas de cargos idênticas entre si — sinal de cópia em massa.
+
+Verdadeiro em qualquer um dos dois. No `app.py` daquela linhagem, o disparo somava-se a
+"GHE sem cargo real" para acionar a re-extração via LLM. Tinha 3 testes
+(`tests/test_camada0_app.py`): muitos cargos, cargos repetidos, distribuição normal.
+
+**Por que não é port.** O código é do **motor legado** (`modules/`), que o `CLAUDE.md` marca como
+não-tocar, e depende do `app.py` antigo. Além disso não é regra clínica: é detector de qualidade
+de parse. O que vale é o **critério**, não a implementação.
+
+**O que a resolução exige.** Decidir se o motor novo precisa de um discriminante equivalente —
+hoje ele bloqueia nomeado por ausência (`DT-003DK-01`, anti-supressão), mas **não tem sinal para
+distribuição presente e implausível**: um parse que atribui todos os cargos ao mesmo GHE atravessa
+sem pendência. Se entrar, entra medido contra o acervo pareado (qual o maior nº de cargos por GHE
+observado num gabarito assinado? qual a taxa real de GHEs com lista idêntica?), não com os
+limiares 10 e 30% herdados, que não têm proveniência conhecida. Faceta de `DT-003L-01`.
+
+**Medição `[MEDIDO — 23/09/2026, branch claude/hopeful-newton-yjv3k7, sobre main 9782074]`.**
+Relatório completo, com método e números por arquivo:
+`docs/referencia/MEDICAO_DT003FG01_distribuicao_cargos_ghe.md`. Nenhum código tocado.
+
+- **Critério (a) ≥ 10 cargos/GHE — REFUTADO.** Nas 16 matrizes assinadas de layout `GHE NN`,
+  máximo **19** cargos/GHE e **4 de 16** matrizes com algum GHE ≥ 10, todos administrativos
+  legítimos (Vila Brasil ADMINISTRAÇÃO 01 = 19; Porto Araras 1 ADMINISTRAÇÃO = 16; Dinamica
+  ADMINISTRAÇÃO = 15). Em 5 das 18 matrizes de layout `SETOR:` o agrupamento é plano (28 a 63
+  cargos): a matriz assinada nem sempre é organizada por GHE.
+- **Critério (b) > 30% dos GHEs com lista idêntica — não discrimina.** Máximo assinado **28,6%**
+  (CMO Vistamerica, 8/28), 25,6% (CMO Varandas Bueno). Repetição legítima: produção dividida em
+  GHEs por frente, mesmos cargos. Folga de 1,4 p.p. até o limiar herdado.
+- **Lado do motor.** Rota determinística (`preparar_ghes`, clientes offline) sobre 29 PGRs do
+  acervo: 26 bloqueiam antes da distribuição (14 `familia_nao_medida`→LLM, 8
+  `segmentacao_implausivel`, 3 `pgr_cargo_based`, 1 rota card) e **3 atravessam** (Fascino, Vila
+  Brasil Escritório, Porto Araras I). O "tudo num balde" que motivou a DT já é coberto, na
+  **segmentação**, pelo gate anti-Vistamérica (D-ARQ-57 peça 2): a transcrição é por bloco.
+- **O que discrimina de fato (n pequeno).** Porto Araras atravessa **com parse errado** (DT nova
+  abaixo). Dois sinais separam esse parse ruim dos bons e dos gabaritos:
+  cargo terminado em preposição (gabaritos **0/1421**; Fascino+Vila Brasil **0/46**; Porto Araras
+  **26/51**) e cargo repetido no mesmo GHE (gabaritos **1** — duplicata real do documento humano;
+  bons **0**; Porto Araras **6**). **Limite:** n = 1 parse ruim e n = 2 bons. Não pega
+  truncamento sem preposição final (`Analista`, `Vigia`) nem GHE perdido.
+
+**Proposta para decisão do Arquiteto.** Descartar (a) e (b) como critérios. Se o detector entrar,
+ele entra como **sinal de truncamento de nome de cargo** (preposição final e/ou repetição no mesmo
+GHE → `Pendencia` nomeada), não como sinal de distribuição. É forma de parse, não regra clínica
+(sem `R-*`). A reversão que deixaria o teste vermelho é remover o predicado da composição de
+pendências de `preparar_ghes`; o caso real é Porto Araras. A DT não fecha por esta nota:
+fecha pela decisão (implementar o sinal substituto ou `DISPENSADA`, com o motivo).
+
+**Nota (mesma branch, 23/09/2026).** O parse ruim que motivou o sinal substituto (Porto Araras)
+foi consertado na causa — `_separar_nome_cbo` cortava a última palavra de cargo sem CBO
+(`DT-(sessão claude/hopeful-newton-yjv3k7)-01`, RESOLVIDA). Pós-fix, o sinal de preposição final
+e o de cargo repetido no mesmo GHE dão **0** nos três PGRs que atravessam a rota determinística.
+O sinal perdeu o único caso positivo medido; a decisão (implementar como defesa ou `DISPENSADA`)
+segue com o Arquiteto.
+
+### DH-003FH-01 — `D-ARQ-84` cl.1(c) não foi aplicada a três blocos de sessão consecutivos `[ABERTA — higiene de método]`
+
+**Origem:** sessão 003.FH, conferência dos blocos 003.FE/FF/FG do `HISTORICO_OPERACIONAL.md`.
+
+**Medido.** `D-ARQ-84` cl.1 — aprovada em 003.FD (22/08/2026, 3ª rodada do Gauntlet) — obriga
+`/conferir` sobre **"(c) bloco de sessão do `HISTORICO_OPERACIONAL.md`"**, antes de o artefato ser
+gravado em doc vivo. Os blocos **003.FE, 003.FF e 003.FG** foram redigidos depois dessa aprovação.
+Os três carregam divergência: **118 afirmações extraídas, 91 CONFERE, 10 DIVERGE, 17 NÃO
+VERIFICÁVEL** (@ `eb94b06`).
+
+Não é regra ausente nem regra nova a criar: é regra **aprovada, versionada e não aplicada**, três
+vezes seguidas, ao artefato que ela nomeia por extenso. O `RITUAL_FECHAMENTO.md` passo 8 já a
+replica. A lacuna é de execução, não de texto.
+
+**As 10 divergências, por classe do `/conferir`:**
+- classe 1 (número herdado citado como corrente): 3 — âncora e duração da suíte de 003.FE; `48`
+  commits de código em 003.FG.
+- classe 4 (âncora que envelheceu): 2 — `DH-003FE-02` declarada `DECIDIDA` depois de fechada;
+  branch do PR #317 declarada apagada antes do PR #318 sair dela.
+- classe 6 (nome/símbolo que não existe): 2 — "forma 3 de `_RECONHECEDORES_GHE`" (a tupla tem 2
+  entradas; a numeração está na docstring de `eh_cabecalho_ghe`); "`DADOS GERAIS` só é lido em
+  `_recuperar_titulo_do_vao`" (a função casa `_PADRAO_TITULO_CARGO`, não aquela string).
+- classe 3 (citação não transcrita): 1 — "CREA 1020541245D-GO" onde o verbatim diz "número de
+  registro", contra a convenção de D-ARQ-53 P2 ("credencial crua sem assumir CREA").
+- outras 2: `DT-003FD-02` declarada paga com header `[ABERTA]`; `test_serralheiro_tem_carboxihemoglobina`
+  atribuído à branch órfã quando está em `main` desde o PR #271.
+
+**Teste de morte desta DH:** uma sessão fechar com bloco conferido e o relatório do `/conferir`
+referenciado no próprio bloco, sem DIVERGE material. Se três fechamentos seguidos fizerem isso, a
+DH fecha por comportamento, não por decisão.
+
+**Faceta nova, medida em 003.FH — auto-conferência não substitui conferência.** A própria 003.FH
+rodou `/conferir` sobre o seu bloco **na sessão que o escreveu** e declarou *"21 afirmações, 21
+CONFERE, 0 DIVERGE"*. Uma passada **a frio** sobre o mesmo bloco, @ `919b32c`, extraiu **46** e achou
+**2 DIVERGE** — uma delas um fato errado sobre o acervo, a outra o próprio placar limpo. Ou seja: a
+cláusula foi cumprida na letra e falhou no efeito.
+
+O `Crítico` já resolve isso para o Gauntlet — `INSTRUCOES_ARQUITETO.md` §6: *"roda em sessão nova,
+nunca na que produziu o artefato"*. `D-ARQ-84` **não** estende a mesma exigência ao `/conferir`.
+Se estender é decisão do Arquiteto, e ainda **não tem origem medida suficiente**: são duas
+ocorrências (esta e as três desta DH), e §11 exige origem medida + teste de morte para regra nova.
+Registrado como insumo da próxima META, não como cláusula proposta.
+
+**Status:** ABERTA, não-bloqueante. Método, não motor. Nenhuma R-* tocada.
+
+### DH-003FH-02 — Os três gabaritos que sustentam os números de 003.FE/FF não são reproduzíveis a partir do repositório `[FECHADA em 04/09/2026 — acervo completo versionado, suíte verde medida]`
+
+**Origem:** sessão 003.FH, ao medir a suíte no container.
+
+**Medido @ `eb94b06`.** `matrizes_originais/` tem **17 arquivos rastreados** apesar de a pasta estar
+no `.gitignore:23` (git ignora só o não-rastreado). Quatro PGRs que os testes e as medições abrem
+**não** estão entre os 17:
+
+| PGR | quem depende |
+|---|---|
+| `PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf` | 2 testes vermelhos; medição 91,1% (003.FE) |
+| `pgr_Cjr Engenharia Ltda (M Construtora).pdf` | 6 testes vermelhos |
+| `PGR - CONSCIENTE … SPE 0030 - FASCINO (15.07.26).pdf` | skips; medição 97,0% (003.FE) |
+| `PGR - ALT T65 2024.2026.pdf` | medição 48,4% e as 24 formas do resíduo (003.FF) |
+
+**Consequência.** A suíte no container dá **1137 passed, 8 failed, 21 skipped** contra os
+`1160 passed, 6 skipped` herdados — **1166 coletados nos dois casos**, logo nenhum teste foi criado
+ou perdido; o que muda é quantos conseguem rodar. E os três percentuais que 003.FE/FF publicam como
+resultado principal (Fascino 97,0%, Ricco 91,1%, T65 48,4%) **só são re-mediveis na máquina do
+Diovanni**. Gabarito que não reproduz não é gabarito — é testemunho.
+
+**Não é `DH-003FE-01`.** Aquela foi **DISPENSADA** por decisão do Diovanni em 29/08 sobre um eixo
+distinto: se versionar acervo com dado pessoal era aceitável. Esta é sobre **irreprodutibilidade de
+medição**, e a dispensa daquela não a cobre — a decisão de dispensar não foi tomada com este custo
+à vista. Também não é `DH-003ET-01` (fixtures de PDF não versionadas), que nomeia a classe mas não
+mede este efeito sobre os gabaritos publicados.
+
+**Achado colateral, dentro de `DH-003ET-01`:** a mesma ausência de PDF produz `skip` declarado em
+alguns testes e `FileNotFoundError` em outros. Inconsistência de instrumento, não de conduta
+clínica.
+
+**Caminho candidato, não decidido:** versionar os 4 PGRs faltantes (mesmo critério dos 17 que já
+entraram), ou publicar um extrato textual versionado por PGR suficiente para os testes, mantendo o
+PDF fora. A escolha é do Arquiteto — as duas têm custo de LGPD distinto.
+
+**Status:** **FECHADA em 04/09/2026** (sessão 003.FI) — o acervo completo foi versionado (PR #322),
+os 4 PGRs que esta DH nomeia estão rastreados sob os nomes exatos, e a suíte roda verde no container
+(`1169 passed, 6 skipped, 0 failed`). Deixa de ser bloqueante para reprodução de gabarito. A classe
+mais ampla segue em `DH-003ET-01` (fixtures de PDF não versionadas), que **não** foi resolvida — só
+deixou de se manifestar neste acervo.
+
+> **Correção 003.FI-C6 (04/09/2026).** Esta linha dizia `"**Status:** ABERTA, não-bloqueante para o
+> motor; bloqueante para reprodução de gabarito"` **enquanto o header da DH já dizia FECHADA** — a
+> `Resolução` e a `Correção 003.FI-C2` foram inseridas antes dela e nenhuma a reescreveu. Um terceiro
+> que abrisse só esta DH leria os dois estados no mesmo bloco. Achado pela 4ª rodada do `/critico`.
+
+**Resolução (04/09/2026, sessão 003.FI).** O Diovanni subiu o acervo completo — PR #322, 66 arquivos
+novos, `matrizes_originais/` passa de 17 para **83 arquivos rastreados**, 386 MB. Foi escolhido o
+primeiro caminho candidato (versionar os PDFs), não o extrato textual.
+
+**Medido nesta sessão, árvore parada @ `4d1bc01`:** os **8** arquivos de `matrizes_originais/`
+referenciados pelos testes existem em disco. Suíte completa pelo comando canônico
+`python -m pytest agente_medico/tests/ tests/`: **1169 passed, 6 skipped, 0 failed** em 580.32s.
+
+**E os 4 PGRs que esta DH nomeia estão rastreados sob os nomes exatos da tabela acima**, conferidos
+um a um com `git ls-tree -r -l 7815f20`: `PGR RICCO-2025-ADMINISTRAÇÃO (1).pdf` (567.168 B),
+`pgr_Cjr Engenharia Ltda (M Construtora).pdf` (1.037.924 B), `PGR - CONSCIENTE … FASCINO
+(15.07.26).pdf` (10.366.538 B) e `PGR - ALT T65 2024.2026.pdf` (1.296.117 B). O T65 é o único dos
+quatro que nenhum teste abre — é insumo de `medicao_pgr` —, e por isso a suíte verde não responde
+por ele; o `ls-tree` responde.
+
+> **Correção 003.FI-C2 (04/09/2026).** A primeira redação dizia **7**, medidos por
+> `git grep -ohE "matrizes_originais/[^\"']+\.(pdf|docx|doc|xlsx)"`. O `/conferir` a frio mostrou que
+> esse comando exige `matrizes_originais/` colado ao nome **num literal só**, e
+> `tests/test_regressao_pcmso.py:168` monta o caminho partido
+> (`ROOT / "matrizes_originais" / "PCMSO(ATUALIZAÇÃO)CMO RESIDENCIAL VIVERDE AREIAO 06.03.25.pdf"`),
+> logo invisível ao grep. Re-medido por casamento de nome de arquivo do acervo contra o texto dos
+> testes, com normalização NFC: **8**. O 8º está rastreado, então a conclusão não muda — mas o
+> comando publicado media **literais de string, não aberturas**, e teria escondido um arquivo ausente.
+
+**O que fecha esta DH é a escolha do Arquiteto, não a aritmética.** A DH não crava critério numérico:
+ela nomeia um critério qualitativo (gabarito reproduzível a partir do repo) e deixa dois caminhos
+candidatos explicitamente não decididos. O Diovanni escolheu o primeiro ao mergear o PR #322; a
+suíte verde é a **evidência** de que o critério qualitativo foi atendido.
+
+**A conta fecha exata, e é ela que fecha a DH:** `1160` passed herdados de 003.FE `+ 8` testes de
+003.FH `+ 1` da correção 003.FH-C3 = **1169**; `skipped` volta de **21** para os **6** herdados. Os
+8 vermelhos e os 15 skips extras que esta DH nomeou eram, um-para-um, os PGRs ausentes — e sumiram
+com a chegada deles. `mypy --strict` no alvo canônico segue limpo, 48 arquivos.
+
+**Os três percentuais de 003.FE/FF passam a ser re-mediveis a partir do repositório.** Não foram
+re-medidos aqui — fica `[A MEDIR]`, porque re-medir é rodar `medicao_pgr`, fora da suíte, e esta
+sessão não o fez. O que esta DH afirmava (irreprodutibilidade) deixou de valer; o valor dos
+percentuais não foi reconferido.
+
+### DT-003FH-01 — 19 das 24 formas do resíduo do T65 ficam sem alias por falta do documento `[ABERTA — insumo medido, não-bloqueante]`
+
+**Origem:** sessão 003.FH, fatia de dado de `R-PGR-07`.
+
+**Situação.** 003.FF mediu **57 de 98 ocorrências (58%) do resíduo do T65 correspondendo a 9 slugs
+já existentes**, em 24 termos distintos. Esta sessão populou **5 aliases** — os únicos cujo verbatim
+está transcrito em doc versionado (`MEDICAO_003FF_par_T65.md` §3/§4/§7). Os outros 19 não têm
+verbatim no repo e o PGR ALT T65 não está no acervo (`DH-003FH-02`), então não são re-mediveis aqui.
+
+**Cobertura entregue:** `trabalho_altura` e `silica` — os dois que 003.FF mede como respondendo por
+**227 das 227 células faltantes**. `esforco_fisico` e 2 das 6 formas de `postura_inadequada`.
+
+**Fora por decisão, não por falta de dado:** `"Choque Elétrico"` → `eletricidade` e
+`"Objetos cortantes e/ou perfurocortantes"` → `acidente_perfurocortante`. Nos dois o termo nomeia o
+**dano** ou o **objeto** e o slug nomeia o **agente**; atribuir é inferir agente por proximidade de
+texto, que `R-PGR-05`/`D-ARQ-14` mandam não fazer. Decisão do Arquiteto, não do Code.
+`"Queda de mesmo nível"` (14 ocorrências) não tem slug correspondente — não é `queda_de_materiais`
+nem `trabalho_altura`.
+
+**O que fecha esta DT:** o T65 (ou o extrato do seu resíduo) chegando ao repo, e uma passada que
+popule os 19 restantes com o mesmo critério de procedência.
+
+**Metade da condição caiu em 04/09/2026 (sessão 003.FI).** O PR #322 trouxe o T65 ao acervo.
+**`matrizes_originais/PGR - ALT T65 2024.2026.pdf` está rastreado sob o nome exato que a
+`DH-003FH-02` nomeou** — blob `7f5c942`, 1.296.117 bytes —, mais dois arquivos da mesma família:
+`PCMSO OBRA NOVA TOCTAO SPE_T65_ 18.03.2024 [assinado].pdf` e `PGR - TOCTAO ALT 65.pdf`.
+Os 19 termos deixam de ser `[A MEDIR]` por falta de documento — passam a ser re-mediveis a partir do
+repositório. **A DT NÃO fecha aqui:** falta a passada que popula os aliases, e ela é fatia de dado
+com o mesmo critério de procedência das 5 de 003.FH (verbatim medido, reversão nomeada, varredura
+inversa). Sessão futura.
+
+> **Correção 003.FI-C4 (04/09/2026).** A primeira redação criava uma **ressalva fabricada**: dizia
+> que o T65 chegara "em dois arquivos" com nomes diferentes do que a `DH-003FH-02` cita, e marcava
+> `[A MEDIR]` se seriam o mesmo documento. **Não havia o que medir** — o arquivo com o nome exato
+> está rastreado em `4d1bc01` e em `7815f20`, e um `git ls-tree` responde. Reproduz:
+> `git ls-tree -r 7815f20 -- "matrizes_originais/PGR - ALT T65 2024.2026.pdf"`.
+> **Causa medida:** a lista de "dois arquivos" saiu da saída do passe 3 da varredura, que **só
+> imprime arquivo com marcador**; o `PGR - ALT T65 2024.2026.pdf` tem zero marcadores, então não
+> apareceu. Ele **foi varrido** — está no cache dos 83/83 —, mas eu li uma **listagem filtrada como
+> se fosse inventário**. O `/critico` apanhou isso na 2ª rodada.
+
+**Status:** ABERTA, não-bloqueante. Dado, não motor. Insumo destravado, trabalho não feito.
+
+### DH-003FI-01 — Nome de pessoa na metadata dos arquivos do acervo `[ABERTA — medida, não-bloqueante]`
+
+**Origem:** sessão 003.FI, varredura do acervo depois do PR #322.
+
+**Medido (04/09/2026, os 83 arquivos de `matrizes_originais/` — escopo completo).**
+**64 arquivos** carregam metadata de autoria: cabeçalho OLE2 nos `.doc`/`.rtf` (campos `Author` e
+`Last Saved By`), `docProps/core.xml` nos `.docx`/`.xlsx` (`dc:creator`, `cp:lastModifiedBy`), e
+dicionário de informações nos `.pdf` (`Author`). **27 valores distintos**, dos quais 7 não são
+pessoa (`DELL`, `CMO`, `RIMA`, `Computador`, `Admin`, `Usuario`, `python-docx`) e **20 são nome de
+pessoa** — médicas do PCMSO (incluindo a coordenadora nomeada nos próprios documentos), pessoal do
+escritório, engenheiros de terceiros e o do Diovanni.
+Reproduz, desde 003.FJ, por instrumento versionado: `python -m scripts.varrer_acervo_lgpd`, que
+imprime `valores distintos no campo de autoria: 27 = 20 nomes de pessoa + 7 de conta generica/
+equipamento excluidos NESTA medicao` — a conta fecha na própria linha, e o tamanho da lista do
+filtro (8 entradas) sai declarado ao lado, separado do que foi de fato excluído.
+
+> **Correção 003.FJ-C3 (08/09/2026).** A redação anterior citava a saída como
+> `"20 distintos (excluidos 8 …)"`, e `20 + 8 = 28` contra os **27** medidos. O `8` era o
+> **tamanho da lista** `VALORES_NAO_PESSOA`, não o que apareceu no acervo: `Microsoft Office Word`
+> está no filtro e nunca ocorreu. O script emitia número sem o escopo que o produziu — **o próprio
+> invariante que ele instala, violado por ele**. Corrigido na fonte do script (`excluidos_nesta_medicao()`)
+> e aqui. Achado pela 3ª rodada do `/critico`. Os comandos avulsos seguem valendo para conferência
+pontual: `file -b <arquivo.doc>` para OLE2; `unzip -p <arquivo.docx> docProps/core.xml` para OOXML;
+`pdfplumber.open(p).metadata["Author"]` para PDF.
+
+> **Correção 003.FI-C2 (04/09/2026).** A primeira redação desta DH dizia **40 arquivos / 16 nomes**.
+> Estava errada por **escopo não declarado**: o `40` era rendimento sobre os **45 não-PDF**, e os
+> **38 PDFs não tinham sido varridos**. Re-medido sobre os 83, os números são os acima. O `/conferir`
+> a frio marcou o `40` como DIVERGE por não bater com partição medível alguma (83 total, 38 PDF,
+> 45 não-PDF) — e o achado, ao ser reproduzido, revelou um escopo maior, não menor. Oito nomes só
+> existem nos PDFs.
+
+**Por que é eixo próprio e não nota na `DH-003FE-01`.** Aquela mede dado pessoal no **conteúdo**, e
+foi dispensada sobre esse eixo. Este dado está no **cabeçalho do arquivo**: nenhuma varredura de
+conteúdo o encontra, nenhuma redação de corpo o remove, e ele viaja junto do binário para qualquer
+lugar em que o arquivo seja aberto. A dispensa de 29/08 não foi tomada com este custo à vista —
+mesma forma do argumento que a própria `DH-003FH-02` usou para não se deixar cobrir por ela.
+
+**Classificação, e ela não é alarmante.** Dado pessoal **comum** (LGPD art. 5º I) de profissional
+identificado no exercício da função — mesma faixa do CRM e do CREA que os documentos já publicam no
+corpo, e o repositório é privado. **Não** é dado sensível, **não** é dado de trabalhador sob
+vigilância de saúde. Não muda o veredito de `DH-003FE-01`.
+
+**Não-bloqueante, e o custo de limpar é medido.** Limpar exigiria reescrever os **64** binários e
+o histórico que já os contém — o mesmo custo desproporcional que dispensou a `DH-003FE-01`. A decisão
+é do Arquiteto; esta DH existe para que o fato esteja registrado antes de alguém redescobri-lo.
+
+**Status:** ABERTA. Registro de fato medido, não pedido de trabalho.
+
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-01 — Nível de risco psicossocial do PGR bruto (COPSOQ) é boilerplate, não sinal por GHE `[RESOLVIDA — R-PSY-03/R-PSY-02 DEPRECATED, sessão branch claude/fervent-brown-7dcc0y]`
+
+**Origem.** Handoff da sessão que abriu o PR #335 (branch `claude/festive-gates-soy0fr`): tabela
+manuscrita das Dras. Carolini e Patrícia, não baseada em norma, cruza tipo de atividade (Trabalho
+em Altura/Espaço Confinado × Sem Atividade Crítica) com nível de risco psicossocial (baixo/médio/
+alto, corte SRQ-20≥7) para decidir Avaliação Psicossocial/Av. Médica de Saúde Mental — em aparente
+contradição com `R-PSY-02` (`quando: todo_trabalhador`, incondicional, `[DERIVADO — corpus de 6
+matrizes pós-vigência, 5 clientes, 2 médicas, 284 cargos, 99% de cobertura; grupo de controle de 13
+matrizes pré-vigência em ~0%]`, sucede `R-PSY-01` DEPRECATED que era condicionada a atividade
+crítica). Hipótese não testada proposta no handoff: se nenhum PGR real jamais declara risco
+psicossocial baixo, os 99% incondicionais deixam de contradizer a tabela nova — decidiria se
+`R-PSY-02` precisa revisão.
+
+**Medido — refuta a hipótese, por motivo mais específico que "baixo existe".** Abertos os 2 PGRs
+brutos do acervo com par mais recente medido (Fascino, Aurora Lago das Rosas), seção "26.1
+INVENTÁRIO DE RISCOS PSICOSSOCIAIS" (COPSOQ II-BR/AQUALI-RPS, 9 fatores, Matriz 5×5 P×S)
+`[MEDIDO — pdfplumber desta sessão; Fascino páginas 90-91, Aurora páginas 75-76]`:
+
+- **BAIXO aparece, predominante nos 2 documentos:** 7-8 de 9 fatores BAIXO, 1-2 MODERADO, nenhum
+  ALTO.
+- **Mas a tabela é boilerplate, não medição por GHE.** Texto **idêntico** — mesma lista de cargos
+  (Armador, Carpinteiro, Eletricista, Servente, Pedreiro etc.), mesmas descrições de fator, quase
+  os mesmos valores P×S — nos 2 PGRs, de 2 empresas distintas. O próprio documento rotula a tabela
+  de "modelo": "Replicar o modelo acima para cada função/cargo... obrigatório para a validade do
+  PGR (NR-01 subitem 1.5.6.1 alínea 'a')" — e nenhum dos 2 PGRs replica. Aparece **uma vez**, sob
+  um GHE genérico ("TÉCNICO ADM/OPERACIONAL"), nunca sob GHE-06 Administração nem GHE-19 Vendas
+  (os GHEs citados no handoff como "aparentemente baixo risco").
+- Os cartões de perigo de GHE-06 Administração e GHE-19 Vendas (Fascino, páginas 43 e 88) **não
+  têm linha Psicossocial própria** — só uma nota remetendo ao item 26.1 genérico.
+- **Instrumentos diferentes, não sobrepostos.** O PGR usa COPSOQ (por GHE nominal, quando
+  preenchido). A tabela das doutoras usa corte SRQ-20≥7 — questionário clínico autoaplicado ao
+  trabalhador individual, cujo resultado só existe depois do exame; não é dado extraível do texto
+  do PGR.
+
+**Leitura.** O eixo "nível de risco psicossocial" da tabela das doutoras não pode vir, pelo menos
+nos 2 PGRs medidos, de extração do texto do PGR — a seção que existiria para isso é preenchimento
+de conformidade genérico (mesmo texto em empresas diferentes), não sinal diferenciado por GHE.
+`GHEPGR.psicossocial` (bool, hoje sem nenhuma regra que o leia) não tem de onde vir um nível
+baixo/médio/alto real por essa via. Reforça o precedente já escrito na `base_normativa` de
+`R-PSY-02` (PGR sem FRPRT — Ricco 2026 Adm — cuja matriz emite mesmo assim, sob a postura de
+`D-ARQ-68`): aqui o PGR não está silencioso, está com FRPRT preenchido e predominantemente BAIXO,
+e mesmo assim não há, no próprio documento, diferenciação por GHE que pudesse ter alimentado uma
+condicional. Os 99% incondicionais medidos e a tabela nova continuam parecendo contraditórios — a
+hipótese "PGR nunca declara baixo" está refutada, não confirmada.
+
+**Não implementado.** Decisão sobre revisar `R-PSY-02`, tratar a tabela das doutoras como
+instrumento clínico separado (SRQ-20 pós-exame, não gatilho de pré-exame), ou pedir sessão
+CONHECIMENTO com a Dra. Carolini sobre a origem real do eixo "nível de risco psicossocial" da
+tabela é do Arquiteto. Divergência entre medição real e a hipótese do handoff é bloqueador nomeado
+(regra do `CLAUDE.md`) — registrado, não ajustado para bater com a hipótese.
+
+**Numeração.** Sessão aberta pelo harness na branch `claude/youthful-lamport-3kfkog`, sem número
+`003.F?` atribuído — mesma classe de desvio já declarada em 003.FI/003.FJ/003.FK/003.FL e na
+sessão do PR #335. ID desta DT fica sem sessão numérica até o Arquiteto rotular; número não
+fabricado aqui.
+
+**Status:** ABERTA, não-bloqueante. Bloqueia decisão clínica sobre `R-PSY-02`, não bloqueia
+produção — a regra atual segue rodando como está.
+
+**Atualização — resposta da Dra. Carolini (17/09/2026), duas rodadas.**
+
+Rodada 1, sobre a estrutura da tabela das doutoras: **não é circular.** Trabalho em altura
+(atividade crítica) → Avaliação Psicossocial + Av. Saúde Mental, incondicional (bate com
+`R-PSY-02` hoje). Sem trabalho em altura → só SRQ-20 (triagem); SRQ-20 ≥ 7 → aí sim Avaliação
+Psicossocial. Resolve a objeção original desta DT (SRQ-20 não pode gatilhar o próprio exame que
+o mede) — é cascata em 2 estágios, não um único exame se autocondicionando.
+
+Rodada 2, pergunta de fechamento sobre o eixo que falta (nível de risco psicossocial em GHE-06
+Administração/GHE-19 Vendas do Fascino, que a matriz assinada de 08/07/2026 mostra recebendo os
+dois exames mesmo sem atividade crítica — contradição aparente com a rodada 1): duas respostas.
+(1) **"A classificação de risco não sou eu que faço, vem do PGR."** Confirma a direção da
+medição desta DT — o eixo deveria vir do documento, não de julgamento clínico ad-hoc — mas não
+resolve o problema que a medição achou: nos 2 PGRs conferidos (Fascino, Aurora), a seção do PGR
+que deveria carregar esse dado (26.1, COPSOQ) é boilerplate genérico, sem diferenciação real por
+GHE. Se a fonte é o PGR e o PGR normalmente não tem esse dado, a pergunta de origem do eixo
+continua sem resposta prática — só muda de "quem classifica" para "o documento raramente
+classifica".
+(2) **A matriz de 08/07/2026 não serve mais de referência — "o protocolo mudou agora, em
+setembro; tô refazendo todas as matrizes; não pode olhar por essa aí."** Isto invalida o
+documento usado nesta DT como evidência de prática corrente: ele reflete o protocolo ANTERIOR a
+setembro/2026, não o que ela descreveu na rodada 1. Consequência direta e mais séria: o corpus
+que fundamenta `R-PSY-02` como `[DERIVADO]` — "6 matrizes pós-vigência NR-01, 5 clientes, 2
+médicas, 284 cargos, 99% de cobertura" — não tem, até agora, confirmação de que alguma dessas 6
+matrizes já é pós-protocolo-de-setembro. Se todas são do protocolo antigo (mesma classe do
+documento de 08/07 aqui invalidado), a medição de 99% incondicional está datada — mede a prática
+anterior, não a atual, e `R-PSY-02` pode já estar desatualizada mesmo antes de qualquer questão
+sobre a tabela das doutoras.
+
+**Atualização — 2 matrizes pós-setembro medidas, achado se inverte (17/09/2026).**
+
+O Diovanni forneceu 2 matrizes novas, ambas pós-mudança de protocolo, com desfechos opostos:
+
+- **Ricco Hetrin, 14/09/2026, VALIDADA** (confirmado pelo Diovanni — não é rascunho). PGR bruto
+  correspondente (`matrizes_originais/PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf`,
+  197 páginas) lido por completo `[MEDIDO — pdfplumber, 197/197 páginas]`: **zero** ocorrência de
+  "psicossocial"/"COPSOQ"/"FRPRT"/"SRQ" em qualquer página. A matriz validada sai com **zero**
+  exames psicossociais em **28 de 28 cargos** — inclusive Pedreiro, cujo bloco de risco no PGR
+  (página 31) já lista "QUEDAS DE ALTURA" com EPI de cinto paraquedista `[MEDIDO]`. Atividade
+  crítica presente no PGR, exame psicossocial ausente na matriz.
+- **CMO Residencial Varandas Flamboyant, 16/09/2026, validada por Carolini M. P. Lisita.** Todo
+  GHE, incluindo Portaria (Servente, sem atividade crítica), sai com Avaliação Psicossocial +
+  Av. Médica de Saúde Mental incondicional — mesmo padrão de sempre.
+
+**Causa, segundo o Diovanni: não é atividade crítica nem nível de risco julgado pela médica — é
+decisão do engenheiro que elabora o PGR.** "Quem decide o psicossocial é o PGR. No do Hetrin o
+engenheiro não quis ter o psicossocial. Por isso na matriz não tem." Isso refuta a leitura de
+cascata por atividade (rodada 1 da Dra. Carolini) — o contra-exemplo do Pedreiro/altura no Hetrin
+já bastaria — e é consistente com a rodada 2 ("a classificação vem do PGR"), mas afina o *quem*:
+não é uma classificação de risco baixo/médio/alto que alguém preenche no PGR — é uma decisão
+binária do engenheiro autor: incluir ou não a seção/inventário de risco psicossocial no documento.
+PGR sem a seção → motor não deveria emitir nada. PGR com a seção → emite incondicional para
+o PGR inteiro (não há, até agora, evidência de variação por GHE dentro do mesmo PGR).
+
+**Já tem endereço no código, nunca implementado.** `GHEPGR.psicossocial: bool`
+(`agente_medico/motor/tipos.py:202`) existe desde `D-ARQ-49` P2 (maio/2026), desenhado
+nomeadamente como sinal de PGR-documenta-psicossocial para alimentar o extinto `R-PSY-01` — e
+nunca ganhou extrator: `hidratacao.py:133` crava `psicossocial=False` sempre, sem ler o PGR.
+`R-PSY-02` (regra viva) não lê o campo — dispara `quando: todo_trabalhador`, incondicional,
+independente do PGR.
+
+**Proposta, não implementada — decisão do Arquiteto.**
+1. Extrator: detectar no texto do PGR a presença da seção de inventário psicossocial (mesmo
+   marcador medido no Fascino/Aurora: "INVENTÁRIO DE RISCOS PSICOSSOCIAIS"/COPSOQ/FRPRT) e
+   popular `GHEPGR.psicossocial`.
+2. `R-PSY-03` nova (sucede `R-PSY-02` — mudança de escopo de aplicação exige ID nova, mesma
+   convenção de `R-PSY-01→R-PSY-02`), `quando: psicossocial`, mesma conduta atual
+   (avaliacao_psicossocial + avaliacao_saude_mental, adm/per/MR).
+3. `R-PSY-02` sai `[DEPRECATED — fundamento refutado por n=2 pós-protocolo, Hetrin 14/09 ×
+   Varandas 16/09, mesmo padrão de D-ARQ-81 aplicado a R-AUD-04]`.
+
+**Risco residual, não resolvido.** N=2 é o piso de reabertura que este projeto já usa (precedente
+`poeira_de_madeira`/`DT-003EJ-01`), não uma amostra grande — ambos os PGRs são de obra de
+construção civil, mesma classe de risco físico. Não sabemos ainda se a granularidade é por PGR
+inteiro (medido: sim, nos 2 casos) ou se pode variar por GHE dentro do mesmo PGR quando o
+elaborador documenta parcialmente. Sem pergunta nova pra Dra. Carolini — ela já indicou não ter
+mais paciência para esta rodada; a decisão de implementar (ou esperar mais um caso) é do
+Arquiteto, não pendente de resposta clínica adicional.
+
+**Status atualizado:** ABERTA — de "aguardando matriz nova" para "proposta concreta pronta,
+aguardando autorização de implementação". Não bloqueia produção (regra atual, embora com
+fundamento refutado, segue rodando sem crash).
+
+**RESOLVIDA (17/09/2026, branch `claude/fervent-brown-7dcc0y`, autorizada pelo Diovanni).**
+Proposta implementada tal como registrada acima: `detectar_psicossocial` (`extracao_pgr.py`)
+extrai o marcador do PGR inteiro e popula `GHEPGR.psicossocial`; `R-PSY-03` nova (`quando:
+psicossocial`, mesma conduta) sucede `R-PSY-02`, que sai `[DEPRECATED — fundamento refutado]`
+em `regras.yaml`/`PROTOCOLO_AGENTE_MEDICO.md` §5.7 (PROTOCOLO v93→v94). Risco residual desta DT
+(granularidade por PGR inteiro vs. por GHE, n=2) **não resolvido** — fica registrado no corpo de
+`R-PSY-03` (`regras.yaml`/PROTOCOLO §5.7), não reaberto aqui como pendência solta. Testes com
+reversão nomeada em `test_extracao_pgr.py` (extrator), `test_hidratacao.py`/`test_predicados.py`
+(threading + primitivo) e `test_orquestrador.py` (regra fim-a-fim + R-PSY-02 excluída do motor);
+quebras legítimas em `test_integracao_002c.py` e o `test_integracao_end_to_end` de
+`test_orquestrador.py` corrigidas com causa nomeada (perdem as 2 linhas que só saíam por
+R-PSY-02 incondicional). Detalhe completo em HISTORICO_OPERACIONAL.md (bloco desta sessão).
+
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-02 — Segunda variante do template Ricco Hetrin quebra o reconhecedor de família AIHA `[REENQUADRADA + fix de diagnóstico IMPLEMENTADO — 17/09/2026, branch claude/fervent-brown-7dcc0y; ARQUITETURA da ingestão (peça 5) proposta — 18-19/09/2026, branch claude/dreamy-mayer-os6jce; fatiamento 5a→5b→5c→5d RATIFICADO — 19/09/2026, branch claude/blissful-knuth-riqucz; ainda ABERTA até a IMPL fechar]`
+
+**Origem.** Diovanni reportou erro real no serviço ao tentar gerar a matriz do PGR
+`PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 páginas): `"Parse total falho —
+nenhuma matriz gerada (D-ARQ-22)"`, `segmentacao_implausivel: 0 bloco(s) GHE detectado(s) em
+documento de 197 páginas`.
+
+**Medido — reproduzido localmente.** `avaliar_estrutura`/`avaliar_familia` direto contra o PDF:
+`eh_cabecalho_ghe` = 0 casos, `eh_ancora_card_cargo` = 0 casos, `avaliar_familia` = `None` →
+cai no fallback `avaliar_segmentacao`, que bloqueia (`_LIMIAR_PAGINAS_DOC_MINIMO` excedido, 0
+blocos). Por `D-ARQ-57`, pendência de estrutura bloqueia **antes** de qualquer tentativa de rota
+LLM — não existe hoje workaround no app para este documento específico.
+
+**Causa raiz.** É a MESMA família já reconhecida (grid AIHA, `_reconhece_funcao_grid_perigo_risco`,
+regex `r"Função .*Perigo / Risco"` — comentário do código já cita "Hetrin/Serra Dourada" como
+caso-âncora). Confirmado no PGR de março/2025 do mesmo Hetrin
+(`matrizes_originais/01. PGR RICCO HETRIN - MAR25.pdf`): o cabeçalho aparece **exatamente** como
+`"Função Identificação de Perigo / Risco Tempo de Meio de..."`, título-caixa, uma linha só —
+casa limpo. No PGR de 14/09/2026 (mesmo cliente, mesma obra), o cabeçalho da tabela virou **TUDO
+CAIXA ALTA** e o `pdfplumber` extrai `"FUNÇÃO"` e `"PERIGO/ RISCO"` em **linhas separadas** — dois
+motivos independentes de falha (maiúscula E fragmentação de linha), confirmado por busca
+case-insensitive: zero linha do documento inteiro casa `"FUN.?.?O.*PERIGO.*RISCO"` mesmo
+afrouxando o regex. Não é reversão trivial de 1 linha — o cabeçalho não aparece inteiro em
+nenhuma linha extraída, precisa de reconhecedor que junte linhas vizinhas ou case por conjunto de
+palavras-chave, não regex de linha única.
+
+**Não implementado.** Escopo de sessão própria (nova família/variante de parser), no molde do
+que o projeto já fez para o T65 (`DT-003FE-01`/`DT-003FF-01`). Não tocado nesta sessão —
+registrado para não se perder.
+
+**Reenquadramento (17/09/2026, branch `claude/fervent-brown-7dcc0y`) — a causa raiz acima está
+incompleta: "casa limpo" no PGR de março era só o teste do regex isolado, não o pipeline
+inteiro.** Reproduzido `avaliar_estrutura`/`avaliar_familia`/`parsear_arquivo` direto contra os
+dois PDFs reais (`01. PGR RICCO HETRIN - MAR25.pdf` e `PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN
+14.09.26.pdf`) `[MEDIDO — execução direta desta sessão]`:
+
+- **PGR mar/2025:** `eh_cabecalho_ghe`=0, `eh_ancora_card_cargo`=0, `_reconhece_funcao_grid_perigo_risco`=**123** casos → `avaliar_familia` retorna `Pendencia(tipo="pgr_cargo_based", bloqueante=True, motivo="...recorte-GHE inaplicável")`. **Também bloqueado hoje** — não gera matriz.
+- **PGR set/2026 (14/09):** mesmos reconhecedores GHE/card = 0; `_reconhece_funcao_grid_perigo_risco`=**0** (cabeçalho em caixa alta e fragmentado em linhas, como já diagnosticado) → `avaliar_familia` retorna `None` → cai no fallback `avaliar_segmentacao`, que bloqueia como `segmentacao_implausivel`.
+- `parsear_arquivo` (`parser_familia_consciente.py`, D-ARQ-65) devolve **0 blocos para os dois arquivos**, sem `FamiliaNaoReconhecida` — não por bug, mas porque esse módulo é o parser determinístico da família **Consciente/Fascino** (cabeçalho `GRUPO/PERIGO-ASPECTO/FONTE/AGRAVO`, D-ARQ-65), inteiramente distinta do grid AIHA Hetrin/Serra Dourada (`Função ... Perigo/Risco`). Confundir os dois nomes ("reconhecedor da família AIHA") foi o erro de leitura da sessão anterior.
+
+**O achado que muda o escopo.** `D-ARQ-57` peça 3 (003.CQ) e a decisão da peça 4 (003.DC,
+ratificada pelo Diovanni) **excluem deliberadamente** o grid AIHA do recorte-por-cargo que foi
+construído: *"grid-header AIHA Hetrin/SD **FORA** [do repertório de recorte] — sinal-de-família
+≠ âncora-de-recorte... o grid AIHA não delimita card individual (é cabeçalho de tabela
+compartilhada)"* (D-ARQ-57, notas 003.DC/003.DF). O recorte-por-cargo 1:1 que a peça 4 entregou
+(`recortar_cards_cargo`) serve só Cjr (`CARGO-CBO`) e EBSERH (`Lotação:`-tripla) — famílias
+"1 card = 1 cargo autocontido". O grid AIHA é estruturalmente diferente: **1 tabela
+compartilhada, N linhas-de-cargo** — mais parecido com a tabela de risco do Fascino (D-ARQ-65)
+do que com um card EBSERH, mas sem cabeçalho-GHE numerado para segmentar por GHE. **Conclusão:
+a família Hetrin/Serra Dourada nunca teve caminho de ingestão automática — nem antes nem depois
+da mudança de cabeçalho de setembro.** `_reconhece_funcao_grid_perigo_risco` sempre foi só
+diagnóstico (classificar corretamente como `pgr_cargo_based` para revisão humana), nunca um
+passo rumo a parsear a tabela.
+
+**O que o conserto do regex ainda vale — e o que não vale.** Ajustar o reconhecedor para casar o
+cabeçalho em caixa-alta/fragmentado (a causa raiz textual, que segue correta) restauraria a
+pendência **correta** (`pgr_cargo_based`, "recorte-GHE inaplicável") no PGR de setembro, em vez
+da atual `segmentacao_implausivel` (que sugere anomalia estrutural, não família reconhecida e
+deliberadamente não-automatizada) — ganho real de qualidade de diagnóstico para quem revisa. **Não
+gera matriz em nenhum dos dois casos** — mar/2025 já está bloqueado hoje pelo mesmo
+`pgr_cargo_based`, sem ninguém ter notado por não ter sido tentado em produção.
+
+**Escopo real de "resolver" o Hetrin/Serra Dourada é maior que uma variante de parser — é uma
+peça nova, irmã da peça 4.** Precisaria: (1) decidir a unidade de recorte de uma tabela
+compartilhada por linha-de-cargo (não card, não GHE — molde mais próximo é a extração de linhas
+de risco do Fascino em `parser_familia_consciente.py`, D-ARQ-65, mas sem os blocos-GHE que lá
+segmentam por GHE); (2) ARQUITETURA própria (molde D-ARQ-57 peça 4 / D-ARQ-65), não fatia
+avulsa — mesmo padrão que `DT-003FE-01` virou `DT-003FF-01` ao ser investigada a fundo (T65: "o
+gargalo é a família de conteúdo", não a âncora). Precedente direto de escopo subestimado citado
+por engano nesta própria DT.
+
+**Fix de escopo contido, implementado (17/09/2026, mesma branch, autorizado pelo Diovanni — só o
+regex, não a arquitetura de ingestão).** `_reconhece_funcao_grid_perigo_risco_fragmentado` novo em
+`extracao_pgr.py`, casa o cabeçalho quebrado em 2 linhas adjacentes (`\b`-delimitado, anti-prosa),
+integrado em `avaliar_familia`. Restaura a pendência **correta** no PGR de 14/09/2026:
+`pgr_cargo_based` em vez de `segmentacao_implausivel`. Validado contra os 40 PGRs reais do acervo
+— só este documento muda de classificação. 15 testes com reversão nomeada, varredura inversa
+15/15 confirmada. Nota de aplicação em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`). Detalhe em
+HISTORICO_OPERACIONAL.md (bloco desta sessão).
+
+**Status:** REENQUADRADA, fix parcial IMPLEMENTADO. Deixou de ser "bug de regressão" (nunca
+funcionou) e passou a ser "família nunca implementada, exclusão deliberada de D-ARQ-57/D-ARQ-65".
+O conserto do regex acima corrige o DIAGNÓSTICO (pendência certa, revisão humana informada
+corretamente) — **não gera matriz** em nenhum PGR Hetrin/Serra Dourada, nem no de março/2025 nem
+no de setembro/2026: ambos bloqueiam hoje, corretamente, para revisão humana. Gerar matriz exige
+ARQUITETURA própria (unidade de recorte de tabela compartilhada por linha-de-cargo, molde D-ARQ-57
+peça 4/D-ARQ-65) — escopo e prioridade a definir pelo Arquiteto, não aberta nesta sessão.
+
+**Nota (sessão branch `claude/dreamy-mayer-os6jce`, 18-19/09/2026) — ARQUITETURA da peça 5 proposta; DT segue ABERTA.** A ARQUITETURA pedida acima foi feita: `D-ARQ-57`, andamento "ARQUITETURA da peça 5" (`DECISOES_ARQUITETURAIS.md`). Medição própria contra os 3 witnesses reais (`01. PGR RICCO HETRIN - MAR25.pdf`, `01. PGR RICCO SERRA DOURADA - MAI.24 1.pdf`, `PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf`) refina a hipótese desta DT ("molde mais próximo é a extração de linhas de risco do Fascino") para uma recomendação testada: banda de coluna calibrada por bloco (`PalavraPDF`, molde exato de `parser_familia_consciente.py`/D-ARQ-65), não `pdfplumber.extract_tables()` — que funciona nos 2 witnesses limpos mas é frágil no witness do chamado real (Hetrin/set-2026, coluna sem grade estável, o mesmo sintoma que já tinha feito o projeto abandonar bandas fixas no Fascino). Fatiamento proposto 5a-5d (5a/5b: recorte + decomposição N:1; 5c: transcrição da célula de risco; 5d: roteamento + plug + e2e, só aqui esta DT fecha) — nenhuma fatia implementada nesta sessão. Achado nomeado: o witness do chamado real (Hetrin/set-2026) é o mais instável dos 3 e só é destravado nas fatias 5b/5d, não na 5a — se a prioridade é esse documento específico, a ordem do fatiamento precisa de decisão explícita do Arquiteto/Diovanni antes da IMPL. Escrita autorizada pelo usuário desta sessão ("pode gravar"); ratificação formal do Diovanni sobre o fatiamento/prioridade não registrada neste turno. `[ARQUITETURA — sessão branch claude/dreamy-mayer-os6jce]`
+
+**Nota (sessão branch `claude/blissful-knuth-riqucz`, 19/09/2026) — fatiamento ratificado pelo Diovanni; DT segue ABERTA.** Decisão: manter 5a→5b→5c→5d, sem reordenar para priorizar o witness Hetrin/set-2026 antes de 5a calibrado nos 2 witnesses limpos — o risco nomeado na nota acima fica aceito, não mitigado. Detalhe da ratificação em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`). Esta DT permanece ABERTA — fecha só na fatia 5d; nenhuma fatia implementada nesta sessão (docs-only). `[RATIFICADO — Diovanni; sessão branch claude/blissful-knuth-riqucz]`
+
+**Nota (mesma sessão, mesmo dia) — fatia 5a IMPLEMENTADA; DT segue ABERTA (fecha só na 5d).** `agente_medico/motor/parser_familia_grid_aiha.py`: banda de coluna + fronteira de função, validado contra os 2 witnesses limpos (nomes e contagens de linha exatas). A medição desta fatia corrigiu a hipótese de ambiguidade registrada na nota de ratificação acima — era artefato de um bug de agrupamento de linha (rótulo colidindo com outras colunas no mesmo `top`), não estrutura real do grid; corrigido, `TrechoAmbiguo`/`Pendencia` não entraram no código. Detalhe completo em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`, nota "Fatia 5a IMPLEMENTADA") e HISTORICO (bloco desta sessão). Próximo: 5b (decomposição N:1, caso do witness instável Hetrin/set-2026). `[IMPLEMENTADO — sessão branch claude/blissful-knuth-riqucz]`
+
+**Nota (sessão branch `claude/nice-ptolemy-wxk1wo`) — bloqueador medido ao abrir a 5b: zero N:1 real acessível; DT segue ABERTA.** Medição contra os 2 witnesses calibrados (`segmentar_arquivo` real, intervalo cheio) achou 3 candidatos com `/` no nome (Hetrin/mar: `Encarregado de Encanador/Hidráulica`, `Comprador / Compradora`, `Engenheiro Civil / Planejamento`; Serra Dourada: 0) — nenhum é N:1 genuíno: o texto cru sob cada um descreve 1 papel só (par de gênero ou título composto), não uma lista de cargos distintos compartilhando 1 grupo de risco. O N:1 real (molde do exemplo da ARQUITETURA) só existe em Hetrin/set-2026, e esse witness não é alcançável pela fatia 5a — `segmentar_arquivo` levanta `GrupoFuncaoNaoReconhecido`: o grid desse documento usa cabeçalho `'FUNÇÃO'`/`'TIPO'` em CAIXA ALTA (medido pág. 14, 0-indexed) contra o title-case (`'Função'`/`'Tipo'`) que `_localizar_cabecalho_grid` exige — nenhuma página do documento tem `'Função'` exato fora de uma tabela não-relacionada (EPI-por-função, pág. 62). Bloqueador reportado, sem código de produção nesta sessão; decisão de como prosseguir (generalizar o reconhecedor de cabeçalho antes de decompor N:1, redefinir escopo da 5b, ou outra ordem) cabe ao Arquiteto. Detalhe completo em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`, nota "Bloqueador medido ao abrir a fatia 5b") e HISTORICO (bloco desta sessão). `[MEDIDO — sessão branch claude/nice-ptolemy-wxk1wo; bloqueador reportado, decisão do Arquiteto]`
+
+**Nota (mesma sessão, mesmo dia) — medição aprofundada e decisão do Diovanni: não perseguir Hetrin/set-2026 agora; DT segue ABERTA.** A pedido do Diovanni, medi o que "aceitar cabeçalho CAIXA ALTA" exigiria de fato: banda Função ~50-83pt (bem mais estreita que os 2 witnesses limpos, quase 1 palavra por linha física); o único caso N:1 real do documento (pág. 14, 6 cargos: Engenheiro Civil/Engenheiro Residente/Estagiário de Engenharia/Apontador/Administrativo de Obra/Técnico de Segurança do Trabalho) tem o separador `/` **ausente** entre 2 dos 6 nomes no texto extraído; e o cabeçalho **não repete em toda página** do intervalo (pág. 32 sem `'FUNÇÃO'`/`'TIPO'`) — quebra o contrato "recalibra por página" da fatia 5a. Achado que decidiu a sessão: mesmo com a 5b completa pra esse witness, o documento não ingere hoje — faltam 5c/5d, nenhuma implementada — já cai em revisão humana, gated by design (mesma classe HUMAP/Cjr, `DT-003DK-01`), sem risco de dado errado. **Decisão do Diovanni: não perseguir a calibração do Hetrin/set-2026 agora**, revisitar quando houver sinal se é template novo do cliente Ricco (a partir de 14/09/26) ou formatação pontual desse envio. Detalhe completo em `D-ARQ-57` (`DECISOES_ARQUITETURAIS.md`, nota "medição aprofundada") e HISTORICO (bloco desta sessão). `[MEDIDO — sessão branch claude/nice-ptolemy-wxk1wo; decisão do Diovanni]`
+
+### DT-(sessão não numerada, branch `claude/dreamy-mayer-os6jce`)-01 — Relatório de rastreabilidade/proveniência da matriz (origem de cada risco/exame, por-que da decisão do motor) `[ABERTA — proposta registrada, sem ARQUITETURA própria]`
+
+**Origem.** Pedido do usuário nesta sessão, durante a revisão da auditoria comparativa da matriz Aurora Lago das Rosas (comparativo app × matriz aprovada pelas médicas): a matriz de exames deveria vir acompanhada de um relatório explicando de onde o app tirou cada risco, de onde tirou cada exame e por que decidiu o que decidiu — não necessariamente uma "auditoria", mas rastreabilidade suficiente para a médica coordenadora entender a origem de uma decisão do app sem precisar reconstruir manualmente a cadeia PGR→regra→exame (exatamente o trabalho que a auditoria Aurora precisou fazer à mão).
+
+**Situação atual.** Parte do mecanismo já existe, mas não sobrevive além da execução:
+- Toda regra clínica já carrega `R-CATEGORIA-NN` e a fonte normativa em comentário/docstring — convenção fixa deste projeto (`CLAUDE.md`, seção "Código"), auditável no código-fonte mas não no artefato final entregue à médica.
+- `Pendencia` já carrega `tipo`/`bloqueante`/`destinatario`/`regra_origem` (D-ARQ-57 e outras decisões reusam esse mecanismo) — mas só para o que ficou em dúvida ou foi rejeitado, nunca para o que **entrou** na matriz.
+- Para os exames que efetivamente saem no `.docx` final, a cadeia agente-do-PGR → regra que disparou → periodicidade/evento aplicado é calculada em runtime e descartada assim que o Word é gerado. Não há hoje nenhum dado de proveniência persistido para o caminho feliz (só para o caminho de pendência).
+
+**Escopo real — não é ajuste de relatório, é mudança de arquitetura.** Cada ponto do motor (`agente_medico/motor`) que hoje retorna só o valor final (periodicidade, evento, exame) precisaria passar a retornar valor + proveniência (qual agente do PGR, qual regra, qual decisão de periodicidade/evento). Isso toca o núcleo do motor, não a superfície de geração do `.docx` — não é um prompt de implementação direto, é candidato a sessão ARQUITETURA própria (levantar onde exatamente a proveniência se perde hoje, decidir a forma do dado de rastro, decidir se ele é gerado sempre ou só sob flag, decidir onde/como aparece no documento entregue).
+
+**Não medido nesta sessão.** Nenhum ponto específico do motor foi inspecionado para confirmar exatamente onde a proveniência se perde nem qual seria o formato do dado de rastro — a avaliação acima é qualitativa, feita em conversa, sem leitura de código. Antes de virar D-ARQ precisa da mesma disciplina de medição que `D-ARQ-57`/`D-ARQ-65` já seguem: ler o motor real, nomear os pontos de perda, medir contra um caso-âncora.
+
+**Priorização.** Deliberadamente adiada nesta sessão — o usuário escolheu fechar a arquitetura do grid AIHA primeiro (`D-ARQ-57` peça 5, acima) e registrar este item "no gatilho" para não se perder. Nenhuma prioridade relativa foi definida entre este item e a fatia 5a-5d de D-ARQ-57.
+
+**Status:** ABERTA. Aguardando sessão ARQUITETURA própria (medição real do motor, molde D-ARQ-57/D-ARQ-65) antes de qualquer código. `[DERIVADO — discussão em chat desta sessão, sem leitura de código; escrita autorizada pelo usuário, "pode gravar"]`
+
+**Nota (sessão branch `claude/blissful-knuth-riqucz`, 19/09/2026) — prioridade definida pelo Diovanni: D-ARQ-57 peça 5 fecha primeiro.** Nenhuma sessão ARQUITETURA para este item antes de `D-ARQ-57` peça 5 chegar à fatia 5d (`pgr_cargo_based`/grid AIHA vira ingestão real). Decisão de sequenciamento de trabalho entre duas frentes arquiteturais abertas, não de arquitetura desta DT — escopo, pontos de perda de proveniência no motor e forma do dado de rastro seguem exatamente como descritos acima, nada medido nesta sessão. `[DECISÃO DE SEQUENCIAMENTO — Diovanni; sessão branch claude/blissful-knuth-riqucz]`
+
+### DT-(sessão claude/nice-ptolemy-wxk1wo)-01 — Casamento manual FDS↔produto do PGR: falta o elo que liga a composição extraída ao `ProdutoQuimico` certo `[RESOLVIDA — fatia 2b IMPLEMENTADA, sessão claude/003ff-fatia2b]`
+
+**Origem.** Pedido do Diovanni nesta sessão: a tela só tinha upload de PGR; produtos químicos (CAS, agravos à saúde) vêm da FDS/FISPQ e complementam o PGR/PCMSO. Fatia 1 (`D-ARQ-47`, nota de aplicação desta sessão) já sobe: `pagina_matriz()` aceita upload avulso de FDS, roda `preparar_composicao` (extração real + transcrição-LLM + gate de forma) e mostra CAS/nome/frases-H na tela — com ou sem PGR.
+
+**O que falta.** A composição extraída da FDS não está ligada a nenhum `ProdutoQuimico` do PGR (`GHEPGR.produtos_quimicos`, `motor/tipos.py`) — sem esse elo, `FDS.composicao_verbatim` nunca é populado em produção, `resolver_composicao`/`executar_com_composicao` (já rodam dentro de `processar_pgr`, D-ARQ-40) não têm o que resolver, e o CAS/frase-H da FDS nunca chega em `Risco.materialidade`/exame emitido. Decisão já tomada com o Diovanni (não automática): pra cada FDS enviada, o usuário escolhe MANUALMENTE, numa lista, qual `ProdutoQuimico.nome` do PGR ela corresponde — casamento automático por nome foi descartado por risco de vínculo errado e silencioso (classe D-ARQ-22).
+
+**O que a implementação vai precisar (não medido/desenhado ainda).**
+1. Expor uma lista de candidatos pra tela escolher — hoje `_rodar_parse_deterministico`/`processar_arquivo_pgr` devolvem `Resultado` (matrizes já resolvidas), não o `PGR` hidratado antes da resolução de composição.
+2. Uma forma barata de RE-rodar só a resolução de composição (`processar_pgr`/`executar_com_composicao`, sem custo de LLM/parse de PDF) depois que o usuário escolhe o casamento — hoje isso é tudo feito numa passada só dentro de `processar_arquivo_pgr`. Provável separação: uma função que devolve o `PGR` hidratado (caro, cacheável) + uma chamada barata de `processar_pgr` sobre esse `PGR` já com o `fds` do produto casado anexado (`dataclasses.replace`).
+3. UI: `st.selectbox` por FDS enviada, listando os candidatos do PGR já parseado; sem PGR processado, a FDS fica só no modo avulso (fatia 1, sem casamento — comportamento já existente).
+
+**Achado que travou a retomada (mesma sessão, ao reabrir esta DT) — `GHEPGR.produtos_quimicos` NÃO existe em produção; a suposição do item 1 acima estava errada.** `hidratar_pgr` (`motor/hidratacao.py:137`) crava `produtos_quimicos=()` sempre — o comentário da própria linha 17 nomeia o motivo: "EPIs, produtos_quimicos e cenario ficam em default (diferidos, `D-ARQ-49 P2`)". Não é um dado já extraído esperando ser exposto na tela — é um campo deferido desde a arquitetura original do parse-PGR, nunca implementado. Construir a extração formal (nome de produto químico por GHE, a partir do texto do PGR) é trabalho do tamanho da própria `D-ARQ-49` (sessão de medição própria), não algo que cabe dentro desta fatia.
+
+**Alternativa considerada — reusar `RiscoVerbatim.agente`/`fonte_geradora` como substituto da lista de produto.** Esses campos JÁ existem (`GHEVerbatim`/`RiscoVerbatim`, `D-ARQ-49` Parte 2/nota 003.BN) e carregam o texto cru do risco declarado — plausivelmente o mesmo nome do produto na maioria dos casos ("Tinta acrílica", "Solvente"). O refactor caro/barato (item 2 acima) seria o MESMO trabalho independente da fonte da lista — não é jogado fora se a extração formal vier depois, só troca de onde a `selectbox` lê as opções. **Não seguido nesta sessão** porque a qualidade de `agente` como "nome de produto" não foi medida contra um PGR real — pode vir limpo ou misturado com risco não-químico (ex. "Ruído contínuo", que não corresponde a produto nenhum) —, e é o usuário real escolhendo na tela; ruído na lista pesa mais que noutro contexto.
+
+**Decisão do Diovanni: parar aqui.** Não implementar fatia 2 nesta sessão, nem pelo caminho da extração formal (D-ARQ-49 P2, fora de escopo/tamanho) nem pelo substituto (`agente`/`fonte_geradora`, não medido). Dois caminhos nomeados pra retomada, nenhum escolhido: (a) medir como `agente`/`fonte_geradora` aparece num PGR real antes de decidir se o substituto serve; (b) abrir sessão de arquitetura própria pra `D-ARQ-49` Parte 2 (extração formal de `produtos_quimicos`) direto.
+
+**Caminho (a) medido (mesma sessão, mesmo dia) — substituto descartado por dado real, não por cautela.** `parsear_arquivo` (`parser_familia_consciente.py`, D-ARQ-65, determinístico — sem LLM, sem chave) contra o PGR real da família Consciente/Fascino (`matrizes_originais/PGR - CONSCIENTE... FASCINO (15.07.26).pdf`): 19 GHEs, 237 riscos. Achado: a granularidade de `agente`/`fonte_geradora` não é "produto", é **componente químico individual dentro de um grupo por atividade** — `fonte_geradora="Exposição a tintas e seus componentes."` sozinha agrupa ~15 `agente` distintos (`Destilados (Petróleo) leves tratados com hidrogênio`, `Tolueno`, `Etanol`, `Metiletilcetona`, `Xileno`, `Dióxido de Titânio`, `Óxido de Ferro Amarelo`...) — a tabela de composição de 1 produto (tinta), já decomposta ingrediente-a-ingrediente no próprio texto do PGR. Mesmo padrão em `"Na execução do trabalho de encanação"` (Hidróxido de sódio, Acetona, Acetato de etila, Copolímero de PVC...) e soldagem (Silicato de alumínio, Ferro, Manganês, Quartzo...). **Não é 1:1** (1 `agente` = 1 produto): é 1 FDS : N linhas de `agente` — o inverso do N:1 medido na fatia 5b (`D-ARQ-57`) mais cedo nesta sessão. Uma `selectbox` de `agente` pra escolher "qual corresponde a esta FDS" obrigaria o usuário a saber que 15 itens da lista são o mesmo produto — não tem 1 item limpo pra apontar. Substituto descartado — confirma, com dado real, que a rota (a) não serve como concebida (casamento 1 FDS : 1 `agente`); resta a rota (b), e ela precisa decidir algo novo: casar a FDS num **grupo de riscos** (por `fonte_geradora`), não num produto único nomeado, porque o PGR (ao menos este witness) não nomeia produto — só declara os componentes. De passagem: achei uma linha corrompida (`"Bater contra ou ser atingido por (trânsito)..."`) — já é defeito conhecido e registrado (`DT-003L-01`, nota acima nesta mesma seção), nada novo. `[MEDIDO — parsear_arquivo real contra o Fascino, sessão claude/nice-ptolemy-wxk1wo; decisão de parar de novo é do Diovanni]`
+
+**Status:** ABERTA. Não-bloqueante: a fatia 1 (extração avulsa, `PR #345`) já entrega valor sozinha. Único caminho de retomada agora: (b) — sessão de arquitetura própria pra `D-ARQ-49` Parte 2, decidindo a unidade de casamento como grupo-por-`fonte_geradora`, não produto nomeado. `[DERIVADO — pedido do Diovanni nesta sessão; leitura de `orquestracao_pgr.py`/`web_matriz.py`/`motor/entrada.py`/`motor/hidratacao.py`/`D-ARQ-49`; medido contra o Fascino real; decisão de parar é do Diovanni]`
+
+**Caminho (b) aberto (sessão `claude/sharp-wozniak-j4596a`) — o próprio agrupamento por `fonte_geradora` é rejeitado; achado novo muda a forma da fatia.** Medido de forma reproduzível contra o mesmo Fascino (`parsear_arquivo`, função já versionada, 19 GHEs/237 riscos): grupos FÍSICOS de `n=2` (`'Operação de máquinas...'` → `['Ruido', 'Vibrações localizadas (mão e braço)']`; `'Poeiras geradas no processo produtivo...'` → `['Sílica livre', 'Poeira respirável']`) contra QUÍMICOS reais de `n=10`/`n=8`/`n≈15` — lacuna limpa NESTE witness, mas sem garantia estrutural de que um PGR diferente não combine 3+ agentes físicos sob 1 `fonte_geradora` (Ruído/Vibração/Radiação aparecem separadas noutros GHEs deste mesmo documento); cravar corte de `n` sem essa garantia inventa categoria sem fonte (D-ARQ-22). Pior: `stage_3_pendencias_estruturais`/R-PGR-04 (`estagios/pendencias_estruturais.py:7-19`, `[VALIDADO]`) emite pendência BLOQUEANTE `composicao_ausente` para todo `produto.fds is None` — nunca disparou até hoje porque `produtos_quimicos` sempre foi `()`; populá-lo automaticamente sem garantia estrutural de filtro arriscaria disparar essa regra falsamente em GHEs físicos que este witness não mostrou (Ruído/Vibração/Postural/Trabalho-em-Altura não são "produto químico" e não deveriam exigir FDS). Nenhuma das duas sessões anteriores (v197/v198) tinha olhado `pendencias_estruturais.py` — achado novo desta sessão, não repetição.
+
+**Decisão de arquitetura revisada.** `produtos_quimicos` NÃO é extraído na hidratação (zero mudança em `hidratar_ghe`/`hidratar_pgr` — sem regressão de R-PGR-04). O RT passa a CRIAR o `ProdutoQuimico` explicitamente na tela (fatia 2b), ao anexar uma FDS avulsa a um GHE do PGR já carregado — o slot só nasce com `fds` já populada, nunca `None` órfão, então R-PGR-04 nunca dispara por essa via (seu gatilho original — PGR aponta produto sem dar composição — segue não-implementado, declarado, não escondido). Fatia 2a: split cheap/expensive em `processar_arquivo_pgr` (expor o `PGR` hidratado antes de `processar_pgr`, sem reprocessar PDF/LLM a cada rerun do Streamlit). Detalhe completo, discriminantes e fronteiras: `DECISOES_ARQUITETURAIS.md` v199 (nota em `D-ARQ-49`).
+
+**Ratificado (mesma sessão, 20/09/2026).** Diovanni ratifica a decisão acima como desenhada (RT cria o produto na tela; fatiamento 2a→2b sem reordenar). Gap do Crítico (universalidade em indústria química não medida) aceito, não mitigado. Detalhe: `DECISOES_ARQUITETURAIS.md` v200 (ratificação em `D-ARQ-49`).
+
+**Fatia 2a implementada (sessão `claude/blissful-johnson-mdeqn5`).** `preparar_pgr_hidratado` extraída em `orquestracao_pgr.py` (`preparar_ghes` -> `hidratar_pgr`, parando antes de `processar_pgr`); `processar_arquivo_pgr` vira wrapper fino sobre ela + `processar_pgr`, mesmo comportamento externo (suíte existente verde, sem teste novo — discriminante nomeado na ARQUITETURA v199/v200). Detalhe: `DECISOES_ARQUITETURAIS.md` v201 (nota de aplicação em `D-ARQ-49`).
+
+**Fatia 2b implementada (sessão `claude/003ff-fatia2b`).** UI em `web_matriz.py`: com um PGR já carregado na tela (`cache.pgr_hidratado is not None`) e uma FDS avulsa com composição extraída, `pagina_matriz()` oferece `st.selectbox` sobre os GHEs do PGR + `st.text_input` do nome do produto (pré-preenchido com o nome do arquivo, decisão de tela — `fonte_geradora` não sobrevive à hidratação, então não é usada como referência: trazê-la exigiria reabrir a fronteira ratificada de `preparar_pgr_hidratado`, fora do escopo desta fatia). Ao confirmar, `anexar_produto_e_reprocessar` (núcleo puro, sem streamlit) cria `ProdutoQuimico(nome, fds)` já com `fds` populada (nunca `None` órfão — R-PGR-04 não dispara por esta via, como previsto na ARQUITETURA), anexa ao GHE escolhido via `dataclasses.replace` aninhado e roda `processar_pgr` de novo sobre o PGR mutado — sem chamar `preparar_pgr_hidratado`, sem tocar PDF/LLM. `CacheMatrizes` ganha o campo aditivo `pgr_hidratado` (molde `chamadas_ia`) pra sobreviver entre reruns do Streamlit em `st.session_state`. Sem PGR carregado, comportamento idêntico ao de antes (fluxo avulso da fatia 1/`D-ARQ-47`). Medido ao vivo (`test_pagina_matriz_fds_anexada_persiste_entre_reruns_sem_chamada_ia`, `AppTest`): FDS de tolueno (CAS 108-88-3) anexada atravessa até `Resultado.matrizes` com o componente resolvido/promovido (Fase C, `resolver_composicao`+`estagios/riscos.py`), `chamadas_ia == 0` no rerun, e um 2º `.run()` sem tocar em widget confirma que o produto NÃO desaparece (persistência em `st.session_state`, a reversão nomeada pela ARQUITETURA). Fronteira respeitada: só `web_matriz.py`/`test_web_matriz.py` tocados; `orquestracao_pgr.py` e o motor intocados — a fatia 2a bastou. Detalhe completo: `DECISOES_ARQUITETURAIS.md` v202 (nota de aplicação em `D-ARQ-49`).
+
+**Status:** RESOLVIDA — D-ARQ-49 Parte 2 (fatias 2a+2b) fecha IMPLEMENTADA. `[MEDIDO — parsear_arquivo real contra o Fascino + leitura de estagios/pendencias_estruturais.py/PROTOCOLO_AGENTE_MEDICO.md §R-PGR-04, sessão claude/sharp-wozniak-j4596a; ratificação do Diovanni na mesma sessão; fatia 2a medida na sessão claude/blissful-johnson-mdeqn5; fatia 2b medida na sessão claude/003ff-fatia2b]`
+
+---
+
+### DT-(sessão branch `docs/003fi-achado-gate-forma-faixa`)-01 — `gate_forma` reprova a maioria dos blocos reais de FDS: separador de faixa raso demais para o padrão real de tabela `[RESOLVIDA — IMPLEMENTAÇÃO, sessão claude/nice-fermat-xahkji]`
+
+**Origem.** Diovanni testou o app publicado (`automacao-pgr-agente-pcmso.streamlit.app`) com 14 FDS reais do acervo (as mesmas medidas nas duas levas de `DT-003M-02`, mais `IMPERMEABILIZANTE.pdf`) e reportou o resultado por screenshot — a maioria dos blocos saiu como `forma_verbatim_fds: Bloco verbatim reprovado no gate de forma`, com CAS e nome perfeitamente legíveis no motivo da pendência.
+
+**Medido — causa raiz confirmada, não hipótese.** `extrair_texto_fds` (determinístico, sem LLM) sobre os mesmos PDFs mostra que a fonte já chega **sem separador** entre os dois números da faixa de concentração, antes de qualquer transcrição:
+```
+'Hipoclorito de sódio 15 19% 7681-52-9'      # Água Sanitária Zulu
+'Acetona 67-64-1 30 70'                       # Adesivo PVC Tigre
+'Asfalto 8052-42-4 35 a 50'                   # Impermeabilizante — usa "a", não hífen
+```
+O `pdfplumber` extrai as duas colunas (mínimo/máximo) como números soltos lado a lado — o hífen visual da tabela do PDF de origem não sobrevive à extração de texto por posição. `gate_forma` (`motor/transcritor_fds.py`) exige `parsear_faixa(faixa) is not None`; `parsear_faixa` usa `_SEPARADOR_FAIXA = re.compile(r"[-–]")` — só hífen/en-dash (`transcricao_fds.py:90`). Sem separador reconhecido → `None` → bloco inteiro reprovado, bloqueante, mesmo com CAS/nome íntegros.
+
+**O LLM não é a causa, mas é inconsistente.** O prompt (`transcritor_gemini.py`, regra 1) já pede "dois números separados por hífen/en-dash" — e às vezes o Gemini insere o hífen que a fonte não tem (funcionou no Cimentcola Interno Quartzolit/Azulejista: "20,0 - 60,0" no candidato, apesar de a fonte trazer "20,0 60,0" sem hífen), às vezes só transcreve os dois números como estão (a maioria dos casos do teste do Diovanni). Comportamento **não-determinístico** do modelo sobre o mesmo tipo de entrada — não dá para contar com o LLM resolver isso de forma confiável.
+
+**Impacto medido — não é caso isolado.** Apareceu em 3 fabricantes distintos (Tigre/adesivo, Zulu/água sanitária, fabricante do eletrodo de solda) — é o padrão comum de tabela de composição nas FDS brasileiras reais do acervo, não uma malformação pontual de 1 documento. Na prática, o gate está descartando a maior parte da composição real que sobe pelo app hoje — o vocabulário de 28 slugs novos populado em `DT-003M-02` (duas levas, `PR #351`/`#352`) vale pouco enquanto o dado nem atravessa o gate de forma antes de chegar em `gate_cas`.
+
+**Achado colateral, natureza distinta — não desta DT.** 2 dos 14 arquivos (`IMPERMEABILIZANTE.pdf`, e uma das cópias de `FDS MONTADOR.pdf`/`FDS SERVIÇOS GERAIS.pdf`, hash-idênticas a arquivos que noutra invocação tiveram sucesso) voltaram `transcricao_indisponivel_fds: JSON inválido` — falha de invocação do LLM (JSON malformado na resposta), não de forma. É instabilidade pontual do modelo sobre o MESMO PDF byte-idêntico noutra chamada — sugere robustecer com retry, mas é problema de natureza diferente do separador de faixa; não misturar as duas correções numa só fatia.
+
+**Proposta (não implementada nesta sessão — handoff por reinício de janela de contexto).** Estender `_SEPARADOR_FAIXA` para reconhecer também espaço puro entre dois números válidos e o literal `" a "` (case-insensitive), sem tocar no LLM/prompt — mantém a extração e o parse 100% determinísticos, só amplia o que conta como separador válido. Risco de falso-positivo (dois números soltos que não sejam min/max de uma faixa real) é mitigado por `_texto_para_float` já exigir token numérico limpo após a troca vírgula→ponto — ruído não-numérico (texto, datas) continua caindo em `None`, não muda esse comportamento. Mexe em `motor/transcricao_fds.py` — contrato de `parsear_faixa` citado em D-ARQ-34 Parte 1 (faixa é FaixaConcentracao, não escalar) e D-ARQ-43 Parte 2 (separadores hífen/en-dash, DT-003AS-01 patologia 5); esta DT amplia o conjunto de separadores aceitos, não revoga a decisão anterior. Precisa de teste com reversão nomeada (regra do CLAUDE.md): candidato natural é "faixa sem separador reconhecido continua reprovando" revertendo a mudança de regex — os 3 casos reais acima (`'15 19'`, `'30 70'`, `'35 a 50'`) são candidatos diretos de fixture, já medidos, prontos para virar caso de teste sem inventar dado novo.
+
+**Resolução (sessão `claude/nice-fermat-xahkji`).** Implementada exatamente a proposta acima, sem desvio: `_SEPARADOR_FAIXA_FALLBACK = re.compile(r"\s+a\s+|\s+", re.IGNORECASE)` em `motor/transcricao_fds.py`, consultado em `parsear_faixa` só quando `_SEPARADOR_FAIXA` (hífen/en-dash) não encontra 2 partes — nunca compete com o separador primário, então as âncoras de D-ARQ-43 P2 (`"0,2 – 0,05"` etc.) continuam pelo caminho antigo, byte a byte. LLM/prompt intocados, como prescrito.
+
+Os 3 casos reais viraram fixture direta, sem dado inventado: `parsear_faixa("15 19") == FaixaConcentracao(15.0, 19.0)`, `parsear_faixa("30 70") == FaixaConcentracao(30.0, 70.0)`, `parsear_faixa("35 a 50") == FaixaConcentracao(35.0, 50.0)` — mais 2 testes de fronteira (fallback não compete com hífen presente; fallback não resgata lixo sem espaço, ex. `"indisponível"`) e 1 teste no nível do gate (`test_faixas_reais_sem_hifen_sao_aprovadas`, `motor/transcritor_fds.py::gate_forma`), confirmando que os 3 blocos reais deixam de gerar `Pendencia` bloqueante.
+
+**Varredura inversa `[MEDIDO — mesma sessão]`.** Reversão nomeada na própria proposta: revogar o fallback (remover a chamada a `_SEPARADOR_FAIXA_FALLBACK` em `parsear_faixa`, restaurando só `_SEPARADOR_FAIXA`). Aplicada isoladamente (só o código-fonte, testes intactos): derruba exatamente 4/6 testes novos — os 3 casos reais + o teste de gate — e preserva os outros 2 (que descrevem comportamento que não depende do fallback existir: hífen presente sempre vence, lixo sem espaço sempre falha). Nenhum teste pré-existente da suíte se move. Restaurada em seguida, suíte volta a verde.
+
+**Risco de falso-positivo, como antecipado na proposta.** `_texto_para_float` já exige token numérico limpo pós-troca vírgula→ponto; ruído não-numérico (texto, datas com barra) continua caindo em `None` sem tratamento especial — nenhum ajuste extra precisou entrar para conter isso.
+
+**Fora do escopo desta fatia, como já registrado.** O achado colateral (2/14 arquivos com `transcricao_indisponivel_fds`, falha de invocação do LLM/JSON malformado) não foi tocado — natureza distinta (robustez de invocação, não forma), conforme já isolado na nota original.
+
+**Status:** RESOLVIDA. `[MEDIDO — recorte `test_transcricao_fds.py`+`test_transcritor_fds.py`+`test_montagem_verbatim.py`+`test_revisao_verbatim.py`+`test_orquestracao_fds.py`+`test_transcritor_gemini.py`+`test_cli_fds.py`+`test_web_fds.py`+`test_web_matriz.py`+`test_composicao_propaga_pendencias.py`+`test_integracao_composicao_fase_c.py`: 156 passed, 3 skipped; varredura inversa 4/6 discriminantes confirmados; `mypy --strict` alvo canônico limpo; suíte completa em `docs/HISTORICO_OPERACIONAL.md` (bloco desta sessão)]`
+
+### DT-(sessão `claude/nice-fermat-xahkji`, achado pós-PR #354)-01 — `gate_forma` reprova faixa dupla-desigualdade (`">= X - < Y"`), classe irmã do separador ausente `[RESOLVIDA — IMPLEMENTAÇÃO, mesma sessão]`
+
+**Origem.** Diovanni testou o app publicado de novo (antes do merge do PR #354, com FDS reais de outro PGR — "CMO Residencial Verdes Mares") e subiu os PDFs usados ao acervo (`fds_originais/`, commit `111ee0e`). Resultado colado por e-mail: a maioria das FDS já passou a mostrar o botão "Anexar ao GHE" — confirma o fix da DT anterior — mas `DESMOLD SIKA - (GHE 05 CARPINTARIA).pdf` reportou `forma_verbatim_fds: Bloco verbatim reprovado no gate de forma: faixa='>= 0.1 - < 1', membros=[dazomete (ISO)]`.
+
+**Medido — causa raiz confirmada, PDF real na mão.** `extrair_texto_fds` sobre o PDF que o próprio Diovanni subiu confirma o texto exato: `"dazomete (ISO) 533-74-4 >= 0.1 - < 1"`. Não é separador ausente (há hífen: `"- <"`) — é uma **faixa dupla-desigualdade**: `">="` antes do piso e `"<"` antes do teto, notação diferente de `"X - Y"` simples. `parsear_faixa` checa `bruto.startswith(">")` (D-ARQ-34 P1, semi-aberta simples) ANTES de qualquer split — para `">= 0.1 - < 1"` isso captura o `">"` inicial e tenta `_texto_para_float("= 0.1 - < 1")`, que falha (não é float), perdendo o teto e devolvendo `None`. Os outros 2 blocos da mesma FDS (`"< 0.1"`, semi-aberta simples) passam normalmente — por isso o botão "Anexar" ainda aparece para este arquivo (block-a-block, não all-or-nothing), só o bloco do dazomete vira pendência bloqueante isolada.
+
+**Família correta:** irmã da DT anterior (mesmo D-ARQ-34 P1/D-ARQ-43 P2, mesmo módulo `parsear_faixa`) — separador presente, mas a notação de desigualdade dupla não era reconhecida. Achado novo, não coberto pela proposta original (que só cobria separador ausente).
+
+**Resolução (mesma sessão).** `_FAIXA_COMPOSTA = re.compile(r"^>=?\s*([\d.,]+)\s*[-–]\s*<=?\s*([\d.,]+)$")` em `motor/transcricao_fds.py`, checada em `parsear_faixa` ANTES dos ramos `startswith("<")`/`startswith(">")` — sem essa ordem, a faixa composta é capturada erroneamente pelo ramo de semi-aberta simples. `=?` aceita tanto o operador estrito quanto "ou-igual" (`>=`/`<=`), mesmo vocabulário de desigualdade que o resto do módulo já reconhece isoladamente (D-ARQ-34 P1) — não introduz conceito novo, só permite os dois lados aparecerem juntos. LLM/prompt intocados; `gate_forma` não mudou (reusa `parsear_faixa`).
+
+5 testes novos: o caso real (`">= 0.1 - < 1"` → `(0.1, 1.0)`), operador estrito (`"> 0.1 - < 1"`), teto ou-igual (`">= 0.1 - <= 1"`), confirmação de que as semi-abertas simples (`"> 1"`, `"< 5"`) continuam intocadas, e 1 teste no gate com o bloco real (CAS 533-74-4, dazomete). **Varredura inversa `[MEDIDO — mesma sessão]`:** revogar só o branch `_FAIXA_COMPOSTA` (código-fonte, testes intactos) derruba exatamente 4/5 — os 3 casos de faixa composta + o teste de gate; o teste "não rouba semi-abertas simples" permanece verde (não depende do branch novo). Nenhum teste pré-existente se move. Restaurado em seguida, suíte volta a verde.
+
+**Escopo, deliberadamente estreito (na 1ª leva desta DT).** Só `">"`/`">="` no piso e `"<"`/`"<="` no teto, **ambos os lados presentes** — o mesmo par que D-ARQ-34 P1 já trata isoladamente. Não adicionei `≥`/`≤` unicode: nenhuma FDS medida usa esses caracteres; se aparecerem, é achado novo, registra-se quando medido (regra do CLAUDE.md — número/padrão não medido não entra por antecipação).
+
+**Nota (mesma sessão, achado do acervo Aurora pós-PR #355) — a exigência de "ambos os lados" era estreita demais, corrigida na mesma DT.** Diovanni subiu FDS reais de outro PGR ("CMO Residencial Aurora") ao acervo (`fds_originais/`, commit `683f5f7`). `extrair_texto_fds` sobre `Fundo Zarcão- PINTURA ESMALTE SINTÉTICO- PINTOR.pdf` mostra `"Destilados de Petróleo levemente tratados com hidrogênio 10 - <50 64742-47-8"` — faixa `"10 - <50"`: hífen presente, mas só o TETO tem operador (`"<50"`), o piso é número puro (`"10"`). O regex original (`^>=?...<=?...$`, ambos obrigatórios) não casava — `_texto_para_float("10 ")` funcionava mas o resto da string não batia o padrão inteiro, devolvendo `None` sem sequer tentar o split. Generalizado para `^(?:>=?)?\s*([\d.,]+)\s*[-–]\s*(?:<=?)?\s*([\d.,]+)$` — cada lado com operador **opcional independente** — e a checagem só entra quando `">" in bruto or "<" in bruto` (gate por substring, barato), preservando intocado o caminho antigo para o caso sem nenhum operador (mesmo princípio "não competir com o separador primário" já usado no fallback de espaço/`" a "`). 2 testes unitários novos (`"10 - <50"` → `(10.0, 50.0)`; `">10 - 50"` → `(10.0, 50.0)`, simétrico ao achado mas com piso — não medido em FDS real, mas mesma classe de forma, coberto pelo mesmo regex) + 1 no gate com o bloco real completo (CAS 64742-47-8). Varredura inversa: reverter só o regex para a forma simétrica antiga derruba exatamente os 3 testes novos desta nota, preserva os 5 da 1ª leva (dazomete) e todo o resto da suíte.
+
+**Status:** RESOLVIDA (as duas levas). `[MEDIDO — recorte `test_transcricao_fds.py`+`test_transcritor_fds.py`+`test_montagem_verbatim.py`+`test_revisao_verbatim.py`+`test_orquestracao_fds.py`+`test_transcritor_gemini.py`+`test_cli_fds.py`+`test_web_fds.py`+`test_web_matriz.py`+`test_composicao_propaga_pendencias.py`+`test_integracao_composicao_fase_c.py`: 164 passed, 3 skipped; varredura inversa da 1ª leva 4/5 e da 2ª leva 3/3 discriminantes confirmados; `mypy --strict` alvo canônico limpo; suíte completa em `docs/HISTORICO_OPERACIONAL.md` (bloco desta sessão)]`
+
+### DT-(sessão `claude/hopeful-newton-yjv3k7`)-01 — Porto Araras I atravessa a rota determinística com GHE perdido e cargos truncados, sem pendência `[RESOLVIDA — IMPLEMENTAÇÃO, mesma branch, 23/09/2026; gate de número saltado IMPLEMENTADO em seguida]`
+
+**Origem.** Medição de `DT-003FG-01` (mesma sessão). `preparar_ghes` com clientes offline sobre
+`matrizes_originais/PGR — PORTO ARARAS I SPE EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf` (par 6 de
+`PAREAMENTO_ACERVO.md`, confiança ALTA) devolve 15 GHEs, 51 cargos e **nenhuma pendência**.
+Conferido contra o texto do PDF (`pdfplumber`, 102 páginas) e contra o gabarito pareado
+(`MATRIZ DE EXAMES(ATUALIZAÇÃO)PORTO ARARAS 1 … 06.07.26`).
+
+**Medido.**
+- **(a) GHE perdido, sem sinal.** O PDF tem 16 cabeçalhos de GHE; `GHE - 14 PINTURA` (pág. 66,
+  cargo `Pintor`) tem o número depois do hífen. `eh_cabecalho_ghe("GHE - 14 PINTURA")` → `False`;
+  `"GHE 13 - INSTALAÇÕES HIDROSSANITÁRIAS"` e `"GHE 15 - PORTARIA"` → `True`. As duas rotas
+  (`parsear_arquivo` e `recortar_blocos_ghe`) usam o mesmo reconhecedor, então as duas contam 15,
+  `len(candidatos) == len(blocos)` passa e a rota determinística é aceita. O `Pintor` — no
+  gabarito com acetona, tolueno, metiletilcetona e xileno — sai da matriz sem pendência. É a
+  classe D-ARQ-22 / anti-supressão (D-ARQ-31/35): trabalhador sem matriz, documento com aparência
+  de completo.
+- **(b) Nomes de cargo truncados.** 26/51 cargos terminam em preposição (`Operador de`,
+  `Meio Oficial de`, `Encarregado de` ×5, `Técnico de Segurança do`, …), outros saem cortados sem
+  preposição (`Analista`, `Engenheiro`, `Vigia` ×2). O parser da família Consciente lê a
+  continuação pela banda `x0` medida no Fascino (D-ARQ-65 cl.5); a geometria de Porto Araras
+  difere. Mesma classe de `DH-003EW-02` (TOCTAO), com uma diferença: lá o sanity-check recusava a
+  família, aqui não recusa.
+
+**Não medido nesta sessão `[A MEDIR]`:** o que a matriz final de Porto Araras emite a jusante
+(exige envelope do topo; `comparar_matriz_gabarito` não foi rodado); se `"GHE - NN"` aparece em
+outros PGRs do acervo; a geometria da célula de cargo de Porto Araras.
+
+**O que a resolução exige.** Duas decisões separadas, do Arquiteto: (1) reconhecedor para
+`"GHE - NN TÍTULO"` em `_RECONHECEDORES_GHE` (extensão medida, molde DT-003CM-01), ou gate que
+detecte número de GHE saltado (13 → 15) como pendência; (2) Porto Araras vira família medida
+(molde D-ARQ-65) ou passa a ser recusado como o TOCTAO. O sinal substituto proposto em
+`DT-003FG-01` teria bloqueado (b), **não** (a).
+
+**Resolução `[MEDIDO — 23/09/2026, mesma branch, sobre main 365b571]`.** Detalhe em `D-ARQ-57`
+(andamento desta sessão) e no HISTORICO.
+- **(a) resolvida e ampliada.** A varredura dos 43 PDFs achou um 2º caso da mesma forma, maior:
+  Vila Brasil Escritório tinha `GHE\x00 01 \x00 ADMINISTRAÇÃO 01` … `GHE\x00 22`, e o motor
+  reconhecia só os GHEs 23–26 (**22 de 26 GHEs perdidos**, 4 GHEs e 5 cargos sem pendência).
+  Forma 6 em `_RECONHECEDORES_GHE`; título por padrão espelho.
+- **(b) resolvida — a causa não era geometria.** O nome inteiro já está na linha do rótulo;
+  `_separar_nome_cbo` cortava a última palavra de todo cargo sem CBO (a "cauda" casava espaço
+  puro). Trocado por `_PADRAO_CBO`, que também separa dois cargos unidos só pelo CBO (Vila
+  Brasil, vírgula ausente).
+- **Medido pós-fix.** Porto Araras 16 GHEs / 52 cargos; Vila Brasil 26 / 86 — contagens iguais
+  às dos gabaritos pareados, nomes divergentes só por grafia humana (acento, `I`×`l`, anotação da
+  médica). Fascino idêntico ao estado anterior (19 / 41, mesmos nomes).
+- **Resíduo, do próprio documento:** `Analista jurídico júnior \x00CBO` (o PDF traz o literal
+  `CBO`) e `Business Partner - RH \x002524` (código cortado na célula do PDF). Ficam visíveis.
+- **Não medido `[A MEDIR]`:** a matriz de exames que Porto Araras e Vila Brasil emitem a jusante
+  (exige envelope do topo; `comparar_matriz_gabarito` não rodado).
+  **Medido depois (mesma branch, 23/09/2026):** 96,8% e 95,1% das células do gabarito reproduzidas;
+  nenhuma lacuna silenciosa. Classificação em `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`.
+- **Gate de número de GHE saltado — proposta, não implementado.** Pós-fix, só dispararia em R78
+  e Floramazônia, já bloqueados por `segmentacao_implausivel`: zero bloqueio novo no acervo. É
+  defesa para forma futura desconhecida (o reconhecedor falha e as duas rotas concordam no erro).
+  Decisão do Arquiteto.
+
+**Nota (mesma branch, pós-merge do PR #359, 23/09/2026) — gate implementado.** Diovanni mandou
+seguir com o gate. `avaliar_numeracao_ghe` (pendência bloqueante `numeracao_ghe_lacunar`),
+encadeado depois de `avaliar_segmentacao` em `avaliar_estrutura`; detalhe em `D-ARQ-57`
+(andamento) e no HISTORICO. Reproduzindo o estado pré-PR #359 (forma 6 fora do repertório), o
+gate acusa o GHE 14 de Porto Araras (teste real com `monkeypatch`). No acervo atual, 0 desfecho
+muda.
+
+### DH-(sessão `claude/hopeful-newton-yjv3k7`)-01 — `comparar_matriz_gabarito` produz divergência falsa em 3 casos medidos `[RESOLVIDA — mesma branch, pós-merge do PR #361]`
+
+**Origem.** Comparação Porto Araras I e Vila Brasil Escritório × gabarito (mesma branch,
+23/09/2026). 21 de 74 células divergentes são do instrumento, não do motor `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`:
+- **Cargo repetido em dois GHEs.** `extrair_gabarito` e `extrair_motor` chaveiam por cargo; o
+  último GHE sobrescreve o anterior. `estagiário` (ADMINISTRAÇÃO e SESMT, Porto Araras) gera 7
+  subemissões falsas. Correção candidata: chave (GHE, cargo), ou comparar o conjunto de exames de
+  todas as ocorrências.
+- **Grafia de exame sem alias.** `rx de coluna lombo sacra` não casa `rx_coluna_lombo_sacra`
+  (1 super + 1 sub). Correção candidata: entrada em `_ALIAS_GRAFIA`.
+- **Momentos sem vírgula no gabarito.** `ECG (ADM PER, MRO)` (Vila Brasil) é lido como só `MRO`
+  (12 divergências de momento). Correção candidata: aceitar espaço como separador de momento.
+
+Não mexe em conduta; distorce a leitura da fila clínica.
+
+**Nota (mesma branch, pós-merge do PR #362) — mais duas formas, mesma classe.** Anotação da médica
+em linha própria sem parêntese nem hífen (`Pintor\nIncluir no WORD…`, Porto Araras — pintor,
+encanador e meio oficial hidráulico ficavam sem par) e grafias de MEK do gabarito
+(`Metil-etil-cetona`, `Metil Etil Cetona`, `Metil-etil-cetona na urina`). Corrigidas em
+`_ANOTACAO_COLADA` e `_ALIAS_GRAFIA`; 2 testes com reversão nomeada.
+
+**Resolução (mesma branch, pós-merge do PR #361, 23/09/2026).** As três correções candidatas
+implementadas: `_chaves_por_ocorrencia` (cargo repetido ganha o ordinal da ocorrência nos dois
+lados; contagens diferentes deixam o cargo sem par, visível), entrada `rx de coluna lombo sacra`
+em `_ALIAS_GRAFIA`, e `_momentos_do_rotulo` em `scripts/medir_audiometria_dem.py` (espaço vale
+como separador só se todo token for momento; compartilhado com o instrumento de DEM). Remedição:
+Porto Araras **100%** de identidade de exame (383/383; restam as 24 de periodicidade do RX,
+`DT-003EC-01`); Vila Brasil 95,2% (338/355), 0 divergência de momento, 17 subemissões — todas
+reais e já classificadas. 4 testes novos + 1 do alias abaixo, varredura inversa 5/5.
+
+### DT-(sessão `claude/hopeful-newton-yjv3k7`)-02 — Termo de risco "produto + agente" não resolve (`Adesivo CPVC Ciclohexanona`) `[RESOLVIDA — aliases por termo, mesma branch, pós-merge do PR #362]`
+
+**Origem.** Vila Brasil Escritório, GHEs INSTALAÇÕES HIDROSSANITÁRIAS e ASSISTÊNCIA TÉCNICA
+MANUTENÇÃO ENERGIZADA: o PGR declara o agente como `Adesivo CPVC Ciclohexanona` e `Adesivo CPVC
+Metiletilcetona` — nome do produto colado ao do agente. `vocabulario_ausente` (visível). O
+gabarito pede ciclohexanol na urina, fenol na urina e MEK na urina para encanador e instalador
+(6 células) e o motor não emite. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
+**O que a resolução exige.** Decidir entre alias por termo inteiro (frágil: um por produto) ou
+extração do agente dentro do termo (reconhecer slug conhecido como sufixo). É o mesmo eixo de
+"produto × agente" do casamento FDS↔PGR (`DT-(sessão claude/nice-ptolemy-wxk1wo)-01`), pelo lado do
+PGR. Antes de decidir, medir quantos termos do acervo têm essa forma.
+
+**Medição (mesma branch, pós-merge do PR #362, 23/09/2026).** Nos 3 PGRs que atravessam a rota
+determinística (Fascino, Porto Araras I, Vila Brasil Escritório), 93 termos distintos não
+resolvidos; 17 contêm uma forma conhecida do vocabulário como trecho de palavra inteira. Extração
+genérica do agente de dentro do termo acertaria 14 e **erraria 3 com confiança**: `Polímero de
+fenol` e `4,4-(1-metiletilideno)bis(fenol)` (bisfenol A) virariam `fenol` → fenol urinário emitido
+errado; `Vibração localizada (mão e braço)` viraria `vibracao` genérico. Classe D-ARQ-22. Além
+disso, `Metiletilcetona` (sem "(MEK)") não resolvia nem sozinho — `fuzzy_recusado` nos 3 PGRs.
+
+**Decisão (Diovanni): aliases por termo.** 12 formas em `termos:` de `agentes.yaml`: `Argamassa
+Cimento Portland` e 7 `Cimento <componente>` (Vila Brasil), `Adesivo CPVC Ciclohexanona`, `Adesivo
+CPVC Metiletilcetona`, `Metiletilcetona`, `Massa acriílica - Hidróxido de amônia 24°Be` (Fascino).
+Fora, de propósito: `Cimento Sulfato de cálcio` (não há slug `sulfato_de_calcio`), `Polímero de
+fenol` e o bisfenol (não são fenol livre). Seguem como `vocabulario_ausente` visível. Guard de
+inventário 154 → 166; o vigia de pares fuzzy (DT-003DM-01) pegou o par novo
+`cimento_silicato_dicalcico`/`…_tricalcico`, revisado e aceito (mesmos slugs do par já aceito).
+
+**Efeito medido.** Vila Brasil: ciclohexanol urinário volta para encanador e instalador; MEK
+urinário também (o gabarito escreve `Metil-etil-cetona` — alias de grafia no instrumento).
+Identidade de exame 96,3% (342/355); restam 13 subemissões, 10 da classe (4) de `DT-003EB-01`, 2
+de fenol urinário (bisfenol/polímero, fora de propósito) e 1 de `Produtos DomissanItários`. Porto
+Araras: pintor passa a ter MEK urinário, como o gabarito pede. Fascino: +1 linha (`mek_urina` no
+GHE PINTURA), onde o gabarito não pede — caso de `DT-003EB-02`. `[MEDIDO — `docs/referencia/MEDICAO_PORTO_ARARAS_VILA_BRASIL_vs_GABARITO.md`]`
+
+
+### DT-(sessão `claude/inspiring-turing-0ylkmk`)-01 — Tela da matriz re-transcreve todas as FDS a cada rerun: 429 na cascata inteira e o "Anexar ao GHE" se perde `[RESOLVIDA — IMPLEMENTAÇÃO, mesma sessão, 24/09/2026]`
+
+**Origem.** Teste do Diovanni em produção (PGR CMO Aurora + ~17 FDS, 23-24/09/2026): FDS com
+`transcricao_indisponivel_fds` — HTTP 429 nos três modelos da cascata — e o anexo de `Fundo
+Zarcão` ao GHE-18 não acontecia. Painel do AI Studio (nível gratuito, capturas do Diovanni): ~600
+requisições no dia, ~400 delas 429; pico RPM 23/15 no Flash Lite, RPD 23/20 nos dois Flash.
+
+**Causa.** `pagina_matriz` chamava `preparar_composicao(..., TranscritorGemini())` para cada FDS
+enviada em **todo** rerun do Streamlit (qualquer widget: selectbox de GHE, nome do produto,
+clique em "Anexar", submit do formulário). N FDS × até 3 modelos por interação; os próprios 429
+contam na janela por minuto, então a cota não se recuperava enquanto a tela era usada. No rerun
+do clique, a composição voltava vazia (429), o bloco `if ... and blocos_fds:` não renderizava o
+botão e o clique era descartado. Reproduzido com `AppTest` (3 FDS: upload 3 chamadas, clique +3;
+com 429 no 2º rerun, produto não anexado e botão ausente). Os testes existentes não pegavam:
+mockavam `preparar_composicao` com retorno fixo, sem contar chamadas por rerun.
+
+**Fix.** `preparar_composicao_cacheada` (núcleo puro de `superficie/web_matriz.py`): memoiza por
+SHA-256 do conteúdo da FDS num dict em `st.session_state["web_matriz_cache_fds"]`.
+`transcricao_indisponivel_fds` (falha transitória de invocação) **não** é memoizada — o rerun
+seguinte tenta de novo; composição extraída e `composicao_ausente_fds` são determinísticas sobre
+o conteúdo e são. 3 testes, varredura inversa 3/3 discriminantes (reversões: remover o lookup;
+memoizar incondicionalmente; dict novo por rerun / casca chamando `preparar_composicao` direto).
+
+**Fora do escopo, a decidir.** (a) Upload de muitas FDS de uma vez ainda dispara N chamadas em
+sequência e pode bater no RPM do nível gratuito — espaçamento/backoff em 429 muda a decisão
+"sem retry por modelo" de D-ARQ-47/48. (b) O motivo do 429 não carrega o `quotaId` do corpo da
+resposta (por minuto × por dia), então a tela não diz ao RT se basta esperar. (c) O nível
+gratuito (20 RPD por modelo Flash, painel do AI Studio em 24/09/2026) não comporta um dia normal
+de PGR + FDS — decisão de faturamento é do Diovanni.
+
+
+### DT-(sessão `claude/determined-fermi-xxah3h`)-01 — Produtos de FDS anexados não aparecem na tela da matriz `[RESOLVIDA — IMPLEMENTAÇÃO, fatias A, B e C, 25/09/2026]`
+
+**Origem.** Diovanni, depois de rodar o Aurora Lago das Rosas com 16 FDS: "não consegui enxergar
+elas". Medido na tela exportada: a confirmação "Produto X anexado ao GHE Y" só aparece no rerun do
+próprio clique e some na interação seguinte; nenhuma lista de anexos por GHE; as pendências de
+Fase C citam CAS das FDS sem dizer de qual produto/GHE. A FDS de aguarrás (benzeno <0,1%) aparece
+com o seletor em GHE-16 (Serralheria), mas a aguarrás está no GHE 18 (Pintura) do PGR — o motor
+emite ácido t,t-mucônico ao serralheiro (o gabarito não pede) e não ao pintor (o gabarito pede).
+Com o anexo visível, o operador teria visto.
+
+**Fatia A (implementada, mesma branch).** Status por FDS lido depois do clique ("anexada a
+GHE-xx" / "ainda não anexada"); recusa de anexo duplicado (mesmo nome no mesmo GHE); painel
+"Produtos anexados" com cada componente como `resolver_composicao` o resolve (CAS → slug ou "não
+reconhecido no vocabulário") e botão Remover (`remover_produto_e_reprocessar`, sem PDF/LLM).
+
+**Resta.** (B) origem do exame na revisão ("via FDS X, componente Y") — o `Motivo` de
+`stage_5_emissao` não carrega o produto hoje (`risco_origem=None`), então é mudança de motor, não
+só de tela; (C) anexos que sobrevivem a reprocessamento (a chave do cache inclui o envelope —
+trocar validade/assinatura refaz o PGR hidratado sem os produtos, sem aviso; leitura de código,
+`[A MEDIR]`) e FDS em mais de um GHE — muda o contrato de `CacheMatrizes` (D-ARQ-49 Parte 2
+fatia 2b), exige nota de decisão antes.
+
+**Fatia B (implementada, mesma branch, pós-merge do PR #372).** Seção "Revisão — origem dos
+exames" na tela, fora do documento assinado: por GHE, exame × regra × status × origem. Origem vem
+de `Motivo.risco_origem`, que o motor passa a preencher nas regras de agente direto (R-BIO-04-*),
+com todas as fontes do agente (PGR com nível, FDS com produto, cargo) — decisão do Diovanni entre
+três caminhos; regra composta mostra o predicado. Mesma seção lista o enquadramento de cada agente
+no Decreto 3.048/1999, Anexo IV (`enquadramento_3048`, D-ARQ-12), com "sem enquadramento
+conferido" distinto de "não consta (conferido)". Resta a fatia C.
+
+**Fatia C (implementada, mesma branch, pós-merge do PR #373) — DT resolvida.** Produtos anexados
+são reaplicados quando o mesmo PDF é reprocessado (troca de validade/assinatura); PDF diferente não
+herda anexos; anexo de GHE que sumiu no reparse é avisado uma vez. FDS pode ir para vários GHEs
+(multiselect sem default — o clique não anexa sem escolha). Nota em D-ARQ-49 (DECISOES v217). O
+`[A MEDIR]` da perda de anexos ficou medido por teste: sem a reaplicação, trocar só a validade
+refaz o PGR hidratado sem o produto (`test_anexo_sobrevive_ao_reprocessamento_do_mesmo_pdf`).
+
+
+### DT-(sessão `claude/determined-fermi-xxah3h`)-02 — FDS fora do formato NBR 14725: composição não localizada (Eletrodo E-6013 Gerdau) `[DECIDIDA — caminho (a), Diovanni, 25/09/2026; aguarda a FDS do fornecedor]`
+
+**Origem.** Tela do app em produção (Aurora, 25/09/2026): `FISPQ Eletrodos E 6013 ( Gerdau) - (GHE
+14 - SERRALHERIA).pdf` → `composicao_ausente_fds`. Arquivo no acervo (`fds_originais/`).
+
+**Causa medida.** O documento é uma "Ficha de Segurança de Produto" da Gerdau, não uma FDS no
+formato NBR 14725: não tem a seção "3. Composição e informações sobre os ingredientes". A tabela
+de substâncias está em "2. SUBSTÂNCIAS PERIGOSAS" (CAS, OSHA PEL, % em peso, peso específico) e
+a seção seguinte é "3. PROPRIEDADES FÍSICO–QUÍMICAS". `_ANCORA_COMPOSICAO` ("COMPOSICAO E
+INFORMACOES SOBRE", derivada de n=6 FDS NBR 14725) não casa em nenhuma linha → `None` →
+pendência bloqueante. É o comportamento desenhado (D-ARQ-47: sem região, nunca o documento
+inteiro como fallback), não defeito.
+
+**O que a ficha traz.** Manganês 7439-96-5, dióxido de titânio 13463-67-7, ferro 7439-89-6,
+carbonato de cálcio 1317-65-3, zircônio 12166-47-1 — materiais formados na decomposição durante a
+soldagem. O manganês já está no PGR (GHE 16), então esta ficha não destrava a lacuna de
+`DT-003EO-03`.
+
+**Caminhos.** (a) Pedir ao fornecedor a FDS no formato NBR 14725 — nenhuma mudança no app;
+(b) âncora adicional "SUBSTANCIAS PERIGOSAS" restrita a título de seção numerado — n=1, documento
+fora da norma, e a tabela mistura % em peso com OSHA PEL (risco de o transcritor pegar a coluna
+errada). Recomendação: (a). Decisão do Diovanni.
+
+**Decisão (Diovanni, 25/09/2026).** Caminho (a): pedir ao fornecedor a FDS do eletrodo no formato
+NBR 14725. Nenhuma mudança no app; a âncora de composição fica como está (D-ARQ-47). A DT fecha
+quando a FDS nova passar pela tela com a composição extraída — até lá, a pendência
+`composicao_ausente_fds` desse arquivo é esperada.
+
+### DT-(sessão `claude/hopeful-ramanujan-rbgh4s`)-01 — Asbesto sem LEO no resolver: medição de asbesto não decide a faixa de R-RX-01 `[ABERTA — sem caso real]`
+
+**Origem.** Fatia 2 de `D-ARQ-86` (25/09/2026). O texto ratificado previa sílica, PNOS e asbesto;
+o Diovanni decidiu implementar só sílica e PNOS.
+
+**Causa medida.** `leo_resolver._PRECEDENCIA` só tem sílica e PNOS; `_helper_silica_asbesto`
+(`predicados.py`) só calcula `pct_LT` com `pct_quartzo`, que o asbesto não tem. Medição de asbesto
+com valor cai no ramo (d) → `Ausente`. O LEO é o LT do Anexo 12 da NR-15, item 12: **2,0 f/cm³**
+para fibras respiráveis de crisotila (conferido no PDF `normas/nr-15-anexo-12 (3).pdf`).
+
+**Por que não agora.** Asbesto aparece em 0 dos 29 PGRs do acervo como agente de GHE (só em texto
+padrão sobre asbestose). Incluir exigiria registro no resolver, mudança na condição do helper de
+R-RX-01 e unidade f/cm³ na tela, sem nenhum caso para conferir.
+
+**Reabre quando** um PGR real trouxer asbesto como agente de exposição.
+
+### DT-(sessão `claude/jolly-wozniak-iz0ley`)-01 — CO da manta asfáltica sem inventário no PGR: o motor não avisa o elaborador `[ABERTA — não-bloqueante]`
+
+**Origem.** Decisão do asfalto (PROTOCOLO v107). Os PGRs CMO (Aurora 27/08/26 GHE 22, Vistamerica
+28/07/26) descrevem caldeira a 180 °C e maçarico, mas não inventariam o monóxido de carbono; os PGRs
+Viverde V02 e Vistamerica Ver.02 inventariam ("queima de produtos derivados de petróleo", MODERADO).
+
+**Situação.** `R-PKG-ASF-CO` emite a carboxihemoglobina por `cimento_asfaltico`, mas o NR-07 7.5.18
+pede exame relacionado a risco **classificado no PGR**. A conduta recomendada é emitir o exame e
+pedir ao elaborador a inclusão do CO (R-PGR-04, informação crítica ausente). `regras.yaml` não tem
+mecanismo de regra que gere pendência — precisa de código no motor, fatia própria.
+
+**Status:** ABERTA — não-bloqueante.
+
+### DT-(sessão `claude/jolly-wozniak-iz0ley`)-02 — NR-07 Anexo V: o documento não registra exposição a cancerígeno nem a guarda de 40 anos do prontuário `[ABERTA — não-bloqueante]`
+
+**Origem.** Leitura da NR-07 Anexo V (texto oficial em `normas/nr-07-atualizada-2022-1 .pdf`) na
+decisão do asfalto. Item 3.1: o médico responsável registra no PCMSO as atividades e funções com
+exposição a substância cancerígena identificada no PGR; item 4.1: prontuário por no mínimo 40 anos
+após o desligamento.
+
+**Situação.** O documento da matriz não marca GHE com cancerígeno nem traz a observação dos 40 anos.
+Candidato: observação por GHE derivada dos agentes cancerígenos (a lista de `cancerigeno_com_ibe` mais
+asfalto/sílica/poeira de madeira etc.), com a fonte do 003.DP. Qual lista a NR-07 usa para
+"cancerígena" não está definida no glossário `[A CONFERIR — LINACH, Portaria Interministerial 9/2014]`.
+
+**Status:** ABERTA — não-bloqueante.
+
+
+### DT-(sessão `claude/cool-babbage-whh1zw`)-01 — Gatilho de solda por marcador de agente, não pela fonte geradora declarada `[ABERTA — não-bloqueante]`
+
+**Origem.** `R-PKG-SOLD-CO` (26/09/2026). O gatilho escolhido pelo Diovanni foi "soldagem declarada
+como fonte geradora no GHE" (via exposição real, R-GHE-05); a medição antes de implementar mostrou
+que o motor não lê esse campo.
+
+**Causa medida.** As três rotas de extração preenchem `RiscoVerbatim.fonte_geradora`
+(`parser_familia_consciente.py`, `transcritor_gemini_pgr.py`, `transcritor_gemini_card.py`), mas a
+hidratação o descarta: `RiscoPGR` (`tipos.py`) não tem o campo e os três construtores em
+`hidratacao.py` não o passam. Nenhum predicado alcança "soldagem"/"eletrodo". Por isso
+`R-VIS-01-solda` e `R-PKG-SOLD-CO` disparam por `solda_indicador` (manganês ou fumos metálicos),
+marcador `[INTERPRETADO]`: um GHE com manganês sem solda recebe acuidade com DEM e COHb.
+
+**Caminho (a1).** `fonte_geradora: str = ""` em `RiscoPGR`, passado nos três construtores da
+hidratação; primitivo `soldagem_declarada` (fonte geradora dos riscos do GHE casa `sold|eletrodo`);
+`solda_indicador` passa a usá-lo nas duas regras de solda de uma vez. Muda `tipos.py` → nota em
+`DECISOES_ARQUITETURAIS.md`. Risco a medir antes: falso positivo quando outro GHE cita "máquina de
+solda" só como equipamento. Medido nesta sessão, rota determinística: dos PGRs do acervo, 3 parseiam
+pela família Consciente e só o GHE Serralheria do Fascino tem `sold|eletrodo` na fonte geradora (12
+riscos); na rota por IA (Aurora e demais CMO) `[A MEDIR]`, sem chave no container.
+
+**Status:** ABERTA — não-bloqueante (a saída do Aurora GHE 16 é a mesma pelos dois gatilhos).

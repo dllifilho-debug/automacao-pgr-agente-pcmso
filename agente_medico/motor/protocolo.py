@@ -6,6 +6,8 @@ from typing import Any
 
 import yaml
 
+from agente_medico.motor.tipos import NIVEIS_RISCO_PXS
+
 
 @dataclass(frozen=True)
 class Vocabulario:
@@ -73,6 +75,8 @@ def carregar(diretorio: Path | str) -> Protocolo:
             regimes[yaml_file.stem] = _load_yaml(yaml_file) or {}
 
     _validar_exames_em_regras(vocabulario.exames, regras)
+    _validar_lt_nr15(vocabulario.agentes)
+    _validar_mencao_documental(vocabulario.agentes, regras)
 
     return Protocolo(
         vocabulario=vocabulario,
@@ -96,3 +100,68 @@ def _validar_exames_em_regras(
                     f"Exame '{slug}' referenciado pela regra '{regra_id}' não existe no vocabulário.\n"
                     f"Slugs disponíveis: {slugs_disponiveis}"
                 )
+
+
+def _validar_lt_nr15(agentes: dict[str, Any]) -> None:
+    """`lt_nr15` (D-ARQ-86 cl.5): LT da NR-15 por unidade, com fonte. Valor
+    malformado viraria dispensa de exame por conta errada — falha no carregamento."""
+    for slug, meta in agentes.items():
+        lt = (meta or {}).get("lt_nr15")
+        if lt is None:
+            continue
+        valores = [lt.get(c) for c in ("ppm", "mg_m3")] if isinstance(lt, dict) else []
+        if (
+            not isinstance(lt, dict)
+            or not set(lt) <= {"ppm", "mg_m3", "fonte"}
+            or not isinstance(lt.get("fonte"), str)
+            or not any(v is not None for v in valores)
+            or not all(v is None or (isinstance(v, (int, float)) and v > 0) for v in valores)
+        ):
+            raise ValueError(
+                f"Agente '{slug}': lt_nr15 exige 'fonte' e ao menos um de 'ppm'/'mg_m3' "
+                f"positivo, recebido {lt!r}"
+            )
+
+
+def _validar_mencao_documental(
+    agentes: dict[str, Any], regras: list[dict[str, Any]]
+) -> None:
+    """`mencao_documental` (R-BIO-05) troca o exame por menção quando todo risco
+    do agente vem com nível P×S listado — só faz sentido se `quando` é o próprio
+    slug do agente, e só com níveis que o parser produz."""
+    for regra in regras:
+        mencao = regra.get("mencao_documental")
+        if mencao is None:
+            continue
+        regra_id = regra.get("id", "<sem id>")
+        if (
+            not isinstance(mencao, dict)
+            or not {"regra", "niveis_risco"} <= set(mencao)
+            or not set(mencao) <= {"regra", "niveis_risco", "niveis_com_medicao_abaixo_acao"}
+        ):
+            raise ValueError(
+                f"Regra '{regra_id}': mencao_documental exige as chaves 'regra' e "
+                f"'niveis_risco' (e aceita 'niveis_com_medicao_abaixo_acao'), recebido {mencao!r}"
+            )
+        quando = regra.get("quando")
+        if not isinstance(quando, str) or quando not in agentes:
+            raise ValueError(
+                f"Regra '{regra_id}': mencao_documental exige 'quando' igual a um slug "
+                f"de agente do vocabulário, recebido {quando!r}"
+            )
+        for chave in ("niveis_risco", "niveis_com_medicao_abaixo_acao"):
+            if chave not in mencao:
+                continue
+            niveis = mencao[chave]
+            if not isinstance(niveis, list) or not niveis or not set(niveis) <= set(NIVEIS_RISCO_PXS):
+                raise ValueError(
+                    f"Regra '{regra_id}': {chave} deve ser lista não-vazia de "
+                    f"{list(NIVEIS_RISCO_PXS)}, recebido {niveis!r}"
+                )
+        if "niveis_com_medicao_abaixo_acao" in mencao and not isinstance(
+            agentes[quando].get("lt_nr15"), dict
+        ):
+            raise ValueError(
+                f"Regra '{regra_id}': niveis_com_medicao_abaixo_acao exige 'lt_nr15' no "
+                f"agente '{quando}' — sem LT não há nível de ação (D-ARQ-86 cl.5)"
+            )

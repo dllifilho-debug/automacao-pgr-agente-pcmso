@@ -109,11 +109,20 @@ def _agrupar_linhas(palavras: Sequence[PalavraPDF]) -> list[_Linha]:
 # GHE 10) SOBREVIVE — não é normalização, é o mesmo glifo-de-fonte já
 # documentado em D-ARQ-57 peça 1 / 003.DS.
 _PADRAO_TITULO_ANCORA = re.compile(r"GHE:?\s*\d+\s*[-\x00]\s*(?P<titulo>.+)")
+# Forma 6 de eh_cabecalho_ghe (separador ANTES do número, título pode vir só
+# após espaço): "GHE - 14 PINTURA", "GHE\x00 01 \x00 ADMINISTRAÇÃO 01" —
+# DT-(sessão claude/hopeful-newton-yjv3k7)-01. Padrão à parte para não
+# alargar o de cima, que exige separador depois do número.
+_PADRAO_TITULO_ANCORA_SEPARADOR_ANTES = re.compile(
+    r"GHE\s*[-\x00]\s*\d+(?:\s*[-\x00]\s*|\s+)(?P<titulo>.+)"
+)
 
 
 def _extrair_titulo_ancora(linha_texto: str) -> str:
     """nome = resto da linha-âncora, VERBATIM (U+0000 preservado)."""
-    m = _PADRAO_TITULO_ANCORA.match(linha_texto)
+    m = _PADRAO_TITULO_ANCORA.match(linha_texto) or (
+        _PADRAO_TITULO_ANCORA_SEPARADOR_ANTES.match(linha_texto)
+    )
     if m is None:
         return ""
     return m.group("titulo").strip()
@@ -136,41 +145,32 @@ def _eh_linha_rotulo_cargo(linha: _Linha) -> bool:
 # dividir por ele quebraria um nome ao meio.
 _PADRAO_DELIMITADOR_ENTRADAS = re.compile(r"[,;]")
 
-# Cauda CBO-2002 de uma entrada: a corrida FINAL de dígitos e glifos-
-# separadores (\x00, espaço, hífen) — 40/41 entradas medidas têm o glifo
-# antes do 1º dígito da família (4 dígitos); 1/41 ("Encarregado de
-# Elétrica 99501\x0005\x00", DT-003EO-04) não tem, e a família aparece com
-# 5 dígitos contíguos. Por isso o padrão NÃO crava 4 dígitos fixos — cravar
-# faria esse caso sobrar um "9" residual no nome (regressão nomeada:
-# ver reversão do teste test_separacao_sem_glifo_antes_do_cbo_ghe03_real).
-# `\s` no padrão cobre o espaço legítimo entre nome e CBO sem confundir com
-# espaços internos do nome: só a corrida MAIS À DIREITA da string é usada
-# (`finditer(...)[-1]`), nunca a 1ª ocorrência.
-_PADRAO_CAUDA_CBO = re.compile(r"[\d\x00\s-]+")
-
-
-def _separar_nome_cbo(entrada_bruta: str) -> str:
-    """nome = tudo antes da cauda CBO, aparado à direita de espaço e glifo-
-    hífen (\\x00/espaço/-). CBO é DESCARTADO nesta fatia (003.EP fatia 2):
-    nenhum consumidor a jusante lê CBO hoje — criar campo novo sem
-    consumidor na mesma fatia repetiria a classe D-ARQ-DG-1 (campo-sem-
-    consumidor). Candidato natural de consumo futuro: faceta de máquina
-    pesada (DT-003ED-01), que já lida com cargo/função ocupacional; ligar
-    os dois é decisão de fatia própria, não desta."""
-    entrada = entrada_bruta.strip()
-    ocorrencias = list(_PADRAO_CAUDA_CBO.finditer(entrada))
-    if not ocorrencias:
-        return entrada
-    cauda = ocorrencias[-1]
-    return entrada[: cauda.start()].rstrip(" \x00-")
+# Código CBO-2002 dentro da célula: família de 4 dígitos (5 em 1/41 do
+# Fascino, "Encarregado de Elétrica 99501\x0005\x00", DT-003EO-04) +
+# ocupação de 2, com glifos-separadores (\x00, espaço, hífen) em volta.
+# Exige dígito: a versão anterior (`[\d\x00\s-]+`, corrida final) casava
+# espaço puro e, em cargo SEM CBO, cortava a última palavra ("Operador de
+# Betoneira" -> "Operador de", 26/51 cargos em Porto Araras I). O código
+# também separa entradas: no Vila Brasil Escritório a vírgula entre dois
+# cargos falta e só o CBO os divide ("Analista de Produtos SR l
+# \x001423\x0030\x00 Coordenador de Marketing"). DT-(sessão
+# claude/hopeful-newton-yjv3k7)-01.
+_PADRAO_CBO = re.compile(r"[\s\x00-]*\d{4,5}[\s\x00-]*\d{2}[\s\x00-]*")
 
 
 def _separar_cargos_da_celula(celula: str) -> tuple[str, ...]:
-    nomes = [
-        _separar_nome_cbo(entrada)
+    """Um nome por cargo: entradas separadas por vírgula/ponto-e-vírgula e
+    por código CBO; o CBO é DESCARTADO (003.EP fatia 2 — nenhum consumidor
+    a jusante lê CBO; candidato natural é a faceta de máquina pesada,
+    DT-003ED-01). \x00 interno ao nome sobrevive; só as bordas são
+    aparadas. Trecho sem letra não é cargo (o "." final após o CBO do GHE
+    OPERAÇÃO DE GRUA do Fascino)."""
+    nomes = (
+        trecho.strip(" \x00-")
         for entrada in _PADRAO_DELIMITADOR_ENTRADAS.split(celula)
-    ]
-    return tuple(nome for nome in nomes if nome)
+        for trecho in _PADRAO_CBO.split(entrada)
+    )
+    return tuple(nome for nome in nomes if any(c.isalpha() for c in nome))
 
 
 def _extrair_cargos_da_linha(
@@ -199,7 +199,7 @@ def _extrair_cargos_da_linha(
     na tabela (ex.: "Encarregado" no fim do rótulo + "de Pintor..." na
     continuação). Junção entre linhas físicas é espaço simples (medido).
     Separação de entradas e descarte do CBO: ver `_separar_cargos_da_celula`
-    / `_separar_nome_cbo`."""
+    / `_PADRAO_CBO`."""
     linha_rotulo = linhas_bloco[idx_rotulo]
     palavras_rotulo = linha_rotulo.palavras
     partes = [p.text for p in palavras_rotulo[3:]]
@@ -258,18 +258,76 @@ def _localizar_cabecalho_tabela(
     return grupo_x, agente_x, fonte_x, agravo_x
 
 
+def _localizar_colunas_avaliacao(
+    linhas: Sequence[_Linha],
+) -> Optional[tuple[float, float]]:
+    """(início, fim) em x0 das colunas S·P·NÍVEL DE RISCO da avaliação
+    qualitativa P×S, calibradas no cabeçalho DESTE bloco (DT-003EC-01).
+    Início = x0 de "S" na linha GRUPO/FONTE/AGRAVO; fim = x0 do primeiro
+    "MEDIDAS" à direita de "P" nas linhas de cabeçalho (antes do 1º token de
+    categoria). Medido nos 3 PGRs da família: S@437/MEDIDAS@541 (Porto
+    Araras I), S@402/MEDIDAS@506 (Vila Brasil Escritório), S@473/MEDIDAS@578
+    na linha PERIGO (Fascino) — a posição varia por documento, a ordem não.
+    None se não localizável: avaliação fica "" (ausente), nunca erro — o
+    bloco segue válido para agente/fonte."""
+    idx_primeira_categoria = next(
+        (
+            k
+            for k, linha in enumerate(linhas)
+            if linha.palavras and linha.palavras[0].text in _TOKENS_CATEGORIA
+        ),
+        len(linhas),
+    )
+    cabecalho = linhas[:idx_primeira_categoria]
+    linha_grupo = next(
+        (
+            linha
+            for linha in cabecalho
+            if {"GRUPO", "FONTE", "AGRAVO"} <= {p.text for p in linha.palavras}
+        ),
+        None,
+    )
+    if linha_grupo is None:
+        return None
+    s_x = next((p.x0 for p in linha_grupo.palavras if p.text == "S"), None)
+    p_x = next((p.x0 for p in linha_grupo.palavras if p.text == "P"), None)
+    if s_x is None or p_x is None or p_x <= s_x:
+        return None
+    medidas_x = min(
+        (p.x0 for linha in cabecalho for p in linha.palavras if p.text == "MEDIDAS" and p.x0 > p_x),
+        default=None,
+    )
+    if medidas_x is None:
+        return None
+    return s_x, medidas_x
+
+
 def _banda(
-    x0: float, agente_x: float, fonte_x: float, agravo_x: float
+    x0: float,
+    agente_x: float,
+    fonte_x: float,
+    agravo_x: float,
+    avaliacao: Optional[tuple[float, float]] = None,
 ) -> Optional[str]:
     if agente_x - _TOLERANCIA_COLUNA_PT <= x0 < fonte_x - _TOLERANCIA_COLUNA_PT:
         return "agente"
     if fonte_x - _TOLERANCIA_COLUNA_PT <= x0 < agravo_x - _TOLERANCIA_COLUNA_PT:
         return "fonte"
+    if (
+        avaliacao is not None
+        and avaliacao[0] - _TOLERANCIA_COLUNA_PT <= x0 < avaliacao[1] - _TOLERANCIA_COLUNA_PT
+    ):
+        return "avaliacao"
     return None
 
 
 def _extrair_riscos(
-    linhas: Sequence[_Linha], agente_x: float, fonte_x: float, agravo_x: float
+    linhas: Sequence[_Linha],
+    agente_x: float,
+    fonte_x: float,
+    agravo_x: float,
+    avaliacao: Optional[tuple[float, float]] = None,
+    grupo_x: Optional[float] = None,
 ) -> tuple[RiscoVerbatim, ...]:
     """Uma RiscoVerbatim por linha iniciada por token de categoria
     (FISICO|QUIMICO|ERGONOMICO|ACIDENTE|BIOLOGICO) na banda GRUPO.
@@ -284,6 +342,16 @@ def _extrair_riscos(
     curto (ex.: GHE 01 "Ruido") segue continuando várias linhas além do
     fim do agente — por isso o span do risco não termina quando uma banda
     específica pára, só quando NENHUMA das duas tem conteúdo na linha.
+
+    avaliacao_qualitativa agrega a banda S·P·NÍVEL (DT-003EC-01) dentro do
+    MESMO span — ela não estende o span: linha só com conteúdo de avaliação
+    não conta como continuação, para não mudar o recorte de agente/fonte.
+
+    Fim da tabela: linha cuja 1ª palavra cai na banda GRUPO sem ser token de
+    categoria ("Legenda (P × S)", "NOTA 1") encerra o risco — a coluna GRUPO
+    só carrega categoria. Sem isso, o último risco do bloco absorvia a
+    legenda quando ela vinha colada, sem linha vazia de separação (Fascino,
+    GHE VENDAS: "Bater contra ou ser atingido por (trânsito) S Irrelevante...").
     """
     riscos: list[RiscoVerbatim] = []
     i = 0
@@ -295,6 +363,7 @@ def _extrair_riscos(
             continue
         agente_palavras: list[str] = []
         fonte_palavras: list[str] = []
+        avaliacao_palavras: list[str] = []
         j = i
         while j < n:
             linha_j = linhas[j]
@@ -302,17 +371,27 @@ def _extrair_riscos(
                 primeira_j = linha_j.palavras[0] if linha_j.palavras else None
                 if primeira_j is not None and primeira_j.text in _TOKENS_CATEGORIA:
                     break
+                if (
+                    primeira_j is not None
+                    and grupo_x is not None
+                    and abs(primeira_j.x0 - grupo_x) <= _TOLERANCIA_COLUNA_PT
+                ):
+                    break
             tem_conteudo = False
+            avaliacao_linha: list[str] = []
             for p in linha_j.palavras:
-                banda = _banda(p.x0, agente_x, fonte_x, agravo_x)
+                banda = _banda(p.x0, agente_x, fonte_x, agravo_x, avaliacao)
                 if banda == "agente":
                     agente_palavras.append(p.text)
                     tem_conteudo = True
                 elif banda == "fonte":
                     fonte_palavras.append(p.text)
                     tem_conteudo = True
+                elif banda == "avaliacao":
+                    avaliacao_linha.append(p.text)
             if j != i and not tem_conteudo:
                 break
+            avaliacao_palavras.extend(avaliacao_linha)
             j += 1
         riscos.append(
             RiscoVerbatim(
@@ -321,6 +400,7 @@ def _extrair_riscos(
                 # nas 237 linhas-de-risco dos 19 blocos (003.DZ).
                 quantificacao="",
                 fonte_geradora=" ".join(fonte_palavras).strip(),
+                avaliacao_qualitativa=" ".join(avaliacao_palavras).strip(),
             )
         )
         i = j
@@ -354,7 +434,14 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
             "Consciente/Fascino (D-ARQ-65 fatia 1)"
         )
 
-    riscos = _extrair_riscos(linhas_bloco, agente_x, fonte_x, agravo_x)
+    riscos = _extrair_riscos(
+        linhas_bloco,
+        agente_x,
+        fonte_x,
+        agravo_x,
+        _localizar_colunas_avaliacao(linhas_bloco),
+        grupo_x,
+    )
     return GHEVerbatim(nome=nome, cargos=cargos, riscos=riscos)
 
 

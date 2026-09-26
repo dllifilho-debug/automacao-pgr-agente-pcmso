@@ -6,6 +6,7 @@ from pathlib import Path
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
+    detectar_psicossocial,
     extrair_texto_pgr,
     recortar_blocos_ghe,
     recortar_cards_cargo,
@@ -19,7 +20,7 @@ from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor_termos import construir_indice_termos
 from agente_medico.motor.resolvedor_topo import resolver_validade
 from agente_medico.motor.revisao_envelope import serializar_envelope
-from agente_medico.motor.tipos import EnvelopeConfirmado, GHEVerbatim, Pendencia, Resultado
+from agente_medico.motor.tipos import PGR, EnvelopeConfirmado, GHEVerbatim, Pendencia, Resultado
 from agente_medico.motor.transcritor_card import TranscritorCard, transcrever_cards
 from agente_medico.motor.transcritor_pgr import TranscritorGHE, gate_forma_ghe, transcrever_ghes
 from agente_medico.motor.transcritor_topo import TranscritorTopo, gate_forma_topo, transcrever_topo
@@ -228,16 +229,16 @@ def preparar_ghes(
     return aprovados, (pendencia_familia, *pend_forma)
 
 
-def processar_arquivo_pgr(
+def preparar_pgr_hidratado(
     caminho: Path,
     protocolo: Protocolo,
     cliente: TranscritorGHE,
     cliente_card: TranscritorCard,
     envelope: EnvelopeConfirmado,
-    hoje: date | None = None,
-) -> tuple[Resultado | None, tuple[Pendencia, ...]]:
-    """Costura completa arquivo -> Resultado (D-ARQ-52/D-ARQ-53; roteamento
-    ghe/card de preparar_ghes via D-ARQ-57 peça 4 fatia 4d).
+) -> tuple[PGR | None, tuple[Pendencia, ...]]:
+    """preparar_ghes -> hidratar_pgr, parando ANTES de processar_pgr (D-ARQ-49
+    Parte 2 fatia 2a: split cheap/expensive — expõe o PGR hidratado para a
+    fatia 2b anexar produtos_quimicos via UI antes do motor rodar).
 
     envelope.validade e envelope.assinatura_engenheiro alimentam
     hidratar_pgr, consumidos por R-PGR-06/R-PGR-01 (estagios/gates.py). A
@@ -254,11 +255,6 @@ def processar_arquivo_pgr(
     cliente e cliente_card são repassados intactos a preparar_ghes, que
     decide a rota (ghe/card) a partir de avaliar_estrutura — este nível não
     julga rota, só costura.
-
-    Aprovação PARCIAL no gate de forma (alguns GHE reprovados) processa os
-    aprovados normalmente e CARREGA as pendências bloqueantes dos reprovados
-    na lista final devolvida — zeramento de linha por bloqueio de GHE é
-    D-ARQ-31 fatia 2, fora de escopo aqui.
     """
     aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card)
     if not aprovados:
@@ -270,8 +266,44 @@ def processar_arquivo_pgr(
         protocolo.vocabulario.agentes,
         fracoes_sem_agente=protocolo.vocabulario.fracoes_sem_agente,
     )
+    # R-PSY-03: 3ª leitura de extrair_texto_pgr sobre o mesmo arquivo — mesma
+    # classe da duplicação documentada acima (preparar_envelope/
+    # preparar_ghes), texto puro sem custo de LLM. psicossocial é sinal de
+    # PGR inteiro (D-ARQ-49 P2 aplicado): replicado a todo GHE via hidratar_pgr.
+    psicossocial = detectar_psicossocial(extrair_texto_pgr(caminho))
     pgr, pend_hidr = hidratar_pgr(
-        aprovados, indice, envelope.validade, envelope.assinatura_engenheiro
+        aprovados,
+        indice,
+        envelope.validade,
+        envelope.assinatura_engenheiro,
+        psicossocial,
     )
+    return pgr, (*pend_forma, *tuple(pend_hidr))
+
+
+def processar_arquivo_pgr(
+    caminho: Path,
+    protocolo: Protocolo,
+    cliente: TranscritorGHE,
+    cliente_card: TranscritorCard,
+    envelope: EnvelopeConfirmado,
+    hoje: date | None = None,
+) -> tuple[Resultado | None, tuple[Pendencia, ...]]:
+    """Costura completa arquivo -> Resultado (D-ARQ-52/D-ARQ-53; roteamento
+    ghe/card de preparar_ghes via D-ARQ-57 peça 4 fatia 4d).
+
+    Wrapper fino sobre preparar_pgr_hidratado + processar_pgr (D-ARQ-49 Parte
+    2 fatia 2a) — MESMO comportamento externo do split, o PGR hidratado
+    intermediário só fica exposto para quem chamar preparar_pgr_hidratado
+    direto (fatia 2b).
+
+    Aprovação PARCIAL no gate de forma (alguns GHE reprovados) processa os
+    aprovados normalmente e CARREGA as pendências bloqueantes dos reprovados
+    na lista final devolvida — zeramento de linha por bloqueio de GHE é
+    D-ARQ-31 fatia 2, fora de escopo aqui.
+    """
+    pgr, pendencias = preparar_pgr_hidratado(caminho, protocolo, cliente, cliente_card, envelope)
+    if pgr is None:
+        return None, pendencias
     resultado = processar_pgr(pgr, protocolo, hoje)
-    return resultado, (*pend_forma, *tuple(pend_hidr))
+    return resultado, pendencias

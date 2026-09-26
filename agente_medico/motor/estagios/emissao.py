@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from agente_medico.motor.leo_resolver import AvaliacaoLimiteQuimico, avaliar_medicao_quimica
 from agente_medico.motor.predicados import (
     ResultadoPredicado,
     avaliar,
@@ -11,12 +12,16 @@ from agente_medico.motor.predicados import (
 )
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import (
+    NIVEIS_RISCO_PXS,
     Ausente,
     ExameEmitido,
     GHEContext,
     Momento,
     Motivo,
+    Observacao,
     Pendencia,
+    ProcedenciaMedicao,
+    Risco,
 )
 
 _MOMENTOS: dict[str, Momento] = {m.name: m for m in Momento}
@@ -29,6 +34,57 @@ def _converter_momento(raw: str, regra_id: str, exame: str) -> Momento:
             f"Momento inválido '{raw}' na regra '{regra_id}', exame '{exame}'"
         )
     return _MOMENTOS[key]
+
+
+def _descrever_quantificacao(risco: Risco) -> str:
+    """D-ARQ-86 cl.3: a medição que decide o exame aparece na revisão com o laudo."""
+    q = risco.quantificacao
+    if q is None or q.valor is None or q.apenas_qualitativa:
+        return ""
+    unidade = "mg/m³" if q.unidade == "mg/m3" else (q.unidade or "")
+    texto = f"; medição {_numero(q.valor)} {unidade}".rstrip()
+    if q.procedencia is not None:
+        texto += f" (laudo {q.procedencia.laudo}, {q.procedencia.data:%d/%m/%Y})"
+    return texto
+
+
+def _descrever_fonte(risco: Risco) -> str:
+    if risco.fonte == "explicito":
+        descricao = "PGR" if risco.nivel_risco is None else f"PGR (nível {risco.nivel_risco})"
+        descricao += _descrever_quantificacao(risco)
+        return descricao if risco.detalhe is None else f"{descricao}; {risco.detalhe}"
+    if risco.fonte == "quimico_composicao":
+        return f"FDS — {risco.detalhe}"
+    return risco.detalhe or risco.fonte
+
+
+# Faixas de R-RX-01 decididas por medição (D-ARQ-86 fatia 2): o primitivo lê um
+# agente só, então a origem é rastreável sem abrir predicados.avaliar.
+_AGENTE_DA_FAIXA: dict[str, str] = {
+    "silica_asbesto_leo_ate_10": "silica",
+    "silica_asbesto_leo_10_50": "silica",
+    "silica_asbesto_leo_50_100": "silica",
+    "silica_asbesto_leo_acima_100": "silica",
+    "pnos_leo_ate_10": "poeira_nao_classificada",
+    "pnos_leo_10_100": "poeira_nao_classificada",
+    "pnos_leo_acima_100": "poeira_nao_classificada",
+}
+
+
+def _risco_origem(regra: dict[str, Any], ctx: GHEContext) -> str | None:
+    """D-ARQ-22 Parte B, faceta `risco_origem` (DH-003ED-01), recorte atômico:
+    só a regra cujo `quando` é o próprio slug do agente (R-BIO-04-*), ou uma
+    faixa de R-RX-01 por medição, sabe de qual risco veio sem rastrear o átomo
+    dentro de `predicados.avaliar`. Composto ou primitivo que não é agente do
+    GHE → None, como antes."""
+    quando = regra["quando"]
+    if not isinstance(quando, str):
+        return None
+    agente = _AGENTE_DA_FAIXA.get(quando, quando)
+    fontes = list(dict.fromkeys(_descrever_fonte(r) for r in ctx.riscos if r.agente == agente))
+    if not fontes:
+        return None
+    return f"{agente} ← " + " | ".join(fontes)
 
 
 def _emitir_regra(
@@ -54,7 +110,7 @@ def _emitir_regra(
     motivo = Motivo(
         regra_id=str(regra["id"]),
         predicado=predicado_str,
-        risco_origem=None,
+        risco_origem=_risco_origem(regra, ctx),
         detalhe=f"Emitido por regra {regra['id']}",
         status_regra=regra.get("status"),
     )
@@ -75,6 +131,76 @@ def _emitir_regra(
         )
 
 
+def _nivel_dispensa(regra: dict[str, Any], ctx: GHEContext) -> str | None:
+    """R-BIO-05 (DT-003EB-02, [INTERPRETADO]): o nível P×S que troca o exame por
+    menção documental, ou None se a regra deve emitir. Dispensa só quando TODO
+    risco do agente traz nível listado em `niveis_risco` — nível ausente (rota
+    sem avaliação, risco implícito, composição de FDS) ou acima da lista emite."""
+    mencao = regra.get("mencao_documental")
+    if mencao is None:
+        return None
+    niveis = [r.nivel_risco for r in ctx.riscos if r.agente == regra["quando"]]
+    permitidos = set(mencao["niveis_risco"])
+    if not niveis or not all(n in permitidos for n in niveis):
+        return None
+    return max((str(n) for n in niveis), key=NIVEIS_RISCO_PXS.index)
+
+
+def _numero(valor: float) -> str:
+    return f"{valor:.4g}".replace(".", ",")
+
+
+def _descrever_medicao(
+    avaliacao: AvaliacaoLimiteQuimico, procedencia: ProcedenciaMedicao | None
+) -> str:
+    unidade = "mg/m³" if avaliacao.unidade == "mg/m3" else avaliacao.unidade
+    texto = (
+        f"{_numero(avaliacao.valor)} {unidade}, {_numero(avaliacao.pct_limite)}% do LT de "
+        f"{_numero(avaliacao.limite)} {unidade} — {avaliacao.fonte_normativa}"
+    )
+    if procedencia is None:
+        return f"{texto}; medição transcrita do PGR"
+    return f"{texto}; laudo {procedencia.laudo}, {procedencia.data:%d/%m/%Y}"
+
+
+def _dispensa_por_medicao(
+    regra: dict[str, Any], ctx: GHEContext, agentes_vocab: dict[str, Any]
+) -> tuple[str, str] | None:
+    """R-BIO-05 emenda D-ARQ-86 cl.6 (NR-07 7.5.12 "b" c/c NR-09 9.6.1 "b"):
+    nível em `niveis_com_medicao_abaixo_acao` dispensa só com medição do agente
+    no GHE abaixo do nível de ação (50% do LT). Várias medições: vale a maior.
+    Risco sem nível só passa se vier de composição de FDS — a medição ambiental
+    do agente cobre a fonte; risco implícito ou linha do PGR sem avaliação emite.
+    Devolve (nível, descrição da medição) ou None se a regra deve emitir."""
+    mencao = regra["mencao_documental"]
+    com_medicao = set(mencao.get("niveis_com_medicao_abaixo_acao", ()))
+    if not com_medicao:
+        return None
+    riscos = [r for r in ctx.riscos if r.agente == regra["quando"]]
+    classificados = [r.nivel_risco for r in riscos if r.nivel_risco is not None]
+    aceitos = com_medicao | set(mencao["niveis_risco"])
+    if (
+        not classificados
+        or any(r.nivel_risco is None and r.fonte != "quimico_composicao" for r in riscos)
+        or not all(n in aceitos for n in classificados)
+    ):
+        return None
+    avaliacoes = [
+        (avaliacao, r.quantificacao.procedencia)
+        for r in riscos
+        if r.quantificacao is not None
+        and (avaliacao := avaliar_medicao_quimica(r.agente, r.quantificacao, agentes_vocab))
+        is not None
+    ]
+    if not avaliacoes:
+        return None
+    maior, procedencia = max(avaliacoes, key=lambda par: par[0].pct_limite)
+    if not maior.abaixo_nivel_acao:
+        return None
+    nivel = max((str(n) for n in classificados), key=NIVEIS_RISCO_PXS.index)
+    return nivel, _descrever_medicao(maior, procedencia)
+
+
 def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]:
     """
     Para cada regra em protocolo.regras:
@@ -90,8 +216,13 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
             e anexar Pendencia(tipo="predicado_ausente_presumido", bloqueante=False) por
             primitivo presumido.
           - Caso contrário → adiciona Pendencia(bloqueante=True) ao ctx.pendencias e não emite
+      5. Se True e a regra tem `mencao_documental` (R-BIO-05) e todo risco do agente
+         traz nível P×S listado → não emite; anexa Observacao a ctx.observacoes.
+         Mesmo desvio quando o nível está em `niveis_com_medicao_abaixo_acao` e há
+         medição do agente abaixo do nível de ação (D-ARQ-86); a Observacao leva
+         a medição.
     Retorna lista de ExameEmitido na ordem em que foram emitidos.
-    Não muta ctx exceto ctx.pendencias.
+    Não muta ctx exceto ctx.pendencias e ctx.observacoes.
     """
     emitidos: list[ExameEmitido] = []
 
@@ -147,6 +278,25 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
             continue
 
         if not resultado:
+            continue
+
+        nivel = _nivel_dispensa(regra, ctx)
+        medicao: str | None = None
+        if nivel is None and "mencao_documental" in regra:
+            por_medicao = _dispensa_por_medicao(regra, ctx, protocolo.vocabulario.agentes)
+            if por_medicao is not None:
+                nivel, medicao = por_medicao
+        if nivel is not None:
+            ctx.observacoes.append(
+                Observacao(
+                    regra_id=str(regra["id"]),
+                    regra_dispensa=str(regra["mencao_documental"]["regra"]),
+                    agente=str(regra["quando"]),
+                    nivel_risco=nivel,
+                    exames_dispensados=tuple(str(item["exame"]) for item in regra["emite"]),
+                    medicao=medicao,
+                )
+            )
             continue
 
         _emitir_regra(regra, ctx, protocolo, emitidos)

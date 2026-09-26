@@ -13,16 +13,25 @@ ininteligível vira None + Pendencia quantificacao_nao_parseada não-bloqueante
 risco entra mesmo assim). Recorte remanescente: quantificacao de ruído
 (slug "ruido", EXATA ou FUZZY) é classificada em relacao_LT por
 classificar_ruido (D-ARQ-51 fatia 3, R-RUIDO-01), aplicada pós-resolução do
-termo — agente=None não classifica.
-EPIs, produtos_quimicos, psicossocial e cenario ficam em default (diferidos,
-D-ARQ-49 P2). Risco NUNCA descartado (D-ARQ-31/35 P3): tri-estado do
+termo — agente=None não classifica. nivel_risco (DT-003EC-01) é extraído
+do texto S·P·NÍVEL da avaliação qualitativa P×S por parsear_nivel_risco;
+texto não reconhecido vira Pendencia avaliacao_qualitativa_nao_parseada
+não-bloqueante, pelo mesmo motivo da quantificação.
+EPIs, produtos_quimicos e cenario ficam em default (diferidos, D-ARQ-49 P2).
+psicossocial (R-PSY-03) é populado por parâmetro — o extrator
+(detectar_psicossocial, extracao_pgr.py) roda sobre o texto cru do PGR
+inteiro, fora do escopo por-GHE desta hidratação; o valor chega já resolvido
+e é replicado para todo GHEPGR do documento, default False para chamador que
+não o repassa. Risco NUNCA descartado (D-ARQ-31/35 P3): tri-estado do
 resolver (EXATA/FUZZY/NAO_RESOLVIDO) sempre vira exatamente 1 RiscoPGR.
 """
 from __future__ import annotations
 
 import dataclasses
+import re
 from collections.abc import Sequence
 from datetime import date
+from typing import Optional
 
 from agente_medico.motor.classificacao_ruido import classificar_ruido
 from agente_medico.motor.quantificacao import parsear_quantificacao
@@ -30,10 +39,36 @@ from agente_medico.motor.resolvedor_termos import Confianca, IndiceTermos, resol
 from agente_medico.motor.tipos import GHEPGR, PGR, GHEVerbatim, Pendencia, RiscoPGR
 
 
+# S·P·NÍVEL da matriz P×S (legenda dos PGRs medidos: Irrelevante/Baixo/
+# Moderado/Alto/Crítico). search, não match: tolera ruído de coluna vizinha
+# antes do par S P sem aceitar nível solto sem os dois números.
+_PADRAO_AVALIACAO_QUALITATIVA = re.compile(
+    r"(?<!\S)\d+\s+\d+\s+(IRRELEVANTE|BAIXO|MODERADO|ALTO|CR[IÍ]TICO)(?!\S)"
+)
+# Declaração explícita de não-avaliação, medida em Porto Araras I (8/172
+# riscos, todos "Ausência de agente nocivo") — não é falha de parse.
+_AVALIACAO_NAO_DEFINIDA = "NÃO DEFINIDO"
+
+
+def parsear_nivel_risco(texto: str) -> tuple[Optional[str], bool]:
+    """Nível P×S do texto verbatim das colunas S·P·NÍVEL (DT-003EC-01).
+    Devolve (nível, reconhecido): nível em maiúsculas ou None; reconhecido
+    False só quando há texto que não é nem nível nem "NÃO DEFINIDO" — o
+    chamador transforma isso em pendência, nunca em silêncio."""
+    bruto = texto.strip().upper()
+    if not bruto:
+        return None, True
+    m = _PADRAO_AVALIACAO_QUALITATIVA.search(bruto)
+    if m is not None:
+        return m.group(1).replace("CRITICO", "CRÍTICO"), True
+    return None, bruto == _AVALIACAO_NAO_DEFINIDA
+
+
 def hidratar_ghe(
     ghe: GHEVerbatim,
     indice: IndiceTermos,
     posicao: int,
+    psicossocial: bool = False,
 ) -> tuple[GHEPGR, list[Pendencia]]:
     """Hidrata um bloco GHE transcrito em GHEPGR + pendências (D-ARQ-51).
 
@@ -79,16 +114,42 @@ def hidratar_ghe(
         if resolucao.slug == "ruido" and quantificacao is not None:
             quantificacao = classificar_ruido(quantificacao)
 
+        nivel_risco, avaliacao_reconhecida = parsear_nivel_risco(
+            risco_verbatim.avaliacao_qualitativa
+        )
+        if not avaliacao_reconhecida:
+            pendencias.append(
+                Pendencia(
+                    tipo="avaliacao_qualitativa_nao_parseada",
+                    destinatario="extracao",
+                    motivo=(
+                        f"avaliação qualitativa '{risco_verbatim.avaliacao_qualitativa}' "
+                        "não pôde ser interpretada — revisão recomendada"
+                    ),
+                    bloqueante=False,
+                    regra_origem="D-ARQ-51",
+                    ghe_id=ghe_id,
+                )
+            )
+
         if resolucao.confianca == Confianca.EXATA:
             riscos.append(
                 RiscoPGR(
-                    tipo="", agente=resolucao.slug, quantificacao=quantificacao, severidade=None
+                    tipo="",
+                    agente=resolucao.slug,
+                    quantificacao=quantificacao,
+                    severidade=None,
+                    nivel_risco=nivel_risco,
                 )
             )
         elif resolucao.confianca == Confianca.FUZZY:
             riscos.append(
                 RiscoPGR(
-                    tipo="", agente=resolucao.slug, quantificacao=quantificacao, severidade=None
+                    tipo="",
+                    agente=resolucao.slug,
+                    quantificacao=quantificacao,
+                    severidade=None,
+                    nivel_risco=nivel_risco,
                 )
             )
             pendencias.append(
@@ -119,6 +180,7 @@ def hidratar_ghe(
                     quantificacao=quantificacao,
                     severidade=None,
                     causa_nao_resolucao=resolucao.pendencia.tipo,
+                    nivel_risco=nivel_risco,
                 )
             )
             pendencias.append(dataclasses.replace(resolucao.pendencia, ghe_id=ghe_id))
@@ -130,7 +192,7 @@ def hidratar_ghe(
         riscos=tuple(riscos),
         epis=(),
         produtos_quimicos=(),
-        psicossocial=False,
+        psicossocial=psicossocial,
         cenario=None,
     )
     return ghe_pgr, pendencias
@@ -141,6 +203,7 @@ def hidratar_pgr(
     indice: IndiceTermos,
     validade: date,
     assinatura_engenheiro: bool,
+    psicossocial: bool = False,
 ) -> tuple[PGR, list[Pendencia]]:
     """Hidrata a sequência de blocos GHE transcritos em PGR (D-ARQ-51 costura plural).
 
@@ -155,7 +218,7 @@ def hidratar_pgr(
     pendencias: list[Pendencia] = []
 
     for posicao, ghe in enumerate(ghes, start=1):
-        ghe_pgr, pendencias_ghe = hidratar_ghe(ghe, indice, posicao)
+        ghe_pgr, pendencias_ghe = hidratar_ghe(ghe, indice, posicao, psicossocial)
         ghes_pgr.append(ghe_pgr)
         pendencias.extend(pendencias_ghe)
 

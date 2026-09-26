@@ -1,3 +1,8 @@
+# lt_nr15 (D-ARQ-86 cl.5): LT até 48 h/semana do Quadro n.º 1 do Anexo 11 da NR-15, por
+# unidade (ppm, mg_m3), conferido no PDF oficial normas/nr-15-anexo-11 (3).pdf
+# (sha256 6ee8a26b…f549bd) em 25/09/2026. Consumidor: R-BIO-05 (dispensa em BAIXO com
+# medição abaixo do nível de ação, NR-09 9.6.1 "b"). Só os 28 agentes com R-BIO-04 que
+# constam do Quadro; ausência = sem decisão quantitativa.
 agentes:
   fumos_metalicos:
     tipo_ibe: null
@@ -17,7 +22,25 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-PKG-ATIVCRIT, R-VIS-01, R-ECG-01]
-    termos: ["Trabalho em Altura"]  # NR-35 (título) e item 35.2.1
+    # R-PGR-07 (proposta 003.FF, ainda não inserida no PROTOCOLO): nomenclatura de perigo no PGR
+    # não é padronizada — o mesmo conceito aparece em formas distintas entre documentos.
+    # "Queda em altura" ≡ "Trabalho em altura": sinônimos de engenheiro, não typo — Levenshtein
+    # ≤2 sobre string inteira nunca os casaria (13 e 20 caracteres de distância).
+    # [DERIVADO — NR-35 item 35.2.1: "atividade executada acima de 2,00 m do nível inferior,
+    # onde haja risco de queda"; a norma define o perigo pela queda, o que sustenta as duas
+    # grafias apontarem ao mesmo agente. Fonte oficial: gov.br/MTE, NRs vigentes.]
+    # [MEDIDO — 003.FF, PGR ALT T65: "Queda em altura" 13 ocorrências, nenhuma resolvida;
+    # predicado `altura` False em 16/16 GHEs, R-PKG-ATIVCRIT nunca disparou, 175 células do
+    # gabarito assinado não emitidas. Ver docs/referencia/MEDICAO_003FF_par_T65.md §3.]
+    termos: ["Trabalho em Altura", "Queda em altura"]  # NR-35 (título) e item 35.2.1
+  # enquadramento_3048: código + tempo de exposição do Decreto 3.048/1999, Anexo IV
+  # ("Classificação dos Agentes Nocivos"), quando o agente consta literalmente na
+  # tabela — dado de referência previdenciária, sem consumidor no motor (DT-003BA-01
+  # segue de pé para a frente de emissão; esta reabertura é só o dado, autorizada
+  # pelo Diovanni em 22/09/2026). null = conferido contra o Anexo IV e ausente da
+  # tabela — não inferir por analogia de classe química.
+  # [DERIVADO — Decreto 3.048/1999, Anexo IV, texto compilado, planalto.gov.br/
+  # ccivil_03/decreto/d3048compilado.htm, conferido 22/09/2026]
   vibracao_corpo_inteiro:
     tipo_ibe: null
     cas: null
@@ -25,12 +48,26 @@ agentes:
     tem_lt: true
     protocolos_especiais: [R-VIB-01]
     termos: ["Vibrações de Corpo Inteiro", "VCI"]
+    enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # item único "Vibrações" — Decreto não distingue VCI/VMB nem usa limiar numérico
   motorista_equipamento_pesado:
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-AUD-01, R-VIS-01]
+  transito_via_publica:
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: [R-PKG-TRANSITO]
+    # Perigo de acidente: deslocamento/condução em via pública. Só a frase completa entra —
+    # "trânsito" sozinho aparece no acervo em sentido de circulação a pé ("Evitar o trânsito
+    # em corredores", "Trânsito sobre terrenos acidentados") e superemitiria.
+    # [MEDIDO — 24/09/2026, parser_familia_consciente: PGR ADENDO VILA BRASIL ESCRITORIO
+    # 25.08.26 (GHEs DIREÇÃO e PATRIMÔNIO) e PGR CONSCIENTE SPE 0030 FASCINO 15.07.26 (GHE
+    # VENDAS), 3 ocorrências; mesma grafia no texto dos PGR Seconci R02AA REV3/REV4 (rota LLM).]
+    termos: ["Bater contra ou ser atingido por (trânsito)"]
   vibracao_mao_braco:
     tipo_ibe: null
     cas: null
@@ -38,19 +75,23 @@ agentes:
     tem_lt: true
     protocolos_especiais: []
     termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)"]
+    enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # mesmo item único de vibracao_corpo_inteiro
   vibracao:
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}
   tolueno:
+    lt_nr15: {ppm: 78, mg_m3: 290, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Tolueno (toluol)"}
     tipo_ibe: EE
     cas: "108-88-3"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: null  # conferido: tolueno puro NÃO consta no Anexo IV (só "diisocianato de tolueno (TDI)", item 1.0.19 — ver slug tdi)
   # termos: aliases de resolução (D-ARQ-50 Parte 2, motor/resolvedor_termos.py).
   # Tier 1 = grafia literal da substância na fonte normativa própria do agente:
   # Anexo I da NR-07 (Quadros 1 e 2, Portaria MTP 567/2022) para agentes de
@@ -70,6 +111,7 @@ agentes:
   # FASCINO (15.07.26).pdf", 9 GHEs; ancorada no literal "Vibrações em Mãos e
   # Braços" da NR-09 Anexo I 1.1].
   xileno:
+    lt_nr15: {ppm: 78, mg_m3: 340, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Xileno (xilol)"}
     tipo_ibe: EE
     cas: "1330-20-7"
     is_carcinogeno_iarc: false
@@ -77,13 +119,16 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Xilenos"]
+    enquadramento_3048: null  # conferido: xileno não consta no Anexo IV
   estireno:
+    lt_nr15: {ppm: 78, mg_m3: 328, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Estireno"}
     tipo_ibe: EE
     cas: "100-42-5"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal
   n_hexano:
     tipo_ibe: EE
     cas: "110-54-3"
@@ -91,7 +136,9 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("mercaptanos, n-hexano")
   dissulfeto_de_carbono:
+    lt_nr15: {ppm: 16, mg_m3: 47, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Dissulfeto de carbono"}
     tipo_ibe: EE
     cas: "75-15-0"
     is_carcinogeno_iarc: false
@@ -99,20 +146,25 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Sulfeto de carbono"]
+    enquadramento_3048: {codigo: "1.0.11", tempo_exposicao: "25 anos"}  # item próprio, literal
   tricloroetileno:
+    lt_nr15: {ppm: 78, mg_m3: 420, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Tricloroetileno"}
     tipo_ibe: EE
     cas: "79-01-6"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: null  # conferido: tricloroetileno não consta no Anexo IV
   monoxido_de_carbono:
+    lt_nr15: {ppm: 39, mg_m3: 43, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Monóxido de carbono"}
     tipo_ibe: EE
     cas: "630-08-0"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: null  # conferido: monóxido de carbono não consta no Anexo IV
   cianeto_de_hidrogenio:
     tipo_ibe: null
     cas: "74-90-8"
@@ -128,7 +180,9 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    enquadramento_3048: {codigo: "1.0.8", tempo_exposicao: "25 anos"}  # literal ("Chumbo e seus compostos tóxicos")
   mercurio:
+    lt_nr15: {ppm: null, mg_m3: 0.04, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Mercúrio (todas as formas exceto orgânicas)"}
     tipo_ibe: EE
     cas: "7439-97-6"
     is_carcinogeno_iarc: false
@@ -136,6 +190,7 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Mercúrio metálico"]
+    enquadramento_3048: {codigo: "1.0.15", tempo_exposicao: "25 anos"}  # literal
   arsenio:
     tipo_ibe: EE
     cas: "7440-38-2"
@@ -144,6 +199,7 @@ agentes:
     protocolos_especiais: []
     is_ototoxico: true
     termos: ["Arsênico"]   # [INTERPRETADO — recorte do literal]
+    enquadramento_3048: {codigo: "1.0.1", tempo_exposicao: "25 anos"}  # literal
   manganes:
     tipo_ibe: null
     cas: "7439-96-5"
@@ -151,25 +207,87 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    # D-ARQ-70 Tier 1-C (DT-003EQ-02): (i) "Maganês" medido em "PGR - CONSCIENTE ...
+    # FASCINO (15.07.26).pdf", 1 ocorrência, p. 82, GHE 17 SERRALHERIA ("fumos de" solda,
+    # BAIXO); (ii)/(iii) núcleo do literal "Manganês e seus compostos" da NR-15 Anexo 12
+    # (Portaria DNSST 08/1992), com uma letra a menos. Sem o alias o fuzzy recusa (slug
+    # carregado, D-ARQ-64) e R-BIO-03/R-CLI-03 não disparam.
+    termos: ["Maganês"]
+    enquadramento_3048: {codigo: "1.0.14", tempo_exposicao: "25 anos"}  # literal
   silica:
     tipo_ibe: null
     cas: "14808-60-7"
     is_carcinogeno_iarc: true
     tem_lt: true
     protocolos_especiais: [R-RX-01]
-    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita"]
+    # R-PGR-07 (proposta 003.FF): os 6 termos abaixo são todos NUS — nomeiam a substância sem a
+    # fração medida. O PGR real escreve substância + fração no mesmo campo.
+    # [DERIVADO — NR-07 Anexo III: o Quadro 1 trata de "poeira CONTENDO sílica" e o Quadro 2 mede
+    # "poeira respirável". "Sílica Livre - Poeira respirável" NOMEIA a substância, logo resolve;
+    # não é `fracao_sem_agente` de D-ARQ-83 cl.2, que barra só a fração isolada. Fonte oficial:
+    # gov.br/MTE, NRs vigentes.]
+    # [MEDIDO — 003.FF, PGR ALT T65: 3 grafias de caixa distintas, nenhuma resolvida; 52 células
+    # (rx_torax_oit + espirometria) não emitidas. Ver MEDICAO_003FF_par_T65.md §3.]
+    # UM alias cobre as 3 grafias, por DOIS mecanismos distintos de `normalizar_termo` — a
+    # decomposição NFKD (que descarta o acento) e o casefold (que descarta a caixa), mais
+    # pontuação->espaço. As três colapsam em `silica_livre_poeira_respiravel`. Enumerar as 3
+    # seria redundante e levantaria colisão-consigo-mesma em `construir_indice_termos`.
+    # [MEDIDO — 003.FH, correção 003.FH-C3: os mecanismos são independentes e nenhum sozinho
+    # cobre duas grafias. Sem o casefold cai só a caixa-alta; sem o NFKD cai só a forma sem
+    # acento. O par sufixo de `postura_inadequada` não é desta classe — ver lá.]
+    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável"]
+    enquadramento_3048: {codigo: "1.0.18", tempo_exposicao: "25 anos"}  # literal ("Sílica livre")
   asbesto:
     tipo_ibe: null
     cas: "1332-21-4"
     is_carcinogeno_iarc: true
     tem_lt: true
     protocolos_especiais: [R-RX-01]
+    enquadramento_3048: {codigo: "1.0.2", tempo_exposicao: "20 anos"}  # literal — único item do bloco químico com tempo diferente de 25 anos
   poeira_nao_classificada:
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: [R-RX-01]
+    # R-RX-01-pnos-*/R-ESP-02: "PNOS" é o próprio nome da classificação (NR-07
+    # Anexo III Quadro 2, "poeiras de menor toxicidade"), não fração isolada
+    # (D-ARQ-83 cl.2 barra só fração sem substância — aqui a CMO já nomeia a
+    # classificação). [MEDIDO — PGR VIVERDE V02, ex.: página com bloco ET05,
+    # coluna "Perigo": "PNOS/ PNOR"; 14 ocorrências de PNOS e 15 de PNOR no
+    # documento.] Três formas cobertas: sigla isolada e o par grudado que o
+    # PDF quebra em duas linhas. Quarta forma [MEDIDO — PGR(ADENDO) CMO
+    # RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf, 10 ocorrências, ex.
+    # página 25]: mesma classificação nomeada por extenso em vez da sigla —
+    # "Particulados insolúveis ou de baixa solubilidade não especificados de
+    # outra maneira (PNOS)", quebrada em 4 linhas pelo PDF.
+    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)"]
+  poeira_de_madeira:
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: [R-RX-03, R-ESP-03]
+    # "da" em vez de "de": grafia do PGR Porto Araras I, GHE CARPINTARIA —
+    # fuzzy_recusado (D-ARQ-64) sem o alias. DT-003EJ-01, nota de 23/09/2026.
+    termos: ["Poeira da madeira"]
+    # DT-003EJ-01 (RESOLVIDA): agente identificável, mas fora dos dois quadros do
+    # Anexo III NR-07 — não é sílica/asbesto/carvão mineral (Quadro 1) nem PNOS
+    # (Quadro 2, "não especificado de outra maneira"; madeira TEM nome próprio).
+    # is_carcinogeno_iarc: true [DERIVADO — IARC Monographs Vol. 62 (1995), "Wood
+    # Dust and Formaldehyde", Grupo 1 (carcinogênico para humanos), reafirmado no
+    # Vol. 100C (2012); fonte internacional, NÃO gov.br/MTE — NR-07/NHO brasileiras
+    # não têm lista própria de carcinógenos, remetem ao Anexo V]. Regime de RX/
+    # espirometria em R-RX-03/R-ESP-03 é [INTERPRETADO] por medição, não por texto
+    # normativo brasileiro: 2 PGRs independentes, mesma médica (Dra. Patrícia
+    # Montalvo Moraes), mesmo cargo (Carpintaria), mesmos valores — RX 60M e
+    # Espirometria 24M nos dois. [MEDIDO — GHE-08 Carpintaria, PGR CONSCIENTE SPE
+    # 0030 FASCINO 15.07.26 (gabarito MATRIZ DE EXAMES(ATUALIZAÇÃO)CONSCIENTE SPE
+    # 0030 LTDA 08.07.26.doc); GHE-04 Carpintaria, PGR(ADENDO) CMO RESIDENCIAL
+    # AURORA LAGO DAS ROSAS 27.08.26 (gabarito MATRIZ DE EXAMES(ADENDO) mesma
+    # data)]. Sensibilização respiratória (asma ocupacional por poeiras de
+    # madeira) segue [INCERTO — não conferido em fonte primária]; não bloqueia
+    # esta implementação porque o regime não depende dessa faceta.
   etanol:
     tipo_ibe: null
     cas: "64-17-5"
@@ -178,12 +296,15 @@ agentes:
     protocolos_especiais: []
     fuzzy_permitido: true
   metil_etil_cetona:
+    lt_nr15: {ppm: 155, mg_m3: 460, fonte: "NR-15 Anexo 11, Quadro n.º 1 — metil etil cetona"}
     tipo_ibe: EE
     cas: "78-93-3"
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
-    termos: ["Metiletilcetona (MEK)"]
+    # "Metiletilcetona" sem o sufixo (MEK) (PGRs Fascino, Porto Araras I, Vila Brasil) e com o
+    # produto na frente (Vila Brasil) — DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Metiletilcetona (MEK)", "Metiletilcetona", "Adesivo CPVC Metiletilcetona"]
   cloreto_de_hidrogenio:
     tipo_ibe: null
     cas: "7647-01-0"
@@ -213,6 +334,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "2.0.1", tempo_exposicao: "25 anos"}  # literal, mesmo limiar NEN>85dB(A) de classificacao_ruido.py
   espaco_confinado:
     tipo_ibe: null
     cas: null
@@ -240,6 +362,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     fuzzy_permitido: true
+    enquadramento_3048: {codigo: "3.0.1", tempo_exposicao: "25 anos"}  # bloco biológico único do Anexo IV
   piso_escorregadio:
     tipo_ibe: null
     cas: null
@@ -297,7 +420,12 @@ agentes:
     # próprio (17.5), distinto de "uso excessivo de força muscular" (17.4.3 "c"), e o
     # vocabulário não tem slug de levantamento de cargas. Decisão do Arquiteto: não criar slug
     # sem consumidor (precedente 003.DG-1). Inspecionar se algum PGR futuro distinguir os dois.
-    termos: ["Levantamento e Transporte Manual de cargas"]
+    # R-PGR-07 (proposta 003.FF) cl.3 — variação de forma inclui SUFIXO, não só a palavra-núcleo.
+    # [MEDIDO — 003.FF, PGR ALT T65: o alias acima falha contra
+    # "Levantamento e transporte manual de cargas ou volumes" apenas pelo sufixo " ou volumes";
+    # Levenshtein ≤2 não alcança (11 caracteres de distância). Ver MEDICAO_003FF_par_T65.md §7,
+    # citado ali como um dos dois casos que provam que o modo de falha não é "falta slug".]
+    termos: ["Levantamento e Transporte Manual de cargas", "Levantamento e transporte manual de cargas ou volumes"]
   movimento_repetitivo:
     tipo_ibe: null
     cas: null
@@ -319,7 +447,24 @@ agentes:
     # alínea "a", "posturas extremas ou nocivas do tronco, do pescoço, da cabeça, dos membros
     # superiores e/ou dos membros inferiores" (Portaria MTP 4.219/2022, texto oficial MTE
     # conferido em 18/08/2026).
-    termos: ["Postural"]
+    # R-PGR-07 (proposta 003.FF): "Postural" é inútil contra as 6 formas que o T65 usa para o
+    # mesmo conceito. Entram aqui as formas com verbatim citado em doc versionado
+    # (MEDICAO_003FF_par_T65.md §4): "Postura incorreta de trabalho" (7 ocorrências) e o par de
+    # grafias "Postura de pe por longos periodo" / "…periodos", que a nota de grafia do §4
+    # registra no MESMO documento.
+    # [MEDIDO — 003.FH, correção 003.FH-C3: o par NÃO difere por caixa nem por acento, difere
+    # pelo SUFIXO "s". `normalizar_termo` colapsa caixa (casefold) e acento (NFKD), e nenhum dos
+    # dois alcança "periodo" vs "periodos" — daí as duas entrarem como aliases distintos. Com um
+    # alias só, a forma singular chegava a este slug pelo ramo FUZZY de D-ARQ-64 (distância 1,
+    # `fuzzy_permitido: true` acima): mecanismo distinto e confiança distinta da EXATA que o
+    # comentário anterior afirmava. O aviso do §4 é literal: "Qualquer solucao por alias literal
+    # tem de aguentar isso".]
+    # As outras 4 formas ficam [A MEDIR]: o PGR ALT T65 não está no acervo versionado
+    # (DH-003FE-01) e o verbatim delas não foi transcrito para nenhum doc do repo.
+    # [DERIVADO — NR-17 item 17.4.3 alínea "a", mesma âncora de "Postural" acima: as duas formas
+    # acima (o par de grafias conta como UMA forma, daí "outras 4 de 6") descrevem postura de
+    # trabalho, dentro do literal da norma. Fonte oficial: gov.br/MTE.]
+    termos: ["Postural", "Postura incorreta de trabalho", "Postura de pé por longos períodos", "Postura de pé por longos período"]
   dermatite_contato:
     tipo_ibe: null
     cas: null
@@ -337,6 +482,7 @@ agentes:
     disparador_clinico: false
     fuzzy_permitido: true
   acetona:
+    lt_nr15: {ppm: 780, mg_m3: 1870, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Acetona"}
     # Solvente de FDS (Adesivo PVC Tigre, T65 GHE 11). CAS conferido fixture 003.M.
     # is_carcinogeno_iarc=false [DERIVADO — IARC: não classificado nas Monografias].
     # is_ototoxico ausente [DERIVADO — fora da lista NIOSH de solventes ototóxicos:
@@ -357,6 +503,347 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     fuzzy_permitido: true
+  # DT-003M-02(A) — sessão de dado (não ARQUITETURA), pedido do Diovanni: cobertura de
+  # composição-de-FDS medida contra 6 FDS reais do acervo (fds_originais/), 19 CAS sem
+  # slug. Fonte de is_carcinogeno_iarc: IARC Monographs "List of Classifications"
+  # (Grupo 1/2A/2B -> true; Grupo 3 ou não avaliado -> false) — busca 20/09/2026, domínio
+  # oficial monographs.iarc.who.int bloqueado pelo proxy de egresso desta sessão; verificado
+  # via WebSearch (snippets de fontes secundárias — SDS de fabricante, PubChem, InChem,
+  # ChemicalBook — cruzados entre si, não WebFetch direto). Nenhum dos 19 é Grupo 1/2A/2B.
+  # tem_lt: só hidroxido_de_amonia é true (amônia no Quadro 1 do Anexo 11 da NR-15); os
+  # demais (minerais de cimento, pigmento, polímero, biocidas de nicho) não estão nessa
+  # lista. tipo_ibe: null em todos — nenhum tem índice biológico no Anexo I da NR-07.
+  cimento_portland:
+    # FDS Cimento Ciplan (fds_originais/01 - FISPQ_cimento - Ciplan.pdf), identificação do
+    # produto. is_carcinogeno_iarc=false [DERIVADO — IARC/ACGIH: cimento Portland em si não
+    # classificado; a preocupação de carcinogenicidade em produtos de cimento é a sílica
+    # cristalina livre (IARC Grupo 1), já coberta pelo slug "silica" existente, agente
+    # DISTINTO — não fundir com este].
+    tipo_ibe: null
+    cas: "65997-15-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Argamassa Cimento Portland"]
+  silicato_tricalcico:
+    # FDS Cimento Ciplan, componente 20-70%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "12168-85-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Silicato tricálcico"]
+  silicato_dicalcico:
+    # FDS Cimento Ciplan, componente 10-60%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "10034-77-2"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Silicato dicálcico"]
+  ferro_aluminato_de_calcio:
+    # FDS Cimento Ciplan, componente 5-15%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "12068-35-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Ferro- aluminato de cálcio"]
+  aluminato_tricalcico:
+    # FDS Cimento Ciplan, componente 1-15%. CAS CORRIGIDO — a FDS real declara "1242-78-3",
+    # que FALHA o dígito verificador (cas_bem_formado, D-ARQ-33 cl.3); o CAS Registry correto
+    # do aluminato tricálcico é 12042-78-3 (dígito bate, confirmado fonte externa) — defeito
+    # de transcrição/OCR do PDF original, não deste vocabulário. Nota: uma FDS real que repita
+    # esse "1242-78-3" continua caindo em cas_invalido (D-ARQ-36 ramo c) — comportamento
+    # correto do gate, não bug; este slug só resolve para o CAS bem-formado.
+    # is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "12042-78-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Aluminato tricálcico"]
+  carbonato_de_calcio:
+    # FDS Cimento Ciplan, componente 0-5%. is_carcinogeno_iarc=false [DERIVADO — IARC/ACGIH:
+    # não classificado; calcário/carbonato de cálcio mineral].
+    tipo_ibe: null
+    cas: "1317-65-3"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Carbonato de cálcio"]
+  oxido_de_magnesio:
+    # FDS Cimento Ciplan, componente 0-4%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC; sem avaliação individual].
+    tipo_ibe: null
+    cas: "1309-48-4"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Óxido de magnésio (livre)"]
+  oxido_de_calcio:
+    # FDS Cimento Ciplan, componente 0-0,2% (cal virgem). is_carcinogeno_iarc=false
+    # [DERIVADO — IARC/ACGIH: não classificado; a preocupação de carcinogenicidade em
+    # produtos de cal é a sílica cristalina como impureza, agente distinto já coberto].
+    tipo_ibe: null
+    cas: "1305-78-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Cimento Óxido de cálcio (livre)"]
+  oxido_de_ferro_amarelo:
+    # FDS Tinta Acrílica (fds_originais/tinta_acrilica.pdf), pigmento 1-3%. is_carcinogeno_iarc=false
+    # [DERIVADO — IARC/ACGIH/NTP/OSHA: não classificado — Pigment Yellow 42].
+    tipo_ibe: null
+    cas: "51274-00-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  silicato_de_aluminio_hidratado:
+    # FDS Tinta Acrílica, carga mineral 5-15% (caulim). is_carcinogeno_iarc=false [DERIVADO —
+    # IARC/ACGIH: caulim (kaolin) classificado A4/não-classificável; a preocupação de
+    # carcinogenicidade é a sílica cristalina como impureza (0,1-4% típico), agente distinto
+    # já coberto pelo slug "silica" — não fundir].
+    tipo_ibe: null
+    cas: "1332-58-7"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  hidroxido_de_amonia:
+    # FDS Tinta Acrílica, componente 0,1-1% (24°Be). is_carcinogeno_iarc=false [DERIVADO —
+    # IARC: não classificado]. tem_lt=true — amônia é agente do Quadro 1, Anexo 11 da NR-15
+    # (lista de agentes com limite de tolerância quantitativo).
+    tipo_ibe: null
+    cas: "1336-21-6"
+    is_carcinogeno_iarc: false
+    tem_lt: true
+    protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR Fascino (Consciente SPE 0030), grafia do PGR com o erro "acriílica"; \x00 some na normalização) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Massa acriílica - Hidróxido de amônia 24°Be"]
+  copolimero_de_pvc:
+    # FDS Adesivo PVC Incolor Tigre (fds_originais/270 -FISPQ -  Adesivo PVC Incolor Tigre.pdf),
+    # componente 15-35%. is_carcinogeno_iarc=false [DERIVADO — IARC Monografia Vol.19 (1979),
+    # "Vinyl Chloride and Polymers": polímeros/copolímeros de cloreto de vinila avaliados como
+    # Grupo 3 (evidência insuficiente) — DISTINTO do monômero cloreto de vinila livre, esse sim
+    # Grupo 1; a FDS declara o copolímero polimerizado, não o monômero residual].
+    tipo_ibe: null
+    cas: "9003-22-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  branqueador_optico_fb184:
+    # FDS Adesivo PVC Incolor Tigre, componente 0-10% (branqueador óptico fluorescente,
+    # "2,5-tiofenodiilbis(5-terc-butil-1,3-benzoxazole)"). is_carcinogeno_iarc=false [DERIVADO
+    # — não encontrado nas Monografias IARC. Identificado como Fluorescent Brightener 184/OB
+    # (CAS 7128-64-5); sem efeitos críticos em estudos de toxicidade subcrônica/crônica do
+    # análogo estrutural Fluorescent Brightener 367, avaliado por agência regulatória
+    # (Canada.ca, screening assessment)].
+    tipo_ibe: null
+    cas: "7128-64-5"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  benzisotiazolinona:
+    # FDS Textura Textucril Leinertex (fds_originais/70 - FISPQ_textura textucril -
+    # Leinertex.pdf) e Massa Corrida (fds_originais/Massa-Corrida.pdf), conservante <0,1-0,4%.
+    # is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias IARC]. Sensibilizante
+    # dérmico conhecido (dermatite de contato ocupacional documentada) — is_sensibilizante NÃO
+    # é campo deste vocabulário (DT-003T-01: populado via frase-H na transcrição da FDS, D-ARQ-55,
+    # não aqui); registrado em comentário para quem revisar.
+    tipo_ibe: null
+    cas: "2634-33-5"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  mistura_cmit_mit:
+    # FDS Textura Textucril Leinertex e Massa Corrida, conservante <0,1-0,4% (Kathon CG,
+    # mistura 3:1 CMIT/MIT). is_carcinogeno_iarc=false [DERIVADO — não encontrado nas
+    # Monografias IARC]. Sensibilizante dérmico potente e bem documentado (mesma ressalva de
+    # is_sensibilizante da entrada acima — campo não existe neste vocabulário).
+    tipo_ibe: null
+    cas: "55965-84-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  diuron:
+    # FDS Textura Textucril Leinertex, componente <0,1-0,05%. is_carcinogeno_iarc=false
+    # [DERIVADO — não avaliado pelas Monografias IARC. A EPA/US classifica diuron
+    # separadamente sob critério próprio ("likely to be carcinogenic to humans") — sistema
+    # distinto do IARC, não confundir; este campo é especificamente IARC].
+    tipo_ibe: null
+    cas: "330-54-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  carbendazim:
+    # FDS Textura Textucril Leinertex, componente <0,1-0,05%. is_carcinogeno_iarc=false
+    # [DERIVADO — IARC Grupo 3 (evidência inadequada em humanos e inadequada/limitada em
+    # animais)]. Nota: toxicidade reprodutiva/mutagenicidade (GHS Categoria 1) documentada
+    # por outras fontes — eixo distinto de carcinogenicidade IARC, não coberto por este campo.
+    tipo_ibe: null
+    cas: "10605-21-7"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  n_octil_isotiazolinona:
+    # FDS Textura Textucril Leinertex, componente <0,01-0,008% (OIT). CAS CORRIGIDO — a FDS
+    # real declara "26530-20-2", que FALHA o dígito verificador (cas_bem_formado); o CAS
+    # Registry correto é 26530-20-1 (dígito bate, confirmado fonte externa) — mesma classe de
+    # defeito de transcrição/OCR já registrada em aluminato_tricalcico acima, não bug deste
+    # vocabulário; uma FDS real repetindo "26530-20-2" continua caindo em cas_invalido
+    # corretamente. is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias
+    # IARC]. Sensibilizante dérmico documentado, raro (mesma ressalva de is_sensibilizante).
+    tipo_ibe: null
+    cas: "26530-20-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  aguarras_mineral:
+    # FDS Textura Textucril Leinertex, componente 0,2-0,1% (hidrocarboneto alifático).
+    # is_carcinogeno_iarc=false [DERIVADO — IARC Monografia Vol.45 (1989), destilados de
+    # petróleo hidrotratados leves: Grupo 3 (não classificável)].
+    tipo_ibe: null
+    cas: "64742-47-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  # 2ª leva de DT-003M-02(A), mesma sessão (branch `docs/003fh-fds-por-cargo`) — 11 FDS
+  # reais por-cargo do acervo (fds_originais/, commit 96a15e9), dedup por hash reduz a
+  # 8 documentos distintos: Adesivo PVC Tigre (Almoxarife/Encanador/Montador — MESMA
+  # composição já coberta na leva anterior, nenhum CAS novo), Água Sanitária Zulu (Aux.
+  # Serviços Gerais/Serviços Gerais), Cimentcola Interno Quartzolit (Azulejista — cimento
+  # Portland já coberto), Desmoldante Concentrado (Carpinteiro — SEM composição
+  # declarada na FDS, "não apresenta ingredientes que contribuam para o perigo", nada a
+  # adicionar), Impermeabilizante Asfáltico (duplicado nas 2 páginas 13/de FDS
+  # PINTOR.pdf e no arquivo IMPERMEABILIZANTE.pdf avulso), Eletrodo 60.13 (Montador de
+  # Estruturas Metálicas/Soldador). Achado de limitação: as páginas 0-11 de
+  # `FDS PINTOR.pdf` (produto "BLASCOR", provável tinta) são PDF só-imagem — pdfplumber
+  # não extrai texto, sem dado de composição legível nesta sessão (fora de escopo:
+  # exigiria OCR). 9 CAS novos, mesma fonte/método da leva anterior (IARC Monographs via
+  # WebSearch, domínio oficial bloqueado pelo proxy; NR-15 Anexo 11 pra tem_lt).
+  hipoclorito_de_sodio:
+    # FDS Água Sanitária Zulu (fds_originais/FDS AUX. DE SERVIÇOS GERAIS.pdf), 15-19%.
+    # is_carcinogeno_iarc=false [DERIVADO — IARC Grupo 3, não classificável].
+    tipo_ibe: null
+    cas: "7681-52-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  carbonato_de_sodio:
+    # FDS Água Sanitária Zulu, 0,5-0,9%. is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "497-19-8"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  asfalto:
+    # FDS Impermeabilizante Asfáltico (fds_originais/IMPERMEABILIZANTE.pdf), 35-50%.
+    # is_carcinogeno_iarc=true [DERIVADO — IARC Monografia Vol.103 (2013), "Bitumens and
+    # Bitumen Emissions": exposição ocupacional a betume oxidado + emissões (telhado) =
+    # Grupo 2A; betume não-oxidado/duro + emissões (pavimentação/massa asfáltica) =
+    # Grupo 2B — a FDS declara "Asfalto" genérico, sem especificar a classe (produto de
+    # impermeabilização tende a usar betume oxidado, mas não confirmado na FDS); ambas
+    # as classes são Grupo 1/2A/2B → true por convenção deste vocabulário. Continua
+    # `tem_lt=false` — não é agente do Anexo 11 da NR-15 (que mede vapor/gás, não fumos
+    # de HPA de betume).
+    tipo_ibe: null
+    cas: "8052-42-4"
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.17", tempo_exposicao: "25 anos"}  # alínea b) "misturas asfálticas contendo hidrocarbonetos policíclicos", literal
+  cimento_asfaltico:
+    # Cimento asfáltico / asfalto oxidado 95/30 — aplicado a quente (caldeira a 180 °C e
+    # maçarico na manta asfáltica), distinto de `asfalto` genérico, que cobre também a
+    # emulsão a frio ("Asfalto em água", PGR Ricco Hetrin 14.09.26). Slug próprio porque
+    # dispara R-PKG-ASF-CO (CO da combustão); cas null: o CAS do CAP é o mesmo do asfalto
+    # (8052-42-4) e o índice CAS não admite colisão — a resolução é por termo.
+    # D-ARQ-70 Tier 1-C: (i) "Cimento Asfáltico 95/30 - Asfalto" medido no PGR(ADENDO) CMO
+    # Aurora Lago das Rosas 27.08.26 (p. 71, GHE 22) e no PGR CMO Vistamerica 2026-07-28
+    # (p. 82, GHE de impermeabilização); (ii)/(iii) núcleo do literal "betume" da NR-15
+    # Anexo 13 (hidrocarbonetos e outros compostos de carbono). is_carcinogeno_iarc=true
+    # [DERIVADO — IARC Monografia Vol.103 (2013): betume oxidado + emissões = Grupo 2A].
+    termos: ["Cimento Asfáltico 95/30 - Asfalto"]
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: [R-PKG-ASF, R-PKG-ASF-CO]
+    enquadramento_3048: {codigo: "1.0.17", tempo_exposicao: "25 anos"}  # alínea b) "misturas asfálticas contendo hidrocarbonetos policíclicos", literal
+  ferro:
+    # FDS Eletrodo 60.13 (fds_originais/FDS MONTADOR DE ESTRUTURAS METÁLICAS.pdf), >50%
+    # (ferro elementar do arame de solda). is_carcinogeno_iarc=false [DERIVADO — não
+    # encontrado nas Monografias IARC — distinto de óxido de ferro/fumo metálico de
+    # solda, já coberto genericamente pelo slug "fumos_metalicos" existente].
+    tipo_ibe: null
+    cas: "7439-89-6"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  feldspato:
+    # FDS Eletrodo 60.13, 1-4% (fluxo do revestimento do eletrodo). is_carcinogeno_iarc=false
+    # [DERIVADO — ACGIH A4/não-classificável; não encontrado nas Monografias IARC —
+    # feldspato pode conter sílica cristalina como impureza, agente distinto já coberto
+    # pelo slug "silica"].
+    tipo_ibe: null
+    cas: "68476-25-5"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  silicato_de_potassio:
+    # FDS Eletrodo 60.13, 1-4% (pasta de silicato, fluxo do revestimento).
+    # is_carcinogeno_iarc=false [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "1312-76-1"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  bentonita:
+    # FDS Eletrodo 60.13, 0,2-1% (fluxo do revestimento). is_carcinogeno_iarc=false
+    # [DERIVADO — não encontrado nas Monografias IARC — bentonita pode conter sílica
+    # cristalina como impureza, agente distinto já coberto pelo slug "silica"].
+    tipo_ibe: null
+    cas: "1302-78-9"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  celulose:
+    # FDS Eletrodo 60.13, 0,2-1% (fluxo do revestimento). is_carcinogeno_iarc=false
+    # [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "9004-34-6"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+  carbonato_de_potassio:
+    # FDS Eletrodo 60.13, 0,2-1% (fluxo do revestimento). is_carcinogeno_iarc=false
+    # [DERIVADO — não encontrado nas Monografias IARC].
+    tipo_ibe: null
+    cas: "584-08-7"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
   # benzeno — [DERIVADO — CAS Registry 71-43-2; IARC grupo 1].
   # benzeno: tipo_ibe=EE (NR-07 Anexo I, Quadro 1). O roteamento de biomonitoramento do benzeno dispara por identidade de agente (R-PKG-BZ), independente do tipo_ibe.
   benzeno:
@@ -365,6 +852,7 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: null
     protocolos_especiais: [R-PKG-BZ]
+    enquadramento_3048: {codigo: "1.0.3", tempo_exposicao: "25 anos"}  # literal
   cadmio:
     # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): cádmio e comp. inorgânicos → cádmio na urina
     # is_carcinogeno_iarc=true (IARC grupo 1); inerte no motor atual (só Componente-FDS consome);
@@ -374,6 +862,7 @@ agentes:
     is_carcinogeno_iarc: true
     tem_lt: false
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.6", tempo_exposicao: "25 anos"}  # literal
   fluoretos:
     # R-BIO-04, NR-07 Anexo I Quadro 2 (IBE/SC): flúor, HF e fluoretos inorgânicos → fluoreto urinário
     tipo_ibe: SC
@@ -399,6 +888,7 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     termos: ["Cromo hexavalente (compostos solúveis)"]
+    enquadramento_3048: {codigo: "1.0.10", tempo_exposicao: "25 anos"}  # ressalva: o Decreto não distingue valência ("Cromo e seus compostos tóxicos") — a NR-07 distingue, o Decreto não
   cobalto:             # R-BIO-04, Quadro 1 (IBE/EE): cobalto e comp. inorg. → cobalto na urina
     tipo_ibe: EE
     cas: "7440-48-4"
@@ -406,30 +896,35 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
   fenol:               # R-BIO-04, Quadro 1 (IBE/EE): fenol → fenol na urina
+    lt_nr15: {ppm: 4, mg_m3: 15, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Fenol"}
     tipo_ibe: EE
     cas: "108-95-2"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
   metanol:             # R-BIO-04, Quadro 1 (IBE/EE): metanol → metanol na urina
+    lt_nr15: {ppm: 156, mg_m3: 200, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Álcool metílico"}
     tipo_ibe: EE
     cas: "67-56-1"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
   diclorometano:       # R-BIO-04, Quadro 1 (IBE/EE): diclorometano → diclorometano na urina
+    lt_nr15: {ppm: 156, mg_m3: 560, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Cloreto de metileno"}
     tipo_ibe: EE
     cas: "75-09-2"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
   etilbenzeno:         # R-BIO-04, Quadro 1 (IBE/EE): etilbenzeno → soma mandélico+fenilglioxílico (mesmo analito do estireno)
+    lt_nr15: {ppm: 78, mg_m3: 340, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Etilbenzeno"}
     tipo_ibe: EE
     cas: "100-41-4"
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
   anilina:             # R-BIO-04, Quadro 1 (IBE/EE): anilina → metahemoglobina (canônico; p-aminofenol é a alt. "OU") [INTERPRETADO]
+    lt_nr15: {ppm: 4, mg_m3: 15, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Anilina"}
     tipo_ibe: EE
     cas: "62-53-3"
     is_carcinogeno_iarc: false
@@ -449,6 +944,7 @@ agentes:
     protocolos_especiais: []
     termos: ["Indutores de Metahemoglobina"]
   tricloroetano_111:
+    lt_nr15: {ppm: 275, mg_m3: 1480, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Metilclorofórmio"}
     tipo_ibe: EE
     cas: "71-55-6"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
@@ -456,12 +952,14 @@ agentes:
     protocolos_especiais: []
     termos: ["1,1,1 Tricloroetano"]
   butadieno_13:
+    lt_nr15: {ppm: 780, mg_m3: 1720, fonte: "NR-15 Anexo 11, Quadro n.º 1 — 1,3 Butadieno"}
     tipo_ibe: EE
     cas: "106-99-0"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
     termos: ["1,3 butadieno"]
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("1-3 butadieno")
   hdi:
     tipo_ibe: EE
     cas: "822-06-0"
@@ -470,6 +968,7 @@ agentes:
     protocolos_especiais: []
     termos: ["1,6 diisocianato de hexametileno (HDI)"]
   metoxietanol_2:
+    lt_nr15: {ppm: 20, mg_m3: 60, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Metil cellosolve"}
     tipo_ibe: EE
     cas: "109-86-4"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
@@ -484,6 +983,7 @@ agentes:
     protocolos_especiais: []
     termos: ["2-metoxietilacetato"]
   propanol_2:
+    lt_nr15: {ppm: 310, mg_m3: 765, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Álcool isopropílico"}
     tipo_ibe: EE
     cas: "67-63-0"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
@@ -491,13 +991,16 @@ agentes:
     protocolos_especiais: []
     termos: ["2-propanol"]
   tdi:
+    lt_nr15: {ppm: 0.016, mg_m3: 0.11, fonte: "NR-15 Anexo 11, Quadro n.º 1 — 2,4 Diisocianato de tolueno (TDI)"}
     tipo_ibe: EE
     cas: null   # 2 CAS no Anexo (isômeros 2,4 e 2,6); campo é string única — null por ser agente-classe
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
     termos: ["Tolueno diisocianato"]   # [INTERPRETADO — recorte do literal]
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("diisocianato de tolueno (TDI)") — distinto do slug tolueno, que NÃO consta
   butoxietanol_2:
+    lt_nr15: {ppm: 39, mg_m3: 190, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Butil cellosolve"}
     tipo_ibe: EE
     cas: "111-76-2"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
@@ -510,25 +1013,33 @@ agentes:
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.8", tempo_exposicao: "25 anos"}  # alínea d) do item 1.0.8, literal
   ciclohexanona:
     tipo_ibe: EE
     cas: "108-94-1"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    # Nome do produto colado ao do componente (PGR ADENDO Vila Brasil Escritório 25.08.26) — alias por termo,
+    # DT-(sessão claude/hopeful-newton-yjv3k7)-02.
+    termos: ["Adesivo CPVC Ciclohexanona"]
   clorobenzeno:
+    lt_nr15: {ppm: 59, mg_m3: 275, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Clorobenzeno"}
     tipo_ibe: EE
     cas: "108-90-7"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    enquadramento_3048: null  # conferido: clorobenzeno não consta no Anexo IV (item 1.0.9 "Cloro" lista organoclorados/PCB/VCM/policloropreno/clorofórmio/tetracloreto de carbono — não clorobenzeno)
   etoxietanol:
+    lt_nr15: {ppm: 78, mg_m3: 290, fonte: "NR-15 Anexo 11, Quadro n.º 1 — 2-Etoxietanol"}
     tipo_ibe: EE
     cas: null   # CAS ausente no Anexo I [INCERTO — não inventar]
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
   etoxietilacetato:
+    lt_nr15: {ppm: 78, mg_m3: 420, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Acetato de cellosolve"}
     tipo_ibe: EE
     cas: "111-15-9"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
@@ -560,6 +1071,7 @@ agentes:
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
   dimetilacetamida:
+    lt_nr15: {ppm: 8, mg_m3: 28, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Dimetilacetamida"}
     tipo_ibe: EE
     cas: "127-19-5"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
@@ -567,6 +1079,7 @@ agentes:
     protocolos_especiais: []
     termos: ["N,N Dimetilacetamida"]
   dimetilformamida:
+    lt_nr15: {ppm: 8, mg_m3: 24, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Dimetiformamida"}
     tipo_ibe: EE
     cas: "68-12-2"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
@@ -574,18 +1087,22 @@ agentes:
     protocolos_especiais: []
     termos: ["N,N Dimetilformamida"]
   oxido_de_etileno:
+    lt_nr15: {ppm: 39, mg_m3: 70, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Óxido de etileno"}
     tipo_ibe: EE
     cas: "75-21-8"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
+    enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo II, literal
   tetracloroetileno:
+    lt_nr15: {ppm: 78, mg_m3: 525, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Percloroetíleno"}
     tipo_ibe: EE
     cas: "127-18-4"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]
     tem_lt: null                # [NÃO VERIFICADO — DT-003DL-01]
     protocolos_especiais: []
   tetrahidrofurano:
+    lt_nr15: {ppm: 156, mg_m3: 460, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Tetrahidrofurano"}
     tipo_ibe: EE
     cas: "109-99-9"
     is_carcinogeno_iarc: null   # [NÃO VERIFICADO — DT-003DL-01]

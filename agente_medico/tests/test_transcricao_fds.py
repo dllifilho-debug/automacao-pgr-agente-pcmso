@@ -134,3 +134,88 @@ def test_parsear_faixa_nao_ordena_par_invertido() -> None:
     assert faixa is not None
     assert faixa.minimo is not None and faixa.maximo is not None
     assert faixa.minimo > faixa.maximo
+
+
+# ---------------------------------------------------------------------------
+# parsear_faixa — fallback de separador (DT-(sessão branch
+# docs/003fi-achado-gate-forma-faixa)-01). Os 3 casos abaixo são reais, medidos
+# via extrair_texto_fds sobre o acervo (Água Sanitária Zulu, Adesivo PVC Tigre,
+# Impermeabilizante) — pdfplumber perde o hífen visual da tabela na extração
+# por posição. Reversão nomeada: reverter _SEPARADOR_FAIXA_FALLBACK (ou
+# esvaziar o fallback em parsear_faixa) derruba exatamente estes 3 testes,
+# sem tocar nenhum outro caso desta suíte.
+# ---------------------------------------------------------------------------
+
+
+def test_parsear_faixa_fallback_espaco_puro_hipoclorito() -> None:
+    assert parsear_faixa("15 19") == FaixaConcentracao(minimo=15.0, maximo=19.0)
+
+
+def test_parsear_faixa_fallback_espaco_puro_acetona() -> None:
+    assert parsear_faixa("30 70") == FaixaConcentracao(minimo=30.0, maximo=70.0)
+
+
+def test_parsear_faixa_fallback_literal_a_asfalto() -> None:
+    assert parsear_faixa("35 a 50") == FaixaConcentracao(minimo=35.0, maximo=50.0)
+
+
+def test_parsear_faixa_fallback_nao_compete_com_hifen() -> None:
+    # Hífen presente vence o fallback por construção (fallback só roda quando
+    # o separador primário não acha 2 partes) — não uma coincidência de valor.
+    assert parsear_faixa("0,2 – 0,05") == FaixaConcentracao(minimo=0.2, maximo=0.05)
+
+
+def test_parsear_faixa_fallback_nao_resgata_lixo_sem_espaco() -> None:
+    # "indisponível" não tem espaço nem hífen — fallback não acha 2 partes,
+    # continua None. Confirma que o fallback não amplia demais.
+    assert parsear_faixa("indisponível") is None
+
+
+# ---------------------------------------------------------------------------
+# parsear_faixa — faixa dupla-desigualdade (achado real, dazomete 533-74-4,
+# FDS DESMOLD SIKA - GHE 05 CARPINTARIA, sessão claude/nice-fermat-xahkji
+# pós-#354). Texto exato medido via extrair_texto_fds sobre o PDF real.
+# Reversão nomeada: reverter o branch de _FAIXA_COMPOSTA em parsear_faixa
+# (ou esvaziar o regex) derruba exatamente estes 4 testes, sem tocar nenhum
+# outro caso desta suíte — inclusive as semi-abertas simples ('< 5'/'> 1'),
+# que continuam passando pelo ramo antigo.
+# ---------------------------------------------------------------------------
+
+
+def test_parsear_faixa_composta_dazomete_real() -> None:
+    assert parsear_faixa(">= 0.1 - < 1") == FaixaConcentracao(minimo=0.1, maximo=1.0)
+
+
+def test_parsear_faixa_composta_aceita_operadores_estritos() -> None:
+    assert parsear_faixa("> 0.1 - < 1") == FaixaConcentracao(minimo=0.1, maximo=1.0)
+
+
+def test_parsear_faixa_composta_aceita_teto_ou_igual() -> None:
+    assert parsear_faixa(">= 0.1 - <= 1") == FaixaConcentracao(minimo=0.1, maximo=1.0)
+
+
+def test_parsear_faixa_composta_nao_rouba_semi_abertas_simples() -> None:
+    # ">"/"<" isolados (sem separador nem segundo número) continuam pelo ramo
+    # antigo — a faixa composta exige um separador hífen/en-dash entre dois
+    # números, não intercepta o caso de um único número com operador.
+    assert parsear_faixa("> 1") == FaixaConcentracao(minimo=1.0, maximo=None)
+    assert parsear_faixa("< 5") == FaixaConcentracao(minimo=None, maximo=5.0)
+
+
+# ---------------------------------------------------------------------------
+# parsear_faixa — faixa composta ASSIMÉTRICA: só um lado tem operador (achado
+# real, acervo Aurora, "Destilados de Petróleo"/Fundo Zarcão-Pintura Esmalte
+# Sintético, sessão claude/nice-fermat-xahkji pós-#355). Texto exato medido
+# via extrair_texto_fds sobre o PDF real. Reversão nomeada: reverter o gate
+# ">" in bruto or "<" in bruto (ou devolver _FAIXA_COMPOSTA ao formato
+# simétrico ">=?...<=?...") derruba exatamente estes 2 testes, sem tocar os
+# casos simétricos (dazomete) nem o caminho antigo sem operador.
+# ---------------------------------------------------------------------------
+
+
+def test_parsear_faixa_composta_assimetrica_so_teto_real() -> None:
+    assert parsear_faixa("10 - <50") == FaixaConcentracao(minimo=10.0, maximo=50.0)
+
+
+def test_parsear_faixa_composta_assimetrica_so_piso() -> None:
+    assert parsear_faixa(">10 - 50") == FaixaConcentracao(minimo=10.0, maximo=50.0)

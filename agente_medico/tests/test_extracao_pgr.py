@@ -4,11 +4,15 @@ from pathlib import Path
 
 import pytest
 
+from agente_medico.motor import extracao_pgr
 from agente_medico.motor.extracao_pgr import (
+    _reconhece_funcao_grid_perigo_risco_fragmentado,
     _reconhece_lotacao_escala_qtd,
     avaliar_estrutura,
     avaliar_familia,
+    avaliar_numeracao_ghe,
     avaliar_segmentacao,
+    detectar_psicossocial,
     eh_ancora_card_cargo,
     eh_cabecalho_ghe,
     eh_sinal_cargo,
@@ -23,6 +27,12 @@ from agente_medico.motor.extracao_pgr import (
 # não skip (espelha a decisão de test_extracao_fds.py para o acervo untracked,
 # mas aqui o arquivo está sob controle de versão: 003.BL / D-ARQ-50).
 CAMINHO_PGR = Path("matrizes_originais/PGR VIVERDE V02 - 03.02.25.pdf")
+
+# Revisão de 14/09/2026 do PGR Hetrin (grid AIHA, cabeçalho fragmentado em
+# caixa alta) — DT-(sessão não numerada, branch claude/youthful-lamport-3kfkog)-02.
+CAMINHO_PGR_HETRIN_SET26 = Path(
+    "matrizes_originais/PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf"
+)
 
 
 @pytest.fixture(scope="module")
@@ -182,6 +192,10 @@ def test_recorte_topo_ancora_na_primeira_linha_devolve_vazio() -> None:
         "GHE 01 \x00 ENGENHARIA",  # forma dominante (17 de 19)
         "GHE 16\x00 PINTURA",  # sem espaço antes do NUL (forma real)
         "GHE 10 \x00 INSTALAÇÕES HIDRO\x00SANITÁRIAS",  # NUL embutido no título, preservado
+        # Separador ANTES do número, DT-(sessão claude/hopeful-newton-yjv3k7)-01:
+        # verbatim real de Porto Araras I (pág. 66) e Vila Brasil Escritório (GHEs 01-22).
+        "GHE - 14 PINTURA",
+        "GHE\x00 01 \x00 ADMINISTRAÇÃO 01",
     ],
 )
 def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
@@ -201,6 +215,9 @@ def test_eh_cabecalho_ghe_reconhece_cada_forma_medida(linha: str) -> None:
         # 003.DS (PGR Fascino): armadilhas do separador U+0000.
         "GHE\x00 TÉCNICO ADM / OPERACIONAL",  # GHE sem número -> DT-003DS-01 (deferido)
         "GHE Grupo Homogêneo de Exposição: trabalhadores com perfil de exposição similar a determinados agentes",  # linha-glossário (102 char, guard de 80 rejeita)
+        # Separador antes do número exige título separado do número: sem isto
+        # o \d+ recua e o último dígito vira "título".
+        "GHE - 14",
     ],
 )
 def test_eh_cabecalho_ghe_rejeita_armadilhas_medidas(linha: str) -> None:
@@ -352,6 +369,107 @@ def test_avaliar_familia_com_ancora_ghe_e_sinal_cargo_e_none() -> None:
 def test_avaliar_familia_sem_ghe_e_sem_sinal_e_none() -> None:
     paginas = ["linha comum", "outra linha comum"]
     assert avaliar_familia(paginas) is None
+
+
+# ---------------------------------------------------------------------------
+# _reconhece_funcao_grid_perigo_risco_fragmentado — cabeçalho grid AIHA
+# quebrado em 2 linhas (Hetrin 14/09/2026). Ver DT-(sessão não numerada,
+# branch claude/youthful-lamport-3kfkog)-02 em PENDENCIAS_CLINICAS.md.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "linha_a,linha_b",
+    [
+        ("FUNÇÃO (quando MEIO DE", "RISCO PERIGO/ RISCO TEMPO DE PROBABILIDAD NÍVEL DE CLASSIFICAÇÃ CONTROLE EXISTENTE"),
+        ("FUNÇÃO (quando", "RISCO PERIGO/ RISCO TEMPO DE MEIO DE NÍVEL DE CONTROLE EXISTENTE"),
+        ("FUNÇÃO DE PERIGO/ MEIO DE", "RISCO (quando aplicável) TEMPO DE PROBABILIDAD NÍVEL DE CLASSIFICAÇÃ CONTROLE EXISTENTE"),
+        ("FUNÇÃO", "RISCO PERIGO/ RISCO (quando TEMPO DE MEIO DE NÍVEL DE CONTROLE EXISTENTE"),
+    ],
+)
+def test_reconhece_funcao_grid_perigo_risco_fragmentado_formas_reais_hetrin(
+    linha_a: str, linha_b: str
+) -> None:
+    # 4 formas medidas direto no PGR Hetrin 14/09/2026 (wrap de coluna do
+    # pdfplumber varia por página). Reversão que mata: exigir as 3 palavras
+    # numa linha só em vez de no par concatenado.
+    assert _reconhece_funcao_grid_perigo_risco_fragmentado(linha_a, linha_b) is True
+
+
+def test_reconhece_funcao_grid_perigo_risco_fragmentado_linha_unica_tambem_casa() -> None:
+    # A forma de linha única (março/2025) também satisfaz o par (linha_b
+    # vazia) — o fragmentado é um superconjunto, não substitui o original.
+    assert (
+        _reconhece_funcao_grid_perigo_risco_fragmentado(
+            "Função Identificação de Perigo / Risco Tempo de Meio de...", ""
+        )
+        is True
+    )
+
+
+@pytest.mark.parametrize(
+    "linha_a,linha_b",
+    [
+        # Prosa real do próprio PGR Hetrin (linhas 561-562, fora da tabela):
+        # os 3 termos só aparecem no plural — nem "função" singular ocorre.
+        ("O Inventário de Riscos Ocupacionais reúne os", "perigos e riscos identificados nas atividades e funções"),
+        # "função"/"perigo" singulares presentes; só "risco" pluralizado —
+        # isola a fronteira de palavra especificamente sobre "risco": sem
+        # \b, "risco" casaria como substring de "riscos" e o par passaria.
+        ("Toda função tem perigo e riscos variados", "nada de tabela aqui"),
+        # "função"/"risco" singulares presentes; só "perigo" pluralizado —
+        # isola a fronteira sobre "perigo" (mesmo raciocínio, termo trocado).
+        ("A função avalia perigos diversos", "mas o risco não aparece na tabela"),
+    ],
+)
+def test_reconhece_funcao_grid_perigo_risco_fragmentado_rejeita_prosa_no_plural(
+    linha_a: str, linha_b: str
+) -> None:
+    # Anti-falso-positivo: "riscos"/"perigos" no plural não podem casar —
+    # \b falha logo após o 's' ("função"→"funções" já não bate nem sem \b,
+    # o acento muda: ã→õ). Reversão que mata: trocar \b por substring
+    # simples (in) sem fronteira de palavra — casos 2 e 3 viram True.
+    assert _reconhece_funcao_grid_perigo_risco_fragmentado(linha_a, linha_b) is False
+
+
+def test_avaliar_familia_grid_aiha_fragmentado_sintetico_e_pgr_cargo_based() -> None:
+    # Reversão que mata: remover a soma de n_sinais_cargo com o loop de
+    # pares adjacentes em avaliar_familia (extracao_pgr.py).
+    paginas = ["linha comum", "FUNÇÃO (quando", "RISCO PERIGO/ RISCO TEMPO DE MEIO DE"]
+    pendencia = avaliar_familia(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+
+
+def test_avaliar_familia_pgr_hetrin_set26_real_e_pgr_cargo_based_nao_segmentacao() -> None:
+    # Documento real: antes deste fix, avaliar_familia devolvia None (0
+    # linhas casavam o regex de linha única) e o app bloqueava com a
+    # pendência ERRADA (segmentacao_implausivel, sugere doc anômalo).
+    # Reversão que mata: qualquer uma das duas de cima.
+    paginas = extrair_texto_pgr(CAMINHO_PGR_HETRIN_SET26)
+    pendencia = avaliar_familia(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+    assert pendencia.bloqueante is True
+
+
+def test_avaliar_estrutura_pgr_hetrin_set26_real_diagnostico_correto() -> None:
+    # Nível de avaliar_estrutura (o que o app realmente consulta em
+    # preparar_ghes): mesma pendência correta, não segmentacao_implausivel.
+    paginas = extrair_texto_pgr(CAMINHO_PGR_HETRIN_SET26)
+    _rota, pendencia = avaliar_estrutura(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
+
+
+def test_avaliar_familia_pgr_hetrin_mar25_real_permanece_pgr_cargo_based() -> None:
+    # Não-regressão: a forma de linha única (março/2025) já funcionava
+    # (123 casos) e continua funcionando depois do fix.
+    caminho_mar25 = Path("matrizes_originais/01. PGR RICCO HETRIN - MAR25.pdf")
+    paginas = extrair_texto_pgr(caminho_mar25)
+    pendencia = avaliar_familia(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "pgr_cargo_based"
 
 
 def test_avaliar_estrutura_cargo_based_grande_e_pgr_cargo_based_nao_segmentacao() -> None:
@@ -790,3 +908,114 @@ def test_recuperar_titulos_cargo_invariante_paralelismo_cjr() -> None:
     assert len(recuperar_titulos_cargo(paginas_cjr)) == len(
         recortar_cards_cargo(paginas_cjr)
     )
+
+
+# ---------------------------------------------------------------------------
+# detectar_psicossocial (R-PSY-03) — marcadores medidos no Hetrin 14/09 (zero
+# ocorrência) e Varandas Flamboyant 16/09 (presente); ver DT-(sessão não
+# numerada, branch claude/youthful-lamport-3kfkog)-01 em PENDENCIAS_CLINICAS.md
+# ---------------------------------------------------------------------------
+
+
+def test_detectar_psicossocial_ausente_sem_marcador() -> None:
+    # Reversão que mata: `return True` fixo em detectar_psicossocial.
+    paginas = ["PGR CONSTRUTORA HETRIN\nQUEDAS DE ALTURA\nCinto paraquedista"]
+    assert detectar_psicossocial(paginas) is False
+
+
+@pytest.mark.parametrize(
+    "marcador",
+    [
+        "Inventário de Riscos Psicossociais",
+        "COPSOQ",
+        "FRPRT",
+    ],
+)
+def test_detectar_psicossocial_presente_por_marcador(marcador: str) -> None:
+    # Reversão que mata: remover o marcador de _MARCADORES_PSICOSSOCIAL.
+    paginas = ["Texto de abertura do PGR", f"Seção — {marcador} — inventário"]
+    assert detectar_psicossocial(paginas) is True
+
+
+def test_detectar_psicossocial_case_insensitive() -> None:
+    # Cabeçalho em caixa alta (mesma classe de variação do bug Hetrin/parser
+    # AIHA) não pode apagar o sinal.
+    paginas = ["INVENTÁRIO DE RISCOS PSICOSSOCIAIS"]
+    assert detectar_psicossocial(paginas) is True
+
+
+def test_detectar_psicossocial_marcador_na_segunda_pagina() -> None:
+    # Reversão que mata: checar só paginas[0] em vez de varrer a lista inteira.
+    paginas = ["Página de abertura, sem marcador", "FRPRT aparece só aqui"]
+    assert detectar_psicossocial(paginas) is True
+
+
+def test_detectar_psicossocial_paginas_vazias() -> None:
+    assert detectar_psicossocial(["", "", ""]) is False
+
+
+# ---------------------------------------------------------------------------
+# Gate de número de GHE saltado (avaliar_numeracao_ghe) — defesa contra forma
+# de cabeçalho desconhecida; casos reais em DT-(sessão
+# claude/hopeful-newton-yjv3k7)-01.
+# ---------------------------------------------------------------------------
+
+
+def test_numeracao_ghe_lacuna_vira_pendencia_bloqueante() -> None:
+    # Reversão que mata: avaliar_numeracao_ghe devolver None sempre.
+    pendencia = avaliar_numeracao_ghe(["GHE 01 - A\nGHE 03 - C"])
+    assert pendencia is not None
+    assert pendencia.tipo == "numeracao_ghe_lacunar"
+    assert pendencia.bloqueante
+    assert "(2)" in pendencia.motivo
+
+
+def test_numeracao_ghe_cabecalho_repetido_nao_e_lacuna() -> None:
+    # Reversão que mata: comparar o nº de cabeçalhos (com repetição) ao maior
+    # número — continuação de página repete o cabeçalho (PGR Vistamérica
+    # Ver.02: 50 cabeçalhos, 19 GHEs).
+    assert avaliar_numeracao_ghe(["GHE 01 - A\nGHE 02 - B", "GHE 02 - B\nGHE 03 - C"]) is None
+
+
+def test_avaliar_estrutura_encadeia_gate_de_numeracao() -> None:
+    # Reversão que mata: tirar `or avaliar_numeracao_ghe(paginas)` do ramo 1
+    # de avaliar_estrutura.
+    rota, pendencia = avaliar_estrutura(_construir_paginas(3, {1: "GHE 01 - A", 3: "GHE 03 - C"}))
+    assert rota == "ghe"
+    assert pendencia is not None
+    assert pendencia.tipo == "numeracao_ghe_lacunar"
+
+
+def test_avaliar_estrutura_segmentacao_precede_numeracao() -> None:
+    # Reversão que mata: inverter a ordem para
+    # `avaliar_numeracao_ghe(...) or avaliar_segmentacao(...)` — R78 e
+    # Floramazônia trocariam de diagnóstico.
+    rota, pendencia = avaliar_estrutura(_construir_paginas(20, {5: "GHE 3"}))
+    assert rota == "ghe"
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
+
+
+CAMINHO_PGR_PORTO_ARARAS = Path(
+    "matrizes_originais/PGR — PORTO ARARAS I SPE EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf"
+)
+
+
+def test_numeracao_ghe_pega_porto_araras_real_sem_a_forma_6(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reproduz o estado pré-PR #359 (reconhecedor da forma 6 ausente): o gate
+    # tem de acusar o GHE 14 que sumia sem pendência. Reversão que mata:
+    # avaliar_numeracao_ghe devolver None sempre.
+    paginas_reais = extrair_texto_pgr(CAMINHO_PGR_PORTO_ARARAS)
+    monkeypatch.setattr(
+        extracao_pgr,
+        "_RECONHECEDORES_GHE",
+        tuple(
+            r
+            for r in extracao_pgr._RECONHECEDORES_GHE
+            if r is not extracao_pgr._reconhece_cabecalho_ghe_separador_antes_do_numero
+        ),
+    )
+    pendencia = avaliar_numeracao_ghe(paginas_reais)
+    assert pendencia is not None
+    assert "(14)" in pendencia.motivo
+

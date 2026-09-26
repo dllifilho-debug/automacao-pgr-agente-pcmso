@@ -6,6 +6,19 @@ PENDENCIAS_CLINICAS.md),
 (3) qualquer cache. Nunca afirmar número de sessão, D-ARQ, hash ou contagem de testes
 de memória — ler do disco.
 
+## Decisão clínica (quem decide e com base em quê)
+
+Decisão clínica é tomada na sessão: Claude propõe, Diovanni opina e decide. As médicas não
+validam antes; validam **depois**, revisando a matriz gerada, e as correções delas voltam como
+entrada de uma sessão seguinte. Nunca propor roteiro, entrevista ou "perguntar à Dra." como
+passo para destravar uma regra (erro repetido em 25/09/2026, pós-PR #391).
+
+A fonte segue a hierarquia de D-ARQ-22 Parte A (PROTOCOLO, "Convenções de status"), parando no
+primeiro nível que resolver: (1) norma vigente conferida no Gov.br/MTE ou NHO da Fundacentro;
+(2) matriz ou anotação das médicas no acervo, como precedente; (3) analogia com regra
+`[VALIDADO]`; (4) nenhuma resolve → `[INTERPRETADO]`, que a revisão de saída olha primeiro. A
+fonte vai no marcador da regra.
+
 ## Verificação (regras duras, sem exceção por conveniência)
 
 - Nenhum prompt ou sessão dispensa a suíte. Se a suíte inteira é cara (DH-003EC-02: ~79% do
@@ -43,9 +56,9 @@ de memória — ler do disco.
 - `python -m pytest` / `python -m mypy --strict` — nunca `pytest`/`mypy` direto
 - **Alvo canônico do mypy, literal** — não usar `<pasta>` genérico:
   `python -m mypy --strict agente_medico/motor agente_medico/superficie agente_medico/tests/invariantes.py app_matriz.py app_matriz_local.py`
-  Referência medida em 003.EV (11/08/2026): limpo, **48 arquivos**. Subiu de
-  47 (003.EU) porque 003.EV criou `app_matriz_local.py` (entrypoint de
-  desenvolvimento sem gate). É referência, não gabarito eterno: prompt que
+  Referência medida em 25/09/2026 (`feat/ambiente-deps-20260925`): limpo, **51 arquivos**.
+  Subiu de 48 (003.EV, 11/08/2026); entre os acréscimos, `motor/medicoes.py` (D-ARQ-86
+  fatia 1) e `superficie/revisao_matriz.py`. É referência, não gabarito eterno: prompt que
   cravar esse número como bloqueador tem de medi-lo na sessão corrente.
   **`agente_medico/` inteiro NÃO é o alvo:** puxa a pasta de testes e 47 erros pré-existentes que
   nenhum gate olha. Erro do Arquiteto 2×, mesmo diagnóstico (003.EC e 003.ES) — o alvo fica escrito

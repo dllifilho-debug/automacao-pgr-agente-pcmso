@@ -78,19 +78,30 @@ def test_resolver_composicao_resolve_slugs_do_vocabulario_real() -> None:
     assert comp["Acetona"] == "acetona"
     assert comp["Metiletilcetona (MEK)"] == "metil_etil_cetona"
     assert comp["Acetato de Etila"] == "acetato_de_etila"
-    # CAS 9003-22-9 válido mas sem slug no vocabulário → ramo (b) → agente=None
-    assert comp["Copolímero de PVC"] is None
-    # CAS oculto → ramo (d) → agente=None
+    # CAS 9003-22-9 ganhou slug em DT-003M-02(A) (sessão `docs/003fg-...`) → ramo (a),
+    # não mais ramo (b). Idem CAS 7128-64-5 (branqueador). Reversão que mata: reverter
+    # a entrada `copolimero_de_pvc`/`branqueador_optico_fb184` de agentes.yaml.
+    assert comp["Copolímero de PVC"] == "copolimero_de_pvc"
+    assert comp["2,5-tiofenodiilbis(5-terc-butil-1,3-benzoxazole)"] == "branqueador_optico_fb184"
+    # CAS oculto → ramo (d) → agente=None (nenhuma entrada de vocabulário resolve isso)
     assert comp["Segredo Industrial 1"] is None
     assert comp["Segredo Industrial 2"] is None
 
 
-def test_adesivo_promove_tres_riscos_quimicos() -> None:
+def test_adesivo_promove_cinco_riscos_quimicos() -> None:
+    # 3 -> 5 em DT-003M-02(A) (sessão `docs/003fg-...`): copolímero de PVC e o
+    # branqueador óptico ganharam slug e passam a promover também (Fase C não filtra
+    # por materialidade, só por agente resolvido — MATERIAL e AUSENTE promovem igual,
+    # ver test_adesivo_materialidade_por_componente). Reversão que mata: reverter as
+    # 2 entradas novas de agentes.yaml usadas por este GHE.
     ctx = _ctx_resolvido("adesivo")
     q = _quimicos(ctx)
 
-    assert len(q) == 3
-    assert {r.agente for r in q} == {"acetona", "metil_etil_cetona", "acetato_de_etila"}
+    assert len(q) == 5
+    assert {r.agente for r in q} == {
+        "acetona", "metil_etil_cetona", "acetato_de_etila",
+        "copolimero_de_pvc", "branqueador_optico_fb184",
+    }
 
 
 def test_adesivo_materialidade_por_componente() -> None:
@@ -100,6 +111,8 @@ def test_adesivo_materialidade_por_componente() -> None:
     assert mat["acetona"] == Materialidade.MATERIAL           # piso 30 > 5
     assert mat["metil_etil_cetona"] == Materialidade.MATERIAL  # piso 10 > 5
     assert mat["acetato_de_etila"] == Materialidade.AUSENTE    # straddle: piso 5 ≤ 5 < teto 30
+    assert mat["copolimero_de_pvc"] == Materialidade.MATERIAL  # piso 15 > 5
+    assert mat["branqueador_optico_fb184"] == Materialidade.AUSENTE  # straddle: piso 0 ≤ 5 < teto 10
 
 
 def test_acetato_ausente_gera_pendencia_bloqueante() -> None:
@@ -160,13 +173,39 @@ def test_adesivo_segredo_industrial_2_bypass_sem_slug_bloqueante() -> None:
     assert pend[0].regra_origem == "D-ARQ-56"
 
 
-def test_cimento_nenhum_componente_promove() -> None:
+def test_cimento_seis_componentes_promovem_pos_dt003m02a() -> None:
+    # Antes de DT-003M-02(A) (sessão `docs/003fg-...`): nenhum dos 8 componentes do
+    # cimento tinha slug (ramo b/c/d, nenhum a) — este teste se chamava
+    # test_cimento_nenhum_componente_promove e afirmava `_quimicos(ctx) == []`.
+    # A expansão do vocabulário deu slug a 6 dos 8 (só aluminato tricálcico, CAS
+    # malformado na FDS/ramo c, e sulfato de cálcio, CAS oculto/ramo d, seguem sem).
+    # Reversão que mata: reverter as 6 entradas novas de agentes.yaml usadas por
+    # este GHE (silicato_tricalcico, silicato_dicalcico, ferro_aluminato_de_calcio,
+    # carbonato_de_calcio, oxido_de_magnesio, oxido_de_calcio).
     ctx = _ctx_resolvido("cimento")
-    assert _quimicos(ctx) == []   # nenhum dos 8 tem slug; aluminato ramo c, demais b/d
+    mat = {r.agente: r.materialidade for r in _quimicos(ctx)}
+    assert set(mat) == {
+        "silicato_tricalcico", "silicato_dicalcico", "ferro_aluminato_de_calcio",
+        "carbonato_de_calcio", "oxido_de_magnesio", "oxido_de_calcio",
+    }
+    assert mat["silicato_tricalcico"] == Materialidade.MATERIAL       # piso 20 > 5
+    assert mat["silicato_dicalcico"] == Materialidade.MATERIAL        # piso 10 > 5
+    assert mat["ferro_aluminato_de_calcio"] == Materialidade.AUSENTE  # straddle: piso 5 ≤5< teto 15
+    assert mat["carbonato_de_calcio"] == Materialidade.NAO_MATERIAL   # teto 5 ≤ 5
+    assert mat["oxido_de_magnesio"] == Materialidade.NAO_MATERIAL     # teto 4 < 5
+    assert mat["oxido_de_calcio"] == Materialidade.NAO_MATERIAL       # teto 0,2 < 5
 
-    # frases_h=() na fixture é MEDIÇÃO PENDENTE (003.CJ decisão 6: cimento não
-    # medido; não é afirmação de ausência na FDS real) — dado (), o contrato
-    # D-ARQ-56/R-FDS-06 exige ramo (b) não-bloqueante.
+    # Aluminato tricálcico (CAS malformado na FDS, ramo c) e sulfato de cálcio (CAS
+    # oculto, ramo d) seguem sem slug — nunca promovem (agente=None, Fase C pula) —,
+    # mas geram pendência materialidade_ausente/R-FDS-06 não-bloqueante (inerte-
+    # declarado, frases_h=() na fixture é MEDIÇÃO PENDENTE per 003.CJ decisão 6, não
+    # afirmação de ausência na FDS real). O straddle do ferro-aluminato (AUSENTE, com
+    # slug) gera a MESMA Pendencia tipo mas por D-ARQ-35 (bloqueante) — as duas
+    # procedências coexistem, não se confundem por tipo sozinho.
     pend = [p for p in ctx.pendencias if p.tipo == "materialidade_ausente"]
-    assert pend
-    assert all(p.regra_origem == "R-FDS-06" and not p.bloqueante for p in pend)
+    pend_rfds06 = [p for p in pend if p.regra_origem == "R-FDS-06"]
+    pend_darq35 = [p for p in pend if p.regra_origem == "D-ARQ-35"]
+    assert len(pend_rfds06) == 2
+    assert all(not p.bloqueante for p in pend_rfds06)
+    assert len(pend_darq35) == 1
+    assert pend_darq35[0].bloqueante is True

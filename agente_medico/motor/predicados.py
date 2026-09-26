@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from dataclasses import replace
 from typing import Any, Callable, Union
 
 from agente_medico.motor.leo_resolver import classifica_cenario, resolve_leo
-from agente_medico.motor.tipos import Ausente, Fracao, GHEContext, Quantificacao
+from agente_medico.motor.tipos import NIVEIS_RISCO_PXS, Ausente, Fracao, GHEContext, Quantificacao
 
 ResultadoPredicado = Union[bool, Ausente]
 
@@ -117,12 +119,15 @@ def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausent
         # R-RX-01 / NR-07 Anexo III Quadro 1, ramo "Empresas sem avaliações
         # quantitativas" (Portaria MTP 567/2022): sem laudo é faixa válida, não
         # pendência — os dois ramos do Quadro 1 são exaustivos.
+        # R-RX-01-qual (DT-003EC-01): dentro desse ramo, sílica com avaliação
+        # qualitativa P×S declarada na linha do risco é estado próprio
+        # (apenas_qualitativa). Só sílica — asbesto sem medição nem decisão.
         return Quantificacao(
             valor=None,
             unidade=None,
             relacao_LT=None,
             pct_LT=None,
-            apenas_qualitativa=False,
+            apenas_qualitativa=risco.agente == "silica" and risco.nivel_risco is not None,
             sem_avaliacao_quantitativa=True,
         )
     if (
@@ -163,6 +168,21 @@ def _fumos_metalicos(ctx: GHEContext) -> bool:
     return any(r.agente == "fumos_metalicos" for r in ctx.riscos)
 
 
+@primitivo("psicossocial")
+def _psicossocial(ctx: GHEContext) -> bool:
+    """R-PSY-03; NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal
+    PGR-documenta-psicossocial (GHEPGR.psicossocial, extraído por
+    detectar_psicossocial em extracao_pgr.py)."""
+    return ctx.pgr_ghe.psicossocial
+
+
+@primitivo("poeira_de_madeira")
+def _poeira_de_madeira(ctx: GHEContext) -> bool:
+    """R-RX-03/R-ESP-03; agente carcinogênico (IARC Grupo 1) fora dos Quadros 1 e 2
+    do Anexo III NR-07 (não é sílica/asbesto/carvão nem PNOS) — DT-003EJ-01."""
+    return any(r.agente == "poeira_de_madeira" for r in ctx.riscos)
+
+
 @primitivo("silica")
 def _silica(ctx: GHEContext) -> bool:
     """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022)."""
@@ -180,12 +200,56 @@ def _benzeno(ctx: GHEContext) -> bool:
     return any(r.agente == "benzeno" for r in ctx.riscos)
 
 
+_NIVEIS_MODERADO_OU_ACIMA: frozenset[str] = frozenset(
+    NIVEIS_RISCO_PXS[NIVEIS_RISCO_PXS.index("MODERADO"):]
+)
+
+
+@primitivo("agente_ibe_moderado_ou_acima")
+def _agente_ibe_moderado_ou_acima(ctx: GHEContext) -> bool:
+    """R-CLI-05 perna (b): agente com indicador biológico no Anexo I da NR-07
+    (Quadro 1 ou 2) classificado MODERADO ou acima na avaliação P×S do PGR.
+    Risco de FDS ou implícito não traz nível e não conta. [DERIVADO — matriz
+    Dra. Patrícia, Aurora 27/08/26, GHE 11: MEK/THF/ciclohexanona MODERADO → 6M]."""
+    return any(
+        r.tipo_ibe is not None and r.nivel_risco in _NIVEIS_MODERADO_OU_ACIMA
+        for r in ctx.riscos
+    )
+
+
+_CARGO_PORTEIRO = re.compile(r"\bporteir[oa]s?\b")
+
+
+@primitivo("cargo_porteiro")
+def _cargo_porteiro(ctx: GHEContext) -> bool:
+    """R-VIS-02 [VALIDADO]: porteiro recebe acuidade visual sem demissional. Gatilho
+    pelo cargo do PGR, normalizado — a Fase B só casa o cargo pela chave exata do
+    vocabulário e "Porteiro" nunca vira `porteiro`."""
+    for cargo in ctx.pgr_ghe.cargos:
+        sem_acento = unicodedata.normalize("NFKD", str(cargo))
+        normalizado = "".join(c for c in sem_acento if not unicodedata.combining(c)).casefold()
+        if _CARGO_PORTEIRO.search(normalizado):
+            return True
+    return False
+
+
 @primitivo("silica_asbesto_sem_medicao")
 def _silica_asbesto_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
         return r
-    return r.sem_avaliacao_quantitativa
+    return r.sem_avaliacao_quantitativa and not r.apenas_qualitativa
+
+
+@primitivo("silica_qualitativa")
+def _silica_qualitativa(ctx: GHEContext) -> ResultadoPredicado:
+    """R-RX-01-qual (DT-003EC-01): sílica sem avaliação quantitativa, com
+    avaliação qualitativa P×S no PGR. Disjunto de silica_asbesto_sem_medicao
+    por construção — os dois leem o mesmo helper e partem por apenas_qualitativa."""
+    r = _helper_silica_asbesto(ctx)
+    if not isinstance(r, Quantificacao):
+        return r
+    return r.sem_avaliacao_quantitativa and r.apenas_qualitativa
 
 
 @primitivo("silica_asbesto_leo_ate_10")

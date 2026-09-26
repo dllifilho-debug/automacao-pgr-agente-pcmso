@@ -6,15 +6,20 @@ from pathlib import Path
 
 import pytest
 from docx import Document as DocxDocument
+from docx.oxml.ns import qn
 
 from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import EnvelopeConfirmado, ExameEmitido, GHEVerbatim, MatrizGHE, Momento
 from agente_medico.superficie.documento_matriz import (
+    _COR_DESTAQUE,
+    _COR_DESTAQUE_HEX,
+    _COR_TEXTO_SOBRE_DESTAQUE,
     _ROTULO_MOMENTO,
     CabecalhoDocumento,
     RodapeDocumento,
     montar_documento,
+    nome_ghe_exibicao,
     renderizar_docx,
     renderizar_html,
 )
@@ -337,6 +342,74 @@ def test_docx_celula_de_exames_preserva_quebra_por_exame(tmp_path: Path) -> None
 
 
 # ---------------------------------------------------------------------------
+# D-ARQ-73, nota de aplicação desta sessão — estilo visual portado de
+# modulo_pcmso.py::gerar_docx_rq61 (legado). Conteúdo/contagem de tabelas e
+# linhas não muda; só a aparência.
+# ---------------------------------------------------------------------------
+
+
+def test_docx_tabela_por_ghe_usa_estilo_com_borda(tmp_path: Path) -> None:
+    # Reversão que mata: tirar `tabela.style = "Table Grid"` -> volta ao
+    # estilo default do python-docx (sem nome, sem borda visível).
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    reaberto = DocxDocument(str(destino))
+    tabela = reaberto.tables[0]
+    assert tabela.style is not None
+    assert tabela.style.name == "Table Grid"
+
+
+def test_docx_cabecalho_de_coluna_tem_fundo_e_texto_destacados(tmp_path: Path) -> None:
+    # Reversão que mata: tirar a chamada de `_aplicar_fundo` e a cor do texto
+    # do cabeçalho de coluna -> célula fica sem `w:shd` no XML e o texto sai
+    # na cor padrão (preto), não branco.
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    reaberto = DocxDocument(str(destino))
+    tabela = reaberto.tables[0]
+    celula_funcao = tabela.rows[0].cells[0]
+
+    tcPr = celula_funcao._tc.tcPr
+    assert tcPr is not None
+    sombreado = tcPr.find(qn("w:shd"))
+    assert sombreado is not None
+    assert sombreado.get(qn("w:fill")).upper() == _COR_DESTAQUE_HEX
+
+    run_cabecalho = celula_funcao.paragraphs[0].runs[0]
+    assert run_cabecalho.bold is True
+    assert run_cabecalho.font.color.rgb == _COR_TEXTO_SOBRE_DESTAQUE
+
+
+def test_docx_titulo_e_cabecalho_de_ghe_usam_cor_de_destaque(tmp_path: Path) -> None:
+    # Reversão que mata: tirar `run_titulo.font.color.rgb = _COR_DESTAQUE` (e
+    # o equivalente no cabeçalho de GHE) -> cor volta a None (preto padrão).
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    reaberto = DocxDocument(str(destino))
+    titulo_documento = reaberto.paragraphs[0]
+    assert titulo_documento.runs[0].font.color.rgb == _COR_DESTAQUE
+
+    cabecalhos_ghe = [p for p in reaberto.paragraphs if p.style.name == "Heading 2"]
+    assert len(cabecalhos_ghe) == 1
+    assert cabecalhos_ghe[0].runs[0].font.color.rgb == _COR_DESTAQUE
+
+
+# ---------------------------------------------------------------------------
 # 003.EP fatia 3 — e2e real: PDF Fascino -> parse determinístico -> hidratação
 # -> processar_arquivo_pgr -> montar_documento. Fecha o critério de pronto do
 # S2 (D-ARQ-65 fatia 1/2, 003.EP): os 41 cargos (não mais 19 células
@@ -412,3 +485,37 @@ def test_pipeline_real_fascino_ate_documento_41_linhas_cargo() -> None:
         assert cargo_recuperado in cargos_extraidos
 
     assert all(linha.cargo != "" for bloco in doc.blocos for linha in bloco.linhas)
+
+
+# Vila Brasil GHE 23: o PDF imprime "MANUTENÇÃO - ENERGIZADA", mas o hífen da
+# fonte Inter-Thin sai do pdfplumber como NUL.
+_NOME_GHE_23 = "ASSISTENCIA TECNICA MANUTENÇÃO \x00 ENERGIZADA"
+
+
+@pytest.mark.parametrize(
+    ("nome", "exibido"),
+    [
+        # Reversão que mata: voltar a só remover o NUL — "MANUTENÇÃO  ENERGIZADA".
+        (_NOME_GHE_23, "ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA"),
+        # Reversão que mata: trocar todo NUL por hífen — NUL colado em texto não
+        # tem glifo conhecido (é parêntese no CBO "\x004121\x0005\x00").
+        ("INSTALAÇÕES HIDRO\x00SANITÁRIAS", "INSTALAÇÕES HIDROSANITÁRIAS"),
+    ],
+)
+def test_nome_ghe_exibicao(nome: str, exibido: str) -> None:
+    assert nome_ghe_exibicao(nome) == exibido
+
+
+def test_docx_mostra_hifen_no_nome_do_ghe_com_nul(tmp_path: Path) -> None:
+    # Reversões que matam: (1) montar_documento usar _sanitizar no nome — o
+    # título sai "MANUTENÇÃO  ENERGIZADA"; (2) passar o nome verbatim — o
+    # python-docx recusa o NUL (ValueError) e o download do Vila Brasil quebra.
+    matriz = MatrizGHE(
+        ghe_id="GHE 23", linhas=[_exame("exame_clinico")], nome_ghe=_NOME_GHE_23, cargos=("Eletricista",)
+    )
+    doc = montar_documento([matriz], carregar(_PROTOCOLO_DIR).vocabulario.exames, _cabecalho(), _rodape())
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(doc, destino)
+
+    texto = "\n".join(par.text for par in DocxDocument(str(destino)).paragraphs)
+    assert "ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA" in texto

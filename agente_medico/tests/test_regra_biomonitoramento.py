@@ -6,7 +6,7 @@ import pytest
 
 from agente_medico.motor.estagios.emissao import stage_5_emissao
 from agente_medico.motor.protocolo import carregar
-from agente_medico.motor.tipos import GHEContext, GHEPGR, Momento, Risco
+from agente_medico.motor.tipos import GHEContext, GHEPGR, ExameEmitido, Momento, Risco
 from agente_medico.tests.invariantes import linhas_de_risco
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
@@ -35,6 +35,10 @@ def _ghe() -> GHEPGR:
 def _ctx_com_agente(agente: str) -> GHEContext:
     risco = Risco(agente=agente, fonte="pgr", detalhe=None, quantificacao=None, tipo_ibe=None)
     return GHEContext(pgr_ghe=_ghe(), riscos=[risco])
+
+
+def _sem_clinico(linhas: list[ExameEmitido]) -> list[ExameEmitido]:
+    return [e for e in linhas if e.exame != "exame_clinico"]
 
 
 @pytest.mark.parametrize(
@@ -95,8 +99,10 @@ def test_regra_bio_04_grupo_ee(proto, agente: str, regra_id: str, exame: str) ->
     assert linha.periodicidade_meses == 6
     assert linha.momentos == _MOMENTOS_PER
     # R-CLI-01 (piso universal, 003.EC) soma exame_clinico a toda matriz; a
-    # contagem que importa é a das linhas de origem em risco.
-    assert len(linhas_de_risco(emitidos)) == 1, (
+    # contagem que importa é a das linhas de origem em risco. R-CLI-05 (26/09/2026)
+    # soma o clínico 6M aos cancerígenos com indicador — fora da contagem, que é
+    # de biomonitoramento.
+    assert len(_sem_clinico(linhas_de_risco(emitidos))) == 1, (
         f"{agente}: esperado apenas 1 exame de risco emitido, got {list(por_exame)}"
     )
 
@@ -139,7 +145,7 @@ def test_regra_bio_04_grupo_sc_agente_unico(proto, agente: str, regra_id: str, e
     assert linha.motivos[0].regra_id == regra_id
     assert linha.periodicidade_meses == 6
     assert linha.momentos == _MOMENTOS_QUADRO_2
-    assert len(linhas_de_risco(emitidos)) == 1, (
+    assert len(_sem_clinico(linhas_de_risco(emitidos))) == 1, (
         f"{agente}: esperado 1 exame de risco, got {list(por_exame)}"
     )
 

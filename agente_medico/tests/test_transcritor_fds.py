@@ -161,6 +161,47 @@ def test_faixas_semiabertas_e_endash_sao_aprovadas() -> None:
         assert pendencias == ()
 
 
+def test_faixas_reais_sem_hifen_sao_aprovadas() -> None:
+    # DT-(sessão branch docs/003fi-achado-gate-forma-faixa)-01: antes do
+    # fallback de _SEPARADOR_FAIXA, estes 3 blocos reais reprovavam no gate
+    # de forma (bloqueante) mesmo com CAS/nome íntegros.
+    for faixa in ("15 19", "30 70", "35 a 50"):
+        bloco = BlocoVerbatim(faixa=faixa, membros=(MembroVerbatim(cas="1-2-3", nome="X"),))
+        aprovados, pendencias = gate_forma([bloco])
+        assert aprovados == (bloco,)
+        assert pendencias == ()
+
+
+def test_faixa_dupla_desigualdade_real_e_aprovada() -> None:
+    # Achado real (DESMOLD SIKA - GHE 05 CARPINTARIA, dazomete 533-74-4):
+    # faixa '>= 0.1 - < 1' reprovava no gate antes de _FAIXA_COMPOSTA.
+    bloco = BlocoVerbatim(
+        faixa=">= 0.1 - < 1",
+        membros=(MembroVerbatim(cas="533-74-4", nome="dazomete (ISO)"),),
+    )
+    aprovados, pendencias = gate_forma([bloco])
+    assert aprovados == (bloco,)
+    assert pendencias == ()
+
+
+def test_faixa_composta_assimetrica_real_e_aprovada() -> None:
+    # Achado real (Fundo Zarcão - PINTURA ESMALTE SINTÉTICO - PINTOR, acervo
+    # Aurora): faixa '10 - <50' (só o teto com operador) reprovava no gate
+    # antes de _FAIXA_COMPOSTA aceitar operador em qualquer um dos dois lados.
+    bloco = BlocoVerbatim(
+        faixa="10 - <50",
+        membros=(
+            MembroVerbatim(
+                cas="64742-47-8",
+                nome="Destilados de Petróleo levemente tratados com hidrogênio",
+            ),
+        ),
+    )
+    aprovados, pendencias = gate_forma([bloco])
+    assert aprovados == (bloco,)
+    assert pendencias == ()
+
+
 # ---------------------------------------------------------------------------
 # Integração (marcador requer_pdfs; espelha test_extrair_texto_fds.py).
 # Composição fim-a-fim (transcrever_fds -> gate_forma -> montar_fds ->
