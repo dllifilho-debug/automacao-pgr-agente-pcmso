@@ -10351,3 +10351,38 @@ Reversão reaplicada e medida: `fuzzy_recusado` em `CAUSAS_ACERTO_NAO_RESOLUCAO`
 **3ª suíte completa (árvore parada): 1457 passed, 6 skipped, 0 failed** (886.63s), +16 exato sobre
 1441 (15 casos em `test_cli_semestral.py` + `test_maganes_resolve_exato_para_manganes`). `mypy
 --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
+
+## Sessão (branch `claude/jolly-wozniak-iz0ley`, pós-merge do PR #392) — 26/09/2026 — IMPLEMENTAÇÃO: pacote do asfalto (`R-PKG-ASF`, `R-PKG-ASF-CO`)
+
+**Origem.** Pendência "critério para o asfalto do GHE 22" (Aurora). Decidida sob D-ARQ-22: Diovanni
+pediu a recomendação "como médico do trabalho, pelas normas vigentes" e aprovou.
+
+**Evidência.** (1) Norma, texto oficial do acervo (`normas/`): NR-07 Anexo V (cancerígeno com CAS no
+inventário; 4.1.1 exames obrigatórios sem avaliação ambiental; 4.1 prontuário 40 anos), 7.5.8 II a 1,
+7.5.18, Anexo I Quadro 1 (CO → COHb); NR-15 Anexo 13-A item 2 (benzeno/mistura ≥1%) e Anexo 13
+(betume). (2) PGR do Aurora GHE 22: asfalto oxidado 95/30 aquecido a 180 °C e manta com maçarico,
+sem avaliação quantitativa; a FDS do impermeabilizante do acervo é emulsão a frio de outro PGR. (3)
+Matrizes: 9 GHEs de impermeabilização em 6 matrizes — manta/asfalto 7/7 clínico 6M, hemograma 6M e
+COHb 6M; reticulócitos 5/7 e t,t-mucônico 3–4/7, só nas CMO recentes. (4) PGRs: Viverde V02 e
+Vistamerica Ver.02 inventariam o CO da manta; CMO Aurora e Vistamerica 07/26 não. Atribuição
+corrigida: a matriz do Aurora tem coordenação CRM-GO 14.949 (Dra. Patrícia) e validação Dra. Carolini.
+
+**Implementado.** Slug `cimento_asfaltico` (cas null — colisão de CAS com `asfalto`; alias
+"Cimento Asfáltico 95/30 - Asfalto" medido em 2 PGRs CMO, D-ARQ-70). `R-PKG-ASF` (asfalto ou cimento
+asfáltico → clínico 6M, hemograma 6M) e `R-PKG-ASF-CO` (cimento asfáltico → COHb 6M), status
+`DERIVADO`. Sem t,t-mucônico/reticulócitos. PROTOCOLO v107; DTs `(sessão claude/jolly-wozniak-iz0ley)-01`
+(CO não inventariado sem pendência ao elaborador) e `-02` (Anexo V no documento).
+
+**Efeito medido.** 3 pares determinísticos (worktree `origin/main 432fb1e` × árvore): **idênticos**
+— nenhum tem asfalto. Os 3 PGRs com asfalto (Vistamerica 07/26, Vistamerica Ver.02, Viverde V02)
+não rodam offline (`familia_nao_medida` → rota LLM). Esperado no Aurora GHE 22: clínico, hemograma e
+COHb corrigidos nos 3 cargos (9 células); t,t-mucônico e reticulócitos seguem divergentes por decisão
+(6) `[A MEDIR — próxima matriz do app]`.
+
+**Testes.** `test_pkg_asfalto.py` (3) e 1 em `test_resolvedor_termos.py`; guarda do índice 169→171.
+Varredura inversa: 7 reversões, 7/7 mortas. Duas reversões da 1ª passada (`status: DEPRECATED`
+inserido antes do `status` existente) não valiam — no YAML a última chave vence; refeitas removendo o
+bloco da regra.
+
+**Verificação.** Suíte completa (árvore parada): **1461 passed, 6 skipped, 0 failed** (885.36s), +4
+exato sobre 1457. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
