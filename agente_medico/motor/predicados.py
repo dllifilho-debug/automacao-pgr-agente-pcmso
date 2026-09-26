@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from dataclasses import replace
 from typing import Any, Callable, Union
 
@@ -213,6 +215,22 @@ def _agente_ibe_moderado_ou_acima(ctx: GHEContext) -> bool:
         r.tipo_ibe is not None and r.nivel_risco in _NIVEIS_MODERADO_OU_ACIMA
         for r in ctx.riscos
     )
+
+
+_CARGO_PORTEIRO = re.compile(r"\bporteir[oa]s?\b")
+
+
+@primitivo("cargo_porteiro")
+def _cargo_porteiro(ctx: GHEContext) -> bool:
+    """R-VIS-02 [VALIDADO]: porteiro recebe acuidade visual sem demissional. Gatilho
+    pelo cargo do PGR, normalizado — a Fase B só casa o cargo pela chave exata do
+    vocabulário e "Porteiro" nunca vira `porteiro`."""
+    for cargo in ctx.pgr_ghe.cargos:
+        sem_acento = unicodedata.normalize("NFKD", str(cargo))
+        normalizado = "".join(c for c in sem_acento if not unicodedata.combining(c)).casefold()
+        if _CARGO_PORTEIRO.search(normalizado):
+            return True
+    return False
 
 
 @primitivo("silica_asbesto_sem_medicao")

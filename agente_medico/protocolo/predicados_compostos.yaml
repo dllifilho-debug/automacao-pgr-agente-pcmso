@@ -34,3 +34,14 @@ predicados_compostos:
       - oxido_de_etileno
       - tetracloroetileno
       - tricloroetileno
+
+  # R-VIS-01-solda: indicador de solda no GHE. Os PGRs não trazem "solda" como agente —
+  # só na fonte geradora ("fumos e gases de soldagem", eletrodo E-6013); o agente de solda
+  # que resolve nos casos reais é o manganês do eletrodo (Aurora GHE 16, Fascino GHE 17).
+  # [INTERPRETADO]: manganês é marcador da atividade, não o risco que justifica o exame
+  # (a radiação UV/IR do arco).
+  solda_indicador:
+    ou:
+      - manganes
+      - fumos_metalicos
+
