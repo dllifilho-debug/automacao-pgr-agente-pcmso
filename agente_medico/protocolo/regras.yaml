@@ -93,6 +93,41 @@ regras:
     base_normativa: "Protocolo Dra. Carolini — rastreio de comorbidade para atividade crítica"
     status: VALIDADO
 
+  - id: R-VIS-01-solda
+    quando: solda_indicador
+    emite:
+      - {exame: acuidade_visual, periodicidade_meses: 12, momentos: [adm, per, MR, dem]}
+    base_normativa: "R-VIS-01 [VALIDADO — entrevista Dra. Carolini]: soldador é o único caso
+      de acuidade visual também no demissional. Nenhuma NR exige acuidade visual para solda
+      (conferido nos textos oficiais do acervo); entra pelo NR-07 7.5.18 — risco que justifica:
+      radiação não ionizante do arco (UV/IR). [DERIVADO — PCMSO-modelo Dra. Carolini SECONCI
+      05/2024 (acuidade para expostos a solda) e 7/9 serralherias do acervo com DEM, inclusive
+      RQ.61 Viverde GHE 10]. Gatilho por manganês/fumos metálicos [INTERPRETADO] — ver
+      `solda_indicador`."
+    status: DERIVADO
+
+  - id: R-VIS-02
+    quando: cargo_porteiro
+    emite:
+      - {exame: acuidade_visual, periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "R-VIS-02 [VALIDADO — entrevista Dra. Carolini]: porteiro recebe acuidade
+      visual em adm/per/MR, sem demissional (também R-PKG-PORT). Nenhuma NR exige; NR-07
+      7.5.18. PCMSO-modelo Dra. Carolini SECONCI 05/2024: acuidade para 'porteiros, vigias'.
+      Precedente: 10/12 GHEs de portaria/vigia/controle de acesso do acervo com acuidade
+      (ADM, PER, MRO); sem: WVM Entreverdes 19 e Porto Araras I 15."
+    status: VALIDADO
+
+  - id: R-VIS-03
+    quando: cimento_asfaltico
+    emite:
+      - {exame: acuidade_visual, periodicidade_meses: 12, momentos: [adm, per, MR, dem]}
+    base_normativa: "Impermeabilização com manta asfáltica a quente (maçarico) — mesma
+      lógica da solda: exposição ocular a chama e radiação IR; NR-07 7.5.18.
+      [INTERPRETADO — prioridade na revisão de saída]: RQ.61 Viverde GHE 09 (validada) e Aurora
+      GHE 22 pedem DEM; Flamboyant 20, Vistamerica 20/21 e Varandas Bueno 18/38 não (2/7).
+      Decisão do Diovanni (26/09/2026) pela matriz validada."
+    status: INTERPRETADO
+
   - id: R-PKG-TRANSITO
     quando: transito_via_publica
     emite:

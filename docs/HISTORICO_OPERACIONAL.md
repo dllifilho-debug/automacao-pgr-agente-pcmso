@@ -10386,3 +10386,59 @@ bloco da regra.
 
 **Verificação.** Suíte completa (árvore parada): **1461 passed, 6 skipped, 0 failed** (885.36s), +4
 exato sobre 1457. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
+
+## Sessão (branch `claude/jolly-wozniak-iz0ley`, pós-merge do PR #393) — 26/09/2026 — IMPLEMENTAÇÃO: acuidade visual no demissional (`R-VIS-01-solda`, `R-VIS-03`)
+
+**Origem.** Pendência "Acuidade Visual com DEM" (Aurora, 13 células: GHEs 16, 18, 20, 21, 22).
+
+**Norma (nível 1) — conferida nesta sessão.** Varredura de "acuidade/visual/oftalm/visão" nos PDFs
+oficiais de `app-auditoria-nrs/normas` (NR-01, 07, 10–13, 15–18, 20, 33, 35): nenhuma NR exige acuidade
+visual para solda nem no demissional; o único requisito de acuidade em exame é a NR-15 Anexo 6
+(mergulho). Base = NR-07 7.5.18 (critério do médico, risco classificado no PGR). Registro: a
+primeira resposta ao Diovanni afirmou "nenhuma NR exige" sem ter conferido — corrigido a pedido dele.
+
+**Precedente (nível 2).** PCMSO-modelo da Dra. Carolini (SECONCI 05/2024): acuidade para atividades
+críticas, eletricidade, solda, porteiros e vigias; para altura/confinado/motoristas "admissional e
+periódico". RQ.61 Viverde: acuidade em todos os GHEs, DEM só em GHE 10 (serralheria) e GHE 09 (manta
+asfáltica). Contagem no acervo (16 matrizes): **238 sem DEM, 15 com DEM** — a primeira contagem
+(242/11) lia linha a linha e perdia o "DEM" em célula quebrada (caso RQ.61 GHE 10); refeita juntando
+a célula. Serralheria/solda com DEM 7/9; manta asfáltica 2/7; Aurora 18/20/21 sem apoio em nenhum modelo.
+
+**Implementado (decisão do Diovanni: solda e manta).** Composto `solda_indicador` (manganês ou fumos
+metálicos, `[INTERPRETADO]`); `R-VIS-01-solda` (status `DERIVADO`) e `R-VIS-03` (`INTERPRETADO`),
+acuidade 12M `[adm, per, MR, dem]`. PROTOCOLO v108.
+
+**Efeito medido — 3 pares (worktree `origin/main 5ddae78` × árvore).** Fascino GHE-17: acuidade
+`[adm, per, MR]` → `[adm, per, MR, dem]`, igual ao gabarito; divergência de momentos 1→0. Porto Araras I
+e Vila Brasil idênticos. A 1ª tentativa da rodada `main` falhou na conversão `.doc` por dois
+LibreOffice concorrentes (perfil compartilhado) — instrumento, refeita em série. Esperado no Aurora:
+GHE 16 e 22 com DEM (6 células); 18/20/21 seguem divergentes por decisão (7) `[A MEDIR — matriz do app]`.
+
+**Testes.** `test_vis_demissional.py` (5 casos). Varredura inversa: 7 reversões (remover cada regra
+— bloco inteiro —, tirar `dem`, tirar cada agente do indicador, asfalto no R-VIS-03, solda como
+`todo_trabalhador`), 7/7 mortas.
+
+**Conferência da matriz_11 do Aurora (app pós-deploy de `5ddae78`; `.docx` sha256 `e7578847ef50e2d7…`,
+e PDF da tela com vínculo FDS↔GHE).** Comparador descartável (6 exames: clínico, hemograma, COHb,
+acuidade, reticulócitos, t,t-mucônico; 1º cargo de cada GHE). Duas correções do instrumento na própria
+passada: alternância de regex sem grupo e cabeçalho "GHE nn – " com travessão. Resultado: **R-CLI-05
+confirmada** — GHE 11 e 18 clínico 6M iguais ao gabarito; GHE 16 clínico 6M (R-CLI-03); **pacote do
+asfalto confirmado** — GHE 22 clínico, hemograma e COHb 6M iguais. Fecha os `[A MEDIR]` dos PRs #392 e
+#393. Divergências remanescentes: acuidade com DEM em 16/18/20/21/22 (anterior a esta branch; 16 e 22
+cobertos aqui, 18/20/21 por decisão), GHE 21 clínico 12M × 6M (TCA sem solvente clorado no PGR),
+GHE 22 reticulócitos e t,t-mucônico (por decisão). **Achado:** GHE 19 PORTARIA sem acuidade — R-VIS-02
+`[VALIDADO]` nunca materializada.
+
+**R-VIS-02 materializada (decisão do Diovanni, mesmo PR).** Primitivo `cargo_porteiro` (cargo do PGR
+normalizado; a Fase B não casa "Porteiro" com a chave `porteiro`). Precedente 10/12 portarias/vigias
+com acuidade; vigia fora por precedente dividido (Porto Araras I GHE 15, Vigia Diurno/Noturno, sem
+acuidade no gabarito; Vila Brasil GHE 18 e Bueno 24 com). 3 pares: nenhum tem cargo porteiro — saída
+igual à da passada anterior (só Fascino GHE-17 muda, pela solda). Testes: 4 casos em
+`test_vis_demissional.py`; varredura inversa 4/4 (remover a regra, pôr `dem`, tirar o `casefold`,
+`todo_trabalhador`). Uma reversão nomeada no comentário do teste negativo ("regex sem fronteira")
+não o matava — "portaria" não contém "porteir" — e saiu do comentário. A suíte da passada anterior
+foi interrompida em ~25% para incluir a R-VIS-02 e rodar uma vez só.
+
+**Verificação.** Suíte completa (árvore parada): **1470 passed, 6 skipped, 0 failed** (875.18s), +9
+exato sobre 1461 (5 de solda/manta + 4 de porteiro em `test_vis_demissional.py`). `mypy --strict`
+alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
