@@ -290,6 +290,12 @@ class Motivo:
     risco_origem: Optional[str]
     detalhe: Optional[str]
     status_regra: Optional[str] = None
+    # D-ARQ-87: o que ESTA regra pediu, antes do piso da consolidação — a linha
+    # consolidada guarda só o resultado; a regra que define a periodicidade é a
+    # de periodicidade_meses igual à da linha.
+    periodicidade_meses: Optional[int] = None
+    momentos: frozenset[Momento] = frozenset()
+    base_normativa: Optional[str] = None
 
 
 @dataclass

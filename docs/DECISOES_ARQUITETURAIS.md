@@ -4270,6 +4270,37 @@ Efeito lateral registrado, não aplicado: o 9.6.1 "c" dá literal ao nível de a
 
 **Base.** Sessão branch `claude/hopeful-ramanujan-rbgh4s`, 25/09/2026, ARQUITETURA. Fontes: NR-07 7.5.12 "b" (Portaria MTP 567/2022, PDF conferido em `claude/eager-fermat-txbn7h`); NR-09 nível de ação `[A CONFERIR]`; NR-15 Anexo 11 Quadro n.º 1 (via gabarito 003.DP, página oficial de NRs vigentes); NR-07 Anexos II e III. Leitura de código: `quantificacao.py`, `classificacao_ruido.py`, `leo_resolver.py`, `predicados.py` (`_ruido_acima_acao`), `estagios/emissao.py` (`_nivel_dispensa`), `regras.yaml` (R-AUD-01, R-AUD-04, R-BIO-04-*).
 
+## D-ARQ-87 — Memorial de raciocínio da matriz: cada `Motivo` guarda o que a própria regra pediu, antes do piso da consolidação
+
+**Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO da fatia 1 (26/09/2026). Fatiamento proposto pelo Claude, fatia 1 autorizada pelo Diovanni ("pode começar pela fatia 1 agora"). Fatias 2 e 3 são proposta, não ratificadas.
+
+Sessão branch `claude/cool-babbage-whh1zw`. Pedido do Diovanni: a matriz deve explicar como chegou em cada exame e periodicidade ("por que 6 meses e não 12"), para as médicas entenderem o raciocínio e para a correção delas apontar onde melhorar. Retoma a DT `claude/dreamy-mayer-os6jce`-01; a sequência de 19/09/2026 (depois de `D-ARQ-57` peça 5d) foi trocada pelo Diovanni nesta sessão.
+
+**Contexto — medido no código nesta sessão.**
+
+- A premissa da DT ("nenhum dado de proveniência persiste no caminho feliz") já não vale: `Motivo` carrega `regra_id`, `predicado`, `risco_origem` e `status_regra` (`D-ARQ-22` Parte B, `D-ARQ-72`), e a revisão na tela (`superficie/revisao_matriz.py`) mostra regra, status e origem.
+- **Ponto de perda 1 — periodicidade.** `stage_8_consolidacao` faz o piso (`min`) das periodicidades e une os momentos das regras que emitem o mesmo exame; a linha consolidada guarda só o resultado. Não havia como saber qual regra pediu o quê — o "por que 6 e não 12" se perdia. Nenhum outro estágio altera `periodicidade_meses` depois da emissão (grep em `motor/`).
+- **Ponto de perda 2 — base normativa.** O texto de `base_normativa` de cada regra (`regras.yaml`, 81/81 regras com o campo) ficava no protocolo; a saída tinha só o ID.
+- **Ponto de perda 3 — momentos.** Idem: o DEM de uma linha não dizia de qual regra veio.
+- Um único `Motivo` era construído por regra e compartilhado por todos os itens do `emite`.
+
+**Decisão.**
+
+**cl.1 — O `Motivo` é por item emitido, não por regra.** Três campos aditivos com default (`tipos.py`): `periodicidade_meses: Optional[int] = None`, `momentos: frozenset[Momento] = frozenset()`, `base_normativa: Optional[str] = None`, preenchidos em `emissao.py` com o que o item da regra pede. Construtores existentes seguem válidos.
+
+**cl.2 — A consolidação não muda.** Continua piso e união (`D-ARQ-39`); como já concatena os motivos, cada um sobrevive com o que pediu. A regra que define a periodicidade da linha é a de `periodicidade_meses` igual à da linha — derivável, não gravada.
+
+**cl.3 — `periodicidade_apos_15a` fora da fatia.** Só a família R-RX-01 o usa; entra se a fatia 2 precisar.
+
+**cl.4 — Fatias propostas.** (1) motor + a revisão na tela mostrando a periodicidade pedida por regra — **esta**; (2) memorial em anexo `.docx`, separado da matriz assinada: uma linha por exame e GHE com código estável (ex. `G16-COHB`), a regra que define e as que perderam, momentos por origem, base normativa, grau de certeza, `[INTERPRETADO]` primeiro e os exames dispensados com o motivo; (3) retorno das correções das médicas pelo código da linha, com contagem por regra.
+
+**Nota de aplicação — fatia 1 IMPLEMENTADA (26/09/2026).**
+
+- **Código:** `tipos.py` (cl.1); `emissao.py` monta o `Motivo` dentro do laço dos itens; `revisao_matriz.py` mostra `R-CLI-01 (12 meses), R-PKG-ASF (6 meses)` na coluna Regra.
+- **Testes:** `test_rastro_periodicidade.py` (4 casos). Varredura inversa: 6 reversões (não passar a periodicidade ao `Motivo`; gravar a periodicidade da linha em vez da do item; momentos vazios; momentos do primeiro item para todos; não passar a base normativa; revisão só com o `regra_id`), 6/6 mortas.
+
+**Base.** Sessão branch `claude/cool-babbage-whh1zw`, 26/09/2026. Leitura de `tipos.py`, `emissao.py`, `consolidacao.py`, `revisao_matriz.py`; DT `claude/dreamy-mayer-os6jce`-01.
+
 ---
 
 ## Histórico de revisões
@@ -4499,3 +4530,4 @@ Efeito lateral registrado, não aplicado: o 9.6.1 "c" dá literal ao nível de a
 | v221 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — fatia 1 de `D-ARQ-86`): **nota de aplicação em `D-ARQ-86`** (mesma ID, nenhuma cláusula alterada) — `lt_nr15` em 28 agentes; R-BIO-05 em BAIXO com medição abaixo do nível de ação em 21 regras (7 cancerígenos excluídos por decisão do Diovanni); painel de medições na tela com procedência de laudo; 3 pares determinísticos idênticos à `main`. |
 | v222 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-86`): **nota de aplicação em `D-ARQ-86`** (mesma ID, nenhuma cláusula alterada) — medição de sílica e PNOS na tela decide a faixa de R-RX-01; asbesto fora por decisão do Diovanni (resolver sem LEO, 0/29 PGRs), aberta `DT-(sessão claude/hopeful-ramanujan-rbgh4s)-01`. |
 | v223 | 25/09/2026 | Branch `feat/ambiente-deps-20260925` (AMBIENTE — dependências): **nota de aplicação em `D-ARQ-75`** (mesma ID, nenhuma cláusula alterada) — piso de streamlit 1.42.0 → 1.56.0, medido por versão (`st.user` em 1.45.0, `AppTest.file_uploader` em 1.56.0; 83/83 testes de tela em 1.56.0). |
+| v224 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (ARQUITETURA + IMPLEMENTAÇÃO, fatia 1 autorizada pelo Diovanni): **`D-ARQ-87` CRIADA** — memorial de raciocínio da matriz; `Motivo` por item com a periodicidade, os momentos e a base normativa que a regra pediu, antes do piso da consolidação; revisão na tela mostra a periodicidade por regra. Fatias 2 (memorial `.docx`) e 3 (retorno das correções) propostas. |

@@ -3,7 +3,8 @@
 RT lê para conferir de onde veio cada exame antes de levar a matriz à médica.
 
 Duas leituras por GHE:
-- por exame: regra, status da regra e origem do risco (`Motivo.risco_origem`,
+- por exame: regra (com a periodicidade que cada uma pediu, D-ARQ-87), status
+  da regra e origem do risco (`Motivo.risco_origem`,
   preenchido pelo motor só nas regras de agente direto — D-ARQ-22 Parte B,
   recorte atômico; nas demais aparece o predicado);
 - por agente: enquadramento no Decreto 3.048/1999, Anexo IV, lido do campo
@@ -53,11 +54,23 @@ def _origem(exame: ExameEmitido) -> str:
     return "predicado: " + " / ".join(dict.fromkeys(m.predicado for m in exame.motivos))
 
 
+def _regras(exame: ExameEmitido) -> str:
+    """Cada regra com a periodicidade que ela pediu (D-ARQ-87): quando duas
+    regras pedem o mesmo exame, a linha mostra por que ficou a menor."""
+    return ", ".join(
+        dict.fromkeys(
+            m.regra_id if m.periodicidade_meses is None
+            else f"{m.regra_id} ({m.periodicidade_meses} meses)"
+            for m in exame.motivos
+        )
+    )
+
+
 def _linha(exame: ExameEmitido, exames_vocab: dict[str, Any]) -> LinhaRevisao:
     return LinhaRevisao(
         exame=exames_vocab.get(exame.exame, {}).get("nome_exibicao", exame.exame),
         periodicidade=f"{exame.periodicidade_meses} meses",
-        regras=", ".join(dict.fromkeys(m.regra_id for m in exame.motivos)),
+        regras=_regras(exame),
         status=", ".join(dict.fromkeys(m.status_regra or "(sem status)" for m in exame.motivos)),
         origem=_origem(exame),
     )

@@ -10475,3 +10475,32 @@ periodicidade 12, momentos `[adm, per]`, `quando: todo_trabalhador`), 4/4 mortas
 
 **Verificação.** Suíte completa (árvore parada): **1473 passed, 6 skipped, 0 failed** (840.21s), +3
 exato sobre 1470. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
+
+## Sessão (branch `claude/cool-babbage-whh1zw`, pós-merge dos PRs #395 e #396) — 26/09/2026 — ARQUITETURA + IMPLEMENTAÇÃO: memorial de raciocínio, fatia 1 (`D-ARQ-87`)
+
+**Conferência da matriz_13 do Aurora (app pós-deploy do #395; `.docx` sha256 `a6a73efd3f3e7056…`).**
+Pareada com a matriz_12 por (GHE, cargo), 59 linhas nos dois: a única diferença é `Carboxihemoglobina no
+sangue (PER 6 meses)` nos 3 cargos do GHE 16 — fecha o `[A MEDIR]` do #395. O Servente também tem COHb
+no gabarito. Títulos de GHE variam entre rodadas (transcrição por IA), exames não.
+
+**GHE 20 (Operador de Grua) — decisão do #394 mantida.** O "achado" da sessão anterior já estava
+decidido (PROTOCOLO §5.6, "Fora do padrão, não seguido"). Medido: acuidade com DEM em 1/5 matrizes do
+acervo com operador de grua (só Aurora; sem DEM em Flamboyant, Vistamerica 12/25, RQ.61 Viverde e R78).
+A planilha da Dra. Patrícia 06/2025 (sem DEM para operação de máquinas pesadas; DEM só para solda;
+COHb 6M PER para policorte/solda) foi lida e depois removida do acervo a pedido do Diovanni por estar
+desatualizada (#396) — os registros dela ficam para a versão nova.
+
+**D-ARQ-87 (pedido do Diovanni: a matriz explicar como chegou em cada exame).** Retoma a DT
+`claude/dreamy-mayer-os6jce`-01 com a sequência trocada. Medido no código: a proveniência já persistia
+em `Motivo`; perdiam-se, na consolidação, a periodicidade e os momentos pedidos por cada regra, e o
+texto da base normativa não chegava à saída. Fatia 1: `Motivo` por item com os três campos;
+revisão na tela com a periodicidade por regra.
+
+**Testes.** `test_rastro_periodicidade.py` (4 casos). Varredura inversa 6/6. Na primeira passada, a
+reversão "periodicidade None" pegou também a linha do `ExameEmitido` (erro de tipo, não falha
+discriminante) — refeita só no `Motivo`.
+
+**Verificação.** Suíte completa (árvore parada): **1477 passed, 6 skipped, 0 failed** (881.92s), +4
+exato sobre 1473. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` tocado → `INDICE_DARQ`
+regenerado e `tests/test_gerar_indice_darq.py` 6 passed. Saída da matriz (exames, periodicidades,
+momentos) inalterada por construção: só `Motivo` ganhou campos e a coluna Regra da revisão mudou de forma.
