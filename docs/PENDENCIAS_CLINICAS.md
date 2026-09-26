@@ -1431,6 +1431,12 @@ Aurora a mesma médica pede 6M nos GHEs 11 (Quadro 1 MODERADO), 16 (Mn), 18/22 (
 (tricloroetileno). Decisão clínica do Diovanni: qual gatilho do semestral (Mn / cancerígeno / nível
 MODERADO+). Fascino (armador/serralheiro 6M) segue dependente de DT-003EQ-02 ("Maganês").
 
+**Nota (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026) — R-CLI-05 sucede R-CLI-02; Serralheria do
+Fascino resolvida.** Gatilho decidido sob D-ARQ-22 (nível 2, matriz do Aurora): cancerígeno IARC 1/2A
+com indicador biológico, ou agente com indicador biológico MODERADO+ (PROTOCOLO v106). DT-003EQ-02
+fechada pelo alias `Maganês`: Fascino GHE-17 em 6M, igual ao gabarito. **Resta aberto:** Fascino
+GHE-09 (Armação), 6M no gabarito sem manganês nem agente do Anexo I no PGR.
+
 ### DT-003EO-04 — `GHEPGR.cargos` chega como 1 string por GHE do parser da família Consciente; a expansão GHE→cargo de D-ARQ-73 não separa cargos reais `[FECHADA — 003.EP]`
 
 **Origem:** 003.EO, fatia 4 — medição contra o Fascino real (achado fora do previsto pela EMENDA 1); quantificado nas EMENDAs 3 e 4.
@@ -1541,7 +1547,7 @@ GHE-03 é o caso originalmente medido em 003.DZ. **GHE-06 é um 2º caso, não c
 
 **Status:** ABERTA.
 
-### DT-003EQ-02 — `Maganês` recusado pelo fuzzy: custo clínico do D-ARQ-64 medido `[ABERTA — decisão de dado]`
+### DT-003EQ-02 — `Maganês` recusado pelo fuzzy: custo clínico do D-ARQ-64 medido `[FECHADA — branch claude/jolly-wozniak-iz0ley, 26/09/2026]`
 
 **Origem:** 003.EQ, rodada real do Fascino.
 
@@ -1551,7 +1557,16 @@ GHE-03 é o caso originalmente medido em 003.DZ. **GHE-06 é um 2º caso, não c
 
 **Caminho candidato.** Alias medido sob D-ARQ-70 (grafia de corpus + fonte dupla + teste anti-FP) — `Maganês` é grafia medida em documento real, não hipótese. Não mexer na allowlist: `manganes` é slug carregado por definição.
 
-**Status:** ABERTA — decisão do Arquiteto, fatia própria.
+**Fechamento (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026, decisão do Diovanni).** Alias
+`termos: ["Maganês"]` em `manganes` (D-ARQ-70 Tier 1-C): 1 ocorrência medida, p. 82 do PGR do
+Fascino, GHE 17 SERRALHERIA; âncora no literal "Manganês e seus compostos" da NR-15 Anexo 12.
+Allowlist intocada. Medido nos 3 pares (`main` × árvore): Fascino GHE-17 ganha clínico 6M e
+manganês no sangue, iguais ao gabarito; Porto Araras I e Vila Brasil idênticos. **Anti-FP (cl.1.iv)
+não virou teste:** "Magnésio"/"Magnesita" não resolvem para `manganes` nem com `fuzzy_permitido`
+ligado (distância 3 e 4), então o teste não teria reversão que o matasse (CLAUDE.md). O
+deslocamento de slug fica coberto pelo teste de resolução exata.
+
+**Status:** FECHADA.
 
 ### DT-003EQ-03 — `status == "PRELIMINAR"` não aparece na tela nem no documento `[ABERTA — não-bloqueante]`
 

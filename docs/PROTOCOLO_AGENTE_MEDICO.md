@@ -204,7 +204,7 @@ Exame clínico **anual** é o piso — vale inclusive para administrativo sem ri
 > ADM/PER/MRO/RET/DEM]`. Quatro testes falha-sem/passa-com em `test_orquestrador.py`.
 > Conteúdo clínico inalterado.
 
-#### R-CLI-02 — Quadro 1 e Quadro 2 do Anexo I (NR-07) `[VALIDADO]`
+#### R-CLI-02 — Quadro 1 e Quadro 2 do Anexo I (NR-07) `[DEPRECATED — sucedida por R-CLI-05; critério "qualquer agente do Anexo I" refutado por medição]`
 Exposição a agente biomonitorado do Anexo I (Quadro 1 ou Quadro 2) demanda clínico **semestral**. Quando exposto a agentes de **ambos os Quadros**, registrar em **uma única linha** semestral (não duplicar).
 
 > **Changelog 003.AA (mesma ID — relabel sem mudança de saída).** "Anexo I / Anexo II" → "Quadro 1 / Quadro 2 do Anexo I" (567/2022; "Anexo II" da NR-07 é ruído, não químico-com-LT). O conjunto de agentes que dispara o semestral não muda → saída estável → ID preservada.
@@ -232,6 +232,29 @@ O **manganês** é o único agente fora do Anexo I (Quadros 1 e 2) da NR-07 que 
 > literal conferida na mesma sessão: NR-15 Anexo 12, "Manganês e seus compostos", item 7 — exames
 > periódicos *"de 6 (seis) meses a anualmente para os trabalhadores de superfície"*,
 > independentemente do LT `[DERIVADO]`; 6M fixo `[INTERPRETADO]`. Caso: Aurora GHE 16.
+
+#### R-CLI-05 — Clínico semestral: cancerígeno com indicador biológico ou agente do Anexo I MODERADO+ `[DERIVADO — matriz Dra. Patrícia, Aurora 27/08/26]`
+Sucede R-CLI-02. Clínico **semestral** (periódico 6M) quando o GHE tem:
+- **(a)** cancerígeno IARC 1/2A com indicador biológico no Anexo I da NR-07 (Quadro 1 ou 2), **em qualquer nível**: arsênio, benzeno, 1,3-butadieno, cádmio, cromo hexavalente, diclorometano, dimetilformamida, estireno, óxido de etileno, tetracloroetileno, tricloroetileno. Lista = gabarito 003.DP (`docs/referencia/GABARITO_003DP_anexo11-12_iarc.md`) ∩ agentes com indicador; chumbo e inseticidas inibidores da colinesterase ficaram ESCALAR no 003.DP e só entram por (b); **ou**
+- **(b)** agente com indicador biológico no Anexo I classificado **MODERADO ou acima** na avaliação P×S do PGR. Poeira/sílica sem indicador biológico não conta, em nenhum nível.
+
+Base: NR-07 fixa o clínico periódico anual e admite intervalo menor a critério do médico — a norma não crava gatilho para o semestral (nível 1 não resolve). Nível 2 (matriz como precedente, D-ARQ-22 Parte A): no Aurora a Dra. Patrícia pede 6M no GHE 11 (MEK, THF, ciclohexanona MODERADO) e no GHE 18 (benzeno da aguarrás); pede 12M onde os agentes do Anexo I são BAIXO/IRRELEVANTE (Porto Araras I 06/07/26, Vila Brasil 26/08/26) e onde só poeira/sílica é MODERADO (10 GHEs do Aurora, 8 de Porto Araras I, 6 de Vila Brasil, 2 do Fascino).
+
+> **Medição de decisão (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026).** A proposta inicial
+> "(b) qualquer químico MODERADO+" foi refutada: 6M indevido por sílica/poeira em Fascino (−3
+> células), Porto Araras I (−22), Vila Brasil (−8) e 10 GHEs do Aurora. Com (b) restrita a agente
+> com indicador biológico, os 3 pares determinísticos ficam idênticos à `main`. **Limite declarado:**
+> nesses 3 pares nem (a) nem (b) disparam — a evidência a favor é só o Aurora, avaliado à mão sobre o
+> inventário do PGR (rota LLM, não reproduzível offline). PGR sem nível P×S na linha do risco deixa
+> (b) sem disparar (12M, lado menos protetivo). Sem explicação no PGR: Aurora GHE 21 (TCA pedido
+> sem solvente clorado declarado) e GHE 22 (asfalto — decisão própria), Fascino GHE-09 (Armação).
+> `[INTERPRETADO — prioridade na revisão de saída]` para essas bordas.
+
+> **Nota de implementação (mesma branch).** `regras.yaml` `R-CLI-05`
+> (`quando: {ou: [cancerigeno_com_ibe, agente_ibe_moderado_ou_acima]}`, `exame_clinico` 6M
+> `[per]`, status `DERIVADO`); composto `cancerigeno_com_ibe` em `predicados_compostos.yaml`;
+> primitivo `agente_ibe_moderado_ou_acima` em `predicados.py`. Demais momentos vêm de R-CLI-01
+> (consolidação D-ARQ-39). Testes: `test_cli_semestral.py`.
 
 #### R-CLI-04 — Risco físico isolado `[VALIDADO]`
 **Nenhum** risco físico (ruído, calor, vibração) isoladamente justifica clínico semestral. O default anual prevalece.
@@ -1021,3 +1044,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v103 | 25/09/2026 | Branch `claude/determined-fermi-xxah3h` (IMPLEMENTAÇÃO, ordem do Diovanni): **`R-CLI-03` materializada** (§4, mesma ID, conteúdo inalterado; base NR-15 Anexo 12 item 7). **`R-CLI-02` não materializada** — medida contra 3 gabaritos, +5 divergências (Porto Araras I, Vila Brasil com clínico anual em Quadro 1 BAIXO); bloqueador reportado, nota na regra. |
 | v104 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — `D-ARQ-86` fatia 1, ratificada): **emenda em `R-BIO-05`** (§5.9, mesma ID) — BAIXO dispensa o indicador do Quadro 1 só com medição do agente abaixo do nível de ação (NR-07 7.5.12 "b" c/c NR-09 9.6.1 "b"; LT da NR-15 Anexo 11); 21 agentes com LT, 7 cancerígenos IARC 1/2A excluídos por decisão do Diovanni. IRRELEVANTE inalterado. 3 pares determinísticos idênticos à `main`. |
 | v105 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — `D-ARQ-86` fatia 2): **nota de aplicação em `R-RX-01`** (§5.4, mesma ID, conteúdo inalterado) — medição de sílica (fração e %quartzo) e de PNOS informada na tela decide a faixa do RX OIT; origem na revisão com o laudo. Asbesto fora (decisão do Diovanni). 3 pares determinísticos idênticos à `main`. |
+| v106 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob a hierarquia D-ARQ-22): **`R-CLI-05` CRIADA** (§4) — clínico 6M por (a) cancerígeno IARC 1/2A com indicador biológico no Anexo I (lista 003.DP) ou (b) agente com indicador biológico MODERADO+ no PGR `[DERIVADO — matriz Patrícia, Aurora]`. **`R-CLI-02` DEPRECATED**, sucedida por `R-CLI-05` (critério "qualquer agente do Anexo I" refutado por medição). Alias `Maganês` em `manganes` (DT-003EQ-02, D-ARQ-70): Fascino GHE-17 passa a clínico 6M e manganês no sangue, iguais ao gabarito. |

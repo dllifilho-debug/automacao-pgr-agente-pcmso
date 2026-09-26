@@ -10296,3 +10296,58 @@ erraria esses dois títulos.
 
 **Verificação.** Suíte completa (árvore parada): **1441 passed, 6 skipped, 0 failed** (901.46s),
 +9 exato sobre 1432. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
+
+## Sessão (branch `claude/jolly-wozniak-iz0ley`, pós-merge do PR #391) — 26/09/2026 — IMPLEMENTAÇÃO: `R-CLI-05` (sucede `R-CLI-02`) e alias `Maganês`
+
+**Origem.** Regra nova no CLAUDE.md (`f83f6a9`): decisão clínica é da sessão — Claude propõe,
+Diovanni decide, hierarquia D-ARQ-22 Parte A; as médicas validam a saída. Proposta para o gatilho
+do clínico semestral: (a) cancerígeno com indicador biológico ou (b) químico MODERADO+.
+
+**Medição de decisão (instrumento descartável no scratchpad, sobre `comparar_matriz_gabarito`).**
+Primeira passada inválida e descartada: pareava cargo pelo nome cru, sem o sufixo de
+`_chaves_por_ocorrencia` (2–3 células por PGR), e filtrava químico por `RiscoPGR.tipo`, que chega
+vazio nos três PGRs. Refeita: 41/45/74 células de clínico pareadas. No gabarito, clínico sem
+número = 12M implícito ("Exame Clínico (ADM, PER, MRO, RET, DEM)"). Resultado: **(b) como proposta
+refutada** — sílica/poeira MODERADO dá 6M indevido em Fascino (−3), Porto Araras I (−22), Vila
+Brasil (−8) e em 10 GHEs do Aurora (inventário extraído do PGR; gabarito do Aurora conferido no
+PDF: 6M só em 11, 16, 18, 21, 22). Bloqueador reportado; Diovanni aprovou a variante (b) restrita a
+agente com indicador biológico.
+
+**Implementado.** `R-CLI-05` em `regras.yaml`, status `DERIVADO`; composto `cancerigeno_com_ibe`
+(11 agentes = gabarito 003.DP ∩ `tipo_ibe`; lista explícita porque `is_carcinogeno_iarc` do
+vocabulário diverge do 003.DP — arsênio está `false`); primitivo `agente_ibe_moderado_ou_acima`.
+`R-CLI-02` DEPRECATED no PROTOCOLO (ID nova porque a saída muda — INSTRUCOES, precedentes
+R-BIO-02→04, R-ESP-01→02). Alias `termos: ["Maganês"]` em `manganes` (DT-003EQ-02 FECHADA; 1
+ocorrência, Fascino p. 82, GHE 17). PROTOCOLO v106; notas em DT-003EO-03 e DT-003EQ-02.
+
+**Efeito medido — 3 pares determinísticos, worktree `origin/main` × árvore.** Fascino: GHE-17
+resolve manganês → clínico 12M→6M e `manganes_sangue` 6M novo, iguais ao gabarito; periodicidade
+divergente 2→1, subemissão 5→4, nenhuma divergência nova. Porto Araras I e Vila Brasil: saída
+idêntica. Nos 3 pares, R-CLI-05 não dispara — só o Aurora exercita a regra (rota LLM, avaliação
+manual): esperado 11 e 18 (com a FDS da aguarrás anexada) passarem a 6M `[A MEDIR — próxima matriz
+do app]`. Sem explicação no PGR: Aurora 21 e 22, Fascino GHE-09.
+
+**Testes.** `test_cli_semestral.py` (15 casos) e 1 em `test_resolvedor_termos.py`; guarda do
+índice 168→169 atualizado com a razão. Varredura inversa: 8 reversões nomeadas (tirar perna (b);
+tirar perna (a); incluir BAIXO; não exigir indicador; tirar TCE da lista; pôr chumbo na lista;
+tirar o alias; e a do anti-FP), **7/8 mortas** — o anti-FP ("Magnésio"/"Magnesita") não é morto
+pela reversão "liberar `manganes` no fuzzy" (distância 3 e 4) e foi retirado por não discriminar.
+
+**1ª suíte completa (árvore parada): 11 failed, 1446 passed, 6 skipped** — todas em
+`test_regra_biomonitoramento.py` (`grupo_ee` e `grupo_sc_agente_unico`), exatamente os 11 agentes de
+`cancerigeno_com_ibe`: o teste contava "1 linha de origem em risco" e R-CLI-05 soma o clínico 6M
+antes da consolidação. Efeito legítimo, não previsto antes da suíte. Corrigido só nesses dois
+testes (`_sem_clinico` na contagem, motivo nomeado no comentário); helper compartilhado
+`linhas_de_risco` intocado; asserções do indicador (exame, regra, 6M, momentos) inalteradas.
+
+**2ª suíte completa: 1 failed, 1456 passed, 6 skipped** — `test_orquestrador.py::
+test_grafia_real_recusada_por_fuzzy_e_ghe_nao_sai_valida` (T7, Emenda 003.FC), que já estava entre
+as 11 da 1ª passada (a leitura da 1ª só mostrou as 7 últimas linhas — erro de leitura meu, não do
+teste). T7 usava "Maganês" como testemunha real de `fuzzy_recusado`; o alias a resolveu, o mesmo
+conflito de quando "Metiletilcetona" ganhou alias. Testemunha trocada para "Silício" (FUZZY-FP
+medido ao vivo em 003.DV, origem da D-ARQ-64; distância 2 de `silica`), checagem e reversão iguais.
+Reversão reaplicada e medida: `fuzzy_recusado` em `CAUSAS_ACERTO_NAO_RESOLUCAO` derruba T6 e T7.
+
+**3ª suíte completa (árvore parada): 1457 passed, 6 skipped, 0 failed** (886.63s), +16 exato sobre
+1441 (15 casos em `test_cli_semestral.py` + `test_maganes_resolve_exato_para_manganes`). `mypy
+--strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
