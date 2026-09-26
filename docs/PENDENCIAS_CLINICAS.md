@@ -3560,3 +3560,39 @@ pela família Consciente e só o GHE Serralheria do Fascino tem `sold|eletrodo` 
 riscos); na rota por IA (Aurora e demais CMO) `[A MEDIR]`, sem chave no container.
 
 **Status:** ABERTA — não-bloqueante (a saída do Aurora GHE 16 é a mesma pelos dois gatilhos).
+
+### DT-(sessão `claude/cool-babbage-whh1zw`)-02 — Espirometria para fumos metálicos e poeira metálica: a planilha da Dra. Patrícia (versão atualizada) pede, o motor não tem regra `[ABERTA — decisão do Diovanni]`
+
+**Origem.** Planilha da Dra. Patrícia, versão atualizada (`d7a7612`, 26/09/2026), linha 61: o gatilho de
+"ESPIROMETRIA 24M (ADM, PER, MR, DEM)" mudou de "névoas/neblinas, tintas, colas, impermeabilização" para
+o grupo "PNOS, poeira de gesso, madeira, poeira metálica, espaço confinado, amido… fumos metálicos".
+
+**Situação medida.** O motor emite espirometria 24M só por `poeira_mineral` (sílica, asbesto, PNOS —
+`R-ESP-02`) e `poeira_de_madeira` (`R-ESP-03`). Fumos metálicos, poeira metálica, gesso e espaço
+confinado ficam fora. O gatilho antigo (tintas etc.) nunca foi regra. Nas 22 matrizes de set/2026,
+26/26 cargos de serralheria/solda têm espirometria 24M; nos casos do acervo medidos até aqui o PGR de
+serralheria traz sílica (Aurora GHE 16, Fascino GHE 17) e o exame já sai. GHE de solda sem poeira no
+PGR `[A MEDIR — nos PGRs do acervo]`.
+
+**Caminho proposto.** Regra `[DERIVADO — planilha Patrícia + 26/26]` com gatilho `solda_indicador` (ou
+`fumos_metalicos`), espirometria 24M (adm, per, MR, dem). Gesso e espaço confinado ficam para medição
+própria.
+
+**Status:** ABERTA — decisão do Diovanni.
+
+### DT-(sessão `claude/cool-babbage-whh1zw`)-03 — Avaliação psicossocial: planilha da Dra. Patrícia restringe, matrizes recentes dão a todos `[ABERTA — decisão do Diovanni]`
+
+**Origem.** Planilha da Dra. Patrícia, versão atualizada (`d7a7612`): "Avaliação Médica de Saúde Mental"
+para riscos psicossociais tolerável a substancial (ADM, PER 12M, MR); "Avaliação Psicossocial" só para
+trabalho em altura com riscos psicossociais e espaço confinado. A linha de máquinas/veículos pesados saiu.
+
+**Situação medida.** `R-PSY-03` `[INTERPRETADO]` emite as duas avaliações a todo GHE quando o PGR tem a
+seção psicossocial. Nas 22 matrizes de set/2026 as duas saem para quase todos os cargos em 16
+documentos (ex.: Vila Brasil 88/91, Floramazônia 79/82 — o resto são linhas sem cargo); dividem
+Consciente Administração Fazenda Santa Luzia (psicossocial em 11 cargos de manutenção, produção e
+operação; saúde mental em 58) e, em parte, as duas Engeseg; Serrinha 201 tem as duas em cerca de metade
+das linhas `[A MEDIR — quantas são cargo]`; Casamerica (obra nova) e o PCMSO da Casa Brasileira não
+foram medidos pelo instrumento (formato). A matriz do Aurora (validação Dra.
+Carolini) dá as duas a todos. Precedentes de nível 2 em conflito.
+
+**Status:** ABERTA — decisão do Diovanni. Enquanto isso, `R-PSY-03` segue como está.

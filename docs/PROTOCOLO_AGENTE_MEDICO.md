@@ -570,7 +570,9 @@ Acuidade visual em **adm/per/MR** para toda atividade crítica:
 > 15–18, 20, 33, 35; o único requisito de acuidade em exame é a NR-15 Anexo 6, mergulho). Base: NR-07
 > 7.5.18, risco que justifica = radiação não ionizante do arco (UV/IR). Precedente: PCMSO-modelo da
 > Dra. Carolini (SECONCI 05/2024: acuidade "para expostos a… solda"), RQ.61 Viverde GHE 10 com DEM e
-> 7/9 serralherias do acervo com DEM (sem DEM: as duas do Vistamerica). O gatilho por manganês é
+> 7/9 serralherias do acervo com DEM (sem DEM: as duas do Vistamerica). Reforço (26/09/2026): planilha
+> da Dra. Patrícia, versão atualizada ("SOLDA → acuidade ADM, PER 12M, MR, DEM", única linha de acuidade
+> com DEM), e 23/26 cargos de solda com DEM nas 22 matrizes de set/2026. O gatilho por manganês é
 > `[INTERPRETADO]`: os PGRs não trazem "solda" como agente, e o manganês do eletrodo é o marcador que
 > resolve nos casos reais (Aurora GHE 16, Fascino GHE 17).
 
@@ -592,7 +594,10 @@ Viverde (GHE 09, validada) e o Aurora (GHE 22) pedem DEM; Flamboyant 20, Vistame
 Varandas Bueno 18/38 não (2/7). Decisão do Diovanni (26/09/2026) pela matriz validada.
 
 **Fora do padrão, não seguido:** DEM de acuidade no Aurora 18 (pintura), 20 (grua) e 21 (manutenção)
-— nenhum modelo das coordenadoras nem outra matriz do acervo sustenta.
+— nenhum modelo das coordenadoras nem outra matriz do acervo sustenta. Grua, medido em 26/09/2026:
+1/5 matrizes anteriores com DEM (só o Aurora; RQ.61 Viverde validada sem) e 0/18 cargos de grua ou
+minigrua nas 22 matrizes de set/2026; a planilha da Dra. Patrícia (versão atualizada) dá acuidade a
+altura, eletricidade, porteiro e máquinas pesadas em ADM, PER 12M, MR, sem DEM.
 
 ### 5.7 Avaliação Psicossocial
 
@@ -892,7 +897,9 @@ elaborador "CO não inventariado" é DT própria.
 **Base.** Soldagem a arco com eletrodo revestido e corte a quente geram CO; NR-07 Anexo I Quadro 1:
 monóxido de carbono → carboxihemoglobina. Precedente (D-ARQ-22 nível 2): COHb 6M PER na serralheria
 de CMO Aurora GHE 16 (27/08/26) e Varandas Flamboyant GHE 17 (16/09/26); Vistamerica GHE 18
-(08/12/25) sem. Nenhum dos PGRs CMO inventaria o CO (Aurora GHE 16: carbonato de cálcio, dióxido de
+(08/12/25) sem. Reforço (26/09/2026): planilha da Dra. Patrícia, versão atualizada ("POLICORTE, SOLDA →
+COHb 6M PER"), e 22/26 cargos de solda com COHb nas 22 matrizes de set/2026. Nenhum dos PGRs CMO
+inventaria o CO (Aurora GHE 16: carbonato de cálcio, dióxido de
 titânio, ferro, manganês, zircônio, poeira, sílica — "fumos e gases de soldagem" do eletrodo E-6013).
 Quando o PGR inventaria o CO, `R-BIO-04-monoxido_de_carbono` emite o mesmo exame e a consolidação une.
 Gatilho `[INTERPRETADO — prioridade na revisão de saída]`: o motor não lê a fonte geradora (DT
@@ -1128,3 +1135,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v107 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-ASF` e `R-PKG-ASF-CO` CRIADAS** (§6) — asfalto/cimento asfáltico → clínico 6M e hemograma 6M (NR-07 Anexo V, 7.5.8, 7.5.18); cimento asfáltico (a quente) → carboxihemoglobina 6M (NR-07 Anexo I Quadro 1, CO). Sem t,t-mucônico/reticulócitos (NR-15 Anexo 13-A). Slug `cimento_asfaltico` com alias medido em 2 PGRs CMO. Nota de atribuição em `R-CLI-05` (Aurora: coordenação Dra. Patrícia, validação Dra. Carolini). |
 | v108 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **exceção do soldador de `R-VIS-01` materializada** como `R-VIS-01-solda` (§5.6, mesma ID, conteúdo inalterado; gatilho `solda_indicador` = manganês ou fumos metálicos `[INTERPRETADO]`); **`R-VIS-03` CRIADA** (manta asfáltica a quente → acuidade com DEM, `[INTERPRETADO]`, RQ.61 Viverde GHE 09). **`R-VIS-02` materializada** (porteiro, primitivo `cargo_porteiro`; vigia fora — precedente dividido). Nenhuma NR exige acuidade para solda (NR-07 7.5.18). Fascino GHE-17: acuidade com DEM, igual ao gabarito. |
 | v109 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-SOLD-CO` CRIADA** (§6) — solda (`solda_indicador`, `[INTERPRETADO]`) → carboxihemoglobina 6M PER (NR-07 Anexo I Quadro 1, CO), precedente Aurora GHE 16 e Flamboyant GHE 17. Gatilho pela fonte geradora declarada fica como DT (o motor não lê o campo). |
+| v110 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (CONHECIMENTO — precedente, sem mudança de regra): planilha da Dra. Patrícia (versão atualizada, `d7a7612`) e 22 matrizes de set/2026 citadas como precedente em **`R-VIS-01-solda`** (§5.6), **`R-PKG-SOLD-CO`** (§6) e na nota "Fora do padrão" de §5.6 (grua sem DEM: 0/18 cargos). |

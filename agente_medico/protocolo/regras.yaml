@@ -102,7 +102,9 @@ regras:
       (conferido nos textos oficiais do acervo); entra pelo NR-07 7.5.18 — risco que justifica:
       radiação não ionizante do arco (UV/IR). [DERIVADO — PCMSO-modelo Dra. Carolini SECONCI
       05/2024 (acuidade para expostos a solda) e 7/9 serralherias do acervo com DEM, inclusive
-      RQ.61 Viverde GHE 10]. Gatilho por manganês/fumos metálicos [INTERPRETADO] — ver
+      RQ.61 Viverde GHE 10; planilha Dra. Patrícia (versão atualizada, set/2026): 'SOLDA →
+      acuidade ADM, PER 12M, MR, DEM'; 22 matrizes de set/2026: 23/26 cargos de solda com DEM].
+      Gatilho por manganês/fumos metálicos [INTERPRETADO] — ver
       `solda_indicador`."
     status: DERIVADO
 
@@ -407,7 +409,10 @@ regras:
     base_normativa: "Soldagem a arco com eletrodo revestido e corte a quente geram CO no GHE;
       NR-07 Anexo I Quadro 1: monóxido de carbono → carboxihemoglobina. [DERIVADO — CMO Aurora
       GHE 16 (27/08/26) e Varandas Flamboyant GHE 17 (16/09/26) com COHb 6M PER na serralheria;
-      Vistamerica GHE 18 (08/12/25) sem; nenhum dos PGRs CMO inventaria o CO]. Gatilho
+      Vistamerica GHE 18 (08/12/25) sem; planilha Dra. Patrícia (versão atualizada, set/2026):
+      'POLICORTE, SOLDA → COHb 6M PER'; 22 matrizes de set/2026: 22/26 cargos de solda com COHb,
+      sem em Vistamerica GHE 17 (16/09/26) e Serrinha 201 GHE 13; nenhum dos PGRs CMO inventaria
+      o CO]. Gatilho
       `solda_indicador` (manganês ou fumos metálicos) [INTERPRETADO], o mesmo de R-VIS-01-solda;
       gatilho pela fonte geradora declarada é DT própria. Quando o PGR inventaria o CO,
       R-BIO-04-monoxido_de_carbono emite o mesmo exame e a consolidação une."
