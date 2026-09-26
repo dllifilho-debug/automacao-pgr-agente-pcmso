@@ -3535,3 +3535,26 @@ asfalto/sílica/poeira de madeira etc.), com a fonte do 003.DP. Qual lista a NR-
 
 **Status:** ABERTA — não-bloqueante.
 
+
+### DT-(sessão `claude/cool-babbage-whh1zw`)-01 — Gatilho de solda por marcador de agente, não pela fonte geradora declarada `[ABERTA — não-bloqueante]`
+
+**Origem.** `R-PKG-SOLD-CO` (26/09/2026). O gatilho escolhido pelo Diovanni foi "soldagem declarada
+como fonte geradora no GHE" (via exposição real, R-GHE-05); a medição antes de implementar mostrou
+que o motor não lê esse campo.
+
+**Causa medida.** As três rotas de extração preenchem `RiscoVerbatim.fonte_geradora`
+(`parser_familia_consciente.py`, `transcritor_gemini_pgr.py`, `transcritor_gemini_card.py`), mas a
+hidratação o descarta: `RiscoPGR` (`tipos.py`) não tem o campo e os três construtores em
+`hidratacao.py` não o passam. Nenhum predicado alcança "soldagem"/"eletrodo". Por isso
+`R-VIS-01-solda` e `R-PKG-SOLD-CO` disparam por `solda_indicador` (manganês ou fumos metálicos),
+marcador `[INTERPRETADO]`: um GHE com manganês sem solda recebe acuidade com DEM e COHb.
+
+**Caminho (a1).** `fonte_geradora: str = ""` em `RiscoPGR`, passado nos três construtores da
+hidratação; primitivo `soldagem_declarada` (fonte geradora dos riscos do GHE casa `sold|eletrodo`);
+`solda_indicador` passa a usá-lo nas duas regras de solda de uma vez. Muda `tipos.py` → nota em
+`DECISOES_ARQUITETURAIS.md`. Risco a medir antes: falso positivo quando outro GHE cita "máquina de
+solda" só como equipamento. Medido nesta sessão, rota determinística: dos PGRs do acervo, 3 parseiam
+pela família Consciente e só o GHE Serralheria do Fascino tem `sold|eletrodo` na fonte geradora (12
+riscos); na rota por IA (Aurora e demais CMO) `[A MEDIR]`, sem chave no container.
+
+**Status:** ABERTA — não-bloqueante (a saída do Aurora GHE 16 é a mesma pelos dois gatilhos).

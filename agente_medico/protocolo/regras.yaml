@@ -400,6 +400,19 @@ regras:
       R-BIO-04-monoxido_de_carbono emite o mesmo exame e a consolidação une."
     status: DERIVADO
 
+  - id: R-PKG-SOLD-CO
+    quando: solda_indicador
+    emite:
+      - {exame: carboxihemoglobina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "Soldagem a arco com eletrodo revestido e corte a quente geram CO no GHE;
+      NR-07 Anexo I Quadro 1: monóxido de carbono → carboxihemoglobina. [DERIVADO — CMO Aurora
+      GHE 16 (27/08/26) e Varandas Flamboyant GHE 17 (16/09/26) com COHb 6M PER na serralheria;
+      Vistamerica GHE 18 (08/12/25) sem; nenhum dos PGRs CMO inventaria o CO]. Gatilho
+      `solda_indicador` (manganês ou fumos metálicos) [INTERPRETADO], o mesmo de R-VIS-01-solda;
+      gatilho pela fonte geradora declarada é DT própria. Quando o PGR inventaria o CO,
+      R-BIO-04-monoxido_de_carbono emite o mesmo exame e a consolidação une."
+    status: DERIVADO
+
   - id: R-PKG-BZ
     quando: benzeno
     emite:
