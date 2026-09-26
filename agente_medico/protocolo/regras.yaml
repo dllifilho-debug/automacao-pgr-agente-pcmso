@@ -338,6 +338,33 @@ regras:
     base_normativa: "Poeira de madeira → RX OIT 60M. SEM âncora no Anexo III da NR-07 (não é sílica/asbesto/carvão do Quadro 1, nem PNOS do Quadro 2 — agente identificável, DT-003EJ-01) — origem IARC Monographs Vol.62/1995 e 100C/2012 (Grupo 1, carcinogênico p/ humanos) + matriz Patrícia, não norma brasileira conferida [INTERPRETADO]. Medido em 2 PGRs independentes, mesma médica, mesmo valor: GHE-08 Carpintaria (PGR CONSCIENTE SPE 0030 FASCINO, 15.07.26) e GHE-04 Carpintaria (PGR CMO Residencial Aurora Lago das Rosas, 27.08.26), ambos RX 60M. DT-003EJ-01 RESOLVIDA por esta regra."
     status: INTERPRETADO
 
+  - id: R-PKG-ASF
+    quando: {ou: [asfalto, cimento_asfaltico]}
+    emite:
+      - {exame: exame_clinico, periodicidade_meses: 6, momentos: [per]}
+      - {exame: hemograma,     periodicidade_meses: 6, momentos: [adm, per, MR, dem]}
+    base_normativa: "Asfalto/betume é cancerígeno com CAS no inventário do PGR → NR-07 Anexo V
+      (itens 2.1, 3.1.1 e 4.1.1: exames complementares obrigatórios sem avaliação ambiental);
+      sem indicador biológico no Anexo I, o complementar é o do 7.5.18 (a critério do médico,
+      tecnicamente justificado) e o clínico em intervalo menor pelo 7.5.8 II a 1. NR-15 Anexo
+      13 trata o betume como cancerígeno. [DERIVADO — 7/7 GHEs de impermeabilização com
+      asfalto em 6 matrizes do acervo, inclusive RQ.61 Viverde validada: clínico 6M e
+      hemograma 6M]. Sem t,t-mucônico nem reticulócitos: regime do benzeno exige benzeno ou
+      mistura ≥1% (NR-15 Anexo 13-A item 2; NR-07 Anexo V 4.2.1)."
+    status: DERIVADO
+
+  - id: R-PKG-ASF-CO
+    quando: cimento_asfaltico
+    emite:
+      - {exame: carboxihemoglobina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "Cimento asfáltico é aplicado a quente (caldeira a 180 °C e maçarico) —
+      CO da combustão; NR-07 Anexo I Quadro 1: monóxido de carbono → carboxihemoglobina.
+      [DERIVADO — 7/7 GHEs de manta asfáltica no acervo com COHb 6M PER; PGRs Viverde V02 e
+      Vistamerica Ver.02 inventariam o CO da manta, CMO Aurora e Vistamerica 07/26 não].
+      Emulsão a frio (asfalto genérico) não dispara. Quando o PGR inventaria o CO,
+      R-BIO-04-monoxido_de_carbono emite o mesmo exame e a consolidação une."
+    status: DERIVADO
+
   - id: R-PKG-BZ
     quando: benzeno
     emite:

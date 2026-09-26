@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_169_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_171_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -58,7 +58,21 @@ def test_indice_real_tem_169_entradas(indice_real: IndiceTermos) -> None:
     # R-PKG-TRANSITO).
     # 168 -> 169 (branch `claude/jolly-wozniak-iz0ley`): +1 alias "Maganês" em `manganes`
     # (DT-003EQ-02, D-ARQ-70 Tier 1-C, PGR Fascino GHE 17).
-    assert len(indice_real.slug_por_forma) == 169
+    # 169 -> 171 (mesma branch): +1 slug `cimento_asfaltico` e +1 termo "Cimento Asfáltico
+    # 95/30 - Asfalto" (R-PKG-ASF-CO; PGRs CMO Aurora e Vistamerica 07/26).
+    assert len(indice_real.slug_por_forma) == 171
+
+
+def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
+    indice_real: IndiceTermos,
+) -> None:
+    # Grafia dos PGRs CMO (Aurora GHE 22). Reversões que matam: tirar o termo de
+    # `cimento_asfaltico` (volta a vocabulario_ausente); gravá-lo em `asfalto` (perde
+    # a distinção aplicação a quente → R-PKG-ASF-CO não dispara).
+    resolucao = resolver_termo("Cimento Asfáltico 95/30 - Asfalto", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "cimento_asfaltico"
+    assert resolver_termo("Asfalto", indice_real).slug == "asfalto"
 
 
 def test_maganes_resolve_exato_para_manganes(indice_real: IndiceTermos) -> None:

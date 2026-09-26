@@ -234,6 +234,10 @@ O **manganês** é o único agente fora do Anexo I (Quadros 1 e 2) da NR-07 que 
 > independentemente do LT `[DERIVADO]`; 6M fixo `[INTERPRETADO]`. Caso: Aurora GHE 16.
 
 #### R-CLI-05 — Clínico semestral: cancerígeno com indicador biológico ou agente do Anexo I MODERADO+ `[DERIVADO — matriz Dra. Patrícia, Aurora 27/08/26]`
+
+> **Correção de atribuição (branch `claude/jolly-wozniak-iz0ley`, 26/09/2026, mesma ID, conteúdo
+> inalterado).** A matriz do Aurora (27/08/26) tem coordenação CRM-GO 14.949 (Dra. Patrícia) e
+> "Médico(a) Responsável pela validação: Carolini M. P. Lisita" — o precedente é das duas médicas.
 Sucede R-CLI-02. Clínico **semestral** (periódico 6M) quando o GHE tem:
 - **(a)** cancerígeno IARC 1/2A com indicador biológico no Anexo I da NR-07 (Quadro 1 ou 2), **em qualquer nível**: arsênio, benzeno, 1,3-butadieno, cádmio, cromo hexavalente, diclorometano, dimetilformamida, estireno, óxido de etileno, tetracloroetileno, tricloroetileno. Lista = gabarito 003.DP (`docs/referencia/GABARITO_003DP_anexo11-12_iarc.md`) ∩ agentes com indicador; chumbo e inseticidas inibidores da colinesterase ficaram ESCALAR no 003.DP e só entram por (b); **ou**
 - **(b)** agente com indicador biológico no Anexo I classificado **MODERADO ou acima** na avaliação P×S do PGR. Poeira/sílica sem indicador biológico não conta, em nenhum nível.
@@ -819,6 +823,39 @@ Pacotes são conjuntos pré-formalizados de exames que disparam em bloco quando 
 - Reticulócitos (adm/per/MR/dem)
 - Ácido trans-trans-mucônico semestral (per)
 
+### R-PKG-ASF — Pacote Asfalto (impermeabilização) `[DERIVADO — NR-07 Anexo V + 7/7 GHEs de impermeabilização com asfalto no acervo]`
+**Predicado:** `asfalto` ou `cimento_asfaltico` no GHE (declarado no PGR ou componente de FDS).
+
+**Exames:**
+- Exame clínico semestral (per; demais momentos por R-CLI-01)
+- Hemograma semestral (adm/per/MR/dem)
+
+**Base.** Asfalto/betume (CAS 8052-42-4) no inventário do PGR é substância cancerígena para a NR-07
+Anexo V (item 2.1; IARC Vol.103: betume oxidado + emissões Grupo 2A; NR-15 Anexo 13 "betume… substâncias
+cancerígenas afins"). Anexo V 4.1.1: exames complementares obrigatórios quando não há avaliação ambiental;
+3.1.1: buscar alterações clínicas ou laboratoriais. Sem indicador biológico no Anexo I, o hemograma entra
+pelo 7.5.18 (a critério do médico, tecnicamente justificado) e o clínico semestral pelo 7.5.8 II a 1
+("intervalos menores"). Precedente (D-ARQ-22 nível 2): clínico 6M e hemograma 6M em 7/7 GHEs de
+impermeabilização com asfalto — CMO Aurora (27/08/26), Varandas Flamboyant (16/09/26), Vistamerica
+(28/07/26 e 08/12/25), Varandas Bueno (11/08/25, 2 GHEs) e RQ.61 Viverde (06/03/25, validada).
+**Fora do pacote, por norma:** t,t-mucônico e reticulócitos são vigilância do benzeno (NR-07 Anexo V
+4.2.1 → IN 2/1995) e o regime exige benzeno ou mistura ≥1% (NR-15 Anexo 13-A item 2); asfalto não é.
+Pedidos nas matrizes CMO recentes (Aurora, Flamboyant, Vistamerica) — divergência consciente,
+`[INTERPRETADO — prioridade na revisão de saída]`. 1-hidroxipireno urinário (marcador de HPA) fica a
+critério do coordenador (7.5.18), não é padrão.
+
+### R-PKG-ASF-CO — Carboxihemoglobina na aplicação a quente `[DERIVADO — NR-07 Anexo I Quadro 1 + 7/7 GHEs de manta asfáltica]`
+**Predicado:** `cimento_asfaltico` (CAP/asfalto oxidado 95/30, aplicado a quente — caldeira a 180 °C e maçarico).
+
+**Exame:** Carboxihemoglobina semestral (per).
+
+**Base.** CO da combustão do maçarico e da caldeira; NR-07 Anexo I Quadro 1: monóxido de carbono →
+carboxihemoglobina. Os PGRs Viverde V02 e Vistamerica Ver.02 inventariam o CO da manta asfáltica
+(MODERADO) — ali R-BIO-04-monoxido_de_carbono já emite o exame; os PGRs CMO (Aurora 27/08/26,
+Vistamerica 28/07/26) descrevem caldeira e maçarico mas não inventariam o CO. Asfalto genérico
+(emulsão a frio) não dispara. Ressalva: o 7.5.18 pede risco classificado no PGR — a pendência ao
+elaborador "CO não inventariado" é DT própria.
+
 ### R-PKG-ARMADOR — Pacote Armador com Policorte `[VALIDADO]`
 **Predicado:** armador (construção civil) com exposição a policorte.
 
@@ -1045,3 +1082,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v104 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — `D-ARQ-86` fatia 1, ratificada): **emenda em `R-BIO-05`** (§5.9, mesma ID) — BAIXO dispensa o indicador do Quadro 1 só com medição do agente abaixo do nível de ação (NR-07 7.5.12 "b" c/c NR-09 9.6.1 "b"; LT da NR-15 Anexo 11); 21 agentes com LT, 7 cancerígenos IARC 1/2A excluídos por decisão do Diovanni. IRRELEVANTE inalterado. 3 pares determinísticos idênticos à `main`. |
 | v105 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — `D-ARQ-86` fatia 2): **nota de aplicação em `R-RX-01`** (§5.4, mesma ID, conteúdo inalterado) — medição de sílica (fração e %quartzo) e de PNOS informada na tela decide a faixa do RX OIT; origem na revisão com o laudo. Asbesto fora (decisão do Diovanni). 3 pares determinísticos idênticos à `main`. |
 | v106 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob a hierarquia D-ARQ-22): **`R-CLI-05` CRIADA** (§4) — clínico 6M por (a) cancerígeno IARC 1/2A com indicador biológico no Anexo I (lista 003.DP) ou (b) agente com indicador biológico MODERADO+ no PGR `[DERIVADO — matriz Patrícia, Aurora]`. **`R-CLI-02` DEPRECATED**, sucedida por `R-CLI-05` (critério "qualquer agente do Anexo I" refutado por medição). Alias `Maganês` em `manganes` (DT-003EQ-02, D-ARQ-70): Fascino GHE-17 passa a clínico 6M e manganês no sangue, iguais ao gabarito. |
+| v107 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-ASF` e `R-PKG-ASF-CO` CRIADAS** (§6) — asfalto/cimento asfáltico → clínico 6M e hemograma 6M (NR-07 Anexo V, 7.5.8, 7.5.18); cimento asfáltico (a quente) → carboxihemoglobina 6M (NR-07 Anexo I Quadro 1, CO). Sem t,t-mucônico/reticulócitos (NR-15 Anexo 13-A). Slug `cimento_asfaltico` com alias medido em 2 PGRs CMO. Nota de atribuição em `R-CLI-05` (Aurora: coordenação Dra. Patrícia, validação Dra. Carolini). |

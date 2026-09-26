@@ -773,6 +773,24 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     enquadramento_3048: {codigo: "1.0.17", tempo_exposicao: "25 anos"}  # alínea b) "misturas asfálticas contendo hidrocarbonetos policíclicos", literal
+  cimento_asfaltico:
+    # Cimento asfáltico / asfalto oxidado 95/30 — aplicado a quente (caldeira a 180 °C e
+    # maçarico na manta asfáltica), distinto de `asfalto` genérico, que cobre também a
+    # emulsão a frio ("Asfalto em água", PGR Ricco Hetrin 14.09.26). Slug próprio porque
+    # dispara R-PKG-ASF-CO (CO da combustão); cas null: o CAS do CAP é o mesmo do asfalto
+    # (8052-42-4) e o índice CAS não admite colisão — a resolução é por termo.
+    # D-ARQ-70 Tier 1-C: (i) "Cimento Asfáltico 95/30 - Asfalto" medido no PGR(ADENDO) CMO
+    # Aurora Lago das Rosas 27.08.26 (p. 71, GHE 22) e no PGR CMO Vistamerica 2026-07-28
+    # (p. 82, GHE de impermeabilização); (ii)/(iii) núcleo do literal "betume" da NR-15
+    # Anexo 13 (hidrocarbonetos e outros compostos de carbono). is_carcinogeno_iarc=true
+    # [DERIVADO — IARC Monografia Vol.103 (2013): betume oxidado + emissões = Grupo 2A].
+    termos: ["Cimento Asfáltico 95/30 - Asfalto"]
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: true
+    tem_lt: false
+    protocolos_especiais: [R-PKG-ASF, R-PKG-ASF-CO]
+    enquadramento_3048: {codigo: "1.0.17", tempo_exposicao: "25 anos"}  # alínea b) "misturas asfálticas contendo hidrocarbonetos policíclicos", literal
   ferro:
     # FDS Eletrodo 60.13 (fds_originais/FDS MONTADOR DE ESTRUTURAS METÁLICAS.pdf), >50%
     # (ferro elementar do arame de solda). is_carcinogeno_iarc=false [DERIVADO — não

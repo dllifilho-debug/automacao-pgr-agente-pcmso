@@ -3507,3 +3507,31 @@ padrão sobre asbestose). Incluir exigiria registro no resolver, mudança na con
 R-RX-01 e unidade f/cm³ na tela, sem nenhum caso para conferir.
 
 **Reabre quando** um PGR real trouxer asbesto como agente de exposição.
+
+### DT-(sessão `claude/jolly-wozniak-iz0ley`)-01 — CO da manta asfáltica sem inventário no PGR: o motor não avisa o elaborador `[ABERTA — não-bloqueante]`
+
+**Origem.** Decisão do asfalto (PROTOCOLO v107). Os PGRs CMO (Aurora 27/08/26 GHE 22, Vistamerica
+28/07/26) descrevem caldeira a 180 °C e maçarico, mas não inventariam o monóxido de carbono; os PGRs
+Viverde V02 e Vistamerica Ver.02 inventariam ("queima de produtos derivados de petróleo", MODERADO).
+
+**Situação.** `R-PKG-ASF-CO` emite a carboxihemoglobina por `cimento_asfaltico`, mas o NR-07 7.5.18
+pede exame relacionado a risco **classificado no PGR**. A conduta recomendada é emitir o exame e
+pedir ao elaborador a inclusão do CO (R-PGR-04, informação crítica ausente). `regras.yaml` não tem
+mecanismo de regra que gere pendência — precisa de código no motor, fatia própria.
+
+**Status:** ABERTA — não-bloqueante.
+
+### DT-(sessão `claude/jolly-wozniak-iz0ley`)-02 — NR-07 Anexo V: o documento não registra exposição a cancerígeno nem a guarda de 40 anos do prontuário `[ABERTA — não-bloqueante]`
+
+**Origem.** Leitura da NR-07 Anexo V (texto oficial em `normas/nr-07-atualizada-2022-1 .pdf`) na
+decisão do asfalto. Item 3.1: o médico responsável registra no PCMSO as atividades e funções com
+exposição a substância cancerígena identificada no PGR; item 4.1: prontuário por no mínimo 40 anos
+após o desligamento.
+
+**Situação.** O documento da matriz não marca GHE com cancerígeno nem traz a observação dos 40 anos.
+Candidato: observação por GHE derivada dos agentes cancerígenos (a lista de `cancerigeno_com_ibe` mais
+asfalto/sílica/poeira de madeira etc.), com a fonte do 003.DP. Qual lista a NR-07 usa para
+"cancerígena" não está definida no glossário `[A CONFERIR — LINACH, Portaria Interministerial 9/2014]`.
+
+**Status:** ABERTA — não-bloqueante.
+
