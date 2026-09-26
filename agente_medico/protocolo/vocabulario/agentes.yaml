@@ -207,6 +207,12 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    # D-ARQ-70 Tier 1-C (DT-003EQ-02): (i) "Maganês" medido em "PGR - CONSCIENTE ...
+    # FASCINO (15.07.26).pdf", 1 ocorrência, p. 82, GHE 17 SERRALHERIA ("fumos de" solda,
+    # BAIXO); (ii)/(iii) núcleo do literal "Manganês e seus compostos" da NR-15 Anexo 12
+    # (Portaria DNSST 08/1992), com uma letra a menos. Sem o alias o fuzzy recusa (slug
+    # carregado, D-ARQ-64) e R-BIO-03/R-CLI-03 não disparam.
+    termos: ["Maganês"]
     enquadramento_3048: {codigo: "1.0.14", tempo_exposicao: "25 anos"}  # literal
   silica:
     tipo_ibe: null

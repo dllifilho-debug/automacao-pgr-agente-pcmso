@@ -16,3 +16,21 @@ predicados_compostos:
       - asbesto
       - pnos
 
+  # R-CLI-05 perna (a): cancerígeno IARC 1/2A com indicador biológico no Anexo I da
+  # NR-07, em qualquer nível. Lista = gabarito 003.DP (docs/referencia/
+  # GABARITO_003DP_anexo11-12_iarc.md) ∩ agentes com tipo_ibe; explícita porque o campo
+  # is_carcinogeno_iarc do vocabulário diverge do 003.DP. Chumbo e inseticidas ficaram
+  # ESCALAR no 003.DP e só entram pela perna (b).
+  cancerigeno_com_ibe:
+    ou:
+      - arsenio
+      - benzeno
+      - butadieno_13
+      - cadmio
+      - cromo_hexavalente
+      - diclorometano
+      - dimetilformamida
+      - estireno
+      - oxido_de_etileno
+      - tetracloroetileno
+      - tricloroetileno

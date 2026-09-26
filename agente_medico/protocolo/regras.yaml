@@ -23,6 +23,18 @@ regras:
       consolidação (D-ARQ-39) une os momentos e fica com a menor periodicidade."
     status: VALIDADO
 
+  - id: R-CLI-05
+    quando: {ou: [cancerigeno_com_ibe, agente_ibe_moderado_ou_acima]}
+    emite:
+      - {exame: exame_clinico, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "Sucede R-CLI-02 (DEPRECATED). NR-07: clínico periódico anual, menor a
+      critério do médico — a norma não fixa gatilho para o semestral. [DERIVADO — matriz
+      Dra. Patrícia, Aurora 27/08/26]: 6M em GHE 11 (agentes do Anexo I MODERADO) e 18
+      (benzeno); 12M onde os agentes do Anexo I são BAIXO/IRRELEVANTE (Porto Araras I
+      06/07/26, Vila Brasil 26/08/26) e onde só poeira/sílica é MODERADO (todos os pares).
+      Emite só o periódico 6M; os demais momentos vêm de R-CLI-01 (consolidação D-ARQ-39)."
+    status: DERIVADO
+
   - id: R-PSY-02
     quando: todo_trabalhador
     emite:

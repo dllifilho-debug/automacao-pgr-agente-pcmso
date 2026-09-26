@@ -4,7 +4,7 @@ from dataclasses import replace
 from typing import Any, Callable, Union
 
 from agente_medico.motor.leo_resolver import classifica_cenario, resolve_leo
-from agente_medico.motor.tipos import Ausente, Fracao, GHEContext, Quantificacao
+from agente_medico.motor.tipos import NIVEIS_RISCO_PXS, Ausente, Fracao, GHEContext, Quantificacao
 
 ResultadoPredicado = Union[bool, Ausente]
 
@@ -196,6 +196,23 @@ def _asbesto(ctx: GHEContext) -> bool:
 @primitivo("benzeno")
 def _benzeno(ctx: GHEContext) -> bool:
     return any(r.agente == "benzeno" for r in ctx.riscos)
+
+
+_NIVEIS_MODERADO_OU_ACIMA: frozenset[str] = frozenset(
+    NIVEIS_RISCO_PXS[NIVEIS_RISCO_PXS.index("MODERADO"):]
+)
+
+
+@primitivo("agente_ibe_moderado_ou_acima")
+def _agente_ibe_moderado_ou_acima(ctx: GHEContext) -> bool:
+    """R-CLI-05 perna (b): agente com indicador biológico no Anexo I da NR-07
+    (Quadro 1 ou 2) classificado MODERADO ou acima na avaliação P×S do PGR.
+    Risco de FDS ou implícito não traz nível e não conta. [DERIVADO — matriz
+    Dra. Patrícia, Aurora 27/08/26, GHE 11: MEK/THF/ciclohexanona MODERADO → 6M]."""
+    return any(
+        r.tipo_ibe is not None and r.nivel_risco in _NIVEIS_MODERADO_OU_ACIMA
+        for r in ctx.riscos
+    )
 
 
 @primitivo("silica_asbesto_sem_medicao")

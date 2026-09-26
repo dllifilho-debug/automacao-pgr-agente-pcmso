@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_168_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_169_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -56,7 +56,19 @@ def test_indice_real_tem_168_entradas(indice_real: IndiceTermos) -> None:
     # 166 -> 168 (branch `claude/inspiring-turing-0ylkmk`): +1 slug `transito_via_publica`
     # e +1 termo "Bater contra ou ser atingido por (trânsito)" (DT-003EB-01 classe 4,
     # R-PKG-TRANSITO).
-    assert len(indice_real.slug_por_forma) == 168
+    # 168 -> 169 (branch `claude/jolly-wozniak-iz0ley`): +1 alias "Maganês" em `manganes`
+    # (DT-003EQ-02, D-ARQ-70 Tier 1-C, PGR Fascino GHE 17).
+    assert len(indice_real.slug_por_forma) == 169
+
+
+def test_maganes_resolve_exato_para_manganes(indice_real: IndiceTermos) -> None:
+    # Grafia do PGR Fascino (GHE 17 SERRALHERIA). Reversão que mata: tirar
+    # `termos: ["Maganês"]` de `manganes` em agentes.yaml — volta a fuzzy_recusado
+    # (distância 1, slug carregado fora da allowlist D-ARQ-64).
+    resolucao = resolver_termo("Maganês", indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == "manganes"
+    assert resolucao.pendencia is None
 
 
 def test_poeira_da_madeira_resolve_exato(indice_real: IndiceTermos) -> None:
