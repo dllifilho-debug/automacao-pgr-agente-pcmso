@@ -884,6 +884,21 @@ Vistamerica 28/07/26) descrevem caldeira e maçarico mas não inventariam o CO. 
 (emulsão a frio) não dispara. Ressalva: o 7.5.18 pede risco classificado no PGR — a pendência ao
 elaborador "CO não inventariado" é DT própria.
 
+### R-PKG-SOLD-CO — Carboxihemoglobina na solda `[DERIVADO — NR-07 Anexo I Quadro 1 + serralherias CMO; gatilho INTERPRETADO]`
+**Predicado:** `solda_indicador` (manganês ou fumos metálicos no GHE — o mesmo de `R-VIS-01-solda`).
+
+**Exame:** Carboxihemoglobina semestral (per).
+
+**Base.** Soldagem a arco com eletrodo revestido e corte a quente geram CO; NR-07 Anexo I Quadro 1:
+monóxido de carbono → carboxihemoglobina. Precedente (D-ARQ-22 nível 2): COHb 6M PER na serralheria
+de CMO Aurora GHE 16 (27/08/26) e Varandas Flamboyant GHE 17 (16/09/26); Vistamerica GHE 18
+(08/12/25) sem. Nenhum dos PGRs CMO inventaria o CO (Aurora GHE 16: carbonato de cálcio, dióxido de
+titânio, ferro, manganês, zircônio, poeira, sílica — "fumos e gases de soldagem" do eletrodo E-6013).
+Quando o PGR inventaria o CO, `R-BIO-04-monoxido_de_carbono` emite o mesmo exame e a consolidação une.
+Gatilho `[INTERPRETADO — prioridade na revisão de saída]`: o motor não lê a fonte geradora (DT
+`claude/cool-babbage-whh1zw`-01); o manganês é marcador da atividade, não o risco. Ressalva do 7.5.18
+(risco classificado no PGR) igual à de `R-PKG-ASF-CO`.
+
 ### R-PKG-ARMADOR — Pacote Armador com Policorte `[VALIDADO]`
 **Predicado:** armador (construção civil) com exposição a policorte.
 
@@ -1112,3 +1127,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v106 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob a hierarquia D-ARQ-22): **`R-CLI-05` CRIADA** (§4) — clínico 6M por (a) cancerígeno IARC 1/2A com indicador biológico no Anexo I (lista 003.DP) ou (b) agente com indicador biológico MODERADO+ no PGR `[DERIVADO — matriz Patrícia, Aurora]`. **`R-CLI-02` DEPRECATED**, sucedida por `R-CLI-05` (critério "qualquer agente do Anexo I" refutado por medição). Alias `Maganês` em `manganes` (DT-003EQ-02, D-ARQ-70): Fascino GHE-17 passa a clínico 6M e manganês no sangue, iguais ao gabarito. |
 | v107 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-ASF` e `R-PKG-ASF-CO` CRIADAS** (§6) — asfalto/cimento asfáltico → clínico 6M e hemograma 6M (NR-07 Anexo V, 7.5.8, 7.5.18); cimento asfáltico (a quente) → carboxihemoglobina 6M (NR-07 Anexo I Quadro 1, CO). Sem t,t-mucônico/reticulócitos (NR-15 Anexo 13-A). Slug `cimento_asfaltico` com alias medido em 2 PGRs CMO. Nota de atribuição em `R-CLI-05` (Aurora: coordenação Dra. Patrícia, validação Dra. Carolini). |
 | v108 | 26/09/2026 | Branch `claude/jolly-wozniak-iz0ley` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **exceção do soldador de `R-VIS-01` materializada** como `R-VIS-01-solda` (§5.6, mesma ID, conteúdo inalterado; gatilho `solda_indicador` = manganês ou fumos metálicos `[INTERPRETADO]`); **`R-VIS-03` CRIADA** (manta asfáltica a quente → acuidade com DEM, `[INTERPRETADO]`, RQ.61 Viverde GHE 09). **`R-VIS-02` materializada** (porteiro, primitivo `cargo_porteiro`; vigia fora — precedente dividido). Nenhuma NR exige acuidade para solda (NR-07 7.5.18). Fascino GHE-17: acuidade com DEM, igual ao gabarito. |
+| v109 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-PKG-SOLD-CO` CRIADA** (§6) — solda (`solda_indicador`, `[INTERPRETADO]`) → carboxihemoglobina 6M PER (NR-07 Anexo I Quadro 1, CO), precedente Aurora GHE 16 e Flamboyant GHE 17. Gatilho pela fonte geradora declarada fica como DT (o motor não lê o campo). |

@@ -10442,3 +10442,36 @@ foi interrompida em ~25% para incluir a R-VIS-02 e rodar uma vez só.
 **Verificação.** Suíte completa (árvore parada): **1470 passed, 6 skipped, 0 failed** (875.18s), +9
 exato sobre 1461 (5 de solda/manta + 4 de porteiro em `test_vis_demissional.py`). `mypy --strict`
 alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
+
+## Sessão (branch `claude/cool-babbage-whh1zw`, pós-merge do PR #394) — 26/09/2026 — IMPLEMENTAÇÃO: carboxihemoglobina na solda (`R-PKG-SOLD-CO`)
+
+**Conferência da matriz_12 do Aurora (app pós-deploy do #394; `matriz_12_aurora_app.docx`).** Fecha
+os `[A MEDIR]` do #394: acuidade `(ADM, PER, MRO, DEM)` nos 3 cargos dos GHEs 16 e 22; GHE 19
+Porteiro com acuidade `(ADM, PER, MRO)`, igual ao gabarito. **Achado:** GHE 20 Operador de Grua — o
+gabarito pede acuidade com DEM, o app não (próxima sessão, por decisão do Diovanni).
+
+**Precedente (nível 2).** COHb 6M PER na serralheria: Aurora GHE 16 (27/08/26) e Varandas Flamboyant
+GHE 17 (16/09/26); Vistamerica GHE 18 (08/12/25) sem (varredura por regex nas matrizes, parcial:
+só o cabeçalho "GHE nn – SERRALHERIA"). Nenhum PGR CMO correspondente inventaria o CO; Aurora GHE 16
+traz os componentes do eletrodo E-6013 como agentes. Norma: NR-07 Anexo I Quadro 1 (CO → COHb).
+
+**Gatilho — bloqueador reportado.** Diovanni escolheu (a), soldagem declarada na fonte geradora.
+Medição antes de implementar: a hidratação descarta `fonte_geradora` (`RiscoPGR` não tem o campo),
+nenhum predicado o alcança. Decisão do Diovanni: (a2) reusar `solda_indicador` (o mesmo de
+`R-VIS-01-solda`) e registrar o encanamento da fonte geradora como DT
+(`claude/cool-babbage-whh1zw`-01).
+
+**Implementado.** `R-PKG-SOLD-CO` em `regras.yaml` (status `DERIVADO`, gatilho `[INTERPRETADO]`).
+PROTOCOLO v109.
+
+**Efeito medido — 3 pares (worktree `origin/main 7436dc7` × árvore, em série).** Fascino GHE-17:
+COHb 6M PER novo por `R-PKG-SOLD-CO`; subemissão 4→3, cargos idênticos 36→37 de 41, sem
+superemissão nova. Porto Araras I e Vila Brasil idênticos. Primeira rodada sem `PYTHONPATH`
+(instrumento, `ModuleNotFoundError`), refeita. Esperado no Aurora: COHb 6M PER no GHE 16 `[A MEDIR —
+próxima matriz do app]`.
+
+**Testes.** `test_pkg_solda_co.py` (3 casos). Varredura inversa: 4 reversões (remover a regra,
+periodicidade 12, momentos `[adm, per]`, `quando: todo_trabalhador`), 4/4 mortas.
+
+**Verificação.** Suíte completa (árvore parada): **1473 passed, 6 skipped, 0 failed** (840.21s), +3
+exato sobre 1470. `mypy --strict` alvo canônico limpo, 51 arquivos. `DECISOES` não tocado.
