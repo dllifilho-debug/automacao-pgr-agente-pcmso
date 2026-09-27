@@ -10563,7 +10563,16 @@ listava as 56 linhas interpretadas uma a uma e repetia o fundamento em cada linh
 agrupa por regra (5 decisões) e leva o fundamento a um apêndice (14 páginas). Larguras de coluna: o
 LibreOffice só respeita a grade da tabela (`gridCol`), não a célula — as duas passaram a receber a largura.
 
-**Testes.** `test_memorial_matriz.py` (6 casos). Varredura inversa 12/12.
+**Testes (primeira versão).** `test_memorial_matriz.py` (6 casos). Varredura inversa 12/12.
+
+**Reescrita em linguagem clínica (mesmo dia, antes de qualquer push).** O Diovanni leu a prévia e achou o
+texto técnico demais — linguagem de tecnologia, não de medicina e segurança do trabalho. Concordei: o
+documento expunha o `base_normativa` (DT, D-ARQ, branches), nomes de predicado, slugs e os status sem
+explicação. Feito: campo `resumo_clinico` nas 79 regras ativas (34 à mão; 45 `R-BIO-04-*` geradas do
+fundamento e gravadas explícitas, depois ajustadas à mão — MEK, indutores de metahemoglobina, compostos);
+rótulos de certeza que se explicam; "Confirmar primeiro"; sem o fundamento de auditoria. Fascino: 22 páginas
+(mais que as 14 da versão técnica, porque o resumo se repete por GHE; a seção 1 é a de revisão).
+`test_memorial_matriz.py` reescrito (7 casos); varredura inversa 14/14.
 
 **Verificação.** Suíte completa (árvore parada): **1486 passed, 6 skipped, 0 failed** (1010.34s), +6 exato
 sobre 1480. `mypy --strict` alvo canônico limpo, **52 arquivos** (era 51; entra `superficie/memorial_matriz.py`).
@@ -10571,3 +10580,7 @@ A primeira rodada foi descartada: o mypy acusou `cache.matrizes` opcional sem gu
 (corrigido com `cache.matrizes is not None`); o `TaskStop` encerrou o shell mas não o pytest filho, que
 seguiu rodando durante a correção — a rodada já estava descartada, e o processo foi morto antes da rodada
 válida. `DECISOES` tocado → `INDICE_DARQ` regenerado e `tests/test_gerar_indice_darq.py` 6 passed.
+
+**Verificação (versão clínica).** Suíte completa (árvore parada): **1487 passed, 6 skipped, 0 failed**
+(940.74s), +1 exato sobre 1486 (`test_memorial_matriz.py` de 6 para 7 casos). `mypy --strict` alvo
+canônico limpo, 52 arquivos. `INDICE_DARQ` regenerado; `tests/test_gerar_indice_darq.py` 6 passed.

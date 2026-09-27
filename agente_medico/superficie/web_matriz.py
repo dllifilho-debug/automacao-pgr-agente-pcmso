@@ -598,7 +598,11 @@ def pagina_matriz() -> None:
         renderizar_docx,
     )
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
-    from agente_medico.superficie.memorial_matriz import montar_memorial, renderizar_memorial_docx
+    from agente_medico.superficie.memorial_matriz import (
+        montar_memorial,
+        renderizar_memorial_docx,
+        resumos_do_protocolo,
+    )
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.apresentacao import (
         MENSAGEM_EMISSAO_FUTURA,
@@ -1062,7 +1066,13 @@ def pagina_matriz() -> None:
                 # D-ARQ-87 fatia 2: memorial de raciocínio, anexo não assinado.
                 destino_memorial = Path(tmp) / "memorial.docx"
                 renderizar_memorial_docx(
-                    montar_memorial(cache.matrizes, cache.exames_vocab), cabecalho, destino_memorial
+                    montar_memorial(
+                        cache.matrizes,
+                        cache.exames_vocab,
+                        resumos_do_protocolo(_protocolo_padrao().regras),
+                    ),
+                    cabecalho,
+                    destino_memorial,
                 )
                 memorial_bytes = destino_memorial.read_bytes()
 

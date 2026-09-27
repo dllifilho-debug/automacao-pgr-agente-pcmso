@@ -8,6 +8,7 @@ regras:
       é o piso, vale inclusive para administrativo sem risco. Momentos:
       R-TEMP-01 (5 momentos) [DERIVADO — medição da matriz humana Fascino
       08/07/26, 19/19 GHEs em ADM/PER/MRO/RET/DEM]"
+    resumo_clinico: "Exame clínico anual para todos os trabalhadores, em todos os momentos (admissional, periódico, retorno, mudança de risco e demissional). É o piso do PCMSO (NR-07); protocolo da coordenação."
     status: VALIDADO
 
   - id: R-CLI-03
@@ -21,6 +22,7 @@ regras:
       anualmente para os trabalhadores de superfície'. [INTERPRETADO]: 6M fixo é a ponta
       protetiva da faixa. Emite só o periódico 6M: os demais momentos vêm de R-CLI-01, e a
       consolidação (D-ARQ-39) une os momentos e fica com a menor periodicidade."
+    resumo_clinico: "Manganês no PGR → exame clínico a cada 6 meses. A NR-15, Anexo 12 (manganês) exige exames periódicos de 6 meses a 1 ano para todo exposto; o protocolo adota 6 meses."
     status: VALIDADO
 
   - id: R-CLI-05
@@ -33,6 +35,7 @@ regras:
       (benzeno); 12M onde os agentes do Anexo I são BAIXO/IRRELEVANTE (Porto Araras I
       06/07/26, Vila Brasil 26/08/26) e onde só poeira/sílica é MODERADO (todos os pares).
       Emite só o periódico 6M; os demais momentos vêm de R-CLI-01 (consolidação D-ARQ-39)."
+    resumo_clinico: "Agente cancerígeno com indicador biológico na NR-07, ou agente do Anexo I da NR-07 com risco moderado ou maior no PGR → exame clínico a cada 6 meses. A NR-07 permite intervalo menor que o anual a critério médico; o gatilho segue a matriz da Dra. Patrícia (Aurora)."
     status: DERIVADO
 
   - id: R-PSY-02
@@ -80,6 +83,7 @@ regras:
       medida é por PGR inteiro, variação por GHE dentro do mesmo PGR não
       descartada por falta de caso. Ver DT-(sessão não numerada, branch
       claude/youthful-lamport-3kfkog)-01 em PENDENCIAS_CLINICAS.md]."
+    resumo_clinico: "PGR com inventário de riscos psicossociais → avaliação psicossocial e avaliação médica de saúde mental, anuais. A NR-01 manda identificar e gerenciar esses riscos, mas não define exame; segue as matrizes das coordenadoras. A planilha atualizada da Dra. Patrícia restringe a avaliação psicossocial a trabalho em altura e espaço confinado — confirmar."
     status: INTERPRETADO
 
   - id: R-PKG-ATIVCRIT
@@ -91,6 +95,7 @@ regras:
       - {exame: acuidade_visual, periodicidade_meses: 12, momentos: [adm, per, MR]}
       - {exame: ecg,             periodicidade_meses: 12, momentos: [adm, per, MR]}
     base_normativa: "Protocolo Dra. Carolini — rastreio de comorbidade para atividade crítica"
+    resumo_clinico: "Atividade crítica (trabalho em altura, espaço confinado ou operação de equipamento pesado) → hemograma, glicemia, audiometria, acuidade visual e ECG anuais, para rastrear condições que ponham o trabalhador ou terceiros em risco. Protocolo da coordenação."
     status: VALIDADO
 
   - id: R-VIS-01-solda
@@ -106,6 +111,7 @@ regras:
       acuidade ADM, PER 12M, MR, DEM'; 22 matrizes de set/2026: 23/26 cargos de solda com DEM].
       Gatilho por manganês/fumos metálicos [INTERPRETADO] — ver
       `solda_indicador`."
+    resumo_clinico: "Solda no GHE → acuidade visual anual, também no demissional, pela radiação ultravioleta e infravermelha do arco. Nenhuma NR exige; entra pela NR-07, item 7.5.18 (a critério do médico). Protocolo da coordenação e matrizes de serralheria."
     status: DERIVADO
 
   - id: R-VIS-02
@@ -117,6 +123,7 @@ regras:
       7.5.18. PCMSO-modelo Dra. Carolini SECONCI 05/2024: acuidade para 'porteiros, vigias'.
       Precedente: 10/12 GHEs de portaria/vigia/controle de acesso do acervo com acuidade
       (ADM, PER, MRO); sem: WVM Entreverdes 19 e Porto Araras I 15."
+    resumo_clinico: "Porteiro → acuidade visual anual, sem demissional. Nenhuma NR exige; NR-07, item 7.5.18. Protocolo da coordenação."
     status: VALIDADO
 
   - id: R-VIS-03
@@ -128,6 +135,7 @@ regras:
       [INTERPRETADO — prioridade na revisão de saída]: RQ.61 Viverde GHE 09 (validada) e Aurora
       GHE 22 pedem DEM; Flamboyant 20, Vistamerica 20/21 e Varandas Bueno 18/38 não (2/7).
       Decisão do Diovanni (26/09/2026) pela matriz validada."
+    resumo_clinico: "Manta asfáltica aplicada a quente (maçarico) → acuidade visual anual, também no demissional, pela exposição à chama e à radiação infravermelha. NR-07, item 7.5.18. Segue a matriz validada do Viverde; outras matrizes não pedem o demissional — confirmar."
     status: INTERPRETADO
 
   - id: R-PKG-TRANSITO
@@ -145,6 +153,7 @@ regras:
       trânsito declarado, não o cargo, e o veículo é leve — distinção das regras de motorista
       e de equipamento pesado registrada no PROTOCOLO §6. Viés declarado (D-ARQ-81 cl.1):
       construção civil, 2 médicas, n=3 GHEs."
+    resumo_clinico: "PGR com risco de trânsito (condução ou deslocamento em via pública) → acuidade visual e audiometria anuais. Nenhuma NR exige; segue matrizes da Dra. Patrícia e da Dra. Carolini — confirmar."
     status: INTERPRETADO
 
   - id: R-VIB-01
@@ -152,6 +161,7 @@ regras:
     emite:
       - {exame: rx_coluna_lombo_sacra, periodicidade_meses: 0, momentos: [adm, MR]}
     base_normativa: "Protocolo Dra. Carolini — vibração corpo inteiro; ADM e mudança de risco (sem demissional). Matriz Patrícia registra ADM+DEM; protocolo vivo prevalece (D-ARQ-16)"
+    resumo_clinico: "Vibração de corpo inteiro → RX de coluna lombossacra no admissional e na mudança de risco. Protocolo da coordenação."
     status: VALIDADO
 
   - id: R-AUD-01
@@ -169,6 +179,7 @@ regras:
       (NR-09 9.4.1/9.4.2, avaliação condicional) admite presunção protetiva
       declarada em quando_ausente.presumir_true — regra sai marcada
       [INTERPRETADO — prioridade na revisão de saída] nesse trecho (D-ARQ-68 cl.5)."
+    resumo_clinico: "Ruído acima do nível de ação, operação de equipamento pesado ou agente ototóxico → audiometria anual. Para o ruído, NR-07, Anexo II; os outros dois gatilhos são protocolo da coordenação."
     status: VALIDADO
 
   - id: R-AUD-02
@@ -183,6 +194,7 @@ regras:
       Mesma presunção protetiva de R-AUD-01 sobre ruido_acima_acao, mesma marca
       [INTERPRETADO — prioridade na revisão de saída] (D-ARQ-68 cl.5); a perna
       'e' NÃO está na allowlist de presunção — ausência ali continua bloqueante."
+    resumo_clinico: "Ruído acima do nível de ação, ou ruído combinado com agente ototóxico e vibração → audiometria também no demissional. Para o ruído, NR-07, Anexo II, item 4.1; a combinação é protocolo da coordenação."
     status: VALIDADO
 
   - id: R-AUD-04
@@ -212,6 +224,7 @@ regras:
     emite:
       - {exame: audiometria, periodicidade_meses: 12, momentos: [adm, per, MR]}
     base_normativa: "Protocolo Dra. Carolini R-VIB-02 — qualquer vibracao (corpo inteiro ou maos-bracos) -> audiometria 12M mesmo abaixo do nivel de acao. Vibracao generica sem qualificar tipo -> Ausente -> bloqueante (D-ARQ-13/16)"
+    resumo_clinico: "Qualquer vibração (corpo inteiro ou mãos e braços) → audiometria anual, mesmo abaixo do nível de ação. Protocolo da coordenação."
     status: VALIDADO
 
   - id: R-RX-01-adm
@@ -221,6 +234,7 @@ regras:
         periodicidade_meses: 0
         momentos: [adm]
     base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto CLSC ≤10% LEO: admissional; demissional se último exame > 2 anos (janela no agendador)"
+    resumo_clinico: "Sílica ou asbesto com medição até 10% do limite de exposição → RX de tórax (padrão OIT) só no admissional. NR-07, Anexo III, Quadro 1."
     status: VALIDADO
 
   - id: R-RX-01-sem
@@ -231,6 +245,7 @@ regras:
         periodicidade_apos_15a: 12
         momentos: [adm, per, MR, dem]
     base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto sem avaliação quantitativa; 24M, encurta para 12M após 15 anos (corte no agendador, D-ARQ-19); demissional se último > 1 ano. Sílica com avaliação qualitativa P×S no PGR sai deste ramo para R-RX-01-qual (DT-003EC-01); aqui fica o PGR silencioso e o asbesto."
+    resumo_clinico: "Sílica ou asbesto sem avaliação ambiental no PGR → RX de tórax (padrão OIT) a cada 2 anos, anual após 15 anos de exposição. NR-07, Anexo III, Quadro 1."
     status: VALIDADO
 
   - id: R-RX-01-qual
@@ -252,6 +267,7 @@ regras:
       contrário. Viés declarado (D-ARQ-81 cl.1): construção civil, 2 médicas; 24M
       aparece em 15/34 matrizes do acervo sem PGR para conferir o estado da sílica.
       Só sílica: asbesto qualitativo segue em R-RX-01-sem (sem medição nem decisão)."
+    resumo_clinico: "Sílica com avaliação só qualitativa no PGR (sem medição) → RX de tórax (padrão OIT) anual. A NR-07, Anexo III, Quadro 1 indica a cada 2 anos sem avaliação quantitativa; o anual segue as matrizes das coordenadoras (Porto Araras, Vila Brasil, Fascino) — confirmar."
     status: INTERPRETADO
 
   - id: R-RX-01-baixa
@@ -262,6 +278,7 @@ regras:
         periodicidade_apos_15a: 36
         momentos: [adm, per, MR, dem]
     base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto >10% e ≤50% LEO; 60M, encurta para 36M após 15 anos (D-ARQ-19); demissional se último > 2 anos"
+    resumo_clinico: "Sílica ou asbesto com medição entre 10% e 50% do limite → RX de tórax (padrão OIT) a cada 5 anos, a cada 3 após 15 anos de exposição. NR-07, Anexo III, Quadro 1."
     status: VALIDADO
 
   - id: R-RX-01-media
@@ -272,6 +289,7 @@ regras:
         periodicidade_apos_15a: 24
         momentos: [adm, per, MR, dem]
     base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto >50% e ≤100% LEO; 36M, encurta para 24M após 15 anos (D-ARQ-19); demissional se último > 1 ano"
+    resumo_clinico: "Sílica ou asbesto com medição entre 50% e 100% do limite → RX de tórax (padrão OIT) a cada 3 anos, a cada 2 após 15 anos de exposição. NR-07, Anexo III, Quadro 1."
     status: VALIDADO
 
   - id: R-RX-01-alta
@@ -282,6 +300,7 @@ regras:
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
     base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022), conferido no site do MTE [DERIVADO] — sílica/asbesto >100% LEO; 12M constante, sem corte de 15 anos; demissional se último > 1 ano"
+    resumo_clinico: "Sílica ou asbesto com medição acima do limite → RX de tórax (padrão OIT) anual. NR-07, Anexo III, Quadro 1."
     status: VALIDADO
 
   - id: R-RX-01-pnos
@@ -301,6 +320,7 @@ regras:
         periodicidade_meses: 0
         momentos: [adm]
     base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022), conferido no MTE [DERIVADO] — PNOS CLSC ≤10% LEO (TLV-PNOS ACGIH 3 mg/m³ resp): só admissional."
+    resumo_clinico: "Poeira não classificada (PNOS) com medição até 10% do limite → RX de tórax (padrão OIT) só no admissional. NR-07, Anexo III, Quadro 2."
     status: INTERPRETADO
 
   - id: R-RX-01-pnos-10a100
@@ -310,6 +330,7 @@ regras:
         periodicidade_meses: 0
         momentos: [adm]
     base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS 10% < CLSC ≤100% LEO: admissional. Repetição única após 5 anos a critério clínico NÃO materializada (lembrete operacional — DT-002Y-01). NÃO é 60M recorrente."
+    resumo_clinico: "Poeira não classificada (PNOS) com medição entre 10% e 100% do limite → RX de tórax (padrão OIT) no admissional; repetição após 5 anos a critério médico. NR-07, Anexo III, Quadro 2."
     status: INTERPRETADO
 
   - id: R-RX-01-pnos-acima100
@@ -320,6 +341,7 @@ regras:
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
     base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS CLSC >100% LEO: adm + 60M (a cada 5 anos)."
+    resumo_clinico: "Poeira não classificada (PNOS) com medição acima do limite → RX de tórax (padrão OIT) no admissional e a cada 5 anos. NR-07, Anexo III, Quadro 2."
     status: INTERPRETADO
 
   - id: R-RX-01-pnos-sem
@@ -330,6 +352,7 @@ regras:
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
     base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS sem avaliação quantitativa: adm + 60M."
+    resumo_clinico: "Poeira não classificada (PNOS) sem medição → RX de tórax (padrão OIT) no admissional e a cada 5 anos. NR-07, Anexo III, Quadro 2."
     status: INTERPRETADO
 
   - id: R-ESP-02
@@ -343,6 +366,7 @@ regras:
       mineral do inventário do PGR → espirometria no admissional e a cada dois anos.
       Momentos MR/dem [DERIVADO — matrizes Carolini 07/2026 e Patrícia 04/2025]; a norma
       crava só adm+per. Sucede R-ESP-01 (DEPRECATED)."
+    resumo_clinico: "Poeira mineral (sílica, asbesto, poeira não classificada) no PGR → espirometria a cada 2 anos. NR-07, Anexo III, item 3.1; mudança de risco e demissional seguem as matrizes das coordenadoras."
     status: DERIVADO
 
   - id: R-ESP-03
@@ -353,6 +377,7 @@ regras:
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
     base_normativa: "Poeira de madeira → espirometria 24M. SEM âncora no item 3.1 do Anexo III (que dispara por 'poeira mineral' — madeira é orgânica, fora do escopo textual de R-ESP-02) — origem matriz Patrícia, não norma conferida [INTERPRETADO]. Mesmo par de PGRs de R-RX-03 (GHE-08 Carpintaria Fascino 15.07.26, GHE-04 Carpintaria Aurora 27.08.26), mesma médica, mesmo valor: ambos Espirometria 24M. ID separada de R-ESP-02 por mudança de escopo de substância (mineral -> madeira), não faixa da mesma regra."
+    resumo_clinico: "Poeira de madeira → espirometria a cada 2 anos. Sem exigência direta na NR-07 (o Anexo III trata de poeira mineral); segue as matrizes das coordenadoras (Fascino, Aurora)."
     status: INTERPRETADO
 
   - id: R-ESP-04
@@ -370,6 +395,7 @@ regras:
       24M ADM, PER, MR, DEM') e 26/26 cargos de serralheria/solda nas 22 matrizes de set/2026.
       Gatilho `solda_indicador` [INTERPRETADO], o mesmo das demais regras de solda. Decisão do
       Diovanni (26/09/2026)."
+    resumo_clinico: "Solda no GHE → espirometria a cada 2 anos. A NR-07, Anexo III, item 3.2 pede espirometria para fumos metálicos só com sintomas respiratórios; o exame de rotina segue a planilha atualizada da Dra. Patrícia e as serralherias das matrizes de set/2026 (NR-07, item 7.5.18) — confirmar."
     status: INTERPRETADO
 
   - id: R-RX-02
@@ -380,6 +406,7 @@ regras:
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
     base_normativa: "Fumos metálicos → RX OIT 60M. SEM âncora no Anexo III da NR-07 (fumos não é Quadro 1 nem Quadro 2) — origem matriz Patrícia/analogia, não norma conferida [INTERPRETADO]. DT-002K-02 firmou risco por metal individual (Mn/Cr⁶⁺), não categoria 'fumos'. Roteamento correto depende da decomposição em metais — ver DT-D3-02."
+    resumo_clinico: "Fumos metálicos → RX de tórax (padrão OIT) a cada 5 anos. Sem exigência no Anexo III da NR-07; segue a matriz da Dra. Patrícia — confirmar."
     status: INTERPRETADO
 
   - id: R-RX-03
@@ -390,6 +417,7 @@ regras:
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
     base_normativa: "Poeira de madeira → RX OIT 60M. SEM âncora no Anexo III da NR-07 (não é sílica/asbesto/carvão do Quadro 1, nem PNOS do Quadro 2 — agente identificável, DT-003EJ-01) — origem IARC Monographs Vol.62/1995 e 100C/2012 (Grupo 1, carcinogênico p/ humanos) + matriz Patrícia, não norma brasileira conferida [INTERPRETADO]. Medido em 2 PGRs independentes, mesma médica, mesmo valor: GHE-08 Carpintaria (PGR CONSCIENTE SPE 0030 FASCINO, 15.07.26) e GHE-04 Carpintaria (PGR CMO Residencial Aurora Lago das Rosas, 27.08.26), ambos RX 60M. DT-003EJ-01 RESOLVIDA por esta regra."
+    resumo_clinico: "Poeira de madeira → RX de tórax (padrão OIT) a cada 5 anos. Sem exigência no Anexo III da NR-07; madeira é cancerígena (IARC grupo 1); segue as matrizes das coordenadoras (Fascino, Aurora)."
     status: INTERPRETADO
 
   - id: R-PKG-ASF
@@ -405,6 +433,7 @@ regras:
       asfalto em 6 matrizes do acervo, inclusive RQ.61 Viverde validada: clínico 6M e
       hemograma 6M]. Sem t,t-mucônico nem reticulócitos: regime do benzeno exige benzeno ou
       mistura ≥1% (NR-15 Anexo 13-A item 2; NR-07 Anexo V 4.2.1)."
+    resumo_clinico: "Asfalto (betume, cancerígeno) no PGR → exame clínico e hemograma a cada 6 meses. NR-07, Anexo V (cancerígenos) e item 7.5.18; segue as 7 matrizes de impermeabilização do acervo."
     status: DERIVADO
 
   - id: R-PKG-ASF-CO
@@ -417,6 +446,7 @@ regras:
       Vistamerica Ver.02 inventariam o CO da manta, CMO Aurora e Vistamerica 07/26 não].
       Emulsão a frio (asfalto genérico) não dispara. Quando o PGR inventaria o CO,
       R-BIO-04-monoxido_de_carbono emite o mesmo exame e a consolidação une."
+    resumo_clinico: "Manta asfáltica aplicada a quente (caldeira e maçarico) gera monóxido de carbono → carboxihemoglobina no periódico, a cada 6 meses. NR-07, Anexo I, Quadro 1. O PGR nem sempre inventaria o CO; segue as matrizes de impermeabilização."
     status: DERIVADO
 
   - id: R-PKG-SOLD-CO
@@ -433,6 +463,7 @@ regras:
       `solda_indicador` (manganês ou fumos metálicos) [INTERPRETADO], o mesmo de R-VIS-01-solda;
       gatilho pela fonte geradora declarada é DT própria. Quando o PGR inventaria o CO,
       R-BIO-04-monoxido_de_carbono emite o mesmo exame e a consolidação une."
+    resumo_clinico: "Solda gera monóxido de carbono → carboxihemoglobina no periódico, a cada 6 meses. NR-07, Anexo I, Quadro 1. O PGR não inventaria o CO; segue as matrizes de serralheria e a planilha atualizada da Dra. Patrícia."
     status: DERIVADO
 
   - id: R-PKG-BZ
@@ -447,6 +478,7 @@ regras:
       reticulócitos: momentos [adm/per/MR/dem] do protocolo; periodicidade 6M
       [DERIVADO — analogia hemograma R-PKG-BZ] (protocolo declara momentos, não periodicidade).
       Dispara por identidade de agente, agnóstico à fonte (4ª fonte D-ARQ-35) e à materialidade."
+    resumo_clinico: "Benzeno na composição de produto (FDS), mesmo em baixa concentração → hemograma e reticulócitos a cada 6 meses em todos os momentos, e ácido trans,trans-mucônico no periódico semestral. Protocolo da coordenação."
     status: VALIDADO
 
   # R-BIO-05 [INTERPRETADO] (DT-003EB-02): nas R-BIO-04 do Quadro 1 (IBE/EE),
@@ -476,6 +508,7 @@ regras:
       protocolo — a norma fala em análise de sangue, faixa 6-12M e adm/per. Momentos e
       periodicidade conferidos contra o gabarito Aurora Lago das Rosas 27.08.26 (Dra.
       Patrícia, GHE 16 SERRALHERIA: 'Manganês no sangue (ADM, PER 6 meses, MRO)')."
+    resumo_clinico: "Manganês no PGR → manganês no sangue a cada 6 meses (admissional, periódico e mudança de risco). A NR-15, Anexo 12 exige acompanhamento de todo exposto; protocolo da coordenação."
     status: VALIDADO
 
   - id: R-BIO-04-acetona
@@ -486,6 +519,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): acetona → acetona na urina. Momento [per],
       periodicidade 6M [R-CLI-02 semestral]."
+    resumo_clinico: "Acetona no PGR → acetona na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-arsenio
@@ -496,6 +530,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): arsênio → arsênio inorgânico + metabólitos
       metilados na urina. Momento [per], periodicidade 6M."
+    resumo_clinico: "Arsênio no PGR → arsênio inorgânico mais metabólitos metilados na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-dissulfeto_de_carbono
@@ -506,6 +541,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): dissulfeto de carbono → TTCA na urina.
       Momento [per], periodicidade 6M."
+    resumo_clinico: "Dissulfeto de carbono no PGR → ácido 2-tioxotiazolidina-4-carboxílico (TTCA) na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-estireno
@@ -516,6 +552,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): estireno → soma dos ácidos mandélico e
       fenilglioxílico na urina (exame único). Momento [per], periodicidade 6M."
+    resumo_clinico: "Estireno no PGR → soma dos ácidos mandélico e fenilglioxílico na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-mercurio
@@ -526,6 +563,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): mercúrio → mercúrio na urina.
       Momento [per], periodicidade 6M."
+    resumo_clinico: "Mercúrio no PGR → mercúrio na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-metil_etil_cetona
@@ -536,6 +574,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): MEK → metil-etil-cetona na urina.
       Momento [per], periodicidade 6M."
+    resumo_clinico: "Metil-etil-cetona (MEK) no PGR → metil-etil-cetona (MEK) na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-monoxido_de_carbono
@@ -546,6 +585,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): monóxido de carbono → carboxihemoglobina
       no sangue. Momento [per], periodicidade 6M."
+    resumo_clinico: "Monóxido de carbono no PGR → carboxihemoglobina no sangue, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-n_hexano
@@ -556,6 +596,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): n-hexano → 2,5-hexanodiona na urina.
       Momento [per], periodicidade 6M."
+    resumo_clinico: "N-hexano no PGR → 2,5-hexanodiona na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-tolueno
@@ -566,6 +607,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE), revisão 2020: tolueno → ortocresol na urina
       (não mais tolueno na urina). Momento [per], periodicidade 6M."
+    resumo_clinico: "Tolueno no PGR → ortocresol na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-tricloroetileno
@@ -576,6 +618,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): tricloroetileno → ácido tricloroacético
       na urina. Momento [per], periodicidade 6M."
+    resumo_clinico: "Tricloroetileno no PGR → ácido tricloroacético na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-xileno
@@ -586,6 +629,7 @@ regras:
     base_normativa: "R-BIO-04 — biomonitoramento por identidade de agente.
       NR-07 Anexo I Quadro 1 (IBE/EE): xileno → ácido metil-hipúrico na urina.
       Momento [per], periodicidade 6M."
+    resumo_clinico: "Xileno no PGR → ácido metil-hipúrico na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-chumbo
@@ -597,6 +641,7 @@ regras:
       chumbo no sangue (Pb-S) e ALA-U. DISTINTO de R-BIO-04-chumbo_tetraetila (Quadro 1/EE,
       chumbo_urina, só periódico) — mesmo elemento, agente/quadro/via analítica diferentes;
       não confundir em auditoria de PCMSO. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
+    resumo_clinico: "Chumbo inorgânico no PGR → chumbo no sangue (Pb-S) e Ácido delta-aminolevulínico na urina (ALA-U) a cada 6 meses, no admissional, periódico, retorno, mudança de risco e demissional. Indicador biológico da NR-07, Anexo I, Quadro 2."
     status: VALIDADO
 
   - id: R-BIO-04-cadmio
@@ -605,6 +650,7 @@ regras:
       - {exame: cadmio_urina, periodicidade_meses: 6, momentos: [adm, per, RT, MR, dem]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 2 (IBE/SC): cádmio e comp.
       inorgânicos → cádmio na urina. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
+    resumo_clinico: "Cádmio e comp. inorgânicos no PGR → cádmio na urina a cada 6 meses, no admissional, periódico, retorno, mudança de risco e demissional. Indicador biológico da NR-07, Anexo I, Quadro 2."
     status: VALIDADO
 
   - id: R-BIO-04-fluoretos
@@ -614,6 +660,7 @@ regras:
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 2 (IBE/SC): flúor, ácido
       fluorídrico e fluoretos inorgânicos → fluoreto urinário. Momentos
       [adm/per/RT/MR/dem], periodicidade 6M."
+    resumo_clinico: "Flúor, ácido fluorídrico e fluoretos inorgânicos no PGR → fluoreto urinário a cada 6 meses, no admissional, periódico, retorno, mudança de risco e demissional. Indicador biológico da NR-07, Anexo I, Quadro 2."
     status: VALIDADO
 
   - id: R-BIO-04-inseticidas_inibidores_colinesterase
@@ -625,6 +672,7 @@ regras:
       (canônico entre OU; butirilcolinesterase plasma/soro é a alternativa)
       [INTERPRETADO — escolha do canônico, revisão de saída]. Momentos
       [adm/per/RT/MR/dem], periodicidade 6M."
+    resumo_clinico: "Inseticidas inibidores da colinesterase no PGR → atividade de acetilcolinesterase eritrocitária a cada 6 meses, no admissional, periódico, retorno, mudança de risco e demissional. Indicador biológico da NR-07, Anexo I, Quadro 2."
     status: VALIDADO
 
   - id: R-BIO-04-cromo_hexavalente
@@ -633,6 +681,7 @@ regras:
     emite:
       - {exame: cromo_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): cromo hexavalente (comp. solúveis) → cromo na urina (FJFS 25 µg/L; critério alt. aumento-na-jornada 10 µg/L, mesmo analito). Momento [per], 6M."
+    resumo_clinico: "Cromo hexavalente (compostos solúveis) no PGR → cromo na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-cobalto
@@ -641,6 +690,7 @@ regras:
     emite:
       - {exame: cobalto_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): cobalto → cobalto na urina. Momento [per], 6M."
+    resumo_clinico: "Cobalto no PGR → cobalto na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-fenol
@@ -649,6 +699,7 @@ regras:
     emite:
       - {exame: fenol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): fenol → fenol na urina. Momento [per], 6M."
+    resumo_clinico: "Fenol no PGR → fenol na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-metanol
@@ -657,6 +708,7 @@ regras:
     emite:
       - {exame: metanol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): metanol → metanol na urina. Momento [per], 6M."
+    resumo_clinico: "Metanol no PGR → metanol na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-diclorometano
@@ -665,6 +717,7 @@ regras:
     emite:
       - {exame: diclorometano_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): diclorometano → diclorometano na urina. Momento [per], 6M."
+    resumo_clinico: "Diclorometano no PGR → diclorometano na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-etilbenzeno
@@ -673,6 +726,7 @@ regras:
     emite:
       - {exame: acido_mandelico_fenilglioxilico, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etilbenzeno → soma dos ácidos mandélico e fenilglioxílico na urina (exame único, mesmo analito do estireno). Momento [per], 6M."
+    resumo_clinico: "Etilbenzeno no PGR → soma dos ácidos mandélico e fenilglioxílico na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-anilina
@@ -681,6 +735,7 @@ regras:
     emite:
       - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): anilina → metahemoglobina no sangue (canônico entre 'OU'; p-aminofenol na urina é a alternativa) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    resumo_clinico: "Anilina no PGR → metahemoglobina no sangue, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-nitrobenzeno
@@ -689,6 +744,7 @@ regras:
     emite:
       - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): nitrobenzeno → metahemoglobina no sangue. Momento [per], 6M."
+    resumo_clinico: "Nitrobenzeno no PGR → metahemoglobina no sangue, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-indutores_metahemoglobina
@@ -697,6 +753,7 @@ regras:
     emite:
       - {exame: metahemoglobina_sangue, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): classe indutores de metahemoglobina → metahemoglobina no sangue. Slug-classe (molde inseticidas). Momento [per], 6M."
+    resumo_clinico: "Indutores de metahemoglobina no PGR → metahemoglobina no sangue, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-tricloroetano_111
@@ -705,6 +762,7 @@ regras:
     emite:
       - {exame: acido_tricloroacetico, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 1,1,1-tricloroetano → ácido tricloroacético na urina (canônico entre 4 opções do Anexo; descartadas: ar exalado final, tricloroetanol total urina, tricloroetanol total sangue) [INTERPRETADO — escolha do canônico, revisão de saída]. Exame compartilhado com R-BIO-04-tricloroetileno (mesmo slug de exame). Momento [per], 6M."
+    resumo_clinico: "1,1,1-tricloroetano no PGR → ácido tricloroacético na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-butadieno_13
@@ -713,6 +771,7 @@ regras:
     emite:
       - {exame: dihidro_acetilcisteina_butano_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 1,3-butadieno → 1,2-dihidro-4-(N-acetilcisteína)butano na urina. Momento [per], 6M."
+    resumo_clinico: "1,3-butadieno no PGR → 1,2-dihidro-4-(N-acetilcisteína)butano na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-hdi
@@ -721,6 +780,7 @@ regras:
     emite:
       - {exame: hexametilenodiamina_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): HDI (diisocianato de hexametileno) → 1,6-hexametilenodiamina na urina. Momento [per], 6M."
+    resumo_clinico: "HDI (diisocianato de hexametileno) no PGR → 1,6-hexametilenodiamina na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-metoxietanol_2
@@ -729,6 +789,7 @@ regras:
     emite:
       - {exame: acido_metoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-metoxietanol → ácido 2-metoxiacético na urina. Exame compartilhado com R-BIO-04-metoxietilacetato_2 (mesmo metabólito urinário). Momento [per], 6M."
+    resumo_clinico: "2-metoxietanol no PGR → ácido 2-metoxiacético na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-metoxietilacetato_2
@@ -737,6 +798,7 @@ regras:
     emite:
       - {exame: acido_metoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): acetato de 2-metoxietila → ácido 2-metoxiacético na urina (mesmo metabólito do 2-metoxietanol). Exame compartilhado com R-BIO-04-metoxietanol_2. Momento [per], 6M."
+    resumo_clinico: "Acetato de 2-metoxietila no PGR → ácido 2-metoxiacético na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-propanol_2
@@ -745,6 +807,7 @@ regras:
     emite:
       - {exame: acetona_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-propanol (isopropanol) → acetona na urina (metabólito comum). Exame compartilhado com R-BIO-04-acetona (mesmo slug de exame). Momento [per], 6M."
+    resumo_clinico: "2-propanol (isopropanol) no PGR → acetona na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-tdi
@@ -753,6 +816,7 @@ regras:
     emite:
       - {exame: toluenodiamino_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): TDI (diisocianato de tolueno, isômeros 2,4 e 2,6) → isômeros 2,4 e 2,6 toluenodiamino na urina (soma dos isômeros). Agente-classe (2 CAS no Anexo; ver comentário em agentes.yaml). Momento [per], 6M."
+    resumo_clinico: "TDI (diisocianato de tolueno, isômeros 2,4 e 2,6) no PGR → isômeros 2,4 e 2,6 toluenodiamino na urina (soma dos isômeros), no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-butoxietanol_2
@@ -761,6 +825,7 @@ regras:
     emite:
       - {exame: acido_butoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): 2-butoxietanol → ácido butoxiacético na urina (BAA). Momento [per], 6M."
+    resumo_clinico: "2-butoxietanol no PGR → ácido butoxiacético na urina (BAA), no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-chumbo_tetraetila
@@ -769,6 +834,7 @@ regras:
     emite:
       - {exame: chumbo_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): chumbo tetraetila → chumbo na urina. DISTINTO de R-BIO-04-chumbo (chumbo inorgânico, Quadro 2/SC, Pb-S + ALA-U, 5 momentos) — mesmo elemento, agente/quadro/via analítica diferentes; não confundir em auditoria de PCMSO. Momento [per], 6M."
+    resumo_clinico: "Chumbo tetraetila no PGR → chumbo na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-ciclohexanona
@@ -777,6 +843,7 @@ regras:
     emite:
       - {exame: ciclohexanol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): ciclohexanona → ciclohexanol na urina (canônico entre 2 opções do Anexo; descartada: 1,2-ciclohexanodiol na urina) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    resumo_clinico: "Ciclohexanona no PGR → ciclohexanol na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-clorobenzeno
@@ -785,6 +852,7 @@ regras:
     emite:
       - {exame: clorocatecol_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): clorobenzeno → 4-clorocatecol na urina (canônico entre 2 opções do Anexo; descartada: p-clorofenol na urina) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    resumo_clinico: "Clorobenzeno no PGR → 4-clorocatecol na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-etoxietanol
@@ -793,6 +861,7 @@ regras:
     emite:
       - {exame: acido_etoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etoxietanol (linha do Anexo: 'Etoxietanol e Etoxietilacetato') → ácido etoxiacético na urina. Exame compartilhado com R-BIO-04-etoxietilacetato (mesmo metabólito urinário; CAS do Anexo atribuído ao acetato, ver comentário em agentes.yaml). Momento [per], 6M."
+    resumo_clinico: "Etoxietanol (linha do Anexo: 'Etoxietanol e Etoxietilacetato') no PGR → ácido etoxiacético na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-etoxietilacetato
@@ -801,6 +870,7 @@ regras:
     emite:
       - {exame: acido_etoxiacetico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): etoxietilacetato → ácido etoxiacético na urina (mesmo metabólito do etoxietanol). Exame compartilhado com R-BIO-04-etoxietanol. Momento [per], 6M."
+    resumo_clinico: "Etoxietilacetato no PGR → ácido etoxiacético na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-furfural
@@ -809,6 +879,7 @@ regras:
     emite:
       - {exame: acido_furoico_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): furfural → ácido furóico na urina. Momento [per], 6M."
+    resumo_clinico: "Furfural no PGR → ácido furóico na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-metil_butil_cetona
@@ -817,6 +888,7 @@ regras:
     emite:
       - {exame: hexanodiona_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): metil-butil-cetona (2-hexanona) → 2,5-hexanodiona na urina (metabólito comum). Exame compartilhado com R-BIO-04-n_hexano (mesmo slug de exame). Momento [per], 6M."
+    resumo_clinico: "Metil-butil-cetona (2-hexanona) no PGR → 2,5-hexanodiona na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-mibk
@@ -825,6 +897,7 @@ regras:
     emite:
       - {exame: mibk_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): metil-isobutil-cetona (MIBK) → MIBK na urina. Momento [per], 6M."
+    resumo_clinico: "Metil-isobutil-cetona (MIBK) no PGR → MIBK na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-n_metil_2_pirrolidona
@@ -833,6 +906,7 @@ regras:
     emite:
       - {exame: hidroxi_metil_pirrolidona_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): N-metil-2-pirrolidona → 5-hidroxi-N-metil-2-pirrolidona na urina. Momento [per], 6M."
+    resumo_clinico: "N-metil-2-pirrolidona no PGR → 5-hidroxi-N-metil-2-pirrolidona na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-dimetilacetamida
@@ -841,6 +915,7 @@ regras:
     emite:
       - {exame: metilacetamida_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): N,N-dimetilacetamida → N-metilacetamida na urina. Momento [per], 6M."
+    resumo_clinico: "N,N-dimetilacetamida no PGR → N-metilacetamida na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-dimetilformamida
@@ -849,6 +924,7 @@ regras:
     emite:
       - {exame: metilformamida_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): N,N-dimetilformamida → N-metilformamida total na urina (canônico entre 2 opções do Anexo; descartada: N-acetil-S-(N-metilcarbamoil)cisteína na urina) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    resumo_clinico: "N,N-dimetilformamida no PGR → N-metilformamida total na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-oxido_de_etileno
@@ -857,6 +933,7 @@ regras:
     emite:
       - {exame: aduto_hev_hemoglobina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): óxido de etileno → adutos de N-(2-hidroxietil)valina (HEV) em hemoglobina. Momento [per], 6M."
+    resumo_clinico: "Óxido de etileno no PGR → adutos de N-(2-hidroxietil)valina (HEV) em hemoglobina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-tetracloroetileno
@@ -865,6 +942,7 @@ regras:
     emite:
       - {exame: tetracloroetileno_sangue, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): tetracloroetileno (percloroetileno) → tetracloroetileno no sangue (canônico entre 2 opções do Anexo; descartada: ar exalado final) [INTERPRETADO — escolha do canônico, revisão de saída]. Momento [per], 6M."
+    resumo_clinico: "Tetracloroetileno (percloroetileno) no PGR → tetracloroetileno no sangue, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
   - id: R-BIO-04-tetrahidrofurano
@@ -873,5 +951,6 @@ regras:
     emite:
       - {exame: tetrahidrofurano_urina, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "R-BIO-04 — NR-07 Anexo I Quadro 1 (IBE/EE): tetrahidrofurano → tetrahidrofurano na urina. Momento [per], 6M."
+    resumo_clinico: "Tetrahidrofurano no PGR → tetrahidrofurano na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
