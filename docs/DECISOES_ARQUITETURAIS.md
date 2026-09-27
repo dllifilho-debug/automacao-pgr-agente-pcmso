@@ -4299,6 +4299,15 @@ Sessão branch `claude/cool-babbage-whh1zw`. Pedido do Diovanni: a matriz deve e
 - **Código:** `tipos.py` (cl.1); `emissao.py` monta o `Motivo` dentro do laço dos itens; `revisao_matriz.py` mostra `R-CLI-01 (12 meses), R-PKG-ASF (6 meses)` na coluna Regra.
 - **Testes:** `test_rastro_periodicidade.py` (4 casos). Varredura inversa: 6 reversões (não passar a periodicidade ao `Motivo`; gravar a periodicidade da linha em vez da do item; momentos vazios; momentos do primeiro item para todos; não passar a base normativa; revisão só com o `regra_id`), 6/6 mortas.
 
+**Nota de aplicação — fatia 2 IMPLEMENTADA (27/09/2026, pós-merge do PR #399).** Mesma ID, cláusulas inalteradas; fatia 2 autorizada pelo Diovanni ("vamos por essa fatia 2").
+
+- **Código:** `superficie/memorial_matriz.py` (apresentação-pura, `D-ARQ-72`): `montar_memorial` + `renderizar_memorial_docx`. Tela: terceiro download, "Baixar memorial de raciocínio" (`memorial.docx`), gerado junto do DOCX da matriz; a matriz assinada não muda.
+- **Grau de certeza da linha = elo mais fraco que a decide:** em cada componente (a periodicidade final e cada momento) vale a regra mais forte que o pede; a linha fica com o pior componente. Regra `[INTERPRETADO]` que só repete o que outra mais forte já pede não rebaixa a linha (ex.: `R-ESP-04` ao lado de `R-ESP-02`).
+- **Documento (paisagem):** (1) "Revisar primeiro" — uma linha por regra interpretada ou sem status, com os GHEs agrupados por exame e o fundamento; (2) uma tabela por GHE: código estável `GHE-xx/slug`, exame, o que cada regra pediu (periodicidade, momentos, gatilho, "define a periodicidade" quando há disputa), certeza e coluna Correção em branco; exames não pedidos (`Observacao`) em lista; (3) apêndice com o fundamento de cada regra citada, uma vez só.
+- **Medido no Fascino (rota determinística):** 179 linhas; "Revisar primeiro" com 5 decisões (R-PSY-03 em 38 linhas, R-RX-01-qual em 14, R-PKG-TRANSITO em 2, R-ESP-03 e R-RX-03 em 1). Primeira versão listava as 56 linhas uma a uma e repetia o fundamento em cada linha (84 páginas); a final tem 14.
+- **Limite conhecido:** o fundamento é o `base_normativa` do `regras.yaml`, escrito para auditoria do projeto (cita DT, D-ARQ, sessões). Um resumo clínico por regra, para leitura das médicas, fica como candidato.
+- **Testes:** `test_memorial_matriz.py` (6 casos). Varredura inversa: 12 reversões, 12/12 mortas.
+
 **Base.** Sessão branch `claude/cool-babbage-whh1zw`, 26/09/2026. Leitura de `tipos.py`, `emissao.py`, `consolidacao.py`, `revisao_matriz.py`; DT `claude/dreamy-mayer-os6jce`-01.
 
 ---
@@ -4531,3 +4540,4 @@ Sessão branch `claude/cool-babbage-whh1zw`. Pedido do Diovanni: a matriz deve e
 | v222 | 25/09/2026 | Branch `claude/hopeful-ramanujan-rbgh4s` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-86`): **nota de aplicação em `D-ARQ-86`** (mesma ID, nenhuma cláusula alterada) — medição de sílica e PNOS na tela decide a faixa de R-RX-01; asbesto fora por decisão do Diovanni (resolver sem LEO, 0/29 PGRs), aberta `DT-(sessão claude/hopeful-ramanujan-rbgh4s)-01`. |
 | v223 | 25/09/2026 | Branch `feat/ambiente-deps-20260925` (AMBIENTE — dependências): **nota de aplicação em `D-ARQ-75`** (mesma ID, nenhuma cláusula alterada) — piso de streamlit 1.42.0 → 1.56.0, medido por versão (`st.user` em 1.45.0, `AppTest.file_uploader` em 1.56.0; 83/83 testes de tela em 1.56.0). |
 | v224 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (ARQUITETURA + IMPLEMENTAÇÃO, fatia 1 autorizada pelo Diovanni): **`D-ARQ-87` CRIADA** — memorial de raciocínio da matriz; `Motivo` por item com a periodicidade, os momentos e a base normativa que a regra pediu, antes do piso da consolidação; revisão na tela mostra a periodicidade por regra. Fatias 2 (memorial `.docx`) e 3 (retorno das correções) propostas. |
+| v225 | 27/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-87`): **nota de aplicação em `D-ARQ-87`** (mesma ID, nenhuma cláusula alterada) — memorial de raciocínio em `.docx` (`superficie/memorial_matriz.py`), download na tela; certeza pelo elo mais fraco; decisões interpretadas agrupadas por regra; apêndice de fundamentos. |

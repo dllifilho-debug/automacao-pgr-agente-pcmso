@@ -3180,6 +3180,8 @@ peça 4/D-ARQ-65) — escopo e prioridade a definir pelo Arquiteto, não aberta 
 
 **Nota (sessão branch `claude/cool-babbage-whh1zw`, 26/09/2026) — sequência trocada pelo Diovanni; virou `D-ARQ-87`, fatia 1 IMPLEMENTADA.** O Diovanni pediu o item antes de `D-ARQ-57` 5d. A medição no código corrigiu a premissa acima: a proveniência do caminho feliz já persiste em `Motivo` (`D-ARQ-22` Parte B, `D-ARQ-72`) e aparece na revisão da tela. O que se perdia era o que cada regra pediu antes do piso da consolidação (periodicidade e momentos) e o texto da base normativa — fechado na fatia 1. Seguem abertas: fatia 2 (memorial `.docx` para as médicas) e fatia 3 (retorno das correções pelo código da linha). **Status:** ABERTA até a fatia 2.
 
+**Nota (27/09/2026) — fatia 2 IMPLEMENTADA** (memorial `.docx`, download na tela; ver `D-ARQ-87`). **Status:** RESOLVIDA no escopo desta DT (a matriz vem acompanhada do raciocínio). A fatia 3 (retorno das correções) segue como proposta em `D-ARQ-87` cl.4.
+
 ### DT-(sessão claude/nice-ptolemy-wxk1wo)-01 — Casamento manual FDS↔produto do PGR: falta o elo que liga a composição extraída ao `ProdutoQuimico` certo `[RESOLVIDA — fatia 2b IMPLEMENTADA, sessão claude/003ff-fatia2b]`
 
 **Origem.** Pedido do Diovanni nesta sessão: a tela só tinha upload de PGR; produtos químicos (CAS, agravos à saúde) vêm da FDS/FISPQ e complementam o PGR/PCMSO. Fatia 1 (`D-ARQ-47`, nota de aplicação desta sessão) já sobe: `pagina_matriz()` aceita upload avulso de FDS, roda `preparar_composicao` (extração real + transcrição-LLM + gate de forma) e mostra CAS/nome/frases-H na tela — com ou sem PGR.

@@ -10552,3 +10552,22 @@ sobre 1477. `mypy --strict` alvo canônico limpo, 51 arquivos. Uma primeira roda
 descartada: o HISTORICO foi escrito durante ela, violando a regra "medição nunca concorrente com escrita"
 (nenhum teste lê o arquivo — só comentários o citam —, mas o número ficaria sem proveniência). `DECISOES`
 não tocado.
+
+## Sessão (branch `claude/cool-babbage-whh1zw`, pós-merge do PR #399) — 27/09/2026 — IMPLEMENTAÇÃO: memorial de raciocínio (`D-ARQ-87` fatia 2)
+
+**Pedido.** Diovanni: seguir pela fatia 2 — o memorial `.docx` para as médicas.
+
+**Implementado.** `superficie/memorial_matriz.py` e o download "Baixar memorial de raciocínio" na tela.
+Detalhe em `D-ARQ-87` (nota da fatia 2). Duas iterações medidas no Fascino antes da versão final: a primeira
+listava as 56 linhas interpretadas uma a uma e repetia o fundamento em cada linha (84 páginas); a final
+agrupa por regra (5 decisões) e leva o fundamento a um apêndice (14 páginas). Larguras de coluna: o
+LibreOffice só respeita a grade da tabela (`gridCol`), não a célula — as duas passaram a receber a largura.
+
+**Testes.** `test_memorial_matriz.py` (6 casos). Varredura inversa 12/12.
+
+**Verificação.** Suíte completa (árvore parada): **1486 passed, 6 skipped, 0 failed** (1010.34s), +6 exato
+sobre 1480. `mypy --strict` alvo canônico limpo, **52 arquivos** (era 51; entra `superficie/memorial_matriz.py`).
+A primeira rodada foi descartada: o mypy acusou `cache.matrizes` opcional sem guarda em `web_matriz.py`
+(corrigido com `cache.matrizes is not None`); o `TaskStop` encerrou o shell mas não o pytest filho, que
+seguiu rodando durante a correção — a rodada já estava descartada, e o processo foi morto antes da rodada
+válida. `DECISOES` tocado → `INDICE_DARQ` regenerado e `tests/test_gerar_indice_darq.py` 6 passed.
