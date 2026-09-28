@@ -598,6 +598,11 @@ def pagina_matriz() -> None:
         renderizar_docx,
     )
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
+    from agente_medico.superficie.memorial_matriz import (
+        montar_memorial,
+        renderizar_memorial_docx,
+        resumos_do_protocolo,
+    )
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.apresentacao import (
         MENSAGEM_EMISSAO_FUTURA,
@@ -1052,10 +1057,24 @@ def pagina_matriz() -> None:
                 return
 
             docx_bytes = None
+            memorial_bytes = None
             if doc is not None:
                 destino_docx = Path(tmp) / "matriz.docx"
                 renderizar_docx(doc, destino_docx)
                 docx_bytes = destino_docx.read_bytes()
+            if doc is not None and cache.matrizes is not None:
+                # D-ARQ-87 fatia 2: memorial de raciocínio, anexo não assinado.
+                destino_memorial = Path(tmp) / "memorial.docx"
+                renderizar_memorial_docx(
+                    montar_memorial(
+                        cache.matrizes,
+                        cache.exames_vocab,
+                        resumos_do_protocolo(_protocolo_padrao().regras),
+                    ),
+                    cabecalho,
+                    destino_memorial,
+                )
+                memorial_bytes = destino_memorial.read_bytes()
 
         st.session_state["web_matriz_cache"] = cache
 
@@ -1117,7 +1136,7 @@ def pagina_matriz() -> None:
             st.subheader("4. Matriz e downloads")
             # Chamada via `st.download_button` dentro de `with coluna`, nunca
             # `coluna.download_button`: os testes espionam o atributo do módulo.
-            col_docx, col_html = st.columns(2)
+            col_docx, col_html, col_memorial = st.columns(3)
             if docx_bytes is not None:
                 with col_docx:
                     st.download_button(
@@ -1129,6 +1148,15 @@ def pagina_matriz() -> None:
                     )
             with col_html:
                 st.download_button("Baixar HTML", html, file_name="matriz.html", mime="text/html")
+            if memorial_bytes is not None:
+                with col_memorial:
+                    st.download_button(
+                        "Baixar memorial de raciocínio",
+                        memorial_bytes,
+                        file_name="memorial.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        help="Anexo para as médicas: por que cada exame e periodicidade. Não entra na matriz assinada.",
+                    )
 
             for bloco in doc.blocos:
                 st.subheader(f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip())

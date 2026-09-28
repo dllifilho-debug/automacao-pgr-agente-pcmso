@@ -10552,3 +10552,46 @@ sobre 1477. `mypy --strict` alvo canônico limpo, 51 arquivos. Uma primeira roda
 descartada: o HISTORICO foi escrito durante ela, violando a regra "medição nunca concorrente com escrita"
 (nenhum teste lê o arquivo — só comentários o citam —, mas o número ficaria sem proveniência). `DECISOES`
 não tocado.
+
+## Sessão (branch `claude/cool-babbage-whh1zw`, pós-merge do PR #399) — 27/09/2026 — IMPLEMENTAÇÃO: memorial de raciocínio (`D-ARQ-87` fatia 2)
+
+**Pedido.** Diovanni: seguir pela fatia 2 — o memorial `.docx` para as médicas.
+
+**Implementado.** `superficie/memorial_matriz.py` e o download "Baixar memorial de raciocínio" na tela.
+Detalhe em `D-ARQ-87` (nota da fatia 2). Duas iterações medidas no Fascino antes da versão final: a primeira
+listava as 56 linhas interpretadas uma a uma e repetia o fundamento em cada linha (84 páginas); a final
+agrupa por regra (5 decisões) e leva o fundamento a um apêndice (14 páginas). Larguras de coluna: o
+LibreOffice só respeita a grade da tabela (`gridCol`), não a célula — as duas passaram a receber a largura.
+
+**Testes (primeira versão).** `test_memorial_matriz.py` (6 casos). Varredura inversa 12/12.
+
+**Reescrita em linguagem clínica (mesmo dia, antes de qualquer push).** O Diovanni leu a prévia e achou o
+texto técnico demais — linguagem de tecnologia, não de medicina e segurança do trabalho. Concordei: o
+documento expunha o `base_normativa` (DT, D-ARQ, branches), nomes de predicado, slugs e os status sem
+explicação. Feito: campo `resumo_clinico` nas 79 regras ativas (34 à mão; 45 `R-BIO-04-*` geradas do
+fundamento e gravadas explícitas, depois ajustadas à mão — MEK, indutores de metahemoglobina, compostos);
+rótulos de certeza que se explicam; "Confirmar primeiro"; sem o fundamento de auditoria. Fascino: 22 páginas
+(mais que as 14 da versão técnica, porque o resumo se repete por GHE; a seção 1 é a de revisão).
+`test_memorial_matriz.py` reescrito (7 casos); varredura inversa 14/14.
+
+**Verificação.** Suíte completa (árvore parada): **1486 passed, 6 skipped, 0 failed** (1010.34s), +6 exato
+sobre 1480. `mypy --strict` alvo canônico limpo, **52 arquivos** (era 51; entra `superficie/memorial_matriz.py`).
+A primeira rodada foi descartada: o mypy acusou `cache.matrizes` opcional sem guarda em `web_matriz.py`
+(corrigido com `cache.matrizes is not None`); o `TaskStop` encerrou o shell mas não o pytest filho, que
+seguiu rodando durante a correção — a rodada já estava descartada, e o processo foi morto antes da rodada
+válida. `DECISOES` tocado → `INDICE_DARQ` regenerado e `tests/test_gerar_indice_darq.py` 6 passed.
+
+**Verificação (versão clínica).** Suíte completa (árvore parada): **1487 passed, 6 skipped, 0 failed**
+(940.74s), +1 exato sobre 1486 (`test_memorial_matriz.py` de 6 para 7 casos). `mypy --strict` alvo
+canônico limpo, 52 arquivos. `INDICE_DARQ` regenerado; `tests/test_gerar_indice_darq.py` 6 passed.
+
+**Compactação (28/09/2026, pedido do Diovanni).** Tabelas por GHE passam a levar só a primeira frase do
+resumo de cada regra (gatilho e exame; corte medido nas 79 regras — nenhum "Dra." no meio da primeira
+frase); o resumo inteiro vai uma vez à seção 3 "Regras usadas nesta matriz"; exames do mesmo GHE com o
+mesmo motivo e a mesma base viram uma linha. Fascino: 22 → 16 páginas. Resumo do chumbo: "Ácido" em
+maiúscula no meio da frase corrigido. `test_memorial_matriz.py`: 9 casos; varredura inversa das 3
+reversões novas e de 3 antigas no trecho tocado, 6/6.
+
+**Verificação (compactação).** Suíte completa (árvore parada): **1489 passed, 6 skipped, 0 failed** (899.79s),
++2 exato sobre 1487. `mypy --strict` alvo canônico limpo, 52 arquivos. `INDICE_DARQ` regenerado;
+`tests/test_gerar_indice_darq.py` 6 passed.
