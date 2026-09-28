@@ -641,7 +641,7 @@ regras:
       chumbo no sangue (Pb-S) e ALA-U. DISTINTO de R-BIO-04-chumbo_tetraetila (Quadro 1/EE,
       chumbo_urina, só periódico) — mesmo elemento, agente/quadro/via analítica diferentes;
       não confundir em auditoria de PCMSO. Momentos [adm/per/RT/MR/dem], periodicidade 6M."
-    resumo_clinico: "Chumbo inorgânico no PGR → chumbo no sangue (Pb-S) e Ácido delta-aminolevulínico na urina (ALA-U) a cada 6 meses, no admissional, periódico, retorno, mudança de risco e demissional. Indicador biológico da NR-07, Anexo I, Quadro 2."
+    resumo_clinico: "Chumbo inorgânico no PGR → chumbo no sangue (Pb-S) e ácido delta-aminolevulínico na urina (ALA-U) a cada 6 meses, no admissional, periódico, retorno, mudança de risco e demissional. Indicador biológico da NR-07, Anexo I, Quadro 2."
     status: VALIDADO
 
   - id: R-BIO-04-cadmio

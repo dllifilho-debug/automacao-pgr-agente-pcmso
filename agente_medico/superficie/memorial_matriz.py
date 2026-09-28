@@ -9,6 +9,7 @@ do documento — está no protocolo e na revisão da tela.
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -51,6 +52,11 @@ _COLUNAS_GHE: tuple[tuple[str, float], ...] = (
     ("Base", 3.8),
     ("Correção", 3.5),
 )
+_COLUNAS_REGRAS: tuple[tuple[str, float], ...] = (
+    ("Regra", 16.9),
+    ("Base", 4.5),
+    ("Correção", 3.5),
+)
 _COLUNAS_REVISAR: tuple[tuple[str, float], ...] = (
     ("Decisão", 11.4),
     ("Onde aparece", 10.0),
@@ -85,10 +91,27 @@ class BlocoMemorial:
 
 
 @dataclass(frozen=True)
+class RegraUsada:
+    regra_id: str
+    resumo: str
+    certeza: str
+
+
+@dataclass(frozen=True)
 class Memorial:
     revisar_primeiro: tuple[DecisaoARevisar, ...]
     blocos: tuple[BlocoMemorial, ...]
     contagem_certeza: tuple[tuple[str, int], ...]
+    regras_usadas: tuple[RegraUsada, ...]
+
+
+_FIM_DE_FRASE = re.compile(r"(?<!Dra)(?<!Dr)\.\s+(?=[A-ZÁÉÍÓÚ])")
+
+
+def primeira_frase(resumo: str) -> str:
+    """O gatilho e o exame — a primeira frase do resumo clínico. Norma e origem
+    da conduta ficam no resumo completo, uma vez só, em "Regras usadas"."""
+    return _FIM_DE_FRASE.split(resumo, maxsplit=1)[0].rstrip(".") + "."
 
 
 def resumos_do_protocolo(regras: Sequence[Mapping[str, Any]]) -> dict[str, str]:
@@ -145,7 +168,7 @@ def _porque(exame: ExameEmitido, resumos: Mapping[str, str]) -> str:
     varias = len(regras) > 1
     partes: list[str] = []
     for m in regras.values():
-        texto = resumos.get(m.regra_id, "Regra sem resumo clínico — confirmar.")
+        texto = primeira_frase(resumos.get(m.regra_id, "Regra sem resumo clínico — confirmar."))
         if varias and m.periodicidade_meses is not None:
             pedido = ExameEmitido(
                 exame=exame.exame, periodicidade_meses=m.periodicidade_meses, momentos=set(m.momentos)
@@ -210,9 +233,13 @@ def montar_memorial(
 ) -> Memorial:
     blocos: list[BlocoMemorial] = []
     niveis: Counter[int] = Counter()
+    usadas: dict[str, Motivo] = {}
     for matriz in matrizes:
         ordenadas = sorted(matriz.linhas, key=lambda e: _chave_ordem_exame(e.exame, exames_vocab))
         niveis.update(nivel_de_certeza(e) for e in ordenadas)
+        for exame in ordenadas:
+            for regra_id, motivo in _por_regra(exame).items():
+                usadas.setdefault(regra_id, motivo)
         blocos.append(
             BlocoMemorial(
                 ghe_id=matriz.ghe_id,
@@ -225,7 +252,24 @@ def montar_memorial(
         revisar_primeiro=_decisoes_a_revisar(matrizes, exames_vocab, resumos),
         blocos=tuple(blocos),
         contagem_certeza=tuple((ROTULO_CERTEZA[n], niveis[n]) for n in sorted(ROTULO_CERTEZA, reverse=True) if niveis[n]),
+        regras_usadas=tuple(
+            RegraUsada(
+                regra_id=regra_id,
+                resumo=_sanitizar(resumos.get(regra_id, "Regra sem resumo clínico — confirmar.")),
+                certeza=ROTULO_CERTEZA[_nivel(motivo.status_regra)],
+            )
+            for regra_id, motivo in sorted(usadas.items())
+        ),
     )
+
+
+def linhas_da_tabela(bloco: BlocoMemorial) -> list[tuple[str, str, str, str]]:
+    """Exames do mesmo GHE com o mesmo motivo e a mesma base viram uma linha só
+    (ex.: hemograma, glicemia e ECG que vêm só da atividade crítica)."""
+    grupos: dict[tuple[str, str], list[str]] = {}
+    for linha in bloco.linhas:
+        grupos.setdefault((linha.porque, linha.certeza), []).append(linha.exame)
+    return [("\n".join(exames), porque, certeza, "") for (porque, certeza), exames in grupos.items()]
 
 
 def _tabela(documento: Any, colunas: Sequence[tuple[str, float]], linhas: Sequence[Sequence[str]]) -> None:
@@ -271,7 +315,8 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
     documento.add_paragraph(
         "Anexo de conferência da matriz, não assinado. Para cada exame: por que foi pedido, com que "
         "base e com que grau de certeza. Quando mais de uma regra pede o mesmo exame, vale a menor "
-        "periodicidade e a soma dos momentos. Para corrigir, escreva na coluna Correção; a correção volta "
+        "periodicidade e a soma dos momentos. Nas tabelas por GHE aparece o motivo em uma frase; a norma e a "
+        "origem de cada conduta estão na seção 3. Para corrigir, escreva na coluna Correção; a correção volta "
         "para o sistema e ajusta a regra citada em \"ref.\"."
     )
 
@@ -300,7 +345,14 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         cabecalho_ghe = documento.add_heading(f"{prefixo}{bloco.ghe_id} {bloco.nome_ghe}".strip(), level=2)
         if cabecalho_ghe.runs:
             cabecalho_ghe.runs[0].font.color.rgb = _COR_DESTAQUE
-        _tabela(documento, _COLUNAS_GHE, [(l.exame, l.porque, l.certeza, "") for l in bloco.linhas])
+        _tabela(documento, _COLUNAS_GHE, linhas_da_tabela(bloco))
         for texto in bloco.nao_pedidos:
             documento.add_paragraph(texto, style="List Bullet")
+
+    documento.add_heading("3. Regras usadas nesta matriz — norma e origem de cada conduta", level=1)
+    _tabela(
+        documento,
+        _COLUNAS_REGRAS,
+        [(f"{r.resumo} (ref. {r.regra_id})", r.certeza, "") for r in memorial.regras_usadas],
+    )
     documento.save(str(destino))

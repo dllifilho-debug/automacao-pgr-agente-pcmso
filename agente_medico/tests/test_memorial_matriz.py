@@ -19,6 +19,7 @@ from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Motivo, 
 from agente_medico.superficie.documento_matriz import CabecalhoDocumento
 from agente_medico.superficie.memorial_matriz import (
     ROTULO_CERTEZA,
+    linhas_da_tabela,
     montar_memorial,
     nivel_de_certeza,
     renderizar_memorial_docx,
@@ -113,10 +114,38 @@ def test_porque_usa_o_resumo_e_mostra_o_que_cada_regra_pediu() -> None:
     (bloco,) = montar_memorial([MatrizGHE(ghe_id="GHE-22", linhas=[clinico])], _EXAMES, _RESUMOS).blocos
     (linha,) = bloco.linhas
 
-    assert "resumo de R-CLI-01 [pede: ADM, PER 12 meses, MRO] (ref. R-CLI-01)" in linha.porque
-    assert "resumo de R-PKG-ASF [pede: PER 6 meses] (ref. R-PKG-ASF)" in linha.porque
+    assert "resumo de R-CLI-01. [pede: ADM, PER 12 meses, MRO] (ref. R-CLI-01)" in linha.porque
+    assert "resumo de R-PKG-ASF. [pede: PER 6 meses] (ref. R-PKG-ASF)" in linha.porque
     assert "vale a menor periodicidade (6 meses)" in linha.porque
     assert "fundamento de" not in linha.porque
+
+
+def test_tabela_do_ghe_leva_so_a_primeira_frase_e_a_secao_3_o_resumo_inteiro() -> None:
+    # Reversões que matam: usar o resumo inteiro em "por que foi pedido" (sem
+    # `primeira_frase`); não montar `regras_usadas` (a seção 3 some).
+    resumos = {"R-CLI-01": "Todos → clínico anual. NR-07, piso do PCMSO."}
+    clinico = _exame("exame_clinico", _motivo("R-CLI-01", "VALIDADO", 12, _ADM_PER_MR))
+    memorial = montar_memorial([MatrizGHE(ghe_id="GHE-01", linhas=[clinico])], _EXAMES, resumos)
+
+    (linha,) = memorial.blocos[0].linhas
+    assert linha.porque == "Todos → clínico anual. (ref. R-CLI-01)"
+    (regra,) = memorial.regras_usadas
+    assert regra.resumo == "Todos → clínico anual. NR-07, piso do PCMSO."
+    assert regra.certeza == "Protocolo validado pela coordenação"
+
+
+def test_exames_com_o_mesmo_motivo_viram_uma_linha_na_tabela() -> None:
+    # Reversão que mata: uma linha de tabela por exame em `linhas_da_tabela`.
+    ativ = _motivo("R-VAL", "VALIDADO", 12, _ADM_PER_MR)
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        linhas=[_exame("hemograma", ativ), _exame("glicemia", ativ), _exame("avaliacao_psicossocial", _motivo("R-PSY", "INTERPRETADO", 12, _ADM_PER_MR))],
+    )
+    (bloco,) = montar_memorial([matriz], _EXAMES, _RESUMOS).blocos
+
+    tabela = linhas_da_tabela(bloco)
+    assert len(tabela) == 2
+    assert tabela[0][0].count("\n") == 1
 
 
 def test_memorial_lista_os_exames_nao_pedidos() -> None:
@@ -141,7 +170,8 @@ def test_memorial_lista_os_exames_nao_pedidos() -> None:
 
 def test_docx_tem_confirmar_primeiro_e_tabela_por_ghe_sem_fundamento_tecnico(tmp_path: Path) -> None:
     # Reversões que matam: tirar a tabela "confirmar primeiro"; tirar a coluna Correção;
-    # voltar a pôr o fundamento de auditoria (`base_normativa`) no documento.
+    # tirar a tabela da seção 3; voltar a pôr o fundamento de auditoria
+    # (`base_normativa`) no documento.
     psy = _motivo("R-PSY", "INTERPRETADO", 12, _ADM_PER_MR)
     matrizes = [MatrizGHE(ghe_id="GHE-01", linhas=[_exame("avaliacao_psicossocial", psy)])]
     destino = tmp_path / "memorial.docx"
@@ -150,8 +180,9 @@ def test_docx_tem_confirmar_primeiro_e_tabela_por_ghe_sem_fundamento_tecnico(tmp
     renderizar_memorial_docx(montar_memorial(matrizes, _EXAMES, _RESUMOS), cab, destino)
 
     documento = Document(str(destino))
-    confirmar, ghe = documento.tables
+    confirmar, ghe, regras = documento.tables
     assert confirmar.rows[1].cells[0].text == "resumo de R-PSY (ref. R-PSY)"
+    assert regras.rows[1].cells[0].text == "resumo de R-PSY (ref. R-PSY)"
     assert ghe.rows[0].cells[-1].text == "Correção"
     assert ghe.rows[1].cells[-1].text == ""
     textos = [p.text for p in documento.paragraphs] + [c.text for t in documento.tables for r in t.rows for c in r.cells]

@@ -10584,3 +10584,14 @@ válida. `DECISOES` tocado → `INDICE_DARQ` regenerado e `tests/test_gerar_indi
 **Verificação (versão clínica).** Suíte completa (árvore parada): **1487 passed, 6 skipped, 0 failed**
 (940.74s), +1 exato sobre 1486 (`test_memorial_matriz.py` de 6 para 7 casos). `mypy --strict` alvo
 canônico limpo, 52 arquivos. `INDICE_DARQ` regenerado; `tests/test_gerar_indice_darq.py` 6 passed.
+
+**Compactação (28/09/2026, pedido do Diovanni).** Tabelas por GHE passam a levar só a primeira frase do
+resumo de cada regra (gatilho e exame; corte medido nas 79 regras — nenhum "Dra." no meio da primeira
+frase); o resumo inteiro vai uma vez à seção 3 "Regras usadas nesta matriz"; exames do mesmo GHE com o
+mesmo motivo e a mesma base viram uma linha. Fascino: 22 → 16 páginas. Resumo do chumbo: "Ácido" em
+maiúscula no meio da frase corrigido. `test_memorial_matriz.py`: 9 casos; varredura inversa das 3
+reversões novas e de 3 antigas no trecho tocado, 6/6.
+
+**Verificação (compactação).** Suíte completa (árvore parada): **1489 passed, 6 skipped, 0 failed** (899.79s),
++2 exato sobre 1487. `mypy --strict` alvo canônico limpo, 52 arquivos. `INDICE_DARQ` regenerado;
+`tests/test_gerar_indice_darq.py` 6 passed.
