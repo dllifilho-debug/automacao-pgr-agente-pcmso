@@ -10632,7 +10632,7 @@ do app]` de `R-PKG-SOLD-CO` e `R-ESP-04` (sessões pós-#394 e pós-#398) e o do
 
 **Contra a matriz validada** (`matrizes_originais/MATRIZ DE EXAMES(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS
 ROSAS 27.08.26.pdf`, Dra. Patrícia, validação Dra. Carolini; texto por `pdfplumber`, união dos cargos de
-cada GHE × memorial; script descartável no scratchpad). **15 de 22 GHEs idênticos**, entre eles o GHE 01
+cada GHE × memorial; script descartável no scratchpad). **16 de 22 GHEs idênticos** (corrigido de 15 na sessão seguinte), entre eles o GHE 01
 (audiometria, espirometria e RX 60M por PNOS também estão na matriz das médicas) e o GHE 16 inteiro.
 Divergências, todas no memorial gerado **sem FDS**:
 
@@ -10646,7 +10646,8 @@ Divergências, todas no memorial gerado **sem FDS**:
   e caem no genérico `vibracao` → `Ausente` `[A MEDIR — rota de IA, sem chave no container]`.
 - **GHE 18** — faltam o pacote do benzeno (t,t-mucônico, reticulócitos, hemograma 6M com DEM), o
   clínico 6M, cobalto na urina e acuidade com DEM; ácido metil-hipúrico a mais (xileno BAIXO). O
-  benzeno vinha da FDS de aguarrás, não anexada desta vez; o resto já estava registrado.
+  benzeno vinha da FDS de aguarrás, não anexada desta vez. Correção (sessão seguinte): o cobalto não é
+  "já registrado" — `cobalto` está no vocabulário, mas o termo do PGR "Octoato de Cobalto" não resolve.
 - **GHE 20** — acuidade visual sem DEM (a matriz pede DEM). Já registrado.
 - **GHE 21** — faltam clínico 6M, ácido tricloroacético e acuidade com DEM. A própria matriz marca o GHE
   como provisório ("aguardar Jean o tipo de poeira") e o PGR não tem solvente clorado. Já registrado.
@@ -10657,3 +10658,58 @@ Desde a comparação anterior do Aurora (com FDS), fecharam: COHb nos GHEs 16 e 
 11, 16 e 22, hemograma 6M no 22, acuidade com DEM nos GHEs 16 e 22, acuidade no GHE 19.
 
 **Verificação.** Só `docs/HISTORICO_OPERACIONAL.md` tocado; recorte da suíte: `test_memorial_matriz.py`, 9 passed.
+
+## Sessão (branch `claude/tender-fermat-591zah`, pós-merge do PR #401) — 29/09/2026 — DADO: aliases de vibração do Aurora; correções da conferência
+
+**Pedido.** Diovanni: executar as tarefas 1 a 3 da lista montada no fim da sessão anterior.
+
+**Tarefa 1 — correções da entrada anterior (feitas no próprio texto).** 16 GHEs idênticos, não 15. Cobalto
+do GHE 18: causa é o termo "Octoato de Cobalto" não resolver, não registro antigo. Retirado dos pontos de
+clareza: `R-RX-01-pnos-sem` no GHE 22 em "Onde aparece" não é defeito — as duas regras de RX do GHE são
+`INTERPRETADO` e pedem os mesmos momentos, então a linha depende das duas.
+
+**Tarefa 2 — aliases de vibração (`agentes.yaml`, D-ARQ-70 Tier 1-C).** Medido no PGR do Aurora (texto por
+`pdfplumber`, linhas `Físico Vibra…`): "Vibração" 5 GHEs (04, 05, 08, 14, 16), "Vibração localizada" 2 (10,
+11), "Vibração de corpo [inteiro]" 1 (12), "Vibrações" 1 (18), "Vibrações localizadas" 1 (21). Resolvedor
+real antes da mudança: todas `NAO_RESOLVIDO`, exceto "Vibração" → genérico `vibracao` (→ `Ausente`).
+Entraram:
+- "Vibração de corpo inteiro" → `vibracao_corpo_inteiro`. Âncora: NR-09 Anexo I, item 5.3.1 (literal
+  "vibração de corpo inteiro", `normas/nr-09-atualizada-2026 .pdf`).
+- "Vibração localizada", "Vibrações localizadas" → `vibracao_mao_braco`. A NR-09 vigente não usa
+  "localizada"; âncora no Decreto 3.048/1999, Anexo II, Lista B ("Vibrações localizadas", síndrome de
+  Raynaud, Quadro XXII, `normas/D3048 - Anexo II - III - IV.pdf`) e no alias do Fascino já aceito
+  ("Vibrações localizadas (mão e braço)"). Vigência do Anexo II `[A CONFERIR — planalto.gov.br]`.
+"Vibração" e "Vibrações" sem tipo **não** foram atribuídos: inferir o tipo pela consequência ("dedos
+brancos") é interpretação, decisão do Diovanni. `DT-003ED-01` dava a faceta vibração como resolvida; só o
+literal plural da NR-09 tinha entrado — nota acrescentada lá.
+
+**Efeito medido — 3 pares, rota determinística.** `preparar_ghes` com clientes offline nos PGRs Fascino,
+Vila Brasil e Porto Araras I; cada `RiscoVerbatim.agente` resolvido com o vocabulário de `origin/main`
+(`bd06812`) e o da árvore: **0 de 587 riscos** mudam de resolução (Fascino 237, Vila Brasil 178, Porto Araras
+172). Como a resolução é o único ponto alterado, as matrizes dos 3 pares ficam idênticas por construção.
+No Aurora (rota de IA), GHE 12 deve ganhar RX lombo-sacra (`R-VIB-01`) e os GHEs 10, 11, 12 e 21 `R-VIB-02`
+como motivo da audiometria `[A MEDIR — próxima matriz do app]`.
+
+**Achado de passagem, não implementado.** Porto Araras I tem "Vibração localizada (mão e braço)" (2) e
+"Vibração localizadas (mão e braço)" (1) que seguem `NAO_RESOLVIDO`. Incluí-los muda a saída de um par
+determinístico — precisa da comparação com o gabarito antes; próxima sessão.
+
+**Tarefa 3 — "Octoato de Cobalto" → `cobalto`: parada, decisão do Diovanni.** NR-07 Anexo I, Quadro 1:
+"Cobalto e seus compostos **inorgânicos**, incluindo óxidos de cobalto, mas não combinados com carbeto de
+tungstênio" (`normas/nr-07-atualizada-2022-1 .pdf`; vigência `[A CONFERIR — Gov.br/MTE]`). Octoato de cobalto
+(2-etil-hexanoato) é sal orgânico: a norma não o alcança, e o alias faria R-BIO-04-cobalto disparar como se
+fosse agente do Quadro 1. O precedente da médica é contraditório (GHE 18 pede cobalto na urina e anota o
+octoato como risco baixo a só mencionar). Proposta: não criar o alias; se o Diovanni quiser o exame por
+critério médico (NR-07, item 7.5.18), regra própria `[INTERPRETADO]`, não alias.
+**Decisão do Diovanni (mesma sessão):** octoato de cobalto fica sem cadastro.
+
+**Testes.** `test_resolvedor_termos.py`: 3 casos no teste de resolução EXATA, 2 no anti-FP, contagem do
+índice 171 → 174. `test_vibracao_aurora.py` (novo, 3 casos): hidratação real → `processar_pgr`; "Vibração
+de corpo inteiro" emite RX lombo-sacra (`R-VIB-01`) e audiometria (`R-VIB-02`); as duas grafias de
+"localizada" emitem `R-VIB-02` sem RX lombo-sacra. Varredura inversa, 4 reversões de dado, 4/4 mortas:
+tirar cada um dos 3 termos (3 falhas cada) e mover "Vibrações localizadas" para corpo inteiro (3 falhas).
+
+**Verificação.** Suíte completa (árvore parada): **1497 passed, 6 skipped, 0 failed** (1197.33s), +8 exato
+sobre 1489 (5 casos parametrizados em `test_resolvedor_termos.py`, 3 em `test_vibracao_aurora.py`; o teste
+de contagem do índice foi renomeado, não somado). `mypy` não rodado: nenhum arquivo do alvo canônico
+tocado. `DECISOES` não tocado.
