@@ -10701,6 +10701,7 @@ tungstênio" (`normas/nr-07-atualizada-2022-1 .pdf`; vigência `[A CONFERIR — 
 fosse agente do Quadro 1. O precedente da médica é contraditório (GHE 18 pede cobalto na urina e anota o
 octoato como risco baixo a só mencionar). Proposta: não criar o alias; se o Diovanni quiser o exame por
 critério médico (NR-07, item 7.5.18), regra própria `[INTERPRETADO]`, não alias.
+**Decisão do Diovanni (mesma sessão):** octoato de cobalto fica sem cadastro.
 
 **Testes.** `test_resolvedor_termos.py`: 3 casos no teste de resolução EXATA, 2 no anti-FP, contagem do
 índice 171 → 174. `test_vibracao_aurora.py` (novo, 3 casos): hidratação real → `processar_pgr`; "Vibração
