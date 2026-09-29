@@ -321,7 +321,8 @@ regras:
         momentos: [adm]
     base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022), conferido no MTE [DERIVADO] — PNOS CLSC ≤10% LEO (TLV-PNOS ACGIH 3 mg/m³ resp): só admissional."
     resumo_clinico: "Poeira não classificada (PNOS) com medição até 10% do limite → RX de tórax (padrão OIT) só no admissional. NR-07, Anexo III, Quadro 2."
-    status: INTERPRETADO
+    # INTERPRETADO → DERIVADO (29/09/2026, decisão do Diovanni): emite exatamente o Quadro 2 ("na admissão").
+    status: DERIVADO
 
   - id: R-RX-01-pnos-10a100
     quando: pnos_leo_10_100
@@ -340,9 +341,10 @@ regras:
         periodicidade_meses: 60
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
-    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS CLSC >100% LEO: adm + 60M (a cada 5 anos)."
-    resumo_clinico: "Poeira não classificada (PNOS) com medição acima do limite → RX de tórax (padrão OIT) no admissional e a cada 5 anos. NR-07, Anexo III, Quadro 2."
-    status: INTERPRETADO
+    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS CLSC >100% LEO: adm + 60M (a cada 5 anos). Mudança de risco e demissional não constam do Quadro 2 [DERIVADO — analogia R-RX-01-alta, faixa >100% LEO do Quadro 1, mesmos momentos]."
+    resumo_clinico: "Poeira não classificada (PNOS) com medição acima do limite → RX de tórax (padrão OIT) no admissional e a cada 5 anos. NR-07, Anexo III, Quadro 2; mudança de risco e demissional seguem a faixa equivalente da sílica no protocolo."
+    # INTERPRETADO → DERIVADO (29/09/2026, decisão do Diovanni): periodicidade pelo Quadro 2; MR/DEM por analogia.
+    status: DERIVADO
 
   - id: R-RX-01-pnos-sem
     quando: pnos_sem_medicao
@@ -351,9 +353,10 @@ regras:
         periodicidade_meses: 60
         periodicidade_apos_15a: null
         momentos: [adm, per, MR, dem]
-    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS sem avaliação quantitativa: adm + 60M."
-    resumo_clinico: "Poeira não classificada (PNOS) sem medição → RX de tórax (padrão OIT) no admissional e a cada 5 anos. NR-07, Anexo III, Quadro 2."
-    status: INTERPRETADO
+    base_normativa: "NR-07 Anexo III Quadro 2 (Portaria MTP 567/2022) [DERIVADO] — PNOS sem avaliação quantitativa: adm + 60M. Mudança de risco e demissional não constam do Quadro 2 [DERIVADO — Patrícia/Aurora 27.08.26: 30/30 células de RX 60M com MRO e DEM]."
+    resumo_clinico: "Poeira não classificada (PNOS) sem medição → RX de tórax (padrão OIT) no admissional e a cada 5 anos. NR-07, Anexo III, Quadro 2; mudança de risco e demissional seguem as matrizes das coordenadoras."
+    # INTERPRETADO → DERIVADO (29/09/2026, decisão do Diovanni): periodicidade pelo Quadro 2; MR/DEM pelo precedente.
+    status: DERIVADO
 
   - id: R-ESP-02
     quando: poeira_mineral

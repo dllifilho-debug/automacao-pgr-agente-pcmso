@@ -503,6 +503,18 @@ Fração do PNOS é sempre RESPIRAVEL (Quadro 2 mede "poeira respirável"); sem 
 
 **PNOS — implementação (002.Y).** A família `R-RX-01-pnos-*` foi materializada em código (PR #49, commit 9bb243e): predicados de faixa `pnos_leo_ate_10`/`pnos_leo_10_100`/`pnos_leo_acima_100`/`pnos_sem_medicao` (predicados.py) + ramo PNOS no LEO-resolver (3 mg/m³ resp, nível 4) + 4 entradas em regras.yaml (status INTERPRETADO) + `R-RX-01-pnos` única marcada DEPRECATED (mantida por contrato de ID; carregador passa a filtrar DEPRECATED). Periodicidades: ate_10 e 10_100 → só admissional; acima_100 e sem_medicao → adm + 60M. O roteamento de PNOS medido em mg/m³ usa injeção de fração RESPIRAVEL (D-ARQ-29). Pendências abertas: lembrete "repetir após 5 anos a critério clínico" da faixa 10_100 não materializado (DT-002Y-01); validação contra Viverde real adiada (DT-002Y-02).
 
+**PNOS — status pela hierarquia de D-ARQ-22 (v113, 29/09/2026, decisão do Diovanni).** Periodicidade e admissional
+das quatro faixas batem com o texto literal do Quadro 2 (cópia `normas/nr-07-atualizada-2022-1 .pdf`, Portaria
+MTP 567/2022; vigência `[A CONFERIR — Gov.br/MTE]`, site bloqueado no ambiente). O Quadro 2 não traz mudança de
+risco nem demissional; é isso que mantinha as faixas em `INTERPRETADO`. Resolvido por faixa:
+- `R-RX-01-pnos-sem` → `[DERIVADO — NR-07 Anexo III Quadro 2 (adm + 5 anos); Patrícia/Aurora 27.08.26 (MRO, DEM:
+  30/30 células de RX 60M)]`.
+- `R-RX-01-pnos-acima100` → `[DERIVADO — NR-07 Anexo III Quadro 2; analogia R-RX-01-alta (MR, DEM)]`.
+- `R-RX-01-pnos-ate10` → `[DERIVADO — NR-07 Anexo III Quadro 2]` (só admissional, exatamente o Quadro 2).
+- `R-RX-01-pnos-10a100` segue `[INTERPRETADO]`: emite menos que o Quadro 2 (falta o RX aos 5 anos e o lembrete
+  "a critério clínico", DT-002Y-01 / D-ARQ-28).
+Nenhuma periodicidade ou momento muda; muda o rótulo de certeza no memorial.
+
 **LEO do PNOS — reconciliação (002.X).** O rodapé do Quadro 2 define PNOS pela condição "não possuir um LEO definido", mas a tabela roteia por % do LEO. Reconciliação: o material é PNOS porque não tem LEO *próprio*; o roteamento usa o LEO *genérico* de PNOS = TLV-PNOS da ACGIH = **3 mg/m³ (respirável)**, via NR-09 item 9.6.1.1 (nível 4 do LEO-resolver, D-ARQ-24). `[DERIVADO — ACGIH TLV-PNOS, via NR-9 9.6.1.1]` no valor; `[INTERPRETADO]` na articulação "este genérico alimenta o Quadro 2" — não está escrita na norma; é o item de maior incerteza desta sessão, inspecionar PRIMEIRO na revisão de saída (D-ARQ-27).
 
 **Pré-requisito para o predicado `pnos` ser computável.** Para o motor classificar um agente como PNOS, `agentes.yaml` precisa carregar as 3 condições ACGIH 2017 (rodapé do Quadro 2): (a) sem LEO próprio definido; (b) insolúvel/pouco solúvel; (c) baixa toxicidade (não citotóxico/genotóxico/reativo, não radioativo, não sensibilizante). Sem esse metadado o predicado `pnos` não tem como ser decidido. Implementação futura.
@@ -1155,3 +1167,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v110 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (CONHECIMENTO — precedente, sem mudança de regra): planilha da Dra. Patrícia (versão atualizada, `d7a7612`) e 22 matrizes de set/2026 citadas como precedente em **`R-VIS-01-solda`** (§5.6), **`R-PKG-SOLD-CO`** (§6) e na nota "Fora do padrão" de §5.6 (grua sem DEM: 0/18 cargos). |
 | v111 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO, decisão do Diovanni sob D-ARQ-22): **`R-ESP-04` CRIADA** (§5.3) — solda (`solda_indicador`) → espirometria 24M adm/per/MR/dem, `[INTERPRETADO]` via 7.5.18, com ressalva do Anexo III item 3.2; precedente planilha Patrícia atualizada e 26/26 serralherias de set/2026. **`R-PSY-03` mantida** apesar da planilha (ver DT `claude/cool-babbage-whh1zw`-03). |
 | v112 | 27/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO — `D-ARQ-87` fatia 2, sem mudança de regra): campo **`resumo_clinico`** em `regras.yaml` nas 79 regras ativas — o texto que as médicas leem no memorial de raciocínio (gatilho, exame, periodicidade, norma pelo número, origem da conduta). Regra nova passa a exigir o campo (teste `test_toda_regra_ativa_tem_resumo_clinico`). |
+| v113 | 29/09/2026 | Branch `claude/tender-fermat-591zah` (decisão do Diovanni sob D-ARQ-22, sem mudança de conduta): **`R-RX-01-pnos-sem`, `R-RX-01-pnos-acima100` e `R-RX-01-pnos-ate10` INTERPRETADO → DERIVADO** (§ R-RX-01, nota "PNOS — status"); `R-RX-01-pnos-10a100` mantida INTERPRETADO. Resumo clínico de `pnos-sem` e `pnos-acima100` passa a dizer de onde vêm mudança de risco e demissional. |
