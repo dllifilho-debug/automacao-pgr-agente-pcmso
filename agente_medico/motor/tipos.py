@@ -284,6 +284,17 @@ class Materialidade(Enum):
 
 
 @dataclass(frozen=True)
+class OrigemRisco:
+    """D-ARQ-88: um risco do GHE que satisfez uma perna verdadeira da regra.
+    `perna` é o primitivo ou slug-folha satisfeito; `presumida` marca a perna
+    `Ausente` aceita por `quando_ausente.presumir_true` (D-ARQ-68 cl.5)."""
+    perna: str
+    agente: str
+    fonte: str
+    presumida: bool = False
+
+
+@dataclass(frozen=True)
 class Motivo:
     regra_id: str
     predicado: str
@@ -296,6 +307,8 @@ class Motivo:
     periodicidade_meses: Optional[int] = None
     momentos: frozenset[Momento] = frozenset()
     base_normativa: Optional[str] = None
+    # D-ARQ-88: `risco_origem` é a visão em texto destas origens.
+    origens: tuple[OrigemRisco, ...] = ()
 
 
 @dataclass

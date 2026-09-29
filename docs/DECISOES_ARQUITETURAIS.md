@@ -515,6 +515,13 @@ a revisão da tela web (`superficie/revisao_matriz.py`), fora do documento assin
 medida: Aurora Lago das Rosas, aguarrás anexada ao GHE errado gerou ácido t,t-mucônico ao
 serralheiro sem que a tela dissesse de onde. Nenhuma `R-*` criada ou alterada.
 
+**Nota de aplicação (branch `claude/exciting-ramanujan-g9bbl4`, 29/09/2026) — faceta `risco_origem`, caso geral.**
+O recorte que ficou fora acima entra por `D-ARQ-88`: passada de explicação separada sobre as
+pernas verdadeiras da regra que emitiu, sem tocar `predicados.avaliar`. `_risco_origem` sai;
+o formato por agente acima é mantido (atômico byte-idêntico nos 3 pares), agentes unidos por
+` + `. Só os primitivos sem risco (`todo_trabalhador`, `psicossocial`, `cargo_porteiro`) seguem
+com `risco_origem=None`.
+
 **Base.** Sessão 002.M (28/05/2026). Decisão de metodologia — sem caso-âncora de código.
 
 ---
@@ -4311,6 +4318,52 @@ Sessão branch `claude/cool-babbage-whh1zw`. Pedido do Diovanni: a matriz deve e
 
 **Base.** Sessão branch `claude/cool-babbage-whh1zw`, 26/09/2026. Leitura de `tipos.py`, `emissao.py`, `consolidacao.py`, `revisao_matriz.py`; DT `claude/dreamy-mayer-os6jce`-01.
 
+
+---
+
+## D-ARQ-88 — A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu
+
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO da fatia 1 (mesma data). Fatia 2 (memorial) é proposta, não ratificada.
+
+Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #405. Tarefa 6 da conferência do memorial do Aurora, parada na sessão pós-#402 (HISTORICO): em regra de predicado composto, `Motivo.risco_origem` saía `None` — o memorial não dizia qual agente do PGR disparou a regra (ex.: R-CLI-05 no GHE 11 do Aurora). Resolve a faceta `risco_origem` de DH-003ED-01.
+
+**Contexto — medido nesta sessão (`8b07663`).**
+
+- `motor/predicados.py`: **28 primitivos**. Por identidade de agente (`any(r.agente == …)`): **12** (altura, espaco_confinado, ruido, motorista_equipamento_pesado, vibracao_corpo_inteiro, vibracao_mao_braco, fumos_metalicos, poeira_de_madeira, silica, asbesto, benzeno, pnos). Quantificação de um agente só (`next(...)` + faixa): **11** (ruido_acima_acao; 6 de sílica/asbesto; 4 de PNOS). De grupo: **2** (ototoxico — flag; agente_ibe_moderado_ou_acima — Anexo I + nível P×S). Sem risco (GHE/cargo): **3** (todo_trabalhador, psicossocial, cargo_porteiro).
+- **79 regras ativas; 10 com `quando` composto** — 4 expressão literal (R-CLI-05, R-AUD-01, R-AUD-02, R-PKG-ASF) e 6 composto nomeado (R-PKG-ATIVCRIT, R-VIB-02, R-ESP-02, R-VIS-01-solda, R-ESP-04, R-PKG-SOLD-CO); 51 por slug de agente (fallback D-ARQ-58), 18 por primitivo.
+- 3 pares determinísticos (Fascino, Porto Araras I, Vila Brasil): `Motivo` de regra composta sem origem 141 / 105 / 75; com origem 12 / 8 / 8 (só R-BIO-04-* e faixas de R-RX-01 por medição).
+- Defeito de passagem: `_AGENTE_DA_FAIXA` fixava `silica` nas faixas `silica_asbesto_leo_*`, mas o helper lê o primeiro risco sílica-ou-asbesto — asbesto medido saía sem origem.
+- O bloqueio registrado desde DT-002C-01/003.EG ("exigiria mudar a assinatura de `avaliar`") não vale: o molde de D-ARQ-71 (passada separada) dispensa a mudança.
+
+**Decisão.**
+
+**cl.1 — Passada separada, sem tocar `avaliar`/`avaliar_predicado`.** `riscos_das_pernas_verdadeiras(expr, ctx, protocolo, presumidos)` em `predicados.py`, irmã de `pernas_ausentes_absorvidas`, roda só nas regras que emitiram (ramo True e ramo presumido; dispensa por R-BIO-05 vira `Observacao` e fica fora). No `ou`, toda perna True contribui, não só a primeira — a ordem do YAML não muda a origem (D-ARQ-06). `e` True desce em todas as pernas. `nao` não contribui (negação não tem risco a apontar; 0 regras ativas usam `nao`). Composto nomeado é expandido com guarda de ciclo própria. Perna `Ausente` não contribui — é de D-ARQ-71 —, salvo a cl.5. Ordem estável de ocorrência; o mesmo risco entra uma vez.
+
+**cl.2 — Pureza.** A passada avalia sobre cópia do cache (`ctx.predicados`) e não escreve em `pendencias` nem `observacoes`. Diferente de D-ARQ-71, que aceitou o efeito colateral no cache: aqui é proibido, porque `predicados_avaliados` entra no critério de matrizes idênticas.
+
+**cl.3 — Cada primitivo declara os riscos que o satisfazem** (`REGISTRO_RISCOS`, via `@primitivo(nome, riscos=...)`): identidade → os riscos do slug; quantificação → exatamente o risco que o helper leu (corrige `_AGENTE_DA_FAIXA`); grupo → os riscos que passam no filtro; sem risco → nenhum, em `PRIMITIVOS_SEM_RISCO`. Fallback D-ARQ-58 → os riscos do slug. Filtro único (Q4): o primitivo booleano é `any(filtro)` e os riscos são o mesmo filtro (`_por_filtro`); os helpers expõem o risco lido. Contrato computado (molde D-ARQ-67): todo nome de `REGISTRO_PRIMITIVOS` tem declaração ou está em `PRIMITIVOS_SEM_RISCO`.
+
+**cl.4 — Um caminho só.** A passada substitui `_risco_origem` e `_AGENTE_DA_FAIXA` (`emissao.py`); o caso atômico é caso particular.
+
+**cl.5 — Perna presumida (Q1).** Na regra emitida por presunção (`quando_ausente.presumir_true`, D-ARQ-68 cl.5), a perna `Ausente` listada contribui com `presumida=True`; no texto, `[presumido: <perna>]`. Perna `Ausente` absorvida por `ou` verdadeiro continua sem origem.
+
+**Contrato no `Motivo` (Q2, aditivo com default, molde D-ARQ-87 cl.1).** `origens: tuple[OrigemRisco, ...] = ()`, `OrigemRisco(perna, agente, fonte, presumida)` congelado; `fonte` = `_descrever_fonte` (PGR + nível + medição/laudo, ou FDS). `risco_origem` segue como visão derivada: `agente ← fonte | fonte` por agente, agentes separados por ` + `; `None` sem origem. Escopo (Q3): todo `quando` que emite, inclusive primitivo de agente único (R-RX-01-sem/-qual, R-RX-02, R-PKG-BZ).
+
+**Critério de aceite — "matrizes dos 3 pares idênticas".** Fascino, Porto Araras I, Vila Brasil, rota determinística, worktree `origin/main` × árvore, saída serializada inteira. Igual: por GHE `status`, `pendencias`, `predicados_avaliados`, `riscos_resolvidos`; por linha exame, periodicidade, `periodicidade_apos_15a`, momentos, pendências anexadas; por `Motivo` todo campo salvo `risco_origem`/`origens`. Única diferença permitida: `None` → preenchido; nenhuma origem existente muda ou some. Comparação contra o gabarito idêntica por construção (compara só exames).
+
+**Fronteiras.** D-ARQ-10 (preguiça do `ou`, cache) preservado. D-ARQ-71 complementar (Ausente absorvida × perna True). D-ARQ-68 cl.5 lido, não alterado. D-ARQ-22 Parte B: fecha a faceta `risco_origem` de DH-003ED-01.
+
+**Universalidade (D-ARQ-06).** Expresso sobre a forma da expressão e o filtro declarado de cada primitivo, não sobre agente ou setor.
+
+**Fatias.** (1) motor — **esta**; a revisão na tela ganha a origem sem mudança de código. (2) memorial: coluna "por que foi pedido" com agente, fonte e nível em linguagem clínica; o nome de exibição do slug fica `[A DECIDIR na fatia 2]` (`agentes.yaml` sem campo de nome — 0 ocorrências de `nome:`).
+
+**Nota de aplicação — fatia 1 IMPLEMENTADA (29/09/2026).**
+
+- **Código:** `tipos.py` (`OrigemRisco`, `Motivo.origens`); `predicados.py` (`REGISTRO_RISCOS`, `PRIMITIVOS_SEM_RISCO`, `_por_filtro`, `_risco_unico`, `riscos_das_pernas_verdadeiras`); `emissao.py` (`_origens`, `_texto_origem`, presumidos repassados no ramo presumido; `_risco_origem`/`_AGENTE_DA_FAIXA` removidos). `revisao_matriz.py`: só docstring.
+- **Medido — critério de aceite:** 3 pares idênticos fora da origem; 28 origens existentes byte-idênticas, 0 mudadas. `None` → preenchido: Fascino 155, Porto Araras I 117, Vila Brasil 84 = 356 — compostos 248 por perna verdadeira + 73 por presunção (R-AUD-01/02, ruído sem laudo), igual ao previsto na proposta; mais 35 de primitivo (R-RX-01-qual 14/12/6, R-RX-01-pnos-sem 0/0/3). Seguem `None`: 57/48/78, todos de primitivo sem risco.
+- **Aurora GHE 11** (rota da hidratação real, termos do PGR p. 45): R-CLI-05 → ciclohexanona, metil_etil_cetona ("Metiletilcetona (MEK)" resolve), tetrahidrofurano, perna `agente_ibe_moderado_ou_acima`. Matriz real do app `[A MEDIR — próxima matriz do app]`.
+- **Testes:** `test_origem_pernas.py` (10). Varredura inversa, 11 reversões, 11/11 mortas por asserção; comentários de reversão de `test_revisao_origem.py` e `test_rx_medicao_poeira.py` reescritos para os símbolos novos, 4/4 mortas.
+
 ---
 
 ## Histórico de revisões
@@ -4542,3 +4595,4 @@ Sessão branch `claude/cool-babbage-whh1zw`. Pedido do Diovanni: a matriz deve e
 | v223 | 25/09/2026 | Branch `feat/ambiente-deps-20260925` (AMBIENTE — dependências): **nota de aplicação em `D-ARQ-75`** (mesma ID, nenhuma cláusula alterada) — piso de streamlit 1.42.0 → 1.56.0, medido por versão (`st.user` em 1.45.0, `AppTest.file_uploader` em 1.56.0; 83/83 testes de tela em 1.56.0). |
 | v224 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (ARQUITETURA + IMPLEMENTAÇÃO, fatia 1 autorizada pelo Diovanni): **`D-ARQ-87` CRIADA** — memorial de raciocínio da matriz; `Motivo` por item com a periodicidade, os momentos e a base normativa que a regra pediu, antes do piso da consolidação; revisão na tela mostra a periodicidade por regra. Fatias 2 (memorial `.docx`) e 3 (retorno das correções) propostas. |
 | v225 | 27/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-87`): **nota de aplicação em `D-ARQ-87`** (mesma ID, nenhuma cláusula alterada) — memorial de raciocínio em `.docx` para as médicas (`superficie/memorial_matriz.py`), download na tela; campo `resumo_clinico` nas 79 regras ativas; certeza pelo elo mais fraco; decisões a confirmar agrupadas por regra; fundamento de auditoria fora do documento. |
+| v226 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA + IMPLEMENTAÇÃO, ratificada pelo Diovanni, Q1–Q4): **`D-ARQ-88` CRIADA** — origem do risco pela passada de explicação sobre as pernas verdadeiras da regra que emitiu; `Motivo.origens` estruturado e `risco_origem` derivado; perna presumida marcada; filtro único por primitivo; fatia 1 implementada, 3 pares idênticos fora da origem. Fecha a faceta `risco_origem` de DH-003ED-01. Decisões 87 → **88**. |

@@ -8,6 +8,7 @@ from agente_medico.motor.predicados import (
     avaliar,
     pernas_ausentes,
     pernas_ausentes_absorvidas,
+    riscos_das_pernas_verdadeiras,
     serializar_predicado,
 )
 from agente_medico.motor.protocolo import Protocolo
@@ -19,6 +20,7 @@ from agente_medico.motor.tipos import (
     Momento,
     Motivo,
     Observacao,
+    OrigemRisco,
     Pendencia,
     ProcedenciaMedicao,
     Risco,
@@ -58,37 +60,38 @@ def _descrever_fonte(risco: Risco) -> str:
     return risco.detalhe or risco.fonte
 
 
-# Faixas de R-RX-01 decididas por medição (D-ARQ-86 fatia 2): o primitivo lê um
-# agente só, então a origem é rastreável sem abrir predicados.avaliar.
-_AGENTE_DA_FAIXA: dict[str, str] = {
-    "silica_asbesto_leo_ate_10": "silica",
-    "silica_asbesto_leo_10_50": "silica",
-    "silica_asbesto_leo_50_100": "silica",
-    "silica_asbesto_leo_acima_100": "silica",
-    "pnos_leo_ate_10": "poeira_nao_classificada",
-    "pnos_leo_10_100": "poeira_nao_classificada",
-    "pnos_leo_acima_100": "poeira_nao_classificada",
-}
+def _origens(
+    regra: dict[str, Any], ctx: GHEContext, protocolo: Protocolo, presumidos: frozenset[str]
+) -> tuple[OrigemRisco, ...]:
+    """D-ARQ-88: os riscos que satisfazem as pernas verdadeiras da regra que
+    emitiu, com a fonte descrita. Mesma fonte repetida no agente entra uma vez."""
+    origens = (
+        OrigemRisco(p.perna, p.risco.agente, _descrever_fonte(p.risco), p.presumida)
+        for p in riscos_das_pernas_verdadeiras(regra["quando"], ctx, protocolo, presumidos)
+    )
+    return tuple(dict.fromkeys(origens))
 
 
-def _risco_origem(regra: dict[str, Any], ctx: GHEContext) -> str | None:
-    """D-ARQ-22 Parte B, faceta `risco_origem` (DH-003ED-01), recorte atômico:
-    só a regra cujo `quando` é o próprio slug do agente (R-BIO-04-*), ou uma
-    faixa de R-RX-01 por medição, sabe de qual risco veio sem rastrear o átomo
-    dentro de `predicados.avaliar`. Composto ou primitivo que não é agente do
-    GHE → None, como antes."""
-    quando = regra["quando"]
-    if not isinstance(quando, str):
+def _texto_origem(origens: tuple[OrigemRisco, ...]) -> str | None:
+    """Visão em texto de `Motivo.origens`: `agente ← fonte | fonte` por agente,
+    agentes separados por " + "; perna presumida sai marcada."""
+    por_agente: dict[str, list[str]] = {}
+    for o in origens:
+        fonte = f"{o.fonte} [presumido: {o.perna}]" if o.presumida else o.fonte
+        por_agente.setdefault(o.agente, []).append(fonte)
+    if not por_agente:
         return None
-    agente = _AGENTE_DA_FAIXA.get(quando, quando)
-    fontes = list(dict.fromkeys(_descrever_fonte(r) for r in ctx.riscos if r.agente == agente))
-    if not fontes:
-        return None
-    return f"{agente} ← " + " | ".join(fontes)
+    return " + ".join(
+        f"{agente} ← " + " | ".join(dict.fromkeys(fontes)) for agente, fontes in por_agente.items()
+    )
 
 
 def _emitir_regra(
-    regra: dict[str, Any], ctx: GHEContext, protocolo: Protocolo, emitidos: list[ExameEmitido]
+    regra: dict[str, Any],
+    ctx: GHEContext,
+    protocolo: Protocolo,
+    emitidos: list[ExameEmitido],
+    presumidos: frozenset[str] = frozenset(),
 ) -> None:
     for nome, ausente in pernas_ausentes_absorvidas(regra["quando"], ctx, protocolo):
         ctx.pendencias.append(
@@ -107,7 +110,8 @@ def _emitir_regra(
         )
 
     predicado_str = serializar_predicado(regra["quando"])
-    risco_origem = _risco_origem(regra, ctx)
+    origens = _origens(regra, ctx, protocolo, presumidos)
+    risco_origem = _texto_origem(origens)
     base_normativa = regra.get("base_normativa")
 
     for item in regra["emite"]:
@@ -125,6 +129,7 @@ def _emitir_regra(
             periodicidade_meses=periodicidade,
             momentos=frozenset(momentos),
             base_normativa=str(base_normativa) if base_normativa is not None else None,
+            origens=origens,
         )
         emitidos.append(
             ExameEmitido(
@@ -245,7 +250,9 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
                 faltantes = pernas_ausentes(regra["quando"], ctx, protocolo)
                 nomes_faltantes = {nome for nome, _ in faltantes}
                 if nomes_faltantes and nomes_faltantes <= primitivos_presumidos:
-                    _emitir_regra(regra, ctx, protocolo, emitidos)
+                    _emitir_regra(
+                        regra, ctx, protocolo, emitidos, frozenset(primitivos_presumidos)
+                    )
                     exames_alvo_presumido = tuple(
                         str(item["exame"]) for item in regra["emite"]
                     )

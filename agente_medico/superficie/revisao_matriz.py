@@ -4,9 +4,9 @@ RT lê para conferir de onde veio cada exame antes de levar a matriz à médica.
 
 Duas leituras por GHE:
 - por exame: regra (com a periodicidade que cada uma pediu, D-ARQ-87), status
-  da regra e origem do risco (`Motivo.risco_origem`,
-  preenchido pelo motor só nas regras de agente direto — D-ARQ-22 Parte B,
-  recorte atômico; nas demais aparece o predicado);
+  da regra e origem do risco (`Motivo.risco_origem`, os riscos das pernas
+  verdadeiras da regra — D-ARQ-88; regra sem risco a apontar, como o clínico
+  de todo trabalhador, mostra o predicado);
 - por agente: enquadramento no Decreto 3.048/1999, Anexo IV, lido do campo
   `enquadramento_3048` de `agentes.yaml` (D-ARQ-12, reabertura parcial de
   DT-003BA-01). Referência previdenciária, não decisão de exame do PCMSO.

@@ -10797,3 +10797,43 @@ reversões de dado, 4/4 mortas: cada uma das três de volta a `INTERPRETADO`; `p
 
 **Verificação.** Suíte completa (árvore parada): **1514 passed, 6 skipped, 0 failed** (1013.58s), +5 exato
 sobre 1509. `mypy` não rodado: nenhum arquivo do alvo canônico tocado. `DECISOES` não tocado.
+
+## Sessão (branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #405) — 29/09/2026 — ARQUITETURA + IMPLEMENTAÇÃO: `D-ARQ-88` (origem do risco pelas pernas verdadeiras), fatia 1
+
+**Pedido.** Diovanni: tarefa 6 da conferência do memorial do Aurora, parada na sessão pós-#402 — em regra
+composta (R-CLI-05, GHE 11) `Motivo.risco_origem` saía `None`. Medir antes de propor; proposta no molde de
+D-ARQ-71; parar para ratificar. Proposta apresentada; **Q1–Q4 ratificadas como recomendado**; fatia 1 autorizada.
+
+**Medido antes da proposta (`8b07663`).** 28 primitivos: 12 por identidade de agente, 11 de quantificação
+de um agente só, 2 de grupo (ototóxico; Anexo I + nível), 3 sem risco. 79 regras ativas, 10 com `quando`
+composto (4 expressão literal, 6 composto nomeado). 3 pares: `Motivo` compostos sem origem 141/105/75.
+Aurora GHE 11 no PDF (p. 45): ciclohexanona, metiletilcetona (MEK), tetrahidrofurano, MODERADO.
+
+**Implementado.** `tipos.py`: `OrigemRisco`, `Motivo.origens`. `predicados.py`: `REGISTRO_RISCOS` por
+`@primitivo(nome, riscos=...)`, `PRIMITIVOS_SEM_RISCO`, filtro único por primitivo booleano (`_por_filtro`),
+risco lido pelo helper nos de quantificação (`_risco_unico`), `riscos_das_pernas_verdadeiras` (passada
+separada, cópia do cache, `avaliar` intocado). `emissao.py`: `_origens`/`_texto_origem`; presumidos
+repassados no ramo presumido; `_risco_origem` e `_AGENTE_DA_FAIXA` removidos (este fixava `silica` nas
+faixas de sílica/asbesto — asbesto medido saía sem origem). Docs: DECISOES v226 (`D-ARQ-88` criada; nota em
+D-ARQ-22 Parte B), índice regenerado, PROTOCOLO v114, DH-003ED-01 RESOLVIDA (PENDENCIAS).
+
+**Efeito medido — 3 pares, worktree `origin/main` × árvore, saída serializada inteira.** Idênticos fora de
+`risco_origem`/`origens`; 28 origens existentes byte-idênticas, 0 mudadas. `None` → preenchido: Fascino 155,
+Porto Araras I 117, Vila Brasil 84 (compostos 248 por perna verdadeira + 73 por presunção de ruído sem laudo,
+igual ao previsto; mais 35 de primitivo). Seguem `None` 57/48/78, todos de primitivo sem risco. Gabarito:
+idêntico por construção. Aurora pela hidratação real: R-CLI-05 → os três solventes; matriz do app
+`[A MEDIR — próxima matriz do app]`.
+
+**Achado de passagem (não tratado).** "Vibração localizada (mãos e braços)" — grafia do Aurora, GHE 11,
+p. 44 — não resolve pela hidratação determinística (plural; o alias existente é "mão e braço"). Se a rota
+LLM normaliza antes, `[A MEDIR]`.
+
+**Testes.** `test_origem_pernas.py` (10). Varredura inversa, 11 reversões de código, 11/11 mortas por
+asserção: perna (b) sem nível; sem a passada; `ou` parando no primeiro True; Ausente sem exigir presumidos;
+presumidos não repassados; composto não expandido; `e` sem descer; faixa por `silica` fixo; avaliar sobre o
+`ctx` original; `ruido_acima_acao` sem declaração; ototóxico por `agente == "ototoxico"`. Comentários de
+reversão de `test_revisao_origem.py` e `test_rx_medicao_poeira.py` reescritos para os símbolos novos, 4/4
+mortas. `mypy --strict` alvo canônico limpo, **52 arquivos**.
+
+**Verificação.** Suíte completa (árvore parada): **1524 passed, 6 skipped, 0 failed** (982.63s), +10 exato
+sobre 1514. `tests/test_gerar_indice_darq.py`: 6 passed.
