@@ -105,6 +105,30 @@ class Memorial:
     regras_usadas: tuple[RegraUsada, ...]
 
 
+_LEGENDA_MOMENTOS = (
+    "Momentos: ADM admissional; PER periódico (anual quando não traz meses); MRO mudança de riscos "
+    "ocupacionais; RET retorno ao trabalho; DEM demissional."
+)
+_DATA_ISO = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
+
+
+def data_exibicao(texto: str) -> str:
+    """Data ISO (aaaa-mm-dd) vira dd/mm/aaaa; qualquer outro texto sai como digitado."""
+    iso = _DATA_ISO.fullmatch(texto.strip())
+    return f"{iso[3]}/{iso[2]}/{iso[1]}" if iso else texto
+
+
+def titulo_ghe(ghe_id: str, nome_ghe: str) -> str:
+    """Código do GHE uma vez só: o nome que o PGR escreve com o próprio código na
+    frente ("GHE 01 - ADMINISTRAÇÃO" no GHE-01) perde a repetição."""
+    codigo = ghe_id if ghe_id.upper().startswith("GHE") else f"GHE {ghe_id}"
+    numero = re.search(r"\d+", ghe_id)
+    nome = nome_ghe
+    if numero:
+        nome = re.sub(rf"^GHE[\s-]*0*{int(numero[0])}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
+    return f"{codigo} — {nome}" if nome else codigo
+
+
 _FIM_DE_FRASE = re.compile(r"(?<!Dra)(?<!Dr)\.\s+(?=[A-ZÁÉÍÓÚ])")
 
 
@@ -205,9 +229,16 @@ def _nao_pedido(obs: Observacao, exames_vocab: dict[str, Any]) -> str:
     )
 
 
+def _lista_ghes(ghes: Sequence[str], todos: set[str]) -> str:
+    if len(todos) > 1 and set(ghes) == todos:
+        return f"todos os GHEs ({len(todos)})"
+    return ", ".join(ghes)
+
+
 def _decisoes_a_revisar(
     matrizes: Sequence[MatrizGHE], exames_vocab: dict[str, Any], resumos: Mapping[str, str]
 ) -> tuple[DecisaoARevisar, ...]:
+    todos = {m.ghe_id for m in matrizes}
     ghes_por_exame: dict[str, dict[str, list[str]]] = {}
     codigos: dict[str, list[str]] = {}
     for matriz in matrizes:
@@ -220,7 +251,7 @@ def _decisoes_a_revisar(
             regra_id=regra_id,
             resumo=resumos.get(regra_id, "Regra sem resumo clínico — confirmar."),
             onde=tuple(
-                f"{_nome_exame(slug, exames_vocab)}: {', '.join(ghes)}" for slug, ghes in por_exame.items()
+                f"{_nome_exame(slug, exames_vocab)}: {_lista_ghes(ghes, todos)}" for slug, ghes in por_exame.items()
             ),
             codigos=tuple(codigos[regra_id]),
         )
@@ -311,7 +342,9 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
     run.bold = True
     run.font.size = Pt(16)
     run.font.color.rgb = _COR_DESTAQUE
-    documento.add_paragraph(f"Empresa: {cabecalho.empresa} · Obra: {cabecalho.obra} · Data: {cabecalho.data}")
+    documento.add_paragraph(
+        f"Empresa: {cabecalho.empresa} · Obra: {cabecalho.obra} · Data: {data_exibicao(cabecalho.data)}"
+    )
     documento.add_paragraph(
         "Anexo de conferência da matriz, não assinado. Para cada exame: por que foi pedido, com que "
         "base e com que grau de certeza. Quando mais de uma regra pede o mesmo exame, vale a menor "
@@ -319,6 +352,7 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         "origem de cada conduta estão na seção 3. Para corrigir, escreva na coluna Correção; a correção volta "
         "para o sistema e ajusta a regra citada em \"ref.\"."
     )
+    documento.add_paragraph(_LEGENDA_MOMENTOS)
 
     total = sum(n for _, n in memorial.contagem_certeza)
     documento.add_heading("Resumo", level=1)
@@ -341,8 +375,7 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
 
     documento.add_heading("2. Matriz completa, por GHE", level=1)
     for bloco in memorial.blocos:
-        prefixo = "" if bloco.ghe_id.upper().startswith("GHE") else "GHE "
-        cabecalho_ghe = documento.add_heading(f"{prefixo}{bloco.ghe_id} {bloco.nome_ghe}".strip(), level=2)
+        cabecalho_ghe = documento.add_heading(titulo_ghe(bloco.ghe_id, bloco.nome_ghe), level=2)
         if cabecalho_ghe.runs:
             cabecalho_ghe.runs[0].font.color.rgb = _COR_DESTAQUE
         _tabela(documento, _COLUNAS_GHE, linhas_da_tabela(bloco))

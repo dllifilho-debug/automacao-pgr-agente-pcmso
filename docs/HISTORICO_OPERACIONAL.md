@@ -10713,3 +10713,36 @@ tirar cada um dos 3 termos (3 falhas cada) e mover "Vibrações localizadas" par
 sobre 1489 (5 casos parametrizados em `test_resolvedor_termos.py`, 3 em `test_vibracao_aurora.py`; o teste
 de contagem do índice foi renomeado, não somado). `mypy` não rodado: nenhum arquivo do alvo canônico
 tocado. `DECISOES` não tocado.
+
+## Sessão (branch `claude/tender-fermat-591zah`, pós-merge do PR #402) — 29/09/2026 — IMPLEMENTAÇÃO: clareza do memorial (`D-ARQ-87` fatia 2); tarefa 6 parada
+
+**Pedido.** Diovanni: tarefas 5 (clareza do memorial) e 6 (agente no "por que") da lista da conferência do
+Aurora.
+
+**Tarefa 5 — `superficie/memorial_matriz.py`.**
+- Título do GHE com o código uma vez só: `titulo_ghe` tira do nome o código que o PGR repete ("GHE-01 GHE 01 -
+  ADMINISTRAÇÃO" → "GHE-01 — ADMINISTRAÇÃO"); nome sem código fica inteiro; "GHE 010" não é cortado no GHE-01.
+- Data do cabeçalho: ISO (aaaa-mm-dd) vira dd/mm/aaaa; qualquer outro texto sai como digitado.
+- Legenda dos momentos abaixo da introdução (ADM, PER — anual quando não traz meses —, MRO, RET, DEM).
+- "Confirmar primeiro": regra que decide em todos os GHEs mostra "todos os GHEs (n)" em vez da lista (no
+  Aurora, `R-PSY-03` listava os 22 GHEs duas vezes).
+- **Não feito, com motivo:** empresa e obra em maiúsculas. São texto livre do formulário do app, e a matriz
+  assinada (`documento_matriz.py`) os imprime como digitados; mudar só no memorial deixaria os dois documentos
+  diferentes. O "cmo · aurora" do memorial do Aurora veio do que foi digitado.
+
+**Tarefa 6 — parada (bloqueador).** A lista dizia que `Motivo.risco_origem` já carregava o agente e faltava
+mostrá-lo. Medido em `motor/estagios/emissao.py` (`_risco_origem`): o campo só é preenchido quando o `quando`
+da regra é o próprio slug do agente (`R-BIO-04-*`) ou uma faixa de `R-RX-01` por medição. Em `R-CLI-05` (GHE 11
+do Aurora), composto, sai `None`. Mostrar o agente exige rastrear o átomo dentro de `predicados.avaliar` —
+faceta `risco_origem` da `DH-003ED-01`, ainda aberta; trabalho de motor e decisão de arquitetura, não de
+apresentação. Erro da lista, não do código.
+
+**Testes.** `test_memorial_matriz.py` 9 → 17 casos (1 teste simples, 1 parametrizado com 5 casos, 2
+simples); o teste de "confirmar primeiro" ganhou um terceiro GHE sem a regra, para seguir cobrindo a lista
+parcial. Varredura inversa, 10 reversões de código, 10/10 mortas: lista sempre por extenso; sem a guarda de
+um GHE só; não tirar o código do nome; sem `(?!\d)`; sem o prefixo "GHE " em id sem ele; data sem converter;
+data convertendo qualquer hífen; render com o título antigo; render sem `data_exibicao`; sem a legenda.
+`mypy --strict` alvo canônico limpo, **52 arquivos**.
+
+**Verificação.** Suíte completa (árvore parada): **1505 passed, 6 skipped, 0 failed** (1118.08s), +8 exato
+sobre 1497. `DECISOES` não tocado.
