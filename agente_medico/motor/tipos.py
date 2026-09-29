@@ -42,6 +42,9 @@ class RiscoPGR:
     # risco para o selo VÁLIDA discriminar acerto do motor de lacuna real. None quando
     # agente resolveu (agente is not None).
     causa_nao_resolucao: Optional[str] = None
+    # D-ARQ-88 fatia 2: termo do PGR, cru (verbatim, pode trazer NUL), que
+    # resolveu (ou não) para `agente`. None fora da hidratação.
+    termo: Optional[str] = None
     # Nível da avaliação qualitativa P×S do próprio PGR para este risco
     # ("IRRELEVANTE"/"BAIXO"/"MODERADO"/"ALTO"/"CRÍTICO"); None quando o documento
     # não traz a avaliação na linha do risco. Consumidor: R-RX-01-qual (DT-003EC-01).
@@ -252,6 +255,8 @@ class Risco:
     # Copiado de RiscoPGR.nivel_risco na Fase A; riscos implícitos (Fase B) e de
     # composição (Fase C) não têm avaliação do PGR — ficam None (DT-003EC-01).
     nivel_risco: Optional[str] = None
+    # D-ARQ-88 fatia 2: RiscoPGR.termo na Fase A; None nas Fases B e C.
+    termo: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -292,6 +297,7 @@ class OrigemRisco:
     agente: str
     fonte: str
     presumida: bool = False
+    termo: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -350,6 +356,8 @@ class Observacao:
     # D-ARQ-86 cl.6: medição abaixo do nível de ação que sustenta a dispensa em
     # BAIXO, já descrita com valor, % do LT e laudo. None = dispensa só pelo nível.
     medicao: Optional[str] = None
+    # D-ARQ-88 fatia 2 (Q4): termos do PGR dos riscos do agente, na ordem.
+    termos: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

@@ -66,7 +66,7 @@ def _origens(
     """D-ARQ-88: os riscos que satisfazem as pernas verdadeiras da regra que
     emitiu, com a fonte descrita. Mesma fonte repetida no agente entra uma vez."""
     origens = (
-        OrigemRisco(p.perna, p.risco.agente, _descrever_fonte(p.risco), p.presumida)
+        OrigemRisco(p.perna, p.risco.agente, _descrever_fonte(p.risco), p.presumida, p.risco.termo)
         for p in riscos_das_pernas_verdadeiras(regra["quando"], ctx, protocolo, presumidos)
     )
     return tuple(dict.fromkeys(origens))
@@ -308,6 +308,11 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
                     nivel_risco=nivel,
                     exames_dispensados=tuple(str(item["exame"]) for item in regra["emite"]),
                     medicao=medicao,
+                    termos=tuple(
+                        dict.fromkeys(
+                            r.termo for r in ctx.riscos if r.agente == regra["quando"] and r.termo
+                        )
+                    ),
                 )
             )
             continue
