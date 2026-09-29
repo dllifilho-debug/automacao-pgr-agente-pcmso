@@ -47,7 +47,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: [R-VIB-01]
-    termos: ["Vibrações de Corpo Inteiro", "VCI"]
+    termos: ["Vibrações de Corpo Inteiro", "VCI", "Vibração de corpo inteiro"]
     enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # item único "Vibrações" — Decreto não distingue VCI/VMB nem usa limiar numérico
   motorista_equipamento_pesado:
     tipo_ibe: null
@@ -74,7 +74,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
-    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)"]
+    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas"]
     enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # mesmo item único de vibracao_corpo_inteiro
   vibracao:
     tipo_ibe: null
@@ -110,6 +110,15 @@ agentes:
   # [DERIVADO — D-ARQ-70 Tier 1-C; grafia medida em "PGR - CONSCIENTE ...
   # FASCINO (15.07.26).pdf", 9 GHEs; ancorada no literal "Vibrações em Mãos e
   # Braços" da NR-09 Anexo I 1.1].
+  # "Vibração de corpo inteiro" — [DERIVADO — D-ARQ-70 Tier 1-C; grafia medida em
+  # "PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf", GHE 12 (1);
+  # literal da NR-09 Anexo I, item 5.3.1 ("vibração de corpo inteiro")].
+  # "Vibração localizada", "Vibrações localizadas" — [DERIVADO — D-ARQ-70 Tier 1-C;
+  # grafias medidas no mesmo PGR do Aurora, GHEs 10 e 11 (singular) e 21 (plural);
+  # âncora: Decreto 3.048/1999, Anexo II, Lista B ("Vibrações localizadas", ligadas à
+  # síndrome de Raynaud, Quadro XXII) — a NR-09 vigente não usa "localizada"; a
+  # redução para mãos e braços segue o alias do Fascino acima. Vigência do Anexo II
+  # [A CONFERIR — planalto.gov.br]].
   xileno:
     lt_nr15: {ppm: 78, mg_m3: 340, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Xileno (xilol)"}
     tipo_ibe: EE

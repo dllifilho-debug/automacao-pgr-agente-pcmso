@@ -1054,6 +1054,14 @@ Inteiro - VCI", texto vigente `nr-09-atualizada-2026.pdf` conferido em 29/07/202
 vibração **RESOLVIDA** (003.EJ, D-ARQ-70). Faceta **máquina pesada segue ABERTA** — sem grafia
 normativa, caminho por `riscos_implicitos` de cargo.
 
+**Nota (branch `claude/tender-fermat-591zah`, 29/09/2026).** A faceta vibração só tinha recebido o
+literal plural da NR-09 ("Vibrações de Corpo Inteiro"); a forma natural singular do próprio caso-âncora desta
+DT, "Vibração de corpo inteiro", seguia `NAO_RESOLVIDO`. Medido no PGR CMO Aurora 27.08.26 (GHE 12, sem RX
+lombo-sacra). Entrou como alias, com "Vibração localizada" e "Vibrações localizadas" (D-ARQ-70 Tier 1-C).
+Seguem sem alias: "Vibração"/"Vibrações" sem tipo (decisão clínica) e, no Porto Araras I, "Vibração
+localizada (mão e braço)" e "Vibração localizadas (mão e braço)" (mudam par determinístico — medir contra
+o gabarito antes).
+
 **Status:** PARCIALMENTE RESOLVIDA (003.EJ). Faceta vibração RESOLVIDA; faceta máquina pesada ABERTA, não-bloqueante.
 
 ### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[PARCIALMENTE RESOLVIDA — 003.EG; faceta risco_origem ABERTA]`

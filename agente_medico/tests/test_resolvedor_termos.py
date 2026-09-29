@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_171_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_174_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -60,7 +60,10 @@ def test_indice_real_tem_171_entradas(indice_real: IndiceTermos) -> None:
     # (DT-003EQ-02, D-ARQ-70 Tier 1-C, PGR Fascino GHE 17).
     # 169 -> 171 (mesma branch): +1 slug `cimento_asfaltico` e +1 termo "Cimento Asfáltico
     # 95/30 - Asfalto" (R-PKG-ASF-CO; PGRs CMO Aurora e Vistamerica 07/26).
-    assert len(indice_real.slug_por_forma) == 171
+    # 171 -> 174 (branch `claude/tender-fermat-591zah`): +3 aliases de vibração do PGR
+    # CMO Aurora 27.08.26 (D-ARQ-70 Tier 1-C) — "Vibração de corpo inteiro" (GHE 12),
+    # "Vibração localizada" (GHEs 10 e 11), "Vibrações localizadas" (GHE 21).
+    assert len(indice_real.slug_por_forma) == 174
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -187,6 +190,9 @@ def test_aliases_tier1_resolvem_exata(indice_real: IndiceTermos, termo: str, slu
         ("Vibração (mão e braço)", "vibracao_mao_braco"),
         ("VMB", "vibracao_mao_braco"),
         ("VCI", "vibracao_corpo_inteiro"),
+        ("Vibração de corpo inteiro", "vibracao_corpo_inteiro"),
+        ("Vibração localizada", "vibracao_mao_braco"),
+        ("Vibrações localizadas", "vibracao_mao_braco"),
     ],
 )
 def test_aliases_vibracao_tier1c_resolvem_exata(
@@ -205,6 +211,8 @@ def test_aliases_vibracao_tier1c_resolvem_exata(
         "Vibração (mão e braço)",
         "VMB",
         "Vibrações em Mãos e Braços",
+        "Vibração localizada",
+        "Vibrações localizadas",
     ],
 )
 def test_aliases_mao_braco_nao_resolvem_para_corpo_inteiro_ou_generico(
