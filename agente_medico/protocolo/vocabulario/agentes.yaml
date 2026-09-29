@@ -74,7 +74,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
-    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas"]
+    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas", "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)"]
     enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # mesmo item único de vibracao_corpo_inteiro
   vibracao:
     tipo_ibe: null
@@ -119,6 +119,10 @@ agentes:
   # síndrome de Raynaud, Quadro XXII) — a NR-09 vigente não usa "localizada"; a
   # redução para mãos e braços segue o alias do Fascino acima. Vigência do Anexo II
   # [A CONFERIR — planalto.gov.br]].
+  # "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)" —
+  # [DERIVADO — D-ARQ-70 Tier 1-C; grafias medidas em "PGR — PORTO ARARAS I SPE
+  # EMPREENDIMENTOS IMOBILIARIOS LTDA.pdf" (rota determinística, 2 e 1 riscos);
+  # mesma âncora do alias do Fascino ("mão e braço" ← NR-09 Anexo I, item 1.1)].
   xileno:
     lt_nr15: {ppm: 78, mg_m3: 340, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Xileno (xilol)"}
     tipo_ibe: EE
