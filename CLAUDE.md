@@ -6,6 +6,16 @@ PENDENCIAS_CLINICAS.md),
 (3) qualquer cache. Nunca afirmar número de sessão, D-ARQ, hash ou contagem de testes
 de memória — ler do disco.
 
+## Onde está o quê
+
+- `matrizes_originais/` — PGRs e matrizes validadas pelas médicas (gabarito de conferência).
+  Pares PGR↔matriz: `docs/referencia/PAREAMENTO_ACERVO.md`.
+- `fds_originais/` — FDS/FISPQ reais do acervo.
+- `normas/` — cópias de trabalho de NR/NHO; a fonte é Gov.br/MTE e Fundacentro (conferir vigência).
+- `agente_medico/protocolo/` — `regras.yaml`, `predicados_compostos.yaml`, `vocabulario/` (agentes, exames).
+- Raiz: `DECISOES_ARQUITETURAIS.md`, `HISTORICO_OPERACIONAL.md`, `PROTOCOLO_AGENTE_MEDICO.md`,
+  `CONTEXTO_SESSAO.md` e `refatoracao/` são legado — a fonte viva é `docs/`.
+
 ## Decisão clínica (quem decide e com base em quê)
 
 Decisão clínica é tomada na sessão: Claude propõe, Diovanni opina e decide. As médicas não
