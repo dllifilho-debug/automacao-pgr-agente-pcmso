@@ -10837,3 +10837,33 @@ mortas. `mypy --strict` alvo canônico limpo, **52 arquivos**.
 
 **Verificação.** Suíte completa (árvore parada): **1524 passed, 6 skipped, 0 failed** (982.63s), +10 exato
 sobre 1514. `tests/test_gerar_indice_darq.py`: 6 passed.
+
+## Sessão (branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #406) — 29/09/2026 — IMPLEMENTAÇÃO: `D-ARQ-88` fatia 2 (memorial nomeia o agente)
+
+**Pedido.** Diovanni: propor e implementar a fatia 2 da `D-ARQ-88` — o memorial dizer qual agente do PGR
+disparou cada regra. Proposta com medição; **Q1–Q4 ratificadas como recomendado**. Branch reiniciada a partir
+de `main 20da822` (PR #406 mergeado).
+
+**Medido antes da proposta.** Hidratação 1:1 termo do PGR × `RiscoPGR` nos 3 pares; o termo era descartado
+ali. Slug com mais de uma grafia no mesmo PGR: Fascino 4, Porto Araras I 1, Vila Brasil 1. Slug humanizado
+sem acento/preposição; `agentes.yaml` sem campo de nome (110 agentes). NUL do PDF no termo (DH-003EG-01).
+
+**Implementado.** Motor: `termo` em `RiscoPGR` (hidratação, três ramos), `Risco` (Fase A) e `OrigemRisco`;
+`Observacao.termos`. Memorial: `Origem: <termo> — <fonte>` por regra em "Por que foi pedido"; FDS pela própria
+fonte; sem termo, slug legível; perna presumida "sem medição no PGR; pedido por precaução"; "não pedido" pelo
+termo do PGR; NUL removido e espaços juntados na exibição. **Desvio de rótulo:** "Origem:" em vez de "No PGR:"
+da proposta (origem pode ser FDS). DECISOES v227 (nota de aplicação em `D-ARQ-88`), índice regenerado.
+
+**Efeito medido — 3 pares, worktree `origin/main` × árvore.** Motor idêntico fora de `termo`/`termos`,
+`risco_origem` byte-idêntico; matriz assinada idêntica; memorial com as mesmas linhas de tabela por GHE
+(111/90/91), texto de "Por que foi pedido" mudado em 123/179, 94/142, 69/147 linhas; páginas 16→17, 12→14,
+13→14. Aurora pela hidratação real: clínico semestral com "Origem: Ciclohexanona — PGR (nível MODERADO);
+Metiletilcetona MEK — …; Tetrahidrofurano — …". Memorial real do app `[A MEDIR — próxima matriz do app]`.
+
+**Testes.** `test_memorial_origem.py` (8). Varredura inversa, 10 reversões de código, 10/10 mortas por
+asserção: hidratação sem termo; Fase A sem copiar; `_porque` sem origens; sem juntar espaços; sem ramo FDS;
+presumida ignorada; só a primeira origem por agente; "não pedido" pelo slug; `Observacao.termos` vazio; sem
+fallback do slug. `mypy --strict` alvo canônico limpo, **52 arquivos**.
+
+**Verificação.** Suíte completa (árvore parada): **1532 passed, 6 skipped, 0 failed** (826.41s), +8 exato
+sobre 1524. `tests/test_gerar_indice_darq.py`: 6 passed.

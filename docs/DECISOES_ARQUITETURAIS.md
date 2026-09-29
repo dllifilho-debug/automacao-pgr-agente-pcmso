@@ -4323,7 +4323,7 @@ Sessão branch `claude/cool-babbage-whh1zw`. Pedido do Diovanni: a matriz deve e
 
 ## D-ARQ-88 — A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu
 
-**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO da fatia 1 (mesma data). Fatia 2 (memorial) é proposta, não ratificada.
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado).
 
 Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #405. Tarefa 6 da conferência do memorial do Aurora, parada na sessão pós-#402 (HISTORICO): em regra de predicado composto, `Motivo.risco_origem` saía `None` — o memorial não dizia qual agente do PGR disparou a regra (ex.: R-CLI-05 no GHE 11 do Aurora). Resolve a faceta `risco_origem` de DH-003ED-01.
 
@@ -4363,6 +4363,18 @@ Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #405. Tarefa
 - **Medido — critério de aceite:** 3 pares idênticos fora da origem; 28 origens existentes byte-idênticas, 0 mudadas. `None` → preenchido: Fascino 155, Porto Araras I 117, Vila Brasil 84 = 356 — compostos 248 por perna verdadeira + 73 por presunção (R-AUD-01/02, ruído sem laudo), igual ao previsto na proposta; mais 35 de primitivo (R-RX-01-qual 14/12/6, R-RX-01-pnos-sem 0/0/3). Seguem `None`: 57/48/78, todos de primitivo sem risco.
 - **Aurora GHE 11** (rota da hidratação real, termos do PGR p. 45): R-CLI-05 → ciclohexanona, metil_etil_cetona ("Metiletilcetona (MEK)" resolve), tetrahidrofurano, perna `agente_ibe_moderado_ou_acima`. Matriz real do app `[A MEDIR — próxima matriz do app]`.
 - **Testes:** `test_origem_pernas.py` (10). Varredura inversa, 11 reversões, 11/11 mortas por asserção; comentários de reversão de `test_revisao_origem.py` e `test_rx_medicao_poeira.py` reescritos para os símbolos novos, 4/4 mortas.
+
+
+**Nota de aplicação — fatia 2 IMPLEMENTADA (29/09/2026, pós-merge do PR #406).** Mesma ID, cláusulas da fatia 1 inalteradas; decisões da fatia 2 ratificadas pelo Diovanni (Q1–Q4 como recomendado).
+
+- **Medido antes:** hidratação é 1:1 termo do PGR × `RiscoPGR` nos 3 pares, e o termo era descartado ali; mesmo slug com mais de uma grafia no PGR (Fascino 4 slugs — "Quartzo"/"Sílica livre", "Ruido"/"Ruído"…; Porto Araras I 1; Vila Brasil 1); slug humanizado perde acento e preposição ("ruido", "trabalho altura", "butadieno 13"); `agentes.yaml` sem campo de nome (110 agentes, 41 com `termos`, que são aliases de resolução); NUL do PDF no termo ("Metiletilcetona \x00MEK\x00", DH-003EG-01).
+- **Q1 — nome do agente = termo do PGR.** `termo: Optional[str] = None` em `RiscoPGR` (hidratação grava `risco_verbatim.agente` cru, nos três ramos), `Risco` (Fase A copia) e `OrigemRisco` (passada da fatia 1 copia). Risco de FDS e implícito seguem com `termo=None`. `risco_origem` inalterado.
+- **Q2 — NUL tratado na apresentação.** O motor guarda o termo cru (evidência, D-ARQ-22); o memorial sanitiza e junta espaços ("Metiletilcetona MEK"). Correção na origem segue com DH-003EG-01.
+- **Q3 — perna presumida:** "sem medição no PGR; pedido por precaução" — genérico, porque D-ARQ-68 cl.5 só presume por silêncio documental.
+- **Q4 — "não pedido":** `Observacao.termos` (aditivo) com os termos do PGR do agente; o memorial deixa o `replace('_', ' ')` do slug.
+- **Memorial (`memorial_matriz.py`):** em "Por que foi pedido", depois da primeira frase de cada regra, `Origem: <termo> — <fonte>; …`; origem de FDS pela própria fonte; sem termo, slug legível. **Desvio de rótulo em relação à proposta:** "Origem:" em vez de "No PGR:", porque a origem pode ser FDS.
+- **Medido — critério de aceite (3 pares, `origin/main 20da822` × árvore):** motor idêntico fora de `termo`/`termos`, `risco_origem` byte-idêntico; matriz assinada (`montar_documento`) idêntica; memorial idêntico fora de "Por que foi pedido" e "não pedido", mesmas linhas de tabela por GHE (111/90/91). Texto mudado em 123/179, 94/142, 69/147 linhas; "não pedido" 0/1/0 (Porto Araras I: "2-butóxietanol" do PGR no lugar de "butoxietanol 2"). Páginas do memorial: 16→17, 12→14, 13→14.
+- **Testes:** `test_memorial_origem.py` (8). Varredura inversa, 10 reversões de código, 10/10 mortas por asserção.
 
 ---
 
@@ -4596,3 +4608,4 @@ Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #405. Tarefa
 | v224 | 26/09/2026 | Branch `claude/cool-babbage-whh1zw` (ARQUITETURA + IMPLEMENTAÇÃO, fatia 1 autorizada pelo Diovanni): **`D-ARQ-87` CRIADA** — memorial de raciocínio da matriz; `Motivo` por item com a periodicidade, os momentos e a base normativa que a regra pediu, antes do piso da consolidação; revisão na tela mostra a periodicidade por regra. Fatias 2 (memorial `.docx`) e 3 (retorno das correções) propostas. |
 | v225 | 27/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-87`): **nota de aplicação em `D-ARQ-87`** (mesma ID, nenhuma cláusula alterada) — memorial de raciocínio em `.docx` para as médicas (`superficie/memorial_matriz.py`), download na tela; campo `resumo_clinico` nas 79 regras ativas; certeza pelo elo mais fraco; decisões a confirmar agrupadas por regra; fundamento de auditoria fora do documento. |
 | v226 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA + IMPLEMENTAÇÃO, ratificada pelo Diovanni, Q1–Q4): **`D-ARQ-88` CRIADA** — origem do risco pela passada de explicação sobre as pernas verdadeiras da regra que emitiu; `Motivo.origens` estruturado e `risco_origem` derivado; perna presumida marcada; filtro único por primitivo; fatia 1 implementada, 3 pares idênticos fora da origem. Fecha a faceta `risco_origem` de DH-003ED-01. Decisões 87 → **88**. |
+| v227 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-88`, ratificada pelo Diovanni, Q1–Q4): **nota de aplicação em `D-ARQ-88`** (mesma ID, cláusulas inalteradas) — termo do PGR atravessa a hidratação até `OrigemRisco`; memorial nomeia o agente que disparou cada regra e usa o termo no "não pedido"; 3 pares com motor e matriz assinada idênticos. |

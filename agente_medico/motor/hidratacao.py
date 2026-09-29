@@ -140,6 +140,7 @@ def hidratar_ghe(
                     quantificacao=quantificacao,
                     severidade=None,
                     nivel_risco=nivel_risco,
+                    termo=risco_verbatim.agente,
                 )
             )
         elif resolucao.confianca == Confianca.FUZZY:
@@ -150,6 +151,7 @@ def hidratar_ghe(
                     quantificacao=quantificacao,
                     severidade=None,
                     nivel_risco=nivel_risco,
+                    termo=risco_verbatim.agente,
                 )
             )
             pendencias.append(
@@ -181,6 +183,7 @@ def hidratar_ghe(
                     severidade=None,
                     causa_nao_resolucao=resolucao.pendencia.tipo,
                     nivel_risco=nivel_risco,
+                    termo=risco_verbatim.agente,
                 )
             )
             pendencias.append(dataclasses.replace(resolucao.pendencia, ghe_id=ghe_id))

@@ -21,7 +21,7 @@ from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 
-from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Motivo, Observacao
+from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Motivo, Observacao, OrigemRisco
 from agente_medico.superficie.documento_matriz import (
     _COR_DESTAQUE,
     _COR_DESTAQUE_HEX,
@@ -187,12 +187,44 @@ def _por_regra(exame: ExameEmitido) -> dict[str, Motivo]:
     return unicos
 
 
+def _termo_exibicao(termo: str) -> str:
+    """Termo do PGR como a médica lê (D-ARQ-88 fatia 2, Q2): o NUL que o PDF
+    deixa no lugar de parênteses sai, e os espaços se juntam."""
+    return " ".join(_sanitizar(termo).split())
+
+
+def _agente_exibicao(slug: str) -> str:
+    return slug.replace("_", " ")
+
+
+def _descrever_origem(o: OrigemRisco) -> str:
+    """D-ARQ-88 fatia 2: o agente pelo termo do PGR (Q1); risco de FDS já é
+    nomeado pela própria fonte; sem termo, o slug legível."""
+    if o.termo:
+        texto = f"{_termo_exibicao(o.termo)} — {o.fonte}"
+    elif o.fonte.startswith("FDS"):
+        texto = o.fonte
+    else:
+        texto = f"{_agente_exibicao(o.agente)} — {o.fonte}"
+    if o.presumida:
+        # Q3: D-ARQ-68 cl.5 só presume por silêncio documental — vale para toda perna.
+        texto += "; sem medição no PGR; pedido por precaução"
+    return texto
+
+
+def _origem(m: Motivo) -> str:
+    return "; ".join(dict.fromkeys(_descrever_origem(o) for o in m.origens))
+
+
 def _porque(exame: ExameEmitido, resumos: Mapping[str, str]) -> str:
     regras = _por_regra(exame)
     varias = len(regras) > 1
     partes: list[str] = []
     for m in regras.values():
         texto = primeira_frase(resumos.get(m.regra_id, "Regra sem resumo clínico — confirmar."))
+        origem = _origem(m)
+        if origem:
+            texto += f" Origem: {origem}."
         if varias and m.periodicidade_meses is not None:
             pedido = ExameEmitido(
                 exame=exame.exame, periodicidade_meses=m.periodicidade_meses, momentos=set(m.momentos)
@@ -220,7 +252,8 @@ def _linha(
 
 def _nao_pedido(obs: Observacao, exames_vocab: dict[str, Any]) -> str:
     exames = ", ".join(_nome_exame(slug, exames_vocab) for slug in obs.exames_dispensados)
-    motivo = f"{obs.agente.replace('_', ' ')} com risco {obs.nivel_risco.lower()} no PGR"
+    agente = "; ".join(dict.fromkeys(_termo_exibicao(t) for t in obs.termos)) or _agente_exibicao(obs.agente)
+    motivo = f"{agente} com risco {obs.nivel_risco.lower()} no PGR"
     if obs.medicao is not None:
         motivo += f" e medição abaixo do nível de ação ({obs.medicao})"
     return _sanitizar(

@@ -34,6 +34,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     tipo_ibe=TipoIBE(meta["tipo_ibe"]) if meta.get("tipo_ibe") else None,
                     is_ototoxico=meta.get("is_ototoxico", False),
                     nivel_risco=risco_pgr.nivel_risco,
+                    termo=risco_pgr.termo,
                 )
             )
         else:
@@ -45,6 +46,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     quantificacao=risco_pgr.quantificacao,
                     tipo_ibe=None,
                     nivel_risco=risco_pgr.nivel_risco,
+                    termo=risco_pgr.termo,
                 )
             )
             ctx.pendencias.append(
