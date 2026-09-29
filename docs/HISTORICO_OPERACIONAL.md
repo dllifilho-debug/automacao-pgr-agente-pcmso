@@ -10867,3 +10867,35 @@ fallback do slug. `mypy --strict` alvo canônico limpo, **52 arquivos**.
 
 **Verificação.** Suíte completa (árvore parada): **1532 passed, 6 skipped, 0 failed** (826.41s), +8 exato
 sobre 1524. `tests/test_gerar_indice_darq.py`: 6 passed.
+
+## Sessão (branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #407) — 29/09/2026 — DADO: aliases de vibração do Aurora (célula inteira)
+
+**Pedido.** Diovanni: o alias de vibração do Aurora ("Vibração localizada (mãos e braços)", achado na sessão
+da fatia 1 de `D-ARQ-88`).
+
+**Medido — e correção da sessão pós-#401.** Aquela medição leu só a primeira linha da célula (`Físico
+Vibra…`), e o PDF quebra o nome do agente em 2–3 linhas. Lida a célula inteira (coluna do agente por
+`pdfplumber.extract_words`), as 10 vibrações do Aurora têm tipo: "Vibração localizada (mãos e braços)" nos
+GHEs 04, 05, 08, 10, 11, 14 e 16 (os cinco "Vibração" sem tipo eram artefato da quebra); "Vibração de corpo
+inteiro" no 12; "Vibrações localizadas (mão-braço)" no 18 (não "Vibrações" sem tipo); "Vibrações localizadas
+(mão e braço)" no 21 (já resolvia). Resolvedor antes: as duas grafias novas `NAO_RESOLVIDO`.
+
+**Implementado.** `agentes.yaml`, `vibracao_mao_braco`: "Vibração localizada (mãos e braços)" e "Vibrações
+localizadas (mão-braço)" (D-ARQ-70 Tier 1-C). Âncoras: NR-09 Anexo I, itens 1.1 ("Vibrações em Mãos e
+Braços") e 5.2.1 ("vibração em mãos e braços"), `normas/nr-09-atualizada-2026 .pdf`; "localizada(s)" pelo
+Decreto 3.048/1999 Anexo II, âncora do alias da sessão pós-#401. A grafia do GHE 18 entrou além da pedida:
+mesma classe, medida no mesmo PGR. Correção registrada em DT-003ED-01 (PENDENCIAS); a decisão clínica sobre
+vibração sem tipo segue aberta, sem caso no Aurora.
+
+**Efeito medido.** 3 pares determinísticos, cada `RiscoVerbatim.agente` resolvido com o vocabulário sem e com
+os aliases: **0 de 587 riscos** mudam (Fascino 237, Porto Araras I 172, Vila Brasil 178) — matrizes idênticas
+por construção. Aurora (rota de IA): GHEs 04, 05, 08, 10, 11, 14, 16 e 18 passam a ter `vibracao_mao_braco`
+se a transcrição mantiver o qualificador (sem ele, "Vibração localizada" já resolvia) `[A MEDIR — próxima
+matriz do app]`.
+
+**Testes.** `test_resolvedor_termos.py`: +2 na resolução EXATA, +2 no anti-FP, contagem do índice 176 → 178;
+`test_vibracao_aurora.py`: +2 casos pela hidratação real. Varredura inversa, 4 reversões de dado, 4/4 mortas:
+tirar cada grafia; mover cada uma para `vibracao_corpo_inteiro`.
+
+**Verificação.** Suíte completa (árvore parada): **1538 passed, 6 skipped, 0 failed** (772.89s), +6 exato
+sobre 1532. `mypy` não rodado: nenhum arquivo do alvo canônico tocado. `DECISOES` não tocado.
