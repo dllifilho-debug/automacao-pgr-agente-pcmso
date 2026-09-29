@@ -10771,3 +10771,29 @@ grafias (medido na sessão pós-#401).
 
 **Verificação.** Suíte completa (árvore parada): **1509 passed, 6 skipped, 0 failed** (1030.73s), +4 exato
 sobre 1505. `mypy` não rodado: nenhum arquivo do alvo canônico tocado. `DECISOES` não tocado.
+
+## Sessão (branch `claude/tender-fermat-591zah`, pós-merge do PR #404) — 29/09/2026 — PROTOCOLO: status das faixas de PNOS (`R-RX-01-pnos-*`)
+
+**Pedido.** Diovanni: tarefa 4 da lista — `R-RX-01-pnos-sem` saía "interpretação — confirmar" citando só a norma.
+Proposta apresentada; aprovados os itens 1 (pnos-sem), 2 (pnos-acima100) e 4 (pnos-ate10).
+
+**Medido.** NR-07 Anexo III, Quadro 2 (`normas/nr-07-atualizada-2022-1 .pdf`, Portaria MTP 567/2022; Gov.br
+bloqueado pelo proxy do ambiente → vigência `[A CONFERIR]`): sem avaliação quantitativa e >100% LEO, "na admissão;
+e a cada 5 anos"; ≤10%, "na admissão"; 10–100%, admissão + após 5 anos + critério clínico. Nenhuma faixa traz
+mudança de risco ou demissional — origem do `INTERPRETADO` desde 002.N/002.Y. Precedente: matriz validada do
+Aurora 27.08.26, **30/30** células de RX 60M com MRO e DEM. Analogia: faixas de sílica `VALIDADO` com os mesmos
+momentos.
+
+**Implementado.** `regras.yaml`: `pnos-sem`, `pnos-acima100` e `pnos-ate10` → `DERIVADO`, fonte no marcador da
+`base_normativa`; resumo clínico de `pnos-sem` e `pnos-acima100` diz de onde vêm MR e DEM. `pnos-10a100` segue
+`INTERPRETADO` (emite menos que o Quadro 2). PROTOCOLO v113. Conduta inalterada: nenhuma periodicidade ou momento
+muda, então as matrizes dos 3 pares ficam idênticas por construção. Efeito esperado no memorial do Aurora:
+`R-RX-01-pnos-sem` sai de "Confirmar primeiro" e 9 linhas de RX passam a "Norma ou matrizes" (GHE 22 segue por
+`R-RX-01-qual`) `[A MEDIR — próxima matriz do app]`.
+
+**Testes.** `test_rx_pnos_status.py` (novo, 5 casos): status das quatro faixas; caminho real PNOS sem medição →
+`R-RX-01-pnos-sem` → memorial, fora de "Confirmar primeiro" e com rótulo "Norma ou matrizes". Varredura inversa, 4
+reversões de dado, 4/4 mortas: cada uma das três de volta a `INTERPRETADO`; `pnos-10a100` subindo a `DERIVADO`.
+
+**Verificação.** Suíte completa (árvore parada): **1514 passed, 6 skipped, 0 failed** (1013.58s), +5 exato
+sobre 1509. `mypy` não rodado: nenhum arquivo do alvo canônico tocado. `DECISOES` não tocado.
