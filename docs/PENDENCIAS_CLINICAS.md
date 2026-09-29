@@ -1173,7 +1173,7 @@ a justifica, com o sinal de que o dado é presumido — não medido — visível
 ruído, GHE-16, resolve por `perna_ausente_absorvida`, D-ARQ-71 cl.2; ver nota de fronteira em
 D-ARQ-68 cl.5) e no piso `PARCIAL` da matriz (nunca `VÁLIDA`).
 
-### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[ABERTA — higiene de instrumento]`
+### DH-003EG-01 — Bytes NUL do PGR vazam para o artefato de saída `[RESOLVIDA — D-ARQ-89 fatia 1, 29/09/2026]`
 
 **Origem:** medição `003eg_fascino_rodar.md` (Fascino, commit `5a2d15b`).
 
@@ -1190,9 +1190,18 @@ origem.
 
 **Registro adicional.** O arquivo é gravado com `\r\n` — recorrência da classe DH-003M-01.
 
-**Status:** ABERTA. Não-bloqueante.
+**Status (003.EG):** ABERTA. Não-bloqueante.
 
 **Nota aditiva (003.EP).** Segue ABERTA — a DH não fecha. Bytes NUL no relatório do harness: **122 → 18** `[MEDIDO — 003.EP, contagem direta sobre \`003eo_fascino_rodar.md\` e \`003ep_fascino_rodar.md\`]`. A fatia 2 de 003.EP (separação nome/CBO na célula "Cargo / Função") removeu 85% como efeito colateral — o blob de cargo com CBO/NUL embutido era a maior fonte medida de NUL no relatório, e a separação limpa o CBO nas pendências `vocabulario_ausente` que citam o nome do cargo. O resíduo de 18 bytes tem outra origem (não medida nesta sessão) e não foi investigado — a correção candidata original (sanitizar na renderização, não no dado) continua válida e não foi implementada.
+
+**Resolução (29/09/2026, branch `claude/exciting-ramanujan-g9bbl4`, `D-ARQ-89`).** Fatia 1: pendências na
+tela (`linha_pendencia`) e relatório do harness (`_renderizar_relatorio`, `_formatar_pendencia`) passam por
+`_sanitizar`, como memorial e matriz assinada — nenhum artefato de saída carrega NUL. Medido na mesma sessão:
+os NUL vêm de 13 glifos ".case" da fonte Inter que o gerador do PDF não mapeia (3 de 28 PGRs, 5.879 casos);
+a restauração do caractere impresso na extração é a fatia 2 de `D-ARQ-89`, que revê a cláusula "não no dado"
+desta DH. O `\r\n` do registro adicional não se reproduz no Linux (`write_text` grava `\n`); não tratado.
+
+**Status:** RESOLVIDA (D-ARQ-89 fatia 1).
 
 ### DH-003EG-02 — O instrumento que pauta a fila vive fora do git `[ABERTA — higiene de método]`
 

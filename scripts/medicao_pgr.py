@@ -43,6 +43,7 @@ from agente_medico.motor.tipos import Pendencia, Resultado
 from agente_medico.motor.transcritor_card import TranscritorCard
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
 from agente_medico.superficie.apresentacao_matriz import renderizar_matriz
+from agente_medico.superficie.documento_matriz import _sanitizar
 
 _RAIZ = Path(__file__).resolve().parent.parent
 
@@ -69,7 +70,7 @@ def _formatar_pendencia(p: Pendencia) -> str:
     return (
         f"- tipo: `{p.tipo}`\n"
         f"  destinatario: `{p.destinatario}`\n"
-        f"  motivo: {p.motivo}\n"
+        f"  motivo: {_sanitizar(p.motivo)}\n"
         f"  bloqueante: {p.bloqueante}\n"
         f"  regra_origem: {p.regra_origem}\n"
         f"{linha_ghe}"
@@ -112,7 +113,7 @@ def _renderizar_relatorio(pdf: Path, resultado: Resultado | None, pendencias: tu
     linhas.append("")
     if resultado is None:
         linhas.append("`resultado` é `None` — parse total falho, sem matrizes.")
-        return "\n".join(linhas) + "\n"
+        return _sanitizar("\n".join(linhas) + "\n")
 
     linhas.append(f"- status: `{resultado.status}`")
     if resultado.motivo_rejeicao is not None:
@@ -129,7 +130,8 @@ def _renderizar_relatorio(pdf: Path, resultado: Resultado | None, pendencias: tu
     for matriz in resultado.matrizes:
         linhas.extend(renderizar_matriz(matriz))
 
-    return "\n".join(linhas) + "\n"
+    # D-ARQ-89 cl.5 (DH-003EG-01): nome de GHE, cargo e motivo podem trazer NUL do PGR.
+    return _sanitizar("\n".join(linhas) + "\n")
 
 
 def _rodar(pdf: Path, artefato_volta: Path, relatorio_md: Path, cliente: TranscritorGHE, cliente_card: TranscritorCard) -> None:

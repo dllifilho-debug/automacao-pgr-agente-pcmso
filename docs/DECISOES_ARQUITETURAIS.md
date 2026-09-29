@@ -4376,6 +4376,45 @@ Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #405. Tarefa
 - **Medido — critério de aceite (3 pares, `origin/main 20da822` × árvore):** motor idêntico fora de `termo`/`termos`, `risco_origem` byte-idêntico; matriz assinada (`montar_documento`) idêntica; memorial idêntico fora de "Por que foi pedido" e "não pedido", mesmas linhas de tabela por GHE (111/90/91). Texto mudado em 123/179, 94/142, 69/147 linhas; "não pedido" 0/1/0 (Porto Araras I: "2-butóxietanol" do PGR no lugar de "butoxietanol 2"). Páginas do memorial: 16→17, 12→14, 13→14.
 - **Testes:** `test_memorial_origem.py` (8). Varredura inversa, 10 reversões de código, 10/10 mortas por asserção.
 
+
+---
+
+## D-ARQ-89 — Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto
+
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO da fatia 1 (mesma data). Fatia 2 autorizada separadamente, não implementada.
+
+Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #408. Pedido do Diovanni: propor a correção do NUL na origem (DH-003EG-01). Revê a correção candidata da DH ("sanitizar na renderização, não no dado — o dado verbatim é evidência").
+
+**Contexto — medido nesta sessão (`main 5b534b7`).**
+
+- **3 de 28 PGRs** do acervo têm U+0000 no texto extraído — Fascino, Vila Brasil, Verde Maris —, **5.879** ao todo, **todos em subconjuntos Type3 da fonte Inter** (um gerador de PDF). Porto Araras I e Aurora: zero.
+- **13 glifos**, por nome estável em `/Differences` (`g14B`…`g18B`, iguais nos 3 PDFs), saem com ToUnicode U+0000 em todos os 90 subconjuntos; nenhum aparece mapeado em lugar nenhum — o PDF sozinho não devolve o caractere.
+- **Identificação visual** (recorte a 500 dpi de uma ocorrência por glifo): g14B `(` 2.242, g14C `)` 1.871, g15C `-` 938, g15D `–` 305, g15E `—` 196, g16E `:` 180, g183 `×` 82, g14D `[` 24, g18B `*` 18, g17E `<` 9, g181 `+` 8, g17F `>` 3, g14E `]` 3 — soma 5.879. É o conjunto ".case" da Inter (pontuação para caixa-alta e dígitos): "(" antes de "Bactérias" vira NUL, ")" depois de "protozoários" não. Largura relativa confirma (0,365 = `(`/`)`, 0,46 = `-`).
+- Vazamento remanescente: pendências na tela (5 `st.write(p.motivo)` em `web_matriz.py`) e relatório do harness (`scripts/medicao_pgr.py`, origem da DH). Memorial e matriz assinada já sanitizam. Saída dos 3 pares com NUL: Fascino 8 `motivo`, 1 `termo`, 1 `nome_ghe`; Vila Brasil 14 `motivo`, 6 `termo`, 2 `cargos`, 1 `nome_ghe`.
+- O código casa `\x00` de propósito: âncoras de GHE (`[-\x00]`) e remoção de CBO (`[\s\x00-]`).
+- Injeção sem monkeypatch: o pdfplumber cria o `PDFResourceManager` em `pdf.py:53` e o usa por página em `page.py:260-264`.
+
+**Decisão.**
+
+**cl.1 — Restauração na extração, por tabela (Q1).** `PDFResourceManager` próprio injetado no pdfplumber em todo ponto que abre o PGR: em fonte Type3 cujo ToUnicode dá U+0000, o glifo é resolvido pelo nome em `/Differences` numa tabela. O NUL não é o que está no documento — é defeito do gerador; o caractere impresso, verificado, é mais fiel ao PGR. Revê o "não no dado" da DH-003EG-01.
+
+**cl.2 — Glifo fora da tabela segue NUL (Q2).** Nada de palpite por largura ou contexto; a sanitização de apresentação cobre.
+
+**cl.3 — Tabela é dado verificado (Q3)**, com procedência por entrada (PDF, página, contexto, recorte) e teste computado de cobertura dos 13 nomes medidos.
+
+**cl.4 — Parsers aceitam o glifo restaurado (Q4)** onde hoje casam `\x00` como separador (`–`/`—` nas âncoras de GHE; `(` `)` `-` no CBO), mantendo `\x00` pela cl.2.
+
+**cl.5 — Sanitização de apresentação completa.** Pendências na tela e relatório do harness passam por `_sanitizar`, como memorial e matriz assinada. Fecha DH-003EG-01 como escrita, independente da cl.1.
+
+**Fatias.** (1) cl.5 — **esta**. (2) cl.1–cl.4. Critério da fatia 2: 25 PGRs sem NUL com texto extraído byte-idêntico; 3 com NUL de 5.879 → 0; Fascino e Vila Brasil com mesmos GHEs, cargos e linhas de exame (exame, periodicidade, momentos, status) — só texto onde havia NUL muda; mudança de resolução de termo ou de exame é bloqueador; Porto Araras I idêntico por construção; Verde Maris mesma contagem de GHEs; tempo de extração dos 3 `[A MEDIR]`.
+
+**Universalidade (D-ARQ-06).** Expresso sobre o mecanismo do PDF (Type3 com ToUnicode nulo), não sobre empresa; a tabela é por nome de glifo medido e cresce por medição.
+
+**Nota de aplicação — fatia 1 IMPLEMENTADA (29/09/2026).**
+
+- **Código:** `web_matriz.py` — `linha_pendencia(p, com_regra)` com `_sanitizar` nos 5 pontos que escreviam `p.motivo`; `scripts/medicao_pgr.py` — `_sanitizar` no retorno de `_renderizar_relatorio` (cobre `nome_ghe`, cargos e a pendência por GHE que `apresentacao_matriz.py` imprime crua) e no motivo de `_formatar_pendencia` (impressão direta de `cmd_ida`). O dado do motor não muda.
+- **Testes:** `test_web_matriz.py` (1, AppTest com pendência global e de extração), `test_medicao_pgr.py` (2). Varredura inversa, 3 reversões de código, 3/3 mortas por asserção.
+
 ---
 
 ## Histórico de revisões
@@ -4609,3 +4648,4 @@ Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #405. Tarefa
 | v225 | 27/09/2026 | Branch `claude/cool-babbage-whh1zw` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-87`): **nota de aplicação em `D-ARQ-87`** (mesma ID, nenhuma cláusula alterada) — memorial de raciocínio em `.docx` para as médicas (`superficie/memorial_matriz.py`), download na tela; campo `resumo_clinico` nas 79 regras ativas; certeza pelo elo mais fraco; decisões a confirmar agrupadas por regra; fundamento de auditoria fora do documento. |
 | v226 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA + IMPLEMENTAÇÃO, ratificada pelo Diovanni, Q1–Q4): **`D-ARQ-88` CRIADA** — origem do risco pela passada de explicação sobre as pernas verdadeiras da regra que emitiu; `Motivo.origens` estruturado e `risco_origem` derivado; perna presumida marcada; filtro único por primitivo; fatia 1 implementada, 3 pares idênticos fora da origem. Fecha a faceta `risco_origem` de DH-003ED-01. Decisões 87 → **88**. |
 | v227 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-88`, ratificada pelo Diovanni, Q1–Q4): **nota de aplicação em `D-ARQ-88`** (mesma ID, cláusulas inalteradas) — termo do PGR atravessa a hidratação até `OrigemRisco`; memorial nomeia o agente que disparou cada regra e usa o termo no "não pedido"; 3 pares com motor e matriz assinada idênticos. |
+| v228 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA + IMPLEMENTAÇÃO, ratificada pelo Diovanni, Q1–Q4): **`D-ARQ-89` CRIADA** — glifo não mapeado pelo gerador do PDF (13 glifos ".case" da Inter, 5.879 NUL em 3 de 28 PGRs) restaurado na extração por tabela verificada visualmente; fatia 1 implementada (pendências na tela e relatório do harness sanitizados; DH-003EG-01 fechada como escrita). Decisões 88 → **89**. |
