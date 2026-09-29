@@ -84,8 +84,8 @@ def test_fracao_total_usa_a_formula_da_poeira_total(proto: Protocolo) -> None:
 
 
 def test_origem_do_rx_mostra_a_medicao_e_o_laudo(proto: Protocolo) -> None:
-    # D-ARQ-86 cl.3. Reversão que mata: tirar _AGENTE_DA_FAIXA de _risco_origem —
-    # a faixa decidida pela medição ficaria sem origem na revisão.
+    # D-ARQ-86 cl.3. Reversão que mata: tirar `riscos=` das faixas
+    # `silica_asbesto_leo_*` (D-ARQ-88) — a faixa medida ficaria sem origem.
     rx = _rx(proto, _pgr(_risco("silica")), _silica(0.24))
 
     assert rx.motivos[0].risco_origem == (
@@ -96,8 +96,8 @@ def test_origem_do_rx_mostra_a_medicao_e_o_laudo(proto: Protocolo) -> None:
 def test_pnos_medido_sai_da_faixa_sem_medicao(proto: Protocolo) -> None:
     # 0,9 mg/m³ = 30% do LEO de 3 mg/m³ (ACGIH via NR-09 9.6.1.1) → Quadro 2,
     # faixa 10–100%: só admissional. Sem medição: adm + 60M. Reversão que mata:
-    # tirar as faixas pnos_leo_* de _AGENTE_DA_FAIXA — a faixa medida sairia sem
-    # a medição na origem da revisão.
+    # tirar `riscos=` das faixas pnos_leo_* (D-ARQ-88) — a faixa medida sairia
+    # sem a medição na origem da revisão.
     sem = _rx(proto, _pgr(_risco("poeira_nao_classificada")))
     com = _rx(
         proto,

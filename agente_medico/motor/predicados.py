@@ -2,15 +2,32 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from dataclasses import replace
-from typing import Any, Callable, Union
+from dataclasses import dataclass, replace
+from typing import Any, Callable, Optional, Union
 
 from agente_medico.motor.leo_resolver import classifica_cenario, resolve_leo
-from agente_medico.motor.tipos import NIVEIS_RISCO_PXS, Ausente, Fracao, GHEContext, Quantificacao
+from agente_medico.motor.tipos import (
+    NIVEIS_RISCO_PXS,
+    Ausente,
+    Fracao,
+    GHEContext,
+    Quantificacao,
+    Risco,
+)
 
 ResultadoPredicado = Union[bool, Ausente]
+FiltroRisco = Callable[[Risco], bool]
+RiscosDoPrimitivo = Callable[[GHEContext], tuple[Risco, ...]]
 
 REGISTRO_PRIMITIVOS: dict[str, Callable[[GHEContext], ResultadoPredicado]] = {}
+
+# D-ARQ-88 cl.3: os riscos do GHE que satisfazem cada primitivo, lidos pela
+# passada de explicação. Todo primitivo declara os seus ou está em
+# PRIMITIVOS_SEM_RISCO (gatilho de GHE ou de cargo, sem risco a apontar).
+REGISTRO_RISCOS: dict[str, RiscosDoPrimitivo] = {}
+PRIMITIVOS_SEM_RISCO: frozenset[str] = frozenset(
+    {"todo_trabalhador", "psicossocial", "cargo_porteiro"}
+)
 
 # Predicados incondicionais (sempre True, independente de risco) — usados pelo
 # orquestrador (D-ARQ-31 fatia 2) para excluir linhas de piso universal do
@@ -26,13 +43,38 @@ class CicloPredicados(RuntimeError):
     pass
 
 
-def primitivo(nome: str) -> Callable[[Callable[[GHEContext], ResultadoPredicado]], Callable[[GHEContext], ResultadoPredicado]]:
+def primitivo(
+    nome: str, riscos: Optional[RiscosDoPrimitivo] = None
+) -> Callable[[Callable[[GHEContext], ResultadoPredicado]], Callable[[GHEContext], ResultadoPredicado]]:
     def decorator(fn: Callable[[GHEContext], ResultadoPredicado]) -> Callable[[GHEContext], ResultadoPredicado]:
         if nome in REGISTRO_PRIMITIVOS:
             raise ValueError(f"Primitivo '{nome}' já registrado — sobrescrita não permitida")
         REGISTRO_PRIMITIVOS[nome] = fn
+        if riscos is not None:
+            REGISTRO_RISCOS[nome] = riscos
         return fn
     return decorator
+
+
+def _riscos_por(filtro: FiltroRisco) -> RiscosDoPrimitivo:
+    return lambda ctx: tuple(r for r in ctx.riscos if filtro(r))
+
+
+def _risco_unico(escolha: Callable[[GHEContext], Optional[Risco]]) -> RiscosDoPrimitivo:
+    """Primitivo de quantificação: o risco é o que o helper leu, não todo
+    risco do agente (D-ARQ-88 cl.3)."""
+    def riscos(ctx: GHEContext) -> tuple[Risco, ...]:
+        risco = escolha(ctx)
+        return () if risco is None else (risco,)
+    return riscos
+
+
+def _por_filtro(nome: str, filtro: FiltroRisco) -> None:
+    """Primitivo booleano de filtro único (D-ARQ-88 Q4): o predicado é
+    `any(filtro)` e os riscos são os que passam no mesmo filtro."""
+    def predicado(ctx: GHEContext) -> bool:
+        return any(filtro(r) for r in ctx.riscos)
+    primitivo(nome, riscos=_riscos_por(filtro))(predicado)
 
 
 @primitivo("todo_trabalhador")
@@ -41,24 +83,18 @@ def _todo_trabalhador(ctx: GHEContext) -> bool:
     return True
 
 
-@primitivo("altura")
-def _altura(ctx: GHEContext) -> bool:
-    return any(r.agente == "trabalho_altura" for r in ctx.riscos)
+_por_filtro("altura", lambda r: r.agente == "trabalho_altura")
+_por_filtro("espaco_confinado", lambda r: r.agente == "espaco_confinado")
+_por_filtro("ruido", lambda r: r.agente == "ruido")
 
 
-@primitivo("espaco_confinado")
-def _espaco_confinado(ctx: GHEContext) -> bool:
-    return any(r.agente == "espaco_confinado" for r in ctx.riscos)
+def _risco_ruido(ctx: GHEContext) -> Optional[Risco]:
+    return next((r for r in ctx.riscos if r.agente == "ruido"), None)
 
 
-@primitivo("ruido")
-def _ruido(ctx: GHEContext) -> bool:
-    return any(r.agente == "ruido" for r in ctx.riscos)
-
-
-@primitivo("ruido_acima_acao")
+@primitivo("ruido_acima_acao", riscos=_risco_unico(_risco_ruido))
 def _ruido_acima_acao(ctx: GHEContext) -> ResultadoPredicado:
-    risco_ruido = next((r for r in ctx.riscos if r.agente == "ruido"), None)
+    risco_ruido = _risco_ruido(ctx)
     if risco_ruido is None:
         return False
     q = risco_ruido.quantificacao
@@ -71,9 +107,17 @@ def _ruido_acima_acao(ctx: GHEContext) -> ResultadoPredicado:
     return False
 
 
-@primitivo("vibracao_corpo_inteiro")
+def _vci(r: Risco) -> bool:
+    return r.agente == "vibracao_corpo_inteiro"
+
+
+def _vmb(r: Risco) -> bool:
+    return r.agente == "vibracao_mao_braco"
+
+
+@primitivo("vibracao_corpo_inteiro", riscos=_riscos_por(_vci))
 def _vibracao_corpo_inteiro(ctx: GHEContext) -> ResultadoPredicado:
-    if any(r.agente == "vibracao_corpo_inteiro" for r in ctx.riscos):
+    if any(_vci(r) for r in ctx.riscos):
         return True
     if any(r.agente == "vibracao" for r in ctx.riscos):
         return Ausente(
@@ -83,14 +127,12 @@ def _vibracao_corpo_inteiro(ctx: GHEContext) -> ResultadoPredicado:
     return False
 
 
-@primitivo("motorista_equipamento_pesado")
-def _motorista_equipamento_pesado(ctx: GHEContext) -> bool:
-    return any(r.agente == "motorista_equipamento_pesado" for r in ctx.riscos)
+_por_filtro("motorista_equipamento_pesado", lambda r: r.agente == "motorista_equipamento_pesado")
 
 
-@primitivo("vibracao_mao_braco")
+@primitivo("vibracao_mao_braco", riscos=_riscos_por(_vmb))
 def _vibracao_mao_braco(ctx: GHEContext) -> ResultadoPredicado:
-    if any(r.agente == "vibracao_mao_braco" for r in ctx.riscos):
+    if any(_vmb(r) for r in ctx.riscos):
         return True
     if any(r.agente == "vibracao" for r in ctx.riscos):
         return Ausente(mensagem="Vibração presente sem qualificação de tipo — necessário "
@@ -98,9 +140,7 @@ def _vibracao_mao_braco(ctx: GHEContext) -> ResultadoPredicado:
     return False
 
 
-@primitivo("ototoxico")
-def _ototoxico(ctx: GHEContext) -> bool:
-    return any(r.is_ototoxico for r in ctx.riscos)
+_por_filtro("ototoxico", lambda r: r.is_ototoxico)
 
 
 # Bordas conferidas vs Quadro 1 Anexo III NR-07 (Portaria MTP 567/2022) — [DERIVADO — 002.N]
@@ -110,8 +150,12 @@ _PCT_LEO_MEDIO: float = 50.0   # 10_50:  10 < pct_LT <= 50  (60M/36M)
 _PCT_LEO_ALTO: float = 100.0   # 50_100: 50 < pct_LT <= 100 (36M/24M); acima_100: > 100 (12M)
 
 
+def _risco_silica_asbesto(ctx: GHEContext) -> Optional[Risco]:
+    return next((r for r in ctx.riscos if r.agente in {"silica", "asbesto"}), None)
+
+
 def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
-    risco = next((r for r in ctx.riscos if r.agente in {"silica", "asbesto"}), None)
+    risco = _risco_silica_asbesto(ctx)
     if risco is None:                                               # (a)
         return False
     q = risco.quantificacao
@@ -163,9 +207,7 @@ def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausent
     return q                                                        # (e)
 
 
-@primitivo("fumos_metalicos")
-def _fumos_metalicos(ctx: GHEContext) -> bool:
-    return any(r.agente == "fumos_metalicos" for r in ctx.riscos)
+_por_filtro("fumos_metalicos", lambda r: r.agente == "fumos_metalicos")
 
 
 @primitivo("psicossocial")
@@ -176,28 +218,13 @@ def _psicossocial(ctx: GHEContext) -> bool:
     return ctx.pgr_ghe.psicossocial
 
 
-@primitivo("poeira_de_madeira")
-def _poeira_de_madeira(ctx: GHEContext) -> bool:
-    """R-RX-03/R-ESP-03; agente carcinogênico (IARC Grupo 1) fora dos Quadros 1 e 2
-    do Anexo III NR-07 (não é sílica/asbesto/carvão nem PNOS) — DT-003EJ-01."""
-    return any(r.agente == "poeira_de_madeira" for r in ctx.riscos)
-
-
-@primitivo("silica")
-def _silica(ctx: GHEContext) -> bool:
-    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022)."""
-    return any(r.agente == "silica" for r in ctx.riscos)
-
-
-@primitivo("asbesto")
-def _asbesto(ctx: GHEContext) -> bool:
-    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022)."""
-    return any(r.agente == "asbesto" for r in ctx.riscos)
-
-
-@primitivo("benzeno")
-def _benzeno(ctx: GHEContext) -> bool:
-    return any(r.agente == "benzeno" for r in ctx.riscos)
+# R-RX-03/R-ESP-03; agente carcinogênico (IARC Grupo 1) fora dos Quadros 1 e 2
+# do Anexo III NR-07 (não é sílica/asbesto/carvão nem PNOS) — DT-003EJ-01.
+_por_filtro("poeira_de_madeira", lambda r: r.agente == "poeira_de_madeira")
+# R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022).
+_por_filtro("silica", lambda r: r.agente == "silica")
+_por_filtro("asbesto", lambda r: r.agente == "asbesto")
+_por_filtro("benzeno", lambda r: r.agente == "benzeno")
 
 
 _NIVEIS_MODERADO_OU_ACIMA: frozenset[str] = frozenset(
@@ -205,16 +232,14 @@ _NIVEIS_MODERADO_OU_ACIMA: frozenset[str] = frozenset(
 )
 
 
-@primitivo("agente_ibe_moderado_ou_acima")
-def _agente_ibe_moderado_ou_acima(ctx: GHEContext) -> bool:
-    """R-CLI-05 perna (b): agente com indicador biológico no Anexo I da NR-07
-    (Quadro 1 ou 2) classificado MODERADO ou acima na avaliação P×S do PGR.
-    Risco de FDS ou implícito não traz nível e não conta. [DERIVADO — matriz
-    Dra. Patrícia, Aurora 27/08/26, GHE 11: MEK/THF/ciclohexanona MODERADO → 6M]."""
-    return any(
-        r.tipo_ibe is not None and r.nivel_risco in _NIVEIS_MODERADO_OU_ACIMA
-        for r in ctx.riscos
-    )
+# R-CLI-05 perna (b): agente com indicador biológico no Anexo I da NR-07
+# (Quadro 1 ou 2) classificado MODERADO ou acima na avaliação P×S do PGR.
+# Risco de FDS ou implícito não traz nível e não conta. [DERIVADO — matriz
+# Dra. Patrícia, Aurora 27/08/26, GHE 11: MEK/THF/ciclohexanona MODERADO → 6M].
+_por_filtro(
+    "agente_ibe_moderado_ou_acima",
+    lambda r: r.tipo_ibe is not None and r.nivel_risco in _NIVEIS_MODERADO_OU_ACIMA,
+)
 
 
 _CARGO_PORTEIRO = re.compile(r"\bporteir[oa]s?\b")
@@ -233,7 +258,7 @@ def _cargo_porteiro(ctx: GHEContext) -> bool:
     return False
 
 
-@primitivo("silica_asbesto_sem_medicao")
+@primitivo("silica_asbesto_sem_medicao", riscos=_risco_unico(_risco_silica_asbesto))
 def _silica_asbesto_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
@@ -241,7 +266,7 @@ def _silica_asbesto_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
     return r.sem_avaliacao_quantitativa and not r.apenas_qualitativa
 
 
-@primitivo("silica_qualitativa")
+@primitivo("silica_qualitativa", riscos=_risco_unico(_risco_silica_asbesto))
 def _silica_qualitativa(ctx: GHEContext) -> ResultadoPredicado:
     """R-RX-01-qual (DT-003EC-01): sílica sem avaliação quantitativa, com
     avaliação qualitativa P×S no PGR. Disjunto de silica_asbesto_sem_medicao
@@ -252,7 +277,7 @@ def _silica_qualitativa(ctx: GHEContext) -> ResultadoPredicado:
     return r.sem_avaliacao_quantitativa and r.apenas_qualitativa
 
 
-@primitivo("silica_asbesto_leo_ate_10")
+@primitivo("silica_asbesto_leo_ate_10", riscos=_risco_unico(_risco_silica_asbesto))
 def _silica_asbesto_leo_ate_10(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
@@ -260,7 +285,7 @@ def _silica_asbesto_leo_ate_10(ctx: GHEContext) -> ResultadoPredicado:
     return r.pct_LT is not None and r.pct_LT <= _PCT_LEO_BAIXO
 
 
-@primitivo("silica_asbesto_leo_10_50")
+@primitivo("silica_asbesto_leo_10_50", riscos=_risco_unico(_risco_silica_asbesto))
 def _silica_asbesto_leo_10_50(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
@@ -268,7 +293,7 @@ def _silica_asbesto_leo_10_50(ctx: GHEContext) -> ResultadoPredicado:
     return r.pct_LT is not None and _PCT_LEO_BAIXO < r.pct_LT <= _PCT_LEO_MEDIO
 
 
-@primitivo("silica_asbesto_leo_50_100")
+@primitivo("silica_asbesto_leo_50_100", riscos=_risco_unico(_risco_silica_asbesto))
 def _silica_asbesto_leo_50_100(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
@@ -276,7 +301,7 @@ def _silica_asbesto_leo_50_100(ctx: GHEContext) -> ResultadoPredicado:
     return r.pct_LT is not None and _PCT_LEO_MEDIO < r.pct_LT <= _PCT_LEO_ALTO
 
 
-@primitivo("silica_asbesto_leo_acima_100")
+@primitivo("silica_asbesto_leo_acima_100", riscos=_risco_unico(_risco_silica_asbesto))
 def _silica_asbesto_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_silica_asbesto(ctx)
     if not isinstance(r, Quantificacao):
@@ -284,18 +309,20 @@ def _silica_asbesto_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
     return r.pct_LT is not None and r.pct_LT > _PCT_LEO_ALTO
 
 
-@primitivo("pnos")
-def _pnos(ctx: GHEContext) -> bool:
-    """R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022). Único consumidor em
-    runtime: R-ESP-02 — R-RX-01-pnos é DEPRECATED e filtrada pelo carregador; as faixas
-    de RX usam pnos_leo_*/pnos_sem_medicao, não este."""
-    return any(r.agente == "poeira_nao_classificada" for r in ctx.riscos)
+# R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022). Único consumidor em
+# runtime: R-ESP-02 — R-RX-01-pnos é DEPRECATED e filtrada pelo carregador; as faixas
+# de RX usam pnos_leo_*/pnos_sem_medicao, não este.
+_por_filtro("pnos", lambda r: r.agente == "poeira_nao_classificada")
 
 
 # Quadro 2 Anexo III NR-07 (Portaria 567/2022) — PNOS [DERIVADO — 002.X/002.Y]
 # Faixas agrupam diferente do Quadro 1: ate_10 (≤10), 10_100 (>10 e ≤100), acima_100 (>100)
+def _risco_pnos(ctx: GHEContext) -> Optional[Risco]:
+    return next((r for r in ctx.riscos if r.agente == "poeira_nao_classificada"), None)
+
+
 def _helper_pnos(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
-    risco = next((r for r in ctx.riscos if r.agente == "poeira_nao_classificada"), None)
+    risco = _risco_pnos(ctx)
     if risco is None:
         return False
     q = risco.quantificacao
@@ -332,7 +359,7 @@ def _helper_pnos(ctx: GHEContext) -> Union[Quantificacao, bool, Ausente]:
     return q
 
 
-@primitivo("pnos_sem_medicao")
+@primitivo("pnos_sem_medicao", riscos=_risco_unico(_risco_pnos))
 def _pnos_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_pnos(ctx)
     if not isinstance(r, Quantificacao):
@@ -340,7 +367,7 @@ def _pnos_sem_medicao(ctx: GHEContext) -> ResultadoPredicado:
     return r.sem_avaliacao_quantitativa
 
 
-@primitivo("pnos_leo_ate_10")
+@primitivo("pnos_leo_ate_10", riscos=_risco_unico(_risco_pnos))
 def _pnos_leo_ate_10(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_pnos(ctx)
     if not isinstance(r, Quantificacao):
@@ -348,7 +375,7 @@ def _pnos_leo_ate_10(ctx: GHEContext) -> ResultadoPredicado:
     return r.pct_LT is not None and r.pct_LT <= _PCT_LEO_BAIXO
 
 
-@primitivo("pnos_leo_10_100")
+@primitivo("pnos_leo_10_100", riscos=_risco_unico(_risco_pnos))
 def _pnos_leo_10_100(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_pnos(ctx)
     if not isinstance(r, Quantificacao):
@@ -356,7 +383,7 @@ def _pnos_leo_10_100(ctx: GHEContext) -> ResultadoPredicado:
     return r.pct_LT is not None and _PCT_LEO_BAIXO < r.pct_LT <= _PCT_LEO_ALTO
 
 
-@primitivo("pnos_leo_acima_100")
+@primitivo("pnos_leo_acima_100", riscos=_risco_unico(_risco_pnos))
 def _pnos_leo_acima_100(ctx: GHEContext) -> ResultadoPredicado:
     r = _helper_pnos(ctx)
     if not isinstance(r, Quantificacao):
@@ -522,6 +549,89 @@ def pernas_ausentes(
     acc: list[tuple[str, Ausente]] = []
     _coletar_pernas_ausentes(expr, ctx, protocolo, acc)
     return tuple(acc)
+
+
+@dataclass(frozen=True)
+class RiscoDaPerna:
+    perna: str
+    risco: Risco
+    presumida: bool
+
+
+def _riscos_da_folha(nome: str, ctx: GHEContext, protocolo: Any) -> tuple[Risco, ...]:
+    if nome in REGISTRO_RISCOS:
+        return REGISTRO_RISCOS[nome](ctx)
+    if nome in REGISTRO_PRIMITIVOS:
+        return ()
+    # Fallback por identidade de agente (D-ARQ-58), o mesmo de avaliar_predicado.
+    return tuple(r for r in ctx.riscos if r.agente == nome)
+
+
+def _coletar_riscos_das_pernas(
+    expr: Any,
+    ctx: GHEContext,
+    protocolo: Any,
+    presumidos: frozenset[str],
+    acc: list[RiscoDaPerna],
+    _visitados: frozenset[str] = frozenset(),
+) -> None:
+    if isinstance(expr, str):
+        valor = avaliar(expr, ctx, protocolo)
+        compostos: dict[str, Any] = protocolo.predicados_compostos
+        if expr in compostos:
+            if expr in _visitados:
+                return
+            if valor is True or (isinstance(valor, Ausente) and presumidos):
+                _coletar_riscos_das_pernas(
+                    compostos[expr], ctx, protocolo, presumidos, acc, _visitados | {expr}
+                )
+            return
+        if valor is True:
+            presumida = False
+        elif isinstance(valor, Ausente) and expr in presumidos:
+            presumida = True
+        else:
+            return
+        acc.extend(RiscoDaPerna(expr, r, presumida) for r in _riscos_da_folha(expr, ctx, protocolo))
+        return
+    if not isinstance(expr, dict):
+        return
+    if "ou" in expr:
+        for filho in expr["ou"]:
+            _coletar_riscos_das_pernas(filho, ctx, protocolo, presumidos, acc, _visitados)
+    elif "e" in expr:
+        valor_e = avaliar(expr, ctx, protocolo)
+        if valor_e is True or (isinstance(valor_e, Ausente) and presumidos):
+            for filho in expr["e"]:
+                _coletar_riscos_das_pernas(filho, ctx, protocolo, presumidos, acc, _visitados)
+    # `nao` não contribui: negação não tem risco a apontar (D-ARQ-88 cl.1).
+
+
+def riscos_das_pernas_verdadeiras(
+    expr: Any,
+    ctx: GHEContext,
+    protocolo: Any,
+    presumidos: frozenset[str] = frozenset(),
+) -> tuple[RiscoDaPerna, ...]:
+    """D-ARQ-88 cl.1-2: os riscos do GHE que satisfazem cada perna verdadeira
+    de uma regra que emitiu. Molde de `pernas_ausentes_absorvidas` (D-ARQ-71):
+    passada separada, `avaliar`/`avaliar_predicado` intocados. No `ou`, toda
+    perna True contribui, não só a primeira; `e` True desce em todas; composto
+    nomeado é expandido com guarda de ciclo. Perna `Ausente` só contribui, com
+    `presumida=True`, quando a regra emitiu por presunção e o nome está em
+    `presumidos` (`quando_ausente.presumir_true`, D-ARQ-68 cl.5). Avalia sobre
+    cópia do cache: `ctx.predicados` não muda, logo `predicados_avaliados`
+    também não. Ordem estável de ocorrência; o mesmo risco entra uma vez."""
+    copia = replace(ctx, predicados=dict(ctx.predicados))
+    acc: list[RiscoDaPerna] = []
+    _coletar_riscos_das_pernas(expr, copia, protocolo, presumidos, acc)
+    vistos: set[int] = set()
+    unicos: list[RiscoDaPerna] = []
+    for item in acc:
+        if id(item.risco) not in vistos:
+            vistos.add(id(item.risco))
+            unicos.append(item)
+    return tuple(unicos)
 
 
 def avaliar_predicado(nome: str, ctx: GHEContext, protocolo: Any, _visitados: frozenset[str] = frozenset()) -> ResultadoPredicado:

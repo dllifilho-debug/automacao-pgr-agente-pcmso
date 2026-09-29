@@ -1064,7 +1064,7 @@ medidas contra o par: nenhuma célula da matriz muda.
 
 **Status:** PARCIALMENTE RESOLVIDA (003.EJ). Faceta vibração RESOLVIDA; faceta máquina pesada ABERTA, não-bloqueante.
 
-### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[PARCIALMENTE RESOLVIDA — 003.EG; faceta risco_origem ABERTA]`
+### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[RESOLVIDA — 003.EG + D-ARQ-88, 29/09/2026]`
 
 **Origem:** 003.ED, ao tentar atribuir causa às 16 emissões de R-PKG-ATIVCRIT. Precedente: DH-003EC-01.
 
@@ -1088,7 +1088,14 @@ explícito, só derivável por leitura de `predicados_avaliados`. Rastro real ex
 assinatura de `predicados.avaliar` (usada em todo o motor) — recorte deixado fora por decisão
 do Arquiteto.
 
-**Status:** PARCIALMENTE RESOLVIDA (003.EG). Faceta `risco_origem` ABERTA, não-bloqueante.
+**Resolução da faceta `risco_origem` (29/09/2026, branch `claude/exciting-ramanujan-g9bbl4`,
+`D-ARQ-88`).** Passada de explicação separada sobre as pernas verdadeiras da regra que emitiu, sem
+mudar a assinatura de `predicados.avaliar` (molde D-ARQ-71). `Motivo.origens` estruturado,
+`risco_origem` derivado. Nos 3 pares determinísticos, 356 `Motivo` passam de `None` a preenchido
+(248 compostos por perna verdadeira, 73 por presunção de ruído sem laudo, 35 de primitivo); seguem
+`None` só os primitivos sem risco (`todo_trabalhador`, `psicossocial`, `cargo_porteiro`).
+
+**Status:** RESOLVIDA (003.EG + D-ARQ-88).
 
 ### DT-003EE-01 — `ConflitoProtocolo` sem disparador após D-ARQ-39 `[ABERTA, não-bloqueante]`
 

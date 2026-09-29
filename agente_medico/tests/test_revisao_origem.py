@@ -66,8 +66,9 @@ def _linha(pgr: PGR, proto: Protocolo, exame: str) -> ExameEmitido:
 
 
 def test_risco_origem_nomeia_pgr_e_fds_na_regra_de_agente(proto: Protocolo) -> None:
-    # Reversão que mata: voltar `risco_origem=None` em _emitir_regra, ou filtrar
-    # ctx.riscos só pela fonte "explicito" — a FDS some da origem.
+    # Reversão que mata: voltar `risco_origem=None` em _emitir_regra, ou o
+    # fallback de agente em `_riscos_da_folha` filtrar só a fonte "explicito" —
+    # a FDS some da origem.
     fundo_zarcao = ProdutoQuimico(
         nome="Fundo Zarcão",
         fds=montar_fds(
@@ -84,9 +85,9 @@ def test_risco_origem_nomeia_pgr_e_fds_na_regra_de_agente(proto: Protocolo) -> N
 
 
 def test_risco_origem_fica_vazio_em_regra_sem_agente_direto(proto: Protocolo) -> None:
-    # Reversão que mata: tirar a guarda `if not fontes: return None` de
-    # _risco_origem — o exame clínico (R-CLI-01, primitivo todo_trabalhador)
-    # sairia com uma origem vazia "todo_trabalhador ← ".
+    # Reversão que mata: tirar a guarda `if not por_agente: return None` de
+    # `_texto_origem` — o exame clínico (R-CLI-01, primitivo sem risco
+    # todo_trabalhador, D-ARQ-88) sairia com origem "" em vez de None.
     risco_pgr = RiscoPGR(tipo="", agente="xileno", quantificacao=None, severidade=None, nivel_risco="BAIXO")
 
     linha = _linha(_pgr((risco_pgr,)), proto, "exame_clinico")
