@@ -19,6 +19,8 @@ from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Motivo, 
 from agente_medico.superficie.documento_matriz import CabecalhoDocumento
 from agente_medico.superficie.memorial_matriz import (
     ROTULO_CERTEZA,
+    data_exibicao,
+    titulo_ghe,
     linhas_da_tabela,
     montar_memorial,
     nivel_de_certeza,
@@ -92,6 +94,7 @@ def test_confirmar_primeiro_agrupa_por_regra_e_ignora_regra_redundante() -> None
     matrizes = [
         MatrizGHE(ghe_id="GHE-01", linhas=[_exame("avaliacao_psicossocial", psy)]),
         MatrizGHE(ghe_id="GHE-16", linhas=[_exame("avaliacao_psicossocial", psy), _exame("espirometria", *esp)]),
+        MatrizGHE(ghe_id="GHE-19", linhas=[_exame("espirometria", *esp)]),
     ]
 
     memorial = montar_memorial(matrizes, _EXAMES, _RESUMOS)
@@ -187,6 +190,61 @@ def test_docx_tem_confirmar_primeiro_e_tabela_por_ghe_sem_fundamento_tecnico(tmp
     assert ghe.rows[1].cells[-1].text == ""
     textos = [p.text for p in documento.paragraphs] + [c.text for t in documento.tables for r in t.rows for c in r.cells]
     assert not any("fundamento de" in t for t in textos)
+
+
+def test_regra_em_todos_os_ghes_aparece_como_todos() -> None:
+    # Reversões que matam: `_lista_ghes` sempre listar os GHEs (a primeira asserção
+    # vira a lista de 3); tirar a guarda `len(todos) > 1` (o memorial de um GHE só
+    # diria "todos os GHEs (1)"). O caso parcial está no teste de "confirmar primeiro".
+    psy = _motivo("R-PSY", "INTERPRETADO", 12, _ADM_PER_MR)
+    tres = [MatrizGHE(ghe_id=g, linhas=[_exame("avaliacao_psicossocial", psy)]) for g in ("GHE-01", "GHE-02", "GHE-03")]
+
+    (decisao,) = montar_memorial(tres, _EXAMES, _RESUMOS).revisar_primeiro
+    (sozinho,) = montar_memorial(tres[:1], _EXAMES, _RESUMOS).revisar_primeiro
+
+    assert decisao.onde == ("Avaliação Psicossocial: todos os GHEs (3)",)
+    assert sozinho.onde == ("Avaliação Psicossocial: GHE-01",)
+
+
+@pytest.mark.parametrize(
+    "ghe_id,nome,esperado",
+    [
+        ("GHE-01", "GHE 01 - ADMINISTRAÇÃO", "GHE-01 — ADMINISTRAÇÃO"),
+        ("GHE-16", "GHE 16 – SERRALHERIA", "GHE-16 — SERRALHERIA"),
+        ("GHE-07", "SUPERVISÃO DE ATIVIDADES EM OBRA", "GHE-07 — SUPERVISÃO DE ATIVIDADES EM OBRA"),
+        ("GHE-01", "GHE 010 - OUTRO", "GHE-01 — GHE 010 - OUTRO"),
+        ("3", "ARMAÇÃO", "GHE 3 — ARMAÇÃO"),
+    ],
+)
+def test_titulo_do_ghe_nao_repete_o_codigo(ghe_id: str, nome: str, esperado: str) -> None:
+    # Reversões que matam: não tirar o código do nome (os dois primeiros repetem
+    # "GHE 01"); tirar o `(?!\d)` (o GHE-01 come o início de "GHE 010"); tirar o
+    # prefixo "GHE " de id sem ele (o último vira "3 — ARMAÇÃO").
+    assert titulo_ghe(ghe_id, nome) == esperado
+
+
+def test_data_iso_vira_dia_mes_ano_e_o_resto_sai_como_digitado() -> None:
+    # Reversão que mata: `data_exibicao` devolver o texto sem converter (a primeira) ou
+    # converter qualquer coisa com hífen (a terceira).
+    assert data_exibicao("2026-09-26") == "26/09/2026"
+    assert data_exibicao("27/09/2026") == "27/09/2026"
+    assert data_exibicao("set-2026") == "set-2026"
+
+
+def test_docx_tem_titulo_do_ghe_data_e_legenda_dos_momentos(tmp_path: Path) -> None:
+    # Reversões que matam: o render voltar a montar o título como `id + nome`; não
+    # passar a data por `data_exibicao`; tirar o parágrafo da legenda dos momentos.
+    psy = _motivo("R-PSY", "INTERPRETADO", 12, _ADM_PER_MR)
+    matrizes = [MatrizGHE(ghe_id="GHE-01", nome_ghe="GHE 01 - ADMINISTRAÇÃO", linhas=[_exame("avaliacao_psicossocial", psy)])]
+    destino = tmp_path / "memorial.docx"
+    cab = CabecalhoDocumento("CMO", "AURORA", "Adendo", "2026-09-26", "Dra. X", "CRM")
+
+    renderizar_memorial_docx(montar_memorial(matrizes, _EXAMES, _RESUMOS), cab, destino)
+
+    paragrafos = [p.text for p in Document(str(destino)).paragraphs]
+    assert "GHE-01 — ADMINISTRAÇÃO" in paragrafos
+    assert "Empresa: CMO · Obra: AURORA · Data: 26/09/2026" in paragrafos
+    assert any(p.startswith("Momentos: ADM admissional;") and "MRO mudança de riscos ocupacionais" in p for p in paragrafos)
 
 
 def test_tela_oferece_o_memorial_com_os_resumos_do_protocolo(monkeypatch: pytest.MonkeyPatch) -> None:
