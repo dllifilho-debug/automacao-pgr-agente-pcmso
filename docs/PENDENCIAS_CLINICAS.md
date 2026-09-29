@@ -1058,9 +1058,9 @@ normativa, caminho por `riscos_implicitos` de cargo.
 literal plural da NR-09 ("Vibrações de Corpo Inteiro"); a forma natural singular do próprio caso-âncora desta
 DT, "Vibração de corpo inteiro", seguia `NAO_RESOLVIDO`. Medido no PGR CMO Aurora 27.08.26 (GHE 12, sem RX
 lombo-sacra). Entrou como alias, com "Vibração localizada" e "Vibrações localizadas" (D-ARQ-70 Tier 1-C).
-Seguem sem alias: "Vibração"/"Vibrações" sem tipo (decisão clínica) e, no Porto Araras I, "Vibração
-localizada (mão e braço)" e "Vibração localizadas (mão e braço)" (mudam par determinístico — medir contra
-o gabarito antes).
+Segue sem alias: "Vibração"/"Vibrações" sem tipo (decisão clínica). As duas grafias do Porto Araras I
+("Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)") entraram na sessão seguinte,
+medidas contra o par: nenhuma célula da matriz muda.
 
 **Status:** PARCIALMENTE RESOLVIDA (003.EJ). Faceta vibração RESOLVIDA; faceta máquina pesada ABERTA, não-bloqueante.
 

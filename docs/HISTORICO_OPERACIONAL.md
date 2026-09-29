@@ -10746,3 +10746,28 @@ data convertendo qualquer hífen; render com o título antigo; render sem `data_
 
 **Verificação.** Suíte completa (árvore parada): **1505 passed, 6 skipped, 0 failed** (1118.08s), +8 exato
 sobre 1497. `DECISOES` não tocado.
+
+## Sessão (branch `claude/tender-fermat-591zah`, pós-merge do PR #403) — 29/09/2026 — DADO: aliases de vibração do Porto Araras I
+
+**Pedido.** Diovanni: tarefa 7 da lista — as grafias de vibração do Porto Araras I achadas na sessão pós-#401.
+
+**Implementado.** `agentes.yaml`, `vibracao_mao_braco`: "Vibração localizada (mão e braço)" e "Vibração
+localizadas (mão e braço)" (D-ARQ-70 Tier 1-C). Medidas no PGR Porto Araras I pela rota determinística
+(`preparar_ghes`, clientes offline): 2 e 1 riscos. Âncora igual à do alias do Fascino ("mão e braço" ← NR-09
+Anexo I, item 1.1). A segunda grafia tem erro de concordância do próprio PGR; entra como está, porque o alias
+é medido, não corrigido.
+
+**Efeito medido — Porto Araras I.** Matriz pela rota determinística com o vocabulário de `origin/main`
+(`064dda0`) e com os 2 aliases, mesmo `GHEVerbatim`: 16 GHEs, 3 diferentes (GHE-01 BETONEIRA, GHE-02 ARMAÇÃO,
+GHE-13 INSTALAÇÕES HIDROSSANITÁRIAS). Em todos, a única diferença é `R-VIB-02` como motivo a mais na
+audiometria, que já saía por `R-AUD-01`/`R-AUD-02`; periodicidade, momentos, status e contagem de pendências
+iguais. Nenhuma célula de exame muda, então a comparação contra o gabarito (`MATRIZ DE EXAMES(ATUALIZAÇÃO)PORTO
+ARARAS 1 SPE EMPREEND. IMOB 06.07.26.doc`) fica idêntica por construção. Fascino e Vila Brasil não têm essas
+grafias (medido na sessão pós-#401).
+
+**Testes.** `test_resolvedor_termos.py`: +2 casos na resolução EXATA, +2 no anti-FP; contagem do índice 174 →
+176. Varredura inversa, 3 reversões de dado, 3/3 mortas: tirar cada grafia; mover a singular para
+`vibracao_corpo_inteiro`.
+
+**Verificação.** Suíte completa (árvore parada): **1509 passed, 6 skipped, 0 failed** (1030.73s), +4 exato
+sobre 1505. `mypy` não rodado: nenhum arquivo do alvo canônico tocado. `DECISOES` não tocado.
