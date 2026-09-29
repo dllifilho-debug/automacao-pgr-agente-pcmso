@@ -10595,3 +10595,65 @@ reversões novas e de 3 antigas no trecho tocado, 6/6.
 **Verificação (compactação).** Suíte completa (árvore parada): **1489 passed, 6 skipped, 0 failed** (899.79s),
 +2 exato sobre 1487. `mypy --strict` alvo canônico limpo, 52 arquivos. `INDICE_DARQ` regenerado;
 `tests/test_gerar_indice_darq.py` 6 passed.
+
+## Sessão (branch `claude/tender-fermat-591zah`, pós-merge do PR #400) — 29/09/2026 — CONFERÊNCIA: memorial de raciocínio do Aurora, primeiro caso real pela rota de IA
+
+**Pedido.** Diovanni anexou o memorial `.docx` do Aurora (CMO) gerado no app depois do deploy do #400, sem
+as FDS. Conferir "Confirmar primeiro", o GHE 16 e a clareza do texto; fecha os `[A MEDIR — próxima matriz
+do app]` de `R-PKG-SOLD-CO` e `R-ESP-04` (sessões pós-#394 e pós-#398) e o do #400.
+
+**Medido no documento** (texto extraído com `python-docx`; 22 GHEs, 206 exames: 117 protocolo validado,
+24 norma/matrizes, 65 interpretação — a soma bate, e os 65 conferem linha a linha: 44 de `R-PSY-03`,
+18 de RX por `R-RX-01-qual`/`R-RX-01-pnos-sem`, 2 do GHE 04 madeira, 1 de `R-VIS-03`).
+
+1. **"Confirmar primeiro"** — 6 decisões: `R-PSY-03` (22 GHEs), `R-RX-01-pnos-sem` (10 GHEs),
+   `R-RX-01-qual` (GHEs 03, 05, 08, 13, 14, 15, 16, 18, 22), `R-ESP-03` e `R-RX-03` (GHE 04),
+   `R-VIS-03` (GHE 22). As três esperadas estão lá. `R-ESP-04` **não** aparece: no GHE 16 a
+   espirometria é pedida igual (24M, ADM/PER/MRO/DEM) por `R-ESP-02` (sílica, `DERIVADO`), e
+   `nivel_de_certeza` não rebaixa a linha — comportamento de `D-ARQ-87` fatia 2, como esperado.
+2. **GHE 16 Serralheria** — carboxihemoglobina no sangue, PER 6M, `R-PKG-SOLD-CO`, base "Norma ou
+   matrizes". Espirometria ADM/PER 24M/MRO/DEM com `R-ESP-02` e `R-ESP-04` como motivos. Também
+   saem acuidade com DEM (`R-VIS-01-solda` + `R-PKG-ATIVCRIT`), manganês no sangue 6M (`R-BIO-03`) e
+   clínico 6M (`R-CLI-03`). `[A MEDIR]` de `R-PKG-SOLD-CO`, `R-ESP-04` e `R-BIO-03` (manganês na rota LLM, sessão do
+   `R-BIO-03`) no Aurora: **fechados**.
+3. **Clareza** — o texto se lê como conduta clínica; pontos que confundem a leitura, sem correção nesta
+   sessão (proposta, decisão do Diovanni):
+   - `R-RX-01-pnos-sem` sai como "Interpretação do sistema — confirmar", mas o resumo só cita a NR-07,
+     Anexo III, Quadro 2, sem dizer o que está em dúvida. `regras.yaml`: `status: INTERPRETADO` com
+     `base_normativa` marcada `[DERIVADO]` — o mesmo em `R-RX-01-pnos-acima100`. A médica vê norma
+     citada e pedido de confirmação sem motivo. Ou o resumo ganha o ponto a confirmar, ou o status sobe.
+   - Títulos de GHE repetem o código: "GHE-01 GHE 01 - ADMINISTRAÇÃO".
+   - Cabeçalho "Empresa: cmo · Obra: aurora" em minúsculas e data em ISO (2026-09-26).
+   - Siglas ADM/PER/MRO/RET/DEM sem legenda; periódico anual sai só "PER" e os demais com meses.
+   - `R-PSY-03` lista os 22 GHEs duas vezes (um por exame) em "Onde aparece" — "todos os GHEs" basta.
+   - `R-RX-01-pnos-sem` aparece no GHE 22 em "Onde aparece", onde o RX sai anual por `R-RX-01-qual`.
+   - O "por que" traz o gatilho da regra, não o agente do PGR que o acionou: no GHE 11 o clínico 6M por
+     `R-CLI-05` não diz qual agente (acetona, ciclohexanona, MEK, THF) disparou.
+
+**Contra a matriz validada** (`matrizes_originais/MATRIZ DE EXAMES(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS
+ROSAS 27.08.26.pdf`, Dra. Patrícia, validação Dra. Carolini; texto por `pdfplumber`, união dos cargos de
+cada GHE × memorial; script descartável no scratchpad). **15 de 22 GHEs idênticos**, entre eles o GHE 01
+(audiometria, espirometria e RX 60M por PNOS também estão na matriz das médicas) e o GHE 16 inteiro.
+Divergências, todas no memorial gerado **sem FDS**:
+
+- **GHE 11** — acetona na urina a mais. Acetona BAIXO no PGR, sem medição; a médica dispensa e anota.
+  Já decidido: BAIXO sem medição emite (`DT-003EB-02`, `D-ARQ-86`). Clínico 6M agora bate (`R-CLI-05`).
+- **GHE 12** — falta RX de coluna lombo-sacra (ADM, MRO). **Achado novo:** o PGR declara "Vibração de
+  corpo [inteiro]" MODERADO, mas nem `R-VIB-01` (RX lombo-sacra, `VALIDADO`) nem `R-VIB-02` saem. A
+  vibração do PGR está em 10 GHEs (04, 05, 08, 10, 11, 12, 14, 16, 18, 21); `R-VIB-02` só aparece no
+  GHE 21. Nos outros a audiometria já sai por outra regra, então só o GHE 12 muda de saída. Hipótese:
+  "Vibração localizada" e "Vibração de corpo" (quebra de linha) não casam os `termos` de `agentes.yaml`
+  e caem no genérico `vibracao` → `Ausente` `[A MEDIR — rota de IA, sem chave no container]`.
+- **GHE 18** — faltam o pacote do benzeno (t,t-mucônico, reticulócitos, hemograma 6M com DEM), o
+  clínico 6M, cobalto na urina e acuidade com DEM; ácido metil-hipúrico a mais (xileno BAIXO). O
+  benzeno vinha da FDS de aguarrás, não anexada desta vez; o resto já estava registrado.
+- **GHE 20** — acuidade visual sem DEM (a matriz pede DEM). Já registrado.
+- **GHE 21** — faltam clínico 6M, ácido tricloroacético e acuidade com DEM. A própria matriz marca o GHE
+  como provisório ("aguardar Jean o tipo de poeira") e o PGR não tem solvente clorado. Já registrado.
+- **GHE 22** — faltam t,t-mucônico e reticulócitos (regime do benzeno para asfalto sem FDS, achado já
+  registrado). COHb, hemograma 6M com DEM, clínico 6M e acuidade com DEM agora batem.
+
+Desde a comparação anterior do Aurora (com FDS), fecharam: COHb nos GHEs 16 e 22, clínico 6M nos GHEs
+11, 16 e 22, hemograma 6M no 22, acuidade com DEM nos GHEs 16 e 22, acuidade no GHE 19.
+
+**Verificação.** Só `docs/HISTORICO_OPERACIONAL.md` tocado; recorte da suíte: `test_memorial_matriz.py`, 9 passed.
