@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_176_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_178_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -65,7 +65,11 @@ def test_indice_real_tem_176_entradas(indice_real: IndiceTermos) -> None:
     # "Vibração localizada" (GHEs 10 e 11), "Vibrações localizadas" (GHE 21).
     # 174 -> 176 (mesma branch, sessão seguinte): +2 aliases de vibração do PGR Porto
     # Araras I — "Vibração localizada (mão e braço)" e "Vibração localizadas (mão e braço)".
-    assert len(indice_real.slug_por_forma) == 176
+    # 176 -> 178 (branch `claude/exciting-ramanujan-g9bbl4`): +2 aliases do PGR CMO Aurora
+    # 27.08.26, lidos na célula inteira (a quebra de linha do PDF escondia o qualificador)
+    # — "Vibração localizada (mãos e braços)" (GHEs 04, 05, 08, 10, 11, 14 e 16) e
+    # "Vibrações localizadas (mão-braço)" (GHE 18).
+    assert len(indice_real.slug_por_forma) == 178
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -197,6 +201,8 @@ def test_aliases_tier1_resolvem_exata(indice_real: IndiceTermos, termo: str, slu
         ("Vibrações localizadas", "vibracao_mao_braco"),
         ("Vibração localizada (mão e braço)", "vibracao_mao_braco"),
         ("Vibração localizadas (mão e braço)", "vibracao_mao_braco"),
+        ("Vibração localizada (mãos e braços)", "vibracao_mao_braco"),
+        ("Vibrações localizadas (mão-braço)", "vibracao_mao_braco"),
     ],
 )
 def test_aliases_vibracao_tier1c_resolvem_exata(
@@ -219,6 +225,8 @@ def test_aliases_vibracao_tier1c_resolvem_exata(
         "Vibrações localizadas",
         "Vibração localizada (mão e braço)",
         "Vibração localizadas (mão e braço)",
+        "Vibração localizada (mãos e braços)",
+        "Vibrações localizadas (mão-braço)",
     ],
 )
 def test_aliases_mao_braco_nao_resolvem_para_corpo_inteiro_ou_generico(

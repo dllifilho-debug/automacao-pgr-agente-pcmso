@@ -52,7 +52,15 @@ def test_vibracao_de_corpo_inteiro_emite_rx_coluna_lombo_sacra(proto: Protocolo)
     assert "R-VIB-02" in _regras(matriz, "audiometria")
 
 
-@pytest.mark.parametrize("agente", ["Vibração localizada", "Vibrações localizadas"])
+@pytest.mark.parametrize(
+    "agente",
+    [
+        "Vibração localizada",
+        "Vibrações localizadas",
+        "Vibração localizada (mãos e braços)",
+        "Vibrações localizadas (mão-braço)",
+    ],
+)
 def test_vibracao_localizada_emite_audiometria_sem_rx_lombo_sacra(
     proto: Protocolo, agente: str
 ) -> None:

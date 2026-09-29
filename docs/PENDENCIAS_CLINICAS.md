@@ -1062,6 +1062,17 @@ Segue sem alias: "Vibração"/"Vibrações" sem tipo (decisão clínica). As dua
 ("Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)") entraram na sessão seguinte,
 medidas contra o par: nenhuma célula da matriz muda.
 
+**Correção (branch `claude/exciting-ramanujan-g9bbl4`, 29/09/2026).** A medição do Aurora da nota acima leu
+só a primeira linha da célula (`Físico Vibra…`); o PDF quebra o nome do agente em 2–3 linhas. Lida a célula
+inteira (coluna do agente por `pdfplumber.extract_words`), **as 10 vibrações do Aurora têm tipo**: "Vibração
+localizada (mãos e braços)" nos GHEs 04, 05, 08, 10, 11, 14 e 16 (os cinco "Vibração" sem tipo eram artefato
+da quebra), "Vibração de corpo inteiro" no 12, "Vibrações localizadas (mão-braço)" no 18 (não "Vibrações" sem
+tipo) e "Vibrações localizadas (mão e braço)" no 21. Entraram "Vibração localizada (mãos e braços)" e
+"Vibrações localizadas (mão-braço)" → `vibracao_mao_braco` (D-ARQ-70 Tier 1-C; âncoras NR-09 Anexo I, itens
+1.1 e 5.2.1, "mãos e braços", `normas/nr-09-atualizada-2026 .pdf`, e Decreto 3.048/1999 Anexo II, "Vibrações
+localizadas"). Nos 3 pares determinísticos, 0 de 587 riscos mudam de resolução. A decisão clínica sobre
+vibração sem tipo continua em aberto, mas o Aurora não tem caso dela.
+
 **Status:** PARCIALMENTE RESOLVIDA (003.EJ). Faceta vibração RESOLVIDA; faceta máquina pesada ABERTA, não-bloqueante.
 
 ### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[RESOLVIDA — 003.EG + D-ARQ-88, 29/09/2026]`

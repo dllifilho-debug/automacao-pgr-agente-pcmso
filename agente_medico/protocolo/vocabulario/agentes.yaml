@@ -74,7 +74,7 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
-    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas", "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)"]
+    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas", "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)", "Vibração localizada (mãos e braços)", "Vibrações localizadas (mão-braço)"]
     enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # mesmo item único de vibracao_corpo_inteiro
   vibracao:
     tipo_ibe: null
