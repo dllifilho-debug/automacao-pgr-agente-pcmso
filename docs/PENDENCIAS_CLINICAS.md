@@ -3664,7 +3664,7 @@ sugerir o GHE 18.
 em `aguarras_mineral`, e os CAS 64742-82-1/8008-20-6 — um slug tem um CAS só no índice, então isso pede
 slug novo ou mudança de `construir_indice_cas`; fonte a conferir (identidade química dos três CAS).
 (b) Fatia 2 da `D-ARQ-90` (fonte geradora como segundo sinal), cuja condição de entrada — "a sobreposição
-por agente deixa de fora vínculo real" — este caso cumpre.
+por agente deixa de fora vínculos reais" — este caso cumpre.
 
 **Status:** ABERTA — decisão do Diovanni.
 

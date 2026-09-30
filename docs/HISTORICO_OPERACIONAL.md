@@ -11023,6 +11023,12 @@ referência do CLAUDE.md, 51, é de 25/09). Suíte completa, árvore parada em `
 
 **Três números clínicos.** Não re-tirados: nenhuma `R-*` e nenhum `.yaml` tocados.
 
+**`/conferir` (`D-ARQ-84`).** Sobre os 4 commits de docs, contra `59d1e18`: 62 afirmações, 40 CONFERE, 1 DIVERGE,
+21 NÃO VERIFICÁVEL. O DIVERGE (não material) era a citação da condição de entrada da fatia 2 na DT-01 ("vínculo
+real" em vez de "vínculos reais", `DECISOES_ARQUITETURAIS.md:4496`), corrigida. Os NÃO VERIFICÁVEL são medições por
+execução (suíte, mypy, `medir_painel`, reversões, `timeit`, aproximação do Aurora) e fontes fora do alcance do
+`git grep` (PDFs, anexos `.docx`).
+
 **Lição de método.** O critério de aceite da `D-ARQ-90` foi escrito sobre a sobreposição **textual** medida na
 sessão de arquitetura (aguarrás "2/7" no GHE 18); a fatia resolve por **slug**, e a diferença só apareceu
 ao medir. Critério de aceite de sugestão por agente precisa ser medido no instrumento da fatia, não no texto.
