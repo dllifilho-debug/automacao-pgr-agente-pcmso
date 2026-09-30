@@ -21,7 +21,16 @@ from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 
-from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Motivo, Observacao, OrigemRisco
+from agente_medico.motor.tipos import (
+    GHEPGR,
+    PGR,
+    ExameEmitido,
+    MatrizGHE,
+    Motivo,
+    Observacao,
+    OrigemRisco,
+    Pendencia,
+)
 from agente_medico.superficie.documento_matriz import (
     _COR_DESTAQUE,
     _COR_DESTAQUE_HEX,
@@ -88,6 +97,7 @@ class BlocoMemorial:
     nome_ghe: str
     linhas: tuple[LinhaMemorial, ...]
     nao_pedidos: tuple[str, ...]
+    nao_reconhecidos: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -262,6 +272,43 @@ def _nao_pedido(obs: Observacao, exames_vocab: dict[str, Any]) -> str:
     )
 
 
+_VIZINHO_RECUSADO = re.compile(r"aproximaria de '([a-z0-9_]+)'")
+
+
+def _vizinho_recusado(ghe_id: str, termo: str, pendencias: Sequence[Pendencia]) -> str | None:
+    for p in pendencias:
+        if p.ghe_id == ghe_id and p.tipo == "fuzzy_recusado" and f"'{termo}'" in p.motivo:
+            achado = _VIZINHO_RECUSADO.search(p.motivo)
+            if achado:
+                return achado[1]
+    return None
+
+
+def riscos_nao_reconhecidos(ghe: GHEPGR, pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
+    """Riscos que o PGR declara no GHE e que não viraram agente: nenhum exame sai
+    deles, e sem esta lista a lacuna não aparece no anexo que a médica revisa
+    (T65, 30/09/2026: gesso no GHE 16 e PNOS com erro de digitação no GHE 18)."""
+    linhas: list[str] = []
+    for risco in ghe.riscos:
+        if risco.agente is not None or not risco.termo:
+            continue
+        termo = _termo_exibicao(risco.termo)
+        if risco.causa_nao_resolucao == "fracao_sem_agente":
+            explicacao = "nomeia fração ou medida sem a substância; pedir a FDS ao elaborador do PGR (R-PGR-05)"
+        elif risco.causa_nao_resolucao == "fuzzy_recusado":
+            vizinho = _vizinho_recusado(ghe.id, risco.termo, pendencias)
+            explicacao = (
+                f"parece {_agente_exibicao(vizinho)}, mas grafia aproximada não é aceita para agente "
+                "que dispara exame; conferir a grafia no PGR"
+                if vizinho
+                else "grafia aproximada de um agente, não aceita; conferir a grafia no PGR"
+            )
+        else:
+            explicacao = "sem correspondência no vocabulário de agentes"
+        linhas.append(_sanitizar(f"{termo}: {explicacao}."))
+    return tuple(dict.fromkeys(linhas))
+
+
 def _lista_ghes(ghes: Sequence[str], todos: set[str]) -> str:
     if len(todos) > 1 and set(ghes) == todos:
         return f"todos os GHEs ({len(todos)})"
@@ -293,8 +340,13 @@ def _decisoes_a_revisar(
 
 
 def montar_memorial(
-    matrizes: Sequence[MatrizGHE], exames_vocab: dict[str, Any], resumos: Mapping[str, str]
+    matrizes: Sequence[MatrizGHE],
+    exames_vocab: dict[str, Any],
+    resumos: Mapping[str, str],
+    pgr: PGR | None = None,
+    pendencias: Sequence[Pendencia] = (),
 ) -> Memorial:
+    ghes_pgr = {g.id: g for g in pgr.ghes} if pgr is not None else {}
     blocos: list[BlocoMemorial] = []
     niveis: Counter[int] = Counter()
     usadas: dict[str, Motivo] = {}
@@ -310,6 +362,11 @@ def montar_memorial(
                 nome_ghe=nome_ghe_exibicao(matriz.nome_ghe),
                 linhas=tuple(_linha(matriz.ghe_id, e, exames_vocab, resumos) for e in ordenadas),
                 nao_pedidos=tuple(_nao_pedido(o, exames_vocab) for o in matriz.observacoes),
+                nao_reconhecidos=(
+                    riscos_nao_reconhecidos(ghes_pgr[matriz.ghe_id], pendencias)
+                    if matriz.ghe_id in ghes_pgr
+                    else ()
+                ),
             )
         )
     return Memorial(
@@ -395,6 +452,14 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
     nao_pedidos = sum(len(b.nao_pedidos) for b in memorial.blocos)
     if nao_pedidos:
         documento.add_paragraph(f"Exames dispensados pelo nível de risco do PGR: {nao_pedidos}", style="List Bullet")
+    nao_reconhecidos = [b for b in memorial.blocos if b.nao_reconhecidos]
+    if nao_reconhecidos:
+        documento.add_paragraph(
+            f"Riscos do PGR que o sistema não reconheceu — nenhum exame sai deles: "
+            f"{sum(len(b.nao_reconhecidos) for b in nao_reconhecidos)}, em "
+            f"{', '.join(b.ghe_id for b in nao_reconhecidos)}. Conferir antes de validar.",
+            style="List Bullet",
+        )
 
     documento.add_heading("1. Confirmar primeiro — decisões sem base direta em norma ou protocolo", level=1)
     if memorial.revisar_primeiro:
@@ -414,6 +479,10 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         _tabela(documento, _COLUNAS_GHE, linhas_da_tabela(bloco))
         for texto in bloco.nao_pedidos:
             documento.add_paragraph(texto, style="List Bullet")
+        if bloco.nao_reconhecidos:
+            documento.add_paragraph("Riscos do PGR não reconhecidos (nenhum exame sai deles — conferir):")
+            for texto in bloco.nao_reconhecidos:
+                documento.add_paragraph(texto, style="List Bullet")
 
     documento.add_heading("3. Regras usadas nesta matriz — norma e origem de cada conduta", level=1)
     _tabela(

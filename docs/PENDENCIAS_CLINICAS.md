@@ -851,6 +851,14 @@ condutas das médicas passa a se resolver por evidência: com laudo abaixo do n�
 matriz segue o Aurora; sem laudo, segue Porto Araras I e Vila Brasil. Os 3 pares determinísticos
 não mudam (sem medição de químico).
 
+**Nota (branch `claude/keen-curie-xdm7kb`, 30/09/2026) — T65: 3º gabarito que dispensa em BAIXO.** No gabarito RQ.61 `MATRIZ DE EXAMES(ADENDO)SPE T65 EMPREENDIMENTO IMOBILIARIO LTDA 24.09.26` (Dra. Patrícia, acervo em `matrizes_originais/`) × matriz do app sobre o `PGR - TOCTAO ALT 65.pdf` (Rev. 01, 06/2026),
+GHE 11 HIDRÁULICA: o PGR classifica MEK e acetona em BAIXO, com "Avaliação ainda qualitativa"; o gabarito não
+pede nenhum indicador e anota *"Incluir no Word do PCMSO risco baixo no PGR para Acetona e Metiletilcetona"*.
+O app emite MEK na urina (R-BIO-04, BAIXO sem medição emite — decisão de 25/09) e não emite acetona porque o
+termo não resolve (`DT-(sessão claude/keen-curie-xdm7kb)-03`). Placar da Dra. Patrícia em BAIXO: emite em Porto
+Araras I (06/07) e Vila Brasil (26/08); dispensa no Aurora (27/08) e no T65 (24/09). **R-BIO-05 inalterada** —
+reabrir o corte é decisão do Diovanni.
+
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 
 **Nota (mesma branch, 25/09/2026) — 2º GHE do Aurora com dispensa em BAIXO.** Matriz_9 do app ×
@@ -3626,6 +3634,12 @@ pulmonares", com espirometria só se houver sinais ou sintomas — motivo da dep
 com a ressalva do 3.2 no PROTOCOLO. **Status:** RESOLVIDA para solda; poeira de gesso e espaço
 confinado seguem sem regra, sem medição.
 
+**Nota (branch `claude/keen-curie-xdm7kb`, 30/09/2026) — gesso medido no T65.** No gabarito RQ.61 `MATRIZ DE EXAMES(ADENDO)SPE T65 EMPREENDIMENTO IMOBILIARIO LTDA 24.09.26` (Dra. Patrícia, acervo em `matrizes_originais/`) × matriz do app sobre o `PGR - TOCTAO ALT 65.pdf` (Rev. 01, 06/2026), GHE 16 GESSO: o PGR
+declara "Sulfato de cálcio — Gesso" (BAIXO), sem slug; o gabarito pede Espirometria (PER 24) e RX OIT (PER 60)
+ao Gesseiro e ao Servente — o padrão de PNOS (R-ESP-02 + R-RX-01-pnos-sem). Proposta: gesso/sulfato de cálcio
+como `poeira_nao_classificada` `[INTERPRETADO — gabarito T65 como precedente]`. **Não implementado** — decisão do
+Diovanni. A partir de `0e99bea` o memorial lista o termo como não reconhecido.
+
 ### DT-(sessão `claude/cool-babbage-whh1zw`)-03 — Avaliação psicossocial: planilha da Dra. Patrícia restringe, matrizes recentes dão a todos `[ABERTA — decisão do Diovanni]`
 
 **Origem.** Planilha da Dra. Patrícia, versão atualizada (`d7a7612`): "Avaliação Médica de Saúde Mental"
@@ -3645,6 +3659,14 @@ Carolini) dá as duas a todos. Precedentes de nível 2 em conflito.
 Aurora. A divergência com a planilha fica como prioridade na revisão de saída: se as médicas confirmarem
 a planilha, a correção volta como entrada e a regra muda. **Status:** DECIDIDA — aguarda revisão das
 médicas.
+
+**Nota (branch `claude/keen-curie-xdm7kb`, 30/09/2026) — a revisão das médicas voltou: T65.** No gabarito RQ.61 `MATRIZ DE EXAMES(ADENDO)SPE T65 EMPREENDIMENTO IMOBILIARIO LTDA 24.09.26` (Dra. Patrícia, acervo em `matrizes_originais/`) × matriz do app sobre o `PGR - TOCTAO ALT 65.pdf` (Rev. 01, 06/2026),
+a Avaliação Psicossocial sai em 13 dos 18 GHEs — exatamente os que têm o pacote de atividade crítica
+(hemograma, glicemia, ECG) — e falta nos GHEs 03, 08, 14, 17 e 18 (15 funções); a Saúde Mental sai nos 18.
+O gabarito traz a OBS "Matriz com adequação para o novo protocolo de avaliação dos riscos psicossociais,
+válidos á partir de 14/09/2026". O Aurora (27/08), que dá as duas a todos, é anterior. Proposta: `R-PSY-03`
+com a Psicossocial condicionada à atividade crítica e a Saúde Mental a todos, fonte nível 2 (gabarito T65 +
+planilha da Dra. Patrícia). **Não implementado** — decisão do Diovanni.
 
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-01 — Aguarrás do Aurora não casa com o GHE 18: termo do PGR e CAS da FISPQ fora do vocabulário `[ABERTA — bloqueia o aceite da D-ARQ-90 fatia 1; decisão do Diovanni]`
 
@@ -3685,3 +3707,23 @@ perigoso; confira contra o que o PGR declara") e o seletor de GHE — muda o que
 composição vazia. (b) Reescrever o critério da D-ARQ-90 para este caso.
 
 **Status:** ABERTA — decisão do Diovanni.
+
+### DT-(sessão `claude/keen-curie-xdm7kb`)-03 — Auditoria T65: acetona com produto no termo e forma do documento da matriz `[ABERTA — não-bloqueante]`
+
+**Origem.** Auditoria do Diovanni (Perplexity e NotebookLM) conferida nesta sessão, função a função, no gabarito RQ.61 `MATRIZ DE EXAMES(ADENDO)SPE T65 EMPREENDIMENTO IMOBILIARIO LTDA 24.09.26` (Dra. Patrícia, acervo em `matrizes_originais/`) × matriz do app sobre o `PGR - TOCTAO ALT 65.pdf` (Rev. 01, 06/2026).
+Conteúdo clínico: 4 divergências (Psicossocial, MEK em BAIXO, gesso, PNOS com "outramaneira"); o resto — 61
+funções, momentos e periodicidades — idêntico. O PNOS foi resolvido por alias em `0e99bea`; os outros três
+estão como notas nas DTs de origem.
+
+**Aberto aqui.**
+- **Acetona do GHE 11:** "Acetona — Solução limpadora" não resolve (produto no termo, classe de
+  `DT-(sessão claude/hopeful-newton-yjv3k7)-02`). Sob a R-BIO-05 atual a acetona devia emitir como o MEK.
+- **Forma do documento:** sem título "Matriz Função – Exames PCMSO" (RQ.61); rodapé sem rótulos e sem campo
+  para a OBS; prefixo do GHE duplicado ("GHE GHE-07 GHE 07 - …", GHEs 07–12; "GHE GHE-xx" em todos); nomes e
+  ordem de exames diferentes do RQ.61. Empresa, obra, data, tipo e CRM são texto livre do formulário — os
+  valores da auditoria ("TOCTAO", "2026-09-30", "PGR", "14949") foram digitados assim.
+- **Grafias do PGR** ("Vigia Noturnom", "MARKETING/RECEPEÇÃO") saem verbatim (D-ARQ-22); a auditoria as leu
+  como erro do app.
+
+**Status:** ABERTA — não-bloqueante.
+
