@@ -11082,3 +11082,47 @@ da DT-03, corrigido. Os NÃO VERIFICÁVEL são conteúdo de PDFs, `.docx`, HTML 
 **Lição de método.** Recomendei (b) sem conferir a D-ARQ-64. Antes de propor mudança em allowlist, índice ou
 vocabulário de slug carregado, ler a decisão que rege o mecanismo — o teste computado teria parado a sessão de
 qualquer jeito, mas a recomendação errada custou um turno do Diovanni.
+
+## Sessão (branch `claude/keen-curie-xdm7kb`, recriada sobre `main 099f405`, pós-merge do PR #413) — 30/09/2026 — IMPLEMENTAÇÃO: `R-PSY-03` → `R-PSY-04`/`R-PSY-05` (psicossocial pela norma)
+
+**Pedido.** Diovanni: psicossocial condicionada à atividade crítica (proposta da auditoria T65). Na medição, o pedido
+virou decisão pela norma, a pedido dele ("temos que ver a norma, para não confiar só no resultado").
+
+**Medido antes (scripts descartáveis no scratchpad).** 22 matrizes da Dra. Patrícia de 14 a 24/09/2026, 1.113 cargos:
+Psicossocial com atividade crítica 565, sem 261 (17 matrizes), atividade crítica sem Psicossocial 174, nenhum 113;
+Saúde Mental em 1.001. Duas versões do T65 24.09.26: o `.doc` do acervo dá Psicossocial ao GHE 03; o PDF da auditoria,
+com a OBS de adequação ao protocolo de 14/09/2026, não. Varandas Flamboyant `.doc` e `.pdf` idênticos. Item 26.1 do
+PGR T65: inventário por 2 grupos (Operacional, Técnico Administrativo), 9 fatores cada, um MODERADO em cada, COPSOQ
+não aplicado ("antecipação técnica") — o nível psicossocial não separa quem recebe o exame.
+
+**Norma (nível 1 da D-ARQ-22).** Varridas as 31 cópias de NR de `normas/`: NR-35 35.4.4 (altura) e NR-33 33.5.19.1
+(espaço confinado) mandam considerar os fatores psicossociais na aptidão; NR-20 20.15.6 (brigada de inflamáveis)
+também; NR-01 só o gerenciamento no PGR; NR-07, NR-11, NR-12, NR-18 e as demais nada. Busca externa: Resolução CFP
+2/2022 (avaliação psicossocial por psicólogo conforme as NRs). Páginas oficiais (gov.br, anamt.org.br,
+biblioteca.cofen.gov.br, cdn.protecao.com.br, seconci.rio) bloqueadas pela rede do ambiente — só resumos da busca;
+blogs comerciais descartados.
+
+**Decisão do Diovanni.** R-PSY-03 DEPRECATED; R-PSY-04 (Avaliação Psicossocial, altura ou espaço confinado, com ou sem
+inventário no PGR, `[DERIVADO — NR-35 35.4.4; NR-33 33.5.19.1; Resolução CFP 2/2022]`); R-PSY-05 (Av. Médica de Saúde
+Mental, inventário no PGR, `[INTERPRETADO]`). Composto `aptidao_psicossocial_nr`.
+
+**Commits.** `6081c05` (regras, composto, comentários de código R-PSY-05, testes); `7b9f1a5` (PROTOCOLO v115);
+`a9e749b` (PENDENCIAS: DT-cool-babbage-03 RESOLVIDA; DT-(sessão claude/keen-curie-xdm7kb)-04 NR-20 aberta); docs deste
+fechamento.
+
+**Efeito medido — 3 pares, `main 099f405` × árvore, rota determinística.** A Psicossocial sai de Fascino 3 GHEs (8 cargos:
+Administração, Betoneira, Vendas), Porto Araras I 4 (22: Betoneira, Limpeza, Administração, Portaria), Vila Brasil 17
+(74); fica em 16/12/9 GHEs. Saúde Mental em todos. Nenhuma outra linha de nenhum GHE muda. Porto Araras I: os 22 cargos
+são exatamente os que o gabarito `.doc` de 24/09 dá Psicossocial sem atividade crítica — divergência declarada.
+
+**Testes.** 2 testes da R-PSY-03 substituídos por 5 casos (R-PSY-04 altura/confinado sem inventário, equipamento pesado
+sozinho não emite, R-PSY-05 só saúde mental, sem inventário não emite); `test_integracao_end_to_end` 6→7 linhas e
+`test_integracao_002c` com causa nomeada. Varredura inversa, 8 reversões, 8/8 mortas; os 5 casos novos discriminantes.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, **54 arquivos**. Suíte completa, árvore parada (código em
+`6081c05` + PROTOCOLO v115): **1563 passed, 6 skipped, 0 failed** (1011,79 s), 1560 − 2 + 5. `medir_painel`:
+`regras 33/48 (69%)` (era 32/47), `cas 78/110`, `índice sincronizado`.
+
+**Lição de método.** A proposta da auditoria ("psicossocial = atividade crítica") vinha de 1 documento; o corpus de 22
+dizia outra coisa, e a norma separou os dois exames. Medir o corpus antes de implementar e subir à norma quando o
+precedente se divide evitou implementar a regra errada.
