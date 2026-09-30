@@ -212,7 +212,7 @@ _por_filtro("fumos_metalicos", lambda r: r.agente == "fumos_metalicos")
 
 @primitivo("psicossocial")
 def _psicossocial(ctx: GHEContext) -> bool:
-    """R-PSY-03; NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal
+    """R-PSY-05 (ex-R-PSY-03); NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal
     PGR-documenta-psicossocial (GHEPGR.psicossocial, extraído por
     detectar_psicossocial em extracao_pgr.py)."""
     return ctx.pgr_ghe.psicossocial

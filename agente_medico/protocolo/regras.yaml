@@ -84,6 +84,45 @@ regras:
       descartada por falta de caso. Ver DT-(sessão não numerada, branch
       claude/youthful-lamport-3kfkog)-01 em PENDENCIAS_CLINICAS.md]."
     resumo_clinico: "PGR com inventário de riscos psicossociais → avaliação psicossocial e avaliação médica de saúde mental, anuais. A NR-01 manda identificar e gerenciar esses riscos, mas não define exame; segue as matrizes das coordenadoras. A planilha atualizada da Dra. Patrícia restringe a avaliação psicossocial a trabalho em altura e espaço confinado — confirmar."
+    # [DEPRECATED — 30/09/2026, decisão do Diovanni sobre a norma] Os dois exames
+    # têm fundamentos diferentes e passam a ter gatilhos diferentes: a avaliação
+    # psicossocial vem da NR-35 35.4.4 e da NR-33 33.5.19.1 (R-PSY-04); a saúde
+    # mental, do inventário psicossocial do PGR (R-PSY-05). Mudança de escopo
+    # exige ID nova (convenção R-PSY-01→02→03).
+    status: DEPRECATED
+
+  - id: R-PSY-04
+    quando: aptidao_psicossocial_nr
+    emite:
+      - {exame: avaliacao_psicossocial, periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "NR-35 item 35.4.4 (trabalho em altura: a avaliação do estado de saúde
+      considera 'patologias que poderão originar mal súbito e queda de altura, bem como
+      os fatores psicossociais') e NR-33 item 33.5.19.1 (espaço confinado: 'avaliados
+      quanto à aptidão física e mental, considerando os fatores de riscos psicossociais'),
+      textos conferidos em normas/ (nr-35-atualizada-2025-1.pdf, nr-33-atualizada-2022-
+      _retificada.pdf) em 30/09/2026. Avaliação feita por psicólogo nos exames
+      ocupacionais conforme as NRs: Resolução CFP n.º 2/2022 (DOU 26/01/2022). A norma
+      exige considerar os fatores psicossociais na aptidão; o exame é a forma da
+      coordenação. Dispara pela atividade, com ou sem inventário psicossocial no PGR.
+      Momentos da R-PSY-03 mantidos. [DERIVADO — norma + gabarito T65 24.09.26 (PDF com
+      adequação ao protocolo psicossocial de 14/09/2026) + planilha da Dra. Patrícia].
+      Equipamento pesado fora: nenhuma NR o associa a fatores psicossociais. Brigada de
+      inflamáveis (NR-20 20.15.6) sem agente no vocabulário — DT própria."
+    resumo_clinico: "Trabalho em altura ou em espaço confinado → avaliação psicossocial anual. A NR-35 (item 35.4.4) e a NR-33 (item 33.5.19.1) mandam considerar os fatores psicossociais na avaliação de aptidão; a avaliação é feita por psicólogo (Resolução CFP n.º 2/2022)."
+    status: DERIVADO
+
+  - id: R-PSY-05
+    quando: psicossocial
+    emite:
+      - {exame: avaliacao_saude_mental, periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "NR-01 itens 1.5.3.1.4 e 1.5.3.2.1 (o PGR inventaria e gerencia os
+      fatores de risco psicossociais) e NR-07 item 7.5.1 (o PCMSO considera os riscos
+      identificados e classificados pelo PGR). Nenhuma NR prescreve o exame. Mesmo
+      gatilho da R-PSY-03 (seção de inventário psicossocial no PGR,
+      detectar_psicossocial). [INTERPRETADO — precedente: 22 matrizes da Dra. Patrícia de
+      14 a 24/09/2026, saúde mental em 1.001 de 1.113 cargos; o T65 24.09.26 a dá aos 18
+      GHEs]."
+    resumo_clinico: "PGR com inventário de riscos psicossociais → avaliação médica de saúde mental anual, para todos. A NR-01 manda gerenciar esses riscos e a NR-07 manda o PCMSO considerá-los, mas nenhuma norma define exame; segue as matrizes das coordenadoras — confirmar."
     status: INTERPRETADO
 
   - id: R-PKG-ATIVCRIT

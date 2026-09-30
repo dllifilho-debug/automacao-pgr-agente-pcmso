@@ -266,7 +266,7 @@ def preparar_pgr_hidratado(
         protocolo.vocabulario.agentes,
         fracoes_sem_agente=protocolo.vocabulario.fracoes_sem_agente,
     )
-    # R-PSY-03: 3ª leitura de extrair_texto_pgr sobre o mesmo arquivo — mesma
+    # R-PSY-05 (ex-R-PSY-03): 3ª leitura de extrair_texto_pgr sobre o mesmo arquivo — mesma
     # classe da duplicação documentada acima (preparar_envelope/
     # preparar_ghes), texto puro sem custo de LLM. psicossocial é sinal de
     # PGR inteiro (D-ARQ-49 P2 aplicado): replicado a todo GHE via hidratar_pgr.

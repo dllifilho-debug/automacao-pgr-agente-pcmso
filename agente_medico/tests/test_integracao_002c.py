@@ -81,16 +81,19 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     # avaliacao_psicossocial/avaliacao_saude_mental NÃO saem mais aqui (sessão
     # de 17/09/2026): R-PSY-02 (incondicional, 003.EN) está DEPRECATED,
     # sucedida por R-PSY-03 (quando: psicossocial) — este GHE não declara
-    # GHEPGR.psicossocial=True.
-    assert not {"avaliacao_psicossocial", "avaliacao_saude_mental"} & nomes
+    # GHEPGR.psicossocial=True. 30/09/2026: a avaliação psicossocial volta a
+    # sair aqui por outra via — R-PSY-04, trabalho em altura (NR-35 35.4.4) —;
+    # a saúde mental (R-PSY-05) segue dependendo do inventário.
+    assert "avaliacao_psicossocial" in nomes
+    assert "avaliacao_saude_mental" not in nomes
 
     # R-AUD-04 (piso incondicional todo_trabalhador) foi DEPRECATED em 003.EZ
     # (D-ARQ-81 — fundamento refutado por DT-003EY-01). Este GHE não tem risco
     # ruído, então R-AUD-01/02 não disparam (nem emitem, nem bloqueiam) — a
     # audiometria volta a sair só por R-PKG-ATIVCRIT (adm/per/MR, sem dem) e
     # cai no loop genérico abaixo, junto dos outros 4 exames do pacote.
-    _INCONDICIONAIS = {"exame_clinico"}
-    exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() not in _INCONDICIONAIS]
+    _FORA_DO_PACOTE = {"exame_clinico", "avaliacao_psicossocial"}  # R-CLI-01; R-PSY-04 (altura)
+    exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() not in _FORA_DO_PACOTE]
     for e in exames_ativcrit:
         assert e.periodicidade_meses == 12
         assert e.momentos == {Momento.ADM, Momento.PER, Momento.MR}
