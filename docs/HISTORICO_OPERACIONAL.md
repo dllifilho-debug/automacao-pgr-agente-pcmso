@@ -10985,3 +10985,44 @@ medida contra as respostas do app no Aurora.
 
 **Verificação.** Docs-only. `python -m scripts.gerar_indice_darq` + `tests/test_gerar_indice_darq.py`: 6
 passed. Suíte completa não rodada: nenhum código, dado ou teste tocado.
+
+## Sessão (branch `claude/keen-curie-xdm7kb`, sobre `main b5bd134`) — 30/09/2026 — IMPLEMENTAÇÃO: `D-ARQ-90` fatia 1 (sugestão de vínculo FDS↔GHE)
+
+**Pedido.** Diovanni: implementar a fatia 1 da `D-ARQ-90` e medir o critério de aceite contra as respostas
+do app no teste do Aurora (memorial e matriz `.docx` anexados), parando antes do push. Na revisão, decidiu:
+botão "Marcar" só no topo; aplicar as três correções da autorrevisão; fechar os docs.
+
+**Commits.** `de23f6c` (núcleo `sugerir_ghes` + tela + 6 testes); `96875d6` ("Marcar" só o topo, vocabulário
+carregado uma vez por renderização, aviso de lacuna de vocabulário; 3 testes); docs deste fechamento.
+
+**Medição do critério.** Os anexos são de 26/09, anteriores à sugestão: mostram a matriz final, não a
+ordem sugerida, e só vinculam os 3 adesivos Tigre (GHE 11), Fundo Zarcão e aguarrás (GHE 18). O PGR do
+Aurora não passa pela rota determinística (`FamiliaNaoReconhecida` no bloco ADMINISTRAÇÃO) e o container
+não tem chave Gemini, então a medição foi por aproximação (script descartável no scratchpad): CAS por
+regex do texto de composição das FDS, agentes por GHE por termo do vocabulário no texto de cada bloco do
+PGR, pelo `sugerir_ghes` real. 1º lugar: ENCANADOR 11, SOLDADOR 16, Fundo Zarcão 18, PINTOR 22, ALMOXARIFE
+11 — conferem. **Divergem, bloqueador reportado:** aguarrás (aviso da cl.4 em vez do 18 —
+`DT-(sessão claude/keen-curie-xdm7kb)-01`) e FDS CARPINTEIRO (sem ingrediente perigoso declarado; a tela
+não abre o vínculo — `DT-(sessão claude/keen-curie-xdm7kb)-02`). Medição no app `[A MEDIR]`.
+
+**Autorrevisão (antes do push).** (1) "Marcar" preenchia todos os sugeridos: a FDS do eletrodo levaria 8 GHEs
+só por sílica → decidido marcar o topo. (2) Regressão introduzida por `de23f6c`: `_protocolo_padrao()` por FDS
+por rerun, 158,6 ms medidos por carga (~2,5 s com 16 FDS) → uma carga por renderização. (3) O aviso da cl.4
+culpava PGR/FDS quando nada resolvia no vocabulário → aviso próprio.
+
+**Testes.** `test_sugestao_vinculo.py`, 9. Varredura inversa, 13 reversões, 13/13 mortas, 9/9 testes
+discriminantes: sem ordenação; limiar ≥2; descartar componente sem slug; sugerir pelo cargo no nome do
+arquivo; pré-marcar; botão sem efeito; botão que anexa; tirar o aviso da cl.4; aviso que bloqueia o anexo;
+marcar todos os sugeridos; marcar só o 1º no empate; aviso único para os dois casos; carga do vocabulário
+por FDS.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, **54 arquivos** (+1, `sugestao_vinculo.py`; a
+referência do CLAUDE.md, 51, é de 25/09). Suíte completa, árvore parada em `96875d6`: **1555 passed,
+6 skipped, 0 failed** (948,37 s), +9 sobre `b5bd134` (1546, medido em D-ARQ-89 fatia 2) — 1552 em `de23f6c`.
+`gerar_indice_darq` regenerado; `tests/test_gerar_indice_darq.py`: 6 passed.
+
+**Três números clínicos.** Não re-tirados: nenhuma `R-*` e nenhum `.yaml` tocados.
+
+**Lição de método.** O critério de aceite da `D-ARQ-90` foi escrito sobre a sobreposição **textual** medida na
+sessão de arquitetura (aguarrás "2/7" no GHE 18); a fatia resolve por **slug**, e a diferença só apareceu
+ao medir. Critério de aceite de sugestão por agente precisa ser medido no instrumento da fatia, não no texto.
