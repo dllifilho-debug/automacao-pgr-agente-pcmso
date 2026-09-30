@@ -11146,7 +11146,8 @@ próprio.
 **Medição do acervo (varredura de texto, `matrizes_originais/*PGR*.pdf`).** Gesso como agente: "Sulfato de cálcio —
 Gesso" (TOCTAO ALT 65 GHE 16), "Gesso (Sulfato de Cálcio hemi-hidratado)" (CMO Vistamerica 2026-07-28, 3 linhas),
 "Sulfato de cálcio" (ALT T65 2024.2026 e EURO Setor C). "Gesso" sozinho só aparece como atividade/GHE — não virou
-termo. Vistamerica Ver.02 declara a poeira do gesso como "PNOS/PNOR" medida (0,08 mg/m³) e segue por R-RX-01-pnos.
+termo. Vistamerica Ver.02 declara a poeira do gesso como "PNOS/PNOR" medida (0,08 mg/m³) e segue por R-RX-01-pnos
+[corrigido na sessão seguinte: não medido, rota LLM — `[A MEDIR]`; e faltou registrar as formas dos PGRs Ricco].
 Fascino, Porto Araras I e Vila Brasil (rota determinística): 0 ocorrências.
 
 **Commits.** `83acbc9` — `poeira_de_gesso` em `agentes.yaml` (índice 179 → 183), predicado `gesso` em
@@ -11173,3 +11174,27 @@ na rota LLM `[A MEDIR — sem chave de API no container]`.
 
 **Lição de método.** "Mesmo padrão de exames" não é "mesma classe normativa": o gabarito dava ao gesso o par de
 PNOS, mas a definição de PNOS da própria NR-07 o exclui. Conferir o critério de enquadramento, não só o resultado.
+
+## Sessão (branch `ccr-983f0b9f-zkz16m`, recriada sobre `main b6781a6`, pós-merge do PR #415) — 30/09/2026 — CORREÇÃO: revisão da própria entrega do gesso
+
+**Pedido.** Diovanni pediu revisão do próprio trabalho antes de publicar; duas falhas encontradas na entrega do
+PR #415, ambas em `main`.
+
+**1. Formas da Ricco não registradas.** A varredura de 30/09 achou o gesso como agente também nos PGRs Ricco Hetrin
+mar/25, Serra Dourada mai/24 e Atualização Hetrin 14.09.26 (células lidas por `extract_tables()`: "- Produtos químicos
+(Gesso - Sulfato de cálcio – e- / Social: Outros Agentes Nocivos);", "Produtos químicos – Gesso e sulfato de / cálcio",
+"PRODUTOS QUÍMICOS / (GESSO - SULFATO DE / CALCIO)"), e o PROTOCOLO v116 listava só três formas como se cobrissem o
+acervo. Medido: `avaliar_estrutura` devolve `pgr_cargo_based` nos três (369, 168 e 21 sinais de bloco por cargo) —
+param antes do resolvedor. **Alias não entra** (literal órfão, classe D-ARQ-67); registro no PROTOCOLO v117 e em
+comentário do `agentes.yaml`.
+
+**2. Afirmação não medida.** "Vistamerica Ver.02 segue por R-RX-01-pnos": o PGR passa o gate (`rota=ghe`, sem
+pendência), mas os GHEs vão pela transcrição LLM — sem chave no container, não medido. Vira `[A MEDIR]` no PROTOCOLO;
+no bloco anterior deste HISTORICO, marcação de correção na própria linha.
+
+**Commits.** PROTOCOLO v117, `agentes.yaml` (só comentário), PENDENCIAS, este bloco, PAINEL. Nenhuma regra, termo ou
+exame alterado.
+
+**Lição de método.** Varredura de texto encontra onde o termo aparece; a pergunta seguinte — o documento chega ao
+resolvedor? — é que decide se o alias tem efeito. Medir o gate antes de listar formas como cobertas.
+
