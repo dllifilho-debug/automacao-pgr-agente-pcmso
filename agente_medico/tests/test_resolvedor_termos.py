@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_178_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_179_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -69,7 +69,10 @@ def test_indice_real_tem_178_entradas(indice_real: IndiceTermos) -> None:
     # 27.08.26, lidos na célula inteira (a quebra de linha do PDF escondia o qualificador)
     # — "Vibração localizada (mãos e braços)" (GHEs 04, 05, 08, 10, 11, 14 e 16) e
     # "Vibrações localizadas (mão-braço)" (GHE 18).
-    assert len(indice_real.slug_por_forma) == 178
+    # 178 -> 179 (branch `claude/keen-curie-xdm7kb`): +1 alias de PNOS com "outramaneira"
+    # sem espaço, do PGR TOCTAO ALT 65 (T65) GHE 18 COPA — recusado por aproximação
+    # (D-ARQ-64 cl.5), auditoria do T65 × gabarito RQ.61 de 24.09.26.
+    assert len(indice_real.slug_por_forma) == 179
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(

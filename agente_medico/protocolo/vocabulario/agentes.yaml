@@ -273,8 +273,11 @@ agentes:
     # RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf, 10 ocorrências, ex.
     # página 25]: mesma classificação nomeada por extenso em vez da sigla —
     # "Particulados insolúveis ou de baixa solubilidade não especificados de
-    # outra maneira (PNOS)", quebrada em 4 linhas pelo PDF.
-    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)"]
+    # outra maneira (PNOS)", quebrada em 4 linhas pelo PDF. Quinta forma [MEDIDO — PGR
+    # TOCTAO ALT 65 (T65), Rev. 01 06/2026, GHE 18 COPA, 1 ocorrência]: a mesma, com
+    # "outramaneira" sem espaço — erro de digitação do PGR, recusado por aproximação
+    # porque este slug dispara R-RX-01/R-ESP-02 (D-ARQ-64 cl.5); vai como alias exato.
+    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)", "Particulados insolúveis ou de baixa solubilidade não especificados de outramaneira (PNOS)"]
   poeira_de_madeira:
     tipo_ibe: null
     cas: null

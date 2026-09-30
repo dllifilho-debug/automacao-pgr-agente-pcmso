@@ -1131,6 +1131,8 @@ def pagina_matriz() -> None:
                         cache.matrizes,
                         cache.exames_vocab,
                         resumos_do_protocolo(_protocolo_padrao().regras),
+                        pgr=cache.pgr_hidratado,
+                        pendencias=cache.pendencias,
                     ),
                     cabecalho,
                     destino_memorial,
