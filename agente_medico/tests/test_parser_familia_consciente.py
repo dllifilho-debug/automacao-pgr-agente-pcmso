@@ -243,7 +243,8 @@ def test_ghes_sem_overflow_inalterados_real(ghes_fascino: tuple[GHEVerbatim, ...
         "PRODUÇÃO": ("Pedreiro", "Ajudante de produção civil"),
         "CARPINTARIA": ("Carpinteiro",),
         "ARMAÇÃO": ("Armador",),
-        "INSTALAÇÕES HIDRO\x00SANITÁRIAS": ("Encanador", "Auxiliar de Encanador"),
+        # D-ARQ-89: hífen restaurado na extração (era U+0000, glifo ".case" da Inter).
+        "INSTALAÇÕES HIDRO-SANITÁRIAS": ("Encanador", "Auxiliar de Encanador"),
         "ELÉTRICA": ("Eletricista", "Auxiliar de eletricista"),
         "BETONEIRA": ("Operador de Betoneiro",),
         "SINALIZAÇÃO DE GRUA": ("Sinaleiro",),
@@ -255,10 +256,14 @@ def test_ghes_sem_overflow_inalterados_real(ghes_fascino: tuple[GHEVerbatim, ...
         "VENDAS": ("Recepcionista Demonstradora", "Recepcionista Comercial"),
     }
     assert len(esperado_por_nome) == 17
+    visitados = set()
     for ghe in ghes_fascino:
         if ghe.nome not in esperado_por_nome:
             continue
+        visitados.add(ghe.nome)
         assert ghe.cargos == esperado_por_nome[ghe.nome], ghe.nome
+    # Nome de GHE que muda não pode ser pulado em silêncio pelo `continue`.
+    assert visitados == set(esperado_por_nome)
 
 
 @requer_pdfs

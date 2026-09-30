@@ -10926,3 +10926,37 @@ limpo, **52 arquivos**.
 
 **Verificação.** Suíte completa (árvore parada): **1541 passed, 6 skipped, 0 failed** (762.36s), +3 exato
 sobre 1538. `tests/test_gerar_indice_darq.py`: 6 passed.
+
+## Sessão (branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #409) — 30/09/2026 — IMPLEMENTAÇÃO: `D-ARQ-89` fatia 2 (glifo restaurado na extração)
+
+**Pedido.** Diovanni: implementar a fatia 2 de `D-ARQ-89` (cl.1–cl.4, ratificadas em 29/09).
+
+**Implementado.** `motor/glifos_pdf.py`: tabela dos 13 glifos ".case" da fonte "Inter-Thin" com procedência
+por entrada, `restaurar_glifos` (só glifo tabelado; fora da tabela segue U+0000) e `GerenciadorComGlifos`
+(`PDFResourceManager.get_font`). `io_pdf.paginas_liberadas` injeta o gerenciador — ponto único do parse de
+PGR e FDS; sem monkeypatch. `parser_familia_consciente._PADRAO_CBO` consome o CBO entre parênteses ("(" antes,
+")" depois, rótulo "CBO:" opcional). `requirements.txt`: `pdfminer.six` (import direto; sem piso próprio, o
+pdfplumber fixa a versão). DECISOES v229 (nota de aplicação em `D-ARQ-89`), índice regenerado; nota da fatia 2
+em DH-003EG-01.
+
+**Desvio da proposta, com motivo.** cl.4 previa `–`/`—` nas âncoras de GHE; medido, os cabeçalhos restaurados
+saem com hífen comum (e `:` na Vila Brasil), que as âncoras já aceitam — não alarguei o reconhecedor sem caso.
+
+**Efeito medido (`main 62dffd2` × árvore).** Texto de 25/28 PGRs byte-idêntico; 3 com NUL: 5.879 → 0, diferença
+só nas posições NUL; extração dos 28: 497,2 s → 499,2 s. 3 pares: GHEs, status, cargos (nº), riscos
+resolvidos, exames, periodicidade, momentos, motivos e pendências por tipo idênticos — nenhuma resolução de
+termo mudou. Matriz assinada: Porto Araras I idêntica; Fascino "HIDROSANITÁRIAS" → "HIDRO-SANITÁRIAS"; Vila
+Brasil "Business Partner - RH 2524" → "Business Partner - RH (2524)" (como o PDF imprime) e "Analista jurídico
+júnior CBO" → "Analista jurídico júnior". Verde Maris: 0 GHEs antes e depois (família não medida).
+
+**Achado.** `test_ghes_sem_overflow_inalterados_real` passava por vacuidade: o `continue` pulava GHE cujo nome
+mudasse. Corrigido (chave "HIDRO-SANITÁRIAS" e exigência de visitar os 17 GHEs esperados).
+
+**Testes.** `test_glifos_pdf.py` (5). Varredura inversa, 8 reversões de código, 8/8 mortas por asserção:
+tirar entrada da tabela; chave pelo nome cru da fonte; não injetar o gerenciador; fallback para glifo fora da
+tabela; CBO sem "(" antes; CBO com ")" antes; CBO sem "CBO:" opcional; sem restauração (teste real do
+Fascino). `mypy --strict` alvo canônico limpo, **53 arquivos** (+1, `glifos_pdf.py`).
+
+**Verificação.** Primeira suíte completa: 2 failed (`test_requirements_app.py` — `pdfminer` importado sem
+declaração), corrigido. Suíte completa final (árvore parada): **1546 passed, 6 skipped, 0 failed** (1017.95s),
++5 exato sobre 1541. `tests/test_gerar_indice_darq.py`: 6 passed.
