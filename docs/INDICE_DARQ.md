@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v230 · 90 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v231 · 90 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -97,4 +97,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v230 · 90 decisões
 | D-ARQ-87 | Memorial de raciocínio da matriz: cada `Motivo` guarda o que a própria regra pediu, antes do piso da consolidação | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO da fatia 1 (26/09/2026) | 4280 | 6516 |
 | D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4324 | 9422 |
 | D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 (29/09/2026) e 2 (30/09/2026) | 4382 | 7135 |
-| D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4430 | 6521 |
+| D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4430 | 8742 |

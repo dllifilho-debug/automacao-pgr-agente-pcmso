@@ -109,6 +109,15 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 30/09/2026, D-ARQ-90 fatia 1]`:** branch `claude/keen-curie-xdm7kb` sobre
+`main b5bd134` (merge do PR #411; IMPLEMENTAÇÃO — sugestão de vínculo FDS↔GHE) · **1555 passed,
+6 skipped, 0 failed** *(MEDIDO em `96875d6`, árvore parada, 948,37 s — 1546 + 9)* · `mypy --strict`
+alvo canônico **limpo, 54 arquivos** · PROTOCOLO **v114** (inalterado) · DECISOES v230→**v231**.
+`medir_painel` em `96875d6`: `regras 32/47 (68%)`, `cas 78/110 (71%)`, `índice sincronizado` — esta
+sessão não tocou regra nem vocabulário; a diferença para o bloco de 25/09 abaixo (`28/45`, `78/109`)
+vem das sessões entre `e7800ad` e `b5bd134`, que não gravaram Baseline aqui. Três números clínicos:
+**não re-tirados** (nenhuma `R-*` nem `.yaml` tocados; `D-ARQ-85` cl.1).
+
 **Baseline `[MEDIDO — 25/09/2026, D-ARQ-86 fatia 2]`:** branch `claude/hopeful-ramanujan-rbgh4s`
 sobre `main c62dc86` (merge do PR #384; IMPLEMENTAÇÃO — medição de sílica e PNOS decide o RX OIT)
 · **1417 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada, 722.25s — 1409 + 8)* · `mypy

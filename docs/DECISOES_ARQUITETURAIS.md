@@ -4532,6 +4532,33 @@ setor.
   nome do arquivo (o caso "FDS PINTOR" passaria a apontar o 18); pré-marcar o `multiselect`; aplicar
   corte por limiar (um GHE com 1 agente em comum sumiria).
 
+**Aplicação — fatia 1 (30/09/2026, branch `claude/keen-curie-xdm7kb`, commits `de23f6c` e `96875d6`).**
+Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na sessão.
+
+- **Implementado.** `superficie/sugestao_vinculo.py::sugerir_ghes` (CAS→slug por `montar_fds` +
+  `gate_cas`, os mesmos do motor, × `RiscoPGR.agente`); na tela (`web_matriz.py`), sugestão por FDS
+  com os agentes nomeados como a FDS os escreve, contagem de componentes sem correspondência, botão
+  "Marcar os GHEs sugeridos" e avisos não bloqueantes. Motor intocado.
+- **Precisão da cl.3 (decisão do Diovanni).** O botão marca só os GHEs com a **maior** contagem de
+  agentes em comum (empates incluídos); a lista continua mostrando todos, sem limiar (cl.2). Motivo
+  medido: marcando todos, a FDS do eletrodo (GHE 16, 3 agentes) levaria junto 8 GHEs que só têm sílica
+  em comum, a dois cliques do anexo.
+- **Precisão da cl.4 (decisão do Diovanni).** FDS com componentes mas **nenhum** reconhecido no
+  vocabulário ganha aviso próprio ("a lacuna é do vocabulário"), separado do aviso da cl.4, que fica
+  para FDS com agente reconhecido que nenhum GHE declara.
+- **Critério de aceite — NÃO fechado (bloqueador reportado, não ajustado).** Medição por aproximação
+  determinística (CAS por regex do texto das FDS; agentes por GHE por termo do vocabulário no texto de
+  cada bloco do PGR), porque o PGR do Aurora só passa pela rota de IA e o container não tem a chave. A
+  medição no app segue `[A MEDIR]`. ENCANADOR→11, SOLDADOR→16, Fundo Zarcão→18, PINTOR→22,
+  ALMOXARIFE→11: conferem. **Aguarrás:** aviso da cl.4 em vez do GHE 18 — `DT-(sessão
+  claude/keen-curie-xdm7kb)-01`. **FDS CARPINTEIRO:** declara que não tem ingrediente perigoso;
+  composição vazia não abre o vínculo na tela, logo nenhum aviso aparece — `DT-(sessão
+  claude/keen-curie-xdm7kb)-02`. Os anexos do teste do app (memorial e matriz de 26/09) são anteriores
+  à sugestão e só vinculam os 3 adesivos Tigre (GHE 11), Fundo Zarcão e aguarrás (GHE 18).
+- **Matriz inalterada.** Por construção (motor intocado; teste: "Marcar" não muda `matrizes` nem
+  anexa). A comparação dos 3 pares determinísticos e do Aurora com a `main` no app não foi rodada
+  `[A MEDIR]`.
+
 ---
 
 ## Histórico de revisões
@@ -4768,3 +4795,4 @@ setor.
 | v228 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA + IMPLEMENTAÇÃO, ratificada pelo Diovanni, Q1–Q4): **`D-ARQ-89` CRIADA** — glifo não mapeado pelo gerador do PDF (13 glifos ".case" da Inter, 5.879 NUL em 3 de 28 PGRs) restaurado na extração por tabela verificada visualmente; fatia 1 implementada (pendências na tela e relatório do harness sanitizados; DH-003EG-01 fechada como escrita). Decisões 88 → **89**. |
 | v229 | 30/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-89`): **nota de aplicação em `D-ARQ-89`** (mesma ID, cláusulas inalteradas) — glifos ".case" da Inter restaurados na extração (`glifos_pdf.py`, injetado em `paginas_liberadas`); 5.879 NUL → 0 em 3 PGRs, 25/28 textos byte-idênticos; 3 pares com estrutura de matriz idêntica; CBO entre parênteses e rótulo "CBO:" consumidos. |
 | v230 | 30/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA — ratificação, docs-only): **`D-ARQ-90` CRIADA e RATIFICADA** (Q1–Q5) — sugestão de vínculo FDS↔GHE por agente em comum (CAS→slug da FDS × riscos resolvidos do GHE), sem ler nome de arquivo nem cargo, sem limiar, nunca pré-marcada; aviso não bloqueante para FDS sem casamento; preserva D-ARQ-49 Parte 2 (produto só nasce do anexo do RT). Sem código. Decisões 89 → **90**. |
+| v231 | 30/09/2026 | Branch `claude/keen-curie-xdm7kb` (IMPLEMENTAÇÃO — fatia 1 de `D-ARQ-90`): **nota de aplicação em `D-ARQ-90`** (mesma ID, cláusulas inalteradas) — `sugerir_ghes` e tela; precisões decididas pelo Diovanni: "Marcar" só o topo (cl.3) e aviso próprio para lacuna de vocabulário (cl.4). Critério de aceite **não fechado**: aguarrás e FDS CARPINTEIRO divergem (DTs novas em `PENDENCIAS_CLINICAS.md`). Decisões seguem em **90**. |

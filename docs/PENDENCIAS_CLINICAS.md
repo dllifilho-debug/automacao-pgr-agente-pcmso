@@ -3645,3 +3645,43 @@ Carolini) dá as duas a todos. Precedentes de nível 2 em conflito.
 Aurora. A divergência com a planilha fica como prioridade na revisão de saída: se as médicas confirmarem
 a planilha, a correção volta como entrada e a regra muda. **Status:** DECIDIDA — aguarda revisão das
 médicas.
+
+### DT-(sessão `claude/keen-curie-xdm7kb`)-01 — Aguarrás do Aurora não casa com o GHE 18: termo do PGR e CAS da FISPQ fora do vocabulário `[ABERTA — bloqueia o aceite da D-ARQ-90 fatia 1; decisão do Diovanni]`
+
+**Origem.** Critério de aceite da `D-ARQ-90` fatia 1: "Fundo Zarcão e aguarrás → 18". Medido em 30/09/2026
+(aproximação determinística, ver nota de aplicação na D-ARQ-90): a aguarrás recebe o aviso da cl.4 em vez de
+sugerir o GHE 18.
+
+**Causa medida — não depende da rota de IA.**
+- PGR, GHE 18 (Pintura): declara "Aguarrás" e "Destilados de Petróleo levemente tratados com hidrogênio".
+  `resolver_termo` não resolve nenhum dos dois; só "Aguarras mineral" resolve (`aguarras_mineral`).
+- FISPQ `fispq-quim-sol-alif-aguarras-mineral.pdf`: nafta hidrodessulfurizada pesada (CAS 64742-82-1),
+  querosene (8008-20-6) e benzeno (71-43-2, <0,1%). Só o benzeno está no vocabulário; o `aguarras_mineral`
+  usa 64742-47-8 (o CAS dos destilados leves hidrotratados da Leinertex).
+- O GHE 18 não declara benzeno. Resultado: agente resolvido na FDS, nenhum GHE o declara → aviso da cl.4.
+
+**Caminhos.** (a) Vocabulário: alias "Aguarrás" e "Destilados de petróleo levemente tratados com hidrogênio"
+em `aguarras_mineral`, e os CAS 64742-82-1/8008-20-6 — um slug tem um CAS só no índice, então isso pede
+slug novo ou mudança de `construir_indice_cas`; fonte a conferir (identidade química dos três CAS).
+(b) Fatia 2 da `D-ARQ-90` (fonte geradora como segundo sinal), cuja condição de entrada — "a sobreposição
+por agente deixa de fora vínculos reais" — este caso cumpre.
+
+**Status:** ABERTA — decisão do Diovanni.
+
+### DT-(sessão `claude/keen-curie-xdm7kb`)-02 — FDS sem ingrediente perigoso declarado não abre o vínculo nem o aviso (FDS CARPINTEIRO) `[ABERTA — decisão do Diovanni]`
+
+**Origem.** Critério de aceite da `D-ARQ-90` fatia 1: "FDS CARPINTEIRO deve gerar o aviso da cl.4".
+
+**Situação medida.** A seção 3 da FDS (Desmoldante Concentrado Quartzolit) diz "Não apresenta ingredientes
+ou impurezas que contribuam para o perigo" — não há composição a transcrever. A tela só mostra vínculo,
+sugestão e avisos quando a composição tem bloco (`web_matriz.py`, condição `and blocos_fds`, anterior a
+esta sessão). Logo nenhum aviso aparece, com ou sem a fatia 1. A divergência PGR × FDS que a D-ARQ-90
+descreve (o PGR declara ácido oleico no GHE 04) é real, mas o sinal por agente não tem o que comparar;
+além disso "Ácido oleico" não resolve para slug (`resolver_termo`, medido), então nem uma FDS que o
+contenha casaria com o GHE 04. Resposta do app com a FDS transcrita `[A MEDIR]`.
+
+**Caminhos.** (a) Mostrar, para FDS sem composição, um aviso próprio ("a FDS não declara ingrediente
+perigoso; confira contra o que o PGR declara") e o seletor de GHE — muda o que a tela mostra hoje para
+composição vazia. (b) Reescrever o critério da D-ARQ-90 para este caso.
+
+**Status:** ABERTA — decisão do Diovanni.

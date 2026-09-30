@@ -60,6 +60,7 @@ from agente_medico.superficie.documento_matriz import (
     montar_documento,
     renderizar_html,
 )
+from agente_medico.superficie.sugestao_vinculo import SugestaoVinculo
 
 __all__ = [
     "CacheMatrizes",
@@ -75,6 +76,7 @@ __all__ = [
     "executar_rota_determinista_cacheada",
     "gerar_documento",
     "ghes_com_produto",
+    "linhas_sugestao",
     "listar_produtos_anexados",
     "montar_envelope",
     "montar_fds",
@@ -563,6 +565,25 @@ def listar_produtos_anexados(pgr: PGR, protocolo: Protocolo) -> tuple[ProdutoAne
     )
 
 
+def linhas_sugestao(sugestao: SugestaoVinculo, rotulos_ghe: dict[str, str]) -> tuple[str, ...]:
+    """Texto da sugestão D-ARQ-90 (cl.2): cada GHE com os agentes em comum
+    nomeados como a FDS os escreve, e a contagem do que não casou (cl.1)."""
+    linhas: list[str] = []
+    if sugestao.ghes:
+        linhas.append("**GHEs com agentes desta FDS declarados no PGR:**")
+    for ghe in sugestao.ghes:
+        nomes = ", ".join(_sanitizar(a.nome_na_fds) for a in ghe.agentes)
+        rotulo = rotulos_ghe.get(ghe.ghe_id, ghe.ghe_id)
+        linhas.append(f"- {rotulo} — {len(ghe.agentes)} em comum: {nomes}")
+    if sugestao.componentes_sem_slug:
+        n = len(sugestao.componentes_sem_slug)
+        linhas.append(
+            f"{n} componente{'s' if n > 1 else ''} sem correspondência no vocabulário: "
+            + "; ".join(_sanitizar(c) for c in sugestao.componentes_sem_slug)
+        )
+    return tuple(linhas)
+
+
 ComposicaoFDS = tuple[tuple[BlocoVerbatim, ...], tuple[Pendencia, ...]]
 
 
@@ -610,6 +631,11 @@ def pagina_matriz() -> None:
         resumos_do_protocolo,
     )
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
+    from agente_medico.superficie.sugestao_vinculo import (
+        AVISO_SEM_CASAMENTO,
+        AVISO_SEM_COMPONENTE_RECONHECIDO,
+        sugerir_ghes,
+    )
     from agente_medico.superficie.apresentacao import (
         MENSAGEM_EMISSAO_FUTURA,
         EmissaoFuturaError,
@@ -623,6 +649,7 @@ def pagina_matriz() -> None:
         executar_rota_determinista_cacheada,
         ghes_com_produto,
         linha_pendencia,
+        linhas_sugestao,
         listar_produtos_anexados,
         montar_envelope,
         montar_fds,
@@ -708,6 +735,12 @@ def pagina_matriz() -> None:
                 mensagens.append(("success", f"Produto '{nome}' anexado a {', '.join(novos)}."))
             st.session_state[f"anexo_mensagens_{nome_arquivo}"] = mensagens
 
+        def _marcar_sugeridos(nome_arquivo: str, ghes_sugeridos: tuple[str, ...]) -> None:
+            # D-ARQ-90 cl.3: só preenche a seleção; anexar continua sendo o outro botão.
+            chave = f"ghe_destino_{nome_arquivo}"
+            atuais: list[str] = st.session_state.get(chave, [])
+            st.session_state[chave] = [*atuais, *(g for g in ghes_sugeridos if g not in atuais)]
+
         def _remover(ghe_id: str, nome: str) -> None:
             atual: CacheMatrizes | None = st.session_state.get("web_matriz_cache")
             if atual is None or atual.pgr_hidratado is None:
@@ -779,6 +812,9 @@ def pagina_matriz() -> None:
         # só mostrava vínculo, produtos e medições na interação seguinte ao clique
         # em Gerar matriz. A posição na tela é a do container etapa_fds.
         def _renderizar_vinculos(cache_vinculo: CacheMatrizes | None) -> None:
+            # Uma carga por renderização, não por FDS: _protocolo_padrao relê os YAML
+            # (~160 ms medidos em 30/09/2026) e a página chega a ter 16 FDS.
+            agentes_vocab: dict[str, Any] | None = None
             for arquivo_fds in arquivos_fds or ():
                 with etapa_fds:
                     with tempfile.TemporaryDirectory() as tmp_fds:
@@ -817,6 +853,24 @@ def pagina_matriz() -> None:
                         rotulos_ghe = {
                             ghe.id: f"{ghe.id} — {nome_ghe_exibicao(ghe.nome)}".strip(" —") for ghe in ghes_pgr
                         }
+                        # D-ARQ-90: sugestão por agente em comum, ao lado da escolha — nunca pré-marcada.
+                        if agentes_vocab is None:
+                            agentes_vocab = _protocolo_padrao().vocabulario.agentes
+                        sugestao = sugerir_ghes(blocos_fds, cache_vinculo.pgr_hidratado, agentes_vocab)
+                        for linha in linhas_sugestao(sugestao, rotulos_ghe):
+                            st.write(linha)
+                        if sugestao.sem_componente_reconhecido:
+                            st.warning(AVISO_SEM_COMPONENTE_RECONHECIDO)
+                        elif sugestao.sem_casamento:
+                            st.warning(AVISO_SEM_CASAMENTO)
+                        else:
+                            st.button(
+                                "Marcar os GHEs sugeridos",
+                                key=f"marcar_sugeridos_{arquivo_fds.name}",
+                                help="Marca os GHEs com mais agentes em comum; os demais ficam para escolha manual.",
+                                on_click=_marcar_sugeridos,
+                                args=(arquivo_fds.name, sugestao.mais_agentes_em_comum),
+                            )
                         # Sem GHE pré-marcado: o selectbox anterior sempre tinha um valor, e
                         # o clique anexava em algum GHE mesmo sem escolha consciente.
                         ghes_escolhidos = st.multiselect(
