@@ -3610,7 +3610,7 @@ riscos); na rota por IA (Aurora e demais CMO) `[A MEDIR]`, sem chave no containe
 
 **Status:** ABERTA — não-bloqueante (a saída do Aurora GHE 16 é a mesma pelos dois gatilhos).
 
-### DT-(sessão `claude/cool-babbage-whh1zw`)-02 — Espirometria para fumos metálicos e poeira metálica: a planilha da Dra. Patrícia (versão atualizada) pede, o motor não tem regra `[RESOLVIDA — R-ESP-04, solda; gesso e espaço confinado seguem abertos]`
+### DT-(sessão `claude/cool-babbage-whh1zw`)-02 — Espirometria para fumos metálicos e poeira metálica: a planilha da Dra. Patrícia (versão atualizada) pede, o motor não tem regra `[RESOLVIDA — R-ESP-04, solda; R-RX-04 + R-ESP-02, gesso; espaço confinado segue aberto]`
 
 **Origem.** Planilha da Dra. Patrícia, versão atualizada (`d7a7612`, 26/09/2026), linha 61: o gatilho de
 "ESPIROMETRIA 24M (ADM, PER, MR, DEM)" mudou de "névoas/neblinas, tintas, colas, impermeabilização" para
@@ -3639,6 +3639,16 @@ declara "Sulfato de cálcio — Gesso" (BAIXO), sem slug; o gabarito pede Espiro
 ao Gesseiro e ao Servente — o padrão de PNOS (R-ESP-02 + R-RX-01-pnos-sem). Proposta: gesso/sulfato de cálcio
 como `poeira_nao_classificada` `[INTERPRETADO — gabarito T65 como precedente]`. **Não implementado** — decisão do
 Diovanni. A partir de `0e99bea` o memorial lista o termo como não reconhecido.
+
+**Decisão (Diovanni, 30/09/2026, branch `ccr-983f0b9f-zkz16m`) — gesso RESOLVIDO, opção (b).** Conflito reportado
+antes de implementar: a nota *** do Quadro 2 do Anexo III NR-07 (texto em `normas/`), alínea "a", exclui do PNOS o
+material com LEO definido, e o sulfato de cálcio tem ACGIH TLV-TWA 10 mg/m³, fração inalável (fontes secundárias
+OSHA e WorkSafeBC). Alias em `poeira_nao_classificada` (opção a) gravaria "gesso é PNOS". Implementado: slug
+`poeira_de_gesso` com 3 termos medidos no acervo; espirometria por `R-ESP-02` (gesso em `poeira_mineral`, item 3.1 —
+nível 1); RX 60M por `R-RX-04` `[INTERPRETADO — gabarito T65]` (nível 2). Código `83acbc9`, PROTOCOLO v116. Efeito
+na rota LLM (T65, Vistamerica 2026-07-28, EURO) `[A MEDIR — sem chave de API no container]`; nos 3 PGRs de rota
+determinística (Fascino, Porto Araras I, Vila Brasil) o texto não traz gesso como agente — efeito nulo.
+**Espaço confinado** segue sem regra de espirometria, sem medição.
 
 ### DT-(sessão `claude/cool-babbage-whh1zw`)-03 — Avaliação psicossocial: planilha da Dra. Patrícia restringe, matrizes recentes dão a todos `[RESOLVIDA — R-PSY-04/R-PSY-05 pela norma, 30/09/2026]`
 

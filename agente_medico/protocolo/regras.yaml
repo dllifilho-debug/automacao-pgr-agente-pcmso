@@ -408,7 +408,7 @@ regras:
       mineral do inventário do PGR → espirometria no admissional e a cada dois anos.
       Momentos MR/dem [DERIVADO — matrizes Carolini 07/2026 e Patrícia 04/2025]; a norma
       crava só adm+per. Sucede R-ESP-01 (DEPRECATED)."
-    resumo_clinico: "Poeira mineral (sílica, asbesto, poeira não classificada) no PGR → espirometria a cada 2 anos. NR-07, Anexo III, item 3.1; mudança de risco e demissional seguem as matrizes das coordenadoras."
+    resumo_clinico: "Poeira mineral (sílica, asbesto, poeira não classificada, gesso) no PGR → espirometria a cada 2 anos. NR-07, Anexo III, item 3.1; mudança de risco e demissional seguem as matrizes das coordenadoras."
     status: DERIVADO
 
   - id: R-ESP-03
@@ -460,6 +460,17 @@ regras:
         momentos: [adm, per, MR, dem]
     base_normativa: "Poeira de madeira → RX OIT 60M. SEM âncora no Anexo III da NR-07 (não é sílica/asbesto/carvão do Quadro 1, nem PNOS do Quadro 2 — agente identificável, DT-003EJ-01) — origem IARC Monographs Vol.62/1995 e 100C/2012 (Grupo 1, carcinogênico p/ humanos) + matriz Patrícia, não norma brasileira conferida [INTERPRETADO]. Medido em 2 PGRs independentes, mesma médica, mesmo valor: GHE-08 Carpintaria (PGR CONSCIENTE SPE 0030 FASCINO, 15.07.26) e GHE-04 Carpintaria (PGR CMO Residencial Aurora Lago das Rosas, 27.08.26), ambos RX 60M. DT-003EJ-01 RESOLVIDA por esta regra."
     resumo_clinico: "Poeira de madeira → RX de tórax (padrão OIT) a cada 5 anos. Sem exigência no Anexo III da NR-07; madeira é cancerígena (IARC grupo 1); segue as matrizes das coordenadoras (Fascino, Aurora)."
+    status: INTERPRETADO
+
+  - id: R-RX-04
+    quando: gesso
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "Poeira de gesso (sulfato de cálcio) → RX OIT 60M. SEM âncora no Anexo III da NR-07: não é sílica/asbesto/carvão (Quadro 1) e não é PNOS (Quadro 2) — tem LEO definido (ACGIH TLV-TWA 10 mg/m³, fração inalável), o que a nota *** do Quadro 2, alínea 'a', exclui. Origem: gabarito RQ.61 MATRIZ DE EXAMES(ADENDO)SPE T65 24.09.26 (Dra. Patrícia), GHE 16 GESSO, Gesseiro e Servente com RX OIT PER 60, sobre PGR TOCTAO ALT 65 (Rev. 01, 06/2026) sem medição [INTERPRETADO — matriz das médicas como precedente, D-ARQ-22 Parte A nível 2]. Momentos MR/dem e o valor coincidem com R-RX-01-pnos-sem por analogia, não por enquadramento. Espirometria do gesso sai por R-ESP-02 (poeira mineral, item 3.1)."
+    resumo_clinico: "Poeira de gesso → RX de tórax (padrão OIT) a cada 5 anos. Sem exigência no Anexo III da NR-07 (gesso tem limite de exposição próprio, não é poeira não classificada); segue a matriz da Dra. Patrícia (T65, 24/09/2026)."
     status: INTERPRETADO
 
   - id: R-PKG-ASF

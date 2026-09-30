@@ -109,6 +109,13 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 30/09/2026, R-RX-04 gesso]`:** branch `ccr-983f0b9f-zkz16m` sobre `main 97703aa` (merge do
+PR #414; IMPLEMENTAÇÃO — gesso como agente próprio) · **1565 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada em
+`83acbc9`, 920,27 s — 1563 + 2)* · `mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v115→**v116** ·
+DECISOES v231 inalterado. `medir_painel`: **`regras 34/49`** (era 33/48 — R-RX-04 nova), **`cas 78/111`** (era 78/110
+— `poeira_de_gesso` sem CAS), `índice sincronizado`. A tabela "Os três números" **não é re-tirada** — segue o
+bloqueador já registrado acima; o movimento fica declarado aqui.
+
 **Baseline `[MEDIDO — 30/09/2026, R-PSY-04/R-PSY-05]`:** branch `claude/keen-curie-xdm7kb` sobre `main 099f405`
 (merge do PR #413; IMPLEMENTAÇÃO — psicossocial pela norma) · **1563 passed, 6 skipped, 0 failed** *(MEDIDO, árvore
 parada, código em `6081c05` + PROTOCOLO v115, 1011,79 s — 1560 − 2 + 5)* · `mypy --strict` alvo canônico **limpo, 54
