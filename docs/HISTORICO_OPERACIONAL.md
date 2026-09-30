@@ -11032,3 +11032,48 @@ execução (suíte, mypy, `medir_painel`, reversões, `timeit`, aproximação do
 **Lição de método.** O critério de aceite da `D-ARQ-90` foi escrito sobre a sobreposição **textual** medida na
 sessão de arquitetura (aguarrás "2/7" no GHE 18); a fatia resolve por **slug**, e a diferença só apareceu
 ao medir. Critério de aceite de sugestão por agente precisa ser medido no instrumento da fatia, não no texto.
+
+## Sessão (branch `claude/keen-curie-xdm7kb`, recriada sobre `main f526edb`, pós-merge do PR #412) — 30/09/2026 — AUDITORIA T65 + IMPLEMENTAÇÃO: alias de PNOS e riscos não reconhecidos no memorial
+
+**Pedido.** Diovanni: revisar duas auditorias externas (Perplexity e NotebookLM) da matriz do app do T65 contra
+o gabarito RQ.61 `MATRIZ DE EXAMES(ADENDO)SPE T65 … 24.09.26`, com o memorial do app. Depois: caminho (a) para o
+PNOS com "outramaneira" — alias, não fuzzy — e o memorial passar a listar os riscos do PGR não reconhecidos.
+
+**Conferência (script descartável no scratchpad, 61 funções × exame, momentos e periodicidade).** 4 divergências:
+Psicossocial a mais em 15 funções (GHE 03, 08, 14, 17, 18); MEK em BAIXO a mais no GHE 11; Espirometria e RX
+faltando nos GHEs 16 (gesso sem slug) e 18 (PNOS com "outramaneira"). Resto idêntico. Total 140 → 138 exames. O
+PGR usado é o `PGR - TOCTAO ALT 65.pdf` do acervo (Rev. 01, 06/2026), confirmado contra o HTML exportado do
+sistema do SECONCI que o Diovanni anexou (mesmos 18 GHEs, mesmas grafias). Erros das auditorias: "27 funções"
+(são 24 ocorrências em 20 funções); prefixo duplicado "GHEs 08 a 16" (é 07–12); cabeçalho e rodapé tratados como
+erro do motor (são texto livre do formulário); grafias do PGR lidas como digitação do app; "suprimidos na saída do
+DOCX" (o motor nunca emitiu). Nenhuma das duas viu a acetona do GHE 11 (BAIXO como o MEK, sem exame porque o termo
+não resolve) nem que o memorial não listava termos não reconhecidos.
+
+**Desvio de rota, com motivo.** O Diovanni escolheu primeiro (b), fuzzy para o PNOS. Parado antes de editar: a
+`D-ARQ-64` cl.5 proíbe `fuzzy_permitido` em slug com canal de criticidade (R-RX-01, R-ESP-02), com teste
+computado. O resolvedor já recusava o termo com `fuzzy_recusado` nomeando o PNOS. Reapresentado; decidido (a).
+
+**Commit.** `0e99bea` — alias em `agentes.yaml` (índice 178 → 179, guard atualizado); `riscos_nao_reconhecidos` e
+`BlocoMemorial.nao_reconhecidos` em `memorial_matriz.py`, contagem no Resumo; a tela passa `pgr` e `pendencias`
+ao memorial. Docs deste fechamento.
+
+**Testes.** `test_memorial_nao_reconhecidos.py`, 5. Varredura inversa, 8 reversões, 8/8 mortas, 5/5
+discriminantes: sem o alias; memorial ignora `pgr`; lista também resolvidos; texto único para toda causa; sem
+cruzar a pendência `fuzzy_recusado` (vizinho); sem render no GHE; sem contagem no Resumo; casca sem `pgr`.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, **54 arquivos**. 1ª suíte completa: 1 failed
+(`test_indice_real_tem_178_entradas`, guard de inventário do índice — esperado pelo alias), atualizado para 179
+com a linha de histórico. Suíte completa final, árvore parada em `0e99bea`: **1560 passed, 6 skipped, 0 failed**
+(937,11 s), +5 sobre 1555 (`96875d6`).
+
+**Pendências.** Notas em `DT-(sessão claude/cool-babbage-whh1zw)-03` (Psicossocial: a revisão das médicas voltou),
+`DT-003EB-02` (3º gabarito que dispensa em BAIXO) e `DT-(sessão claude/cool-babbage-whh1zw)-02` (gesso medido);
+nova `DT-(sessão claude/keen-curie-xdm7kb)-03` (acetona com produto no termo; forma do documento). Nenhuma regra
+clínica alterada: as três propostas aguardam decisão do Diovanni.
+
+**Três números clínicos.** Não re-tirados: nenhuma `R-*` tocada; `agentes.yaml` só em `termos:`, sem `cas:` nem
+slug novo — `medir_painel` em `0e99bea`: `regras 32/47`, `cas 78/110`, iguais ao Baseline anterior.
+
+**Lição de método.** Recomendei (b) sem conferir a D-ARQ-64. Antes de propor mudança em allowlist, índice ou
+vocabulário de slug carregado, ler a decisão que rege o mecanismo — o teste computado teria parado a sessão de
+qualquer jeito, mas a recomendação errada custou um turno do Diovanni.
