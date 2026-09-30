@@ -3670,12 +3670,12 @@ planilha da Dra. Patrícia). **Não implementado** — decisão do Diovanni.
 
 **Resolução (branch `claude/keen-curie-xdm7kb`, 30/09/2026) — decidida pela norma, não pelo placar.** Medido antes de
 implementar, 22 matrizes da Dra. Patrícia de 14 a 24/09/2026 (1.113 cargos): Psicossocial com atividade crítica 565,
-**sem atividade crítica 261** (17 matrizes), atividade crítica sem Psicossocial 174 (quase todas de PGR sem seção
+**sem atividade crítica 261** (15 dos 22 documentos), atividade crítica sem Psicossocial 174 (quase todas de PGR sem seção
 psicossocial), nenhum dos dois 113; Saúde Mental em 1.001. O `.doc` do T65 no acervo (26/09) dá Psicossocial ao GHE 03;
 o PDF da auditoria, com a OBS de adequação ao protocolo de 14/09/2026, não — é o único dos 22 que se declara adequado.
 Com o precedente dividido, a hierarquia da D-ARQ-22 manda ao nível 1: NR-35 **35.4.4** (altura) e NR-33 **33.5.19.1**
 (espaço confinado) mandam considerar os fatores psicossociais na aptidão; NR-20 **20.15.6**, para brigada de
-inflamáveis. Nas 31 cópias de NR de `normas/`, nenhuma outra liga fatores psicossociais à avaliação de aptidão (a NR-17
+inflamáveis. Nos 32 arquivos de NR de `normas/`, nenhuma outra liga fatores psicossociais à avaliação de aptidão (a NR-17
 cita no Anexo I, operador de checkout; a NR-04, só num código CNAE) — equipamento pesado fica fora. Resolução CFP 2/2022:
 avaliação psicossocial por psicólogo conforme as NRs. **Decisão do Diovanni:** R-PSY-03 DEPRECATED; **R-PSY-04**
 (Psicossocial, altura ou espaço confinado, com ou sem inventário no PGR, `[DERIVADO]`) e **R-PSY-05** (Saúde Mental,
