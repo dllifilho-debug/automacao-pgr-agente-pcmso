@@ -3649,6 +3649,9 @@ nível 1); RX 60M por `R-RX-04` `[INTERPRETADO — gabarito T65]` (nível 2). C�
 na rota LLM (T65, Vistamerica 2026-07-28, EURO) `[A MEDIR — sem chave de API no container]`; nos 3 PGRs de rota
 determinística (Fascino, Porto Araras I, Vila Brasil) o texto não traz gesso como agente — efeito nulo.
 **Espaço confinado** segue sem regra de espirometria, sem medição.
+Correção (PROTOCOLO v117): os PGRs Ricco (Hetrin mar/25, Serra Dourada mai/24, Atualização 14.09.26) declaram
+o gesso como agente, mas param no gate `pgr_cargo_based` — sem alias até existir rota por cargo. Saída do
+Vistamerica Ver.02 (gesso como "PNOS/PNOR" medido) `[A MEDIR — rota LLM]`.
 
 ### DT-(sessão `claude/cool-babbage-whh1zw`)-03 — Avaliação psicossocial: planilha da Dra. Patrícia restringe, matrizes recentes dão a todos `[RESOLVIDA — R-PSY-04/R-PSY-05 pela norma, 30/09/2026]`
 
