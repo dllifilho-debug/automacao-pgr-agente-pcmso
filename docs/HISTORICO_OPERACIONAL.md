@@ -10960,3 +10960,28 @@ Fascino). `mypy --strict` alvo canônico limpo, **53 arquivos** (+1, `glifos_pdf
 **Verificação.** Primeira suíte completa: 2 failed (`test_requirements_app.py` — `pdfminer` importado sem
 declaração), corrigido. Suíte completa final (árvore parada): **1546 passed, 6 skipped, 0 failed** (1017.95s),
 +5 exato sobre 1541. `tests/test_gerar_indice_darq.py`: 6 passed.
+
+## Sessão (branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #410) — 30/09/2026 — ARQUITETURA: `D-ARQ-90` (sugestão de vínculo FDS↔GHE), ratificada
+
+**Pedido.** Diovanni: quais FDS vincular a cada GHE do Aurora; depois, se o app faz esse cruzamento, e a
+proposta de uma D-ARQ para sugerir o vínculo. **Q1–Q5 ratificadas como recomendado.** Sem código.
+
+**Medido (scripts descartáveis no scratchpad).** Agentes químicos e fonte geradora por GHE no PGR do Aurora,
+cruzados com o texto das 37 FDS de `fds_originais/`. Os números de GHE nos nomes dos arquivos são de outros
+PGRs ("GHE 08 Hidro-sanitárias" = GHE 11 do Aurora). Pacotes "FDS <CARGO>.pdf" identificados por produto.
+Sobreposição de componentes: FDS ENCANADOR 6/6 no GHE 11; eletrodo no GHE 16; Fundo Zarcão 5/7 e aguarrás
+2/7 no GHE 18. Armadilhas por nome: "FDS PINTOR" é impermeabilizante asfáltico (GHE 22); "FDS ALMOXARIFE" é o
+adesivo de PVC (GHE 11, não 02). Divergência PGR × FDS: "FDS CARPINTEIRO" (Quartzolit) sem o ácido oleico
+que o PGR declara no GHE 04. O vínculo é manual por decisão (D-ARQ-49 Parte 2, v199/v200) — confirmado em
+`web_matriz.py`.
+
+**Achado de passagem.** O commit "Add files via upload" (`f35ff93`, 30/09 06:02) entrou na `main` sem
+arquivos (árvore idêntica à de `cc17d99`): as FDS que o Diovanni pretendia subir não chegaram ao repositório.
+
+**Decisão.** `D-ARQ-90` criada e ratificada (DECISOES v230): sugestão por agente em comum (CAS→slug da FDS ×
+riscos resolvidos do GHE), sem nome de arquivo nem cargo, sem limiar, nunca pré-marcada (botão explícito),
+aviso não bloqueante para FDS sem casamento, fonte geradora adiada. Fatia 1 a implementar em sessão seguinte,
+medida contra as respostas do app no Aurora.
+
+**Verificação.** Docs-only. `python -m scripts.gerar_indice_darq` + `tests/test_gerar_indice_darq.py`: 6
+passed. Suíte completa não rodada: nenhum código, dado ou teste tocado.

@@ -4424,6 +4424,114 @@ Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #408. Pedido
 - **Testes:** `test_glifos_pdf.py` (5). Varredura inversa, 8 reversões de código, 8/8 mortas por asserção.
 - **Dependência:** `pdfminer.six` passa a ser importado direto (`glifos_pdf.py`) e entra em `requirements.txt` sem piso próprio — o pdfplumber 0.11.10 fixa `pdfminer.six==20260107`; já era instalado como dependência transitiva, então o build (D-ARQ-78) não muda. Pego por `test_requirements_app.py` na primeira suíte completa da fatia (2 falhas), mapa import→distribuição atualizado.
 
+
+---
+
+## D-ARQ-90 — Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma
+
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta). Sem código. Fatia 1 a implementar em sessão seguinte, medida contra as respostas do app no Aurora.
+
+Sessão branch `claude/exciting-ramanujan-g9bbl4` (`main f35ff93`). Pedido do Diovanni, depois da conferência manual de quais FDS do acervo vão em cada GHE do Aurora.
+
+**Contexto.**
+
+**O que a decisão anterior rejeitou, e esta decisão mantém rejeitado** (D-ARQ-49 Parte 2, v199/v200 e
+nota de 25/09/2026):
+
+1. **Criar `produtos_quimicos` automaticamente pela fonte geradora.** Rejeitado por medição no Fascino:
+   agrupar por `fonte_geradora` não separa químico de físico, e produto sem FDS dispara R-PGR-04
+   bloqueante falso. Esta decisão **não cria produto nem anexa nada**: só sugere; o anexo continua
+   sendo o clique do RT.
+2. **Sugerir pelo nome do arquivo.** No Aurora, o arquivo diz "GHE 08 Hidro-sanitárias", e o PGR
+   numera esse GHE como 11. Esta decisão **não lê o nome do arquivo** — nem número de GHE, nem cargo.
+
+**Medido em 30/09/2026 (conferência manual, scripts descartáveis no scratchpad).** Cruzando os
+componentes que o PGR do Aurora declara por GHE com o texto das 37 FDS de `fds_originais/`:
+
+- **Onde a sobreposição de componentes acerta:**
+  - GHE 11 (adesivo plástico para PVC; o PGR lista MEK, THF, ciclohexanona, acetona, acetato de etila
+    e 2,5-tiofenodiilbis): "FDS ENCANADOR" cobre 6/6; as FDS Tigre isoladas cobrem 4/6 cada.
+  - GHE 16 (fumos de solda): eletrodo, 3–4/4.
+  - GHE 18 (pintura): Fundo Zarcão 5/7, aguarrás 2/7.
+- **Onde um sinal por nome enganaria — e a sobreposição não:**
+  - "FDS PINTOR" é impermeabilizante asfáltico: pelo nome iria para Pintura (GHE 18); pelo componente
+    (asfalto), vai para Impermeabilização (GHE 22).
+  - "FDS ALMOXARIFE" é o pacote do adesivo de PVC: pelo cargo iria para Almoxarifado (GHE 02, que no
+    PGR só tem particulados); pelo componente, para o GHE 11.
+- **Divergência PGR × FDS que só aparece cruzando:** "FDS CARPINTEIRO" (Desmoldante Concentrado
+  Quartzolit) não contém ácido oleico, que é o que o PGR declara no GHE 04. Os desmoldantes que contêm
+  são Desmol CD e Vedacit.
+- **Limite medido:** o GHE 13 declara "Produtos Domissanitários (Água Sanitária e detergente)" — termo
+  genérico que pode não resolver para slug; aí a sobreposição por agente não acha a FDS de água
+  sanitária `[A MEDIR — resolução do termo]`.
+
+**O que existe hoje para apoiar.** Antes do vínculo, a tela já tem a composição transcrita da FDS
+(`BlocoVerbatim`/`MembroVerbatim`: CAS e nome por membro), resolvível para slug pelo mesmo
+`resolver_composicao` + `construir_indice_cas` que o motor usa (`listar_produtos_anexados` já faz isso
+depois do vínculo). O PGR hidratado já tem, por GHE, os riscos resolvidos para slug (`RiscoPGR.agente`).
+
+**Decisão.**
+
+**cl.1 — Sinal único: agente em comum.** Para cada FDS carregada, a sugestão compara os slugs dos
+componentes da FDS (resolvidos por CAS, o mesmo caminho do motor) com os slugs dos riscos declarados
+em cada GHE do PGR. Não entram: nome do arquivo, número de GHE no nome, nome do cargo, nem heurística
+de texto livre. Componente sem slug não conta e aparece como "N componentes sem correspondência no
+vocabulário".
+
+**cl.2 — Sem limiar.** Todo GHE com pelo menos um agente em comum aparece, ordenado pelo número de
+agentes em comum, **com os agentes nomeados** ("GHE 11 — 6 em comum: MEK, THF, …"). Não há corte que
+decida sozinho: um corte seria categoria sem fonte (D-ARQ-22). Agentes genéricos (sílica, poeira) vão
+aparecer em muitos GHEs para uma FDS de cimento — isso é verdade do PGR e fica visível como tal.
+
+**cl.3 — Nunca pré-marcar.** O `multiselect` continua vazio por padrão (nota de 25/09: o clique
+anexava sem escolha consciente). A sugestão é um texto ao lado, mais um botão explícito "Marcar os GHEs
+sugeridos", que só preenche a seleção; anexar continua sendo o botão de sempre.
+
+**cl.4 — Divergência vira aviso, não bloqueio.** FDS cujos componentes não casam com nenhum GHE ganha
+um aviso não bloqueante: "nenhum GHE do PGR declara os agentes desta FDS — confira se o PGR está
+desatualizado ou se a FDS é de outro produto" (caso Quartzolit × ácido oleico).
+
+**cl.5 — Fonte geradora como segundo sinal: adiada por medição.** O texto da fonte geradora ("adesivo
+plástico para PVC", "Água Sanitária") pegaria o caso do GHE 13, mas hoje é descartado na hidratação.
+Só entra (fatia 2) se a fatia 1 medir que a sobreposição por agente deixa de fora vínculos reais.
+
+**Fronteiras.**
+- **D-ARQ-49 Parte 2** preservada: produto só nasce do anexo do RT; nenhum `None` órfão; R-PGR-04 não
+  é tocado.
+- **Motor intocado:** a sugestão é apresentação, e usa só funções que já existem.
+- **D-ARQ-22:** nada muda sem clique; a divergência aparece em vez de sumir.
+
+**Universalidade (D-ARQ-06).** Expressa sobre CAS → slug e risco → slug, não sobre obra, marca ou
+setor.
+
+**Fatias.**
+
+1. **Núcleo puro** `sugerir_ghes(blocos_fds, pgr_hidratado, vocabulario)` em `superficie/`, que
+   devolve, por GHE, os agentes em comum e os componentes sem slug. Mais, na tela: sugestão por FDS,
+   botão "Marcar os GHEs sugeridos" e o aviso da cl.4.
+2. **Condicional à medição da fatia 1:** fonte geradora como segundo sinal (atravessar o texto na
+   hidratação, como o `termo` da D-ARQ-88).
+3. **Opcional:** visão inversa — GHE com agente químico declarado e sem FDS anexada (ex.: GHE 21,
+   óleo lubrificante).
+
+**Critério de aceite da fatia 1.**
+
+- **Matriz inalterada:** a sugestão não muda nenhuma matriz. Nos 3 pares determinísticos e no Aurora,
+  a saída do motor é idêntica à da `main` com os mesmos anexos.
+- **Aurora com o pacote de FDS** — o GHE sugerido em 1º lugar deve ser:
+  - FDS ENCANADOR → 11;
+  - FDS SOLDADOR → 16;
+  - Fundo Zarcão e aguarrás → 18;
+  - FDS PINTOR → 22;
+  - FDS ALMOXARIFE → 11 (não 02).
+
+  FDS CARPINTEIRO deve gerar o aviso da cl.4. Os resultados dependem da composição transcrita pela
+  rota de IA e das respostas do app `[A MEDIR]`. Divergência nesses casos é bloqueador: parar e
+  reportar.
+- **Testes:** cada teste nomeia a reversão de código que o deixa vermelho. Por exemplo: sugerir pelo
+  nome do arquivo (o caso "FDS PINTOR" passaria a apontar o 18); pré-marcar o `multiselect`; aplicar
+  corte por limiar (um GHE com 1 agente em comum sumiria).
+
 ---
 
 ## Histórico de revisões
@@ -4659,3 +4767,4 @@ Sessão branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #408. Pedido
 | v227 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-88`, ratificada pelo Diovanni, Q1–Q4): **nota de aplicação em `D-ARQ-88`** (mesma ID, cláusulas inalteradas) — termo do PGR atravessa a hidratação até `OrigemRisco`; memorial nomeia o agente que disparou cada regra e usa o termo no "não pedido"; 3 pares com motor e matriz assinada idênticos. |
 | v228 | 29/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA + IMPLEMENTAÇÃO, ratificada pelo Diovanni, Q1–Q4): **`D-ARQ-89` CRIADA** — glifo não mapeado pelo gerador do PDF (13 glifos ".case" da Inter, 5.879 NUL em 3 de 28 PGRs) restaurado na extração por tabela verificada visualmente; fatia 1 implementada (pendências na tela e relatório do harness sanitizados; DH-003EG-01 fechada como escrita). Decisões 88 → **89**. |
 | v229 | 30/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (IMPLEMENTAÇÃO — fatia 2 de `D-ARQ-89`): **nota de aplicação em `D-ARQ-89`** (mesma ID, cláusulas inalteradas) — glifos ".case" da Inter restaurados na extração (`glifos_pdf.py`, injetado em `paginas_liberadas`); 5.879 NUL → 0 em 3 PGRs, 25/28 textos byte-idênticos; 3 pares com estrutura de matriz idêntica; CBO entre parênteses e rótulo "CBO:" consumidos. |
+| v230 | 30/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA — ratificação, docs-only): **`D-ARQ-90` CRIADA e RATIFICADA** (Q1–Q5) — sugestão de vínculo FDS↔GHE por agente em comum (CAS→slug da FDS × riscos resolvidos do GHE), sem ler nome de arquivo nem cargo, sem limiar, nunca pré-marcada; aviso não bloqueante para FDS sem casamento; preserva D-ARQ-49 Parte 2 (produto só nasce do anexo do RT). Sem código. Decisões 89 → **90**. |
