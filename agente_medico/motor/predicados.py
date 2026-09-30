@@ -221,6 +221,9 @@ def _psicossocial(ctx: GHEContext) -> bool:
 # R-RX-03/R-ESP-03; agente carcinogênico (IARC Grupo 1) fora dos Quadros 1 e 2
 # do Anexo III NR-07 (não é sílica/asbesto/carvão nem PNOS) — DT-003EJ-01.
 _por_filtro("poeira_de_madeira", lambda r: r.agente == "poeira_de_madeira")
+# R-RX-04/R-ESP-02; gesso tem LEO (ACGIH), logo não é PNOS do Quadro 2 do Anexo III
+# NR-07 — predicado próprio, fora de pnos_*.
+_por_filtro("gesso", lambda r: r.agente == "poeira_de_gesso")
 # R-ESP-02; NR-07 Anexo III item 3.1 (Portaria MTP 567/2022).
 _por_filtro("silica", lambda r: r.agente == "silica")
 _por_filtro("asbesto", lambda r: r.agente == "asbesto")

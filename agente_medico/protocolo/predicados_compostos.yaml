@@ -23,6 +23,7 @@ predicados_compostos:
       - silica
       - asbesto
       - pnos
+      - gesso
 
   # R-CLI-05 perna (a): cancerígeno IARC 1/2A com indicador biológico no Anexo I da
   # NR-07, em qualquer nível. Lista = gabarito 003.DP (docs/referencia/
