@@ -11089,13 +11089,13 @@ qualquer jeito, mas a recomendação errada custou um turno do Diovanni.
 virou decisão pela norma, a pedido dele ("temos que ver a norma, para não confiar só no resultado").
 
 **Medido antes (scripts descartáveis no scratchpad).** 22 matrizes da Dra. Patrícia de 14 a 24/09/2026, 1.113 cargos:
-Psicossocial com atividade crítica 565, sem 261 (17 matrizes), atividade crítica sem Psicossocial 174, nenhum 113;
+Psicossocial com atividade crítica 565, sem 261 (15 dos 22 documentos), atividade crítica sem Psicossocial 174, nenhum 113;
 Saúde Mental em 1.001. Duas versões do T65 24.09.26: o `.doc` do acervo dá Psicossocial ao GHE 03; o PDF da auditoria,
 com a OBS de adequação ao protocolo de 14/09/2026, não. Varandas Flamboyant `.doc` e `.pdf` idênticos. Item 26.1 do
 PGR T65: inventário por 2 grupos (Operacional, Técnico Administrativo), 9 fatores cada, um MODERADO em cada, COPSOQ
 não aplicado ("antecipação técnica") — o nível psicossocial não separa quem recebe o exame.
 
-**Norma (nível 1 da D-ARQ-22).** Varridas as 31 cópias de NR de `normas/`: NR-35 35.4.4 (altura) e NR-33 33.5.19.1
+**Norma (nível 1 da D-ARQ-22).** Varridos os 32 arquivos de NR de `normas/`: NR-35 35.4.4 (altura) e NR-33 33.5.19.1
 (espaço confinado) mandam considerar os fatores psicossociais na aptidão; NR-20 20.15.6 (brigada de inflamáveis)
 também; NR-01 só o gerenciamento no PGR; NR-07, NR-11, NR-12, NR-18 e as demais nada. Busca externa: Resolução CFP
 2/2022 (avaliação psicossocial por psicólogo conforme as NRs). Páginas oficiais (gov.br, anamt.org.br,
@@ -11122,6 +11122,12 @@ sozinho não emite, R-PSY-05 só saúde mental, sem inventário não emite); `te
 **Verificação.** `mypy --strict` alvo canônico: limpo, **54 arquivos**. Suíte completa, árvore parada (código em
 `6081c05` + PROTOCOLO v115): **1563 passed, 6 skipped, 0 failed** (1011,79 s), 1560 − 2 + 5. `medir_painel`:
 `regras 33/48 (69%)` (era 32/47), `cas 78/110`, `índice sincronizado`.
+
+**`/conferir` (`D-ARQ-84`).** Sobre `7b9f1a5..4dbf3da`, contra `4dbf3da`: 54 afirmações, 27 CONFERE, 3 DIVERGE, 24 NÃO
+VERIFICÁVEL. Os 3 DIVERGE eram a mesma contagem ("31" arquivos de NR em `normas/`; são 32), corrigida no PROTOCOLO,
+PENDENCIAS e HISTORICO. Entre os NÃO VERIFICÁVEL, o "(17 matrizes)": recontado nesta sessão, são 15 dos 22 documentos —
+corrigido, junto com "as outras 20 matrizes" do PROTOCOLO. A frase de vigência passou a remeter a `normas/` (mantido
+atualizado pelo Diovanni), sem `[A MEDIR]` de Gov.br.
 
 **Lição de método.** A proposta da auditoria ("psicossocial = atividade crítica") vinha de 1 documento; o corpus de 22
 dizia outra coisa, e a norma separou os dois exames. Medir o corpus antes de implementar e subir à norma quando o
