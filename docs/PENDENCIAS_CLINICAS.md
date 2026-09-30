@@ -3640,7 +3640,7 @@ ao Gesseiro e ao Servente — o padrão de PNOS (R-ESP-02 + R-RX-01-pnos-sem). P
 como `poeira_nao_classificada` `[INTERPRETADO — gabarito T65 como precedente]`. **Não implementado** — decisão do
 Diovanni. A partir de `0e99bea` o memorial lista o termo como não reconhecido.
 
-### DT-(sessão `claude/cool-babbage-whh1zw`)-03 — Avaliação psicossocial: planilha da Dra. Patrícia restringe, matrizes recentes dão a todos `[ABERTA — decisão do Diovanni]`
+### DT-(sessão `claude/cool-babbage-whh1zw`)-03 — Avaliação psicossocial: planilha da Dra. Patrícia restringe, matrizes recentes dão a todos `[RESOLVIDA — R-PSY-04/R-PSY-05 pela norma, 30/09/2026]`
 
 **Origem.** Planilha da Dra. Patrícia, versão atualizada (`d7a7612`): "Avaliação Médica de Saúde Mental"
 para riscos psicossociais tolerável a substancial (ADM, PER 12M, MR); "Avaliação Psicossocial" só para
@@ -3667,6 +3667,22 @@ O gabarito traz a OBS "Matriz com adequação para o novo protocolo de avaliaç�
 válidos á partir de 14/09/2026". O Aurora (27/08), que dá as duas a todos, é anterior. Proposta: `R-PSY-03`
 com a Psicossocial condicionada à atividade crítica e a Saúde Mental a todos, fonte nível 2 (gabarito T65 +
 planilha da Dra. Patrícia). **Não implementado** — decisão do Diovanni.
+
+**Resolução (branch `claude/keen-curie-xdm7kb`, 30/09/2026) — decidida pela norma, não pelo placar.** Medido antes de
+implementar, 22 matrizes da Dra. Patrícia de 14 a 24/09/2026 (1.113 cargos): Psicossocial com atividade crítica 565,
+**sem atividade crítica 261** (17 matrizes), atividade crítica sem Psicossocial 174 (quase todas de PGR sem seção
+psicossocial), nenhum dos dois 113; Saúde Mental em 1.001. O `.doc` do T65 no acervo (26/09) dá Psicossocial ao GHE 03;
+o PDF da auditoria, com a OBS de adequação ao protocolo de 14/09/2026, não — é o único dos 22 que se declara adequado.
+Com o precedente dividido, a hierarquia da D-ARQ-22 manda ao nível 1: NR-35 **35.4.4** (altura) e NR-33 **33.5.19.1**
+(espaço confinado) mandam considerar os fatores psicossociais na aptidão; NR-20 **20.15.6**, para brigada de
+inflamáveis. Nas 31 cópias de NR de `normas/`, nenhuma outra liga fatores psicossociais à avaliação de aptidão (a NR-17
+cita no Anexo I, operador de checkout; a NR-04, só num código CNAE) — equipamento pesado fica fora. Resolução CFP 2/2022:
+avaliação psicossocial por psicólogo conforme as NRs. **Decisão do Diovanni:** R-PSY-03 DEPRECATED; **R-PSY-04**
+(Psicossocial, altura ou espaço confinado, com ou sem inventário no PGR, `[DERIVADO]`) e **R-PSY-05** (Saúde Mental,
+inventário no PGR, `[INTERPRETADO]`). As 261 Psicossociais fora dessas atividades ficam como conduta acima do
+mínimo normativo. Efeito nos 3 pares: a Psicossocial sai de 3/4/17 GHEs (Fascino 8, Porto Araras I 22, Vila Brasil
+74 cargos). Pesquisa externa: páginas oficiais (Gov.br, ANAMT, Cofen) bloqueadas pela rede do ambiente; o manual
+GRO/PGR e as Perguntas e Respostas do MTE (2026) não foram lidos no texto integral `[A MEDIR]`.
 
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-01 — Aguarrás do Aurora não casa com o GHE 18: termo do PGR e CAS da FISPQ fora do vocabulário `[ABERTA — bloqueia o aceite da D-ARQ-90 fatia 1; decisão do Diovanni]`
 
@@ -3726,4 +3742,19 @@ estão como notas nas DTs de origem.
   como erro do app.
 
 **Status:** ABERTA — não-bloqueante.
+
+### DT-(sessão `claude/keen-curie-xdm7kb`)-04 — Brigada de emergência com inflamáveis (NR-20 20.15.6) sem gatilho de avaliação psicossocial `[ABERTA — sem caso medido]`
+
+**Origem.** Varredura das NRs de `normas/` na decisão da R-PSY-04 (30/09/2026). NR-20 **20.15.6**: *"Os integrantes da
+equipe de resposta a emergências devem ser submetidos a exames médicos específicos para a função que irão
+desempenhar, conforme estabelece a Norma Regulamentadora nº 7, incluindo os fatores de riscos psicossociais, com a
+emissão do respectivo atestado de saúde ocupacional."*
+
+**Situação.** Não há agente nem cargo no vocabulário que marque "equipe de resposta a emergências com inflamáveis"; a
+R-PSY-04 cobre só altura e espaço confinado. Nenhum PGR do acervo medido declara essa equipe `[A MEDIR]`.
+
+**Caminho.** Quando aparecer o primeiro PGR com a brigada da NR-20: slug ou marcador de cargo e inclusão no composto
+`aptidao_psicossocial_nr`, com a fonte NR-20 20.15.6.
+
+**Status:** ABERTA — sem caso medido.
 
