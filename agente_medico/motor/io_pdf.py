@@ -6,6 +6,8 @@ from pathlib import Path
 import pdfplumber
 from pdfplumber.page import Page
 
+from agente_medico.motor.glifos_pdf import GerenciadorComGlifos
+
 
 def paginas_liberadas(caminho: Path) -> Iterator[Page]:
     """Abre `caminho` com pdfplumber e entrega cada página, chamando
@@ -17,6 +19,9 @@ def paginas_liberadas(caminho: Path) -> Iterator[Page]:
     parte do pico; `close()` é o que resolve [MEDIDO — 003.ET fatia 2].
     """
     with pdfplumber.open(caminho) as pdf:
+        # D-ARQ-89 cl.1: antes da primeira página, que é quando o pdfplumber
+        # passa a usar o gerenciador para carregar fontes.
+        pdf.rsrcmgr = GerenciadorComGlifos()
         for page in pdf.pages:
             yield page
             page.close()

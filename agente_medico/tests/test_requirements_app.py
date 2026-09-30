@@ -11,6 +11,7 @@ from pathlib import Path
 MAPA_IMPORT_PARA_DISTRIBUICAO: dict[str, str] = {
     "docx": "python-docx",
     "pdfplumber": "pdfplumber",
+    "pdfminer": "pdfminer.six",
     "requests": "requests",
     "streamlit": "streamlit",
     "yaml": "PyYAML",

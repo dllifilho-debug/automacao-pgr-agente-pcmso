@@ -1203,6 +1203,10 @@ desta DH. O `\r\n` do registro adicional não se reproduz no Linux (`write_text`
 
 **Status:** RESOLVIDA (D-ARQ-89 fatia 1).
 
+**Fatia 2 (30/09/2026).** O caractere impresso é restaurado na extração (`motor/glifos_pdf.py`, injetado em
+`io_pdf.paginas_liberadas`): 5.879 NUL → 0 nos 3 PGRs, texto dos outros 25 byte-idêntico, matrizes dos 3
+pares com a mesma estrutura. A sanitização de apresentação fica como defesa para glifo fora da tabela.
+
 ### DH-003EG-02 — O instrumento que pauta a fila vive fora do git `[ABERTA — higiene de método]`
 
 **Origem:** 003.EG, ao abrir a sessão contra um diff desatualizado.

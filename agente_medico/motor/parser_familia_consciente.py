@@ -154,8 +154,13 @@ _PADRAO_DELIMITADOR_ENTRADAS = re.compile(r"[,;]")
 # também separa entradas: no Vila Brasil Escritório a vírgula entre dois
 # cargos falta e só o CBO os divide ("Analista de Produtos SR l
 # \x001423\x0030\x00 Coordenador de Marketing"). DT-(sessão
-# claude/hopeful-newton-yjv3k7)-01.
-_PADRAO_CBO = re.compile(r"[\s\x00-]*\d{4,5}[\s\x00-]*\d{2}[\s\x00-]*")
+# claude/hopeful-newton-yjv3k7)-01. D-ARQ-89 cl.4: com o glifo restaurado na
+# extração o CBO chega entre parênteses, "(4110-10)" — os parênteses são
+# consumidos junto, senão sobra "(" no fim do nome do cargo. Só "(" antes e
+# ")" depois: o ")" de um nome como "(Betoneira)" não pode ser engolido.
+# O rótulo "CBO:" dentro do parêntese sai junto (Vila Brasil GHE 20,
+# "Analista jurídico júnior (CBO: 2410-40)").
+_PADRAO_CBO = re.compile(r"[\s\x00(-]*(?:CBO:?\s*)?\d{4,5}[\s\x00-]*\d{2}[\s\x00)-]*")
 
 
 def _separar_cargos_da_celula(celula: str) -> tuple[str, ...]:
