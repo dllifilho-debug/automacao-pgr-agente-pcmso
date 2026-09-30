@@ -52,7 +52,6 @@ from agente_medico.motor.transcricao_fds import montar_fds
 from agente_medico.motor.transcritor_fds import TranscritorLLM
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
 from agente_medico.superficie.apresentacao import EmissaoFuturaError, validar_data_emissao
-from agente_medico.superficie.sugestao_vinculo import SugestaoVinculo
 from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
     DocumentoMatriz,
@@ -61,6 +60,7 @@ from agente_medico.superficie.documento_matriz import (
     montar_documento,
     renderizar_html,
 )
+from agente_medico.superficie.sugestao_vinculo import SugestaoVinculo
 
 __all__ = [
     "CacheMatrizes",
@@ -631,7 +631,11 @@ def pagina_matriz() -> None:
         resumos_do_protocolo,
     )
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
-    from agente_medico.superficie.sugestao_vinculo import AVISO_SEM_CASAMENTO, sugerir_ghes
+    from agente_medico.superficie.sugestao_vinculo import (
+        AVISO_SEM_CASAMENTO,
+        AVISO_SEM_COMPONENTE_RECONHECIDO,
+        sugerir_ghes,
+    )
     from agente_medico.superficie.apresentacao import (
         MENSAGEM_EMISSAO_FUTURA,
         EmissaoFuturaError,
@@ -808,6 +812,9 @@ def pagina_matriz() -> None:
         # só mostrava vínculo, produtos e medições na interação seguinte ao clique
         # em Gerar matriz. A posição na tela é a do container etapa_fds.
         def _renderizar_vinculos(cache_vinculo: CacheMatrizes | None) -> None:
+            # Uma carga por renderização, não por FDS: _protocolo_padrao relê os YAML
+            # (~160 ms medidos em 30/09/2026) e a página chega a ter 16 FDS.
+            agentes_vocab: dict[str, Any] | None = None
             for arquivo_fds in arquivos_fds or ():
                 with etapa_fds:
                     with tempfile.TemporaryDirectory() as tmp_fds:
@@ -847,19 +854,22 @@ def pagina_matriz() -> None:
                             ghe.id: f"{ghe.id} — {nome_ghe_exibicao(ghe.nome)}".strip(" —") for ghe in ghes_pgr
                         }
                         # D-ARQ-90: sugestão por agente em comum, ao lado da escolha — nunca pré-marcada.
-                        sugestao = sugerir_ghes(
-                            blocos_fds, cache_vinculo.pgr_hidratado, _protocolo_padrao().vocabulario.agentes
-                        )
+                        if agentes_vocab is None:
+                            agentes_vocab = _protocolo_padrao().vocabulario.agentes
+                        sugestao = sugerir_ghes(blocos_fds, cache_vinculo.pgr_hidratado, agentes_vocab)
                         for linha in linhas_sugestao(sugestao, rotulos_ghe):
                             st.write(linha)
-                        if sugestao.sem_casamento:
+                        if sugestao.sem_componente_reconhecido:
+                            st.warning(AVISO_SEM_COMPONENTE_RECONHECIDO)
+                        elif sugestao.sem_casamento:
                             st.warning(AVISO_SEM_CASAMENTO)
                         else:
                             st.button(
                                 "Marcar os GHEs sugeridos",
                                 key=f"marcar_sugeridos_{arquivo_fds.name}",
+                                help="Marca os GHEs com mais agentes em comum; os demais ficam para escolha manual.",
                                 on_click=_marcar_sugeridos,
-                                args=(arquivo_fds.name, tuple(g.ghe_id for g in sugestao.ghes)),
+                                args=(arquivo_fds.name, sugestao.mais_agentes_em_comum),
                             )
                         # Sem GHE pré-marcado: o selectbox anterior sempre tinha um valor, e
                         # o clique anexava em algum GHE mesmo sem escolha consciente.

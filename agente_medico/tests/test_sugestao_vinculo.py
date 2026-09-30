@@ -19,7 +19,11 @@ from agente_medico.motor.tipos import (
     Pendencia,
     RiscoPGR,
 )
-from agente_medico.superficie.sugestao_vinculo import AVISO_SEM_CASAMENTO, sugerir_ghes
+from agente_medico.superficie.sugestao_vinculo import (
+    AVISO_SEM_CASAMENTO,
+    AVISO_SEM_COMPONENTE_RECONHECIDO,
+    sugerir_ghes,
+)
 from agente_medico.superficie.web_matriz import pagina_matriz
 from agente_medico.tests.test_web_matriz import _submeter_formulario
 
@@ -49,6 +53,7 @@ def _fds(*membros: tuple[str, str]) -> tuple[BlocoVerbatim, ...]:
 _TOLUENO = ("108-88-3", "Tolueno")
 _XILENO = ("1330-20-7", "Xileno")
 _ASFALTO = ("8052-42-4", "Asfalto")
+_BENZENO = ("71-43-2", "Benzeno")
 # CAS válido fora do vocabulário (nafta da FISPQ de aguarrás do acervo).
 _NAFTA = ("64742-82-1", "Nafta hidrodessulfurizada pesada")
 
@@ -84,18 +89,20 @@ def test_componente_sem_slug_nao_conta_mas_aparece() -> None:
 
     sugestao = sugerir_ghes(_fds(_NAFTA, ("", "Segredo industrial")), pgr, _AGENTES)
 
-    assert sugestao.sem_casamento
+    assert sugestao.ghes == ()
     assert sugestao.componentes_sem_slug == (
         "64742-82-1 | Nafta hidrodessulfurizada pesada",
         "— | Segredo industrial",
     )
 
 
-def _pagina(monkeypatch: pytest.MonkeyPatch, nome_fds: str, blocos: tuple[BlocoVerbatim, ...]) -> AppTest:
-    """PGR de 3 GHEs processado de verdade e uma FDS enviada, sem anexo."""
+def _pagina(
+    monkeypatch: pytest.MonkeyPatch, nome_fds: str | tuple[str, ...], blocos: tuple[BlocoVerbatim, ...]
+) -> AppTest:
+    """PGR de 3 GHEs processado de verdade e FDS enviadas, sem anexo."""
     pgr = _pgr(
         _ghe("GHE-02", "Almoxarifado", "tolueno", cargos=("Almoxarife",)),
-        _ghe("GHE-18", "Pintura", "xileno", cargos=("Pintor",)),
+        _ghe("GHE-18", "Pintura", "tolueno", "xileno", cargos=("Pintor",)),
         _ghe("GHE-22", "Impermeabilização", "asfalto", cargos=("Impermeabilizador",)),
     )
 
@@ -109,7 +116,8 @@ def _pagina(monkeypatch: pytest.MonkeyPatch, nome_fds: str, blocos: tuple[BlocoV
     at = AppTest.from_function(pagina_matriz)
     at.run()
     _submeter_formulario(at)
-    at.file_uploader[1].set_value([(nome_fds, b"conteudo qualquer", "application/pdf")]).run()
+    nomes = (nome_fds,) if isinstance(nome_fds, str) else nome_fds
+    at.file_uploader[1].set_value([(n, n.encode(), "application/pdf") for n in nomes]).run()
     assert not at.exception
     return at
 
@@ -131,7 +139,8 @@ def test_marcar_sugeridos_so_preenche_a_selecao(monkeypatch: pytest.MonkeyPatch)
     # Reversões que matam: (1) pré-marcar o multiselect com os sugeridos — a
     # seleção não começaria vazia (cl.3); (2) botão sem efeito — a seleção
     # continuaria vazia depois do clique; (3) o botão anexar em vez de só
-    # marcar — o produto entraria no GHE e a matriz mudaria.
+    # marcar — o produto entraria no GHE e a matriz mudaria; (4) marcar todos
+    # os sugeridos em vez do topo — o GHE-02, com só tolueno, entraria junto.
     at = _pagina(monkeypatch, "fds.pdf", _fds(_TOLUENO, _XILENO))
     matrizes_antes = at.session_state["web_matriz_cache"].matrizes
     assert at.multiselect(key="ghe_destino_fds.pdf").value == []
@@ -139,18 +148,62 @@ def test_marcar_sugeridos_so_preenche_a_selecao(monkeypatch: pytest.MonkeyPatch)
     at.button(key="marcar_sugeridos_fds.pdf").click().run()
     assert not at.exception
 
-    assert at.multiselect(key="ghe_destino_fds.pdf").value == ["GHE-02", "GHE-18"]
+    assert at.multiselect(key="ghe_destino_fds.pdf").value == ["GHE-18"]
     cache = at.session_state["web_matriz_cache"]
     assert all(g.produtos_quimicos == () for g in cache.pgr_hidratado.ghes)
     assert cache.matrizes == matrizes_antes
 
 
-def test_fds_sem_agente_do_pgr_ganha_aviso_e_continua_anexavel(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Caso Aurora: desmoldante sem o ácido oleico que o PGR declara. Reversões
-    # que matam: (1) tirar o st.warning do ramo sem casamento; (2) tratar a
-    # divergência como bloqueio, escondendo o botão Anexar (cl.4: não bloqueia).
-    at = _pagina(monkeypatch, "fds.pdf", _fds(_NAFTA))
+def test_empate_no_topo_marca_os_empatados(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: marcar só o 1º da lista (ghes[0]) — no empate a ordem
+    # do PGR decidiria sozinha e o GHE-18, empatado com o GHE-02, ficaria fora.
+    at = _pagina(monkeypatch, "fds.pdf", _fds(_TOLUENO))
 
-    assert AVISO_SEM_CASAMENTO in [w.value for w in at.warning]
+    at.button(key="marcar_sugeridos_fds.pdf").click().run()
+
+    assert at.multiselect(key="ghe_destino_fds.pdf").value == ["GHE-02", "GHE-18"]
+
+
+def test_fds_sem_agente_do_pgr_ganha_aviso_e_continua_anexavel(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Caso Aurora (aguarrás): o único componente reconhecido é o benzeno, que
+    # nenhum GHE declara. Reversões que matam: (1) tirar o st.warning do ramo
+    # sem casamento; (2) tratar a divergência como bloqueio, escondendo o
+    # botão Anexar (cl.4: não bloqueia).
+    at = _pagina(monkeypatch, "fds.pdf", _fds(_NAFTA, _BENZENO))
+
+    assert [w.value for w in at.warning] == [AVISO_SEM_CASAMENTO]
     assert at.button(key="anexar_fds_fds.pdf") is not None
     assert _linhas_de_ghe(at) == []
+
+
+def test_fds_sem_componente_reconhecido_culpa_o_vocabulario(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: um aviso só para os dois casos — a FDS só de nafta
+    # (CAS fora do vocabulário) mandaria o RT conferir o PGR, que não tem culpa.
+    at = _pagina(monkeypatch, "fds.pdf", _fds(_NAFTA))
+
+    assert [w.value for w in at.warning] == [AVISO_SEM_COMPONENTE_RECONHECIDO]
+    assert at.button(key="anexar_fds_fds.pdf") is not None
+
+
+def test_vocabulario_carregado_uma_vez_por_renderizacao(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: chamar _protocolo_padrao() dentro do laço das FDS —
+    # com 3 FDS a página carregaria o protocolo 2 vezes a mais que com 1
+    # (~160 ms cada, medido em 30/09/2026).
+    import agente_medico.superficie.web_matriz as web_matriz
+
+    original = web_matriz._protocolo_padrao
+    chamadas: list[int] = []
+
+    def _contado() -> Any:
+        chamadas.append(1)
+        return original()
+
+    def _cargas_no_rerun(nomes: tuple[str, ...]) -> int:
+        at = _pagina(monkeypatch, nomes, _fds(_TOLUENO))
+        monkeypatch.setattr(web_matriz, "_protocolo_padrao", _contado)
+        chamadas.clear()
+        at.run()
+        monkeypatch.setattr(web_matriz, "_protocolo_padrao", original)
+        return len(chamadas)
+
+    assert _cargas_no_rerun(("a.pdf", "b.pdf", "c.pdf")) == _cargas_no_rerun(("a.pdf",))

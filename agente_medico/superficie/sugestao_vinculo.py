@@ -18,6 +18,7 @@ from agente_medico.motor.transcricao_fds import montar_fds
 
 __all__ = [
     "AVISO_SEM_CASAMENTO",
+    "AVISO_SEM_COMPONENTE_RECONHECIDO",
     "AgenteEmComum",
     "GHESugerido",
     "SugestaoVinculo",
@@ -27,6 +28,11 @@ __all__ = [
 AVISO_SEM_CASAMENTO = (
     "Nenhum GHE do PGR declara os agentes desta FDS — confira se o PGR está "
     "desatualizado ou se a FDS é de outro produto."
+)
+
+AVISO_SEM_COMPONENTE_RECONHECIDO = (
+    "Nenhum componente desta FDS foi reconhecido no vocabulário de agentes, então "
+    "não há como sugerir GHE — a lacuna é do vocabulário, não do PGR nem da FDS."
 )
 
 
@@ -48,15 +54,33 @@ class SugestaoVinculo:
     """ghes: todo GHE com ≥1 agente em comum, sem limiar (cl.2), do maior para
     o menor número de agentes; empate fica na ordem do PGR. componentes_sem_slug:
     "CAS | nome" de cada membro que o motor não resolveria (CAS ausente,
-    inválido ou fora do vocabulário) — não conta, mas aparece (cl.1)."""
+    inválido ou fora do vocabulário) — não conta, mas aparece (cl.1).
+    agentes_da_fds: slugs resolvidos da FDS, casem ou não com algum GHE."""
 
     ghes: tuple[GHESugerido, ...]
     componentes_sem_slug: tuple[str, ...]
+    agentes_da_fds: tuple[str, ...] = ()
+
+    @property
+    def sem_componente_reconhecido(self) -> bool:
+        """Nada resolveu para slug: sem sinal, a divergência não é do PGR."""
+        return not self.agentes_da_fds
 
     @property
     def sem_casamento(self) -> bool:
-        """cl.4: dispara o aviso não bloqueante."""
-        return not self.ghes
+        """cl.4: há agente resolvido na FDS e nenhum GHE o declara."""
+        return bool(self.agentes_da_fds) and not self.ghes
+
+    @property
+    def mais_agentes_em_comum(self) -> tuple[str, ...]:
+        """GHEs do topo (maior contagem, empates incluídos) — o que o botão
+        "Marcar" preenche. Decisão do Diovanni em 30/09/2026 sobre a cl.3: marcar
+        todos os sugeridos levava agente genérico (sílica de uma FDS de eletrodo)
+        a GHEs sem relação com o produto a dois cliques do anexo."""
+        if not self.ghes:
+            return ()
+        topo = len(self.ghes[0].agentes)
+        return tuple(g.ghe_id for g in self.ghes if len(g.agentes) == topo)
 
 
 def sugerir_ghes(
@@ -86,4 +110,8 @@ def sugerir_ghes(
         if em_comum:
             sugeridos.append(GHESugerido(ghe_id=ghe.id, ghe_nome=ghe.nome, agentes=em_comum))
     sugeridos.sort(key=lambda g: len(g.agentes), reverse=True)
-    return SugestaoVinculo(ghes=tuple(sugeridos), componentes_sem_slug=tuple(sem_slug))
+    return SugestaoVinculo(
+        ghes=tuple(sugeridos),
+        componentes_sem_slug=tuple(sem_slug),
+        agentes_da_fds=tuple(nome_por_slug),
+    )
