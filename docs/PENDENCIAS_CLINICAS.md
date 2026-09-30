@@ -855,7 +855,7 @@ não mudam (sem medição de químico).
 GHE 11 HIDRÁULICA: o PGR classifica MEK e acetona em BAIXO, com "Avaliação ainda qualitativa"; o gabarito não
 pede nenhum indicador e anota *"Incluir no Word do PCMSO risco baixo no PGR para Acetona e Metiletilcetona"*.
 O app emite MEK na urina (R-BIO-04, BAIXO sem medição emite — decisão de 25/09) e não emite acetona porque o
-termo não resolve (`DT-(sessão claude/keen-curie-xdm7kb)-01`). Placar da Dra. Patrícia em BAIXO: emite em Porto
+termo não resolve (`DT-(sessão claude/keen-curie-xdm7kb)-03`). Placar da Dra. Patrícia em BAIXO: emite em Porto
 Araras I (06/07) e Vila Brasil (26/08); dispensa no Aurora (27/08) e no T65 (24/09). **R-BIO-05 inalterada** —
 reabrir o corte é decisão do Diovanni.
 

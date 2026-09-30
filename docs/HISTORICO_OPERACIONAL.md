@@ -11074,6 +11074,11 @@ clínica alterada: as três propostas aguardam decisão do Diovanni.
 **Três números clínicos.** Não re-tirados: nenhuma `R-*` tocada; `agentes.yaml` só em `termos:`, sem `cas:` nem
 slug novo — `medir_painel` em `0e99bea`: `regras 32/47`, `cas 78/110`, iguais ao Baseline anterior.
 
+**`/conferir` (`D-ARQ-84`).** Sobre os 3 commits de docs, contra `49da5f7`: 58 afirmações, 33 CONFERE, 1 DIVERGE,
+24 NÃO VERIFICÁVEL. O DIVERGE (não material) era a nota da DT-003EB-02 remeter a acetona à DT-01 (aguarrás) em vez
+da DT-03, corrigido. Os NÃO VERIFICÁVEL são conteúdo de PDFs, `.docx`, HTML e auditorias fora do alcance do
+`git grep`, e medições por execução (suíte, mypy, `medir_painel`, reversões).
+
 **Lição de método.** Recomendei (b) sem conferir a D-ARQ-64. Antes de propor mudança em allowlist, índice ou
 vocabulário de slug carregado, ler a decisão que rege o mecanismo — o teste computado teria parado a sessão de
 qualquer jeito, mas a recomendação errada custou um turno do Diovanni.
