@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v227 · 88 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v228 · 89 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -95,4 +95,5 @@ Fonte: DECISOES_ARQUITETURAIS.md v227 · 88 decisões
 | D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4154 | 4834 |
 | D-ARQ-86 | Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (25/09/2026), com Q1–Q4 resolvidas (ver "Ratificação" abaixo) | 4188 | 14883 |
 | D-ARQ-87 | Memorial de raciocínio da matriz: cada `Motivo` guarda o que a própria regra pediu, antes do piso da consolidação | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO da fatia 1 (26/09/2026) | 4280 | 6516 |
-| D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4324 | 9421 |
+| D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4324 | 9422 |
+| D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO da fatia 1 (mesma data) | 4382 | 4253 |

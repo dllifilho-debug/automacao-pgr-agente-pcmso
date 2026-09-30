@@ -217,3 +217,35 @@ def test_inspecionar_primeiro_so_validado_diz_nenhuma() -> None:
         relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
     bloco = _bloco_inspecionar_primeiro(relatorio)
     assert "(nenhuma)" in bloco
+
+
+_NUL = "Microorganismos \x00Bacterias, virus, fungos e protozoários)"
+
+
+def test_relatorio_nao_carrega_nul_do_pgr() -> None:
+    # D-ARQ-89 cl.5 (DH-003EG-01). Pendência por GHE com termo do Fascino, que
+    # renderizar_matriz imprime cru. Reversão que mata: tirar o `_sanitizar` do
+    # retorno final de `_renderizar_relatorio` — o NUL volta e o `grep` trata o
+    # relatório como binário.
+    pendencia = Pendencia(
+        tipo="vocabulario_ausente",
+        destinatario="protocolo",
+        motivo=f"termo '{_NUL}' não resolvido no vocabulário de agentes (D-ARQ-14)",
+        bloqueante=False,
+        regra_origem="D-ARQ-14",
+        ghe_id="GHE-01",
+    )
+    resultado = Resultado(status="OK", matrizes=[MatrizGHE(ghe_id="GHE-01", pendencias=[pendencia])])
+    with patch("scripts.medicao_pgr._hash_commit", return_value="abc1234"):
+        relatorio = _renderizar_relatorio(Path("fake.pdf"), resultado, ())
+
+    assert "\x00" not in relatorio
+    assert "Microorganismos Bacterias, virus" in relatorio
+
+
+def test_pendencia_impressa_no_terminal_nao_carrega_nul() -> None:
+    # `cmd_ida` imprime `_formatar_pendencia` direto, sem passar pelo relatório.
+    # Reversão que mata: tirar o `_sanitizar` do motivo em `_formatar_pendencia`.
+    pendencia = Pendencia(tipo="t", destinatario="d", motivo=_NUL, bloqueante=False, regra_origem="R")
+
+    assert "\x00" not in _formatar_pendencia(pendencia)

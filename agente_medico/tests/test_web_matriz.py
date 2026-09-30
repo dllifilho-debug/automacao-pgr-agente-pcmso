@@ -504,6 +504,33 @@ def test_pendencias_globais_aparecem_antes_das_de_extracao(
     assert idx_global < idx_extracao
 
 
+
+def test_pendencias_na_tela_nao_carregam_nul_do_pgr(monkeypatch: pytest.MonkeyPatch) -> None:
+    # D-ARQ-89 cl.5 (DH-003EG-01): motivo que cita termo do PGR Fascino com NUL.
+    # Reversão que mata: tirar o `_sanitizar` de `linha_pendencia`.
+    nul = "Microorganismos \x00Bacterias, virus)"
+    pendencia_global = Pendencia(
+        tipo="pgr_informativo_global", destinatario="empresa",
+        motivo=f"GLOBAL {nul}", bloqueante=False, regra_origem="R-PGR-99",
+    )
+    pendencia_extracao = Pendencia(
+        tipo="vocabulario_ausente", destinatario="extracao",
+        motivo=f"EXTRACAO {nul}", bloqueante=False, regra_origem="D-ARQ-14",
+    )
+    exame = ExameEmitido(exame="exame_clinico", periodicidade_meses=12, momentos={Momento.ADM})
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[exame], cargos=("Cargo Teste",))
+    resultado = Resultado(status="OK", matrizes=[matriz], pendencias_globais=[pendencia_global])
+    _mockar_parse_deterministico(monkeypatch, resultado, pendencias_extracao=(pendencia_extracao,))
+
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+
+    assert not at.exception
+    textos = [el.value for el in at.markdown if "Microorganismos" in el.value]
+    assert len(textos) == 2
+    assert all("\x00" not in t and "Microorganismos Bacterias" in t for t in textos)
+
 def test_documento_sem_linha_cargo_nao_e_oferecido_para_download(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -56,6 +56,7 @@ from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
     DocumentoMatriz,
     RodapeDocumento,
+    _sanitizar,
     montar_documento,
     renderizar_html,
 )
@@ -84,6 +85,11 @@ __all__ = [
     "responsavel_pcmso_incompleto",
 ]
 
+
+def linha_pendencia(p: Pendencia, com_regra: bool = False) -> str:
+    """D-ARQ-89 cl.5 (DH-003EG-01): o motivo pode citar texto do PGR com NUL."""
+    regra = f" ({p.regra_origem})" if com_regra else ""
+    return f"- `{p.tipo}`{regra}: {_sanitizar(p.motivo)}"
 
 def montar_envelope(
     validade_iso: str, assinatura: bool, hoje: date | None = None
@@ -616,6 +622,7 @@ def pagina_matriz() -> None:
         anexar_produto_em_ghes,
         executar_rota_determinista_cacheada,
         ghes_com_produto,
+        linha_pendencia,
         listar_produtos_anexados,
         montar_envelope,
         montar_fds,
@@ -793,7 +800,7 @@ def pagina_matriz() -> None:
                             frases_h = ", ".join(membro.frases_h) or "—"
                             st.write(f"- CAS {membro.cas} | {membro.nome} | H: {frases_h}")
                     for p in pendencias_fds:
-                        st.write(f"- `{p.tipo}`: {p.motivo}")
+                        st.write(linha_pendencia(p))
 
                     # Casamento manual FDS<->produto (D-ARQ-49 Parte 2 fatia 2b, decisão
                     # ratificada v199/v200: RT escolhe o GHE e nomeia o produto na tela —
@@ -1048,7 +1055,7 @@ def pagina_matriz() -> None:
                     st.error("PGR rejeitado — pendências bloqueantes impedem a emissão da matriz:")
                     for p in cache.pendencias_globais:
                         if p.bloqueante:
-                            st.write(f"- `{p.tipo}` ({p.regra_origem}): {p.motivo}")
+                            st.write(linha_pendencia(p, com_regra=True))
                 # Elo D: nunca grava cache de um estado REJEITADO — a chave não
                 # pode mascarar a rejeição num rerun (ex.: clique de download de
                 # uma submissão anterior bem-sucedida ainda em session_state).
@@ -1082,7 +1089,7 @@ def pagina_matriz() -> None:
             with etapa_pgr:
                 st.error("Parse total falho — nenhuma matriz gerada (D-ARQ-22).")
                 for p in pendencias:
-                    st.write(f"- `{p.tipo}`: {p.motivo}")
+                    st.write(linha_pendencia(p))
             bloqueio = "nenhuma matriz gerada — veja a etapa 1"
             return
 
@@ -1096,12 +1103,12 @@ def pagina_matriz() -> None:
             with caixa_conferencia:
                 st.markdown("**Pendências (itens a confirmar)**")
                 for p in cache.pendencias_globais:
-                    st.write(f"- `{p.tipo}` ({p.regra_origem}): {p.motivo}")
+                    st.write(linha_pendencia(p, com_regra=True))
 
         if pendencias:
             with caixa_conferencia.expander(f"Pendências de extração e vocabulário ({len(pendencias)})"):
                 for p in pendencias:
-                    st.write(f"- `{p.tipo}`: {p.motivo}")
+                    st.write(linha_pendencia(p))
 
         if not cache.pendencias_globais and not pendencias:
             caixa_conferencia.caption("Nenhuma pendência a confirmar.")

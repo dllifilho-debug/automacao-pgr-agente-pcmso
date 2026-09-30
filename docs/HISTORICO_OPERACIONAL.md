@@ -10899,3 +10899,30 @@ tirar cada grafia; mover cada uma para `vibracao_corpo_inteiro`.
 
 **Verificação.** Suíte completa (árvore parada): **1538 passed, 6 skipped, 0 failed** (772.89s), +6 exato
 sobre 1532. `mypy` não rodado: nenhum arquivo do alvo canônico tocado. `DECISOES` não tocado.
+
+## Sessão (branch `claude/exciting-ramanujan-g9bbl4`, pós-merge do PR #408) — 29/09/2026 — ARQUITETURA + IMPLEMENTAÇÃO: `D-ARQ-89` (NUL do PDF), fatia 1
+
+**Pedido.** Diovanni: propor a correção do NUL na origem (DH-003EG-01). Proposta com medição; **Q1–Q4
+ratificadas como recomendado**; fatia 1 autorizada.
+
+**Medido.** NUL em **3 de 28 PGRs** (Fascino, Vila Brasil, Verde Maris), **5.879**, todos em subconjuntos
+Type3 da fonte Inter. 13 glifos, por nome estável em `/Differences`, com ToUnicode U+0000 em todos os 90
+subconjuntos, sem mapeamento em lugar nenhum. Identificados visualmente (recorte a 500 dpi de uma ocorrência
+cada): `(` `)` `-` `–` `—` `:` `×` `[` `]` `*` `<` `+` `>` — o conjunto ".case" da Inter; contagem por glifo
+fecha 5.879. Vazamento remanescente: pendências na tela e relatório do harness. Injeção possível sem
+monkeypatch (pdfplumber `pdf.py:53`, `page.py:260-264`). Instrumentos no scratchpad (`nul_pdf.py`,
+`nul_tabela.py`, `nul_visual.py`, mosaico dos recortes).
+
+**Implementado (fatia 1, cl.5).** `web_matriz.py`: `linha_pendencia` com `_sanitizar` nos 5 pontos que
+escreviam `p.motivo` (inclusive no import interno de `pagina_matriz`, que o AppTest executa isolada).
+`scripts/medicao_pgr.py`: `_sanitizar` no retorno de `_renderizar_relatorio` e no motivo de
+`_formatar_pendencia`. Motor intocado. DECISOES v228 (`D-ARQ-89` criada), índice regenerado; DH-003EG-01
+RESOLVIDA (PENDENCIAS), com a revisão da cláusula "não no dado" apontada para a fatia 2.
+
+**Testes.** `test_web_matriz.py` +1 (AppTest, pendência global e de extração com NUL), `test_medicao_pgr.py`
++2. Varredura inversa, 3 reversões de código, 3/3 mortas por asserção: `linha_pendencia` sem `_sanitizar`;
+relatório sem `_sanitizar` final; `_formatar_pendencia` sem `_sanitizar`. `mypy --strict` alvo canônico
+limpo, **52 arquivos**.
+
+**Verificação.** Suíte completa (árvore parada): **1541 passed, 6 skipped, 0 failed** (762.36s), +3 exato
+sobre 1538. `tests/test_gerar_indice_darq.py`: 6 passed.
