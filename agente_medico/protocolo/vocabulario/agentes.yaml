@@ -295,6 +295,9 @@ agentes:
     # (PGR TOCTAO ALT 65, Rev. 01 06/2026, GHE 16 GESSO); "Gesso (Sulfato de Cálcio
     # hemi-hidratado)" (PGR CMO Vistamerica 2026-07-28, célula em 3 linhas); "Sulfato de
     # cálcio" (PGR ALT T65 2024.2026 e PGR EURO Setor C 2024.2026).
+    # Fora, de propósito: as formas dos PGRs Ricco ("- Produtos químicos (Gesso - Sulfato de
+    # cálcio – e-Social: …)") — os três param no gate `pgr_cargo_based` e nunca chegam ao
+    # resolvedor; alias seria literal órfão (D-ARQ-67). PROTOCOLO v117.
     termos: ["Sulfato de cálcio — Gesso", "Gesso (Sulfato de Cálcio hemi-hidratado)", "Sulfato de cálcio"]
   poeira_de_madeira:
     tipo_ibe: null
