@@ -109,6 +109,13 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 30/09/2026, auditoria T65]`:** branch `claude/keen-curie-xdm7kb` sobre `main
+f526edb` (merge do PR #412; alias de PNOS "outramaneira" e riscos não reconhecidos no memorial) · **1560 passed,
+6 skipped, 0 failed** *(MEDIDO em `0e99bea`, árvore parada, 937,11 s — 1555 + 5)* · `mypy --strict` alvo canônico
+**limpo, 54 arquivos** · PROTOCOLO **v114** e DECISOES **v231** (inalterados). `medir_painel` em `0e99bea`:
+`regras 32/47 (68%)`, `cas 78/110 (71%)`, `índice sincronizado` — inalterados (alias em `termos:`). Três números
+clínicos: **não re-tirados** (nenhuma `R-*` tocada; `D-ARQ-85` cl.1).
+
 **Baseline `[MEDIDO — 30/09/2026, D-ARQ-90 fatia 1]`:** branch `claude/keen-curie-xdm7kb` sobre
 `main b5bd134` (merge do PR #411; IMPLEMENTAÇÃO — sugestão de vínculo FDS↔GHE) · **1555 passed,
 6 skipped, 0 failed** *(MEDIDO em `96875d6`, árvore parada, 948,37 s — 1546 + 9)* · `mypy --strict`
