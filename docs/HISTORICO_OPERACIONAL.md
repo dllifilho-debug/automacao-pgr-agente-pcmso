@@ -11146,7 +11146,8 @@ próprio.
 **Medição do acervo (varredura de texto, `matrizes_originais/*PGR*.pdf`).** Gesso como agente: "Sulfato de cálcio —
 Gesso" (TOCTAO ALT 65 GHE 16), "Gesso (Sulfato de Cálcio hemi-hidratado)" (CMO Vistamerica 2026-07-28, 3 linhas),
 "Sulfato de cálcio" (ALT T65 2024.2026 e EURO Setor C). "Gesso" sozinho só aparece como atividade/GHE — não virou
-termo. Vistamerica Ver.02 declara a poeira do gesso como "PNOS/PNOR" medida (0,08 mg/m³) e segue por R-RX-01-pnos.
+termo. Vistamerica Ver.02 declara a poeira do gesso como "PNOS/PNOR" medida (0,08 mg/m³) e segue por R-RX-01-pnos
+[corrigido na sessão seguinte: não medido, rota LLM — `[A MEDIR]`; e faltou registrar as formas dos PGRs Ricco].
 Fascino, Porto Araras I e Vila Brasil (rota determinística): 0 ocorrências.
 
 **Commits.** `83acbc9` — `poeira_de_gesso` em `agentes.yaml` (índice 179 → 183), predicado `gesso` em
@@ -11173,3 +11174,44 @@ na rota LLM `[A MEDIR — sem chave de API no container]`.
 
 **Lição de método.** "Mesmo padrão de exames" não é "mesma classe normativa": o gabarito dava ao gesso o par de
 PNOS, mas a definição de PNOS da própria NR-07 o exclui. Conferir o critério de enquadramento, não só o resultado.
+
+## Sessão (branch `ccr-983f0b9f-zkz16m`, recriada sobre `main b6781a6`, pós-merge do PR #415) — 30/09/2026 — CORREÇÃO: revisão da própria entrega do gesso
+
+**Pedido.** Diovanni pediu revisão do próprio trabalho antes de publicar; duas falhas encontradas na entrega do
+PR #415, ambas em `main`.
+
+**1. Formas da Ricco não registradas.** A varredura de 30/09 achou o gesso como agente também nos PGRs Ricco Hetrin
+mar/25, Serra Dourada mai/24 e Atualização Hetrin 14.09.26 (células lidas por `extract_tables()`: "- Produtos químicos
+(Gesso - Sulfato de cálcio – e- / Social: Outros Agentes Nocivos);", "Produtos químicos – Gesso e sulfato de / cálcio",
+"PRODUTOS QUÍMICOS / (GESSO - SULFATO DE / CALCIO)"), e o PROTOCOLO v116 listava só três formas como se cobrissem o
+acervo. Medido: `avaliar_estrutura` devolve `pgr_cargo_based` nos três (369, 168 e 21 sinais de bloco por cargo) —
+param antes do resolvedor. **Alias não entra** (literal órfão, classe D-ARQ-67); registro no PROTOCOLO v117 e em
+comentário do `agentes.yaml`.
+
+**2. Afirmação não medida.** "Vistamerica Ver.02 segue por R-RX-01-pnos": o PGR passa o gate (`rota=ghe`, sem
+pendência), mas os GHEs vão pela transcrição LLM — sem chave no container, não medido. Vira `[A MEDIR]` no PROTOCOLO;
+no bloco anterior deste HISTORICO, marcação de correção na própria linha.
+
+**3. Vistamerica Ver.02 fechado sem chave de API.** O motor é determinístico: o risco foi montado como o PGR o declara
+(`extract_tables()`, GHE 05 e 06: "PNOS/PNOR 0,08 mg/m³") e rodado por `hidratar_pgr` + `processar_pgr`. Saída: RX OIT
+só admissional (`R-RX-01-pnos-ate10`, 2,7% do LEO de 3 mg/m³), espirometria 24M (`R-ESP-02`). Gabarito `MATRIZ DE
+EXAMES(ATUALIZAÇÃO)CMO RESIDENCIAL VISTAMERICA 08.12.25`, GHE 22 GESSO: RX 60M adm/per/MRO/dem. Decisão do Diovanni:
+**mantém a norma** (Quadro 2, nível 1 da D-ARQ-22). PROTOCOLO v118. A chave só é necessária para medir a fidelidade
+da transcrição do Gemini — isso o Diovanni mede rodando o app e mandando o DOCX exportado.
+
+**Commits.** `820c453` (`agentes.yaml`, só comentário), `36598f8` (PROTOCOLO v117), `4817e74` (PENDENCIAS),
+`68b9861` (este bloco), e os do registro da decisão (PROTOCOLO v118, PENDENCIAS, HISTORICO, PAINEL). Nenhuma regra,
+termo ou exame alterado.
+
+**Verificação.** Suíte completa sobre `68b9861`: **1565 passed, 6 skipped, 0 failed** (1263,09 s — mais lenta que
+os 920 s anteriores porque rodaram scripts de leitura do acervo em paralelo; nenhuma escrita na árvore durante a
+medição). Recorte `test_resolvedor_termos.py` + `test_memorial_nao_reconhecidos.py`: 125 passed. `medir_painel`:
+`regras 34/49`, `cas 78/111`, `índice sincronizado` — inalterados.
+
+**Método acordado com o Diovanni.** Nenhum `[A MEDIR]` fica parado: ou é medido na sessão (o motor roda sem chave,
+sobre o risco como o PGR declara), ou vira pedido concreto ao Diovanni (rodar o app no PDF X e mandar o DOCX), ou
+vira decisão tomada na hora.
+
+**Lição de método.** Varredura de texto encontra onde o termo aparece; a pergunta seguinte — o documento chega ao
+resolvedor? — é que decide se o alias tem efeito. Medir o gate antes de listar formas como cobertas.
+

@@ -109,6 +109,13 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 30/09/2026, correção da entrega do gesso]`:** branch `ccr-983f0b9f-zkz16m` sobre `main
+b6781a6` (merge do PR #415; CORREÇÃO + decisão, sem mudança de regra) · **1565 passed, 6 skipped, 0 failed** *(MEDIDO
+em `68b9861`, 1263,09 s — inalterada; mudanças só em texto e comentário)* · `mypy --strict` alvo canônico: não
+re-medido, nenhum `.py` tocado desde `83acbc9` (limpo, 54 arquivos) · PROTOCOLO v116→**v118** · DECISOES v231
+inalterado. `medir_painel`: `regras 34/49`, `cas 78/111`, `índice sincronizado` — inalterados. Três números
+clínicos: não re-tirados.
+
 **Baseline `[MEDIDO — 30/09/2026, R-RX-04 gesso]`:** branch `ccr-983f0b9f-zkz16m` sobre `main 97703aa` (merge do
 PR #414; IMPLEMENTAÇÃO — gesso como agente próprio) · **1565 passed, 6 skipped, 0 failed** *(MEDIDO, árvore parada em
 `83acbc9`, 920,27 s — 1563 + 2)* · `mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v115→**v116** ·
