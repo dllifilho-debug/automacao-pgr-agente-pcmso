@@ -11132,3 +11132,44 @@ atualizado pelo Diovanni), sem `[A MEDIR]` de Gov.br.
 **Lição de método.** A proposta da auditoria ("psicossocial = atividade crítica") vinha de 1 documento; o corpus de 22
 dizia outra coisa, e a norma separou os dois exames. Medir o corpus antes de implementar e subir à norma quando o
 precedente se divide evitou implementar a regra errada.
+
+## Sessão (branch `ccr-983f0b9f-zkz16m`, sobre `main 97703aa`, pós-merge do PR #414) — 30/09/2026 — IMPLEMENTAÇÃO: gesso como agente próprio (R-RX-04)
+
+**Pedido.** Diovanni: próximo item, "gesso como PNOS" (nota do T65 na `DT-(sessão claude/cool-babbage-whh1zw)-02`).
+
+**Parada antes de editar.** A nota *** do Quadro 2 do Anexo III NR-07 (`normas/nr-07-atualizada-2022-1 .pdf`) define
+PNOS pela ACGIH 2017, alínea "a": "não possuir um LEO definido". Sulfato de cálcio tem ACGIH TLV-TWA 10 mg/m³, fração
+inalável (OSHA Chemical Data e WorkSafeBC; livreto da ACGIH fora do acervo). Alias em `poeira_nao_classificada` faria
+o RX sair citando o Quadro 2 que o exclui. Reapresentadas duas opções com a mesma saída no T65; decidido (b), slug
+próprio.
+
+**Medição do acervo (varredura de texto, `matrizes_originais/*PGR*.pdf`).** Gesso como agente: "Sulfato de cálcio —
+Gesso" (TOCTAO ALT 65 GHE 16), "Gesso (Sulfato de Cálcio hemi-hidratado)" (CMO Vistamerica 2026-07-28, 3 linhas),
+"Sulfato de cálcio" (ALT T65 2024.2026 e EURO Setor C). "Gesso" sozinho só aparece como atividade/GHE — não virou
+termo. Vistamerica Ver.02 declara a poeira do gesso como "PNOS/PNOR" medida (0,08 mg/m³) e segue por R-RX-01-pnos.
+Fascino, Porto Araras I e Vila Brasil (rota determinística): 0 ocorrências.
+
+**Commits.** `83acbc9` — `poeira_de_gesso` em `agentes.yaml` (índice 179 → 183), predicado `gesso` em
+`predicados.py`, `gesso` em `poeira_mineral` (R-ESP-02), `R-RX-04` `[INTERPRETADO — gabarito T65]` RX OIT 60M
+adm/per/MR/dem; o memorial passa a usar a acetona do T65 como exemplo de risco não reconhecido. `8160108` (PROTOCOLO
+v116), `c7b4aaf` (PENDENCIAS), docs deste fechamento.
+
+**Testes.** +2 em `test_memorial_nao_reconhecidos.py`; guard do índice 179 → 183; 3 testes do memorial trocam o
+exemplo (gesso → acetona). Varredura inversa, 6 reversões, 6/6 mortas: sem o termo do T65; sem R-RX-04; `gesso` fora
+de `poeira_mineral`; R-RX-04 só adm/per; termos do gesso em `poeira_nao_classificada`; filtros `pnos`/`_risco_pnos`
+aceitando `poeira_de_gesso`. A última só o teste da regra de origem mata — 2/2 discriminantes.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, **54 arquivos**. Suíte completa, árvore parada em `83acbc9`:
+**1565 passed, 6 skipped, 0 failed** (920,27 s), 1563 + 2. `medir_painel` após PROTOCOLO v116: `regras 34/49 (69%)`
+(era 33/48), `cas 78/111 (70%)` (era 78/110 — slug novo sem CAS: três hidratos, campo aceita um), `índice
+sincronizado`.
+
+**Três números clínicos.** Não re-tirados — segue o bloqueador registrado no PAINEL; movimento declarado no Baseline.
+
+**Pendências.** `DT-(sessão claude/cool-babbage-whh1zw)-02`: gesso RESOLVIDO; espaço confinado segue aberto. Efeito
+na rota LLM `[A MEDIR — sem chave de API no container]`.
+
+**`/conferir` (`D-ARQ-84`).** Não rodado nesta sessão `[A MEDIR]`.
+
+**Lição de método.** "Mesmo padrão de exames" não é "mesma classe normativa": o gabarito dava ao gesso o par de
+PNOS, mas a definição de PNOS da própria NR-07 o exclui. Conferir o critério de enquadramento, não só o resultado.
