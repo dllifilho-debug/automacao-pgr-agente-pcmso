@@ -18,6 +18,7 @@ from agente_medico.motor.resolvedor_termos import (
 )
 from agente_medico.motor.tipos import (
     GHEPGR,
+    ExameEmitido,
     GHEVerbatim,
     Momento,
     PGR,
@@ -301,10 +302,14 @@ def test_integracao_end_to_end() -> None:
     # avaliacao_saude_mental saíam daqui via R-PSY-02 incondicional; R-PSY-02
     # está DEPRECATED e R-PSY-03 exige GHEPGR.psicossocial=True, que este GHE
     # (fixture genérica, sem relação com o achado psicossocial) não declara.
-    assert len(matriz.linhas) == 6
+    # 6->7 (30/09/2026, R-PSY-04): trabalho em altura dispara a avaliação
+    # psicossocial pela NR-35 35.4.4, com ou sem inventário psicossocial no PGR;
+    # a saúde mental (R-PSY-05) segue dependendo dele.
+    assert len(matriz.linhas) == 7
     nomes = {e.exame.strip().lower() for e in matriz.linhas}
     assert nomes == {
         "hemograma", "glicemia", "audiometria", "acuidade_visual", "ecg", "exame_clinico",
+        "avaliacao_psicossocial",
     }
     for e in matriz.linhas:
         assert e.periodicidade_meses == 12
@@ -564,48 +569,69 @@ def test_raud01_raud02_presuncao_promove_bloqueada_para_parcial_com_linha_de_ris
 
 
 # ---------------------------------------------------------------------------
-# R-PSY-03 — psicossocial condicionada ao GHEPGR.psicossocial (sessão de
-# 17/09/2026). Sucede R-PSY-02 (DEPRECATED — fundamento refutado por n=2
-# pós-protocolo-de-setembro/2026, Hetrin 14/09 x Varandas 16/09). NR-01
-# 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3. Usa o protocolo real porque R-PSY-03 é a
-# regra sob teste, não um fixture sintético.
+# R-PSY-04/R-PSY-05 (30/09/2026, sucedem R-PSY-03, DEPRECATED): a avaliação
+# psicossocial dispara por altura ou espaço confinado (NR-35 35.4.4, NR-33
+# 33.5.19.1), com ou sem inventário psicossocial no PGR; a saúde mental, pelo
+# inventário (GHEPGR.psicossocial). Protocolo real: as regras são o objeto.
 #
-# Troca registrada, não apagamento silencioso (D-ARQ-06, mesmo precedente de
-# poeira_de_madeira/003.FL): test_rpsy02_emite_psicossocial_e_saude_mental_
-# 12m_sem_risco (003.EN) assertava emissão incondicional — comportamento que
-# esta sessão revoga. Redação antiga preservada em HISTORICO_OPERACIONAL.md.
+# Troca registrada, não apagamento silencioso (D-ARQ-06): os dois testes da
+# R-PSY-03 (emite as duas com psicossocial=True; não emite sem) assertavam o
+# gatilho único que esta sessão separa. Redação antiga preservada no git
+# (099f405) e no HISTORICO.
 # ---------------------------------------------------------------------------
 
 _MOMENTOS_PSY = {Momento.ADM, Momento.PER, Momento.MR}
 
 
-def test_rpsy03_emite_psicossocial_e_saude_mental_12m_quando_ghe_pgr_documenta() -> None:
-    # GHE sem risco algum, mas com GHEPGR.psicossocial=True: R-PSY-03 emite.
+def _nomes(riscos: tuple[RiscoPGR, ...], psicossocial: bool) -> dict[str, ExameEmitido]:
     proto = carregar(_PROTOCOLO_DIR)
-    ghe = _ghe(riscos=(), psicossocial=True)
-    pgr = _pgr(ghes=(ghe,))
-    resultado = executar(pgr, proto, hoje=HOJE)
-    matriz = resultado.matrizes[0]
-    psicossocial = next(ln for ln in matriz.linhas if ln.exame == "avaliacao_psicossocial")
-    saude_mental = next(ln for ln in matriz.linhas if ln.exame == "avaliacao_saude_mental")
-    for linha in (psicossocial, saude_mental):
-        assert linha.periodicidade_meses == 12
-        assert linha.momentos == _MOMENTOS_PSY
-        assert any(m.regra_id == "R-PSY-03" for m in linha.motivos)
+    resultado = executar(_pgr(ghes=(_ghe(riscos=riscos, psicossocial=psicossocial),)), proto, hoje=HOJE)
+    return {ln.exame: ln for ln in resultado.matrizes[0].linhas}
 
 
-def test_rpsy03_nao_emite_quando_ghe_pgr_nao_documenta_psicossocial() -> None:
-    # Reversão que mata: reverter `quando: psicossocial` de R-PSY-03 para
-    # `quando: todo_trabalhador` em regras.yaml (volta ao comportamento
-    # incondicional de R-PSY-02).
-    proto = carregar(_PROTOCOLO_DIR)
-    ghe = _ghe(riscos=(), psicossocial=False)
-    pgr = _pgr(ghes=(ghe,))
-    resultado = executar(pgr, proto, hoje=HOJE)
-    matriz = resultado.matrizes[0]
-    nomes = {ln.exame for ln in matriz.linhas}
-    assert "avaliacao_psicossocial" not in nomes
-    assert "avaliacao_saude_mental" not in nomes
+def _risco(agente: str) -> RiscoPGR:
+    return RiscoPGR(tipo="", agente=agente, quantificacao=None, severidade=None)
+
+
+@pytest.mark.parametrize("agente", ["trabalho_altura", "espaco_confinado"])
+def test_rpsy04_altura_ou_confinado_emite_psicossocial_sem_inventario(agente: str) -> None:
+    # Reversões que matam: (1) `quando: psicossocial` na R-PSY-04 — sem inventário
+    # no PGR o exame some; (2) tirar `altura` ou `espaco_confinado` do composto
+    # aptidao_psicossocial_nr — some o caso correspondente.
+    linhas = _nomes((_risco(agente),), psicossocial=False)
+
+    psicossocial = linhas["avaliacao_psicossocial"]
+    assert (psicossocial.periodicidade_meses, psicossocial.momentos) == (12, _MOMENTOS_PSY)
+    assert [m.regra_id for m in psicossocial.motivos] == ["R-PSY-04"]
+    assert "avaliacao_saude_mental" not in linhas
+
+
+def test_rpsy04_equipamento_pesado_sozinho_nao_emite_psicossocial() -> None:
+    # Reversão que mata: `quando: atividade_critica` na R-PSY-04 — o operador de
+    # equipamento pesado receberia o exame sem NR que o associe a fatores
+    # psicossociais.
+    linhas = _nomes((_risco("motorista_equipamento_pesado"),), psicossocial=True)
+
+    assert "hemograma" in linhas
+    assert "avaliacao_psicossocial" not in linhas
+
+
+def test_rpsy05_inventario_psicossocial_emite_so_saude_mental() -> None:
+    # Administrativo com inventário psicossocial no PGR (T65 GHE 03). Reversões
+    # que matam: (1) devolver a avaliação psicossocial à R-PSY-05 — ela voltaria
+    # a sair sem altura; (2) `status: DEPRECATED` na R-PSY-05 — a saúde mental some.
+    linhas = _nomes((), psicossocial=True)
+
+    saude_mental = linhas["avaliacao_saude_mental"]
+    assert (saude_mental.periodicidade_meses, saude_mental.momentos) == (12, _MOMENTOS_PSY)
+    assert [m.regra_id for m in saude_mental.motivos] == ["R-PSY-05"]
+    assert "avaliacao_psicossocial" not in linhas
+
+
+def test_rpsy05_sem_inventario_nao_emite_saude_mental() -> None:
+    # Reversão que mata: `quando: todo_trabalhador` na R-PSY-05 — volta o
+    # comportamento incondicional da R-PSY-02, refutado em 17/09/2026.
+    assert "avaliacao_saude_mental" not in _nomes((), psicossocial=False)
 
 
 def test_rpsy02_deprecated_nao_emite_mesmo_incondicional() -> None:

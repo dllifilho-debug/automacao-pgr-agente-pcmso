@@ -5,6 +5,14 @@ predicados_compostos:
       - espaco_confinado
       - motorista_equipamento_pesado
 
+  # R-PSY-04: as duas atividades em que a NR manda considerar os fatores
+  # psicossociais na aptidão — NR-35 35.4.4 (altura) e NR-33 33.5.19.1 (espaço
+  # confinado). Sem equipamento pesado, diferente de atividade_critica.
+  aptidao_psicossocial_nr:
+    ou:
+      - altura
+      - espaco_confinado
+
   vibracao_qualquer:
     ou:
       - vibracao_corpo_inteiro

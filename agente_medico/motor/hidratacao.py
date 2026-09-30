@@ -18,7 +18,7 @@ do texto S·P·NÍVEL da avaliação qualitativa P×S por parsear_nivel_risco;
 texto não reconhecido vira Pendencia avaliacao_qualitativa_nao_parseada
 não-bloqueante, pelo mesmo motivo da quantificação.
 EPIs, produtos_quimicos e cenario ficam em default (diferidos, D-ARQ-49 P2).
-psicossocial (R-PSY-03) é populado por parâmetro — o extrator
+psicossocial (R-PSY-05, ex-R-PSY-03) é populado por parâmetro — o extrator
 (detectar_psicossocial, extracao_pgr.py) roda sobre o texto cru do PGR
 inteiro, fora do escopo por-GHE desta hidratação; o valor chega já resolvido
 e é replicado para todo GHEPGR do documento, default False para chamador que

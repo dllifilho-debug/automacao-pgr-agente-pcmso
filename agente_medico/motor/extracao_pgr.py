@@ -47,7 +47,7 @@ def extrair_texto_pgr(caminho: Path) -> list[str]:
     return [page.extract_text() or "" for page in paginas_liberadas(caminho)]
 
 
-# R-PSY-03; NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal PGR-documenta-
+# R-PSY-05 (ex-R-PSY-03); NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal PGR-documenta-
 # psicossocial (GHEPGR.psicossocial, diferido em D-ARQ-49 P2, nunca extraído
 # até aqui). Marcadores e case-insensitive [INTERPRETADO — DT-(sessão não
 # numerada, branch claude/youthful-lamport-3kfkog)-01]: mesmos 3 termos que a
@@ -64,7 +64,7 @@ _MARCADORES_PSICOSSOCIAL = (
 
 def detectar_psicossocial(paginas: Sequence[str]) -> bool:
     """Presença de ao menos 1 marcador do inventário de risco psicossocial
-    em qualquer página do PGR (R-PSY-03). Sinal de PGR inteiro, não por GHE
+    em qualquer página do PGR (R-PSY-05, ex-R-PSY-03). Sinal de PGR inteiro, não por GHE
     — não há, até a medição de origem, evidência de variação por GHE dentro
     do mesmo documento; o chamador replica o resultado para todo GHEPGR do
     PGR."""
