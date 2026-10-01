@@ -11475,3 +11475,34 @@ parada em `1471900`: **1601 passed, 6 skipped, 0 failed** (813,85 s), 1597 + 4. 
 **Três números clínicos.** Não re-tirados.
 
 **Pendências.** DT-keen-curie-03 segue ABERTA só com nomes e ordem dos exames. Nenhuma nova.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main d423fca`, pós-merge do PR #425) — 01/10/2026 — Ordem e nomes dos exames (DT-keen-curie-03) + FDS da TOCTAO no app
+
+**Medição.** 32 gabaritos de matriz de 2026 de `matrizes_originais/` (`.doc` → `.docx` por LibreOffice), 1.690 células
+de cargo, extrator do `comparar_matriz_gabarito` (scripts descartáveis no scratchpad). Ordem: nenhum modelo único (até a
+mesma obra muda: T65 08.07 × 24.09); indicador biológico sempre antes de Espirometria/RX/Saúde Mental/Psicossocial;
+Espirometria/RX antes das avaliações 15 × 8 arquivos; Saúde Mental antes de Psicossocial 16 × 9; Hemograma/Glicemia/ECG
+13 × 16. A ordem do app era a do SPE 0030 (08.07.26). Nomes: "RX de Tórax OIT" 29/30 arquivos; "Carboxihemoglobina" 17
+× 7; "Glicemia em/de Jejum" 15 × 20.
+
+**Decisão do Diovanni: itens 1, 2 e 4.** Commit `9b0c1ad`: `bloco_exibicao: fim` em `exames.yaml` (Espirometria, RX de
+Coluna, RX de Tórax, Saúde Mental 13, Psicossocial 14); `_chave_ordem_exame` com o bloco; 3 nomes novos; apelidos de
+grafia do `comparar_matriz_gabarito` apontam para os nomes novos e aceitam os antigos. Efeito: células na mesma ordem
+387 → 728/1690; pares fora de ordem 11,7% → 7,4%. 4 testes novos; varredura inversa 4/4 (ignorar o bloco; ordem do SPE
+0030; inverter Saúde Mental/Psicossocial; nomes antigos). 1ª suíte em `5c14d15`: 1604 passed, 1 failed —
+`test_pnos_sem_medicao_sai_de_confirmar_primeiro` localizava a linha pelo nome "RX Tórax"; corrigido (amend local) e
+mais 2 testes do instrumento com mapa fixo nos nomes antigos.
+
+**FDS da TOCTAO no app (T65, sem anexar).** CARPINTEIRO: aviso de FDS sem ingrediente declarado — fecha o `[A MEDIR]` da
+DT-keen-curie-02. ALMOXARIFE: só GHE-11 (acetona e MEK em comum). AZULEJISTA: GHE-07 e GHE-08 empatados (cimento). AUX.
+DE SERVIÇOS GERAIS: HTTP 503 nos três modelos do Gemini (transitório).
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos (código de saída 0). Suíte completa, árvore parada em
+`9b0c1ad`: **1605 passed, 6 skipped, 0 failed** (874,62 s), 1601 + 4. DECISOES v237 (notas em D-ARQ-73 e D-ARQ-90),
+índice regenerado, `test_gerar_indice_darq.py` 6 passed. `medir_painel`: `regras 34/49`, `cas 78/111`, índice
+sincronizado. PROTOCOLO v120 inalterado.
+
+**Três números clínicos.** Não re-tirados — apresentação.
+
+**Pendências.** DT-keen-curie-03 RESOLVIDA. DT-keen-curie-02 com a medição no app. Abertas: thinner
+(`DT-(sessão claude/clever-hopper-er6xqi)-01`).
