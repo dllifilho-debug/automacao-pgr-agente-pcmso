@@ -4575,6 +4575,16 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
   (aguarrás sem IBE nem LT). Seguem do critério: FDS CARPINTEIRO (`DT-…-02`) e a medição no app, que pede o
   Gemini e é do Diovanni.
 
+- **Nota (branch `claude/clever-hopper-er6xqi`, 01/10/2026) — critério "FDS CARPINTEIRO" FECHADO pela opção (a).**
+  `DT-(sessão claude/keen-curie-xdm7kb)-02` resolvida por decisão do Diovanni: FDS com composição lida e vazia **sem
+  pendência** (seção 3 sem ingrediente) ganha aviso próprio, "A FDS não declara ingrediente perigoso; confira contra o
+  que o PGR declara.", e o seletor de GHE para vínculo manual, sem sugestão nem "Marcar" — não há agente para a cl.1
+  comparar. O critério dizia "aviso da cl.4"; o aviso é outro porque a cl.4 pressupõe agente reconhecido, e a precisão
+  da cl.4 de 30/09 já separou os avisos por causa. Composição vazia **com** pendência (região ausente, transcrição
+  indisponível, bloco reprovado) é falha de leitura e segue sem vínculo. Só tela (`fds_sem_ingrediente_declarado` em
+  `superficie/sugestao_vinculo.py`, `web_matriz.py`), commit `811b980`; motor e regras intocados. Resposta do Gemini
+  à seção 3 da FDS CARPINTEIRO no app `[A MEDIR]` — o aviso depende de a composição voltar vazia.
+
 ---
 
 ## Histórico de revisões
@@ -4815,3 +4825,4 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
 | v232 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO — desempenho, decisão do Diovanni): **nota de aplicação em `D-ARQ-50`** (Parte 1, mesma ID, cláusulas inalteradas) — leitura única e paralela do PDF (`io_pdf.ler_pdf`); `preparar_pgr_hidratado` passa de três leituras completas a uma; texto, palavras e PGR hidratado idênticos aos atuais. |
 | v233 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO): **nota de correção em `D-ARQ-50`** — paralelismo da leitura por subprocesso dedicado (o `spawn` quebrava sob `streamlit run`, medido); **nota em `D-ARQ-90`** — critério "aguarrás → 18" fechado (`DT-(sessão claude/keen-curie-xdm7kb)-01`), `cas_adicionais` no índice de CAS (D-ARQ-36). |
 | v234 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO, decisão do Diovanni): **nota em `D-ARQ-86`** — cl.7 substituída (BAIXO sem medição dispensa o IBE do Quadro 1, fora dos cancerígenos); medição acima do nível de ação emite sempre. |
+| v235 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — tela, decisão do Diovanni): **nota em `D-ARQ-90`** — critério "FDS CARPINTEIRO" fechado (`DT-(sessão claude/keen-curie-xdm7kb)-02`, opção (a)): FDS sem ingrediente declarado e sem pendência ganha aviso próprio e seletor de GHE. Decisões seguem em **90**. |
