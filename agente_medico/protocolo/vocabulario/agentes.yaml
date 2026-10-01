@@ -91,6 +91,10 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    # "Thinner <agente>" dos PGRs CMO (Aurora 27.08.26, págs. 61-63; versão de 20/08): o PGR nomeia o
+    # agente e o IBE da NR-07 Anexo I Quadro 1 é por substância (NR-07 7.5.4 "a"/"b") —
+    # DT-(sessão claude/clever-hopper-er6xqi)-01; a forma com hífen dá a mesma chave.
+    termos: ["Thinner Tolueno"]
     enquadramento_3048: null  # conferido: tolueno puro NÃO consta no Anexo IV (só "diisocianato de tolueno (TDI)", item 1.0.19 — ver slug tdi)
   # termos: aliases de resolução (D-ARQ-50 Parte 2, motor/resolvedor_termos.py).
   # Tier 1 = grafia literal da substância na fonte normativa própria do agente:
@@ -131,7 +135,10 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
-    termos: ["Xilenos"]
+    # "Thinner <agente>" dos PGRs CMO (Aurora 27.08.26, págs. 61-63; versão de 20/08): o PGR nomeia o
+    # agente e o IBE da NR-07 Anexo I Quadro 1 é por substância (NR-07 7.5.4 "a"/"b") —
+    # DT-(sessão claude/clever-hopper-er6xqi)-01; a forma com hífen dá a mesma chave.
+    termos: ["Xilenos", "Thinner Xileno"]
     enquadramento_3048: null  # conferido: xileno não consta no Anexo IV
   estireno:
     lt_nr15: {ppm: 78, mg_m3: 328, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Estireno"}
@@ -336,6 +343,10 @@ agentes:
     tem_lt: true
     protocolos_especiais: []
     fuzzy_permitido: true
+    # "Thinner <agente>" dos PGRs CMO (Aurora 27.08.26, págs. 61-63; versão de 20/08): o PGR nomeia o
+    # agente e o IBE da NR-07 Anexo I Quadro 1 é por substância (NR-07 7.5.4 "a"/"b") —
+    # DT-(sessão claude/clever-hopper-er6xqi)-01; a forma com hífen dá a mesma chave.
+    termos: ["Thinner Etanol"]
   metil_etil_cetona:
     lt_nr15: {ppm: 155, mg_m3: 460, fonte: "NR-15 Anexo 11, Quadro n.º 1 — metil etil cetona"}
     tipo_ibe: EE
@@ -345,7 +356,7 @@ agentes:
     protocolos_especiais: []
     # "Metiletilcetona" sem o sufixo (MEK) (PGRs Fascino, Porto Araras I, Vila Brasil) e com o
     # produto na frente (Vila Brasil) — DT-(sessão claude/hopeful-newton-yjv3k7)-02.
-    termos: ["Metiletilcetona (MEK)", "Metiletilcetona", "Adesivo CPVC Metiletilcetona"]
+    termos: ["Metiletilcetona (MEK)", "Metiletilcetona", "Adesivo CPVC Metiletilcetona", "Thinner Metiletilcetona"]
   cloreto_de_hidrogenio:
     tipo_ibe: null
     cas: "7647-01-0"
@@ -551,6 +562,10 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     fuzzy_permitido: true
+    # "Thinner <agente>" dos PGRs CMO (Aurora 27.08.26, págs. 61-63; versão de 20/08): o PGR nomeia o
+    # agente e o IBE da NR-07 Anexo I Quadro 1 é por substância (NR-07 7.5.4 "a"/"b") —
+    # DT-(sessão claude/clever-hopper-er6xqi)-01; a forma com hífen dá a mesma chave.
+    termos: ["Thinner Acetato de etila"]
   # DT-003M-02(A) — sessão de dado (não ARQUITETURA), pedido do Diovanni: cobertura de
   # composição-de-FDS medida contra 6 FDS reais do acervo (fds_originais/), 19 CAS sem
   # slug. Fonte de is_carcinogeno_iarc: IARC Monographs "List of Classifications"
