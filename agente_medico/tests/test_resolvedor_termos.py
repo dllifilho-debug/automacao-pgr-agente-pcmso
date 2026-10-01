@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_183_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_185_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -76,7 +76,10 @@ def test_indice_real_tem_183_entradas(indice_real: IndiceTermos) -> None:
     # medidos no acervo — "Sulfato de cálcio — Gesso" (T65 GHE 16), "Gesso (Sulfato de
     # Cálcio hemi-hidratado)" (Vistamerica 2026-07-28) e "Sulfato de cálcio" (ALT T65
     # 2024.2026, EURO Setor C). R-RX-04 + R-ESP-02.
-    assert len(indice_real.slug_por_forma) == 183
+    # 183 -> 185 (mesma branch, sessão seguinte): +2 termos de `aguarras_mineral` do PGR
+    # CMO Aurora 27.08.26 GHE 18 — "Aguarrás" e "Destilados de Petróleo levemente tratados
+    # com hidrogênio" (DT-(sessão claude/keen-curie-xdm7kb)-01).
+    assert len(indice_real.slug_por_forma) == 185
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(

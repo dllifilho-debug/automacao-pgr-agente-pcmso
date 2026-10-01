@@ -38,6 +38,8 @@ def construir_indice_cas(agentes_vocab: dict[str, Any]) -> dict[str, EntradaIndi
     """Inverte o vocabulário de agentes: CAS normalizado -> EntradaIndice (slug + flag de carcinogenicidade).
 
     Agentes físicos e de metadata pobre (sem campo "cas") são pulados.
+    "cas_adicionais" (lista) indexa outros CAS da mesma substância comercial para o
+    mesmo slug — ex.: aguarrás com o CAS de cada fabricante.
     Colisão de CAS entre slugs distintos levanta ValueError (integridade do vocabulário).
     is_carcinogeno_iarc é carregado no índice mas não aplicado ao Componente nesta fatia
     (reversão D-ARQ-36 nota 003.V — flag vem da transcrição, não do índice).
@@ -45,21 +47,24 @@ def construir_indice_cas(agentes_vocab: dict[str, Any]) -> dict[str, EntradaIndi
     """
     indice: dict[str, EntradaIndice] = {}
     for slug, meta in agentes_vocab.items():
-        cas_raw = meta.get("cas") if isinstance(meta, dict) else None
-        if not cas_raw:
+        if not isinstance(meta, dict):
             continue
-        cas_norm = _so_digitos(str(cas_raw))
-        if not cas_norm:
-            continue
-        if cas_norm in indice and indice[cas_norm].slug != slug:
-            raise ValueError(
-                f"Colisão de CAS no vocabulário: {cas_raw!r} aponta para "
-                f"{indice[cas_norm].slug!r} e {slug!r}"
+        todos_cas = [meta.get("cas"), *(meta.get("cas_adicionais") or ())]
+        for cas_raw in todos_cas:
+            if not cas_raw:
+                continue
+            cas_norm = _so_digitos(str(cas_raw))
+            if not cas_norm:
+                continue
+            if cas_norm in indice and indice[cas_norm].slug != slug:
+                raise ValueError(
+                    f"Colisão de CAS no vocabulário: {cas_raw!r} aponta para "
+                    f"{indice[cas_norm].slug!r} e {slug!r}"
+                )
+            indice[cas_norm] = EntradaIndice(
+                slug=slug,
+                is_carcinogeno_iarc=bool(meta.get("is_carcinogeno_iarc", False)),
             )
-        indice[cas_norm] = EntradaIndice(
-            slug=slug,
-            is_carcinogeno_iarc=bool(meta.get("is_carcinogeno_iarc", False)),
-        )
     return indice
 
 
