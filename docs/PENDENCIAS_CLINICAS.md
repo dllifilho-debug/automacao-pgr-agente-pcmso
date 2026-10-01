@@ -3834,7 +3834,7 @@ R-PSY-04 cobre só altura e espaço confinado. Nenhum PGR do acervo medido decla
 
 **Status:** ABERTA — sem caso medido.
 
-### DT-(sessão `claude/clever-hopper-er6xqi`)-01 — Thinner com acetona no termo (PGRs CMO) não resolve `[ABERTA — decisão do Diovanni]`
+### DT-(sessão `claude/clever-hopper-er6xqi`)-01 — Thinner com acetona no termo (PGRs CMO) não resolve `[RESOLVIDA — opção (a) restrita; mesma branch, 01/10/2026]`
 
 **Origem.** Varredura do acervo ao resolver a acetona do T65 (01/10/2026): `PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS
 ROSAS 27.08.26` declara "Thinner Acetona" (pág. 62); `PGR_CMO_CONSTRUTORA_RESIDENCIAL_VISTAMERICA_2026-07-28`,
@@ -3849,5 +3849,14 @@ como uma substância só e esconderia outros componentes com exame próprio (cla
 deixando "Thinner" sozinho e o álcool diacetona sem agente; (b) nenhum alias — o vínculo da FDS do thinner ao GHE
 (D-ARQ-90) traz a composição real; (c) slug `thinner` com aviso de pedir a FDS.
 
-**Status:** ABERTA — decisão do Diovanni.
+**Status:** RESOLVIDA (01/10/2026, decisão do Diovanni: opção (a) só nas formas que nomeiam a acetona). "Thinner
+Acetona" em `termos:` de `acetona` ("Thinner - Acetona" dá a mesma chave normalizada) [DERIVADO — NR-07 7.5.4 "a"/"b":
+o PCMSO segue os riscos identificados e classificados no PGR; NR-07 Anexo I Quadro 1: IBE por substância, Acetona
+67-64-1 → acetona na urina]. "Thinner - Álcool diacetona" fica sem agente: o álcool diacetona não está no Quadro 1 da
+NR-07 nem no Anexo 11 da NR-15 (cópias de `normas/`). "Thinner" sozinho: sem caso no acervo; quando aparecer, R-PGR-05.
+Custo aceito: o termo deixa de aparecer como não reconhecido, que servia de alerta para pedir a FDS do thinner.
+Vigência conferida pelo Diovanni no Gov.br (01/10/2026): NR-07 até a Portaria MTP 567/2022 e NR-15 até a Portaria MTE
+2.021/2025 — as cópias de `normas/` trazem as duas. O Anexo 11 da NR-15 em `normas/` não tem data `[A MEDIR]`.
+Commit `b7e2713`; índice de termos 188 → 189; varredura inversa 3/3. Efeito no Aurora e no Vistamerica (rota de IA)
+`[A MEDIR]` no app.
 
