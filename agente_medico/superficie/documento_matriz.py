@@ -110,6 +110,15 @@ class CabecalhoDocumento:
     medico_coordenador: str
     crm: str
 
+    def linha_coordenador(self) -> str:
+        """Rótulo das matrizes RQ.61 do acervo; o CRM digitado só com o número ganha o
+        prefixo "CRM", sem duplicar quando já vem escrito ("CRM-GO 14.949")."""
+        crm = self.crm.strip()
+        if crm and not crm.upper().startswith("CRM"):
+            crm = f"CRM {crm}"
+        identificacao = " — ".join(parte for parte in (self.medico_coordenador.strip(), crm) if parte)
+        return f"Médico(a) Coordenador(a) do PCMSO: {identificacao}".rstrip()
+
 
 @dataclass(frozen=True)
 class LinhaCargo:
@@ -248,7 +257,7 @@ def renderizar_html(doc: DocumentoMatriz) -> str:
         f"<p>Obra: {html.escape(c.obra)}</p>",
         *([f"<p>Tipo: {html.escape(c.tipo_documento)}</p>"] if c.tipo_documento.strip() else []),
         f"<p>Data: {html.escape(c.data)}</p>",
-        f"<p>{html.escape(c.medico_coordenador)} | {html.escape(c.crm)}</p>",
+        f"<p>{html.escape(c.linha_coordenador())}</p>",
     ]
     for bloco in doc.blocos:
         partes.append(f"<h2>{html.escape(titulo_ghe(bloco.ghe_id, bloco.nome_ghe))}</h2>")
@@ -297,7 +306,7 @@ def renderizar_docx(doc: DocumentoMatriz, destino: Path) -> None:
     if c.tipo_documento.strip():
         documento.add_paragraph(f"Tipo: {c.tipo_documento}")
     documento.add_paragraph(f"Data: {c.data}")
-    documento.add_paragraph(f"{c.medico_coordenador} | {c.crm}")
+    documento.add_paragraph(c.linha_coordenador())
 
     for bloco in doc.blocos:
         cabecalho_ghe = documento.add_heading(titulo_ghe(bloco.ghe_id, bloco.nome_ghe), level=2)
