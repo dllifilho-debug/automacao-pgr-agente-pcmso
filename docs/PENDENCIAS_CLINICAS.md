@@ -3651,7 +3651,8 @@ determinística (Fascino, Porto Araras I, Vila Brasil) o texto não traz gesso c
 **Espaço confinado** segue sem regra de espirometria, sem medição.
 Correção (PROTOCOLO v117): os PGRs Ricco (Hetrin mar/25, Serra Dourada mai/24, Atualização 14.09.26) declaram
 o gesso como agente, mas param no gate `pgr_cargo_based` — sem alias até existir rota por cargo. Saída do
-Vistamerica Ver.02 (gesso como "PNOS/PNOR" medido, 0,08 mg/m³): medido no motor com o risco declarado — RX só
+App em produção (T65, 01/10/2026): o GHE 16 saiu sem espirometria e RX porque o Gemini transcreveu
+"Sulfato de cálcio — pó de Gesso" — termo acrescentado (PROTOCOLO v119). Vistamerica Ver.02 (gesso como "PNOS/PNOR" medido, 0,08 mg/m³): medido no motor com o risco declarado — RX só
 admissional (`R-RX-01-pnos-ate10`), espirometria 24M; o gabarito 08.12.25 dá RX 60M. **Decisão do Diovanni
 (30/09/2026): mantém a norma** (NR-07 Anexo III Quadro 2, ≤10% LEO → admissão). Fechado, sem pendência nova.
 
