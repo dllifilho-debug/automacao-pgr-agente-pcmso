@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import logging
+import time
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -143,10 +145,15 @@ class _TranscritorContado:
 
     interno: TranscritorGHE
     chamadas: int = 0
+    segundos: float = 0.0
 
     def transcrever(self, bloco: str) -> GHEVerbatim:
         self.chamadas += 1
-        return self.interno.transcrever(bloco)
+        inicio = time.perf_counter()
+        try:
+            return self.interno.transcrever(bloco)
+        finally:
+            self.segundos += time.perf_counter() - inicio
 
     def transcrever_lote(self, blocos: Sequence[str]) -> tuple[GHEVerbatim, ...]:
         """Delega o lote quando o interno o oferece (TranscritorGeminiGHE) e
@@ -158,9 +165,44 @@ class _TranscritorContado:
         """
         self.chamadas += len(blocos)
         em_lote = getattr(self.interno, "transcrever_lote", None)
-        if callable(em_lote):
-            return tuple(em_lote(blocos))
-        return tuple(self.interno.transcrever(b) for b in blocos)
+        inicio = time.perf_counter()
+        try:
+            if callable(em_lote):
+                return tuple(em_lote(blocos))
+            return tuple(self.interno.transcrever(b) for b in blocos)
+        finally:
+            self.segundos += time.perf_counter() - inicio
+
+
+_log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class TempoProcessamento:
+    """Tempo da parte cara do processamento do PGR, para o operador ver onde
+    o tempo vai: total, espera pela IA e motor; o resto é leitura do PDF e
+    montagem do PGR hidratado."""
+
+    total_s: float
+    ia_s: float
+    motor_s: float
+
+    @property
+    def leitura_e_montagem_s(self) -> float:
+        return max(0.0, self.total_s - self.ia_s - self.motor_s)
+
+
+def _segundos(valor: float) -> str:
+    return f"{valor:.1f} s".replace(".", ",") if valor < 10 else f"{valor:.0f} s"
+
+
+def texto_tempo(tempo: TempoProcessamento, blocos_ia: int) -> str:
+    partes = []
+    if blocos_ia > 0:
+        partes.append(f"IA (Gemini): {_segundos(tempo.ia_s)} em {blocos_ia} bloco(s)")
+    partes.append(f"leitura do PDF e montagem: {_segundos(tempo.leitura_e_montagem_s)}")
+    partes.append(f"motor: {_segundos(tempo.motor_s)}")
+    return f"⏱ Processamento do PGR: {_segundos(tempo.total_s)} — " + " · ".join(partes)
 
 
 def _protocolo_padrao() -> Protocolo:
@@ -184,6 +226,7 @@ def _rodar_parse_deterministico(
     str | None,
     tuple[Pendencia, ...],
     int,
+    TempoProcessamento,
 ]:
     """Devolve, além de matrizes/exames_vocab/pendencias (extração+hidratação),
     resultado.status e resultado.pendencias_globais — sem esses dois campos a
@@ -200,6 +243,7 @@ def _rodar_parse_deterministico(
     só fica visível para quem chama esta função."""
     protocolo = _protocolo_padrao()
     contador = _TranscritorContado(interno=TranscritorGeminiGHE())
+    inicio = time.perf_counter()
     pgr_hidratado, pendencias = preparar_pgr_hidratado(
         caminho_pdf,
         protocolo,
@@ -208,8 +252,12 @@ def _rodar_parse_deterministico(
         envelope,
     )
     if pgr_hidratado is None:
-        return None, None, protocolo.vocabulario.exames, pendencias, None, (), contador.chamadas
+        tempo = TempoProcessamento(time.perf_counter() - inicio, contador.segundos, 0.0)
+        return None, None, protocolo.vocabulario.exames, pendencias, None, (), contador.chamadas, tempo
+    inicio_motor = time.perf_counter()
     resultado = processar_pgr(pgr_hidratado, protocolo)
+    fim = time.perf_counter()
+    tempo = TempoProcessamento(fim - inicio, contador.segundos, fim - inicio_motor)
     return (
         pgr_hidratado,
         tuple(resultado.matrizes),
@@ -218,6 +266,7 @@ def _rodar_parse_deterministico(
         resultado.status,
         tuple(resultado.pendencias_globais),
         contador.chamadas,
+        tempo,
     )
 
 
@@ -235,7 +284,7 @@ def executar_rota_determinista(
     devolve (None, None, pendencias) — nunca inventa matriz (D-ARQ-22).
     Primitiva sem cache — executar_rota_determinista_cacheada é a versão que a
     casca usa de fato."""
-    _pgr_hidratado, matrizes, exames_vocab, pendencias, _status, _pendencias_globais, _chamadas_ia = (
+    _pgr_hidratado, matrizes, exames_vocab, pendencias, _status, _pendencias_globais, _chamadas_ia, _tempo = (
         _rodar_parse_deterministico(caminho_pdf, envelope)
     )
     if matrizes is None:
@@ -262,7 +311,8 @@ class CacheMatrizes:
     existe mais — a casca avisa uma vez e limpa. `medicoes` (D-ARQ-86 cl.8):
     avaliações quantitativas informadas na tela; ficam FORA de pgr_hidratado e
     são reaplicadas a cada processar_pgr, então remover uma medição devolve o
-    valor do PGR."""
+    valor do PGR. `tempo`: quanto levou o processamento que gerou este cache
+    (campo aditivo; None em caches montados sem passar por ele)."""
 
     chave: str
     matrizes: tuple[MatrizGHE, ...] | None
@@ -274,6 +324,7 @@ class CacheMatrizes:
     pgr_hidratado: PGR | None
     anexos_descartados: tuple[tuple[str, str], ...] = ()
     medicoes: tuple[MedicaoInformada, ...] = ()
+    tempo: TempoProcessamento | None = None
 
 
 def calcular_chave_cache(conteudo_pdf: bytes, envelope: EnvelopeConfirmado) -> str:
@@ -315,9 +366,10 @@ def executar_rota_determinista_cacheada(
         medicoes_anteriores = (
             cache.medicoes if cache is not None and _mesmo_pdf(cache.chave, chave_atual) else ()
         )
-        pgr_hidratado, matrizes, exames_vocab, pendencias, status, pendencias_globais, chamadas_ia = (
+        pgr_hidratado, matrizes, exames_vocab, pendencias, status, pendencias_globais, chamadas_ia, tempo = (
             _rodar_parse_deterministico(caminho_pdf, envelope)
         )
+        _log.info("%s — %s", caminho_pdf.name, texto_tempo(tempo, chamadas_ia))
         cache = CacheMatrizes(
             chave=chave_atual,
             matrizes=matrizes,
@@ -327,6 +379,7 @@ def executar_rota_determinista_cacheada(
             pendencias_globais=pendencias_globais,
             chamadas_ia=chamadas_ia,
             pgr_hidratado=pgr_hidratado,
+            tempo=tempo,
         )
         if anteriores and cache.pgr_hidratado is not None and cache.status != "REJEITADO":
             cache = _reaplicar_produtos(cache, _protocolo_padrao(), anteriores)
@@ -658,6 +711,7 @@ def pagina_matriz() -> None:
         remover_medicao_e_reprocessar,
         remover_produto_e_reprocessar,
         responsavel_pcmso_incompleto,
+        texto_tempo,
     )
 
     st.title("Matriz de Exames — PCMSO")
@@ -1192,6 +1246,8 @@ def pagina_matriz() -> None:
                 "reconhecido pela rota determinística. Confira a matriz com "
                 "atenção redobrada."
             )
+        if cache.tempo is not None:
+            caixa_conferencia.caption(texto_tempo(cache.tempo, cache.chamadas_ia))
 
         matriz_gerada = True
         caixa_matriz = etapa_matriz.container(border=True)
