@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_187_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_188_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -81,7 +81,9 @@ def test_indice_real_tem_187_entradas(indice_real: IndiceTermos) -> None:
     # com hidrogênio" (DT-(sessão claude/keen-curie-xdm7kb)-01).
     # 185 -> 187 (mesma branch): +2 termos medidos no app em produção (T65, 01/10/2026) —
     # "Sulfato de cálcio — pó de Gesso" (GHE 16, transcrição do Gemini) e "Pó de madeira" (GHE 06).
-    assert len(indice_real.slug_por_forma) == 187
+    # 187 -> 188 (branch `claude/clever-hopper-er6xqi`): +1 termo "Acetona — Solução limpadora"
+    # (T65 GHE 11, DT-(sessão claude/keen-curie-xdm7kb)-03).
+    assert len(indice_real.slug_por_forma) == 188
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -842,13 +844,15 @@ def test_r_pgr_07_par_de_sufixo_de_postura_resolve_exata_nas_duas_grafias(
         ("Adesivo CPVC Metiletilcetona", "metil_etil_cetona"),
         ("Metiletilcetona", "metil_etil_cetona"),
         ("Massa acriílica - Hidróxido de amônia \x0024°Be\x00", "hidroxido_de_amonia"),
+        ("Acetona — Solução limpadora", "acetona"),
     ],
 )
 def test_produto_mais_componente_resolve_por_alias(
     indice_real: IndiceTermos, termo: str, slug_esperado: str
 ) -> None:
     # Verbatim dos PGRs Vila Brasil Escritório e Fascino (DT-(sessão
-    # claude/hopeful-newton-yjv3k7)-02). Reversão que mata cada caso: tirar o
+    # claude/hopeful-newton-yjv3k7)-02) e do T65 pela rota de IA (acetona, DT-(sessão
+    # claude/keen-curie-xdm7kb)-03). Reversão que mata cada caso: tirar o
     # termo correspondente do `termos:` do slug em agentes.yaml.
     resolucao = resolver_termo(termo, indice_real)
     assert resolucao.confianca == Confianca.EXATA
