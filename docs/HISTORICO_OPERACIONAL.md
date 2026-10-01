@@ -11528,3 +11528,30 @@ inversa 3/3. Um caso redundante com `test_thinner_nao_resolvido_produto_nao_e_ag
 
 **Pendências.** `DT-(sessão claude/clever-hopper-er6xqi)-01` RESOLVIDA. Efeito no Aurora/Vistamerica `[A MEDIR]` no app.
 Nenhuma nova.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main 629ce1f`, pós-merge do PR #427) — 01/10/2026 — "Thinner <agente>" do Aurora (DT-clever-hopper-01, extensão)
+
+**Achado.** O Diovanni mandou o PGR do Aurora em HTML (sistema do SECONCI, versão de 20/08; riscos como dados JSON no
+arquivo). A varredura da sessão anterior procurou só "aceton" e registrou "Thinner Acetona"; o PGR lista o thinner por
+componente (PDF 27.08.26, págs. 61-63). Na versão de 20/08, Thinner Tolueno e Xileno estão em MODERADO. Tolueno, xileno e
+MEK têm R-BIO-04; sem alias, o indicador acima de BAIXO não sairia.
+
+**Decisão do Diovanni: estender o alias.** Commit `5f045f8`: "Thinner Tolueno", "Thinner Xileno", "Thinner
+Metiletilcetona", "Thinner Acetato de etila", "Thinner Etanol" nos `termos:` dos slugs (base NR-07 7.5.4 "a"/"b" e
+Anexo I Quadro 1). Índice de termos 189 → 194; 6 casos novos; varredura inversa 5/5.
+
+**PDF novo do Aurora.** `matrizes_originais/PGR — CMO AURORA.pdf` (upload do Diovanni, `093bc88`) tem o mesmo sha256 do
+`PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS ROSAS 27.08.26.pdf` — duplicata, não versão nova.
+
+**Higiene.** Branches remotas antigas (`claude/nice-ptolemy-wxk1wo`, `claude/sharp-wozniak-j4596a`,
+`correcao-parser-pgr-viverde`, `normas`) apagadas pelo Diovanni no GitHub — conferido por `git ls-remote`: só `main`.
+Anexo 11 da NR-15: o PDF do próprio Gov.br não traz data; a vigência fica pela lista de alterações da NR-15 (Portaria
+MTE 2.021/2025).
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos (código de saída 0). Suíte completa, árvore parada em
+`5f045f8`: **1614 passed, 6 skipped, 0 failed** (799,89 s), 1608 + 6. DECISOES v237 e PROTOCOLO v120 inalterados.
+
+**Três números clínicos.** Não re-tirados — alias de termo.
+
+**Pendências.** Efeito no Aurora (indicadores em BAIXO → menção; audiometria por ototóxico) `[A MEDIR]` no app. Nenhuma
+nova.

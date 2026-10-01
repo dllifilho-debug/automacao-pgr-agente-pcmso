@@ -3860,3 +3860,14 @@ Vigência conferida pelo Diovanni no Gov.br (01/10/2026): NR-07 até a Portaria 
 Commit `b7e2713`; índice de termos 188 → 189; varredura inversa 3/3. Efeito no Aurora e no Vistamerica (rota de IA)
 `[A MEDIR]` no app.
 
+**Nota (mesma branch, 01/10/2026) — medição corrigida e alias estendido.** A origem acima registrou só "Thinner Acetona"
+no Aurora porque a varredura procurou "aceton"; o PGR CMO Aurora (27.08.26, págs. 61-63) lista o thinner componente a
+componente — Thinner 1,2,4-trimetilbenzeno, 2-butanol, Acetato de etila, Acetona, Etanol, Tolueno (e Xileno avulso) —,
+e a versão de 20/08 (HTML do sistema do SECONCI) traz também Isopropilbenzeno, Metiletilcetona, Acetato de sec-butila,
+com Thinner Tolueno em **MODERADO** (no PDF de 27.08, BAIXO). Sem alias, um tolueno acima de BAIXO não emitiria o
+indicador. Decisão do Diovanni: estender pela mesma base — "Thinner Tolueno", "Thinner Xileno", "Thinner
+Metiletilcetona", "Thinner Acetato de etila", "Thinner Etanol" (commit `5f045f8`; índice 189 → 194; varredura inversa
+5/5). Isopropilbenzeno, 1,2,4-trimetilbenzeno, 2-butanol, acetato de sec-butila e álcool diacetona seguem sem agente
+(fora do Quadro 1 da NR-07 não medido para os quatro primeiros `[A MEDIR]`). Tolueno e xileno são `is_ototoxico`:
+efeito na audiometria do GHE da pintura `[A MEDIR]` no app.
+
