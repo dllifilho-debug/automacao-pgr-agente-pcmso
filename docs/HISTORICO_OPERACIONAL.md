@@ -11352,3 +11352,31 @@ regenerado, `test_gerar_indice_darq.py` 6 passed.
 
 **Pendências.** DT-003EB-02 com a decisão registrada. Nenhuma nova. O efeito no T65 (rota LLM) se confirma na próxima
 rodada do Diovanni no app.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, sobre `main 68bdb94`, pós-merge do PR #420) — 01/10/2026 — T65 conferido (R-BIO-05 em BAIXO) + FDS sem ingrediente declarado (DT-keen-curie-02)
+
+**T65 em produção.** Diovanni mandou matriz e memorial do app depois do #420. Comparado ao gabarito RQ.61 de 24.09.26
+com o extrator de `comparar_matriz_gabarito` (scripts descartáveis no scratchpad): GHE 11 sem MEK na urina, com "Obs.:
+risco baixo no PGR para metil etil cetona — incluir menção no PCMSO" em Encanador, Meio Oficial e Servente (memorial
+cita R-BIO-05 e NR-07 7.5.12 "b"); GHE 16 com Espirometria 24M e RX 60M; única divergência restante a Avaliação
+Psicossocial (decidida, R-PSY-04), em 15 cargos — 13 pareados por nome e 2 pareados à mão (Vigia Noturno/"Noturnom",
+Servente da betoneira). Nenhuma divergência de periodicidade ou momento. Não pareados por nome só por grafia ("(não opera
+policorte)", "Sinaleiro e Amarrador" separado, "Jr."). O extrator lê a linha "Obs.:" como exame — artefato do
+instrumento, não do app. Riscos não reconhecidos: 49.
+
+**DT-(sessão claude/keen-curie-xdm7kb)-02 — opção (a), decisão do Diovanni.** Commit `811b980`:
+`fds_sem_ingrediente_declarado` (composição vazia e nenhuma pendência) em `superficie/sugestao_vinculo.py`; em
+`web_matriz.py` a FDS nesse estado abre o vínculo com aviso próprio e seletor, sem sugestão nem "Marcar"; o "Gere a
+matriz" também passa a aparecer para ela. Medido: `extrair_texto_fds` acha a seção 3 da FDS CARPINTEIRO ("Não apresenta
+ingredientes ou impurezas que contribuam para o perigo"); a resposta do Gemini no app `[A MEDIR]`. 4 testes novos;
+varredura inversa 5/5 (abrir o vínculo só com `blocos_fds`; mandar a composição vazia a `sugerir_ghes`; guarda
+`if not blocos` em `_anexar`; decidir só por `not blocos_fds`; `st.info` condicionado a `blocos_fds`).
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada em `811b980`:
+**1589 passed, 6 skipped, 0 failed** (867,14 s), 1585 + 4. DECISOES v235 (nota em D-ARQ-90), índice regenerado,
+`test_gerar_indice_darq.py` 6 passed. PROTOCOLO v120 inalterado.
+
+**Três números clínicos.** Não re-tirados — nenhuma regra nem vocabulário tocado.
+
+**Pendências.** DT-keen-curie-02 RESOLVIDA. Nenhuma nova. Critério de aceite da D-ARQ-90 fatia 1: todos os itens
+fechados no código; segue `[A MEDIR]` a rodada no app com o pacote de FDS do Aurora.
