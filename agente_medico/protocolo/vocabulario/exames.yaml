@@ -13,6 +13,14 @@
 # carregam; os demais saem depois, em ordem alfabética de slug (fallback do
 # emissor, não deste arquivo). "Manganês no sangue" (manganes_sangue) entrou
 # com R-BIO-03 (25/09/2026), grafia do gabarito Aurora Lago das Rosas.
+#
+# bloco_exibicao: fim (D-ARQ-73, nota de 01/10/2026, decisão do Diovanni): o exame vai
+# para depois dos que não têm ordem_exibicao (os indicadores biológicos). Medido em 32
+# gabaritos de matriz de 2026: indicador biológico sempre antes de Espirometria, RX,
+# Saúde Mental e Psicossocial (nenhuma ocorrência contra); Espirometria e RX antes de
+# Saúde Mental e Psicossocial em 15 arquivos contra 8; Saúde Mental antes de
+# Psicossocial em 16 contra 9. Nomes "RX de Tórax OIT" (29/30 arquivos),
+# "Carboxihemoglobina" (17 contra 7) e "RX de Coluna Lombo-Sacra" pela mesma medição.
 
 exames:
   exame_clinico:
@@ -25,13 +33,15 @@ exames:
     nome_exibicao: "Avaliação Psicossocial"
     categoria: ocupacional
     fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
-    ordem_exibicao: 8
+    bloco_exibicao: fim
+    ordem_exibicao: 14
 
   avaliacao_saude_mental:
     nome_exibicao: "Av. Médica de Saúde Mental"
     categoria: ocupacional
     fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
-    ordem_exibicao: 9
+    bloco_exibicao: fim
+    ordem_exibicao: 13
 
   hemograma:
     nome_exibicao: "Hemograma"
@@ -64,15 +74,17 @@ exames:
     ordem_exibicao: 6
 
   rx_coluna_lombo_sacra:
-    nome_exibicao: "RX Coluna Lombo-Sacra"
+    nome_exibicao: "RX de Coluna Lombo-Sacra"
     categoria: imagem
     fonte_matriz: "VIBRAÇÃO CORPO INTEIRO"
+    bloco_exibicao: fim
     ordem_exibicao: 11
 
   rx_torax_oit:
-    nome_exibicao: "RX Tórax OIT"
+    nome_exibicao: "RX de Tórax OIT"
     categoria: imagem
     fonte_matriz: "SÍLICA / ASBESTO / POEIRAS"
+    bloco_exibicao: fim
     ordem_exibicao: 12
     periodicidade_sempre_visivel: true   # unico exame que imprime o numero a 12M — ver docs/referencia/MEDICAO_003FE_regra_forma_periodicidade.md
 
@@ -80,6 +92,7 @@ exames:
     nome_exibicao: "Espirometria"
     categoria: ocupacional
     fonte_matriz: "R-ESP-02 — poeira mineral (NR-07 Anexo III 3.1)"
+    bloco_exibicao: fim
     ordem_exibicao: 10
 
   reticulocitos:
@@ -128,7 +141,7 @@ exames:
     fonte_matriz: "R-BIO-03 — manganês, fora do Anexo I da NR-07"
 
   carboxihemoglobina:
-    nome_exibicao: "Carboxihemoglobina no sangue"
+    nome_exibicao: "Carboxihemoglobina"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
     ordem_exibicao: 7

@@ -29,7 +29,7 @@ from scripts.medir_cobertura_e_forma import FormaPeriodicidade, extrair_forma_pe
 # `exames.yaml` mapeia nome_exibicao → slug; aqui só o recorte que os testes usam.
 MAPA = {
     "glicemia de jejum": "glicemia",
-    "rx torax oit": "rx_torax_oit",
+    "rx de torax oit": "rx_torax_oit",
     "avaliacao psicossocial": "avaliacao_psicossocial",
     "exame clinico": "exame_clinico",
 }
@@ -93,7 +93,7 @@ def test_grafia_divergente_do_gabarito_resolve_para_o_mesmo_slug() -> None:
     """
     for grafia, slug in (
         ("Glicemia em Jejum (ADM, PER)", "glicemia"),
-        ("RX de Tórax OIT (ADM, PER 12 meses)", "rx_torax_oit"),
+        ("RX Tórax OIT (ADM, PER 12 meses)", "rx_torax_oit"),
     ):
         bruta = extrair_forma_periodicidade(grafia, MAPA)
         assert resolver_slug(bruta, MAPA).exame == slug, grafia
@@ -179,7 +179,7 @@ def test_grafia_lombo_sacra_sem_hifen_resolve_slug() -> None:
     """R — apagar a entrada "rx de coluna lombo sacra" de `_ALIAS_GRAFIA` mata
     este teste. Grafia do gabarito Porto Araras 1 (06.07.26); sem o alias, 1
     superemissão + 1 subemissão falsas no operador de cremalheira."""
-    mapa = {"rx coluna lombo-sacra": "rx_coluna_lombo_sacra"}
+    mapa = {"rx de coluna lombo-sacra": "rx_coluna_lombo_sacra"}
     bruta = extrair_forma_periodicidade("RX de Coluna Lombo Sacra (ADM, PER, MRO)", mapa)
     assert resolver_slug(bruta, mapa).exame == "rx_coluna_lombo_sacra"
 

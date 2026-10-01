@@ -636,3 +636,57 @@ def test_html_e_word_usam_a_linha_do_coordenador(tmp_path: Path) -> None:
     linha = "Médico(a) Coordenador(a) do PCMSO: Dra. Teste — CRM-GO 0000"
     assert f"<p>{linha}</p>" in renderizar_html(documento)  # type: ignore[arg-type]
     assert linha in [p.text for p in DocxDocument(str(destino)).paragraphs]
+
+
+# D-ARQ-73, nota de 01/10/2026 (decisão do Diovanni): ordem e nomes medidos em 32
+# gabaritos de matriz de 2026.
+
+_EXAMES_REAIS = carregar(Path(__file__).parent.parent / "protocolo").vocabulario.exames
+
+
+def test_indicador_biologico_fica_entre_os_laboratoriais_e_espirometria_rx_e_avaliacoes() -> None:
+    # Reversões que matam: (1) ignorar `bloco_exibicao` na chave — o MEK volta para
+    # depois do RX, onde nenhum gabarito o põe; (2) devolver Saúde Mental/Psicossocial
+    # para antes de Espirometria/RX no exames.yaml (ordem do SPE 0030); (3) inverter
+    # Saúde Mental e Psicossocial no exames.yaml.
+    matriz = MatrizGHE(
+        ghe_id="GHE-11",
+        linhas=[
+            _exame(slug)
+            for slug in (
+                "avaliacao_psicossocial",
+                "rx_torax_oit",
+                "mek_urina",
+                "avaliacao_saude_mental",
+                "espirometria",
+                "ecg",
+                "exame_clinico",
+            )
+        ],
+        cargos=("Encanador",),
+    )
+    (bloco,) = montar_documento([matriz], _EXAMES_REAIS, _cabecalho(), _rodape()).blocos
+    nomes = [celula.split(" (")[0] for celula in bloco.linhas[0].celulas]
+    assert nomes == [
+        "Exame Clínico",
+        "ECG",
+        "Metil-etil-cetona",
+        "Espirometria",
+        "RX de Tórax OIT",
+        "Av. Médica de Saúde Mental",
+        "Avaliação Psicossocial",
+    ]
+
+
+@pytest.mark.parametrize(
+    "slug,nome",
+    [
+        ("rx_torax_oit", "RX de Tórax OIT"),
+        ("carboxihemoglobina", "Carboxihemoglobina"),
+        ("rx_coluna_lombo_sacra", "RX de Coluna Lombo-Sacra"),
+    ],
+)
+def test_nome_de_exibicao_segue_a_grafia_majoritaria_dos_gabaritos(slug: str, nome: str) -> None:
+    # Reversão que mata cada caso: voltar o nome_exibicao do slug em exames.yaml
+    # ("RX Tórax OIT", "Carboxihemoglobina no sangue", "RX Coluna Lombo-Sacra").
+    assert _EXAMES_REAIS[slug]["nome_exibicao"] == nome
