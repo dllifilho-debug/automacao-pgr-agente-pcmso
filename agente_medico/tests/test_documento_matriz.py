@@ -582,3 +582,31 @@ def test_cabecalho_do_ghe_nao_repete_o_codigo(tmp_path: Path) -> None:
     assert "<h2>GHE-01 — ENGENHARIA/PRODUÇÃO</h2>" in renderizar_html(documento)  # type: ignore[arg-type]
     cabecalhos = [p.text for p in DocxDocument(str(destino)).paragraphs if p.style.name == "Heading 2"]
     assert cabecalhos == ["GHE-01 — ENGENHARIA/PRODUÇÃO"]
+
+
+def test_rodape_sai_com_os_rotulos_do_rq61(tmp_path: Path) -> None:
+    # DT-(sessão claude/keen-curie-xdm7kb)-03, rodapé. Reversões que matam: voltar a
+    # emitir só o valor, sem rótulo, no HTML ou no Word — três linhas soltas que a
+    # médica não sabe a que se referem (T65 em produção, 01/10/2026).
+    documento = _documento_t65()
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(documento, destino)  # type: ignore[arg-type]
+
+    esperado = [
+        "Responsável pelo preenchimento: Teste",
+        "Médico(a) Responsável pela validação: Dra. Teste",
+        "Data do PGR: 01/01/2026",
+    ]
+    saida = renderizar_html(documento)  # type: ignore[arg-type]
+    assert all(f"<p>{linha}</p>" in saida for linha in esperado)
+    assert [p.text for p in DocxDocument(str(destino)).paragraphs][-3:] == esperado
+
+
+def test_rodape_em_branco_mantem_o_rotulo() -> None:
+    # Gabaritos ENGESEG 24.04.25: "Médico(a) Responsável pela validação:" em branco,
+    # para preencher à mão. Reversão que mata: omitir a linha quando o valor é vazio.
+    assert RodapeDocumento("", "", "").linhas() == (
+        "Responsável pelo preenchimento:",
+        "Médico(a) Responsável pela validação:",
+        "Data do PGR:",
+    )

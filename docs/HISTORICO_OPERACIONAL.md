@@ -11432,3 +11432,25 @@ sincronizado. DECISOES v236 e PROTOCOLO v120 inalterados.
 
 **Pendências.** DT-keen-curie-03: acetona resolvida, segue ABERTA (rodapé e OBS; nomes e ordem dos exames). Nova:
 `DT-(sessão claude/clever-hopper-er6xqi)-01` (thinner). Efeito no T65 `[A MEDIR]` na próxima rodada no app.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main 4e44420`, pós-merge do PR #423) — 01/10/2026 — Rodapé do RQ.61 (DT-keen-curie-03)
+
+**Medido.** 29 gabaritos de matriz de `matrizes_originais/` convertidos por LibreOffice: rodapé com "Responsável pelo
+preenchimento:", "Médico(a) Responsável pela validação:" e "Data do PGR:" (os mais antigos, "Data do PCMAT/PGR:");
+rótulo mantido com valor em branco (ENGESEG 24.04.25); nenhum com campo de OBS no rodapé — a observação vai na célula da
+função. O gabarito T65 24.09.26 escreve "Encanador (Incluir no Word do PCMSO risco baixo no PGR para Acetona e
+Metiletilcetona)", o que confirma o alias da acetona da sessão anterior.
+
+**Commit `3674106`.** `RodapeDocumento.linhas()` com os três rótulos; HTML e Word emitem por ela. 2 testes novos;
+varredura inversa 3/3 (sem rótulo no HTML; sem rótulo no Word; omitir linha vazia). O 1º commit tinha 2 erros de mypy
+(nome `linha` reaproveitado no Word) que o `| tail` do comando mascarou; corrigido com amend local antes de qualquer
+push — lição: checar o código de saída do mypy, não a última linha.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada em `3674106`:
+**1597 passed, 6 skipped, 0 failed** (769,89 s), 1595 + 2. `medir_painel`: `regras 34/49`, `cas 78/111`, índice
+sincronizado. DECISOES v236 e PROTOCOLO v120 inalterados (rótulo não muda o seam humano da cl.5 de D-ARQ-73).
+
+**Três números clínicos.** Não re-tirados.
+
+**Pendências.** DT-keen-curie-03: segue ABERTA só com nomes e ordem dos exames (e o rótulo do coordenador no cabeçalho,
+registrado). Nenhuma nova.

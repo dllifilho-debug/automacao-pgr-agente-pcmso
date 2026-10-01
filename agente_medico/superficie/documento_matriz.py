@@ -130,6 +130,18 @@ class RodapeDocumento:
     medico_validador: str
     data_pgr: str
 
+    def linhas(self) -> tuple[str, ...]:
+        """Rótulos do rodapé das matrizes RQ.61 do acervo; o rótulo fica mesmo com o
+        valor em branco, para preenchimento à mão, como nos gabaritos."""
+        return tuple(
+            f"{rotulo} {valor}".rstrip()
+            for rotulo, valor in (
+                ("Responsável pelo preenchimento:", self.responsavel_preenchimento),
+                ("Médico(a) Responsável pela validação:", self.medico_validador),
+                ("Data do PGR:", self.data_pgr),
+            )
+        )
+
 
 @dataclass(frozen=True)
 class DocumentoMatriz:
@@ -248,14 +260,8 @@ def renderizar_html(doc: DocumentoMatriz) -> str:
                 f"<tr><td>{html.escape(linha.cargo)}</td><td>{celulas_html}</td></tr>"
             )
         partes.append("</table>")
-    partes.extend(
-        [
-            f"<p>{html.escape(r.responsavel_preenchimento)}</p>",
-            f"<p>{html.escape(r.medico_validador)}</p>",
-            f"<p>{html.escape(r.data_pgr)}</p>",
-            "</div>",
-        ]
-    )
+    partes.extend(f"<p>{html.escape(linha)}</p>" for linha in r.linhas())
+    partes.append("</div>")
     return "\n".join(partes)
 
 
@@ -319,7 +325,6 @@ def renderizar_docx(doc: DocumentoMatriz, destino: Path) -> None:
                 for exame_formatado in linha.celulas[1:]:
                     celula_exames.add_paragraph(exame_formatado)
 
-    documento.add_paragraph(r.responsavel_preenchimento)
-    documento.add_paragraph(r.medico_validador)
-    documento.add_paragraph(r.data_pgr)
+    for linha_rodape in r.linhas():
+        documento.add_paragraph(linha_rodape)
     documento.save(str(destino))

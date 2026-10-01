@@ -3792,6 +3792,15 @@ sai dos não reconhecidos e passa pela R-BIO-05 (em BAIXO, observação no lugar
 transcreve `[A MEDIR]` no app. Matriz da rota determinística: inalterada — o termo não ocorre nos PGRs dela. **Segue
 aberto:** rodapé e OBS; nomes e ordem dos exames. Thinner virou `DT-(sessão claude/clever-hopper-er6xqi)-01`.
 
+**Nota (branch `claude/clever-hopper-er6xqi`, 01/10/2026) — rodapé feito; OBS no rodapé descartada por medição.**
+Rodapé com os rótulos dos gabaritos ("Responsável pelo preenchimento:", "Médico(a) Responsável pela validação:", "Data
+do PGR:"), mantidos com valor em branco (gabaritos ENGESEG 24.04.25) — commit `3674106`, `RodapeDocumento.linhas`. Campo
+de OBS no rodapé: nenhum dos 29 gabaritos de matriz convertidos o tem; a observação mora na célula da função (T65 RQ.61:
+"Encanador (Incluir no Word do PCMSO risco baixo no PGR para Acetona e Metiletilcetona)"), e o app já a emite na célula
+("Obs.: …"). O mesmo trecho do gabarito confirma o alias da acetona (`c305bcb`). **Segue aberto:** nomes e ordem dos
+exames do RQ.61. Fora do pedido, mesma classe: no cabeçalho, o coordenador sai "DRA. X | CRM" sem o rótulo
+"Médico(a) Coordenador(a) do PCMSO" dos gabaritos.
+
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-04 — Brigada de emergência com inflamáveis (NR-20 20.15.6) sem gatilho de avaliação psicossocial `[ABERTA — sem caso medido]`
 
 **Origem.** Varredura das NRs de `normas/` na decisão da R-PSY-04 (30/09/2026). NR-20 **20.15.6**: *"Os integrantes da
