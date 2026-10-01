@@ -3871,3 +3871,11 @@ Metiletilcetona", "Thinner Acetato de etila", "Thinner Etanol" (commit `5f045f8`
 (fora do Quadro 1 da NR-07 não medido para os quatro primeiros `[A MEDIR]`). Tolueno e xileno são `is_ototoxico`:
 efeito na audiometria do GHE da pintura `[A MEDIR]` no app.
 
+**Medição no app (mesma branch, 01/10/2026) — Aurora 27.08.26 depois do PR #428.** GHE-18 PINTURA: o app emite as
+observações de risco baixo para acetona, MEK, tolueno e xileno, sem os indicadores — o gabarito RQ.61 de 27.08.26 (Dra.
+Carolini) anota "Inserir no Word do PCMSO risco ocupacional baixo no PGR para Octoato de Cobalto, Thinner Acetona, Thinner
+Metiletilcetona, Thinner Tolueno e Xileno"; só o octoato falta, sem cadastro por decisão anterior. Audiometria inalterada
+(ADM, PER, MRO, DEM por ruído e atividade crítica). Não reconhecidos do thinner: só 1,2,4-trimetilbenzeno, 2-butanol e
+isopropilbenzeno. Os `[A MEDIR]` do Aurora acima estão fechados. Divergências restantes na pintura (pacote do benzeno e
+cobalto na urina) são anteriores e não vêm do thinner.
+

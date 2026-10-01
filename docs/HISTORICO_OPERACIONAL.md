@@ -11555,3 +11555,21 @@ MTE 2.021/2025).
 
 **Pendências.** Efeito no Aurora (indicadores em BAIXO → menção; audiometria por ototóxico) `[A MEDIR]` no app. Nenhuma
 nova.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main 53699e7`, pós-merge do PR #428) — 01/10/2026 — Aurora conferido no app (thinner) + fechamento
+
+**Medido (matriz e memorial do Diovanni, Aurora 27.08.26 sem FDS).** Memorial: 201 exames em 22 GHEs; 5 dispensados pelo
+nível de risco; 95 riscos não reconhecidos. GHE-18 PINTURA: "Obs.: risco baixo no PGR para acetona / metil etil cetona /
+tolueno / xileno — incluir menção no PCMSO", sem acetona na urina, MEK, ortocresol nem metil-hipúrico; memorial cita a
+origem ("Thinner Tolueno com risco baixo no PGR", R-BIO-05). Gabarito RQ.61 27.08.26 (Dra. Carolini, PDF do acervo): "Inserir
+no Word do PCMSO risco ocupacional baixo no PGR para Octoato de Cobalto, Thinner Acetona, Thinner Metiletilcetona, Thinner
+Tolueno e Xileno" — coincide, menos o octoato (sem cadastro por decisão anterior). Audiometria da pintura inalterada (ADM,
+PER, MRO, DEM; R-AUD-01 e R-PKG-ATIVCRIT). Não reconhecidos do thinner: 1,2,4-trimetilbenzeno, 2-butanol, isopropilbenzeno.
+Restam na pintura, anteriores a esta sessão: pacote do benzeno (t,t-mucônico, reticulócitos, hemograma e clínico 6M) e
+cobalto na urina.
+
+**Verificação.** Só docs nesta entrada (PENDENCIAS e HISTORICO); recorte: `tests/test_gerar_indice_darq.py` e
+`medir_painel` (sem `--suite`). Suíte completa herdada de `5f045f8` (1614 passed, 6 skipped, 0 failed) — nenhum `.py` nem
+`.yaml` tocado desde então.
+
+**Fechamento.** Contexto da conversa em 58%; o Diovanni segue em chat novo a partir dos docs vivos.
