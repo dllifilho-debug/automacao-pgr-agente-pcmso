@@ -11506,3 +11506,25 @@ sincronizado. PROTOCOLO v120 inalterado.
 
 **Pendências.** DT-keen-curie-03 RESOLVIDA. DT-keen-curie-02 com a medição no app. Abertas: thinner
 (`DT-(sessão claude/clever-hopper-er6xqi)-01`).
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main 383f361`, pós-merge do PR #426) — 01/10/2026 — Thinner dos PGRs CMO (DT-clever-hopper-01)
+
+**Recomendação pedida pelo Diovanni, técnica e pela norma.** Lidos em `normas/`: NR-07 7.5.4 "a"/"b" (PCMSO pelos riscos
+identificados e classificados no PGR), 7.5.12 "b" (IBE conforme a classificação do PGR), Anexo I Quadro 1 (IBE por
+substância; acetona presente; tolueno e xilenos presentes; álcool diacetona ausente); NR-15 Anexo 11 (álcool diacetona
+ausente). Vigência: o Diovanni mandou as páginas do Gov.br — NR-07 até a Portaria MTP 567/2022, NR-15 até a Portaria MTE
+2.021/2025; as cópias de `normas/` trazem as duas. O Anexo 11 em `normas/` não tem data.
+
+**Decisão do Diovanni: item 1.** Commit `b7e2713`: "Thinner Acetona" em `termos:` de `acetona` (a forma com hífen dá a
+mesma chave); "Thinner" sozinho (sem caso no acervo) e "Thinner - Álcool diacetona" ficam sem agente. Índice de termos
+188 → 189 (teste renomeado `test_indice_real_tem_189_entradas`); 2 casos de alias e 1 teste do diacetona; varredura
+inversa 3/3. Um caso redundante com `test_thinner_nao_resolvido_produto_nao_e_agente` foi retirado antes do commit.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos (código de saída 0). Suíte completa, árvore parada em
+`b7e2713`: **1608 passed, 6 skipped, 0 failed** (832,11 s), 1605 + 3. `medir_painel`: `regras 34/49`, `cas 78/111`,
+índice sincronizado. DECISOES v237 e PROTOCOLO v120 inalterados.
+
+**Três números clínicos.** Não re-tirados — alias de termo.
+
+**Pendências.** `DT-(sessão claude/clever-hopper-er6xqi)-01` RESOLVIDA. Efeito no Aurora/Vistamerica `[A MEDIR]` no app.
+Nenhuma nova.

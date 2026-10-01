@@ -536,7 +536,10 @@ agentes:
     # Produto junto do agente no PGR TOCTAO ALT 65 (T65) GHE 11, como a rota de IA transcreve
     # ("Acetona" e "Solução Limpadora" em linhas separadas da célula) — alias por termo, mesma
     # decisão de DT-(sessão claude/hopeful-newton-yjv3k7)-02; DT-(sessão claude/keen-curie-xdm7kb)-03.
-    termos: ["Acetona — Solução limpadora"]
+    # "Thinner Acetona"/"Thinner - Acetona" (PGRs CMO Aurora 27.08.26 e Vistamerica 2026-07-28): o PGR
+    # nomeia o agente, e o IBE da NR-07 Anexo I Quadro 1 é por substância (NR-07 7.5.4 "a"/"b") —
+    # DT-(sessão claude/clever-hopper-er6xqi)-01. "Thinner" sozinho e o álcool diacetona ficam fora.
+    termos: ["Acetona — Solução limpadora", "Thinner Acetona"]
   acetato_de_etila:
     # Solvente de FDS (Adesivo PVC Tigre, T65 GHE 11). CAS conferido fixture 003.M.
     # is_carcinogeno_iarc=false [DERIVADO — IARC: não classificado].

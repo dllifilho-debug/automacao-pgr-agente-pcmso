@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_188_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_189_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -83,7 +83,9 @@ def test_indice_real_tem_188_entradas(indice_real: IndiceTermos) -> None:
     # "Sulfato de cálcio — pó de Gesso" (GHE 16, transcrição do Gemini) e "Pó de madeira" (GHE 06).
     # 187 -> 188 (branch `claude/clever-hopper-er6xqi`): +1 termo "Acetona — Solução limpadora"
     # (T65 GHE 11, DT-(sessão claude/keen-curie-xdm7kb)-03).
-    assert len(indice_real.slug_por_forma) == 188
+    # 188 -> 189 (mesma branch): +1 termo "Thinner Acetona" (PGRs CMO Aurora e Vistamerica; a
+    # forma com hífen dá a mesma chave), DT-(sessão claude/clever-hopper-er6xqi)-01.
+    assert len(indice_real.slug_por_forma) == 189
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -845,6 +847,8 @@ def test_r_pgr_07_par_de_sufixo_de_postura_resolve_exata_nas_duas_grafias(
         ("Metiletilcetona", "metil_etil_cetona"),
         ("Massa acriílica - Hidróxido de amônia \x0024°Be\x00", "hidroxido_de_amonia"),
         ("Acetona — Solução limpadora", "acetona"),
+        ("Thinner Acetona", "acetona"),
+        ("Thinner - Acetona", "acetona"),
     ],
 )
 def test_produto_mais_componente_resolve_por_alias(
@@ -858,3 +862,10 @@ def test_produto_mais_componente_resolve_por_alias(
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == slug_esperado
 
+
+def test_thinner_com_alcool_diacetona_nao_vira_acetona(indice_real: IndiceTermos) -> None:
+    # DT-(sessão claude/clever-hopper-er6xqi)-01 (PGR CMO Vistamerica 2026-07-28): álcool diacetona
+    # não é acetona nem consta do Quadro 1 da NR-07 Anexo I. Reversão que mata: incluir "Thinner -
+    # Álcool diacetona" nos termos de `acetona` junto com as formas do thinner que nomeiam a acetona.
+    # ("Thinner" sozinho: test_thinner_nao_resolvido_produto_nao_e_agente.)
+    assert resolver_termo("Thinner - Álcool diacetona", indice_real).slug is None
