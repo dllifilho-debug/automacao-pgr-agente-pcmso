@@ -109,6 +109,11 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[01/10/2026, Aurora conferido no app — só docs]`:** branch `claude/clever-hopper-er6xqi` sobre `main 53699e7`
+(merge do PR #428) · suíte **herdada** de `5f045f8`: 1614 passed, 6 skipped, 0 failed (nenhum `.py`/`.yaml` tocado desde
+então); recorte desta entrada: `test_gerar_indice_darq.py` 6 passed · PROTOCOLO v120 e DECISOES v237 inalterados.
+`medir_painel` (sem `--suite`): `regras 34/49`, `cas 78/111`, `índice sincronizado`. Três números clínicos: não re-tirados.
+
 **Baseline `[MEDIDO — 01/10/2026, "Thinner <agente>" do Aurora]`:** branch `claude/clever-hopper-er6xqi` sobre `main
 629ce1f` (merge do PR #427) · **1614 passed, 6 skipped, 0 failed** *(MEDIDO em `5f045f8`, árvore parada, 799,89 s — 1608 +
 6)* · `mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v120 e DECISOES v237 inalterados. `medir_painel`:
