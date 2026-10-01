@@ -95,6 +95,17 @@ def test_gesso_do_t65_gera_espirometria_e_rx_do_gabarito(proto: Protocolo) -> No
     assert linhas["rx_torax_oit"].momentos == {Momento.ADM, Momento.PER, Momento.MR, Momento.DEM}
 
 
+def test_gesso_como_o_gemini_transcreve_no_t65_gera_os_exames(proto: Protocolo) -> None:
+    # App em produção, 01/10/2026: o Gemini transcreveu o agente do GHE 16 juntando
+    # "pó de" da coluna da fonte geradora. Reversão que mata: tirar o termo
+    # "Sulfato de cálcio — pó de Gesso" de `poeira_de_gesso` — espirometria e RX somem.
+    pgr, _ = _hidratar(proto, ("GESSO", ("Sulfato de cálcio — pó de Gesso",)))
+    (matriz,) = _matrizes(proto, pgr)
+
+    periodicidade = {e.exame: e.periodicidade_meses for e in matriz.linhas}
+    assert (periodicidade.get("espirometria"), periodicidade.get("rx_torax_oit")) == (24, 60)
+
+
 def test_gesso_nao_passa_pelo_quadro_2_de_pnos(proto: Protocolo) -> None:
     # Gesso tem LEO (ACGIH), e a nota *** do Quadro 2 do Anexo III NR-07 exclui
     # do PNOS o que tem LEO: o RX sai por R-RX-04, não por R-RX-01-pnos-sem.

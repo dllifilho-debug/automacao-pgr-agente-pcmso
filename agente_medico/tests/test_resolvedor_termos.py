@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_185_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_187_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -79,7 +79,9 @@ def test_indice_real_tem_185_entradas(indice_real: IndiceTermos) -> None:
     # 183 -> 185 (mesma branch, sessão seguinte): +2 termos de `aguarras_mineral` do PGR
     # CMO Aurora 27.08.26 GHE 18 — "Aguarrás" e "Destilados de Petróleo levemente tratados
     # com hidrogênio" (DT-(sessão claude/keen-curie-xdm7kb)-01).
-    assert len(indice_real.slug_por_forma) == 185
+    # 185 -> 187 (mesma branch): +2 termos medidos no app em produção (T65, 01/10/2026) —
+    # "Sulfato de cálcio — pó de Gesso" (GHE 16, transcrição do Gemini) e "Pó de madeira" (GHE 06).
+    assert len(indice_real.slug_por_forma) == 187
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -112,6 +114,14 @@ def test_poeira_da_madeira_resolve_exato(indice_real: IndiceTermos) -> None:
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == "poeira_de_madeira"
     assert resolucao.pendencia is None
+
+
+def test_po_de_madeira_resolve_exato(indice_real: IndiceTermos) -> None:
+    # Grafia do T65 GHE 06 no app em produção (01/10/2026). Reversão que mata:
+    # tirar "Pó de madeira" dos termos de `poeira_de_madeira` — volta a
+    # vocabulario_ausente.
+    resolucao = resolver_termo("Pó de madeira", indice_real)
+    assert (resolucao.confianca, resolucao.slug) == (Confianca.EXATA, "poeira_de_madeira")
 
 
 # ---------------------------------------------------------------------------

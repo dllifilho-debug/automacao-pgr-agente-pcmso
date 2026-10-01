@@ -298,7 +298,9 @@ agentes:
     # Fora, de propósito: as formas dos PGRs Ricco ("- Produtos químicos (Gesso - Sulfato de
     # cálcio – e-Social: …)") — os três param no gate `pgr_cargo_based` e nunca chegam ao
     # resolvedor; alias seria literal órfão (D-ARQ-67). PROTOCOLO v117.
-    termos: ["Sulfato de cálcio — Gesso", "Gesso (Sulfato de Cálcio hemi-hidratado)", "Sulfato de cálcio"]
+    # Quarta forma [MEDIDO — app em produção, 01/10/2026, T65 GHE 16, memorial do Diovanni]:
+    # a transcrição do Gemini juntou "pó de" da coluna vizinha (fonte geradora) ao agente.
+    termos: ["Sulfato de cálcio — Gesso", "Gesso (Sulfato de Cálcio hemi-hidratado)", "Sulfato de cálcio", "Sulfato de cálcio — pó de Gesso"]
   poeira_de_madeira:
     tipo_ibe: null
     cas: null
@@ -307,7 +309,9 @@ agentes:
     protocolos_especiais: [R-RX-03, R-ESP-03]
     # "da" em vez de "de": grafia do PGR Porto Araras I, GHE CARPINTARIA —
     # fuzzy_recusado (D-ARQ-64) sem o alias. DT-003EJ-01, nota de 23/09/2026.
-    termos: ["Poeira da madeira"]
+    # "Pó de madeira" [MEDIDO — app em produção, 01/10/2026, T65 GHE 06 CARPINTARIA, memorial
+    # do Diovanni]: mesma poeira; o carpinteiro já recebia RX/espirometria por outro agente do GHE.
+    termos: ["Poeira da madeira", "Pó de madeira"]
     # DT-003EJ-01 (RESOLVIDA): agente identificável, mas fora dos dois quadros do
     # Anexo III NR-07 — não é sílica/asbesto/carvão mineral (Quadro 1) nem PNOS
     # (Quadro 2, "não especificado de outra maneira"; madeira TEM nome próprio).
