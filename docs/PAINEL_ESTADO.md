@@ -109,6 +109,12 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 01/10/2026, paralelismo sob Streamlit + aguarrás]`:** branch `ccr-983f0b9f-zkz16m` sobre
+`main c56fcbc` (merge do PR #417) · **1576 passed, 6 skipped, 0 failed** *(MEDIDO em `1042690`, árvore parada,
+725,53 s — 1572 + 4)* · `mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v118 inalterado · DECISOES
+v232→**v233** (índice regenerado). `medir_painel`: `regras 34/49`, `cas 78/111`, `índice sincronizado` — inalterados.
+Três números clínicos: não re-tirados.
+
 **Baseline `[MEDIDO — 01/10/2026, leitura única e paralela do PDF]`:** branch `ccr-983f0b9f-zkz16m` sobre `main
 693b8b7` (merge do PR #416; IMPLEMENTAÇÃO — desempenho) · **1572 passed, 6 skipped, 0 failed** *(MEDIDO em `6ae462c`,
 árvore parada, 1254,21 s — 1565 + 7)* · `mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v118
