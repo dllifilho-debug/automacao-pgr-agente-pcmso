@@ -13,15 +13,17 @@ from dataclasses import dataclass
 from typing import Any, Sequence
 
 from agente_medico.motor.resolvedor import construir_indice_cas, gate_cas
-from agente_medico.motor.tipos import PGR, BlocoVerbatim
+from agente_medico.motor.tipos import PGR, BlocoVerbatim, Pendencia
 from agente_medico.motor.transcricao_fds import montar_fds
 
 __all__ = [
     "AVISO_SEM_CASAMENTO",
     "AVISO_SEM_COMPONENTE_RECONHECIDO",
+    "AVISO_SEM_INGREDIENTE_DECLARADO",
     "AgenteEmComum",
     "GHESugerido",
     "SugestaoVinculo",
+    "fds_sem_ingrediente_declarado",
     "sugerir_ghes",
 ]
 
@@ -34,6 +36,20 @@ AVISO_SEM_COMPONENTE_RECONHECIDO = (
     "Nenhum componente desta FDS foi reconhecido no vocabulário de agentes, então "
     "não há como sugerir GHE — a lacuna é do vocabulário, não do PGR nem da FDS."
 )
+
+AVISO_SEM_INGREDIENTE_DECLARADO = (
+    "A FDS não declara ingrediente perigoso; confira contra o que o PGR declara."
+)
+
+
+def fds_sem_ingrediente_declarado(
+    blocos_fds: Sequence[BlocoVerbatim], pendencias_fds: Sequence[Pendencia]
+) -> bool:
+    """Composição lida e vazia, sem pendência: a seção 3 existe e não lista
+    ingrediente (caso FDS CARPINTEIRO, DT-(sessão claude/keen-curie-xdm7kb)-02).
+    Com pendência (região ausente, transcrição indisponível, bloco reprovado) a
+    composição vazia é falha de leitura, não declaração da FDS."""
+    return not blocos_fds and not pendencias_fds
 
 
 @dataclass(frozen=True)

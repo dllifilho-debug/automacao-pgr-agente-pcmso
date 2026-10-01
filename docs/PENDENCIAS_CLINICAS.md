@@ -3734,7 +3734,7 @@ Definition of White Spirit (REACH); ECHA]. Querosene (8008-20-6) fica sem agente
 nenhum exame muda. "Solvente de nafta" (Aurora e Vistamerica 07/26) não entrou: nafta solvente costuma ser aromática,
 outra identidade química. Testes `test_aguarras_vinculo.py`, varredura inversa 6/6.
 
-### DT-(sessão `claude/keen-curie-xdm7kb`)-02 — FDS sem ingrediente perigoso declarado não abre o vínculo nem o aviso (FDS CARPINTEIRO) `[ABERTA — decisão do Diovanni]`
+### DT-(sessão `claude/keen-curie-xdm7kb`)-02 — FDS sem ingrediente perigoso declarado não abre o vínculo nem o aviso (FDS CARPINTEIRO) `[RESOLVIDA — opção (a), tela; branch claude/clever-hopper-er6xqi, 01/10/2026]`
 
 **Origem.** Critério de aceite da `D-ARQ-90` fatia 1: "FDS CARPINTEIRO deve gerar o aviso da cl.4".
 
@@ -3750,7 +3750,12 @@ contenha casaria com o GHE 04. Resposta do app com a FDS transcrita `[A MEDIR]`.
 perigoso; confira contra o que o PGR declara") e o seletor de GHE — muda o que a tela mostra hoje para
 composição vazia. (b) Reescrever o critério da D-ARQ-90 para este caso.
 
-**Status:** ABERTA — decisão do Diovanni.
+**Status:** RESOLVIDA (01/10/2026, decisão do Diovanni: opção (a)). Composição lida e vazia **sem pendência** ganha
+o aviso "A FDS não declara ingrediente perigoso; confira contra o que o PGR declara." e o seletor de GHE, sem sugestão
+nem "Marcar"; com pendência (região ausente, transcrição indisponível, bloco reprovado) a tela segue como antes — é
+falha de leitura, não declaração da FDS. Só tela, commit `811b980`; motor e regras intocados. Testes em
+`test_sugestao_vinculo.py` (4 novos), varredura inversa 5/5. "Ácido oleico" sem slug (medido acima) segue fora do
+escopo — não muda exame. Resposta do Gemini à seção 3 da FDS CARPINTEIRO no app `[A MEDIR]`.
 
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-03 — Auditoria T65: acetona com produto no termo e forma do documento da matriz `[ABERTA — não-bloqueante]`
 

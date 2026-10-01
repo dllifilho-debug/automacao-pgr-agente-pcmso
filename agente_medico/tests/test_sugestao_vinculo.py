@@ -22,6 +22,7 @@ from agente_medico.motor.tipos import (
 from agente_medico.superficie.sugestao_vinculo import (
     AVISO_SEM_CASAMENTO,
     AVISO_SEM_COMPONENTE_RECONHECIDO,
+    AVISO_SEM_INGREDIENTE_DECLARADO,
     sugerir_ghes,
 )
 from agente_medico.superficie.web_matriz import pagina_matriz
@@ -98,7 +99,10 @@ def test_componente_sem_slug_nao_conta_mas_aparece() -> None:
 
 
 def _pagina(
-    monkeypatch: pytest.MonkeyPatch, nome_fds: str | tuple[str, ...], blocos: tuple[BlocoVerbatim, ...]
+    monkeypatch: pytest.MonkeyPatch,
+    nome_fds: str | tuple[str, ...],
+    blocos: tuple[BlocoVerbatim, ...],
+    pendencias_fds: tuple[Pendencia, ...] = (),
 ) -> AppTest:
     """PGR de 3 GHEs processado de verdade e FDS enviadas, sem anexo."""
     pgr = _pgr(
@@ -112,7 +116,7 @@ def _pagina(
 
     monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_falso)
     monkeypatch.setattr(
-        "agente_medico.superficie.web_matriz.preparar_composicao", lambda *a, **k: (blocos, ())
+        "agente_medico.superficie.web_matriz.preparar_composicao", lambda *a, **k: (blocos, pendencias_fds)
     )
     at = AppTest.from_function(pagina_matriz)
     at.run()
@@ -208,3 +212,64 @@ def test_vocabulario_carregado_uma_vez_por_renderizacao(monkeypatch: pytest.Monk
         return len(chamadas)
 
     assert _cargas_no_rerun(("a.pdf", "b.pdf", "c.pdf")) == _cargas_no_rerun(("a.pdf",))
+
+
+# DT-(sessão claude/keen-curie-xdm7kb)-02: FDS CARPINTEIRO (Desmoldante Quartzolit), seção 3
+# "Não apresenta ingredientes ou impurezas que contribuam para o perigo".
+
+
+def test_fds_sem_ingrediente_declarado_ganha_aviso_proprio_e_seletor(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversões que matam: (1) voltar a exigir composição não vazia para abrir o
+    # vínculo (`and blocos_fds`) — nem aviso nem seletor aparecem; (2) mandar a
+    # composição vazia para sugerir_ghes — sai o aviso de lacuna de vocabulário,
+    # que culpa o vocabulário por uma FDS que não declarou nada.
+    at = _pagina(monkeypatch, "FDS CARPINTEIRO.pdf", ())
+
+    assert [w.value for w in at.warning] == [AVISO_SEM_INGREDIENTE_DECLARADO]
+    assert at.multiselect(key="ghe_destino_FDS CARPINTEIRO.pdf").value == []
+    assert at.button(key="anexar_fds_FDS CARPINTEIRO.pdf") is not None
+    assert _linhas_de_ghe(at) == []
+
+
+def test_fds_sem_ingrediente_declarado_anexa_no_ghe_escolhido(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: guarda em _anexar que descarta composição vazia
+    # (`if not blocos: return`) — o seletor aparece e o clique não anexa nada.
+    at = _pagina(monkeypatch, "FDS CARPINTEIRO.pdf", ())
+
+    at.multiselect(key="ghe_destino_FDS CARPINTEIRO.pdf").set_value(["GHE-02"]).run()
+    at.button(key="anexar_fds_FDS CARPINTEIRO.pdf").click().run()
+    assert not at.exception
+
+    ghes = {g.id: g for g in at.session_state["web_matriz_cache"].pgr_hidratado.ghes}
+    assert [p.nome for p in ghes["GHE-02"].produtos_quimicos] == ["FDS CARPINTEIRO"]
+    assert ghes["GHE-18"].produtos_quimicos == ()
+
+
+def test_composicao_vazia_com_pendencia_nao_vira_fds_sem_ingrediente(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: decidir "sem ingrediente" só por `not blocos_fds` — a FDS
+    # cuja seção 3 não foi achada ganharia o aviso e o seletor, e o RT anexaria
+    # como "sem ingrediente perigoso" uma FDS que o sistema não leu.
+    ausente = Pendencia(
+        tipo="composicao_ausente_fds",
+        destinatario="extracao",
+        motivo="Região de composição não localizada",
+        bloqueante=True,
+        regra_origem="D-ARQ-47",
+    )
+    at = _pagina(monkeypatch, "fds.pdf", (), (ausente,))
+
+    assert AVISO_SEM_INGREDIENTE_DECLARADO not in [w.value for w in at.warning]
+    assert not at.multiselect
+
+
+def test_fds_sem_ingrediente_antes_de_gerar_a_matriz_diz_como_vincular(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: deixar o st.info do ramo sem PGR processado condicionado
+    # a `blocos_fds` — antes de gerar, a FDS sem ingrediente volta a não mostrar nada.
+    monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_composicao", lambda *a, **k: ((), ()))
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    at.file_uploader[1].set_value([("FDS CARPINTEIRO.pdf", b"x", "application/pdf")]).run()
+    assert not at.exception
+
+    assert "Gere a matriz para vincular esta FDS a um GHE." in [i.value for i in at.info]
