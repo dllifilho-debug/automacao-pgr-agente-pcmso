@@ -3783,6 +3783,15 @@ testes novos e 1 caso novo (nome com o próprio código) no teste de tela do NUL
 aberto:** acetona do GHE 11; rodapé sem rótulos e sem campo de OBS; nomes e ordem dos exames diferentes do RQ.61. O
 código do GHE sai como o ID do PGR ("GHE-01"); o RQ.61 escreve "GHE 01 –" — fica como está até decisão contrária.
 
+**Nota (branch `claude/clever-hopper-er6xqi`, 01/10/2026) — acetona do GHE 11 resolvida.** "Acetona — Solução
+limpadora" vira alias de `acetona` (`termos:` em `agentes.yaml`), mesma decisão de alias por termo de `DT-(sessão
+claude/hopeful-newton-yjv3k7)-02` — nível (3) de D-ARQ-22 Parte A, analogia. A normalização (`normalizar_termo`) cobre
+travessão, hífen, caixa e parênteses: as quatro variações medidas dão `acetona_solucao_limpadora`. Commit `c305bcb`;
+índice de termos 187 → 188; varredura inversa: tirar o termo derruba os 2 testes previstos. Efeito no T65: a acetona
+sai dos não reconhecidos e passa pela R-BIO-05 (em BAIXO, observação no lugar do exame); o nível que a rota de IA
+transcreve `[A MEDIR]` no app. Matriz da rota determinística: inalterada — o termo não ocorre nos PGRs dela. **Segue
+aberto:** rodapé e OBS; nomes e ordem dos exames. Thinner virou `DT-(sessão claude/clever-hopper-er6xqi)-01`.
+
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-04 — Brigada de emergência com inflamáveis (NR-20 20.15.6) sem gatilho de avaliação psicossocial `[ABERTA — sem caso medido]`
 
 **Origem.** Varredura das NRs de `normas/` na decisão da R-PSY-04 (30/09/2026). NR-20 **20.15.6**: *"Os integrantes da
@@ -3797,4 +3806,21 @@ R-PSY-04 cobre só altura e espaço confinado. Nenhum PGR do acervo medido decla
 `aptidao_psicossocial_nr`, com a fonte NR-20 20.15.6.
 
 **Status:** ABERTA — sem caso medido.
+
+### DT-(sessão `claude/clever-hopper-er6xqi`)-01 — Thinner com acetona no termo (PGRs CMO) não resolve `[ABERTA — decisão do Diovanni]`
+
+**Origem.** Varredura do acervo ao resolver a acetona do T65 (01/10/2026): `PGR(ADENDO)CMO RESIDENCIAL AURORA LAGO DAS
+ROSAS 27.08.26` declara "Thinner Acetona" (pág. 62); `PGR_CMO_CONSTRUTORA_RESIDENCIAL_VISTAMERICA_2026-07-28`,
+"Thinner Acetona" (pág. 95), "Thinner - Acetona" e "Thinner - Álcool diacetona" (pág. 100) — em BAIXO no texto do PDF.
+`resolver_termo`: os quatro (e "Thinner" sozinho) dão `vocabulario_ausente`. Leitura por linha de texto do PDF; o termo
+que a rota de IA transcreve `[A MEDIR]`.
+
+**Por que não entrou como alias.** Thinner é mistura de composição variável; alias para `acetona` trataria o produto
+como uma substância só e esconderia outros componentes com exame próprio (classe do bisfenol na DT-hopeful-newton-02).
+
+**Caminhos.** (a) Alias só das formas com o agente nomeado ("Thinner Acetona", "Thinner - Acetona") para `acetona`,
+deixando "Thinner" sozinho e o álcool diacetona sem agente; (b) nenhum alias — o vínculo da FDS do thinner ao GHE
+(D-ARQ-90) traz a composição real; (c) slug `thinner` com aviso de pedir a FDS.
+
+**Status:** ABERTA — decisão do Diovanni.
 

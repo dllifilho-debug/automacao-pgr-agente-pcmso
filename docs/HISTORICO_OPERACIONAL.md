@@ -11406,3 +11406,29 @@ PROTOCOLO v120 inalterado.
 **Três números clínicos.** Não re-tirados — nenhuma regra nem vocabulário tocado.
 
 **Pendências.** DT-keen-curie-03 segue ABERTA (acetona; rodapé e OBS; nomes e ordem dos exames). Nenhuma nova.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main f38c95e`, pós-merge do PR #422) — 01/10/2026 — Acetona do T65 (DT-keen-curie-03)
+
+**Decisão.** Alias por termo, pela decisão já tomada em `DT-(sessão claude/hopeful-newton-yjv3k7)-02` (nível 3 de
+D-ARQ-22 Parte A). No PDF do T65 o agente aparece em duas linhas ("Acetona" / "Solução Limpadora", pág. 26); a rota de IA
+as junta como "Acetona — Solução limpadora" (memorial de hoje).
+
+**Commit `c305bcb`.** `termos: ["Acetona — Solução limpadora"]` em `acetona`; índice de termos 187 → 188 (teste
+renomeado `test_indice_real_tem_188_entradas`); caso novo em `test_produto_mais_componente_resolve_por_alias`. Os 3
+testes do memorial que usavam a acetona como termo não reconhecido passam a usar "Queda de mesmo nível" (sem agente no
+memorial do T65). Varredura inversa: tirar o termo do YAML derruba os 2 testes previstos.
+
+**Medido.** `normalizar_termo` dá a mesma chave para travessão, hífen, meia-risca e parênteses. Varredura de
+"solução limpadora" nos PDFs de `matrizes_originais/`: 8 arquivos; nenhum dos PGRs da rota determinística. Achado:
+os PGRs CMO (Aurora 27.08.26 e Vistamerica 2026-07-28) escrevem "Thinner Acetona", "Thinner - Acetona" e "Thinner -
+Álcool diacetona", todos `vocabulario_ausente` — fora do alias, de propósito (mistura) → `DT-(sessão
+claude/clever-hopper-er6xqi)-01`.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada em `c305bcb`:
+**1595 passed, 6 skipped, 0 failed** (829,97 s), 1594 + 1. `medir_painel`: `regras 34/49`, `cas 78/111`, índice
+sincronizado. DECISOES v236 e PROTOCOLO v120 inalterados.
+
+**Três números clínicos.** Não re-tirados — alias de termo, sem regra nem CAS.
+
+**Pendências.** DT-keen-curie-03: acetona resolvida, segue ABERTA (rodapé e OBS; nomes e ordem dos exames). Nova:
+`DT-(sessão claude/clever-hopper-er6xqi)-01` (thinner). Efeito no T65 `[A MEDIR]` na próxima rodada no app.

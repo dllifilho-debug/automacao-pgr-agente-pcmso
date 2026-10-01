@@ -33,7 +33,7 @@ _HOJE = date(2026, 9, 30)
 # Termos como o PGR TOCTAO ALT 65 (Rev. 01, 06/2026) os escreve.
 _PNOS_OUTRAMANEIRA = "Particulados (insolúveis ou de baixa solubilidade) não especificados de outramaneira (PNOS)"
 _GESSO = "Sulfato de cálcio — Gesso"
-_ACETONA = "Acetona — Solução limpadora"
+_QUEDA = "Queda de mesmo nível"
 
 
 @pytest.fixture(scope="module")
@@ -124,7 +124,7 @@ def test_memorial_lista_o_que_o_pgr_declara_e_nao_virou_agente(proto: Protocolo)
     # Reversões que matam: (1) montar_memorial ignorar `pgr` — a lista sai vazia;
     # (2) listar também os riscos resolvidos — a sílica apareceria; (3) texto
     # único para toda causa — a fração deixaria de pedir a FDS ao elaborador.
-    pgr, pendencias = _hidratar(proto, ("LIMPEZA", ("Sílica livre", _ACETONA, "Poeira respirável")))
+    pgr, pendencias = _hidratar(proto, ("LIMPEZA", ("Sílica livre", _QUEDA, "Poeira respirável")))
     memorial = montar_memorial(
         _matrizes(proto, pgr),
         proto.vocabulario.exames,
@@ -135,7 +135,7 @@ def test_memorial_lista_o_que_o_pgr_declara_e_nao_virou_agente(proto: Protocolo)
 
     (bloco,) = memorial.blocos
     assert bloco.nao_reconhecidos == (
-        "Acetona — Solução limpadora: sem correspondência no vocabulário de agentes.",
+        "Queda de mesmo nível: sem correspondência no vocabulário de agentes.",
         "Poeira respirável: nomeia fração ou medida sem a substância; pedir a FDS ao "
         "elaborador do PGR (R-PGR-05).",
     )
@@ -166,7 +166,7 @@ def test_docx_do_memorial_mostra_a_lista_no_resumo_e_no_ghe(proto: Protocolo, tm
     # a contagem do Resumo — a médica só veria a lacuna rolando GHE a GHE.
     from docx import Document
 
-    pgr, pendencias = _hidratar(proto, ("LIMPEZA", (_ACETONA,)))
+    pgr, pendencias = _hidratar(proto, ("LIMPEZA", (_QUEDA,)))
     memorial = montar_memorial(
         _matrizes(proto, pgr),
         proto.vocabulario.exames,
@@ -179,7 +179,7 @@ def test_docx_do_memorial_mostra_a_lista_no_resumo_e_no_ghe(proto: Protocolo, tm
     renderizar_memorial_docx(memorial, cab, destino)
 
     paragrafos = [p.text for p in Document(str(destino)).paragraphs]
-    assert "Acetona — Solução limpadora: sem correspondência no vocabulário de agentes." in paragrafos
+    assert "Queda de mesmo nível: sem correspondência no vocabulário de agentes." in paragrafos
     assert any(
         p.startswith("Riscos do PGR que o sistema não reconheceu — nenhum exame sai deles: 1, em GHE-01.")
         for p in paragrafos
@@ -191,7 +191,7 @@ def test_tela_passa_pgr_e_pendencias_ao_memorial(monkeypatch: pytest.MonkeyPatch
     # memorial baixado sairia sem a lista, mesmo com o núcleo correto.
     import agente_medico.superficie.memorial_matriz as memorial_mod
 
-    pgr, pendencias = _hidratar(proto, ("LIMPEZA", (_ACETONA,)))
+    pgr, pendencias = _hidratar(proto, ("LIMPEZA", (_QUEDA,)))
     monkeypatch.setattr(
         "agente_medico.superficie.web_matriz.preparar_pgr_hidratado", lambda *a, **k: (pgr, tuple(pendencias))
     )
