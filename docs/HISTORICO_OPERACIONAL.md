@@ -11215,3 +11215,45 @@ vira decisão tomada na hora.
 **Lição de método.** Varredura de texto encontra onde o termo aparece; a pergunta seguinte — o documento chega ao
 resolvedor? — é que decide se o alias tem efeito. Medir o gate antes de listar formas como cobertas.
 
+
+## Sessão (branch `ccr-983f0b9f-zkz16m`, recriada sobre `main 693b8b7`, pós-merge do PR #416) — 01/10/2026 — IMPLEMENTAÇÃO: leitura única e paralela do PDF
+
+**Pedido.** Diovanni: melhorar a velocidade sem perder qualidade; pesquisar alternativas ao extrator. Proposta aceita:
+ler o PDF uma vez e em paralelo, com o mesmo extrator, critério de aceite texto idêntico byte a byte.
+
+**Medição antes de decidir (01/10/2026, 4 CPUs).** Alternativas: pypdfium2 (25–35× mais rápido, texto diferente, sem a
+restauração de glifos da D-ARQ-89 — descartado como fonte do verbatim); docling (MIT, mais lento em CPU que hoje);
+pymupdf4llm (AGPL — fora para produção); PDF direto ao Gemini (sem verbatim auditável, D-ARQ-09). Perfil de
+`preparar_pgr_hidratado` no Fascino: ~97% do tempo em três leituras completas do PDF (2× `extract_text`, 1×
+`extract_words` no parser determinístico); hidratação 7 s.
+
+**Commits.** `dc70b72` — `io_pdf.ler_pdf`/`ler_faixa`/`PaginaLida`; `parsear_leitura`; `preparar_pgr_hidratado` lê uma
+vez e passa a leitura a `preparar_ghes`, ao parser e ao psicossocial; `test_orquestracao_pgr.py` troca o ponto de
+substituição (`extrair_texto_pgr`/`parsear_arquivo` → `ler_pdf`/`parsear_leitura`, 17 sítios, mesmo conteúdo).
+`6ae462c` — `PCMSO_PDF_PROCESSOS` lido no adaptador: a 1ª suíte completa (em `dc70b72`) deu **1 failed**,
+`test_pureza_motor::test_motor_nao_le_os_environ` — o `io_pdf` lia `os.environ` dentro do motor (D-ARQ-47/48).
+Nota de aplicação em `D-ARQ-50` (DECISOES v232), índice regenerado.
+
+**Resultado medido.** Texto e palavras idênticos aos atuais em T65, Fascino, Aurora e Viverde. Leitura única: série
+16,8–27,1 s, 4 processos 7,0–8,2 s, contra 30,9–51,7 s de texto + palavras hoje. `preparar_pgr_hidratado` no Fascino
+(rota determinística, transcritores offline): **73,7 s → 10,2 s**, PGR hidratado e pendências idênticos (sha256 de
+`repr((pgr, pend))` igual em `main` e na branch). T65 até a transcrição LLM: 37,5 s → 6,9 s. RSS máximo por filho
+152 MB — no deploy com pouca memória, `PCMSO_PDF_PROCESSOS=2`.
+
+**Testes.** `test_leitura_pdf.py`, 7. Varredura inversa, 10 reversões, 10/10 mortas: faixas fora de ordem; fim de faixa
+`i + passo - 1`; sem `GerenciadorComGlifos` no filho; sem `close()`; `flush_cache()` no lugar; sem fallback do pool;
+aceitar 0 e texto em `PCMSO_PDF_PROCESSOS`; `preparar_ghes` relendo; psicossocial relendo; parser relendo. A 1ª
+rodada deu 9/10: o teste de leitura única terminava antes do psicossocial (leitura falsa sem GHE aprovado) —
+corrigido com a rota determinística aceita; R8, R9, R10 refeitas, vermelhas.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, **54 arquivos**; `orquestracao_pgr.py` e `test_leitura_pdf.py`
+limpos à parte. Suíte completa, árvore parada em `6ae462c`: **1572 passed, 6 skipped, 0 failed** (1254,21 s), 1565 + 7.
+O tempo da suíte não cai: os testes chamam `extrair_texto_pgr`/`parsear_arquivo` direto, que seguem em série.
+`test_gerar_indice_darq.py`: 6 passed.
+
+**Três números clínicos.** Não re-tirados — nenhuma regra, termo ou exame tocado.
+
+**Pendências.** Nenhuma nova.
+
+**Lição de método.** A varredura inversa pegou um teste que não passava pelo caminho que dizia cobrir (a leitura falsa
+parava o fluxo antes do psicossocial) — mesma classe medida em 003.EK.

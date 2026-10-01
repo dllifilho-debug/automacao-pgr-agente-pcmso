@@ -14,6 +14,7 @@ from agente_medico.adaptadores.orquestracao_pgr import (
 )
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe
+from agente_medico.motor.io_pdf import PaginaLida
 from agente_medico.motor.parser_familia_consciente import FamiliaNaoReconhecida
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.revisao_envelope import desserializar_confirmacao
@@ -36,8 +37,8 @@ requer_pdfs = pytest.mark.skipif(
     reason="PDF Fascino/Viverde ausente; harness integração 003.EA indisponível",
 )
 
-_ALVO_EXTRACAO = "agente_medico.adaptadores.orquestracao_pgr.extrair_texto_pgr"
-_ALVO_PARSER_DETERMINISTICO = "agente_medico.adaptadores.orquestracao_pgr.parsear_arquivo"
+_ALVO_EXTRACAO = "agente_medico.adaptadores.orquestracao_pgr.ler_pdf"
+_ALVO_PARSER_DETERMINISTICO = "agente_medico.adaptadores.orquestracao_pgr.parsear_leitura"
 
 _GHE_VALIDO = GHEVerbatim(
     nome="Setor Teste",
@@ -47,6 +48,10 @@ _GHE_VALIDO = GHEVerbatim(
 _GHE_INVALIDO = GHEVerbatim(nome="", cargos=(), riscos=())
 
 _ENVELOPE_PADRAO = EnvelopeConfirmado(validade=date.today(), assinatura_engenheiro=True)
+
+
+def _leitura(paginas: list[str]) -> tuple[PaginaLida, ...]:
+    return tuple(PaginaLida(texto, ()) for texto in paginas)
 
 
 def _paginas_com_bloco(nome_setor: str = "Setor Teste") -> list[str]:
@@ -165,7 +170,7 @@ def test_e2e_arquivo_real_ate_resultado_com_transcritor_mockado() -> None:
 
 
 def test_blocos_ausentes_vira_none_e_pendencia_bloqueante() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=["página sem âncora nenhuma"]):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(["página sem âncora nenhuma"])):
         resultado, pendencias = processar_arquivo_pgr(
             Path("qualquer.pdf"),
             _PROTO,
@@ -183,7 +188,7 @@ def test_blocos_ausentes_vira_none_e_pendencia_bloqueante() -> None:
 def test_cargo_based_bloqueia_antes_da_transcricao() -> None:
     paginas = ["CARGO/FUNÇÃO: Pintor\nlinha\n"] * 3
     mock = MockTranscritorConstante(_GHE_VALIDO)
-    with patch(_ALVO_EXTRACAO, return_value=paginas):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(paginas)):
         resultado, pendencias = processar_arquivo_pgr(
             Path("qualquer.pdf"),
             _PROTO,
@@ -206,7 +211,7 @@ def test_segmentacao_implausivel_bloqueia_antes_da_transcricao() -> None:
         + ["conteudo\n"] * 10
     )
     mock = MockTranscritorConstante(_GHE_VALIDO)
-    with patch(_ALVO_EXTRACAO, return_value=paginas):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(paginas)):
         resultado, pendencias = processar_arquivo_pgr(
             Path("qualquer.pdf"),
             _PROTO,
@@ -224,7 +229,7 @@ def test_segmentacao_implausivel_bloqueia_antes_da_transcricao() -> None:
 
 def test_doc_grande_sem_ancora_emite_segmentacao_nao_blocos_ausentes() -> None:
     paginas = ["linha qualquer\n"] * 12
-    with patch(_ALVO_EXTRACAO, return_value=paginas):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(paginas)):
         resultado, pendencias = processar_arquivo_pgr(
             Path("qualquer.pdf"),
             _PROTO,
@@ -239,7 +244,7 @@ def test_doc_grande_sem_ancora_emite_segmentacao_nao_blocos_ausentes() -> None:
 
 
 def test_transcricao_indisponivel_vira_none_e_pendencia_bloqueante() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())), patch(
         _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
     ):
         resultado, pendencias = processar_arquivo_pgr(
@@ -266,7 +271,7 @@ def test_aprovacao_parcial_processa_aprovados_e_carrega_pendencia_de_forma() -> 
         "GHE 2 - Setor Ruim\nCargo B"
     ]
     mock = MockTranscritorSequencial((_GHE_VALIDO, _GHE_INVALIDO))
-    with patch(_ALVO_EXTRACAO, return_value=paginas), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(paginas)), patch(
         _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
     ):
         resultado, pendencias = processar_arquivo_pgr(
@@ -287,7 +292,7 @@ def test_aprovacao_parcial_processa_aprovados_e_carrega_pendencia_de_forma() -> 
 
 
 def test_envelope_validade_atravessa_ate_o_gate_r_pgr_06() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())), patch(
         _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
     ):
         resultado, _ = processar_arquivo_pgr(
@@ -334,7 +339,7 @@ def test_preparar_envelope_pdf_real_viverde_gera_artefato_com_proposta_pre_preen
 
 
 def test_preparar_envelope_sem_ancora_de_topo_vira_pendencia_bloqueante() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=["página sem âncora nenhuma"]):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(["página sem âncora nenhuma"])):
         artefato, pendencias = preparar_envelope(
             Path("qualquer.pdf"), MockTranscritorTopoConstante(_ENVELOPE_VIVERDE_GABARITO)
         )
@@ -346,7 +351,7 @@ def test_preparar_envelope_sem_ancora_de_topo_vira_pendencia_bloqueante() -> Non
 
 
 def test_preparar_envelope_transcricao_indisponivel_vira_pendencia_bloqueante() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())):
         artefato, pendencias = preparar_envelope(
             Path("qualquer.pdf"), MockTranscritorTopoIndisponivel("CHAVE_API_GOOGLE ausente")
         )
@@ -362,7 +367,7 @@ def test_preparar_envelope_integralmente_vazio_vira_pendencia_de_forma() -> None
     envelope_vazio = EnvelopeVerbatim(
         validade_textos=(), responsavel_tecnico="", titulo_rt="", registro_profissional=""
     )
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())):
         artefato, pendencias = preparar_envelope(
             Path("qualquer.pdf"), MockTranscritorTopoConstante(envelope_vazio)
         )
@@ -386,7 +391,7 @@ def test_ida_e_volta_validade_antiga_gera_pendencia_r_pgr_06_bloqueante() -> Non
         titulo_rt="Eng.",
         registro_profissional="CREA 1",
     )
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())), patch(
         _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
     ):
         artefato, pend_envelope = preparar_envelope(
@@ -422,7 +427,7 @@ def test_ida_e_volta_validade_recente_nao_gera_pendencia_r_pgr_06() -> None:
         titulo_rt="Eng.",
         registro_profissional="CREA 1",
     )
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())), patch(
         _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
     ):
         artefato, _ = preparar_envelope(
@@ -507,7 +512,7 @@ def test_preparar_ghes_cjr_real_gated_por_contagem_nenhum_cliente_invocado() -> 
 
 
 def test_preparar_ghes_rota_card_transcricao_indisponivel_vira_pendencia_bloqueante() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_card()):
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_card())):
         aprovados, pendencias = preparar_ghes(
             Path("qualquer.pdf"),
             MockTranscritorConstante(_GHE_VALIDO),
@@ -531,7 +536,7 @@ def test_preparar_ghes_rota_card_transcricao_indisponivel_vira_pendencia_bloquea
 
 
 def test_preparar_ghes_rota_deterministica_aceita_sem_invocar_cliente_llm() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())), patch(
         _ALVO_PARSER_DETERMINISTICO, return_value=(_GHE_VALIDO,)
     ):
         aprovados, pendencias = preparar_ghes(
@@ -544,7 +549,7 @@ def test_preparar_ghes_rota_deterministica_aceita_sem_invocar_cliente_llm() -> N
 
 def test_preparar_ghes_rota_deterministica_recusada_por_excecao_aciona_fallback_llm() -> None:
     mock = MockTranscritorConstante(_GHE_VALIDO)
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())), patch(
         _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
     ):
         aprovados, pendencias = preparar_ghes(Path("qualquer.pdf"), mock, _CLIENTE_CARD_NUNCA_CHAMADO)
@@ -559,7 +564,7 @@ def test_preparar_ghes_rota_deterministica_recusada_por_excecao_aciona_fallback_
 
 
 def test_preparar_ghes_rota_deterministica_recusada_e_llm_indisponivel_ambas_pendencias() -> None:
-    with patch(_ALVO_EXTRACAO, return_value=_paginas_com_bloco()), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(_paginas_com_bloco())), patch(
         _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
     ):
         aprovados, pendencias = preparar_ghes(
@@ -580,7 +585,7 @@ def test_preparar_ghes_rota_deterministica_recusada_e_llm_indisponivel_ambas_pen
 def test_preparar_ghes_rota_deterministica_recusada_por_contagem_divergente() -> None:
     paginas = ["GHE 1 - Setor Bom\nCargo A\nGHE 2 - Setor Ruim\nCargo B"]
     mock = MockTranscritorSequencial((_GHE_VALIDO, _GHE_VALIDO))
-    with patch(_ALVO_EXTRACAO, return_value=paginas), patch(
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(paginas)), patch(
         _ALVO_PARSER_DETERMINISTICO, return_value=(_GHE_VALIDO,)
     ):
         aprovados, pendencias = preparar_ghes(Path("qualquer.pdf"), mock, _CLIENTE_CARD_NUNCA_CHAMADO)
