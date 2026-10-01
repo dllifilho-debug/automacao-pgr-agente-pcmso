@@ -109,6 +109,12 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 01/10/2026, "Thinner <agente>" do Aurora]`:** branch `claude/clever-hopper-er6xqi` sobre `main
+629ce1f` (merge do PR #427) · **1614 passed, 6 skipped, 0 failed** *(MEDIDO em `5f045f8`, árvore parada, 799,89 s — 1608 +
+6)* · `mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v120 e DECISOES v237 inalterados. `medir_painel`:
+não re-medido (nenhuma regra nem CAS; herdado de `b7e2713`: `regras 34/49`, `cas 78/111`). Três números clínicos: não
+re-tirados.
+
 **Baseline `[MEDIDO — 01/10/2026, thinner dos PGRs CMO]`:** branch `claude/clever-hopper-er6xqi` sobre `main 383f361`
 (merge do PR #426) · **1608 passed, 6 skipped, 0 failed** *(MEDIDO em `b7e2713`, árvore parada, 832,11 s — 1605 + 3)* ·
 `mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v120 e DECISOES v237 inalterados. `medir_painel` (sem
