@@ -687,6 +687,8 @@ def pagina_matriz() -> None:
     from agente_medico.superficie.sugestao_vinculo import (
         AVISO_SEM_CASAMENTO,
         AVISO_SEM_COMPONENTE_RECONHECIDO,
+        AVISO_SEM_INGREDIENTE_DECLARADO,
+        fds_sem_ingrediente_declarado,
         sugerir_ghes,
     )
     from agente_medico.superficie.apresentacao import (
@@ -900,31 +902,39 @@ def pagina_matriz() -> None:
                     # (blocos_fds não-vazio) — sem PGR, comportamento idêntico ao de hoje.
                     # A lista de GHEs só existe depois do parse do PGR (Gerar matriz). Sem
                     # este aviso a FDS aparecia sem nenhuma forma de vínculo e sem dizer por quê.
-                    if blocos_fds and (cache_vinculo is None or cache_vinculo.pgr_hidratado is None):
+                    # FDS que declara não ter ingrediente perigoso também é vinculável: sem
+                    # isso a tela não mostrava nada (DT-(sessão claude/keen-curie-xdm7kb)-02).
+                    sem_ingrediente = fds_sem_ingrediente_declarado(blocos_fds, pendencias_fds)
+                    vinculavel = bool(blocos_fds) or sem_ingrediente
+                    if vinculavel and (cache_vinculo is None or cache_vinculo.pgr_hidratado is None):
                         st.info("Gere a matriz para vincular esta FDS a um GHE.")
-                    if cache_vinculo is not None and cache_vinculo.pgr_hidratado is not None and blocos_fds:
+                    if cache_vinculo is not None and cache_vinculo.pgr_hidratado is not None and vinculavel:
                         ghes_pgr = cache_vinculo.pgr_hidratado.ghes
                         rotulos_ghe = {
                             ghe.id: f"{ghe.id} — {nome_ghe_exibicao(ghe.nome)}".strip(" —") for ghe in ghes_pgr
                         }
                         # D-ARQ-90: sugestão por agente em comum, ao lado da escolha — nunca pré-marcada.
-                        if agentes_vocab is None:
-                            agentes_vocab = _protocolo_padrao().vocabulario.agentes
-                        sugestao = sugerir_ghes(blocos_fds, cache_vinculo.pgr_hidratado, agentes_vocab)
-                        for linha in linhas_sugestao(sugestao, rotulos_ghe):
-                            st.write(linha)
-                        if sugestao.sem_componente_reconhecido:
-                            st.warning(AVISO_SEM_COMPONENTE_RECONHECIDO)
-                        elif sugestao.sem_casamento:
-                            st.warning(AVISO_SEM_CASAMENTO)
+                        # Sem componente não há sinal de agente: só o aviso e a escolha manual.
+                        if sem_ingrediente:
+                            st.warning(AVISO_SEM_INGREDIENTE_DECLARADO)
                         else:
-                            st.button(
-                                "Marcar os GHEs sugeridos",
-                                key=f"marcar_sugeridos_{arquivo_fds.name}",
-                                help="Marca os GHEs com mais agentes em comum; os demais ficam para escolha manual.",
-                                on_click=_marcar_sugeridos,
-                                args=(arquivo_fds.name, sugestao.mais_agentes_em_comum),
-                            )
+                            if agentes_vocab is None:
+                                agentes_vocab = _protocolo_padrao().vocabulario.agentes
+                            sugestao = sugerir_ghes(blocos_fds, cache_vinculo.pgr_hidratado, agentes_vocab)
+                            for linha in linhas_sugestao(sugestao, rotulos_ghe):
+                                st.write(linha)
+                            if sugestao.sem_componente_reconhecido:
+                                st.warning(AVISO_SEM_COMPONENTE_RECONHECIDO)
+                            elif sugestao.sem_casamento:
+                                st.warning(AVISO_SEM_CASAMENTO)
+                            else:
+                                st.button(
+                                    "Marcar os GHEs sugeridos",
+                                    key=f"marcar_sugeridos_{arquivo_fds.name}",
+                                    help="Marca os GHEs com mais agentes em comum; os demais ficam para escolha manual.",
+                                    on_click=_marcar_sugeridos,
+                                    args=(arquivo_fds.name, sugestao.mais_agentes_em_comum),
+                                )
                         # Sem GHE pré-marcado: o selectbox anterior sempre tinha um valor, e
                         # o clique anexava em algum GHE mesmo sem escolha consciente.
                         ghes_escolhidos = st.multiselect(
