@@ -3165,6 +3165,15 @@ matriz traz; os dois renderizadores herdam a célula sem mudança. O instrumento
 `comparar_matriz_gabarito` lê `matriz.linhas`, não as células, e não vê a observação. Nenhuma
 cláusula alterada.
 
+**Nota de aplicação (branch `claude/clever-hopper-er6xqi`, 01/10/2026 — `DT-(sessão claude/keen-curie-xdm7kb)-03`,
+forma do documento, fatia 1).** O título do documento deixa de ser o texto livre do campo "Tipo de documento" e passa
+a ser fixo, "MATRIZ FUNÇÃO – EXAMES PCMSO" — o título do formulário RQ.61 como o cabeçalho das matrizes do acervo o
+escreve (T65 de 24.09.26). O tipo continua seam humano (cl.5) e sai em linha própria, "Tipo: …", omitida quando
+vazia. O cabeçalho de GHE usa `titulo_ghe` (movida de `memorial_matriz.py` para `documento_matriz.py`): o código uma
+vez só — "GHE-01 — ENGENHARIA/PRODUÇÃO" em vez de "GHE GHE-01 GHE 01 - ENGENHARIA/PRODUÇÃO"; os rótulos de GHE da
+tela seguem a mesma função. Commit `d6ee35e`. Conteúdo clínico e contagem de tabelas inalterados; nenhuma cláusula
+alterada.
+
 ## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003.EQ). Não cria nem altera
@@ -4826,3 +4835,4 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
 | v233 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO): **nota de correção em `D-ARQ-50`** — paralelismo da leitura por subprocesso dedicado (o `spawn` quebrava sob `streamlit run`, medido); **nota em `D-ARQ-90`** — critério "aguarrás → 18" fechado (`DT-(sessão claude/keen-curie-xdm7kb)-01`), `cas_adicionais` no índice de CAS (D-ARQ-36). |
 | v234 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO, decisão do Diovanni): **nota em `D-ARQ-86`** — cl.7 substituída (BAIXO sem medição dispensa o IBE do Quadro 1, fora dos cancerígenos); medição acima do nível de ação emite sempre. |
 | v235 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — tela, decisão do Diovanni): **nota em `D-ARQ-90`** — critério "FDS CARPINTEIRO" fechado (`DT-(sessão claude/keen-curie-xdm7kb)-02`, opção (a)): FDS sem ingrediente declarado e sem pendência ganha aviso próprio e seletor de GHE. Decisões seguem em **90**. |
+| v236 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — forma do documento): **nota em `D-ARQ-73`** — título fixo do RQ.61 ("MATRIZ FUNÇÃO – EXAMES PCMSO"), tipo em linha própria, código do GHE uma vez só (`titulo_ghe`) no emissor e na tela (`DT-(sessão claude/keen-curie-xdm7kb)-03`, fatia 1). Decisões seguem em **90**. |
