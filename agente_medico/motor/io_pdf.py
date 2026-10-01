@@ -20,7 +20,6 @@ _log = logging.getLogger(__name__)
 # Abaixo disso, subir processos custa mais que ler em série.
 _MIN_PAGINAS_PARALELO = 16
 _MAX_PROCESSOS_PADRAO = 4
-_ENV_PROCESSOS = "PCMSO_PDF_PROCESSOS"
 
 
 def paginas_liberadas(caminho: Path) -> Iterator[Page]:
@@ -67,16 +66,6 @@ def ler_faixa(caminho: Path, inicio: int, fim: int) -> list[PaginaLida]:
 
 
 def processos_padrao() -> int:
-    """`PCMSO_PDF_PROCESSOS` se definido; senão min(4, nº de CPUs)."""
-    bruto = os.environ.get(_ENV_PROCESSOS)
-    if bruto is not None:
-        try:
-            valor = int(bruto)
-        except ValueError as e:
-            raise ValueError(f"{_ENV_PROCESSOS}={bruto!r} não é inteiro") from e
-        if valor < 1:
-            raise ValueError(f"{_ENV_PROCESSOS}={bruto!r} deve ser >= 1")
-        return valor
     return min(_MAX_PROCESSOS_PADRAO, os.cpu_count() or 1)
 
 

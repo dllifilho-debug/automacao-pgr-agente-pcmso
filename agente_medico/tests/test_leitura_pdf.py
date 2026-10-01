@@ -16,7 +16,7 @@ import agente_medico.adaptadores.orquestracao_pgr as orq
 from agente_medico.adaptadores.transcritor_offline import TranscritorCardOffline, TranscritorGHEOffline
 from agente_medico.motor import io_pdf
 from agente_medico.motor.extracao_pgr import extrair_texto_pgr
-from agente_medico.motor.io_pdf import PaginaLida, ler_faixa, ler_pdf, paginas_liberadas, processos_padrao
+from agente_medico.motor.io_pdf import PaginaLida, ler_faixa, ler_pdf, paginas_liberadas
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import EnvelopeConfirmado, GHEVerbatim, RiscoVerbatim
 from agente_medico.tests.test_liberacao_cache_pdf import (
@@ -91,7 +91,7 @@ def test_variavel_de_processos_invalida_e_erro(monkeypatch: pytest.MonkeyPatch, 
     # série sem aviso; texto derrubaria o app longe da causa).
     monkeypatch.setenv("PCMSO_PDF_PROCESSOS", valor)
     with pytest.raises(ValueError, match="PCMSO_PDF_PROCESSOS"):
-        processos_padrao()
+        orq.processos_leitura_pdf()
 
 
 def test_processamento_le_o_pdf_uma_vez(monkeypatch: pytest.MonkeyPatch) -> None:

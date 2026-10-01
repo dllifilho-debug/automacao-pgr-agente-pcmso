@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Sequence
 from datetime import date
 from pathlib import Path
@@ -15,7 +16,7 @@ from agente_medico.motor.extracao_pgr import (
 )
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_pgr
-from agente_medico.motor.io_pdf import PaginaLida, ler_pdf
+from agente_medico.motor.io_pdf import PaginaLida, ler_pdf, processos_padrao
 from agente_medico.motor.parser_familia_consciente import FamiliaNaoReconhecida, parsear_leitura
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor_termos import construir_indice_termos
@@ -46,6 +47,24 @@ from agente_medico.motor.transcritor_topo import TranscritorTopo, gate_forma_top
 # (TranscritorGHE), nunca importado no módulo.
 
 
+_ENV_PROCESSOS_PDF = "PCMSO_PDF_PROCESSOS"
+
+
+def processos_leitura_pdf() -> int:
+    """Processos da leitura do PDF: `PCMSO_PDF_PROCESSOS` se definido (o
+    ambiente é lido no adaptador, D-ARQ-47/48); senão o padrão do motor."""
+    bruto = os.environ.get(_ENV_PROCESSOS_PDF)
+    if bruto is None:
+        return processos_padrao()
+    try:
+        valor = int(bruto)
+    except ValueError as e:
+        raise ValueError(f"{_ENV_PROCESSOS_PDF}={bruto!r} não é inteiro") from e
+    if valor < 1:
+        raise ValueError(f"{_ENV_PROCESSOS_PDF}={bruto!r} deve ser >= 1")
+    return valor
+
+
 def preparar_envelope(
     caminho: Path, cliente: TranscritorTopo
 ) -> tuple[str | None, tuple[Pendencia, ...]]:
@@ -70,7 +89,7 @@ def preparar_envelope(
     repassa a Pendencia de gate_forma_topo ("forma_verbatim_topo") tal como
     preparar_ghes repassa a de gate_forma_ghe.
     """
-    paginas = [p.texto for p in ler_pdf(caminho)]
+    paginas = [p.texto for p in ler_pdf(caminho, processos_leitura_pdf())]
     topo = recortar_topo(paginas)
     if topo is None:
         return None, (
@@ -152,7 +171,7 @@ def preparar_ghes(
     cliente da outra.
     """
     if leitura is None:
-        leitura = ler_pdf(caminho)
+        leitura = ler_pdf(caminho, processos_leitura_pdf())
     paginas = [p.texto for p in leitura]
     rota, pendencia_estrutura = avaliar_estrutura(paginas)
     if pendencia_estrutura is not None:
@@ -259,7 +278,7 @@ def preparar_pgr_hidratado(
     decide a rota (ghe/card) a partir de avaliar_estrutura — este nível não
     julga rota, só costura.
     """
-    leitura = ler_pdf(caminho)
+    leitura = ler_pdf(caminho, processos_leitura_pdf())
     aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card, leitura)
     if not aprovados:
         # Parse total falho (blocos ausentes, transcrição indisponível, ou
