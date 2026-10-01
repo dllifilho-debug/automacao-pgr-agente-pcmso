@@ -3801,6 +3801,13 @@ de OBS no rodapé: nenhum dos 29 gabaritos de matriz convertidos o tem; a observ
 exames do RQ.61. Fora do pedido, mesma classe: no cabeçalho, o coordenador sai "DRA. X | CRM" sem o rótulo
 "Médico(a) Coordenador(a) do PCMSO" dos gabaritos.
 
+**Nota (branch `claude/clever-hopper-er6xqi`, 01/10/2026) — rótulo do coordenador feito; conferência no app.** Cabeçalho
+com "Médico(a) Coordenador(a) do PCMSO: <nome> — CRM <número>" (`CabecalhoDocumento.linha_coordenador`, commit
+`1471900`); CRM só com o número ganha o prefixo, sem duplicar "CRM-GO …". T65 rodado no app pelo Diovanni depois do PR
+#424: título, prefixo do GHE (18 GHEs), rodapé rotulado e acetona do GHE 11 (observação de risco baixo, como o MEK e como
+o gabarito pede) conferidos; riscos não reconhecidos 49 → 48; exames idênticos aos da rodada anterior nos 62 cargos.
+**Segue aberto:** nomes e ordem dos exames do RQ.61.
+
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-04 — Brigada de emergência com inflamáveis (NR-20 20.15.6) sem gatilho de avaliação psicossocial `[ABERTA — sem caso medido]`
 
 **Origem.** Varredura das NRs de `normas/` na decisão da R-PSY-04 (30/09/2026). NR-20 **20.15.6**: *"Os integrantes da
