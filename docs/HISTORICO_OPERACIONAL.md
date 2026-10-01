@@ -11380,3 +11380,29 @@ varredura inversa 5/5 (abrir o vínculo só com `blocos_fds`; mandar a composiç
 
 **Pendências.** DT-keen-curie-02 RESOLVIDA. Nenhuma nova. Critério de aceite da D-ARQ-90 fatia 1: todos os itens
 fechados no código; segue `[A MEDIR]` a rodada no app com o pacote de FDS do Aurora.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main 45c3041`, pós-merge do PR #421) — 01/10/2026 — Forma do documento: título RQ.61 e prefixo do GHE (DT-keen-curie-03, fatia 1)
+
+**Pedido do Diovanni.** Começar a DT-keen-curie-03 pelo prefixo duplicado e pelo título, vistos na matriz do T65 de
+hoje ("MATRIZ DE EXAMES" — texto digitado no campo "Tipo de documento" — e "GHE GHE-01 GHE 01 - ENGENHARIA/PRODUÇÃO").
+
+**Commit `d6ee35e`.** `TITULO_MATRIZ` ("MATRIZ FUNÇÃO – EXAMES PCMSO", lido do cabeçalho do gabarito T65 24.09.26
+convertido) no `<h1>` do HTML e no título do Word; tipo em linha "Tipo: …", omitida se vazia. `titulo_ghe` movida de
+`memorial_matriz.py` para `documento_matriz.py` (o memorial a importa) e aplicada no `<h2>`/heading do emissor e em 5
+rótulos da tela (subtítulo da matriz, expander da revisão, vínculo FDS, produtos anexados, GHE das medições). Teste que
+fixava "GHE GHE-01 …" no expander ajustado; 4 testes novos em `test_documento_matriz.py` e caso parametrizado novo em
+`test_tela_mostra_hifen_no_nome_do_ghe_com_nul`. Varredura inversa 12/12.
+
+**Branches remotas.** Varredura do passo 9 com histórico completo (o clone era raso; `--unshallow`): 4 branches
+mergeadas — `claude/nice-ptolemy-wxk1wo`, `claude/sharp-wozniak-j4596a`, `correcao-parser-pgr-viverde`, `normas` — 0
+commits fora de `main`. As duas últimas foram criadas pela conta do Diovanni no GitHub, sem PR nem commit próprio.
+`push --delete` daqui: HTTP 403 (escopo da credencial, como em `DH-003FE-02`). Seguem no remoto; o Diovanni apaga
+quando tiver acesso.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada em `d6ee35e`:
+**1594 passed, 6 skipped, 0 failed** (822,63 s), 1589 + 5. DECISOES v236 (nota em D-ARQ-73), índice regenerado, `test_gerar_indice_darq.py` 6 passed; `medir_painel`: `regras 34/49`, `cas 78/111`, índice sincronizado.
+PROTOCOLO v120 inalterado.
+
+**Três números clínicos.** Não re-tirados — nenhuma regra nem vocabulário tocado.
+
+**Pendências.** DT-keen-curie-03 segue ABERTA (acetona; rodapé e OBS; nomes e ordem dos exames). Nenhuma nova.
