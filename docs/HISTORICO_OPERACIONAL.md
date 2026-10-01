@@ -11257,3 +11257,41 @@ O tempo da suíte não cai: os testes chamam `extrair_texto_pgr`/`parsear_arquiv
 
 **Lição de método.** A varredura inversa pegou um teste que não passava pelo caminho que dizia cobrir (a leitura falsa
 parava o fluxo antes do psicossocial) — mesma classe medida em 003.EK.
+
+## Sessão (branch `ccr-983f0b9f-zkz16m`, recriada sobre `main c56fcbc`, pós-merge do PR #417) — 01/10/2026 — CORREÇÃO do paralelismo sob Streamlit + aguarrás do Aurora (DT-keen-curie-01)
+
+**Pedido.** Diovanni: seguir pela aguarrás (opção a).
+
+**1. Bug achado no meio do caminho, já em `main` (PR #417).** Um script de medição rodado por stdin quebrou no
+`spawn`. Testado num `streamlit run` real (app mínimo + Chromium headless): o `spawn` reimporta o módulo principal,
+que sob Streamlit é o script do app; cada filho reexecutava a página, chamava `ler_pdf` no bootstrapping e o pool
+quebrava (`RuntimeError`). O fallback segurou a correção da saída, mas o paralelismo nunca acontecia no app — Viverde
+11,4 s com aviso. Os testes não pegaram: sob pytest o módulo principal não executa nada ao ser importado; a medição
+do PR #417 foi fora do Streamlit. Correção `3c2aa1c`: subprocesso dedicado por faixa (`python -m
+agente_medico.motor.io_pdf`, saída JSON). Re-medido no `streamlit run`: 4,6 s, sem aviso nem traceback. Identidade
+de texto e palavras nos 4 PGRs mantida; Fascino `preparar_pgr_hidratado` com o mesmo sha256 de antes do #417 (7,9 s).
+Teste novo com script principal sem guarda; varredura: volta ao `spawn` e sem fallback de subprocesso, 2/2 vermelhas;
+ordem, fim de faixa e glifos no filho refeitas pelo subprocesso, 3/3.
+
+**2. Aguarrás (`8768e4d`).** Identidade química conferida: 64742-82-1 = nafta pesada hidrodessulfurizada, *white
+spirit type 1* (ESIG, Definition of White Spirit; ECHA); "Destilados de petróleo levemente tratados com hidrogênio"
+é o nome do 64742-47-8 que o vocabulário já tinha; querosene 8008-20-6 é outra substância. `aguarras_mineral` ganha
+os 2 termos do PGR Aurora e `cas_adicionais`; `construir_indice_cas` indexa `cas_adicionais` com checagem de colisão.
+Linha de base reproduzida com o instrumento da sessão keen-curie (o separador da normalização é `_`, corrigido no
+script): antes, só o benzeno da FISPQ resolvia e nenhum GHE era sugerido; depois, só o GHE 18 PINTURA. Nenhum exame
+muda (aguarrás sem IBE nem LT). Varredura do acervo: "Aguarrás" no Aurora e no Vistamerica 07/26; "Aguarrás Mineral"
+já resolvia; "Solvente de nafta" fora (provável aromática). Testes `test_aguarras_vinculo.py`, 3; varredura 6/6.
+A 1ª suíte completa deu 3 failed: testes que usavam 64742-82-1 como exemplo de CAS sem agente
+(`test_sugestao_vinculo` ×2, `test_web_matriz` ×1) — exemplo trocado pelo querosene em `1042690`, mesmo conteúdo.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada em `1042690`:
+**1576 passed, 6 skipped, 0 failed** (725,53 s), 1572 + 4. `medir_painel`: `regras 34/49`, `cas 78/111` (o campo
+`cas` principal não mudou), `índice sincronizado`. DECISOES v233 (notas em D-ARQ-50 e D-ARQ-90), índice regenerado,
+`test_gerar_indice_darq.py` 6 passed.
+
+**Três números clínicos.** Não re-tirados — nenhuma regra tocada.
+
+**Pendências.** `DT-(sessão claude/keen-curie-xdm7kb)-01` RESOLVIDA. Nenhuma nova.
+
+**Lição de método.** Ganho de desempenho medido fora do ambiente de produção não é ganho medido: o `spawn` depende do
+módulo principal do processo, e o do Streamlit não é o do pytest. Medir no `streamlit run` antes de afirmar.
