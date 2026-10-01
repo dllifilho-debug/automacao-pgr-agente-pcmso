@@ -757,7 +757,7 @@ worktree main 5977bf5]`: subemissão 13→9 (Vila Brasil), 9→5 (Fascino), Port
 zero superemissão nova. 4 testes (`test_pkg_transito.py`), varredura inversa 4/4. **Seguem
 abertos na classe (4):** VIGILÂNCIA (acuidade, 2 células) e PLANEJAMENTO (acuidade +
 audiometria, 4 células) de Vila Brasil — sem trânsito nem direção no bloco.
-### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/eager-fermat-txbn7h, 24/09/2026: R-BIO-05, só IRRELEVANTE]`
+### DT-003EB-02 — R-BIO-04 emite indicador biológico onde a matriz humana pede só menção documental em risco baixo `[RESOLVIDA — R-BIO-05: IRRELEVANTE (24/09/2026) e BAIXO sem medição (01/10/2026, branch ccr-983f0b9f-zkz16m)]`
 
 **Origem:** Sessão 003.EB (25/07/2026), mesmo diff acima.
 
@@ -858,6 +858,12 @@ O app emite MEK na urina (R-BIO-04, BAIXO sem medição emite — decisão de 25
 termo não resolve (`DT-(sessão claude/keen-curie-xdm7kb)-03`). Placar da Dra. Patrícia em BAIXO: emite em Porto
 Araras I (06/07) e Vila Brasil (26/08); dispensa no Aurora (27/08) e no T65 (24/09). **R-BIO-05 inalterada** —
 reabrir o corte é decisão do Diovanni.
+
+**Decisão (Diovanni, 01/10/2026) — corte reaberto, opção (b).** As matrizes vigentes da Dra. Patrícia também
+dispensam em BAIXO: Porto Araras I e Vila Brasil de 24/09 (que substituem as de 06/07 e 26/08), além de Aurora e
+T65. Implementado: BAIXO sem medição vira menção no PCMSO, fora dos 9 cancerígenos de `cancerigeno_com_ibe`;
+medição acima do nível de ação emite sempre (NR-07 7.5.12 "b"). Medido: superemissão de indicador 7→0 (Fascino),
+6→0 (Porto Araras I 24.09), 4→0 (Vila Brasil 24.09), sem subemissão nova. PROTOCOLO v120; D-ARQ-86 cl.7 substituída.
 
 ### DT-003EC-01 — Matriz humana emite RX Tórax OIT 12M onde R-RX-01 sem-medição prescreve 24M `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/inspiring-turing-0ylkmk, 24/09/2026: ramo R-RX-01-qual]`
 

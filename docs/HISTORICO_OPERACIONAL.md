@@ -11320,3 +11320,35 @@ mostrá-lo).
 
 **Lição de método.** Termo cadastrado pela grafia do PDF não cobre a grafia que a IA produz da mesma célula. Na rota
 LLM, a conferência contra o gabarito precisa usar a saída do app, não a leitura do PDF.
+
+## Sessão (branch `ccr-983f0b9f-zkz16m`, recriada sobre `main 55173ae`, pós-merge do PR #419) — 01/10/2026 — T65 em produção conferido + R-BIO-05 em BAIXO
+
+**Entrada.** Diovanni rodou o T65 depois do #419: **⏱ 36 s — IA (Gemini) 27 s em 18 blocos · leitura do PDF e montagem
+9,4 s · motor 0,0 s**. Conferência contra o gabarito de 24.09.26 (61 funções): GHE 16 GESSO agora com espirometria 24M e
+RX 60M; riscos não reconhecidos 51 → 49; única divergência fora da Psicossocial (decidida): MEK no GHE 11 em BAIXO.
+
+**Decisão do Diovanni: opção (b), conferindo a norma.** NR-07 7.5.12 "b" e NR-09 9.6.1 "b"/9.6.1.2 (cópias em
+`normas/`, NR-09 2026): exame obrigatório acima do nível de ação ou se a classificação do PGR indicar — BAIXO sem
+medição não aciona nenhum dos dois. Precedente medido: as matrizes de 24/09 da Dra. Patrícia para Porto Araras I e
+Vila Brasil — as mesmas obras em que, em julho/agosto, ela pedia o indicador em BAIXO — dispensam (superemissão do
+motor 6 e 4 células).
+
+**Commit `6e2fa5c`.** 33 `R-BIO-04-*` com `niveis_risco: [IRRELEVANTE, BAIXO]` (9 cancerígenos de
+`cancerigeno_com_ibe` ficam com `[IRRELEVANTE]`); `_medicao_acima_do_nivel_de_acao` em `stage_5_emissao` — achado na
+revisão da própria mudança: sem ela, BAIXO (e IRRELEVANTE, já antes) com medição acima do nível de ação seria
+dispensado, contra o 7.5.12 "b". 8 testes que travavam a regra antiga ajustados (3 afirmavam "BAIXO emite"; 3 editavam
+o YAML pelo texto `[IRRELEVANTE]`; 2 de medição na tela usavam BAIXO sem medição como estado que emite), 3 novos.
+Varredura inversa 6/6.
+
+**Efeito medido (`comparar_matriz_gabarito`, rota determinística).** Superemissão 7→0 (Fascino 08.07, Dra. Carolini),
+6→0 (Porto Araras I 24.09), 4→0 (Vila Brasil 24.09); subemissão inalterada nessas três. Contra as versões substituídas:
++6 (Porto Araras I 06.07) e +4 (Vila Brasil 26.08).
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada em `6e2fa5c`:
+**1585 passed, 6 skipped, 0 failed** (1250,61 s), 1582 + 3. PROTOCOLO v120; DECISOES v234 (nota em D-ARQ-86), índice
+regenerado, `test_gerar_indice_darq.py` 6 passed.
+
+**Três números clínicos.** Não re-tirados — R-BIO-05 alterada em escopo, sem regra nova nem status mudado.
+
+**Pendências.** DT-003EB-02 com a decisão registrada. Nenhuma nova. O efeito no T65 (rota LLM) se confirma na próxima
+rodada do Diovanni no app.
