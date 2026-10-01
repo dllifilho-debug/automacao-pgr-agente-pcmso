@@ -103,14 +103,34 @@ def _risco_motor(fonte: str, nivel: str | None, q: Quantificacao | None) -> Risc
 # --- Motor: R-BIO-05 com medição ------------------------------------------------
 
 
-def test_baixo_sem_medicao_emite(proto: Protocolo) -> None:
-    # Caso Aurora GHE 18: xileno BAIXO, "avaliação ainda qualitativa". Reversão que
-    # mata: em _dispensa_por_medicao, tratar lista de avaliações vazia como
-    # dispensa (BAIXO sem medição volta a ser dispensado, o que D-ARQ-86 cl.7 veda).
+def test_baixo_sem_medicao_dispensa_sem_medicao_na_observacao(proto: Protocolo) -> None:
+    # Caso Aurora GHE 18: xileno BAIXO, "avaliação ainda qualitativa". Decisão do
+    # Diovanni (01/10/2026) substitui D-ARQ-86 cl.7. Reversão que mata: tirar BAIXO
+    # de niveis_risco de R-BIO-04-xileno — o exame volta.
     exames, ctx = _emitir(proto, _risco_pgr("xileno", "BAIXO"))
+
+    assert _MHA not in exames
+    (obs,) = ctx.observacoes
+    assert (obs.nivel_risco, obs.medicao) == ("BAIXO", None)
+
+
+def test_baixo_com_medicao_acima_do_nivel_de_acao_emite(proto: Protocolo) -> None:
+    # NR-07 7.5.12 "b": acima do nível de ação o exame é obrigatório, qualquer que
+    # seja o nível do PGR. 50 ppm = 64% do LT de 78 ppm. Reversão que mata: tirar
+    # `_medicao_acima_do_nivel_de_acao` de stage_5_emissao — a dispensa por nível
+    # passaria por cima da medição.
+    exames, ctx = _emitir(proto, _risco_pgr("xileno", "BAIXO", _medida(50)))
 
     assert _MHA in exames
     assert ctx.observacoes == []
+
+
+def test_irrelevante_com_medicao_acima_do_nivel_de_acao_emite(proto: Protocolo) -> None:
+    # Mesmo literal do 7.5.12 "b" no IRRELEVANTE — antes, IRRELEVANTE dispensava com
+    # qualquer medição. Reversão que mata: a mesma do teste acima.
+    exames, _ = _emitir(proto, _risco_pgr("xileno", "IRRELEVANTE", _medida(50)))
+
+    assert _MHA in exames
 
 
 def test_baixo_com_medicao_abaixo_do_nivel_de_acao_dispensa_com_laudo(proto: Protocolo) -> None:
@@ -223,13 +243,13 @@ def test_carregador_recusa_dispensa_por_medicao_em_agente_sem_lt(tmp_path: Path)
     destino = _copiar_protocolo(tmp_path)
     regras = destino / "regras.yaml"
     texto = regras.read_text(encoding="utf-8")
-    alvo = "    quando: ciclohexanona\n    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]}"
+    alvo = "    quando: ciclohexanona\n    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE, BAIXO]}"
     assert alvo in texto
     regras.write_text(
         texto.replace(
             alvo,
             "    quando: ciclohexanona\n    mencao_documental: {regra: R-BIO-05, niveis_risco: "
-            "[IRRELEVANTE], niveis_com_medicao_abaixo_acao: [BAIXO]}",
+            "[IRRELEVANTE, BAIXO], niveis_com_medicao_abaixo_acao: [BAIXO]}",
         ),
         encoding="utf-8",
     )
@@ -347,13 +367,14 @@ def _exames(cache: CacheMatrizes) -> set[str]:
 def test_registrar_e_remover_medicao_refazem_a_matriz(proto: Protocolo) -> None:
     # Reversão que mata: _reprocessar passar pgr_atualizado direto a
     # processar_pgr, sem aplicar_medicoes — a medição registrada não mudaria nada.
+    # 50 ppm (64% do LT) faz o exame sair; sem a medição, BAIXO dispensa.
     cache = _cache(proto, _pgr(_ghe(_risco_pgr("xileno", "BAIXO"))))
 
-    com = registrar_medicao_e_reprocessar(cache, proto, _medicao(10))
+    com = registrar_medicao_e_reprocessar(cache, proto, _medicao(50))
     sem = remover_medicao_e_reprocessar(com, proto, "GHE-18", "xileno")
 
-    assert _MHA not in _exames(com)
-    assert _MHA in _exames(sem)
+    assert _MHA in _exames(com)
+    assert _MHA not in _exames(sem)
     assert sem.medicoes == ()
     assert com.pgr_hidratado == cache.pgr_hidratado
 
@@ -409,12 +430,12 @@ def test_pdf_diferente_nao_herda_medicao(proto: Protocolo, monkeypatch: pytest.M
     # Laudo de uma obra não vale para o PGR de outra. Reversão que mata: tirar a
     # checagem _mesmo_pdf do repasse de medições.
     cache = _rodar(monkeypatch, b"pgr da obra A", date(2026, 12, 31), None)
-    cache = registrar_medicao_e_reprocessar(cache, proto, _medicao(10))
+    cache = registrar_medicao_e_reprocessar(cache, proto, _medicao(50))
 
     cache = _rodar(monkeypatch, b"pgr da obra B", date(2026, 12, 31), cache)
 
     assert cache.medicoes == ()
-    assert _MHA in _exames(cache)
+    assert _MHA not in _exames(cache)
 
 
 def _pagina_com_pgr(monkeypatch: pytest.MonkeyPatch) -> AppTest:

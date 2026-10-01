@@ -78,16 +78,29 @@ def test_risco_irrelevante_troca_indicador_por_observacao(proto: Protocolo) -> N
     ]
 
 
-def test_risco_baixo_emite_indicador(proto: Protocolo) -> None:
-    # Caso Porto Araras I / Vila Brasil: a Dra. Patrícia pede acetona e MEK com
-    # risco BAIXO. Reversão que mata: voltar BAIXO para niveis_risco das
-    # R-BIO-04 (regras.yaml), ou `_nivel_dispensa` dispensar sem olhar o nível.
+def test_risco_baixo_sem_medicao_vira_mencao(proto: Protocolo) -> None:
+    # Decisão do Diovanni (01/10/2026): matrizes mais recentes — T65 24.09.26, GHE 11:
+    # "Incluir no Word do PCMSO risco baixo no PGR para Acetona e Metiletilcetona".
+    # Reversão que mata: tirar BAIXO de niveis_risco de R-BIO-04-acetona e
+    # R-BIO-04-metil_etil_cetona (regras.yaml) — os indicadores voltam.
     exames, ctx = _emitir(
         proto, _risco("acetona", "BAIXO"), _risco("metil_etil_cetona", "BAIXO")
     )
 
-    assert exames["acetona_urina"].periodicidade_meses == 6
-    assert exames["mek_urina"].periodicidade_meses == 6
+    assert "acetona_urina" not in exames and "mek_urina" not in exames
+    assert sorted((o.agente, o.nivel_risco) for o in ctx.observacoes) == [
+        ("acetona", "BAIXO"),
+        ("metil_etil_cetona", "BAIXO"),
+    ]
+
+
+def test_cancerigeno_baixo_sem_medicao_emite(proto: Protocolo) -> None:
+    # Cancerígenos IARC 1/2A do Quadro 1 recebem o indicador em BAIXO (decisão de
+    # 25/09/2026, mantida). Reversão que mata: pôr BAIXO em niveis_risco de
+    # R-BIO-04-estireno.
+    exames, ctx = _emitir(proto, _risco("estireno", "BAIXO"))
+
+    assert "acido_mandelico_fenilglioxilico" in exames
     assert ctx.observacoes == []
 
 
@@ -101,31 +114,20 @@ def test_nivel_ausente_emite_indicador(proto: Protocolo) -> None:
     assert ctx.observacoes == []
 
 
-def test_mesmo_agente_irrelevante_e_baixo_emite(proto: Protocolo) -> None:
+def test_mesmo_agente_irrelevante_e_moderado_emite(proto: Protocolo) -> None:
     # Reversão que mata: trocar `all` por `any` em `_nivel_dispensa` — uma linha
-    # IRRELEVANTE esconderia a linha BAIXO do mesmo agente.
-    exames, ctx = _emitir(proto, _risco("xileno", "IRRELEVANTE"), _risco("xileno", "BAIXO"))
+    # IRRELEVANTE esconderia a linha MODERADO do mesmo agente.
+    exames, ctx = _emitir(proto, _risco("xileno", "IRRELEVANTE"), _risco("xileno", "MODERADO"))
 
     assert "acido_metilhipurico" in exames
     assert ctx.observacoes == []
 
 
-def test_observacao_carrega_o_maior_nivel_dispensado(tmp_path: Path) -> None:
-    # Mecanismo, não a conduta vigente: com dois níveis dispensáveis, a
-    # observação nomeia o maior. Reversão que mata: trocar `max` por `min` em
-    # `_nivel_dispensa` — a menção diria "irrelevante" com linha BAIXO no PGR.
-    regras = tmp_path / "protocolo" / "regras.yaml"
-    shutil.copytree(_PROTOCOLO_DIR, tmp_path / "protocolo")
-    texto = regras.read_text(encoding="utf-8")
-    alvo = "    quando: tolueno\n    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE]"
-    assert alvo in texto
-    regras.write_text(
-        texto.replace(alvo, alvo.replace("[IRRELEVANTE]", "[IRRELEVANTE, BAIXO]")), encoding="utf-8"
-    )
-
-    _, ctx = _emitir(
-        carregar(tmp_path / "protocolo"), _risco("tolueno", "IRRELEVANTE"), _risco("tolueno", "BAIXO")
-    )
+def test_observacao_carrega_o_maior_nivel_dispensado(proto: Protocolo) -> None:
+    # Com dois níveis dispensáveis, a observação nomeia o maior. Reversão que
+    # mata: trocar `max` por `min` em `_nivel_dispensa` — a menção diria
+    # "irrelevante" com linha BAIXO no PGR.
+    _, ctx = _emitir(proto, _risco("tolueno", "IRRELEVANTE"), _risco("tolueno", "BAIXO"))
 
     assert [o.nivel_risco for o in ctx.observacoes] == ["BAIXO"]
 
@@ -142,14 +144,18 @@ _CANCERIGENOS_COM_LT = {
 
 
 def test_mencao_documental_so_nas_regras_do_quadro_1(proto: Protocolo) -> None:
-    # Escopo da decisão: IBE/EE (Quadro 1); sem medição, só IRRELEVANTE. O Quadro 2
+    # Escopo da decisão: IBE/EE (Quadro 1); sem medição, IRRELEVANTE e BAIXO —
+    # BAIXO fora dos cancerígenos IARC 1/2A com IBE (`cancerigeno_com_ibe`,
+    # decisão do Diovanni de 01/10/2026). O Quadro 2
     # (IBE/SC, significado clínico) segue emitindo em qualquer nível. Emenda
     # D-ARQ-86: BAIXO com medição abaixo do nível de ação só nos agentes com LT
     # na NR-15 que não são cancerígenos IARC 1/2A (21). Computado do dado
     # (D-ARQ-67). Reversão que mata: tirar a chave de qualquer R-BIO-04 EE,
-    # pô-la numa R-BIO-04 SC, acrescentar BAIXO a qualquer niveis_risco, ou pôr
-    # niveis_com_medicao_abaixo_acao num cancerígeno ou em agente sem LT.
+    # pô-la numa R-BIO-04 SC, pôr BAIXO em niveis_risco de cancerígeno ou tirá-lo
+    # de não cancerígeno, ou pôr niveis_com_medicao_abaixo_acao num cancerígeno
+    # ou em agente sem LT.
     agentes = proto.vocabulario.agentes
+    cancerigenos = set(proto.predicados_compostos["cancerigeno_com_ibe"]["ou"])
     bio04 = [r for r in proto.regras if str(r["id"]).startswith("R-BIO-04-")]
     com_chave = {r["id"] for r in bio04 if "mencao_documental" in r}
     ee = {r["id"] for r in bio04 if agentes[r["quando"]].get("tipo_ibe") == "EE"}
@@ -170,7 +176,8 @@ def test_mencao_documental_so_nas_regras_do_quadro_1(proto: Protocolo) -> None:
     assert len(ee) == 42
     assert all(
         r["mencao_documental"]["regra"] == "R-BIO-05"
-        and r["mencao_documental"]["niveis_risco"] == ["IRRELEVANTE"]
+        and r["mencao_documental"]["niveis_risco"]
+        == (["IRRELEVANTE"] if r["quando"] in cancerigenos else ["IRRELEVANTE", "BAIXO"])
         and r["mencao_documental"].get("niveis_com_medicao_abaixo_acao", ["BAIXO"]) == ["BAIXO"]
         for r in bio04
         if "mencao_documental" in r
