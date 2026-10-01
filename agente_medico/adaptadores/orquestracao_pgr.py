@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import date
 from pathlib import Path
 
@@ -7,7 +8,6 @@ from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
     detectar_psicossocial,
-    extrair_texto_pgr,
     recortar_blocos_ghe,
     recortar_cards_cargo,
     recortar_topo,
@@ -15,7 +15,8 @@ from agente_medico.motor.extracao_pgr import (
 )
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_pgr
-from agente_medico.motor.parser_familia_consciente import FamiliaNaoReconhecida, parsear_arquivo
+from agente_medico.motor.io_pdf import PaginaLida, ler_pdf
+from agente_medico.motor.parser_familia_consciente import FamiliaNaoReconhecida, parsear_leitura
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor_termos import construir_indice_termos
 from agente_medico.motor.resolvedor_topo import resolver_validade
@@ -48,7 +49,7 @@ from agente_medico.motor.transcritor_topo import TranscritorTopo, gate_forma_top
 def preparar_envelope(
     caminho: Path, cliente: TranscritorTopo
 ) -> tuple[str | None, tuple[Pendencia, ...]]:
-    """extrair_texto_pgr -> recortar_topo -> transcrever_topo -> gate_forma_topo
+    """ler_pdf -> recortar_topo -> transcrever_topo -> gate_forma_topo
     -> resolver_validade -> serializar_envelope (D-ARQ-53 fatia 4; consumidores
     finais R-PGR-01/R-PGR-06).
 
@@ -69,7 +70,7 @@ def preparar_envelope(
     repassa a Pendencia de gate_forma_topo ("forma_verbatim_topo") tal como
     preparar_ghes repassa a de gate_forma_ghe.
     """
-    paginas = extrair_texto_pgr(caminho)
+    paginas = [p.texto for p in ler_pdf(caminho)]
     topo = recortar_topo(paginas)
     if topo is None:
         return None, (
@@ -101,24 +102,25 @@ def preparar_envelope(
 
 
 def preparar_ghes(
-    caminho: Path, cliente: TranscritorGHE, cliente_card: TranscritorCard
+    caminho: Path,
+    cliente: TranscritorGHE,
+    cliente_card: TranscritorCard,
+    leitura: Sequence[PaginaLida] | None = None,
 ) -> tuple[tuple[GHEVerbatim, ...], tuple[Pendencia, ...]]:
-    """extrair_texto_pgr -> avaliar_estrutura -> ROTEIA (D-ARQ-57 peça 4
+    """ler_pdf -> avaliar_estrutura -> ROTEIA (D-ARQ-57 peça 4
     fatia 4d, plug que FECHA DT-003CS-01):
 
     - Pendência de estrutura não-None (qualquer rota): bloqueia aqui, sem
       gastar chamada LLM sobre recorte inválido/implausível — como sempre.
     - Rota "ghe" (D-ARQ-65 fatia 2, roteamento determinístico-primeiro):
-      DEPOIS do check de blocos_ausentes, tenta parsear_arquivo(caminho) —
-      2ª leitura do PDF sobre o mesmo `caminho` (precedente já documentado
-      em processar_arquivo_pgr: o seam humano de confirmação-RT entre
-      preparar_envelope e preparar_ghes impede passada única de I/O; aqui é
-      a mesma classe, dentro da própria preparar_ghes). Aceita a rota
+      DEPOIS do check de blocos_ausentes, tenta parsear_leitura(leitura) —
+      as palavras vêm da mesma leitura do texto, sem reabrir o PDF. `leitura`
+      é passada por preparar_pgr_hidratado; sem ela, lê aqui. Aceita a rota
       determinística SOMENTE se (i) nenhum FamiliaNaoReconhecida foi
       levantado E (ii) len(candidatos) == len(blocos) — as duas rotas usam
       eh_cabecalho_ghe sobre reconstruções de linha diferentes
-      (parsear_arquivo/pdfplumber.extract_words vs. recortar_blocos_ghe/
-      extrair_texto_pgr), então divergência de contagem é tratada como
+      (palavras de extract_words vs. recortar_blocos_ghe/texto de
+      extract_text, as duas da mesma leitura), então divergência de contagem é tratada como
       família não reconhecida (conservador, motivo nomeia as duas
       contagens). Aceita -> gate_forma_ghe(candidatos), cliente LLM NUNCA é
       invocado. Recusada (exceção OU contagem divergente) -> Pendencia
@@ -149,7 +151,9 @@ def preparar_ghes(
     quem monta o adaptador decide os dois clientes; uma rota nunca invoca o
     cliente da outra.
     """
-    paginas = extrair_texto_pgr(caminho)
+    if leitura is None:
+        leitura = ler_pdf(caminho)
+    paginas = [p.texto for p in leitura]
     rota, pendencia_estrutura = avaliar_estrutura(paginas)
     if pendencia_estrutura is not None:
         # Gate de estrutura ANTES do recorte/transcrição (D-ARQ-57):
@@ -188,7 +192,7 @@ def preparar_ghes(
 
     pendencia_familia: Pendencia | None = None
     try:
-        candidatos_deterministicos = parsear_arquivo(caminho)
+        candidatos_deterministicos = parsear_leitura(leitura)
     except FamiliaNaoReconhecida as e:
         pendencia_familia = Pendencia(
             tipo="familia_nao_medida",
@@ -246,17 +250,17 @@ def preparar_pgr_hidratado(
     caller monta o EnvelopeConfirmado a partir de preparar_envelope (ida) +
     desserializar_confirmacao (volta, após revisão-RT humana no artefato) —
     o paliativo RT-supplied de D-ARQ-52 seam 3 fecha aqui, no nível do
-    adaptador. Consequência estrutural (não paliativo): extrair_texto_pgr
-    roda 2x sobre o mesmo arquivo — uma vez em preparar_envelope (ida do
-    envelope), outra em preparar_ghes/aqui dentro (volta dos GHEs) — porque
-    o seam de confirmação-RT entre as duas invocações é humano, não
-    componível numa única passada de I/O.
+    adaptador. O PDF é lido uma vez aqui (ler_pdf: texto e palavras, por
+    faixas de páginas em paralelo) e a leitura serve a preparar_ghes e ao
+    sinal psicossocial. preparar_envelope lê de novo, porque o seam de
+    confirmação-RT entre as duas invocações é humano.
 
     cliente e cliente_card são repassados intactos a preparar_ghes, que
     decide a rota (ghe/card) a partir de avaliar_estrutura — este nível não
     julga rota, só costura.
     """
-    aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card)
+    leitura = ler_pdf(caminho)
+    aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card, leitura)
     if not aprovados:
         # Parse total falho (blocos ausentes, transcrição indisponível, ou
         # todos os GHE reprovados no gate): sem verbatim para hidratar, não
@@ -266,11 +270,9 @@ def preparar_pgr_hidratado(
         protocolo.vocabulario.agentes,
         fracoes_sem_agente=protocolo.vocabulario.fracoes_sem_agente,
     )
-    # R-PSY-05 (ex-R-PSY-03): 3ª leitura de extrair_texto_pgr sobre o mesmo arquivo — mesma
-    # classe da duplicação documentada acima (preparar_envelope/
-    # preparar_ghes), texto puro sem custo de LLM. psicossocial é sinal de
-    # PGR inteiro (D-ARQ-49 P2 aplicado): replicado a todo GHE via hidratar_pgr.
-    psicossocial = detectar_psicossocial(extrair_texto_pgr(caminho))
+    # R-PSY-05 (ex-R-PSY-03): psicossocial é sinal de PGR inteiro (D-ARQ-49 P2
+    # aplicado), replicado a todo GHE via hidratar_pgr; sai da mesma leitura.
+    psicossocial = detectar_psicossocial([p.texto for p in leitura])
     pgr, pend_hidr = hidratar_pgr(
         aprovados,
         indice,

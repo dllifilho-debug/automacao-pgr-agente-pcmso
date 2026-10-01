@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import NamedTuple, Optional
 
 from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe
-from agente_medico.motor.io_pdf import paginas_liberadas
+from agente_medico.motor.io_pdf import PaginaLida, paginas_liberadas
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 
 # [DERIVADO — D-ARQ-65 fatia 1; molde D-ARQ-49/50 (verbatim tipado) +
@@ -487,3 +487,11 @@ def parsear_arquivo(caminho: Path) -> tuple[GHEVerbatim, ...]:
         for page in paginas_liberadas(caminho)
     ]
     return parsear_paginas(paginas)
+
+
+def parsear_leitura(paginas: Sequence[PaginaLida]) -> tuple[GHEVerbatim, ...]:
+    """Mesmo resultado de `parsear_arquivo`, sobre palavras já lidas por
+    `io_pdf.ler_pdf` — sem reabrir o PDF."""
+    return parsear_paginas(
+        [tuple(PalavraPDF(text=t, x0=x0, top=top) for t, x0, top in p.palavras) for p in paginas]
+    )
