@@ -11295,3 +11295,28 @@ A 1ª suíte completa deu 3 failed: testes que usavam 64742-82-1 como exemplo de
 
 **Lição de método.** Ganho de desempenho medido fora do ambiente de produção não é ganho medido: o `spawn` depende do
 módulo principal do processo, e o do Streamlit não é o do pytest. Medir no `streamlit run` antes de afirmar.
+
+## Sessão (branch `ccr-983f0b9f-zkz16m`, recriada sobre `main 868a119`, pós-merge do PR #418) — 01/10/2026 — CONFERÊNCIA do T65 em produção + cronômetro na tela
+
+**Entrada.** Diovanni rodou o T65 no app publicado depois do #418 — sem erro — e mandou matriz, memorial e a tela em
+PDF. Conferência (script descartável, gabarito `MATRIZ DE EXAMES(ADENDO)SPE T65 … 24.09.26.doc` convertido com
+LibreOffice, 61 funções × exame, momentos e periodicidade): fora da Psicossocial (decidida, R-PSY-04), 2 divergências —
+**MEK na urina a mais no GHE 11** (corte do BAIXO, decisão do Diovanni) e **GHE 16 GESSO sem espirometria e RX**. Causa
+no memorial: o Gemini transcreveu "Sulfato de cálcio — pó de Gesso", juntando "pó de" da coluna da fonte geradora; o
+termo cadastrado era a grafia do PDF. "Pó de madeira" (GHE 06) aparecia como não reconhecido, sem efeito na saída.
+
+**Commits.** `6377659` — termos "Sulfato de cálcio — pó de Gesso" (`poeira_de_gesso`) e "Pó de madeira"
+(`poeira_de_madeira`), índice 185 → 187, 2 testes, varredura 2/2. `763b161` — tempo de processamento na tela e no log:
+`_TranscritorContado.segundos`, `TempoProcessamento` (total, IA, motor; leitura e montagem = o resto),
+`CacheMatrizes.tempo` (aditivo), `texto_tempo`; 4 testes, varredura 5/5. PROTOCOLO v119, PENDENCIAS, este bloco, PAINEL.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa em `6377659`: 1578 passed; em
+`763b161`, árvore parada: **1582 passed, 6 skipped, 0 failed** (1332,29 s).
+
+**Três números clínicos.** Não re-tirados — nenhuma regra tocada.
+
+**Pendências.** Nenhuma nova. O tempo real do T65 em produção fica para a próxima rodada do Diovanni (a tela passa a
+mostrá-lo).
+
+**Lição de método.** Termo cadastrado pela grafia do PDF não cobre a grafia que a IA produz da mesma célula. Na rota
+LLM, a conferência contra o gabarito precisa usar a saída do app, não a leitura do PDF.
