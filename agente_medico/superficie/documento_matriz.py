@@ -159,16 +159,21 @@ class DocumentoMatriz:
     rodape: RodapeDocumento
 
 
-def _chave_ordem_exame(slug: str, exames_vocab: dict[str, Any]) -> tuple[int, int, str]:
+def _chave_ordem_exame(slug: str, exames_vocab: dict[str, Any]) -> tuple[int, int, int, str]:
     # 003.EO EMENDA 1: ordem_exibicao é opcional no vocabulário — só os slugs
     # medidos no gabarito o carregam. Quem tem vai primeiro (tag 0, por valor);
     # quem não tem vai depois (tag 1), desempatado por slug alfabético — nunca
     # por um sentinela numérico solto (isso reabriria a classe D-ARQ-67: um
     # `.get(..., 0)` faria o exame sem ordem subir para o topo).
-    ordem = exames_vocab.get(slug, {}).get("ordem_exibicao")
+    # D-ARQ-73, nota de 01/10/2026: `bloco_exibicao: fim` põe o exame depois dos
+    # sem ordem (os indicadores biológicos ficam entre os laboratoriais e
+    # Espirometria/RX/Saúde Mental/Psicossocial, como nos gabaritos de 2026).
+    entrada = exames_vocab.get(slug, {})
+    bloco = 1 if entrada.get("bloco_exibicao") == "fim" else 0
+    ordem = entrada.get("ordem_exibicao")
     if ordem is not None:
-        return (0, ordem, slug)
-    return (1, 0, slug)
+        return (bloco, 0, ordem, slug)
+    return (bloco, 1, 0, slug)
 
 
 def _formatar_momentos(exame: ExameEmitido, mostrar_periodicidade: bool) -> str:

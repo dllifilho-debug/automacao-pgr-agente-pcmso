@@ -3757,7 +3757,11 @@ falha de leitura, não declaração da FDS. Só tela, commit `811b980`; motor e 
 `test_sugestao_vinculo.py` (4 novos), varredura inversa 5/5. "Ácido oleico" sem slug (medido acima) segue fora do
 escopo — não muda exame. Resposta do Gemini à seção 3 da FDS CARPINTEIRO no app `[A MEDIR]`.
 
-### DT-(sessão `claude/keen-curie-xdm7kb`)-03 — Auditoria T65: acetona com produto no termo e forma do documento da matriz `[ABERTA — não-bloqueante]`
+**Medição no app (branch `claude/clever-hopper-er6xqi`, 01/10/2026).** T65 com a FDS CARPINTEIRO enviada (sem anexar):
+o Gemini devolveu composição vazia sem pendência e a tela mostrou "A FDS não declara ingrediente perigoso; confira
+contra o que o PGR declara." com o seletor de GHE — o `[A MEDIR]` acima está fechado.
+
+### DT-(sessão `claude/keen-curie-xdm7kb`)-03 — Auditoria T65: acetona com produto no termo e forma do documento da matriz `[RESOLVIDA — branch claude/clever-hopper-er6xqi, 01/10/2026]`
 
 **Origem.** Auditoria do Diovanni (Perplexity e NotebookLM) conferida nesta sessão, função a função, no gabarito RQ.61 `MATRIZ DE EXAMES(ADENDO)SPE T65 EMPREENDIMENTO IMOBILIARIO LTDA 24.09.26` (Dra. Patrícia, acervo em `matrizes_originais/`) × matriz do app sobre o `PGR - TOCTAO ALT 65.pdf` (Rev. 01, 06/2026).
 Conteúdo clínico: 4 divergências (Psicossocial, MEK em BAIXO, gesso, PNOS com "outramaneira"); o resto — 61
@@ -3807,6 +3811,13 @@ com "Médico(a) Coordenador(a) do PCMSO: <nome> — CRM <número>" (`CabecalhoDo
 #424: título, prefixo do GHE (18 GHEs), rodapé rotulado e acetona do GHE 11 (observação de risco baixo, como o MEK e como
 o gabarito pede) conferidos; riscos não reconhecidos 49 → 48; exames idênticos aos da rodada anterior nos 62 cargos.
 **Segue aberto:** nomes e ordem dos exames do RQ.61.
+
+**Nota (branch `claude/clever-hopper-er6xqi`, 01/10/2026) — nomes e ordem dos exames; DT RESOLVIDA.** Medição de 32
+gabaritos de matriz de 2026 (detalhe na nota de `D-ARQ-73`); Diovanni decidiu os itens 1, 2 e 4: indicador biológico
+logo após os laboratoriais, Espirometria/RX antes de Saúde Mental/Psicossocial, Saúde Mental antes de Psicossocial
+(`bloco_exibicao: fim`), e os nomes "RX de Tórax OIT", "Carboxihemoglobina", "RX de Coluna Lombo-Sacra". Hemograma/
+Glicemia/ECG e "Glicemia de Jejum" ficam (acervo dividido). Commit `9b0c1ad`. Todos os pontos da auditoria estão
+resolvidos ou descartados por medição; as grafias do PGR seguem verbatim por D-ARQ-22.
 
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-04 — Brigada de emergência com inflamáveis (NR-20 20.15.6) sem gatilho de avaliação psicossocial `[ABERTA — sem caso medido]`
 

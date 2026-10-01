@@ -91,10 +91,11 @@ _MOMENTO_NO_NOME = re.compile(
 # revisão de `R-*`. Cada entrada é uma grafia medida no acervo, não suposta.
 _ALIAS_GRAFIA = {
     "glicemia em jejum": "glicemia de jejum",
-    "rx de torax oit": "rx torax oit",
-    "rx da coluna lombo-sacra": "rx coluna lombo-sacra",
-    "rx de coluna lombo-sacra": "rx coluna lombo-sacra",
-    "rx de coluna lombo sacra": "rx coluna lombo-sacra",
+    "rx torax oit": "rx de torax oit",
+    "rx coluna lombo-sacra": "rx de coluna lombo-sacra",
+    "rx da coluna lombo-sacra": "rx de coluna lombo-sacra",
+    "rx de coluna lombo sacra": "rx de coluna lombo-sacra",
+    "carboxihemoglobina no sangue": "carboxihemoglobina",
     "metil-etil-cetona": "metil-etil-cetona (mek) na urina",
     "metil etil cetona": "metil-etil-cetona (mek) na urina",
     "metil-etil-cetona na urina": "metil-etil-cetona (mek) na urina",

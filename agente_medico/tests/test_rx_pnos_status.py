@@ -54,5 +54,5 @@ def test_pnos_sem_medicao_sai_de_confirmar_primeiro(proto: Protocolo) -> None:
     memorial = montar_memorial([matriz], proto.vocabulario.exames, resumos_do_protocolo(proto.regras))
 
     assert "R-RX-01-pnos-sem" not in {d.regra_id for d in memorial.revisar_primeiro}
-    (rx,) = [linha for bloco in memorial.blocos for linha in bloco.linhas if linha.exame.startswith("RX Tórax")]
+    (rx,) = [linha for bloco in memorial.blocos for linha in bloco.linhas if linha.exame.startswith("RX de Tórax")]
     assert rx.certeza == ROTULO_CERTEZA[2]

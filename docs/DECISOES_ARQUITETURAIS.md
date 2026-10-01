@@ -3174,6 +3174,18 @@ vez só — "GHE-01 — ENGENHARIA/PRODUÇÃO" em vez de "GHE GHE-01 GHE 01 - EN
 tela seguem a mesma função. Commit `d6ee35e`. Conteúdo clínico e contagem de tabelas inalterados; nenhuma cláusula
 alterada.
 
+**Nota de aplicação (branch `claude/clever-hopper-er6xqi`, 01/10/2026 — ordem e nomes dos exames, decisão do
+Diovanni).** A ordem da EMENDA 1 vinha do gabarito Fascino (Consciente SPE 0030, 08.07.26). Medida contra 32 gabaritos
+de matriz de 2026 (1.690 células de cargo, extrator do `comparar_matriz_gabarito`, script descartável): nenhum
+gabarito tem uma ordem única, mas (1) indicador biológico sempre antes de Espirometria, RX, Saúde Mental e Psicossocial
+— nenhuma ocorrência contra, e o emissor os punha no fim; (2) Espirometria e RX antes de Saúde Mental e Psicossocial em
+15 arquivos contra 8; (3) Saúde Mental antes de Psicossocial em 16 contra 9; (4) Hemograma/Glicemia/ECG dividido (13 x
+16) — fica como estava. Novo campo opcional `bloco_exibicao: fim` em `exames.yaml` (Espirometria, RX de Coluna, RX de
+Tórax, Saúde Mental, Psicossocial): o exame vai depois dos sem `ordem_exibicao`. Nomes: "RX de Tórax OIT" (29 de 30
+arquivos), "Carboxihemoglobina" (17 contra 7), "RX de Coluna Lombo-Sacra". Efeito: células na mesma ordem do app 387 →
+728; pares fora de ordem 11,7% → 7,4%. Commit `9b0c1ad`. Ordem não é conduta (cabeçalho do `exames.yaml`); nenhum exame,
+periodicidade ou momento muda. Cláusula de ordem cravada como dado mantida — só o dado mudou.
+
 ## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003.EQ). Não cria nem altera
@@ -4594,6 +4606,13 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
   `superficie/sugestao_vinculo.py`, `web_matriz.py`), commit `811b980`; motor e regras intocados. Resposta do Gemini
   à seção 3 da FDS CARPINTEIRO no app `[A MEDIR]` — o aviso depende de a composição voltar vazia.
 
+- **Nota (branch `claude/clever-hopper-er6xqi`, 01/10/2026) — medição no app (T65, FDS da TOCTAO, sem anexar).**
+  FDS CARPINTEIRO: o Gemini devolve composição vazia sem pendência e a tela mostra o aviso próprio e o seletor —
+  medido. FDS ALMOXARIFE (adesivo de PVC): sugere só o GHE-11 HIDRÁULICA, 2 em comum (acetona e MEK) — mesmo
+  resultado que o critério pedia no Aurora. FDS AZULEJISTA (cimento): GHE-07 e GHE-08 empatados. FDS AUX. DE SERVIÇOS
+  GERAIS: `transcricao_indisponivel_fds` (HTTP 503 nos três modelos; transitório, não memoizado). Critério de aceite da
+  fatia 1: itens do código fechados; a rodada com o pacote do Aurora segue opcional.
+
 ---
 
 ## Histórico de revisões
@@ -4836,3 +4855,4 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
 | v234 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO, decisão do Diovanni): **nota em `D-ARQ-86`** — cl.7 substituída (BAIXO sem medição dispensa o IBE do Quadro 1, fora dos cancerígenos); medição acima do nível de ação emite sempre. |
 | v235 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — tela, decisão do Diovanni): **nota em `D-ARQ-90`** — critério "FDS CARPINTEIRO" fechado (`DT-(sessão claude/keen-curie-xdm7kb)-02`, opção (a)): FDS sem ingrediente declarado e sem pendência ganha aviso próprio e seletor de GHE. Decisões seguem em **90**. |
 | v236 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — forma do documento): **nota em `D-ARQ-73`** — título fixo do RQ.61 ("MATRIZ FUNÇÃO – EXAMES PCMSO"), tipo em linha própria, código do GHE uma vez só (`titulo_ghe`) no emissor e na tela (`DT-(sessão claude/keen-curie-xdm7kb)-03`, fatia 1). Decisões seguem em **90**. |
+| v237 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — apresentação, decisão do Diovanni): **nota em `D-ARQ-73`** — ordem e nomes dos exames pela maioria de 32 gabaritos de 2026 (`bloco_exibicao: fim`; indicador biológico antes de Espirometria/RX/avaliações); **nota em `D-ARQ-90`** — FDS da TOCTAO medidas no app (CARPINTEIRO com o aviso próprio). Decisões seguem em **90**. |
