@@ -8,6 +8,7 @@ clínica nova, nenhum R-* tocado.
 from __future__ import annotations
 
 import html
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
@@ -55,10 +56,24 @@ def nome_ghe_exibicao(nome: str) -> str:
     return _sanitizar(nome.replace(" \x00 ", " - "))
 
 
+def titulo_ghe(ghe_id: str, nome_ghe: str) -> str:
+    """Código do GHE uma vez só: o nome que o PGR escreve com o próprio código na
+    frente ("GHE 01 - ADMINISTRAÇÃO" no GHE-01) perde a repetição."""
+    codigo = ghe_id if ghe_id.upper().startswith("GHE") else f"GHE {ghe_id}"
+    numero = re.search(r"\d+", ghe_id)
+    nome = nome_ghe
+    if numero:
+        nome = re.sub(rf"^GHE[\s-]*0*{int(numero[0])}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
+    return f"{codigo} — {nome}" if nome else codigo
+
+
 # D-ARQ-73, nota de aplicação desta sessão: paleta reaproveitada de
 # `modules/modulo_pcmso.py::gerar_docx_rq61`
 # (v9.5, já em produção no legado) — não é identidade visual de terceiro, é só a
 # cor que o escritório já usa; troca-se em um lugar só se decidirem por outra.
+# Título do formulário RQ.61 do escritório, como o cabeçalho das matrizes do acervo o escreve.
+TITULO_MATRIZ = "MATRIZ FUNÇÃO – EXAMES PCMSO"
+
 _COR_DESTAQUE = RGBColor(0x08, 0x4D, 0x22)
 _COR_DESTAQUE_HEX = "084D22"
 _COR_TEXTO_SOBRE_DESTAQUE = RGBColor(0xFF, 0xFF, 0xFF)
@@ -216,15 +231,15 @@ def renderizar_html(doc: DocumentoMatriz) -> str:
     r = doc.rodape
     partes: list[str] = [
         "<div>",
+        f"<h1>{html.escape(TITULO_MATRIZ)}</h1>",
         f"<p>Empresa: {html.escape(c.empresa)}</p>",
         f"<p>Obra: {html.escape(c.obra)}</p>",
-        f"<p>{html.escape(c.tipo_documento)}</p>",
+        *([f"<p>Tipo: {html.escape(c.tipo_documento)}</p>"] if c.tipo_documento.strip() else []),
         f"<p>Data: {html.escape(c.data)}</p>",
         f"<p>{html.escape(c.medico_coordenador)} | {html.escape(c.crm)}</p>",
     ]
     for bloco in doc.blocos:
-        titulo = f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip()
-        partes.append(f"<h2>{html.escape(titulo)}</h2>")
+        partes.append(f"<h2>{html.escape(titulo_ghe(bloco.ghe_id, bloco.nome_ghe))}</h2>")
         partes.append("<table>")
         partes.append("<tr><th>FUNÇÃO</th><th>EXAMES SOLICITADOS</th></tr>")
         for linha in bloco.linhas:
@@ -266,19 +281,20 @@ def renderizar_docx(doc: DocumentoMatriz, destino: Path) -> None:
 
     titulo_documento = documento.add_paragraph()
     titulo_documento.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run_titulo = titulo_documento.add_run(c.tipo_documento)
+    run_titulo = titulo_documento.add_run(TITULO_MATRIZ)
     run_titulo.bold = True
     run_titulo.font.size = Pt(16)
     run_titulo.font.color.rgb = _COR_DESTAQUE
 
     documento.add_paragraph(f"Empresa: {c.empresa}")
     documento.add_paragraph(f"Obra: {c.obra}")
+    if c.tipo_documento.strip():
+        documento.add_paragraph(f"Tipo: {c.tipo_documento}")
     documento.add_paragraph(f"Data: {c.data}")
     documento.add_paragraph(f"{c.medico_coordenador} | {c.crm}")
 
     for bloco in doc.blocos:
-        titulo = f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip()
-        cabecalho_ghe = documento.add_heading(titulo, level=2)
+        cabecalho_ghe = documento.add_heading(titulo_ghe(bloco.ghe_id, bloco.nome_ghe), level=2)
         if cabecalho_ghe.runs:
             cabecalho_ghe.runs[0].font.color.rgb = _COR_DESTAQUE
 

@@ -675,6 +675,7 @@ def pagina_matriz() -> None:
         CabecalhoDocumento,
         RodapeDocumento,
         nome_ghe_exibicao,
+        titulo_ghe,
         renderizar_docx,
     )
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
@@ -911,7 +912,7 @@ def pagina_matriz() -> None:
                     if cache_vinculo is not None and cache_vinculo.pgr_hidratado is not None and vinculavel:
                         ghes_pgr = cache_vinculo.pgr_hidratado.ghes
                         rotulos_ghe = {
-                            ghe.id: f"{ghe.id} — {nome_ghe_exibicao(ghe.nome)}".strip(" —") for ghe in ghes_pgr
+                            ghe.id: titulo_ghe(ghe.id, nome_ghe_exibicao(ghe.nome)) for ghe in ghes_pgr
                         }
                         # D-ARQ-90: sugestão por agente em comum, ao lado da escolha — nunca pré-marcada.
                         # Sem componente não há sinal de agente: só o aviso e a escolha manual.
@@ -976,7 +977,7 @@ def pagina_matriz() -> None:
                         st.caption("Nenhum produto anexado.")
                     for produto_anexado in produtos_anexados:
                         st.write(
-                            f"**{produto_anexado.ghe_id} — {nome_ghe_exibicao(produto_anexado.ghe_nome)}**"
+                            f"**{titulo_ghe(produto_anexado.ghe_id, nome_ghe_exibicao(produto_anexado.ghe_nome))}**"
                             f" · {produto_anexado.nome}"
                         )
                         for componente in produto_anexado.componentes:
@@ -1001,7 +1002,7 @@ def pagina_matriz() -> None:
                         "a medição define a periodicidade do RX OIT (NR-07 Anexo III)."
                     )
                     rotulos_medicao = {
-                        ghe.id: f"{ghe.id} — {nome_ghe_exibicao(ghe.nome)}".strip(" —")
+                        ghe.id: titulo_ghe(ghe.id, nome_ghe_exibicao(ghe.nome))
                         for ghe in cache_vinculo.pgr_hidratado.ghes
                     }
                     col_agente, col_laudo = st.columns(2)
@@ -1288,7 +1289,7 @@ def pagina_matriz() -> None:
                     )
 
             for bloco in doc.blocos:
-                st.subheader(f"GHE {bloco.ghe_id} {bloco.nome_ghe}".strip())
+                st.subheader(titulo_ghe(bloco.ghe_id, bloco.nome_ghe))
                 for linha in bloco.linhas:
                     st.write(f"**{linha.cargo}**: {', '.join(linha.celulas)}")
 
@@ -1298,7 +1299,7 @@ def pagina_matriz() -> None:
                     cache.matrizes, cache.exames_vocab, _protocolo_padrao().vocabulario.agentes
                 )
                 for revisao in revisoes:
-                    with st.expander(f"GHE {revisao.ghe_id} {nome_ghe_exibicao(revisao.nome_ghe)}".strip()):
+                    with st.expander(titulo_ghe(revisao.ghe_id, nome_ghe_exibicao(revisao.nome_ghe))):
                         # Tabela em markdown, não st.table: st.table importa pandas no
                         # primeiro render da sessão (medido: +9 s a frio no container).
                         st.markdown(tabela_markdown(revisao))

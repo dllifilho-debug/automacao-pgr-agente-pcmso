@@ -42,6 +42,7 @@ from agente_medico.superficie.documento_matriz import (
     _formatar_momentos,
     _sanitizar,
     nome_ghe_exibicao,
+    titulo_ghe,
 )
 
 # Grau de certeza, do mais forte ao mais fraco (convenções de status do
@@ -126,17 +127,6 @@ def data_exibicao(texto: str) -> str:
     """Data ISO (aaaa-mm-dd) vira dd/mm/aaaa; qualquer outro texto sai como digitado."""
     iso = _DATA_ISO.fullmatch(texto.strip())
     return f"{iso[3]}/{iso[2]}/{iso[1]}" if iso else texto
-
-
-def titulo_ghe(ghe_id: str, nome_ghe: str) -> str:
-    """Código do GHE uma vez só: o nome que o PGR escreve com o próprio código na
-    frente ("GHE 01 - ADMINISTRAÇÃO" no GHE-01) perde a repetição."""
-    codigo = ghe_id if ghe_id.upper().startswith("GHE") else f"GHE {ghe_id}"
-    numero = re.search(r"\d+", ghe_id)
-    nome = nome_ghe
-    if numero:
-        nome = re.sub(rf"^GHE[\s-]*0*{int(numero[0])}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
-    return f"{codigo} — {nome}" if nome else codigo
 
 
 _FIM_DE_FRASE = re.compile(r"(?<!Dra)(?<!Dr)\.\s+(?=[A-ZÁÉÍÓÚ])")
