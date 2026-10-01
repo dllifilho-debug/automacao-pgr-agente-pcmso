@@ -1440,13 +1440,22 @@ def test_etapa_2_mostra_vinculo_e_produtos_no_rerun_do_clique_em_gerar(
     assert "Gere a matriz para vincular esta FDS a um GHE." not in [i.value for i in at.info]
 
 
-def test_tela_mostra_hifen_no_nome_do_ghe_com_nul(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    "nome",
+    [
+        "ASSISTENCIA TECNICA MANUTENÇÃO \x00 ENERGIZADA",
+        "GHE 01 - ASSISTENCIA TECNICA MANUTENÇÃO \x00 ENERGIZADA",
+    ],
+)
+def test_tela_mostra_hifen_no_nome_do_ghe_com_nul(monkeypatch: pytest.MonkeyPatch, nome: str) -> None:
     # Vila Brasil GHE 23 (conferência Playwright, 25/09/2026): o NUL do nome
     # aparecia na tela. Reversões que matam, uma por superfície — voltar ao
     # nome verbatim em: (1) rótulos do vínculo FDS→GHE; (2) "Produtos
-    # anexados"; (3) GHE das avaliações quantitativas; (4) expander da revisão.
+    # anexados"; (3) GHE das avaliações quantitativas; (4) expander da revisão;
+    # (5) subtítulo do GHE na matriz. O 2º caso é o T65 (nome com o próprio
+    # código, DT-(sessão claude/keen-curie-xdm7kb)-03): montar o rótulo sem
+    # titulo_ghe em qualquer superfície repete "GHE 01" (ou "GHE GHE-01").
     esperado = "GHE-01 — ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA"
-    nome = "ASSISTENCIA TECNICA MANUTENÇÃO \x00 ENERGIZADA"
     pgr = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome=nome, cargos=("Eletricista",)))
     _parse_em_sequencia(monkeypatch, pgr, pgr)
     monkeypatch.setattr(
@@ -1463,5 +1472,6 @@ def test_tela_mostra_hifen_no_nome_do_ghe_com_nul(monkeypatch: pytest.MonkeyPatc
 
     assert any(m.value.startswith(f"**{esperado}**") for m in at.markdown)
     assert at.selectbox(key="medicao_ghe").options == [esperado]
-    assert f"GHE GHE-01 {esperado.removeprefix('GHE-01 — ')}" in [e.label for e in at.expander]
+    assert esperado in [e.label for e in at.expander]
+    assert esperado in [s.value for s in at.subheader]
     assert not any("\x00" in m.value for m in at.markdown)

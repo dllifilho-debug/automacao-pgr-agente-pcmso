@@ -3776,6 +3776,13 @@ estão como notas nas DTs de origem.
 
 **Status:** ABERTA — não-bloqueante.
 
+**Nota (branch `claude/clever-hopper-er6xqi`, 01/10/2026) — forma do documento, fatia 1 feita.** Título fixo "MATRIZ
+FUNÇÃO – EXAMES PCMSO" no HTML e no Word (o campo "Tipo de documento" sai como "Tipo: …", omitido se vazio) e código
+do GHE uma vez só (`titulo_ghe`) no emissor e nos rótulos de GHE da tela — commit `d6ee35e`, nota em `D-ARQ-73`. 4
+testes novos e 1 caso novo (nome com o próprio código) no teste de tela do NUL; varredura inversa 12/12. **Segue
+aberto:** acetona do GHE 11; rodapé sem rótulos e sem campo de OBS; nomes e ordem dos exames diferentes do RQ.61. O
+código do GHE sai como o ID do PGR ("GHE-01"); o RQ.61 escreve "GHE 01 –" — fica como está até decisão contrária.
+
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-04 — Brigada de emergência com inflamáveis (NR-20 20.15.6) sem gatilho de avaliação psicossocial `[ABERTA — sem caso medido]`
 
 **Origem.** Varredura das NRs de `normas/` na decisão da R-PSY-04 (30/09/2026). NR-20 **20.15.6**: *"Os integrantes da

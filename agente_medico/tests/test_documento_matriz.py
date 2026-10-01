@@ -16,6 +16,7 @@ from agente_medico.superficie.documento_matriz import (
     _COR_DESTAQUE_HEX,
     _COR_TEXTO_SOBRE_DESTAQUE,
     _ROTULO_MOMENTO,
+    TITULO_MATRIZ,
     CabecalhoDocumento,
     RodapeDocumento,
     montar_documento,
@@ -519,3 +520,65 @@ def test_docx_mostra_hifen_no_nome_do_ghe_com_nul(tmp_path: Path) -> None:
 
     texto = "\n".join(par.text for par in DocxDocument(str(destino)).paragraphs)
     assert "ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA" in texto
+
+
+# DT-(sessão claude/keen-curie-xdm7kb)-03, forma do documento: título do RQ.61 e
+# código do GHE uma vez só (T65: "GHE GHE-01 GHE 01 - ENGENHARIA/PRODUÇÃO").
+
+_VOCAB_CLINICO = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+
+
+def _documento_t65(tipo: str = "Atualização") -> object:
+    matriz = MatrizGHE(
+        ghe_id="GHE-01",
+        nome_ghe="GHE 01 - ENGENHARIA/PRODUÇÃO",
+        linhas=[_exame("exame_clinico")],
+        cargos=("Engenheiro Civil",),
+    )
+    cabecalho = CabecalhoDocumento("E", "O", tipo, "01/10/2026", "Dra. Teste", "CRM-GO 0000")
+    return montar_documento([matriz], _VOCAB_CLINICO, cabecalho, _rodape())
+
+
+def test_html_tem_titulo_rq61_e_tipo_em_linha_propria() -> None:
+    # Reversões que matam: (1) tirar o <h1> do TITULO_MATRIZ — a matriz volta a
+    # sair sem o título do formulário; (2) imprimir o tipo cru, sem o rótulo
+    # "Tipo:" — o texto digitado volta a parecer título.
+    saida = renderizar_html(_documento_t65())  # type: ignore[arg-type]
+
+    assert f"<h1>{TITULO_MATRIZ}</h1>" in saida
+    assert "<p>Tipo: Atualização</p>" in saida
+
+
+def test_docx_titulo_e_o_do_rq61_nao_o_tipo_digitado(tmp_path: Path) -> None:
+    # Reversões que matam: (1) `add_run(c.tipo_documento)` no título — volta a
+    # sair "Atualização" (ou o que for digitado) como título; (2) tirar a linha
+    # "Tipo:" — o tipo some do documento.
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(_documento_t65(), destino)  # type: ignore[arg-type]
+
+    textos = [p.text for p in DocxDocument(str(destino)).paragraphs]
+    assert textos[0] == TITULO_MATRIZ
+    assert "Tipo: Atualização" in textos
+
+
+def test_tipo_vazio_nao_gera_linha_sem_valor(tmp_path: Path) -> None:
+    # Reversão que mata: emitir "Tipo:" sem a condição — linha rótulo-sem-valor
+    # no HTML e no Word quando o campo fica em branco.
+    destino = tmp_path / "matriz.docx"
+    documento = _documento_t65(tipo="  ")
+    renderizar_docx(documento, destino)  # type: ignore[arg-type]
+
+    assert "Tipo:" not in renderizar_html(documento)  # type: ignore[arg-type]
+    assert not any(p.text.startswith("Tipo:") for p in DocxDocument(str(destino)).paragraphs)
+
+
+def test_cabecalho_do_ghe_nao_repete_o_codigo(tmp_path: Path) -> None:
+    # Reversão que mata: voltar a `f"GHE {ghe_id} {nome_ghe}"` no HTML ou no
+    # Word — sai "GHE GHE-01 GHE 01 - ENGENHARIA/PRODUÇÃO".
+    documento = _documento_t65()
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(documento, destino)  # type: ignore[arg-type]
+
+    assert "<h2>GHE-01 — ENGENHARIA/PRODUÇÃO</h2>" in renderizar_html(documento)  # type: ignore[arg-type]
+    cabecalhos = [p.text for p in DocxDocument(str(destino)).paragraphs if p.style.name == "Heading 2"]
+    assert cabecalhos == ["GHE-01 — ENGENHARIA/PRODUÇÃO"]
