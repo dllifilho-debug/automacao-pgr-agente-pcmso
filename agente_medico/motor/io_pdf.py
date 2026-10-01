@@ -3,11 +3,12 @@ from __future__ import annotations
 import logging
 import math
 import os
+import json
+import subprocess
+import sys
 from collections.abc import Iterator
-from concurrent.futures import ProcessPoolExecutor
-from concurrent.futures.process import BrokenProcessPool
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from multiprocessing import get_context
 from pathlib import Path
 
 import pdfplumber
@@ -20,6 +21,8 @@ _log = logging.getLogger(__name__)
 # Abaixo disso, subir processos custa mais que ler em série.
 _MIN_PAGINAS_PARALELO = 16
 _MAX_PROCESSOS_PADRAO = 4
+# Raiz do repositório: cwd do subprocesso, para `-m agente_medico...` resolver.
+_RAIZ = Path(__file__).resolve().parents[2]
 
 
 def paginas_liberadas(caminho: Path) -> Iterator[Page]:
@@ -88,11 +91,36 @@ def ler_pdf(caminho: Path, processos: int | None = None) -> tuple[PaginaLida, ..
 
     faixas = _faixas(total, n)
     try:
-        # spawn: o mesmo comportamento no Linux do deploy e no Windows local,
-        # sem herdar threads do Streamlit num fork.
-        with ProcessPoolExecutor(max_workers=n, mp_context=get_context("spawn")) as pool:
-            partes = list(pool.map(ler_faixa, [caminho] * len(faixas), *zip(*faixas)))
-    except (BrokenProcessPool, OSError) as e:
+        with ThreadPoolExecutor(max_workers=n) as pool:
+            partes = list(pool.map(lambda f: _ler_faixa_em_subprocesso(caminho, *f), faixas))
+    except (subprocess.CalledProcessError, OSError, ValueError) as e:
         _log.warning("Leitura paralela de %s falhou (%s); lendo em série.", caminho, e)
         return tuple(ler_faixa(caminho, 0, total))
     return tuple(p for parte in partes for p in parte)
+
+
+def _ler_faixa_em_subprocesso(caminho: Path, inicio: int, fim: int) -> list[PaginaLida]:
+    # Subprocesso próprio, não multiprocessing: o `spawn` reimporta o módulo
+    # principal de quem chama, e sob `streamlit run` esse módulo é o script do
+    # app — cada filho reexecutava a página e o pool quebrava [MEDIDO —
+    # 01/10/2026, RuntimeError de bootstrapping em `streamlit run`].
+    saida = subprocess.run(
+        [sys.executable, "-m", "agente_medico.motor.io_pdf", str(Path(caminho).resolve()), str(inicio), str(fim)],
+        cwd=_RAIZ,
+        capture_output=True,
+        check=True,
+    )
+    return [
+        PaginaLida(texto, tuple((t, x0, top) for t, x0, top in palavras))
+        for texto, palavras in json.loads(saida.stdout)
+    ]
+
+
+if __name__ == "__main__":
+    _caminho, _inicio, _fim = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+    # JSON de tipos simples: a classe deste módulo, rodando como __main__, não
+    # seria a mesma do processo que lê a saída. float sai em repr, ida e volta exata.
+    json.dump(
+        [[p.texto, [list(w) for w in p.palavras]] for p in ler_faixa(Path(_caminho), _inicio, _fim)],
+        sys.stdout,
+    )

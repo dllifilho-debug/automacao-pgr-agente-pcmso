@@ -761,9 +761,20 @@ agentes:
     # petróleo hidrotratados leves: Grupo 3 (não classificável)].
     tipo_ibe: null
     cas: "64742-47-8"
+    # Mesma substância comercial (aguarrás / white spirit) com outro CAS: nafta pesada
+    # hidrodessulfurizada, "white spirit type 1" [DERIVADO — ESIG, Definition of White
+    # Spirit (REACH); ECHA]. [MEDIDO — FISPQ fispq-quim-sol-alif-aguarras-mineral.pdf,
+    # seção 3: "Nafta hidrodessulfurizada pesada 0 - 100 64742-82-1"]. O querosene da mesma
+    # FISPQ (8008-20-6) é outra substância e não entra aqui.
+    cas_adicionais: ["64742-82-1"]
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # [MEDIDO — PGR(ADENDO) CMO Aurora Lago das Rosas 27.08.26, GHE 18 PINTURA; "Aguarrás"
+    # também no PGR CMO Vistamerica 2026-07-28]. O segundo termo é o nome químico do CAS
+    # 64742-47-8 ("distillates (petroleum), hydrotreated light"). DT-(sessão
+    # claude/keen-curie-xdm7kb)-01.
+    termos: ["Aguarrás", "Destilados de Petróleo levemente tratados com hidrogênio"]
   # 2ª leva de DT-003M-02(A), mesma sessão (branch `docs/003fh-fds-por-cargo`) — 11 FDS
   # reais por-cargo do acervo (fds_originais/, commit 96a15e9), dedup por hash reduz a
   # 8 documentos distintos: Adesivo PVC Tigre (Almoxarife/Encanador/Montador — MESMA

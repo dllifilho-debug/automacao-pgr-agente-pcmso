@@ -4,6 +4,8 @@ separados, com texto e palavras idênticos aos de `extrair_texto_pgr` e
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -72,17 +74,43 @@ def test_ler_faixa_libera_pagina_durante_a_leitura(monkeypatch: pytest.MonkeyPat
     _assert_liberacao_durante_extracao(eventos, n_paginas)
 
 
-def test_pool_quebrado_cai_para_leitura_em_serie(
+def test_subprocesso_que_falha_cai_para_leitura_em_serie(
     monkeypatch: pytest.MonkeyPatch, leitura_viverde_paralela: tuple[PaginaLida, ...]
 ) -> None:
-    # Reversão que mata: tirar o `except (BrokenProcessPool, OSError)` de ler_pdf —
-    # a falha do pool sobe e o PGR não é lido.
-    class _PoolQuebrado:
-        def __init__(self, *a: Any, **k: Any) -> None:
-            raise OSError("sem processos (teste)")
+    # Reversão que mata: tirar o `except` de ler_pdf — a falha de um
+    # subprocesso sobe e o PGR não é lido.
+    def _falha(*a: Any, **k: Any) -> Any:
+        raise subprocess.CalledProcessError(1, "io_pdf")
 
-    monkeypatch.setattr(io_pdf, "ProcessPoolExecutor", _PoolQuebrado)
+    monkeypatch.setattr(io_pdf.subprocess, "run", _falha)
     assert ler_pdf(_VIVERDE, processos=2) == leitura_viverde_paralela
+
+
+def test_paralelo_funciona_com_script_principal_sem_guarda(tmp_path: Path) -> None:
+    # Situação do `streamlit run`: o módulo principal é o script do app, que
+    # chama ler_pdf ao ser executado, sem `if __name__ == "__main__"`. Reversão
+    # que mata: voltar a ProcessPoolExecutor com spawn — o filho reexecuta o
+    # script, o pool quebra e a leitura cai em série (o aviso aparece).
+    script = tmp_path / "app.py"
+    script.write_text(
+        "import logging, sys\n"
+        "from pathlib import Path\n"
+        "from agente_medico.motor.io_pdf import ler_pdf\n"
+        "avisos = []\n"
+        "class H(logging.Handler):\n"
+        "    def emit(self, r): avisos.append(r.getMessage())\n"
+        "logging.getLogger('agente_medico.motor.io_pdf').addHandler(H())\n"
+        f"lidas = ler_pdf(Path({str(_VIVERDE.resolve())!r}), processos=2)\n"
+        "print(len(lidas), len(avisos))\n",
+        encoding="utf-8",
+    )
+    raiz = Path(__file__).resolve().parents[2]
+    saida = subprocess.run(
+        [sys.executable, str(script)], cwd=raiz, capture_output=True, text=True, timeout=600,
+        env={"PYTHONPATH": str(raiz), "PATH": "/usr/bin:/bin"},
+    )
+    paginas, avisos = saida.stdout.split()
+    assert (int(avisos), int(paginas)) == (0, len(extrair_texto_pgr(_VIVERDE)))
 
 
 @pytest.mark.parametrize("valor", ["0", "dois"])

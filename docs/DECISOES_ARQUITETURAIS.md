@@ -1745,6 +1745,8 @@ escore, onde o padrão S·P·NÍVEL casaria falsos níveis. Nenhuma cláusula al
 
 [NOTA (branch `ccr-983f0b9f-zkz16m`, 01/10/2026) — Parte 1, leitura única e paralela do PDF. `io_pdf.ler_pdf` abre cada página uma vez e entrega texto (`extract_text`) e palavras (`extract_words`) do mesmo layout, por faixas de páginas em processos separados (`spawn`; duas faixas por processo). Cada processo aplica `GerenciadorComGlifos` (D-ARQ-89 cl.1) e `close()` por página (003.ET). Pool falhou (`BrokenProcessPool`/`OSError`) → leitura em série; abaixo de 16 páginas, em série. Nº de processos: `PCMSO_PDF_PROCESSOS`, lido no adaptador (`orquestracao_pgr.processos_leitura_pdf`, D-ARQ-47/48 — o motor não lê ambiente), senão min(4, CPUs). `preparar_pgr_hidratado` lê uma vez e passa a leitura a `preparar_ghes`, ao parser determinístico (`parsear_leitura`) e ao sinal psicossocial — eram três leituras completas (2× texto, 1× palavras). `extrair_texto_pgr` e `parsear_arquivo` ficam, inalteradas, para quem as chama isoladas. [MEDIDO — 01/10/2026, 4 CPUs]: texto e palavras idênticos aos atuais em T65, Fascino, Aurora e Viverde; `preparar_pgr_hidratado` no Fascino 73,7 s → 10,2 s com PGR hidratado e pendências idênticos (sha256 de `repr((pgr, pend))` igual em `main` e na branch); T65 até a transcrição 37,5 s → 6,9 s; RSS máximo por processo filho 152 MB. Testes: `test_leitura_pdf.py`, 7, varredura inversa 10/10.]
 
+[NOTA (branch `ccr-983f0b9f-zkz16m`, 01/10/2026) — correção da nota anterior: o paralelismo por `ProcessPoolExecutor` com `spawn` **não funcionava sob `streamlit run`**. O `spawn` reimporta o módulo principal de quem chama, e no Streamlit esse módulo é o script do app: cada filho reexecutava a página, chamava `ler_pdf` no próprio bootstrapping e o pool quebrava (`RuntimeError`), caindo sempre na leitura em série com 4 processos inúteis. Os testes não pegaram porque sob pytest o módulo principal não executa nada ao ser importado; a medição da nota anterior foi feita fora do Streamlit. [MEDIDO — `streamlit run` real + Chromium headless, Viverde]: 11,4 s com aviso de fallback → 4,6 s sem aviso nem traceback. Correção: cada faixa roda em `python -m agente_medico.motor.io_pdf` (cwd na raiz), saída em JSON de tipos simples; o `ThreadPoolExecutor` só espera os subprocessos. Teste com script principal sem guarda (a situação do Streamlit); reversão ao `spawn` o deixa vermelho. Fascino, `preparar_pgr_hidratado`: PGR hidratado e pendências com o mesmo sha256 de antes do PR #417.]
+
 ## D-ARQ-51 — Hidratação GHEVerbatim → tipos.PGR: consumidor de produção do resolver termo→slug; id posicional, agente tri-estado→Optional, None-agente não-bloqueante
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO por fatias. 1a (contrato de tipo) materializada em 003.BQ; 1b (`hidratar_ghe`) e o parse de quantificação são fatias futuras. Autorização para virar D-ARQ do Diovanni (003.BQ).
@@ -4561,6 +4563,16 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
   anexa). A comparação dos 3 pares determinísticos e do Aurora com a `main` no app não foi rodada
   `[A MEDIR]`.
 
+- **Nota (branch `ccr-983f0b9f-zkz16m`, 01/10/2026) — critério "aguarrás → 18" FECHADO.**
+  `DT-(sessão claude/keen-curie-xdm7kb)-01` resolvida pela opção (a), vocabulário: `aguarras_mineral` ganha os
+  termos do PGR Aurora ("Aguarrás", "Destilados de Petróleo levemente tratados com hidrogênio" — o 2º é o nome
+  do CAS 64742-47-8) e `cas_adicionais: ["64742-82-1"]` (nafta pesada hidrodessulfurizada, *white spirit type
+  1*, ESIG/ECHA). `construir_indice_cas` (D-ARQ-36) passa a indexar `cas_adicionais` com a mesma checagem de
+  colisão. Querosene (8008-20-6) fica sem agente: outra substância. Medido com o instrumento da nota anterior
+  (texto de cada bloco do PGR × composição da FISPQ): a FISPQ sugere só o GHE 18 PINTURA. Nenhum exame muda
+  (aguarrás sem IBE nem LT). Seguem do critério: FDS CARPINTEIRO (`DT-…-02`) e a medição no app, que pede o
+  Gemini e é do Diovanni.
+
 ---
 
 ## Histórico de revisões
@@ -4799,3 +4811,4 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
 | v230 | 30/09/2026 | Branch `claude/exciting-ramanujan-g9bbl4` (ARQUITETURA — ratificação, docs-only): **`D-ARQ-90` CRIADA e RATIFICADA** (Q1–Q5) — sugestão de vínculo FDS↔GHE por agente em comum (CAS→slug da FDS × riscos resolvidos do GHE), sem ler nome de arquivo nem cargo, sem limiar, nunca pré-marcada; aviso não bloqueante para FDS sem casamento; preserva D-ARQ-49 Parte 2 (produto só nasce do anexo do RT). Sem código. Decisões 89 → **90**. |
 | v231 | 30/09/2026 | Branch `claude/keen-curie-xdm7kb` (IMPLEMENTAÇÃO — fatia 1 de `D-ARQ-90`): **nota de aplicação em `D-ARQ-90`** (mesma ID, cláusulas inalteradas) — `sugerir_ghes` e tela; precisões decididas pelo Diovanni: "Marcar" só o topo (cl.3) e aviso próprio para lacuna de vocabulário (cl.4). Critério de aceite **não fechado**: aguarrás e FDS CARPINTEIRO divergem (DTs novas em `PENDENCIAS_CLINICAS.md`). Decisões seguem em **90**. |
 | v232 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO — desempenho, decisão do Diovanni): **nota de aplicação em `D-ARQ-50`** (Parte 1, mesma ID, cláusulas inalteradas) — leitura única e paralela do PDF (`io_pdf.ler_pdf`); `preparar_pgr_hidratado` passa de três leituras completas a uma; texto, palavras e PGR hidratado idênticos aos atuais. |
+| v233 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO): **nota de correção em `D-ARQ-50`** — paralelismo da leitura por subprocesso dedicado (o `spawn` quebrava sob `streamlit run`, medido); **nota em `D-ARQ-90`** — critério "aguarrás → 18" fechado (`DT-(sessão claude/keen-curie-xdm7kb)-01`), `cas_adicionais` no índice de CAS (D-ARQ-36). |
