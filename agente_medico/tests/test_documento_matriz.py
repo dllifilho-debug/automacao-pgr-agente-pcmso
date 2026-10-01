@@ -610,3 +610,29 @@ def test_rodape_em_branco_mantem_o_rotulo() -> None:
         "Médico(a) Responsável pela validação:",
         "Data do PGR:",
     )
+
+
+@pytest.mark.parametrize(
+    "medico,crm,esperado",
+    [
+        ("DRA. PATRÍCIA", "14949", "Médico(a) Coordenador(a) do PCMSO: DRA. PATRÍCIA — CRM 14949"),
+        ("DRA. PATRÍCIA", "CRM-GO 14.949", "Médico(a) Coordenador(a) do PCMSO: DRA. PATRÍCIA — CRM-GO 14.949"),
+        ("", "", "Médico(a) Coordenador(a) do PCMSO:"),
+    ],
+)
+def test_linha_do_coordenador_tem_rotulo_e_crm(medico: str, crm: str, esperado: str) -> None:
+    # DT-(sessão claude/keen-curie-xdm7kb)-03, cabeçalho. Reversões que matam: (1) tirar
+    # o rótulo — volta "DRA. X | 14949" (T65 em produção); (2) prefixar "CRM" sempre —
+    # o 2º caso vira "CRM CRM-GO"; (3) não prefixar — o 1º sai com o número solto.
+    assert CabecalhoDocumento("E", "O", "", "", medico, crm).linha_coordenador() == esperado
+
+
+def test_html_e_word_usam_a_linha_do_coordenador(tmp_path: Path) -> None:
+    # Reversão que mata: voltar a f"{medico} | {crm}" no HTML ou no Word.
+    documento = _documento_t65()
+    destino = tmp_path / "matriz.docx"
+    renderizar_docx(documento, destino)  # type: ignore[arg-type]
+
+    linha = "Médico(a) Coordenador(a) do PCMSO: Dra. Teste — CRM-GO 0000"
+    assert f"<p>{linha}</p>" in renderizar_html(documento)  # type: ignore[arg-type]
+    assert linha in [p.text for p in DocxDocument(str(destino)).paragraphs]

@@ -109,6 +109,11 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[MEDIDO — 01/10/2026, rótulo do coordenador]`:** branch `claude/clever-hopper-er6xqi` sobre `main 4a63d04`
+(merge do PR #424) · **1601 passed, 6 skipped, 0 failed** *(MEDIDO em `1471900`, árvore parada, 813,85 s — 1597 + 4)* ·
+`mypy --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v120 e DECISOES v236 inalterados. `medir_painel` (sem
+`--suite`): `regras 34/49`, `cas 78/111`, `índice sincronizado` — inalterados. Três números clínicos: não re-tirados.
+
 **Baseline `[MEDIDO — 01/10/2026, rodapé do RQ.61]`:** branch `claude/clever-hopper-er6xqi` sobre `main 4e44420` (merge
 do PR #423) · **1597 passed, 6 skipped, 0 failed** *(MEDIDO em `3674106`, árvore parada, 769,89 s — 1595 + 2)* · `mypy
 --strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v120 e DECISOES v236 inalterados. `medir_painel` (sem

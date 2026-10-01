@@ -11454,3 +11454,24 @@ sincronizado. DECISOES v236 e PROTOCOLO v120 inalterados (rótulo não muda o se
 
 **Pendências.** DT-keen-curie-03: segue ABERTA só com nomes e ordem dos exames (e o rótulo do coordenador no cabeçalho,
 registrado). Nenhuma nova.
+
+## Sessão (branch `claude/clever-hopper-er6xqi`, recriada sobre `main 4a63d04`, pós-merge do PR #424) — 01/10/2026 — T65 conferido no app + rótulo do coordenador (DT-keen-curie-03)
+
+**T65 em produção (matriz e memorial do Diovanni, depois do #424).** Título "MATRIZ FUNÇÃO – EXAMES PCMSO"; 18 cabeçalhos
+"GHE-NN — …" sem repetição; rodapé com os três rótulos (valores em branco); GHE 11 com "Obs.: risco baixo no PGR para
+acetona — incluir menção no PCMSO" ao lado da do MEK — o gabarito escreve "risco baixo no PGR para Acetona e
+Metiletilcetona". Memorial: não reconhecidos 49 → 48; dispensados pelo nível de risco 1 → 2. Extrator de
+`comparar_matriz_gabarito`: os 62 cargos com exames, periodicidades e momentos idênticos aos da rodada da manhã; contra o
+gabarito, só a Avaliação Psicossocial (13 cargos pareados, decidida). A linha "Tipo:" trouxe "MATRIZ DE EXAMES",
+digitado no campo — o campo agora é para o tipo do RQ.61 (Adendo etc.). Fecha os `[A MEDIR]` de forma e acetona.
+
+**Commit `1471900`.** `CabecalhoDocumento.linha_coordenador()`; HTML e Word emitem por ela. 4 testes (3 parametrizados +
+1 de emissão); varredura inversa 5/5.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos (código de saída 0 conferido). Suíte completa, árvore
+parada em `1471900`: **1601 passed, 6 skipped, 0 failed** (813,85 s), 1597 + 4. `medir_painel`: `regras 34/49`, `cas
+78/111`, índice sincronizado. DECISOES v236 e PROTOCOLO v120 inalterados.
+
+**Três números clínicos.** Não re-tirados.
+
+**Pendências.** DT-keen-curie-03 segue ABERTA só com nomes e ordem dos exames. Nenhuma nova.
