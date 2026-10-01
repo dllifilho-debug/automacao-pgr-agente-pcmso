@@ -3699,7 +3699,7 @@ mínimo normativo. Efeito nos 3 pares: a Psicossocial sai de 3/4/17 GHEs (Fascin
 74 cargos). Pesquisa externa: páginas oficiais (Gov.br, ANAMT, Cofen) bloqueadas pela rede do ambiente; o manual
 GRO/PGR e as Perguntas e Respostas do MTE (2026) não foram lidos no texto integral `[A MEDIR]`.
 
-### DT-(sessão `claude/keen-curie-xdm7kb`)-01 — Aguarrás do Aurora não casa com o GHE 18: termo do PGR e CAS da FISPQ fora do vocabulário `[ABERTA — bloqueia o aceite da D-ARQ-90 fatia 1; decisão do Diovanni]`
+### DT-(sessão `claude/keen-curie-xdm7kb`)-01 — Aguarrás do Aurora não casa com o GHE 18: termo do PGR e CAS da FISPQ fora do vocabulário `[RESOLVIDA — opção (a), vocabulário; branch ccr-983f0b9f-zkz16m, 01/10/2026]`
 
 **Origem.** Critério de aceite da `D-ARQ-90` fatia 1: "Fundo Zarcão e aguarrás → 18". Medido em 30/09/2026
 (aproximação determinística, ver nota de aplicação na D-ARQ-90): a aguarrás recebe o aviso da cl.4 em vez de
@@ -3719,7 +3719,13 @@ slug novo ou mudança de `construir_indice_cas`; fonte a conferir (identidade qu
 (b) Fatia 2 da `D-ARQ-90` (fonte geradora como segundo sinal), cuja condição de entrada — "a sobreposição
 por agente deixa de fora vínculos reais" — este caso cumpre.
 
-**Status:** ABERTA — decisão do Diovanni.
+**Status:** RESOLVIDA (01/10/2026, decisão do Diovanni: seguir pela opção (a)). `aguarras_mineral` ganha os termos
+"Aguarrás" e "Destilados de Petróleo levemente tratados com hidrogênio" (nome do CAS 64742-47-8) e
+`cas_adicionais: ["64742-82-1"]` — nafta pesada hidrodessulfurizada, *white spirit type 1* [DERIVADO — ESIG,
+Definition of White Spirit (REACH); ECHA]. Querosene (8008-20-6) fica sem agente: outra substância.
+`construir_indice_cas` indexa `cas_adicionais` com checagem de colisão. Medido: a FISPQ sugere só o GHE 18 PINTURA;
+nenhum exame muda. "Solvente de nafta" (Aurora e Vistamerica 07/26) não entrou: nafta solvente costuma ser aromática,
+outra identidade química. Testes `test_aguarras_vinculo.py`, varredura inversa 6/6.
 
 ### DT-(sessão `claude/keen-curie-xdm7kb`)-02 — FDS sem ingrediente perigoso declarado não abre o vínculo nem o aviso (FDS CARPINTEIRO) `[ABERTA — decisão do Diovanni]`
 
