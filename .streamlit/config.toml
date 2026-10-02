@@ -4,9 +4,19 @@ maxUploadSize = 50
 [client]
 toolbarMode = "minimal"
 
+# Paleta SST: azul-petróleo (primária) + teal (acento). Acabamentos que o
+# tema nativo não cobre ficam em agente_medico/superficie/estilos.py.
 [theme]
-primaryColor = "#084D22"
-backgroundColor = "#F0F2F5"
-secondaryBackgroundColor = "#F7F9FB"
-textColor = "#1A1D23"
-font = "sans serif"
+base = "light"
+primaryColor = "#0F4C5C"
+backgroundColor = "#F5F7FA"
+secondaryBackgroundColor = "#EEF2F5"
+textColor = "#1A2B33"
+linkColor = "#0F4C5C"
+borderColor = "#E3E8EE"
+showWidgetBorder = true
+baseRadius = "0.6rem"
+buttonRadius = "0.5rem"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFontWeights = [700, 600, 600, 600, 600, 600]
