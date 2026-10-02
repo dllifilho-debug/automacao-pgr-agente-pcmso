@@ -70,9 +70,11 @@ def test_fispq_da_aguarras_sugere_o_ghe_da_pintura(proto: Protocolo) -> None:
     assert sugestao.componentes_sem_slug == ()
 
 
-def test_nome_quimico_do_cas_resolve_para_aguarras(proto: Protocolo) -> None:
+def test_nome_quimico_do_cas_resolve_para_destilados_hidrotratados(proto: Protocolo) -> None:
     # "Destilados de petróleo levemente tratados com hidrogênio" é o nome do CAS
-    # 64742-47-8. Reversão que mata: tirar o termo de aguarras_mineral.
+    # 64742-47-8. Desde 03/10/2026 (opção b ajustada) o termo do PGR vai para
+    # `destilados_petroleo_hidrotratados`, sem benzeno a confirmar; o CAS segue na
+    # aguarrás. Reversão que mata: devolver o termo a aguarras_mineral.
     indice = construir_indice_termos(
         proto.vocabulario.agentes, fracoes_sem_agente=proto.vocabulario.fracoes_sem_agente
     )
@@ -94,7 +96,7 @@ def test_nome_quimico_do_cas_resolve_para_aguarras(proto: Protocolo) -> None:
         date(2030, 1, 1),
         True,
     )
-    assert pgr.ghes[0].riscos[0].agente == "aguarras_mineral"
+    assert pgr.ghes[0].riscos[0].agente == "destilados_petroleo_hidrotratados"
 
 
 def test_cas_adicional_que_colide_com_outro_agente_e_erro() -> None:

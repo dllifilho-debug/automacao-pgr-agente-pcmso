@@ -3982,3 +3982,12 @@ mais que o gabarito. PROTOCOLO v125; DECISOES v238.
 número). Recontado: **24 de 46** blocos de pintura com o pacote, reticulócitos e t,t-mucônico sempre juntos (0 e 0).
 Os "21 de 41" acima ficam como registro.
 
+**Nota em `DT-(sessão claude/cool-planck-niq4le)-01` (03/10/2026) — "Querosene hidratado" (WV Maldi) resolvido.** A
+variante não era só do Maldi: "Destilados (Petróleo) leves tratados com hidrogênio." aparece no Fascino GHE 16 (par
+determinístico) e "Destilados (Petróleo)", cortado, no R78 Naturia. Gabaritos com o solvente isolado sem o pacote do
+benzeno (Fascino 08.07.26; WVM 05 24.09.26). As FDS do acervo chamam o CAS 64742-47-8 de aguarrás (Textucril, Fundo
+Zarcão) e nenhuma declara benzeno. Decisão do Diovanni (opção b ajustada): slug `destilados_petroleo_hidrotratados` sem
+CAS, sem exame e sem `contaminantes_a_confirmar`, com as grafias do Aurora/Vistamerica (antes em `aguarras_mineral`), do
+Fascino e do Maldi; o CAS 64742-47-8 fica na aguarrás para a FDS seguir respondendo por ela. "Destilados (Petróleo)" do
+R78 segue sem resolver — o PDF corta o termo e não dá para afirmar a substância `[A MEDIR]`. PROTOCOLO v126.
+

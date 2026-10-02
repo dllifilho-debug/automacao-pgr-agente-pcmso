@@ -800,11 +800,33 @@ agentes:
     # também no PGR CMO Vistamerica 2026-07-28]. O segundo termo é o nome químico do CAS
     # 64742-47-8 ("distillates (petroleum), hydrotreated light"). DT-(sessão
     # claude/keen-curie-xdm7kb)-01.
-    termos: ["Aguarrás", "Destilados de Petróleo levemente tratados com hidrogênio"]
+    # O nome químico "Destilados de Petróleo levemente tratados com hidrogênio" saiu para
+    # `destilados_petroleo_hidrotratados` (03/10/2026); o CAS 64742-47-8 fica aqui, porque as
+    # FDS do acervo o chamam de aguarrás (Textucril: "Aguarrás Mineral"; Fundo Zarcão:
+    # "Destilados ... hidrogênio (Aguarrás)").
+    termos: ["Aguarrás"]
     # R-FDS-07: benzeno como contaminante a confirmar na FDS quando a aguarrás vem do PGR
     # sem a FDS dela no GHE. [MEDIDO — FISPQ fispq-quim-sol-alif-aguarras-mineral.pdf, seção
     # 3: "Benzeno <0,1 71-43-2"]. Base: NR-07 7.5.5.
     contaminantes_a_confirmar: [benzeno]
+  destilados_petroleo_hidrotratados:
+    # Solvente de petróleo nomeado pelo nome químico no PGR, sem dizer "aguarrás". Sem LT no
+    # NR-15 Anexo 11 nem IBE no NR-07 Anexo I — nenhum exame — e SEM contaminantes_a_confirmar:
+    # não alimenta a R-FDS-07 nem a R-PKG-BZ-PRES. Precedente (D-ARQ-22 nível 2): Fascino GHE 16
+    # (gabarito 08.07.26) e WV Maldi GHE 20 (revisão WVM 05 de 24.09.26), solvente isolado,
+    # sem o pacote do benzeno; nenhuma FDS do acervo com 64742-47-8 declara benzeno. cas: null
+    # — o CAS 64742-47-8 fica em `aguarras_mineral`, como as FDS o nomeiam. Decisão do Diovanni,
+    # 03/10/2026 (opção b ajustada). Termos [MEDIDO]: Aurora 27.08.26 e Vistamerica 2026-07-28
+    # (1º), Fascino 15.07.26 (2º), WV Maldi Entreverdes 2026-07-22 (3º).
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    termos:
+      - "Destilados de Petróleo levemente tratados com hidrogênio"
+      - "Destilados (Petróleo) leves tratados com hidrogênio"
+      - "Destilados (Petróleo) leves tratados com hidrogênio (Querosene hidratado)"
   querosene:
     # Solvente de petróleo da pintura. [MEDIDO — PGRs CMO Aurora 27.08.26 GHE 18 e Vistamerica
     # 2026-07-28: "Querosene (petróleo)", BAIXO; Porto Araras I: "Querosene", IRRELEVANTE]. O próprio

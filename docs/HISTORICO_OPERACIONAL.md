@@ -11741,3 +11741,27 @@ contaminante a confirmar (`riscos_com_contaminante_sem_fds` devolve vazio). Fech
 
 **Verificação.** Só HISTORICO; recorte: `tests/test_gerar_indice_darq.py`. Suíte herdada de `b040247` (1631 passed, 6
 skipped) — nenhum `.py`/`.yaml` tocado desde então.
+
+## Sessão (branch `claude/cool-planck-niq4le`, recriada sobre `main 860d3e6`, pós-merge do PR #435) — 03/10/2026 — IMPLEMENTAÇÃO: destilados de petróleo hidrotratados ("Querosene hidratado")
+
+**Origem.** `[A MEDIR]` da DT `-01`: "Destilados (Petróleo) leves tratados com hidrogênio (Querosene hidratado)" (WV Maldi).
+
+**Medido.** A variante aparece também no Fascino GHE 16 ("… hidrogênio.", BAIXO, par determinístico) e, cortada, no R78
+Naturia. Gabaritos com o solvente isolado sem o pacote do benzeno (Fascino 08.07.26; WVM 05 24.09.26). As FDS do acervo
+chamam o CAS 64742-47-8 de aguarrás (Textucril "Aguarrás Mineral"; Fundo Zarcão "Destilados … (Aguarrás)") — a premissa
+"hidrotratado não é aguarrás" que levei à 1ª proposta estava errada na parte comercial; parado e reportado. Nenhuma FDS
+com 64742-47-8 declara benzeno.
+
+**Decisão do Diovanni (opção b ajustada).** Slug `destilados_petroleo_hidrotratados` sem CAS, sem exame e sem
+`contaminantes_a_confirmar`, com as grafias do Aurora/Vistamerica (saem de `aguarras_mineral`), Fascino e Maldi; o CAS
+64742-47-8 fica na aguarrás (mover quebraria o vínculo FDS→aguarrás: PGR "Aguarrás" + FDS 64742-47-8 voltaria a presumir
+benzeno). "Destilados (Petróleo)" do R78 segue sem resolver `[A MEDIR]`. PROTOCOLO v126; nota na DT `-01`.
+
+**Testes.** `test_destilados_hidrotratados.py`, 3 casos; `test_aguarras_vinculo.py` ajustado por decisão; guard do índice
+199 → 202. Varredura inversa 5/5 (cada termo; termos de volta na aguarrás; contaminante no slug; CAS fora da aguarrás).
+
+**Efeito nos 3 pares determinísticos** (matrizes antes × depois): exames, status, observações e pendências idênticos;
+Fascino GHE-16 PINTURA passa a reconhecer o termo (segue PARCIAL por outras lacunas).
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada: **1634 passed, 6
+skipped, 0 failed** (965,72 s), +3 exato sobre 1631. `DECISOES` não tocado.
