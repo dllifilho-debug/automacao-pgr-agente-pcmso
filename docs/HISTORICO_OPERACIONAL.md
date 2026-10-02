@@ -11687,3 +11687,32 @@ para decisão do Diovanni (conflito com a `R-FDS-07`).
 
 **Verificação.** Só docs (PENDENCIAS, HISTORICO); recorte: `tests/test_gerar_indice_darq.py`. Nenhum `.py`/`.yaml` tocado
 desde a suíte de `397a43e` (1626 passed, 6 skipped). `DECISOES` não tocado.
+
+## Sessão (mesma branch, sobre `5e4b9fe`) — 03/10/2026 — IMPLEMENTAÇÃO: pacote do benzeno presumido (`R-PKG-BZ-PRES`, DT `-04`)
+
+**Decisão do Diovanni.** Opção (b) da `DT-(sessão claude/cool-planck-niq4le)-04` — presunção protetiva (D-ARQ-68 cl.5)
+— e, depois da medição nos pares, opção (b′): corte por IRRELEVANTE.
+
+**Implementado.** `Risco.contaminantes_a_confirmar` (hidratado do vocabulário nas três fases do stage 2); helper
+`riscos_com_contaminante_sem_fds` em `predicados.py`, usado pela `R-FDS-07` (refatorada, mesmo comportamento) e pelo
+primitivo novo `benzeno_a_confirmar` (Ausente com solvente sem FDS e sem benzeno; False com benzeno, sem solvente ou com
+todo risco do solvente IRRELEVANTE). `R-PKG-BZ-PRES` `[INTERPRETADO]` com `quando_ausente: {presumir_true:
+[benzeno_a_confirmar]}`: hemograma e reticulócitos 6M adm/per/MR/dem, t,t-mucônico 6M per, clínico 6M per. PROTOCOLO v125;
+DECISOES v238 (nota de aplicação em D-ARQ-68; `INDICE_DARQ` regenerado, `tests/test_gerar_indice_darq.py` 6 passed);
+PENDENCIAS `-04` resolvida, contagem corrigida para **24 de 46** (a varredura também perdia "GHE - NN").
+
+**Medição que mudou a decisão.** Com (b) sem corte, Porto Araras I GHE-14 (querosene IRRELEVANTE) ganhava t,t-mucônico,
+reticulócitos, hemograma 6M e clínico 6M — os gabaritos de 06.07.26 e 24.09.26 não pedem. Parado e reportado; com (b′),
+os 3 pares determinísticos ficaram idênticos ao estado anterior (matrizes antes × depois).
+
+**Testes.** `test_pkg_benzeno_presumido.py`, 5 casos. Ajustados por decisão: `test_contaminante_a_confirmar.py` (o caso
+sem FDS não afirma mais "sem pacote, VÁLIDA") e `test_solventes_petroleo.py` (querosene/nafta só mudam a matriz pela
+`R-PKG-BZ-PRES`). Varredura inversa 13/13 (regra; `quando_ausente`; primitivo False; periodicidade; sem t,t-mucônico; sem
+clínico; status; ignorar FDS; não checar benzeno; Ausente sempre; sem corte IRRELEVANTE; cortar BAIXO também; vocabulário
+da nafta) + deduplicação da `R-FDS-07` após a refatoração.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada: **1631 passed, 6
+skipped, 0 failed** (931,94 s), +5 exato sobre 1626.
+
+**Efeito no Aurora** (sem FDS): GHE 18 com o pacote do benzeno e clínico 6M, como o gabarito, matriz PARCIAL e pendência
+pedindo a FDS `[A MEDIR — app]`.

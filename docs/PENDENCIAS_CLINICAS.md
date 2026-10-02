@@ -3926,7 +3926,7 @@ chumbo nem benzeno — destilados de petróleo 64742-47-8 10-<50%, xileno 5-10%,
 0,1-0,2%) e zircônio, metil etil cetoxima; produto classificado H351 (carcinogenicidade categoria 2). O "6 de 41" entrou
 na recomendação da `-01` (PR #430) — a decisão foi tomada sobre número errado; reaberta como `-04`.
 
-### DT-(sessão `claude/cool-planck-niq4le`)-04 — Pacote do benzeno presumido pelas médicas nas pinturas com solvente de petróleo `[ABERTA — decisão do Diovanni]`
+### DT-(sessão `claude/cool-planck-niq4le`)-04 — Pacote do benzeno presumido pelas médicas nas pinturas com solvente de petróleo `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/cool-planck-niq4le, 03/10/2026: R-PKG-BZ-PRES]`
 
 **Medido (03/10/2026, varredura de texto com padrão tolerante).** Pacote do benzeno (t,t-mucônico + reticulócitos +
 hemograma 6M) em 21 de 41 blocos de pintura das matrizes do acervo. Nos PGRs pareados legíveis:
@@ -3969,3 +3969,16 @@ sem exame — NR-15 Anexo 11 e NR-07 Anexo I não os listam (conferido em `norma
 2026-07-28), "Querosene" (Porto Araras I). Efeito com a FISPQ anexada: querosene "0 - 100" vira pendência bloqueante de
 materialidade (D-ARQ-35), como a nafta. Fora: "Destilados (Petróleo) leves tratados com hidrogênio (Querosene hidratado)"
 (WV Maldi Entreverdes) — variante do nome da aguarrás, não resolve hoje `[A MEDIR]`, item próprio. PROTOCOLO v124.
+
+**Nota em `DT-(sessão claude/cool-planck-niq4le)-04` — decisão e implementação (03/10/2026).** Diovanni escolheu a presunção protetiva (opção b) e, depois da medição em Porto
+Araras I, o corte por IRRELEVANTE (opção b′). `R-PKG-BZ-PRES` `[INTERPRETADO]`: solvente de petróleo com
+`contaminantes_a_confirmar: [benzeno]`, sem a FDS dele e sem benzeno identificado → pacote do benzeno + clínico 6M sob
+presunção (D-ARQ-68 cl.5, nota de aplicação), pendência `predicado_ausente_presumido` por linha, matriz `PARCIAL`. Todo
+risco do solvente IRRELEVANTE → sem presunção (corte da `R-BIO-05` para cancerígeno). Porto Araras I GHE-14 (querosene
+IRRELEVANTE; gabaritos de 06.07.26 e 24.09.26 sem o pacote) seguiu idêntico; com o corte desligado, ganhava 4 linhas a
+mais que o gabarito. PROTOCOLO v125; DECISOES v238.
+
+**Nota em `DT-(sessão claude/cool-planck-niq4le)-04` — correção de contagem (mesma data).** A varredura da DT também perdia o cabeçalho "GHE - NN PINTURA" (hífen antes do
+número). Recontado: **24 de 46** blocos de pintura com o pacote, reticulócitos e t,t-mucônico sempre juntos (0 e 0).
+Os "21 de 41" acima ficam como registro.
+

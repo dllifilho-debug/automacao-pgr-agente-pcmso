@@ -257,6 +257,8 @@ class Risco:
     nivel_risco: Optional[str] = None
     # D-ARQ-88 fatia 2: RiscoPGR.termo na Fase A; None nas Fases B e C.
     termo: Optional[str] = None
+    # R-FDS-07 / R-PKG-BZ-PRES: `contaminantes_a_confirmar` do vocabulário do agente.
+    contaminantes_a_confirmar: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

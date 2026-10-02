@@ -2942,6 +2942,17 @@ agentes.yaml, 003.ED: 1 órfão, eliminado]`
 
 **Base.** Sessão 003.EH. Texto literal do Anexo III conferido no PDF oficial do MTE (Portaria MTP 567/2022). Commit `7dd68e6`, merge `37cdda6` (PR #270).
 
+**Nota de aplicação (branch `claude/cool-planck-niq4le`, 03/10/2026) — 2º caso da cl.5: `R-PKG-BZ-PRES`.**
+Primitivo `benzeno_a_confirmar` declarado em `quando_ausente.presumir_true`. Forma da norma: NR-07 Anexo V
+2.1 delega as substâncias cancerígenas ao "Inventário de Riscos do PGR", e a NR-01 não obriga o inventário
+a listar contaminante de mistura — o PGR declara o solvente (aguarrás, querosene, nafta), não o benzeno
+que a FDS dele pode trazer. Presunção na direção protetiva (benzeno presente), declarada no dado
+(`regras.yaml`), pendência `predicado_ausente_presumido` por linha e matriz `PARCIAL` (alíneas a–d).
+Diferença do caso-âncora: aqui a presunção tem corte por nível — todo risco do solvente IRRELEVANTE não
+presume (mesmo corte da `R-BIO-05` para cancerígeno), medido contra Porto Araras I GHE-14. Com a FDS do
+solvente anexada, o predicado deixa de ser `Ausente` (falso sem benzeno; `R-PKG-BZ` com benzeno).
+Decisão do Diovanni (opção b′ da `DT-(sessão claude/cool-planck-niq4le)-04`).
+
 ## D-ARQ-69 — Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita
 
 **Contexto.** R-ESP-01 era `[VALIDADO]` desde a v2 do protocolo (17/05/2026) e citava "NR-07, item de espirometria" como base normativa. Ao materializá-la em 003.EI, a conferência do Anexo III vigente (Portaria MTP 567/2022, PDF oficial MTE) mostrou divergência nas duas pernas: o gatilho é **poeira mineral** (item 3.1), não "químico respiratório / fumos metálicos"; e a exceção-EPI (3.3) é condicionada a histórico de doença respiratória crônica ou sinais/sintomas, condicionante ausente da redação. Sem a conferência, a sessão ia instalar campo novo (`via_respiratoria`) em `agentes.yaml` e emitir espirometria por solvente — superemissão contra a norma, classe D-ARQ-22. Custo medido do desvio: três reformulações de escopo antes de alguém abrir a norma que a própria regra citava.
@@ -4856,3 +4867,4 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
 | v235 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — tela, decisão do Diovanni): **nota em `D-ARQ-90`** — critério "FDS CARPINTEIRO" fechado (`DT-(sessão claude/keen-curie-xdm7kb)-02`, opção (a)): FDS sem ingrediente declarado e sem pendência ganha aviso próprio e seletor de GHE. Decisões seguem em **90**. |
 | v236 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — forma do documento): **nota em `D-ARQ-73`** — título fixo do RQ.61 ("MATRIZ FUNÇÃO – EXAMES PCMSO"), tipo em linha própria, código do GHE uma vez só (`titulo_ghe`) no emissor e na tela (`DT-(sessão claude/keen-curie-xdm7kb)-03`, fatia 1). Decisões seguem em **90**. |
 | v237 | 01/10/2026 | Branch `claude/clever-hopper-er6xqi` (IMPLEMENTAÇÃO — apresentação, decisão do Diovanni): **nota em `D-ARQ-73`** — ordem e nomes dos exames pela maioria de 32 gabaritos de 2026 (`bloco_exibicao: fim`; indicador biológico antes de Espirometria/RX/avaliações); **nota em `D-ARQ-90`** — FDS da TOCTAO medidas no app (CARPINTEIRO com o aviso próprio). Decisões seguem em **90**. |
+| v238 | 03/10/2026 | Branch `claude/cool-planck-niq4le` (IMPLEMENTAÇÃO, decisão do Diovanni): **nota de aplicação em `D-ARQ-68`** (cl.5, mesma ID, cláusulas inalteradas) — 2º caso de presunção protetiva: `R-PKG-BZ-PRES` (benzeno presumido em solvente de petróleo sem FDS), com corte por IRRELEVANTE. |

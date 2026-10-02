@@ -541,6 +541,36 @@ regras:
     resumo_clinico: "Benzeno na composição de produto (FDS), mesmo em baixa concentração → hemograma e reticulócitos a cada 6 meses em todos os momentos, e ácido trans,trans-mucônico no periódico semestral. Protocolo da coordenação."
     status: VALIDADO
 
+  # R-PKG-BZ-PRES [INTERPRETADO] (D-ARQ-68 cl.5): solvente de petróleo no PGR sem a FDS
+  # dele e sem benzeno identificado → pacote do benzeno sob presunção protetiva, com
+  # pendência ao elaborador e matriz PARCIAL até a FDS responder.
+  - id: R-PKG-BZ-PRES
+    quando: benzeno_a_confirmar
+    quando_ausente: {presumir_true: [benzeno_a_confirmar]}
+    emite:
+      - {exame: hemograma,           periodicidade_meses: 6, momentos: [adm, per, MR, dem]}
+      - {exame: reticulocitos,       periodicidade_meses: 6, momentos: [adm, per, MR, dem]}
+      - {exame: acido_transmuconico, periodicidade_meses: 6, momentos: [per]}
+      - {exame: exame_clinico,       periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-PKG-BZ-PRES [INTERPRETADO]. Presunção protetiva (D-ARQ-68 cl.5): o
+      PGR declara solvente derivado de petróleo (aguarrás, querosene, solvente de nafta —
+      `contaminantes_a_confirmar: [benzeno]`) sem a FDS dele, e o benzeno não foi
+      identificado. Norma: NR-07 Anexo V 2.1 delega ao inventário do PGR as substâncias
+      cancerígenas com CAS, e a NR-01 não obriga o inventário a listar contaminante de
+      mistura; nenhum dispositivo obriga o pacote sem benzeno identificado (NR-15 Anexo 13-A
+      item 2, >=1%; IN MTP 2/2021 Anexo X no campo do regime) — o exame entra pelo NR-07
+      7.5.18. Exames e momentos iguais aos da R-PKG-BZ (IN MTP 2/2021 Anexo X 2.1.3 e 3.1;
+      NR-07 Anexo I Quadro 1); clínico 6M como na R-CLI-05 para o benzeno. Todo risco desses
+      solventes IRRELEVANTE → sem presunção (corte da R-BIO-05 para cancerígeno). Precedente
+      (D-ARQ-22 nível 2), medido em 03/10/2026: pacote do benzeno em 24 de 46 blocos de
+      pintura do acervo; no mesmo PGR CMO Vistamerica 2026-07-28, GHE 24 (aguarrás,
+      destilados, nafta, querosene, thinner; BAIXO) com o pacote e GHE 22 (só tinta) sem;
+      Aurora 27.08.26 GHE 18 (BAIXO) com; Porto Araras I GHE-14 (querosene IRRELEVANTE) sem.
+      Contra: WVM 05 Entreverdes, revisão de 24.09.26 retirou o pacote com o mesmo PGR. Com a
+      FDS anexada, o pacote só sai se ela declarar benzeno (R-PKG-BZ)."
+    resumo_clinico: "Solvente derivado de petróleo (aguarrás, querosene, nafta) no PGR, com risco acima de irrelevante e sem a FDS do produto → pacote do benzeno presumido (hemograma e reticulócitos a cada 6 meses, ácido trans,trans-mucônico e clínico semestrais), até a FDS confirmar ou afastar o benzeno. Decisão interpretada, conferir primeiro."
+    status: INTERPRETADO
+
   # R-BIO-05 [INTERPRETADO] (DT-003EB-02): nas R-BIO-04 do Quadro 1 (IBE/EE),
   # mencao_documental troca o indicador por observação quando todo risco do
   # agente no GHE vem classificado IRRELEVANTE na matriz P×S do PGR. BAIXO

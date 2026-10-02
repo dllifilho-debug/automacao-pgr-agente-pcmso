@@ -94,11 +94,12 @@ def _a_confirmar(matriz: MatrizGHE) -> list[Pendencia]:
     return [p for p in matriz.pendencias if p.regra_origem == "R-FDS-07"]
 
 
-def test_aguarras_sem_fds_pede_a_fds_e_nao_emite_o_pacote(proto: Protocolo) -> None:
+def test_aguarras_sem_fds_pede_a_fds(proto: Protocolo) -> None:
     # Reversões que matam: (1) tirar `contaminantes_a_confirmar` da aguarras_mineral em
     # agentes.yaml; (2) tirar a chamada de _contaminantes_a_confirmar do stage 3;
-    # (3) pendência bloqueante — derruba a matriz de VÁLIDA; (4) disparar para todo
-    # agente sem olhar o vocabulário — o GHE de ruído ganha pendência.
+    # (3) pendência bloqueante; (4) disparar para todo agente sem olhar o
+    # vocabulário — o GHE de ruído ganha pendência. O pacote presumido (DT -04,
+    # 03/10/2026) é coberto em test_pkg_benzeno_presumido.py.
     pgr, _ = _hidratar(proto, ("GHE 18 - PINTURA", (_AGUARRAS,)), ("GHE 01 - ADM", ("Ruído",)))
     pintura, adm = _matrizes(proto, pgr)
 
@@ -106,8 +107,6 @@ def test_aguarras_sem_fds_pede_a_fds_e_nao_emite_o_pacote(proto: Protocolo) -> N
     assert pendencia.tipo == "contaminante_a_confirmar"
     assert not pendencia.bloqueante
     assert "Aguarrás" in pendencia.motivo and "benzeno" in pendencia.motivo
-    assert pintura.status == "VÁLIDA"
-    assert not {"acido_transmuconico", "reticulocitos"} & {e.exame for e in pintura.linhas}
     assert _a_confirmar(adm) == []
 
 

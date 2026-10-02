@@ -77,6 +77,44 @@ def _por_filtro(nome: str, filtro: FiltroRisco) -> None:
     primitivo(nome, riscos=_riscos_por(filtro))(predicado)
 
 
+def riscos_com_contaminante_sem_fds(ctx: GHEContext, contaminante: str) -> tuple[Risco, ...]:
+    """R-FDS-07: riscos cujo agente lista `contaminante` a confirmar, sem o
+    contaminante entre os riscos do GHE e sem FDS anexada que declare o próprio
+    agente. Vazio quando o contaminante já foi identificado."""
+    if any(r.agente == contaminante for r in ctx.riscos):
+        return ()
+    com_fds = {
+        comp.agente
+        for produto in ctx.pgr_ghe.produtos_quimicos
+        if produto.fds is not None
+        for comp in produto.fds.composicao
+        if comp.agente is not None
+    }
+    return tuple(
+        r for r in ctx.riscos if contaminante in r.contaminantes_a_confirmar and r.agente not in com_fds
+    )
+
+
+def _riscos_benzeno_a_confirmar(ctx: GHEContext) -> tuple[Risco, ...]:
+    return riscos_com_contaminante_sem_fds(ctx, "benzeno")
+
+
+@primitivo("benzeno_a_confirmar", riscos=_riscos_benzeno_a_confirmar)
+def _benzeno_a_confirmar(ctx: GHEContext) -> ResultadoPredicado:
+    """R-PKG-BZ-PRES [INTERPRETADO] (D-ARQ-68 cl.5): solvente de petróleo no PGR sem a
+    FDS dele e sem benzeno identificado → Ausente, que a regra presume True. Benzeno
+    identificado → False (o pacote sai pela R-PKG-BZ). Todo risco desses solventes
+    IRRELEVANTE → False: o corte da R-BIO-05 para cancerígeno (Porto Araras I GHE-14,
+    querosene IRRELEVANTE, gabarito sem o pacote)."""
+    pendentes = _riscos_benzeno_a_confirmar(ctx)
+    if not pendentes or all(r.nivel_risco == "IRRELEVANTE" for r in pendentes):
+        return False
+    nomes = ", ".join(dict.fromkeys(r.termo or r.agente for r in pendentes))
+    return Ausente(
+        mensagem=f"benzeno não confirmado — {nomes} sem FDS anexada; a FDS pode declarar benzeno (R-FDS-07)"
+    )
+
+
 @primitivo("todo_trabalhador")
 def _todo_trabalhador(ctx: GHEContext) -> bool:
     """R-CLI-01; NR-07 item 7.5.8 (exame clínico para todo empregado)."""
