@@ -1,5 +1,8 @@
 [server]
 maxUploadSize = 50
+# Serve static/ em app/static/ — só a fonte do tema (sem requisição a terceiros).
+# Arquivos ali são públicos, sem passar pelo gate de login: não pôr dado nenhum.
+enableStaticServing = true
 
 [client]
 toolbarMode = "minimal"
@@ -17,6 +20,15 @@ borderColor = "#E3E8EE"
 showWidgetBorder = true
 baseRadius = "0.6rem"
 buttonRadius = "0.5rem"
-font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+font = "Inter"
+headingFont = "Inter"
 headingFontWeights = [700, 600, 600, 600, 600, 600]
+
+# Inter servida pelo próprio app (static/fonts, licença SIL OFL 1.1 junto), não
+# pelo Google Fonts: o navegador do usuário não envia IP a terceiro (LGPD art. 5º, I).
+# Arquivo variável: um só cobre os pesos 100–900.
+[[theme.fontFaces]]
+family = "Inter"
+url = "app/static/fonts/InterVariable.woff2"
+weight = "100 900"
+style = "normal"

@@ -221,7 +221,7 @@ def test_pagina_matriz_validade_invalida_mostra_erro_e_nao_processa(
 
     def _rota_espia(*args: Any, **kwargs: Any) -> tuple[None, None, tuple[Pendencia, ...], None]:
         chamadas.append(1)
-        return None, None, (), None  # type: ignore[return-value]
+        return None, None, (), None
 
     monkeypatch.setattr(
         "agente_medico.superficie.web_matriz.executar_rota_determinista_cacheada", _rota_espia

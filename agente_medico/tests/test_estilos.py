@@ -58,6 +58,40 @@ def test_entrypoints_aplicam_estilos(monkeypatch: pytest.MonkeyPatch, entrypoint
     assert chamadas
 
 
+def test_css_nao_carrega_nada_de_terceiros() -> None:
+    # Reversão que mata: pôr um `@import url('https://fonts.googleapis.com/...')`
+    # no CSS — reabre a requisição a terceiro que o fontFaces local eliminou.
+    # `xmlns='http://www.w3.org/2000/svg'` dos ícones é namespace, não requisição.
+    css_sem_namespace = re.sub(r"xmlns='[^']*'", "", estilos._css())
+    assert "://" not in css_sem_namespace
+
+
+# Nomes que o frontend monta por template (`stAlertContent${tipo}`,
+# `stBaseButton-${kind}`): no bundle só aparece o prefixo seguido de `${`.
+_PREFIXOS_TEMPLATE = ("stAlertContent", "stBaseButton-")
+
+
+def test_data_testids_do_css_existem_no_streamlit_instalado() -> None:
+    # Reversão que mata: trocar no CSS `stFileUploaderDropzone` por um nome que
+    # o frontend não emite (ex.: `stFileDropzone`) — o seletor deixa de casar
+    # e a dropzone perde o estilo sem erro. Pega renomeação de testid num
+    # upgrade do Streamlit; mudança de ESTRUTURA do DOM (seletores FRÁGIL) não.
+    pasta_js = Path(streamlit.__file__).parent / "static" / "static" / "js"
+    bundle = "".join(js.read_text(encoding="utf-8", errors="ignore") for js in pasta_js.glob("*.js"))
+    usados = set(re.findall(r'data-testid\^?="(st[A-Za-z-]+)"', estilos._css()))
+    assert usados
+
+    def _existe(testid: str) -> bool:
+        prefixo = next((p for p in _PREFIXOS_TEMPLATE if testid.startswith(p)), None)
+        if prefixo is not None:
+            return f"{prefixo}${{" in bundle
+        return any(f"{q}{testid}{q}" in bundle for q in '`"\'')
+
+    ausentes = sorted(t for t in usados if not _existe(t))
+    assert not ausentes, f"data-testid ausentes no Streamlit {streamlit.__version__}: {ausentes}"
+    assert "st-key-" in bundle
+
+
 def _passos(at: AppTest) -> dict[str, str]:
     """Key do container `passo_*` → texto do markdown dentro dele."""
     achados: dict[str, str] = {}
