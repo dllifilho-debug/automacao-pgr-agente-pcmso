@@ -530,7 +530,12 @@ regras:
       hemograma 6M [adm/per/MR/dem] e t,t-mucônico 6M [per] [VALIDADO — R-PKG-BZ].
       reticulócitos: momentos [adm/per/MR/dem] do protocolo; periodicidade 6M
       [DERIVADO — analogia hemograma R-PKG-BZ] (protocolo declara momentos, não periodicidade).
-      Dispara por identidade de agente, agnóstico à fonte (4ª fonte D-ARQ-35) e à materialidade."
+      Dispara por identidade de agente, agnóstico à fonte (4ª fonte D-ARQ-35) e à materialidade.
+      Procedência (02/10/2026): o regime obrigatório tem limiar — NR-07 Anexo V 2.1 (CAS no
+      inventário, mistura >=0,1%) e 4.2.1; NR-15 Anexo 13-A item 2 (>=1%); NR-07 Anexo I
+      Quadro 1 (S-PMA ou t,t-mucônico). Abaixo de 0,1% o pacote é conduta do protocolo pelo
+      NR-07 7.5.18, não obrigação do Anexo V. Sem benzeno identificado não dispara; a FDS
+      faltante vira pendência R-FDS-07."
     resumo_clinico: "Benzeno na composição de produto (FDS), mesmo em baixa concentração → hemograma e reticulócitos a cada 6 meses em todos os momentos, e ácido trans,trans-mucônico no periódico semestral. Protocolo da coordenação."
     status: VALIDADO
 

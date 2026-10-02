@@ -3879,3 +3879,33 @@ Metiletilcetona, Thinner Tolueno e Xileno"; só o octoato falta, sem cadastro po
 isopropilbenzeno. Os `[A MEDIR]` do Aurora acima estão fechados. Divergências restantes na pintura (pacote do benzeno e
 cobalto na urina) são anteriores e não vêm do thinner.
 
+
+### DT-(sessão `claude/cool-planck-niq4le`)-01 — Pacote do benzeno na pintura do Aurora sem a FISPQ da aguarrás `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/cool-planck-niq4le, 02/10/2026: R-FDS-07 + nota de procedência em R-PKG-BZ]`
+
+**Origem.** Aurora 27.08.26, GHE 18 PINTURA, rodado sem FDS (01/10/2026): o gabarito RQ.61 pede t,t-mucônico (PER 6M) e
+reticulócitos (ADM, PER 6M, MRO, DEM); o app não. O PGR não nomeia benzeno — declara aguarrás, destilados de petróleo
+hidrotratados, querosene, solvente de nafta e os componentes do thinner, todos BAIXO `[MEDIDO]`. A FISPQ da aguarrás do
+acervo declara benzeno 71-43-2 "<0,1" `[MEDIDO]`; com ela anexada a `R-PKG-BZ` já emitia o pacote e o GHE 18 batia
+(matriz_11).
+
+**Norma (nível 1, PDFs de `normas/`).** NR-15 Anexo 13-A item 2: benzeno e misturas ≥1%; 2.1 exclui combustíveis. NR-07
+Anexo V 2.1: cancerígeno com CAS no inventário do PGR, mistura ≥0,1%; 4.1.1 exames obrigatórios sem avaliação
+ambiental; 4.2.1 vigilância pela IN 2/1995 e Portaria de Consolidação 5/MS. NR-07 Anexo I Quadro 1: S-PMA ou
+t,t-mucônico. NR-07 7.5.18: exame a critério do médico, relacionado a risco classificado no PGR. Nenhum dos dois cenários
+obriga o pacote: com a FDS ele entra pelo 7.5.18 (conduta do protocolo); sem a FDS e sem benzeno no PGR, não há risco
+classificado que o sustente — mesma leitura do `R-PKG-ASF`.
+
+**Decisão (Diovanni, 02/10/2026).** Não disparar a `R-PKG-BZ` por inferência a partir de "aguarrás/thinner". Criar
+`R-FDS-07`: aguarrás sem a FDS dela e sem benzeno no GHE → pendência não bloqueante ao elaborador (NR-07 7.5.5), na tela
+(conferência) e no memorial. Nota de procedência na `R-PKG-BZ` (abaixo de 0,1% é conduta pelo 7.5.18). No Aurora sem FDS
+a divergência do GHE 18 fica consciente; o que fecha é anexar a FISPQ.
+
+**Fica `[A CONFERIR]`.** IN 2/2021 Anexos IX e X (citada pelo Anexo 13-A, Portaria MTP 806/2022) × IN 2/1995 (citada
+pelo Anexo V 4.2.1 e pelo `R-PKG-ASF`) — a IN 2/2021 não está em `normas/`. Querosene e solvente de nafta do mesmo PGR
+sem slug: fora da `R-FDS-07` até entrarem no vocabulário.
+
+### DT-(sessão `claude/cool-planck-niq4le`)-02 — Reticulócitos sem t,t-mucônico nas pinturas do acervo `[ABERTA — A MEDIR]`
+
+Varredura descartável de texto (02/10/2026) nos blocos de pintura das matrizes de `matrizes_originais/`: t,t-mucônico em 6
+de 41 blocos (CMO recentes e Viverde 05); reticulócitos em cerca de 20, a maioria sem t,t-mucônico. Reticulócitos sem
+benzeno sugere outro motivo (hipótese: zarcão/chumbo na pintura metálica), não medido. Nenhuma regra alterada.

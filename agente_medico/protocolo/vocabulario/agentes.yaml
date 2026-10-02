@@ -801,6 +801,10 @@ agentes:
     # 64742-47-8 ("distillates (petroleum), hydrotreated light"). DT-(sessão
     # claude/keen-curie-xdm7kb)-01.
     termos: ["Aguarrás", "Destilados de Petróleo levemente tratados com hidrogênio"]
+    # R-FDS-07: benzeno como contaminante a confirmar na FDS quando a aguarrás vem do PGR
+    # sem a FDS dela no GHE. [MEDIDO — FISPQ fispq-quim-sol-alif-aguarras-mineral.pdf, seção
+    # 3: "Benzeno <0,1 71-43-2"]. Base: NR-07 7.5.5.
+    contaminantes_a_confirmar: [benzeno]
   # 2ª leva de DT-003M-02(A), mesma sessão (branch `docs/003fh-fds-por-cargo`) — 11 FDS
   # reais por-cargo do acervo (fds_originais/, commit 96a15e9), dedup por hash reduz a
   # 8 documentos distintos: Adesivo PVC Tigre (Almoxarife/Encanador/Montador — MESMA
