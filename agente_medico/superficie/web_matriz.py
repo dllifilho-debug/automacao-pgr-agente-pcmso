@@ -663,6 +663,17 @@ def preparar_composicao_cacheada(
     return resultado
 
 
+# Estado do passo no indicador de etapas → ícone. O mesmo estado vira a key
+# `passo_<n>_<estado>` que estilos.py colore.
+ICONE_PASSO: dict[str, str] = {
+    "concluido": "✅",
+    "bloqueado": "⛔",
+    "ativo": "⬜",
+    "pendente": "⬜",
+    "opcional": "➖",
+}
+
+
 def pagina_matriz() -> None:
     import dataclasses
     import tempfile
@@ -698,6 +709,7 @@ def pagina_matriz() -> None:
         EmissaoFuturaError,
     )
     from agente_medico.superficie.web_matriz import (
+        ICONE_PASSO,
         CacheMatrizes,
         TranscritorGemini,
         _protocolo_padrao,
@@ -731,10 +743,11 @@ def pagina_matriz() -> None:
     # esta ordem é contrato dos testes (file_uploader[0] = PGR, button[0] =
     # Gerar matriz; antes de gerar a matriz, text_input[-1] = validade).
     indicador = st.empty()
-    etapa_pgr = st.container(border=True)
-    etapa_fds = st.container(border=True)
-    etapa_conferencia = st.container()
-    etapa_matriz = st.container()
+    # `key=` só dá a classe CSS `st-key-<key>` usada em estilos.py; não é widget.
+    etapa_pgr = st.container(border=True, key="etapa_pgr")
+    etapa_fds = st.container(border=True, key="etapa_fds")
+    etapa_conferencia = st.container(key="etapa_conferencia")
+    etapa_matriz = st.container(key="etapa_matriz")
     caixa_conferencia: DeltaGenerator | None = None
     caixa_matriz: DeltaGenerator | None = None
     matriz_gerada = False
@@ -1215,7 +1228,7 @@ def pagina_matriz() -> None:
             bloqueio = "nenhuma matriz gerada — veja a etapa 1"
             return
 
-        caixa_conferencia = etapa_conferencia.container(border=True)
+        caixa_conferencia = etapa_conferencia.container(border=True, key="caixa_conferencia")
         caixa_conferencia.subheader("3. Conferência — pendências")
 
         # Elo B: pendências GLOBAIS (D-ARQ-08, prioridade visual) sempre entram
@@ -1270,7 +1283,7 @@ def pagina_matriz() -> None:
             caixa_conferencia.caption(texto_tempo(cache.tempo, cache.chamadas_ia))
 
         matriz_gerada = True
-        caixa_matriz = etapa_matriz.container(border=True)
+        caixa_matriz = etapa_matriz.container(border=True, key="caixa_matriz")
         with caixa_matriz:
             st.subheader("4. Matriz e downloads")
             # Chamada via `st.download_button` dentro de `with coluna`, nunca
@@ -1330,12 +1343,24 @@ def pagina_matriz() -> None:
             etapa_conferencia.caption(f"**3. Conferência — pendências** · {pendente}")
         if caixa_matriz is None:
             etapa_matriz.caption(f"**4. Matriz e downloads** · {pendente}")
-        with indicador.container():
+        # Um estado por passo decide o ícone E a key de cor (`passo_<n>_<estado>`,
+        # estilos.py): fonte única, para a cor nunca contradizer o ícone.
+        estado_1 = "concluido" if matriz_gerada else "bloqueado" if bloqueio else "ativo"
+        estado_seguinte = "concluido" if matriz_gerada else "pendente"
+        with indicador.container(key="indicador_etapas"):
             col_1, col_2, col_3, col_4 = st.columns(4)
-            col_1.markdown(("✅" if matriz_gerada else "⛔" if bloqueio else "⬜") + " **1. PGR e identificação**")
-            col_2.markdown("➖ **2. FDS/FISPQ e medições** (opcional)")
-            col_3.markdown(("✅" if matriz_gerada else "⬜") + " **3. Conferência**")
-            col_4.markdown(("✅" if matriz_gerada else "⬜") + " **4. Matriz e downloads**")
+            col_1.container(key=f"passo_1_{estado_1}").markdown(
+                f"{ICONE_PASSO[estado_1]} **1. PGR e identificação**"
+            )
+            col_2.container(key="passo_2_opcional").markdown(
+                f"{ICONE_PASSO['opcional']} **2. FDS/FISPQ e medições** (opcional)"
+            )
+            col_3.container(key=f"passo_3_{estado_seguinte}").markdown(
+                f"{ICONE_PASSO[estado_seguinte]} **3. Conferência**"
+            )
+            col_4.container(key=f"passo_4_{estado_seguinte}").markdown(
+                f"{ICONE_PASSO[estado_seguinte]} **4. Matriz e downloads**"
+            )
 
 
 if __name__ == "__main__":
