@@ -753,6 +753,25 @@ regras:
     resumo_clinico: "Cobalto no PGR → cobalto na urina, no periódico, a cada 6 meses. Indicador biológico de exposição da NR-07, Anexo I, Quadro 1."
     status: VALIDADO
 
+  # R-BIO-06 [INTERPRETADO]: octoato de cobalto (sal orgânico, fora do Quadro 1) — menção em
+  # IRRELEVANTE/BAIXO pelo mecanismo da R-BIO-05; acima disso, cobalto na urina pelo 7.5.18.
+  - id: R-BIO-06
+    quando: octoato_de_cobalto
+    mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE, BAIXO]}
+    emite:
+      - {exame: cobalto_urina, periodicidade_meses: 6, momentos: [per]}
+    base_normativa: "R-BIO-06 [INTERPRETADO]. NR-07 Anexo I Quadro 1 alcança 'Cobalto e seus
+      compostos inorgânicos' (cobalto na urina, 15 µg/L, NE); o octoato de cobalto é sal
+      orgânico e fica fora do texto literal. O exame entra pelo NR-07 7.5.18 (a critério do
+      médico, relacionado a risco classificado no PGR): o analito mede o cobalto absorvido,
+      qualquer que seja o composto. Precedente (D-ARQ-22 nível 2): 7 matrizes CMO com octoato
+      de cobalto BAIXO/trivial no PGR anotam menção ('incluir no Word do PCMSO'); 6 não pedem
+      o exame (Vistamerica 08.12.25, 28.07.26, 16.09.26; Floramazonia 19.08.26; Vaca Brava
+      16.09.26; Casamerica 16.09.26); Aurora 27.08.26 pede cobalto na urina PER 6M e anota a
+      menção no mesmo cargo — divergência consciente. Acima de BAIXO, sem caso no acervo."
+    resumo_clinico: "Octoato de cobalto (secante de tinta) no PGR → em risco irrelevante ou baixo, só menção no PCMSO; acima disso, cobalto na urina no periódico a cada 6 meses, a critério do médico (NR-07 7.5.18) — o octoato é sal orgânico, fora do Quadro 1."
+    status: INTERPRETADO
+
   - id: R-BIO-04-fenol
     quando: fenol
     mencao_documental: {regra: R-BIO-05, niveis_risco: [IRRELEVANTE, BAIXO], niveis_com_medicao_abaixo_acao: [BAIXO]}

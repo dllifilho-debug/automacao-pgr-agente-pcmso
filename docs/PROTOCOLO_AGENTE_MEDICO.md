@@ -881,6 +881,33 @@ Agente do **Quadro 1 (IBE/EE)** cujo risco o PGR classifica como **IRRELEVANTE**
 - **Precedente (nível 2 da D-ARQ-22):** matrizes vigentes das duas médicas dispensam em BAIXO — Dra. Patrícia: Aurora (27/08), T65 (24/09, *"Incluir no Word do PCMSO risco baixo no PGR para Acetona e Metiletilcetona"*), Porto Araras I e Vila Brasil (24/09); Dra. Carolini: Fascino (08/07). As versões anteriores da Dra. Patrícia (Porto Araras I 06/07, Vila Brasil 26/08), base da decisão de 24/09, foram substituídas pelas de 24/09.
 - **Efeito medido (rota determinística, `comparar_matriz_gabarito`):** superemissão 7→0 (Fascino 08.07), 6→0 (Porto Araras I 24.09), 4→0 (Vila Brasil 24.09); nenhuma subemissão nova contra essas matrizes. Contra as versões substituídas, +6 (Porto Araras I 06.07) e +4 (Vila Brasil 26.08), esperado.
 
+#### R-BIO-06 — Octoato de cobalto: menção em risco baixo, cobalto na urina acima `[INTERPRETADO — prioridade na revisão de saída]`
+**Predicado:** `octoato_de_cobalto` no GHE (termo "Octoato de Cobalto" dos PGRs CMO; CAS 136-52-7 na FDS).
+
+**Consequência:** todo risco do agente IRRELEVANTE ou BAIXO → menção no PCMSO, sem exame (mecanismo
+da `R-BIO-05`). MODERADO ou acima, ou sem nível (risco de FDS, rota sem P×S) → cobalto na urina,
+periódico, 6M.
+
+**Base.** NR-07 Anexo I Quadro 1 alcança "Cobalto e seus compostos **inorgânicos**, incluindo óxidos de
+cobalto, mas não combinados com carbeto de tungstênio" (cobalto na urina, 15 µg/L, NE). O octoato
+(2-etil-hexanoato de cobalto(II), secante de tinta) é sal orgânico: fora do texto literal, por isso
+slug próprio e não alias de `cobalto`. O exame entra pelo NR-07 7.5.18 — o analito mede o cobalto
+absorvido, qualquer que seja o composto. Precedente (D-ARQ-22 nível 2), medido em 03/10/2026: 7
+matrizes CMO com octoato BAIXO/trivial no PGR da pintura anotam a menção ("incluir no Word do PCMSO");
+6 não pedem o exame (Vistamerica 08.12.25, 28.07.26 e 16.09.26; Floramazonia 19.08.26; Vaca Brava
+16.09.26; Casamerica 16.09.26). Aurora 27.08.26 (GHE 18) pede cobalto na urina PER 6M e anota a
+menção no mesmo cargo — contradição interna; divergência consciente. Ramo acima de BAIXO: sem caso no
+acervo.
+
+`[A CONFERIR]`: carcinogenicidade do octoato. IARC Vol.131 (2022) classifica sais solúveis de
+cobalto(II) como 2A; o octoato não foi conferido, e o PGR do Aurora o descreve com "Pode provocar
+câncer" sem FDS legível no acervo. Se a FDS declarar H350, a `R-FDS-03` o trata como cancerígeno e a
+dispensa em BAIXO deixa de valer (mesmo corte de `cancerigeno_com_ibe`) — reabrir com a FDS.
+
+**Origem.** Decisão do Diovanni (03/10/2026, opção B) — substitui "octoato sem cadastro" da sessão
+`claude/tender-fermat-591zah`. Implementado em `regras.yaml` (`R-BIO-06`) e `agentes.yaml`
+(`octoato_de_cobalto`); testes em `test_octoato_de_cobalto.py`.
+
 ---
 
 ## 6. PACOTES POR CARGO / ATIVIDADE
@@ -1260,3 +1287,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v120 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b): **`R-BIO-05` ampliada** (§5.9) — risco BAIXO sem medição também vira menção no PCMSO, fora dos 9 cancerígenos de `cancerigeno_com_ibe`; medição acima do nível de ação emite sempre (NR-07 7.5.12 "b", inclusive em IRRELEVANTE). `[INTERPRETADO]` mantido. Substitui a cl.7 da D-ARQ-86. Fecha a divergência do T65 GHE 11 (MEK). |
 | v121 | 02/10/2026 | Branch `claude/cool-planck-niq4le` (IMPLEMENTAÇÃO, decisão do Diovanni — itens 2 e 3 da reavaliação do benzeno pela norma): **`R-FDS-07` CRIADA** (§4) — aguarrás sem a FDS dela no GHE e sem benzeno identificado → pendência não bloqueante ao elaborador (NR-07 7.5.5), na tela e no memorial; nenhum exame. **Nota de procedência em `R-PKG-BZ`** — abaixo de 0,1% o pacote é conduta pelo 7.5.18, não obrigação do Anexo V; comportamento inalterado. `[A CONFERIR]` IN 2/2021 (Anexo 13-A) × IN 2/1995 (Anexo V 4.2.1). |
 | v122 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 89ffad4` (CORREÇÃO de procedência, sem mudança de comportamento): IN MTP 2/2021 e Portaria de Consolidação MS 5/2017 lidas de `normas/`. **`R-PKG-BZ`**: reticulócitos 6M em adm/per/MR/dem passa de analogia ao hemograma para base literal (IN MTP 2/2021 Anexo X, 2.1.3 e 3.1); IN SSST 2/1995 registrada como revogada (art. 294, V). **`R-PKG-ASF`** e §5.9 (carcinógenos): citação da IN atualizada. Fecha os `[A CONFERIR]` da v121 (IN e vigência da NR-07). |
+| v123 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 35c1d2e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção B): **`R-BIO-06` CRIADA** (§5.9) — octoato de cobalto (slug próprio, CAS 136-52-7): IRRELEVANTE/BAIXO → menção no PCMSO; acima → cobalto na urina PER 6M pelo 7.5.18. `[INTERPRETADO]`. Precedente: 7 matrizes CMO anotam a menção, 6 sem o exame; Aurora diverge (contradição interna). Substitui "octoato sem cadastro". `[A CONFERIR]` carcinogenicidade do octoato. |

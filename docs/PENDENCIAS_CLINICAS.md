@@ -3916,3 +3916,19 @@ reticulócitos só aparecem no regime do benzeno (IN 2/2021 Anexo X; PC 5/MS Ane
 Varredura descartável de texto (02/10/2026) nos blocos de pintura das matrizes de `matrizes_originais/`: t,t-mucônico em 6
 de 41 blocos (CMO recentes e Viverde 05); reticulócitos em cerca de 20, a maioria sem t,t-mucônico. Reticulócitos sem
 benzeno sugere outro motivo (hipótese: zarcão/chumbo na pintura metálica), não medido. Nenhuma regra alterada.
+
+### DT-(sessão `claude/cool-planck-niq4le`)-03 — Cobalto na urina na pintura do Aurora (octoato de cobalto) `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/cool-planck-niq4le, 03/10/2026: R-BIO-06]`
+
+**Origem.** Aurora 27.08.26, GHE 18 PINTURA: o gabarito pede Cobalto na Urina (PER 6M) e, no mesmo cargo, anota o octoato
+de cobalto como risco baixo a mencionar. O PGR declara "Octoato de Cobalto" BAIXO; o termo não resolvia (sem cadastro por
+decisão da sessão `claude/tender-fermat-591zah`).
+
+**Norma.** NR-07 Anexo I Quadro 1: só cobalto e compostos inorgânicos; octoato é sal orgânico → 7.5.18. Mesmo tratado como
+cobalto, BAIXO daria menção pela `R-BIO-05` (cobalto fora de `cancerigeno_com_ibe`).
+
+**Precedente medido.** 7 matrizes CMO com octoato de cobalto: todas anotam a menção; 6 sem o exame; só o Aurora pede.
+
+**Decisão (Diovanni, 03/10/2026, opção B).** Slug próprio `octoato_de_cobalto` e `R-BIO-06` `[INTERPRETADO]`: menção em
+IRRELEVANTE/BAIXO; cobalto na urina PER 6M acima. No Aurora o pedido do exame fica como divergência consciente; a menção
+passa a sair como no gabarito. `[A CONFERIR]`: carcinogenicidade do octoato (IARC Vol.131; H350 na FDS) — reabre se a FDS
+declarar H350.

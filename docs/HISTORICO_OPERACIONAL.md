@@ -11616,3 +11616,29 @@ da IN e o da vigência da NR-07 (conferida pelo Diovanni em 01/10/2026). PROTOCO
 
 **Verificação.** Recorte da suíte (59 arquivos que leem `regras.yaml`, `R-PKG-BZ` ou benzeno): 855 passed, 3 skipped
 (354,03 s). Só `base_normativa` e docs mudaram; `DECISOES` não tocado.
+
+## Sessão (branch `claude/cool-planck-niq4le`, recriada sobre `main 35c1d2e`, pós-merge do PR #431) — 03/10/2026 — IMPLEMENTAÇÃO: octoato de cobalto (`R-BIO-06`)
+
+**Origem.** Divergência restante do Aurora 27.08.26 GHE 18 PINTURA: o gabarito pede Cobalto na Urina PER 6M e, no mesmo
+cargo, anota o octoato de cobalto como risco baixo a mencionar. O PGR declara "Octoato de Cobalto" BAIXO; sem cadastro
+por decisão da sessão `claude/tender-fermat-591zah`.
+
+**Norma e precedente.** NR-07 Anexo I Quadro 1 alcança só cobalto e compostos inorgânicos; o octoato é sal orgânico →
+7.5.18. Medido no acervo (varredura de texto): 7 matrizes CMO com octoato de cobalto no PGR da pintura anotam a menção; 6
+não pedem o exame (Vistamerica 08.12.25, 28.07.26, 16.09.26; Floramazonia 19.08.26; Vaca Brava 16.09.26; Casamerica
+16.09.26); só o Aurora pede.
+
+**Decisão do Diovanni (opção B).** Slug próprio `octoato_de_cobalto` (CAS 136-52-7; o slug normaliza igual ao termo do
+PGR) e `R-BIO-06` `[INTERPRETADO]`: IRRELEVANTE/BAIXO → menção (mecanismo da `R-BIO-05`, sem mudança de motor); acima →
+cobalto na urina PER 6M. PROTOCOLO v123; PENDENCIAS `DT-(sessão claude/cool-planck-niq4le)-03` (resolvida, `[A CONFERIR]`
+carcinogenicidade do octoato). Guard do índice de termos 194 → 195.
+
+**Testes.** `test_octoato_de_cobalto.py`, 3 casos. Varredura inversa 9/9: tirar a regra; tirar `mencao_documental`; tirar
+BAIXO dos níveis; alias em `cobalto` no lugar do slug; periodicidade; momentos; MODERADO nos níveis; status; tirar o CAS.
+A 1ª versão da reversão "alias" quebrava a carga do protocolo (erro, não comportamento) — refeita removendo slug e regra.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada sobre `35c1d2e` com as
+mudanças no working tree: **1624 passed, 6 skipped, 0 failed** (1007,79 s), +3 exato sobre 1621. `DECISOES` não tocado.
+Pares determinísticos: nenhum PGR tem octoato (varredura do acervo) — saída inalterada.
+
+**Efeito no Aurora.** GHE 18 ganha a menção do octoato; cobalto na urina segue divergente por decisão `[A MEDIR — app]`.
