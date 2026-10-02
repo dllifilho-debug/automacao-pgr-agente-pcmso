@@ -791,7 +791,7 @@ agentes:
     # hidrodessulfurizada, "white spirit type 1" [DERIVADO — ESIG, Definition of White
     # Spirit (REACH); ECHA]. [MEDIDO — FISPQ fispq-quim-sol-alif-aguarras-mineral.pdf,
     # seção 3: "Nafta hidrodessulfurizada pesada 0 - 100 64742-82-1"]. O querosene da mesma
-    # FISPQ (8008-20-6) é outra substância e não entra aqui.
+    # FISPQ (8008-20-6) é outra substância: slug `querosene` (03/10/2026).
     cas_adicionais: ["64742-82-1"]
     is_carcinogeno_iarc: false
     tem_lt: false
@@ -804,6 +804,36 @@ agentes:
     # R-FDS-07: benzeno como contaminante a confirmar na FDS quando a aguarrás vem do PGR
     # sem a FDS dela no GHE. [MEDIDO — FISPQ fispq-quim-sol-alif-aguarras-mineral.pdf, seção
     # 3: "Benzeno <0,1 71-43-2"]. Base: NR-07 7.5.5.
+    contaminantes_a_confirmar: [benzeno]
+  querosene:
+    # Solvente de petróleo da pintura. [MEDIDO — PGRs CMO Aurora 27.08.26 GHE 18 e Vistamerica
+    # 2026-07-28: "Querosene (petróleo)", BAIXO; Porto Araras I: "Querosene", IRRELEVANTE]. O próprio
+    # slug cobre "Querosene"; o termo cobre a forma com "(petróleo)". CAS 8008-20-6 [MEDIDO — FISPQ
+    # fispq-quim-sol-alif-aguarras-mineral.pdf, seção 3]. Sem LT no NR-15 Anexo 11 nem IBE no NR-07
+    # Anexo I (conferido em normas/, 03/10/2026) — nenhum exame. is_carcinogeno_iarc=false
+    # [DERIVADO — IARC Monografia Vol.45 (1989), solventes de petróleo: Grupo 3].
+    # R-FDS-07: benzeno a confirmar na FDS (derivado de petróleo; a FISPQ do acervo traz querosene
+    # com benzeno <0,1%). Decisão do Diovanni, 03/10/2026.
+    tipo_ibe: null
+    cas: "8008-20-6"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    termos: ["Querosene (petróleo)"]
+    contaminantes_a_confirmar: [benzeno]
+  solvente_de_nafta:
+    # Solvente de petróleo da pintura. [MEDIDO — PGRs CMO Aurora 27.08.26 GHE 18 e Vistamerica
+    # 2026-07-28: "Solvente de nafta (petróleo)", BAIXO]. cas: null — "nafta (petróleo)" sem FDS
+    # não identifica a substância (há naftas alifáticas e aromáticas com CAS distintos); entra só
+    # pelo termo do PGR. Sem LT nem IBE (normas/, 03/10/2026) — nenhum exame.
+    # is_carcinogeno_iarc=false [DERIVADO — IARC Vol.45 (1989), solventes de petróleo: Grupo 3].
+    # R-FDS-07: benzeno a confirmar na FDS. Decisão do Diovanni, 03/10/2026.
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    termos: ["Solvente de nafta (petróleo)"]
     contaminantes_a_confirmar: [benzeno]
   # 2ª leva de DT-003M-02(A), mesma sessão (branch `docs/003fh-fds-por-cargo`) — 11 FDS
   # reais por-cargo do acervo (fds_originais/, commit 96a15e9), dedup por hash reduz a

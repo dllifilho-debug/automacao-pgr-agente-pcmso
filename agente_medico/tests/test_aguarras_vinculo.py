@@ -36,7 +36,8 @@ def test_fispq_da_aguarras_sugere_o_ghe_da_pintura(proto: Protocolo) -> None:
     # Reversões que matam: (1) tirar "Aguarrás" dos termos de aguarras_mineral — o
     # GHE não declara o agente; (2) tirar "64742-82-1" de cas_adicionais, ou
     # (3) construir_indice_cas ignorar cas_adicionais — a FDS não tem o agente;
-    # (4) pôr o querosene (8008-20-6) como aguarrás — ele deixa de sair sem agente.
+    # (4) tirar o CAS 8008-20-6 do slug `querosene` (03/10/2026) — o querosene da FISPQ
+    # volta a sair sem agente e o GHE perde o vínculo pelo querosene.
     indice = construir_indice_termos(
         proto.vocabulario.agentes, fracoes_sem_agente=proto.vocabulario.fracoes_sem_agente
     )
@@ -45,7 +46,10 @@ def test_fispq_da_aguarras_sugere_o_ghe_da_pintura(proto: Protocolo) -> None:
             GHEVerbatim(
                 nome="GHE 18 - PINTURA",
                 cargos=("Pintor",),
-                riscos=(RiscoVerbatim(agente="Aguarrás", quantificacao="", fonte_geradora="Atividade com pinturas"),),
+                riscos=(
+                    RiscoVerbatim(agente="Aguarrás", quantificacao="", fonte_geradora="Atividade com pinturas"),
+                    RiscoVerbatim(agente="Querosene (petróleo)", quantificacao="", fonte_geradora="Atividade com pintura"),
+                ),
             ),
             GHEVerbatim(
                 nome="GHE 01 - ADMINISTRAÇÃO",
@@ -61,9 +65,9 @@ def test_fispq_da_aguarras_sugere_o_ghe_da_pintura(proto: Protocolo) -> None:
     sugestao = sugerir_ghes(_FISPQ_AGUARRAS, pgr, proto.vocabulario.agentes)
 
     assert [(g.ghe_nome, [a.slug for a in g.agentes]) for g in sugestao.ghes] == [
-        ("GHE 18 - PINTURA", ["aguarras_mineral"])
+        ("GHE 18 - PINTURA", ["aguarras_mineral", "querosene"])
     ]
-    assert sugestao.componentes_sem_slug == ("8008-20-6 | Querosene",)
+    assert sugestao.componentes_sem_slug == ()
 
 
 def test_nome_quimico_do_cas_resolve_para_aguarras(proto: Protocolo) -> None:

@@ -11642,3 +11642,30 @@ mudanças no working tree: **1624 passed, 6 skipped, 0 failed** (1007,79 s), +3 
 Pares determinísticos: nenhum PGR tem octoato (varredura do acervo) — saída inalterada.
 
 **Efeito no Aurora.** GHE 18 ganha a menção do octoato; cobalto na urina segue divergente por decisão `[A MEDIR — app]`.
+
+## Sessão (branch `claude/cool-planck-niq4le`, recriada sobre `main c24f319`, pós-merge do PR #432) — 03/10/2026 — IMPLEMENTAÇÃO: querosene e solvente de nafta (`R-FDS-07` estendida)
+
+**Origem.** Tarefa aberta no PR #430: querosene e solvente de nafta do PGR Aurora GHE 18 sem slug, fora da `R-FDS-07`.
+
+**Medido.** Termos no acervo: "Querosene (petróleo)" e "Solvente de nafta (petróleo)" (CMO Aurora 27.08.26 e Vistamerica
+2026-07-28, BAIXO); "Querosene" (Porto Araras I, IRRELEVANTE). Norma (`normas/`): nenhum dos dois no NR-15 Anexo 11 nem no
+NR-07 Anexo I. CAS do querosene 8008-20-6 (FISPQ de aguarrás do acervo); nafta sem CAS identificável sem FDS.
+
+**Decisão do Diovanni (opção a).** Slugs `querosene` (com CAS) e `solvente_de_nafta` (sem CAS), sem regra de exame, com
+`contaminantes_a_confirmar: [benzeno]`. Com a FISPQ anexada, o querosene "0 - 100" vira materialidade indeterminada
+bloqueante (D-ARQ-35), como a nafta. PROTOCOLO v124; nota na `DT-(sessão claude/cool-planck-niq4le)-01`. Fora: variante
+"Destilados (Petróleo) leves tratados com hidrogênio (Querosene hidratado)" (WV Maldi) `[A MEDIR]`.
+
+**Testes.** `test_solventes_petroleo.py`, 2 casos; varredura inversa 6/6 (contaminante de cada slug, termo de cada slug,
+regra de exame, CAS). A 1ª versão da asserção "sem exame" não matava a reversão "dar regra de exame" — trocada por
+comparação com GHE sem os dois agentes. Ajustes por mudança de premissa do dado: guard do índice 195 → 199;
+`test_aguarras_vinculo.py` (o querosene da FISPQ agora tem slug); fixture "CAS fora do vocabulário" de
+`test_sugestao_vinculo.py` e `test_web_matriz.py` trocada do querosene para 1,2,4-trimetilbenzeno (95-63-6, thinner do
+Aurora) — as 3 falhas da 1ª suíte vinham daí.
+
+**Efeito nos 3 pares determinísticos** (rota offline, matrizes antes × depois): Fascino e Vila Brasil idênticos; Porto
+Araras I só ganha a pendência `R-FDS-07` no GHE-14 — exames e status iguais.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada sobre `c24f319` com as
+mudanças no working tree: 1ª rodada 3 failed (fixtures acima); 2ª **1626 passed, 6 skipped, 0 failed** (936,33 s), +2
+exato sobre 1624. `DECISOES` não tocado.

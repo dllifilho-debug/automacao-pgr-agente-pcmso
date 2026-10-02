@@ -55,9 +55,10 @@ _TOLUENO = ("108-88-3", "Tolueno")
 _XILENO = ("1330-20-7", "Xileno")
 _ASFALTO = ("8052-42-4", "Asfalto")
 _BENZENO = ("71-43-2", "Benzeno")
-# CAS válido fora do vocabulário (querosene da FISPQ de aguarrás do acervo; a nafta
-# da mesma FISPQ passou a ser aguarras_mineral, DT-(sessão claude/keen-curie-xdm7kb)-01).
-_QUEROSENE = ("8008-20-6", "Querosene")
+# CAS válido fora do vocabulário: 1,2,4-trimetilbenzeno, componente do thinner do PGR CMO
+# Aurora 27.08.26 sem slug. Antes era o querosene da FISPQ de aguarrás, cadastrado em
+# 03/10/2026 (`querosene`, R-FDS-07) — a premissa do dado mudou, não o comportamento testado.
+_FORA_DO_VOCAB = ("95-63-6", "1,2,4-Trimetilbenzeno")
 
 
 def test_ghe_com_mais_agentes_em_comum_vem_primeiro() -> None:
@@ -89,11 +90,11 @@ def test_componente_sem_slug_nao_conta_mas_aparece() -> None:
     # só de nafta pareceria sem composição.
     pgr = _pgr(_ghe("GHE-18", "Pintura", "xileno", None))
 
-    sugestao = sugerir_ghes(_fds(_QUEROSENE, ("", "Segredo industrial")), pgr, _AGENTES)
+    sugestao = sugerir_ghes(_fds(_FORA_DO_VOCAB, ("", "Segredo industrial")), pgr, _AGENTES)
 
     assert sugestao.ghes == ()
     assert sugestao.componentes_sem_slug == (
-        "8008-20-6 | Querosene",
+        "95-63-6 | 1,2,4-Trimetilbenzeno",
         "— | Segredo industrial",
     )
 
@@ -174,7 +175,7 @@ def test_fds_sem_agente_do_pgr_ganha_aviso_e_continua_anexavel(monkeypatch: pyte
     # nenhum GHE declara. Reversões que matam: (1) tirar o st.warning do ramo
     # sem casamento; (2) tratar a divergência como bloqueio, escondendo o
     # botão Anexar (cl.4: não bloqueia).
-    at = _pagina(monkeypatch, "fds.pdf", _fds(_QUEROSENE, _BENZENO))
+    at = _pagina(monkeypatch, "fds.pdf", _fds(_FORA_DO_VOCAB, _BENZENO))
 
     assert [w.value for w in at.warning] == [AVISO_SEM_CASAMENTO]
     assert at.button(key="anexar_fds_fds.pdf") is not None
@@ -184,7 +185,7 @@ def test_fds_sem_agente_do_pgr_ganha_aviso_e_continua_anexavel(monkeypatch: pyte
 def test_fds_sem_componente_reconhecido_culpa_o_vocabulario(monkeypatch: pytest.MonkeyPatch) -> None:
     # Reversão que mata: um aviso só para os dois casos — a FDS só de nafta
     # (CAS fora do vocabulário) mandaria o RT conferir o PGR, que não tem culpa.
-    at = _pagina(monkeypatch, "fds.pdf", _fds(_QUEROSENE))
+    at = _pagina(monkeypatch, "fds.pdf", _fds(_FORA_DO_VOCAB))
 
     assert [w.value for w in at.warning] == [AVISO_SEM_COMPONENTE_RECONHECIDO]
     assert at.button(key="anexar_fds_fds.pdf") is not None

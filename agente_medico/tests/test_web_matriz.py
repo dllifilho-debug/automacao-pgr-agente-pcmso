@@ -1057,11 +1057,13 @@ def test_pagina_matriz_anexar_fds_nao_retranscreve_e_sobrevive_a_429(
 # operador visse). Status por FDS, recusa de duplicata, painel com remoção.
 # ---------------------------------------------------------------------------
 
-_FDS_TOLUENO_E_QUEROSENE = BlocoVerbatim(
+_FDS_TOLUENO_E_FORA_DO_VOCAB = BlocoVerbatim(
     faixa="6-10%",
     membros=(
         MembroVerbatim(cas="108-88-3", nome="Tolueno", frases_h=()),
-        MembroVerbatim(cas="8008-20-6", nome="Querosene", frases_h=()),
+        # Fora do vocabulário: 1,2,4-trimetilbenzeno (thinner do Aurora). Era o querosene,
+        # cadastrado em 03/10/2026 (`querosene`, R-FDS-07).
+        MembroVerbatim(cas="95-63-6", nome="1,2,4-Trimetilbenzeno", frases_h=()),
     ),
 )
 
@@ -1095,7 +1097,7 @@ def test_listar_produtos_anexados_mostra_o_agente_que_o_motor_resolveu() -> None
         protocolo,
         "GHE-01",
         "Tinta",
-        montar_fds((_FDS_TOLUENO_E_QUEROSENE,)),
+        montar_fds((_FDS_TOLUENO_E_FORA_DO_VOCAB,)),
     )
     assert cache.pgr_hidratado is not None
 
@@ -1104,7 +1106,7 @@ def test_listar_produtos_anexados_mostra_o_agente_que_o_motor_resolveu() -> None
     assert (produto.ghe_id, produto.ghe_nome, produto.nome) == ("GHE-01", "Pintura", "Tinta")
     assert [(c.cas, c.agente) for c in produto.componentes] == [
         ("108-88-3", "tolueno"),
-        ("8008-20-6", None),
+        ("95-63-6", None),
     ]
 
 

@@ -189,8 +189,8 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 
 ### R-FDS-07 — Contaminante a confirmar na FDS `[DERIVADO — NR-07 7.5.5; FISPQ do acervo]`
 **Predicado:** agente do GHE cujo vocabulário lista `contaminantes_a_confirmar`, sem o contaminante
-entre os riscos do GHE e sem FDS anexada que declare o próprio agente. Hoje um caso:
-`aguarras_mineral` → benzeno.
+entre os riscos do GHE e sem FDS anexada que declare o próprio agente. Hoje três agentes, todos
+→ benzeno: `aguarras_mineral`, `querosene` e `solvente_de_nafta` (os dois últimos desde a v124).
 
 **Consequência:** pendência ao elaborador do PGR, não bloqueante: pedir a FDS e anexá-la. Nenhum
 exame sai da pendência. O pacote do benzeno (`R-PKG-BZ`) só sai com o benzeno identificado no PGR
@@ -201,7 +201,9 @@ os responsáveis pelo PGR. A FISPQ `fispq-quim-sol-alif-aguarras-mineral.pdf` do
 benzeno 71-43-2 "<0,1" `[MEDIDO]`. Sem a FDS, inferir benzeno do nome "aguarrás" seria pedir exame
 para agente não classificado no PGR (7.5.18), fora do campo da NR-07 Anexo V 2.1 (CAS no inventário,
 mistura ≥0,1%) e do NR-15 Anexo 13-A item 2 (mistura ≥1%). Mesma leitura do `R-PKG-ASF`.
-Querosene e solvente de nafta do mesmo PGR não têm slug; ficam fora até entrarem no vocabulário.
+Querosene e solvente de nafta do mesmo PGR entraram no vocabulário na v124: slugs sem exame (sem LT no
+NR-15 Anexo 11, sem IBE no NR-07 Anexo I), só com `contaminantes_a_confirmar`. O querosene tem CAS
+8008-20-6 (FISPQ do acervo); a nafta fica sem CAS (o termo não identifica a substância).
 
 **Origem.** Aurora 27.08.26, GHE 18 PINTURA, rodado sem a FISPQ da aguarrás (01/10/2026): o
 gabarito pede t,t-mucônico e reticulócitos e o app não, em silêncio. Implementado em
@@ -1288,3 +1290,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v121 | 02/10/2026 | Branch `claude/cool-planck-niq4le` (IMPLEMENTAÇÃO, decisão do Diovanni — itens 2 e 3 da reavaliação do benzeno pela norma): **`R-FDS-07` CRIADA** (§4) — aguarrás sem a FDS dela no GHE e sem benzeno identificado → pendência não bloqueante ao elaborador (NR-07 7.5.5), na tela e no memorial; nenhum exame. **Nota de procedência em `R-PKG-BZ`** — abaixo de 0,1% o pacote é conduta pelo 7.5.18, não obrigação do Anexo V; comportamento inalterado. `[A CONFERIR]` IN 2/2021 (Anexo 13-A) × IN 2/1995 (Anexo V 4.2.1). |
 | v122 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 89ffad4` (CORREÇÃO de procedência, sem mudança de comportamento): IN MTP 2/2021 e Portaria de Consolidação MS 5/2017 lidas de `normas/`. **`R-PKG-BZ`**: reticulócitos 6M em adm/per/MR/dem passa de analogia ao hemograma para base literal (IN MTP 2/2021 Anexo X, 2.1.3 e 3.1); IN SSST 2/1995 registrada como revogada (art. 294, V). **`R-PKG-ASF`** e §5.9 (carcinógenos): citação da IN atualizada. Fecha os `[A CONFERIR]` da v121 (IN e vigência da NR-07). |
 | v123 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 35c1d2e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção B): **`R-BIO-06` CRIADA** (§5.9) — octoato de cobalto (slug próprio, CAS 136-52-7): IRRELEVANTE/BAIXO → menção no PCMSO; acima → cobalto na urina PER 6M pelo 7.5.18. `[INTERPRETADO]`. Precedente: 7 matrizes CMO anotam a menção, 6 sem o exame; Aurora diverge (contradição interna). Substitui "octoato sem cadastro". `[A CONFERIR]` carcinogenicidade do octoato. |
+| v124 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main c24f319` (IMPLEMENTAÇÃO, decisão do Diovanni — opção a): **`R-FDS-07` estendida** (§4) — slugs `querosene` (CAS 8008-20-6) e `solvente_de_nafta` (sem CAS), sem regra de exame (sem LT nem IBE), com `contaminantes_a_confirmar: [benzeno]`. Com a FISPQ da aguarrás anexada, o querosene "0 - 100" passa a materialidade indeterminada bloqueante (D-ARQ-35), como a nafta da mesma FISPQ. Pares determinísticos: só Porto Araras I GHE-14 muda (+ pendência R-FDS-07); exames e status iguais. |
