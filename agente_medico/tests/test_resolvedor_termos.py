@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_195_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_199_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -89,7 +89,9 @@ def test_indice_real_tem_195_entradas(indice_real: IndiceTermos) -> None:
     # acetato de etila, etanol), mesma DT.
     # 194 -> 195 (branch `claude/cool-planck-niq4le`, 03/10/2026): +1 slug `octoato_de_cobalto`
     # (R-BIO-06), sem `termos:` — o slug normaliza igual a "Octoato de Cobalto" dos PGRs CMO.
-    assert len(indice_real.slug_por_forma) == 195
+    # 195 -> 199 (mesma branch): +2 slugs `querosene` e `solvente_de_nafta` e +2 termos com
+    # "(petróleo)" dos PGRs CMO Aurora e Vistamerica (R-FDS-07, decisão do Diovanni).
+    assert len(indice_real.slug_por_forma) == 199
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(

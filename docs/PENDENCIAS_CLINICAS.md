@@ -3932,3 +3932,11 @@ cobalto, BAIXO daria menção pela `R-BIO-05` (cobalto fora de `cancerigeno_com_
 IRRELEVANTE/BAIXO; cobalto na urina PER 6M acima. No Aurora o pedido do exame fica como divergência consciente; a menção
 passa a sair como no gabarito. `[A CONFERIR]`: carcinogenicidade do octoato (IARC Vol.131; H350 na FDS) — reabre se a FDS
 declarar H350.
+
+**Nota em `DT-(sessão claude/cool-planck-niq4le)-01` (03/10/2026) — querosene e solvente de nafta cadastrados.** Decisão
+do Diovanni (opção a): slugs `querosene` (CAS 8008-20-6, medido na FISPQ da aguarrás) e `solvente_de_nafta` (sem CAS),
+sem exame — NR-15 Anexo 11 e NR-07 Anexo I não os listam (conferido em `normas/`) —, com `contaminantes_a_confirmar:
+[benzeno]` (`R-FDS-07`). Termos medidos: "Querosene (petróleo)" e "Solvente de nafta (petróleo)" (Aurora, Vistamerica
+2026-07-28), "Querosene" (Porto Araras I). Efeito com a FISPQ anexada: querosene "0 - 100" vira pendência bloqueante de
+materialidade (D-ARQ-35), como a nafta. Fora: "Destilados (Petróleo) leves tratados com hidrogênio (Querosene hidratado)"
+(WV Maldi Entreverdes) — variante do nome da aguarrás, não resolve hoje `[A MEDIR]`, item próprio. PROTOCOLO v124.
