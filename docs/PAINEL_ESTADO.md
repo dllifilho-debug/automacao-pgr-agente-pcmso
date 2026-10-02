@@ -109,6 +109,14 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[03/10/2026, fechamento do chat dos PRs #430–#436]`:** branch `claude/cool-planck-niq4le` sobre `main 13b26b3`
+(merge do PR #436) · **1634 passed, 6 skipped, 0 failed** *(MEDIDO em `c6d99ea` com a árvore parada, 965,72 s)* · `mypy
+--strict` alvo canônico **limpo, 54 arquivos** · PROTOCOLO v126 · DECISOES v238. `medir_painel` (sem `--suite`) em
+`13b26b3`: `regras 36/51 (71%)`, `cas 80/115 (70%)`, `índice sincronizado` — **dois dos três números se moveram** desde
+`53699e7` (34/49 e 78/111: `R-BIO-06`, `R-PKG-BZ-PRES`, slugs novos). Tabela "Os três números": **não re-tirada neste
+fechamento, decisão declarada** — fica como 1º item do próximo chat, junto da divergência painel × instrumento já
+documentada acima.
+
 **Baseline `[01/10/2026, Aurora conferido no app — só docs]`:** branch `claude/clever-hopper-er6xqi` sobre `main 53699e7`
 (merge do PR #428) · suíte **herdada** de `5f045f8`: 1614 passed, 6 skipped, 0 failed (nenhum `.py`/`.yaml` tocado desde
 então); recorte desta entrada: `test_gerar_indice_darq.py` 6 passed · PROTOCOLO v120 e DECISOES v237 inalterados.
