@@ -205,6 +205,12 @@ mistura ≥0,1%) e do NR-15 Anexo 13-A item 2 (mistura ≥1%). Mesma leitura do 
 Querosene e solvente de nafta do mesmo PGR entraram no vocabulário na v124: slugs sem exame (sem LT no
 NR-15 Anexo 11, sem IBE no NR-07 Anexo I), só com `contaminantes_a_confirmar`. O querosene tem CAS
 8008-20-6 (FISPQ do acervo); a nafta fica sem CAS (o termo não identifica a substância).
+Fora da regra, por decisão (v126): `destilados_petroleo_hidrotratados` — o nome químico do destilado
+hidrotratado no PGR ("Destilados (de) Petróleo leve(mente)s tratados com hidrogênio", com ou sem
+"(Querosene hidratado)") é reconhecido sem exame e sem `contaminantes_a_confirmar`. Precedente: Fascino
+GHE 16 (08.07.26) e WV Maldi GHE 20 (revisão de 24.09.26), solvente isolado, sem o pacote do benzeno;
+nenhuma FDS do acervo com 64742-47-8 declara benzeno. O CAS 64742-47-8 segue em `aguarras_mineral`, que
+é como as FDS do acervo o nomeiam (Textucril, Fundo Zarcão).
 
 **Origem.** Aurora 27.08.26, GHE 18 PINTURA, rodado sem a FISPQ da aguarrás (01/10/2026): o
 gabarito pede t,t-mucônico e reticulócitos e o app não, em silêncio. Implementado em
@@ -1316,3 +1322,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v123 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 35c1d2e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção B): **`R-BIO-06` CRIADA** (§5.9) — octoato de cobalto (slug próprio, CAS 136-52-7): IRRELEVANTE/BAIXO → menção no PCMSO; acima → cobalto na urina PER 6M pelo 7.5.18. `[INTERPRETADO]`. Precedente: 7 matrizes CMO anotam a menção, 6 sem o exame; Aurora diverge (contradição interna). Substitui "octoato sem cadastro". `[A CONFERIR]` carcinogenicidade do octoato. |
 | v124 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main c24f319` (IMPLEMENTAÇÃO, decisão do Diovanni — opção a): **`R-FDS-07` estendida** (§4) — slugs `querosene` (CAS 8008-20-6) e `solvente_de_nafta` (sem CAS), sem regra de exame (sem LT nem IBE), com `contaminantes_a_confirmar: [benzeno]`. Com a FISPQ da aguarrás anexada, o querosene "0 - 100" passa a materialidade indeterminada bloqueante (D-ARQ-35), como a nafta da mesma FISPQ. Pares determinísticos: só Porto Araras I GHE-14 muda (+ pendência R-FDS-07); exames e status iguais. |
 | v125 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 55bd73e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b′ da `DT-(sessão claude/cool-planck-niq4le)-04`): **`R-PKG-BZ-PRES` CRIADA** (§6) — solvente de petróleo sem FDS e sem benzeno identificado → pacote do benzeno + clínico 6M sob presunção protetiva (D-ARQ-68 cl.5), matriz `PARCIAL`; IRRELEVANTE não presume. `R-FDS-07` (§4) passa a apontar para ela. Precedente corrigido: 24 de 46 pinturas (a contagem de 02/10 perdia grafias sem acento e cabeçalho "GHE - NN"). |
+| v126 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 860d3e6` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b ajustada): slug `destilados_petroleo_hidrotratados` (sem CAS, sem exame, sem `contaminantes_a_confirmar`) com as grafias de Aurora/Vistamerica, Fascino e WV Maldi ("Querosene hidratado"); o termo do nome químico sai de `aguarras_mineral`, o CAS 64742-47-8 fica nela. Nota em `R-FDS-07` (§4). Pares determinísticos: exames, status e pendências iguais; Fascino GHE-16 passa a reconhecer o termo. |
