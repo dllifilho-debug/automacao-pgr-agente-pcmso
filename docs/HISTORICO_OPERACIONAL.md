@@ -11669,3 +11669,21 @@ Araras I só ganha a pendência `R-FDS-07` no GHE-14 — exames e status iguais.
 **Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada sobre `c24f319` com as
 mudanças no working tree: 1ª rodada 3 failed (fixtures acima); 2ª **1626 passed, 6 skipped, 0 failed** (936,33 s), +2
 exato sobre 1624. `DECISOES` não tocado.
+
+## Sessão (branch `claude/cool-planck-niq4le`, recriada sobre `main 55bd73e`, pós-merge do PR #433) — 03/10/2026 — MEDIÇÃO: reticulócitos nas pinturas (DT `-02`) e correção do instrumento
+
+**Origem.** `DT-(sessão claude/cool-planck-niq4le)-02`: "reticulócitos sem t,t-mucônico" em ~20 pinturas.
+
+**Achado de instrumento.** A varredura de 02/10/2026 usava `muc[oô]nico`; a conversão `.doc → txt` derruba o acento
+("Mucnico", "cido trans-t…"). Refeita com padrão tolerante: t,t-mucônico e reticulócitos juntos em **21 de 41** blocos de
+pintura, nunca separados. O "6 de 41" registrado na entrada de 02/10 (PR #430) está errado — fica no texto, corrigido aqui
+e na PENDENCIAS (D-ARQ-06). FDS do Fundo Zarcão do acervo sem chumbo nem benzeno (hipótese do chumbo descartada); octoato de
+cobalto 136-52-7 medido nela (confirma o CAS da `R-BIO-06`); produto H351.
+
+**Achado clínico.** Nos PGRs pareados, o pacote do benzeno acompanha solvente derivado de petróleo declarado (Vistamerica
+GHE 24 com × GHE 22 sem, mesmo PGR; Aurora GHE 18 com; Fascino GHE 16 e T65 GHE 15 sem), sem benzeno nomeado. WVM 05: a
+revisão de 24.09.26 retirou o pacote que a de 20.07.26 tinha, mesmo PGR. Aberta `DT-(sessão claude/cool-planck-niq4le)-04`
+para decisão do Diovanni (conflito com a `R-FDS-07`).
+
+**Verificação.** Só docs (PENDENCIAS, HISTORICO); recorte: `tests/test_gerar_indice_darq.py`. Nenhum `.py`/`.yaml` tocado
+desde a suíte de `397a43e` (1626 passed, 6 skipped). `DECISOES` não tocado.
