@@ -680,6 +680,7 @@ def pagina_matriz() -> None:
     )
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.memorial_matriz import (
+        contaminantes_a_confirmar,
         montar_memorial,
         renderizar_memorial_docx,
         resumos_do_protocolo,
@@ -1226,12 +1227,20 @@ def pagina_matriz() -> None:
                 for p in cache.pendencias_globais:
                     st.write(linha_pendencia(p, com_regra=True))
 
+        # R-FDS-07: pendência por GHE, que a tela não mostrava (só as globais).
+        a_confirmar = [texto for m in cache.matrizes or () for texto in contaminantes_a_confirmar(m)]
+        if a_confirmar:
+            with caixa_conferencia:
+                st.markdown("**FDS a pedir ao elaborador do PGR (contaminante a confirmar)**")
+                for texto in a_confirmar:
+                    st.write(f"- {texto}")
+
         if pendencias:
             with caixa_conferencia.expander(f"Pendências de extração e vocabulário ({len(pendencias)})"):
                 for p in pendencias:
                     st.write(linha_pendencia(p))
 
-        if not cache.pendencias_globais and not pendencias:
+        if not cache.pendencias_globais and not pendencias and not a_confirmar:
             caixa_conferencia.caption("Nenhuma pendência a confirmar.")
 
         # Elo C: guarda anti-documento-vazio, independente do gate — documento

@@ -11573,3 +11573,28 @@ cobalto na urina.
 `.yaml` tocado desde então.
 
 **Fechamento.** Contexto da conversa em 58%; o Diovanni segue em chat novo a partir dos docs vivos.
+
+## Sessão (branch `claude/cool-planck-niq4le`, sobre `main c492eb8`, pós-merge do PR #429) — 02/10/2026 — IMPLEMENTAÇÃO: pacote do benzeno na pintura do Aurora reavaliado pela norma (`R-FDS-07`, procedência da `R-PKG-BZ`)
+
+**Origem.** Divergência restante do Aurora 27.08.26 sem FDS, GHE 18 PINTURA: o gabarito pede t,t-mucônico e
+reticulócitos; o app não. O PGR não nomeia benzeno; a FISPQ da aguarrás do acervo declara benzeno "<0,1" `[MEDIDO]`.
+
+**Norma (PDFs de `normas/`).** NR-15 Anexo 13-A item 2 (≥1%) e 2.1; NR-07 Anexo V 2.1 (CAS no inventário, ≥0,1%),
+4.1.1 e 4.2.1; NR-07 Anexo I Quadro 1 (S-PMA ou t,t-mucônico); NR-07 7.5.5 e 7.5.18. Nenhum cenário obriga o pacote;
+com a FDS ele entra pelo 7.5.18. Precedente: t,t-mucônico em 6 de 41 blocos de pintura do acervo (varredura descartável).
+
+**Decisão do Diovanni (itens 2 e 3 da recomendação).** Não disparar a `R-PKG-BZ` por inferência. `R-FDS-07`: aguarrás
+sem a FDS dela e sem benzeno no GHE → pendência não bloqueante ao elaborador (`contaminante_a_confirmar`), vocabulário
+`contaminantes_a_confirmar: [benzeno]` em `aguarras_mineral`. Pendência por GHE passa a aparecer na conferência da tela e
+no memorial (Resumo e bloco do GHE) — antes nenhuma pendência de `MatrizGHE` chegava a essas duas superfícies. Nota de
+procedência na `R-PKG-BZ` (`regras.yaml` e PROTOCOLO), comportamento inalterado. PROTOCOLO v121; PENDENCIAS
+`DT-(sessão claude/cool-planck-niq4le)-01` (resolvida) e `-02` (reticulócitos sem t,t-mucônico, `[A MEDIR]`).
+`[A CONFERIR]`: IN 2/2021 (Anexo 13-A) × IN 2/1995 (Anexo V 4.2.1).
+
+**Testes.** `test_contaminante_a_confirmar.py`, 7 casos. Varredura inversa: 11 reversões isoladas, 11/11 mortas, mais a
+combinada (ignorar FDS anexada e riscos presentes) que mata o caso da FISPQ com benzeno.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada sobre `c492eb8` com
+as mudanças no working tree: **1621 passed, 6 skipped, 0 failed** (1007,64 s), +7 exato sobre 1614. `DECISOES` não tocado.
+
+**Efeito no Aurora.** Sem a FISPQ, GHE 18 ganha a pendência; com ela, o pacote segue igual ao gabarito `[A MEDIR — app]`.

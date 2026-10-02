@@ -187,6 +187,26 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 
 **Nota de aplicação (003.CI, D-ARQ-55).** R-FDS-06 ganha consumidor executável no recorte (B) da transcrição-FDS: a frase-H declarada na FDS é confiada por default (sem desconfiança por classe), transcrita verbatim em `Componente.frases_h` e admitida pelo RT (D-ARQ-47 cl.4) → mapa determinístico resolver-side {H334, H317} → `is_sensibilizante`. O gate é de FORMA (`H\d{3}`), não de conteúdo — coerente com "confiar na FDS é o default; investigação só por genericidade (R-FDS-04)". Semântica de R-FDS-06 intacta; ID preservada. **Implementada (003.CJ, PR #190):** `mapear_frases_h` (`agente_medico/motor/resolvedor.py`, docstring carrega o ID), teste-por-regra em `test_mapa_frases_h.py` (cada caso falha sem a fatia). **Segunda aplicação (003.CK, D-ARQ-56, PR #192):** a articulação "ausência de frase-H ⇒ inerte-declarado" (`[INTERPRETADO — prioridade na revisão de saída]`, sem norma literal) materializada na Fase C — componente sem slug e `frases_h == ()` gera pendência NÃO-bloqueante com `regra_origem="R-FDS-06"` (`estagios/riscos.py`); teste-por-regra em `test_promocao_quimico.py`. Semântica e ID intactas.
 
+### R-FDS-07 — Contaminante a confirmar na FDS `[DERIVADO — NR-07 7.5.5; FISPQ do acervo]`
+**Predicado:** agente do GHE cujo vocabulário lista `contaminantes_a_confirmar`, sem o contaminante
+entre os riscos do GHE e sem FDS anexada que declare o próprio agente. Hoje um caso:
+`aguarras_mineral` → benzeno.
+
+**Consequência:** pendência ao elaborador do PGR, não bloqueante: pedir a FDS e anexá-la. Nenhum
+exame sai da pendência. O pacote do benzeno (`R-PKG-BZ`) só sai com o benzeno identificado no PGR
+ou na FDS. Aparece na conferência da tela e no memorial (Resumo e bloco do GHE).
+
+**Base.** NR-07 7.5.5: o médico que observa inconsistência no inventário de riscos a reavalia com
+os responsáveis pelo PGR. A FISPQ `fispq-quim-sol-alif-aguarras-mineral.pdf` do acervo declara
+benzeno 71-43-2 "<0,1" `[MEDIDO]`. Sem a FDS, inferir benzeno do nome "aguarrás" seria pedir exame
+para agente não classificado no PGR (7.5.18), fora do campo da NR-07 Anexo V 2.1 (CAS no inventário,
+mistura ≥0,1%) e do NR-15 Anexo 13-A item 2 (mistura ≥1%). Mesma leitura do `R-PKG-ASF`.
+Querosene e solvente de nafta do mesmo PGR não têm slug; ficam fora até entrarem no vocabulário.
+
+**Origem.** Aurora 27.08.26, GHE 18 PINTURA, rodado sem a FISPQ da aguarrás (01/10/2026): o
+gabarito pede t,t-mucônico e reticulócitos e o app não, em silêncio. Implementado em
+`motor/estagios/pendencias_estruturais.py`; testes em `test_contaminante_a_confirmar.py`.
+
 ---
 
 ## 5. REGRAS POR TIPO DE EXAME
@@ -923,6 +943,21 @@ Pacotes são conjuntos pré-formalizados de exames que disparam em bloco quando 
 - Reticulócitos (adm/per/MR/dem)
 - Ácido trans-trans-mucônico semestral (per)
 
+**Nota de procedência (02/10/2026, mesma ID, comportamento inalterado).** Releitura pela norma
+(PDFs oficiais em `normas/`). O regime obrigatório do benzeno tem limiar: NR-07 Anexo V 2.1
+(cancerígeno com CAS no inventário do PGR; mistura ≥0,1% em volume) e 4.1.1 (exames obrigatórios
+sem avaliação ambiental), com a vigilância em 4.2.1; NR-15 Anexo 13-A item 2 (benzeno e misturas
+≥1%). Indicadores: NR-07 Anexo I Quadro 1, S-PMA 45 µg/g creat. **ou** t,t-mucônico 750 µg/g creat.
+(EPNE, NE). Abaixo de 0,1% — caso da FISPQ de aguarrás do acervo, "<0,1" — o pacote não é
+obrigação do Anexo V: é conduta do protocolo pelo NR-07 7.5.18 (exame a critério do médico,
+relacionado a risco classificado no PGR — a aguarrás — e justificado pela FDS). "Independente da
+concentração" (R-FDS-04) fica como conduta `[VALIDADO]`, não como texto da norma. Sem benzeno no PGR
+nem na FDS, o pacote não sai; a falta da FDS vira pendência (`R-FDS-07`).
+`[A CONFERIR]`: o Anexo V 4.2.1 cita a IN 2/1995; o Anexo 13-A (itens 7.4 e 8.1, Portaria MTP
+806/2022) remete à IN 2/2021, Anexos IX e X. A IN 2/2021 não está em `normas/` — conferir no
+Gov.br/MTE antes de citá-la em regra. Vigência da NR-07 do acervo (`nr-07-atualizada-2022-1`)
+também a conferir.
+
 ### R-PKG-ASF — Pacote Asfalto (impermeabilização) `[DERIVADO — NR-07 Anexo V + 7/7 GHEs de impermeabilização com asfalto no acervo]`
 **Predicado:** `asfalto` ou `cimento_asfaltico` no GHE (declarado no PGR ou componente de FDS).
 
@@ -1213,3 +1248,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v118 | 30/09/2026 | Branch `ccr-983f0b9f-zkz16m` (DECISÃO do Diovanni, sem mudança de código): §5.4 R-RX-04, parágrafo **Termos** — o `[A MEDIR]` do Vistamerica Ver.02 fecha por medição no motor (risco declarado: PNOS/PNOR 0,08 mg/m³ → RX só admissional por `R-RX-01-pnos-ate10`, espirometria 24M por `R-ESP-02`); divergência com o gabarito 08.12.25 (RX 60M) **resolvida pela norma** (Quadro 2, nível 1). Nenhuma regra alterada. |
 | v119 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (CORREÇÃO medida em produção): §5.4 R-RX-04, parágrafo **Termos** — 4ª forma "Sulfato de cálcio — pó de Gesso" (transcrição do Gemini no T65, GHE 16 sem espirometria e RX no app). Nenhuma regra alterada. |
 | v120 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b): **`R-BIO-05` ampliada** (§5.9) — risco BAIXO sem medição também vira menção no PCMSO, fora dos 9 cancerígenos de `cancerigeno_com_ibe`; medição acima do nível de ação emite sempre (NR-07 7.5.12 "b", inclusive em IRRELEVANTE). `[INTERPRETADO]` mantido. Substitui a cl.7 da D-ARQ-86. Fecha a divergência do T65 GHE 11 (MEK). |
+| v121 | 02/10/2026 | Branch `claude/cool-planck-niq4le` (IMPLEMENTAÇÃO, decisão do Diovanni — itens 2 e 3 da reavaliação do benzeno pela norma): **`R-FDS-07` CRIADA** (§4) — aguarrás sem a FDS dela no GHE e sem benzeno identificado → pendência não bloqueante ao elaborador (NR-07 7.5.5), na tela e no memorial; nenhum exame. **Nota de procedência em `R-PKG-BZ`** — abaixo de 0,1% o pacote é conduta pelo 7.5.18, não obrigação do Anexo V; comportamento inalterado. `[A CONFERIR]` IN 2/2021 (Anexo 13-A) × IN 2/1995 (Anexo V 4.2.1). |

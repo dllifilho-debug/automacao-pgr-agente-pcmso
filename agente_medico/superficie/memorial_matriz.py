@@ -21,6 +21,7 @@ from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 
+from agente_medico.motor.estagios.pendencias_estruturais import TIPO_CONTAMINANTE_A_CONFIRMAR
 from agente_medico.motor.tipos import (
     GHEPGR,
     PGR,
@@ -99,6 +100,7 @@ class BlocoMemorial:
     linhas: tuple[LinhaMemorial, ...]
     nao_pedidos: tuple[str, ...]
     nao_reconhecidos: tuple[str, ...] = ()
+    a_confirmar: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -274,6 +276,16 @@ def _vizinho_recusado(ghe_id: str, termo: str, pendencias: Sequence[Pendencia]) 
     return None
 
 
+def contaminantes_a_confirmar(matriz: MatrizGHE) -> tuple[str, ...]:
+    """R-FDS-07: o pacote do contaminante não sai sem ele identificado; sem esta
+    lista, a FDS que falta no GHE não aparece no anexo que a médica revisa."""
+    return tuple(
+        _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
+        for p in matriz.pendencias
+        if p.tipo == TIPO_CONTAMINANTE_A_CONFIRMAR
+    )
+
+
 def riscos_nao_reconhecidos(ghe: GHEPGR, pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
     """Riscos que o PGR declara no GHE e que não viraram agente: nenhum exame sai
     deles, e sem esta lista a lacuna não aparece no anexo que a médica revisa
@@ -357,6 +369,7 @@ def montar_memorial(
                     if matriz.ghe_id in ghes_pgr
                     else ()
                 ),
+                a_confirmar=contaminantes_a_confirmar(matriz),
             )
         )
     return Memorial(
@@ -450,6 +463,13 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
             f"{', '.join(b.ghe_id for b in nao_reconhecidos)}. Conferir antes de validar.",
             style="List Bullet",
         )
+    a_confirmar = [b for b in memorial.blocos if b.a_confirmar]
+    if a_confirmar:
+        documento.add_paragraph(
+            f"FDS a pedir ao elaborador do PGR para confirmar contaminante: "
+            f"{', '.join(b.ghe_id for b in a_confirmar)}.",
+            style="List Bullet",
+        )
 
     documento.add_heading("1. Confirmar primeiro — decisões sem base direta em norma ou protocolo", level=1)
     if memorial.revisar_primeiro:
@@ -472,6 +492,10 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         if bloco.nao_reconhecidos:
             documento.add_paragraph("Riscos do PGR não reconhecidos (nenhum exame sai deles — conferir):")
             for texto in bloco.nao_reconhecidos:
+                documento.add_paragraph(texto, style="List Bullet")
+        if bloco.a_confirmar:
+            documento.add_paragraph("FDS a pedir ao elaborador do PGR (contaminante a confirmar):")
+            for texto in bloco.a_confirmar:
                 documento.add_paragraph(texto, style="List Bullet")
 
     documento.add_heading("3. Regras usadas nesta matriz — norma e origem de cada conduta", level=1)
