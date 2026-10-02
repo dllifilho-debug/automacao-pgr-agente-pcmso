@@ -11716,3 +11716,28 @@ skipped, 0 failed** (931,94 s), +5 exato sobre 1626.
 
 **Efeito no Aurora** (sem FDS): GHE 18 com o pacote do benzeno e clínico 6M, como o gabarito, matriz PARCIAL e pendência
 pedindo a FDS `[A MEDIR — app]`.
+
+## Sessão (branch `claude/cool-planck-niq4le`, recriada sobre `main f440077`, pós-merge do PR #434) — 03/10/2026 — MEDIÇÃO no app: Aurora com e sem a FISPQ da aguarrás
+
+**Medido (matriz e memorial do Diovanni, Aurora 27.08.26, pós-deploy de `f440077`).** Arquivos `.docx` sha256
+`eaded371…` (matriz sem FDS), `65f1ec9b…` (memorial sem FDS), `c1065428…` (matriz com a FISPQ
+`fispq-quim-sol-alif-aguarras-mineral.pdf` no GHE 18), `07a04327…` (memorial com FDS).
+
+**Matriz.** As duas idênticas em todos os 22 GHEs. GHE-18 PINTURA: clínico PER 6M, hemograma (ADM, PER 6M, MRO, DEM),
+ácido trans-trans-mucônico (PER 6M), reticulócitos (ADM, PER 6M, MRO, DEM); menções de risco baixo para acetona, MEK,
+tolueno, xileno e octoato de cobalto. Contra o gabarito RQ.61 27.08.26: pacote do benzeno, clínico 6M e as menções
+**batem**; seguem divergentes, por decisão, cobalto na urina (`R-BIO-06`, contradição interna do gabarito) e acuidade
+com DEM (decisão de 26/09).
+
+**Memorial.** Sem FDS: pacote pela `R-PKG-BZ-PRES` ("Confirmar primeiro"), origem "Aguarrás — PGR", e a lista "FDS a
+pedir ao elaborador" com aguarrás, querosene e solvente de nafta (`R-FDS-07`), no Resumo e no bloco do GHE-18. Com FDS:
+pacote pela `R-PKG-BZ` (origem "FDS — componente Benzeno do produto fispq-quim-sol-alif-aguarras-mineral"), clínico 6M
+pela `R-CLI-05`, sem pendência `R-FDS-07`. Contagem por certeza: sem FDS 114 / 51 / 38; com FDS 117 / 52 / 34.
+
+**Previsão errada, registro (D-ARQ-06).** Eu disse ao Diovanni que, com a FISPQ, a pendência `R-FDS-07` seguiria para o
+solvente de nafta. Não segue, e o app está certo pela regra escrita: com o benzeno identificado no GHE, não há
+contaminante a confirmar (`riscos_com_contaminante_sem_fds` devolve vazio). Fecha os `[A MEDIR — app]` dos PRs #430,
+#432, #433 e #434 no Aurora.
+
+**Verificação.** Só HISTORICO; recorte: `tests/test_gerar_indice_darq.py`. Suíte herdada de `b040247` (1631 passed, 6
+skipped) — nenhum `.py`/`.yaml` tocado desde então.
