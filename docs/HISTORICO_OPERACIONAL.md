@@ -11669,3 +11669,50 @@ Araras I só ganha a pendência `R-FDS-07` no GHE-14 — exames e status iguais.
 **Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada sobre `c24f319` com as
 mudanças no working tree: 1ª rodada 3 failed (fixtures acima); 2ª **1626 passed, 6 skipped, 0 failed** (936,33 s), +2
 exato sobre 1624. `DECISOES` não tocado.
+
+## Sessão (branch `claude/cool-planck-niq4le`, recriada sobre `main 55bd73e`, pós-merge do PR #433) — 03/10/2026 — MEDIÇÃO: reticulócitos nas pinturas (DT `-02`) e correção do instrumento
+
+**Origem.** `DT-(sessão claude/cool-planck-niq4le)-02`: "reticulócitos sem t,t-mucônico" em ~20 pinturas.
+
+**Achado de instrumento.** A varredura de 02/10/2026 usava `muc[oô]nico`; a conversão `.doc → txt` derruba o acento
+("Mucnico", "cido trans-t…"). Refeita com padrão tolerante: t,t-mucônico e reticulócitos juntos em **21 de 41** blocos de
+pintura, nunca separados. O "6 de 41" registrado na entrada de 02/10 (PR #430) está errado — fica no texto, corrigido aqui
+e na PENDENCIAS (D-ARQ-06). FDS do Fundo Zarcão do acervo sem chumbo nem benzeno (hipótese do chumbo descartada); octoato de
+cobalto 136-52-7 medido nela (confirma o CAS da `R-BIO-06`); produto H351.
+
+**Achado clínico.** Nos PGRs pareados, o pacote do benzeno acompanha solvente derivado de petróleo declarado (Vistamerica
+GHE 24 com × GHE 22 sem, mesmo PGR; Aurora GHE 18 com; Fascino GHE 16 e T65 GHE 15 sem), sem benzeno nomeado. WVM 05: a
+revisão de 24.09.26 retirou o pacote que a de 20.07.26 tinha, mesmo PGR. Aberta `DT-(sessão claude/cool-planck-niq4le)-04`
+para decisão do Diovanni (conflito com a `R-FDS-07`).
+
+**Verificação.** Só docs (PENDENCIAS, HISTORICO); recorte: `tests/test_gerar_indice_darq.py`. Nenhum `.py`/`.yaml` tocado
+desde a suíte de `397a43e` (1626 passed, 6 skipped). `DECISOES` não tocado.
+
+## Sessão (mesma branch, sobre `5e4b9fe`) — 03/10/2026 — IMPLEMENTAÇÃO: pacote do benzeno presumido (`R-PKG-BZ-PRES`, DT `-04`)
+
+**Decisão do Diovanni.** Opção (b) da `DT-(sessão claude/cool-planck-niq4le)-04` — presunção protetiva (D-ARQ-68 cl.5)
+— e, depois da medição nos pares, opção (b′): corte por IRRELEVANTE.
+
+**Implementado.** `Risco.contaminantes_a_confirmar` (hidratado do vocabulário nas três fases do stage 2); helper
+`riscos_com_contaminante_sem_fds` em `predicados.py`, usado pela `R-FDS-07` (refatorada, mesmo comportamento) e pelo
+primitivo novo `benzeno_a_confirmar` (Ausente com solvente sem FDS e sem benzeno; False com benzeno, sem solvente ou com
+todo risco do solvente IRRELEVANTE). `R-PKG-BZ-PRES` `[INTERPRETADO]` com `quando_ausente: {presumir_true:
+[benzeno_a_confirmar]}`: hemograma e reticulócitos 6M adm/per/MR/dem, t,t-mucônico 6M per, clínico 6M per. PROTOCOLO v125;
+DECISOES v238 (nota de aplicação em D-ARQ-68; `INDICE_DARQ` regenerado, `tests/test_gerar_indice_darq.py` 6 passed);
+PENDENCIAS `-04` resolvida, contagem corrigida para **24 de 46** (a varredura também perdia "GHE - NN").
+
+**Medição que mudou a decisão.** Com (b) sem corte, Porto Araras I GHE-14 (querosene IRRELEVANTE) ganhava t,t-mucônico,
+reticulócitos, hemograma 6M e clínico 6M — os gabaritos de 06.07.26 e 24.09.26 não pedem. Parado e reportado; com (b′),
+os 3 pares determinísticos ficaram idênticos ao estado anterior (matrizes antes × depois).
+
+**Testes.** `test_pkg_benzeno_presumido.py`, 5 casos. Ajustados por decisão: `test_contaminante_a_confirmar.py` (o caso
+sem FDS não afirma mais "sem pacote, VÁLIDA") e `test_solventes_petroleo.py` (querosene/nafta só mudam a matriz pela
+`R-PKG-BZ-PRES`). Varredura inversa 13/13 (regra; `quando_ausente`; primitivo False; periodicidade; sem t,t-mucônico; sem
+clínico; status; ignorar FDS; não checar benzeno; Ausente sempre; sem corte IRRELEVANTE; cortar BAIXO também; vocabulário
+da nafta) + deduplicação da `R-FDS-07` após a refatoração.
+
+**Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada: **1631 passed, 6
+skipped, 0 failed** (931,94 s), +5 exato sobre 1626.
+
+**Efeito no Aurora** (sem FDS): GHE 18 com o pacote do benzeno e clínico 6M, como o gabarito, matriz PARCIAL e pendência
+pedindo a FDS `[A MEDIR — app]`.

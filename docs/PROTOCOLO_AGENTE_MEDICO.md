@@ -192,9 +192,10 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 entre os riscos do GHE e sem FDS anexada que declare o próprio agente. Hoje três agentes, todos
 → benzeno: `aguarras_mineral`, `querosene` e `solvente_de_nafta` (os dois últimos desde a v124).
 
-**Consequência:** pendência ao elaborador do PGR, não bloqueante: pedir a FDS e anexá-la. Nenhum
-exame sai da pendência. O pacote do benzeno (`R-PKG-BZ`) só sai com o benzeno identificado no PGR
-ou na FDS. Aparece na conferência da tela e no memorial (Resumo e bloco do GHE).
+**Consequência:** pendência ao elaborador do PGR, não bloqueante: pedir a FDS e anexá-la. Aparece na
+conferência da tela e no memorial (Resumo e bloco do GHE). Desde a v125 o mesmo estado dispara o
+pacote do benzeno presumido (`R-PKG-BZ-PRES`, §6), salvo risco IRRELEVANTE; com a FDS anexada, o
+pacote só sai se ela declarar benzeno (`R-PKG-BZ`).
 
 **Base.** NR-07 7.5.5: o médico que observa inconsistência no inventário de riscos a reavalia com
 os responsáveis pelo PGR. A FISPQ `fispq-quim-sol-alif-aguarras-mineral.pdf` do acervo declara
@@ -997,6 +998,29 @@ Anexo LXVIII (`normas/`): reticulócitos aparecem no protocolo de investigação
 (4.1.4 d), não como rastreio. Vigência da NR-07 do acervo (até a Portaria MTP 567/2022) conferida
 pelo Diovanni no Gov.br em 01/10/2026.
 
+### R-PKG-BZ-PRES — Pacote Benzeno presumido (solvente de petróleo sem FDS) `[INTERPRETADO — prioridade na revisão de saída]`
+**Predicado:** primitivo `benzeno_a_confirmar` — agente com `contaminantes_a_confirmar: [benzeno]`
+(`aguarras_mineral`, `querosene`, `solvente_de_nafta`) no GHE, sem a FDS dele anexada e sem benzeno
+entre os riscos. Responde `Ausente`, que a regra presume verdadeiro (`quando_ausente: {presumir_true:
+[benzeno_a_confirmar]}`, D-ARQ-68 cl.5). Todo risco desses solventes IRRELEVANTE → falso (corte da
+`R-BIO-05` para cancerígeno).
+
+**Exames:** os da `R-PKG-BZ` (hemograma e reticulócitos 6M adm/per/MR/dem; t,t-mucônico 6M per) e
+clínico 6M per (como a `R-CLI-05` faz para o benzeno). Cada linha leva a pendência
+`predicado_ausente_presumido`; a matriz sai `PARCIAL` até a FDS responder.
+
+**Base.** Norma: nenhum dispositivo obriga o pacote sem benzeno identificado — NR-15 Anexo 13-A item 2
+(≥1%), NR-07 Anexo V 2.1 (CAS no inventário, ≥0,1%), IN MTP 2/2021 Anexo X (campo do regime do
+benzeno); NR-07 7.5.18 permite. NR-07 Anexo V 2.1 delega ao inventário do PGR, e a NR-01 não obriga o
+inventário a listar contaminante de mistura — a forma de D-ARQ-68 cl.5. Precedente (D-ARQ-22 nível 2),
+medido em 03/10/2026: pacote do benzeno em 24 de 46 blocos de pintura do acervo, sempre com
+reticulócitos e t,t-mucônico juntos. PGRs pareados: CMO Vistamerica 2026-07-28 GHE 24 (aguarrás,
+destilados, nafta, querosene, thinner; BAIXO) com e GHE 22 (só tinta) sem, no mesmo PGR; Aurora 27.08.26
+GHE 18 (BAIXO) com; Porto Araras I GHE-14 (querosene IRRELEVANTE) sem; Fascino GHE 16 e T65 GHE 15
+(sem solvente de petróleo) sem. Contra: WVM 05 Entreverdes, revisão de 24.09.26 retirou o pacote com o
+mesmo PGR (Maldi). Decisão do Diovanni (03/10/2026, opção b′) — reverte parte da decisão da `R-FDS-07`
+(v121), tomada sobre contagem errada ("6 de 41", ver `DT-(sessão claude/cool-planck-niq4le)-02`).
+
 ### R-PKG-ASF — Pacote Asfalto (impermeabilização) `[DERIVADO — NR-07 Anexo V + 7/7 GHEs de impermeabilização com asfalto no acervo]`
 **Predicado:** `asfalto` ou `cimento_asfaltico` no GHE (declarado no PGR ou componente de FDS).
 
@@ -1291,3 +1315,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v122 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 89ffad4` (CORREÇÃO de procedência, sem mudança de comportamento): IN MTP 2/2021 e Portaria de Consolidação MS 5/2017 lidas de `normas/`. **`R-PKG-BZ`**: reticulócitos 6M em adm/per/MR/dem passa de analogia ao hemograma para base literal (IN MTP 2/2021 Anexo X, 2.1.3 e 3.1); IN SSST 2/1995 registrada como revogada (art. 294, V). **`R-PKG-ASF`** e §5.9 (carcinógenos): citação da IN atualizada. Fecha os `[A CONFERIR]` da v121 (IN e vigência da NR-07). |
 | v123 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 35c1d2e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção B): **`R-BIO-06` CRIADA** (§5.9) — octoato de cobalto (slug próprio, CAS 136-52-7): IRRELEVANTE/BAIXO → menção no PCMSO; acima → cobalto na urina PER 6M pelo 7.5.18. `[INTERPRETADO]`. Precedente: 7 matrizes CMO anotam a menção, 6 sem o exame; Aurora diverge (contradição interna). Substitui "octoato sem cadastro". `[A CONFERIR]` carcinogenicidade do octoato. |
 | v124 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main c24f319` (IMPLEMENTAÇÃO, decisão do Diovanni — opção a): **`R-FDS-07` estendida** (§4) — slugs `querosene` (CAS 8008-20-6) e `solvente_de_nafta` (sem CAS), sem regra de exame (sem LT nem IBE), com `contaminantes_a_confirmar: [benzeno]`. Com a FISPQ da aguarrás anexada, o querosene "0 - 100" passa a materialidade indeterminada bloqueante (D-ARQ-35), como a nafta da mesma FISPQ. Pares determinísticos: só Porto Araras I GHE-14 muda (+ pendência R-FDS-07); exames e status iguais. |
+| v125 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 55bd73e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b′ da `DT-(sessão claude/cool-planck-niq4le)-04`): **`R-PKG-BZ-PRES` CRIADA** (§6) — solvente de petróleo sem FDS e sem benzeno identificado → pacote do benzeno + clínico 6M sob presunção protetiva (D-ARQ-68 cl.5), matriz `PARCIAL`; IRRELEVANTE não presume. `R-FDS-07` (§4) passa a apontar para ela. Precedente corrigido: 24 de 46 pinturas (a contagem de 02/10 perdia grafias sem acento e cabeçalho "GHE - NN"). |

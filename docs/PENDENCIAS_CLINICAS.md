@@ -3911,11 +3911,40 @@ periódico a no máximo 6 meses, mudança de função e demissional (3.1). Retic
 literal (PROTOCOLO v122). Vigência da NR-07 do acervo conferida pelo Diovanni (01/10/2026). Para a `-02`: na norma, os
 reticulócitos só aparecem no regime do benzeno (IN 2/2021 Anexo X; PC 5/MS Anexo LXVIII 4.1.4 d, investigação de caso).
 
-### DT-(sessão `claude/cool-planck-niq4le`)-02 — Reticulócitos sem t,t-mucônico nas pinturas do acervo `[ABERTA — A MEDIR]`
+### DT-(sessão `claude/cool-planck-niq4le`)-02 — Reticulócitos sem t,t-mucônico nas pinturas do acervo `[RESOLVIDA — artefato de instrumento, 03/10/2026; ver -04]`
 
 Varredura descartável de texto (02/10/2026) nos blocos de pintura das matrizes de `matrizes_originais/`: t,t-mucônico em 6
 de 41 blocos (CMO recentes e Viverde 05); reticulócitos em cerca de 20, a maioria sem t,t-mucônico. Reticulócitos sem
 benzeno sugere outro motivo (hipótese: zarcão/chumbo na pintura metálica), não medido. Nenhuma regra alterada.
+
+**Correção (03/10/2026) — a premissa era erro do instrumento; o texto acima fica como registro (D-ARQ-06).** A regex
+`muc[oô]nico` não casava a grafia que a conversão `.doc → txt` produz quando derruba o acento ("Mucnico", "cido
+trans-t…"). Com padrão tolerante (`muc\S{0,2}nico|trans[\s-–,]*trans|TTMA`): **t,t-mucônico em 21 de 41 blocos de
+pintura, reticulócitos nos mesmos 21; um sem o outro: 0 e 0.** Reticulócitos nas pinturas são sempre o pacote do
+benzeno. A hipótese do chumbo cai também pela FDS: `Fundo Zarcão- PINTURA ESMALTE SINTÉTICO- PINTOR.pdf` (acervo) não tem
+chumbo nem benzeno — destilados de petróleo 64742-47-8 10-<50%, xileno 5-10%, octoatos de cálcio, cobalto (136-52-7,
+0,1-0,2%) e zircônio, metil etil cetoxima; produto classificado H351 (carcinogenicidade categoria 2). O "6 de 41" entrou
+na recomendação da `-01` (PR #430) — a decisão foi tomada sobre número errado; reaberta como `-04`.
+
+### DT-(sessão `claude/cool-planck-niq4le`)-04 — Pacote do benzeno presumido pelas médicas nas pinturas com solvente de petróleo `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/cool-planck-niq4le, 03/10/2026: R-PKG-BZ-PRES]`
+
+**Medido (03/10/2026, varredura de texto com padrão tolerante).** Pacote do benzeno (t,t-mucônico + reticulócitos +
+hemograma 6M) em 21 de 41 blocos de pintura das matrizes do acervo. Nos PGRs pareados legíveis:
+- CMO Vistamerica 2026-07-28 (mesmo PGR, mesma matriz 28.07.26 e 16.09.26): GHE 24 PINTURA 2 declara aguarrás, destilados
+  de petróleo, solvente de nafta, querosene e thinner → **com** pacote; GHE 22 PINTURA declara só tinta → **sem** pacote.
+- CMO Aurora 27.08.26 GHE 18 (aguarrás, destilados, nafta, querosene, thinner) → **com** pacote.
+- Consciente SPE 0030/Fascino GHE 16 (tinta, tolueno, xileno — sem solvente de petróleo) e T65 GHE 15 (massa, textura,
+  tinta) → **sem** pacote.
+- WV Maldi Entreverdes GHE 20 (destilados "querosene hidratado", thinner, tolueno, xileno): matriz WVM 05 de 20.07.26
+  **com** pacote; a revisão de 24.09.26, mesmo PGR, **retirou** o pacote e baixou o hemograma para anual.
+Nenhum desses PGRs nomeia benzeno; o padrão é "solvente derivado de petróleo declarado → pacote presumido".
+
+**Conflito com a `R-FDS-07` (PR #430).** O app hoje pede a FDS (pendência) e só emite o pacote com benzeno identificado.
+A decisão da `-01` usou "6 de 41" como precedente; o medido é 21 de 41 com padrão consistente, e uma revisão recente
+(WVM 24.09.26) na direção da `R-FDS-07`. Norma (níveis 1): NR-15 Anexo 13-A item 2 (≥1%), NR-07 Anexo V 2.1 (CAS no
+inventário, ≥0,1%), IN MTP 2/2021 Anexo X (campo do regime do benzeno) — nenhuma obriga o pacote sem benzeno no PGR; o
+7.5.18 permite. Caminho possível no projeto: presunção protetiva da D-ARQ-68 cl.5 (pacote emitido `[INTERPRETADO]` com
+pendência e matriz `PARCIAL`) — exigiria nota de aplicação em D-ARQ-68.
 
 ### DT-(sessão `claude/cool-planck-niq4le`)-03 — Cobalto na urina na pintura do Aurora (octoato de cobalto) `[RESOLVIDA — IMPLEMENTAÇÃO, branch claude/cool-planck-niq4le, 03/10/2026: R-BIO-06]`
 
@@ -3940,3 +3969,16 @@ sem exame — NR-15 Anexo 11 e NR-07 Anexo I não os listam (conferido em `norma
 2026-07-28), "Querosene" (Porto Araras I). Efeito com a FISPQ anexada: querosene "0 - 100" vira pendência bloqueante de
 materialidade (D-ARQ-35), como a nafta. Fora: "Destilados (Petróleo) leves tratados com hidrogênio (Querosene hidratado)"
 (WV Maldi Entreverdes) — variante do nome da aguarrás, não resolve hoje `[A MEDIR]`, item próprio. PROTOCOLO v124.
+
+**Nota em `DT-(sessão claude/cool-planck-niq4le)-04` — decisão e implementação (03/10/2026).** Diovanni escolheu a presunção protetiva (opção b) e, depois da medição em Porto
+Araras I, o corte por IRRELEVANTE (opção b′). `R-PKG-BZ-PRES` `[INTERPRETADO]`: solvente de petróleo com
+`contaminantes_a_confirmar: [benzeno]`, sem a FDS dele e sem benzeno identificado → pacote do benzeno + clínico 6M sob
+presunção (D-ARQ-68 cl.5, nota de aplicação), pendência `predicado_ausente_presumido` por linha, matriz `PARCIAL`. Todo
+risco do solvente IRRELEVANTE → sem presunção (corte da `R-BIO-05` para cancerígeno). Porto Araras I GHE-14 (querosene
+IRRELEVANTE; gabaritos de 06.07.26 e 24.09.26 sem o pacote) seguiu idêntico; com o corte desligado, ganhava 4 linhas a
+mais que o gabarito. PROTOCOLO v125; DECISOES v238.
+
+**Nota em `DT-(sessão claude/cool-planck-niq4le)-04` — correção de contagem (mesma data).** A varredura da DT também perdia o cabeçalho "GHE - NN PINTURA" (hífen antes do
+número). Recontado: **24 de 46** blocos de pintura com o pacote, reticulócitos e t,t-mucônico sempre juntos (0 e 0).
+Os "21 de 41" acima ficam como registro.
+

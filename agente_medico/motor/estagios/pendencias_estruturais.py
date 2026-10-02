@@ -1,33 +1,24 @@
 from __future__ import annotations
 
+from agente_medico.motor.predicados import riscos_com_contaminante_sem_fds
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import GHEContext, Pendencia
 
 TIPO_CONTAMINANTE_A_CONFIRMAR = "contaminante_a_confirmar"
 
 
-def _contaminantes_a_confirmar(ctx: GHEContext, proto: Protocolo) -> None:
+def _contaminantes_a_confirmar(ctx: GHEContext) -> None:
     """R-FDS-07 (NR-07 7.5.5): agente do GHE cujo vocabulário lista contaminante
-    em `contaminantes_a_confirmar` (aguarrás → benzeno), sem o contaminante entre os
-    riscos e sem FDS anexada no GHE que declare o próprio agente. Não bloqueia e não
-    emite exame: o pacote do contaminante só sai com ele identificado (R-PKG-BZ)."""
-    presentes = {r.agente for r in ctx.riscos}
-    com_fds = {
-        comp.agente
-        for produto in ctx.pgr_ghe.produtos_quimicos
-        if produto.fds is not None
-        for comp in produto.fds.composicao
-        if comp.agente is not None
-    }
-    vistos: set[tuple[str, str]] = set()
-    for risco in ctx.riscos:
-        if risco.agente in com_fds:
-            continue
-        meta = proto.vocabulario.agentes.get(risco.agente) or {}
-        for contaminante in meta.get("contaminantes_a_confirmar") or ():
-            if contaminante in presentes or (risco.agente, contaminante) in vistos:
+    em `contaminantes_a_confirmar` (aguarrás, querosene, nafta → benzeno), sem o
+    contaminante entre os riscos e sem FDS anexada no GHE que declare o próprio
+    agente. Não bloqueia. O pacote presumido sai pela R-PKG-BZ-PRES."""
+    contaminantes = dict.fromkeys(c for r in ctx.riscos for c in r.contaminantes_a_confirmar)
+    for contaminante in contaminantes:
+        vistos: set[str] = set()
+        for risco in riscos_com_contaminante_sem_fds(ctx, contaminante):
+            if risco.agente in vistos:
                 continue
-            vistos.add((risco.agente, contaminante))
+            vistos.add(risco.agente)
             ctx.pendencias.append(
                 Pendencia(
                     tipo=TIPO_CONTAMINANTE_A_CONFIRMAR,
@@ -45,7 +36,7 @@ def _contaminantes_a_confirmar(ctx: GHEContext, proto: Protocolo) -> None:
 
 
 def stage_3_pendencias_estruturais(ctx: GHEContext, proto: Protocolo) -> None:
-    _contaminantes_a_confirmar(ctx, proto)
+    _contaminantes_a_confirmar(ctx)
     for produto in ctx.pgr_ghe.produtos_quimicos:
         if produto.fds is None:
             ctx.pendencias.append(

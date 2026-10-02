@@ -38,11 +38,12 @@ def test_querosene_e_nafta_do_pgr_pedem_a_fds_cada_um(proto: Protocolo) -> None:
     motivos = [p.motivo for p in _a_confirmar(pintura)]
     assert len(motivos) == 2
     assert motivos[0].startswith("Querosene (petróleo) sem FDS") and motivos[1].startswith(_NAFTA + " sem FDS")
+    # Nenhuma regra própria deles emite exame; o que muda frente a um GHE sem os dois
+    # vem só do pacote do benzeno presumido (R-PKG-BZ-PRES, DT -04).
     sem_os_dois, _ = _hidratar(proto, ("GHE 18 - PINTURA", ()))
     (referencia,) = _matrizes(proto, sem_os_dois)
-    assert sorted((e.exame, e.periodicidade_meses) for e in pintura.linhas) == sorted(
-        (e.exame, e.periodicidade_meses) for e in referencia.linhas
-    )
+    regras = {m.regra_id for e in pintura.linhas for m in e.motivos}
+    assert regras - {m.regra_id for e in referencia.linhas for m in e.motivos} == {"R-PKG-BZ-PRES"}
 
 
 def test_querosene_da_fispq_e_risco_material_nao_inerte(proto: Protocolo) -> None:

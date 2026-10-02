@@ -8,6 +8,10 @@ from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import GHEContext, Materialidade, Pendencia, Risco, TipoIBE
 
 
+def _contaminantes(meta: dict[str, Any] | None) -> tuple[str, ...]:
+    return tuple((meta or {}).get("contaminantes_a_confirmar") or ())
+
+
 def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
     agentes_vocab: dict[str, Any] = proto.vocabulario.agentes
     cargos_vocab: dict[str, Any] = proto.vocabulario.cargos
@@ -35,6 +39,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     is_ototoxico=meta.get("is_ototoxico", False),
                     nivel_risco=risco_pgr.nivel_risco,
                     termo=risco_pgr.termo,
+                    contaminantes_a_confirmar=_contaminantes(meta),
                 )
             )
         else:
@@ -110,6 +115,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                         quantificacao=None,
                         tipo_ibe=TipoIBE(meta["tipo_ibe"]) if meta is not None and meta.get("tipo_ibe") else None,
                         is_ototoxico=meta.get("is_ototoxico", False) if meta is not None else False,
+                        contaminantes_a_confirmar=_contaminantes(meta),
                     )
                 )
 
@@ -202,6 +208,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     materialidade=mat,
                     is_carcinogeno_iarc=componente.is_carcinogeno_iarc,
                     is_sensibilizante=componente.is_sensibilizante,
+                    contaminantes_a_confirmar=_contaminantes(meta),
                 )
             )
 
