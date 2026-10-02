@@ -51,10 +51,17 @@ def _distribuicao(modulo: str) -> str:
     return _MAPA_IMPORT_PARA_DISTRIBUICAO.get(modulo, modulo)
 
 
-def _declaradas() -> set[str]:
+def _declaradas(manifesto: Path = _MANIFESTO) -> set[str]:
+    """Distribuições que `pip install -r <manifesto>` instala, seguindo `-r`
+    como o pip segue: `streamlit` vem de `requirements.txt` via
+    `-r requirements.txt` e está tão instalado quanto o que é listado aqui
+    (o `scripts/smoke_visual.py` o sobe em subprocesso)."""
     declaradas: set[str] = set()
-    for linha in _MANIFESTO.read_text(encoding="utf-8").splitlines():
+    for linha in manifesto.read_text(encoding="utf-8").splitlines():
         linha = linha.split("#", 1)[0].strip()
+        if linha.startswith("-r "):
+            declaradas |= _declaradas(manifesto.parent / linha[3:].strip())
+            continue
         if not linha or linha.startswith("-"):
             continue
         corte = len(linha)
@@ -109,7 +116,9 @@ def test_comando_padrao_do_claude_md_tem_ferramenta_declarada() -> None:
 
 
 def test_ferramenta_gerada_em_subprocesso_esta_declarada() -> None:
-    """R2 — apagar a linha `coverage` de `requirements-dev.txt` mata este teste."""
+    """R2 — apagar a linha `coverage` de `requirements-dev.txt` mata este teste.
+    Também o mata `_declaradas` deixar de seguir `-r`: o `python -m streamlit`
+    de `scripts/smoke_visual.py` vira ferramenta não declarada."""
     ferramentas = _ferramentas_geradas_em_subprocesso()
     assert "coverage" in ferramentas, (
         "a varredura não achou o `python -m coverage` do portão de cobertura — "
