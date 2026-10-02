@@ -11598,3 +11598,21 @@ combinada (ignorar FDS anexada e riscos presentes) que mata o caso da FISPQ com 
 as mudanças no working tree: **1621 passed, 6 skipped, 0 failed** (1007,64 s), +7 exato sobre 1614. `DECISOES` não tocado.
 
 **Efeito no Aurora.** Sem a FISPQ, GHE 18 ganha a pendência; com ela, o pacote segue igual ao gabarito `[A MEDIR — app]`.
+
+## Sessão (branch `claude/cool-planck-niq4le`, recriada sobre `main 89ffad4`, pós-merge do PR #430) — 03/10/2026 — CORREÇÃO de procedência: IN MTP 2/2021 no benzeno
+
+**Origem.** `[A CONFERIR]` do PR #430. Diovanni subiu em `normas/` a IN MTP 2/2021 (`43943d2`) e a Portaria de
+Consolidação MS 5/2017 (`89ffad4`).
+
+**Lido.** IN MTP 2/2021 (texto compilado, alterada pelas IN MTP 2 e 3/2022): art. 294, V revoga a IN SSST 2/1995; art.
+186 remete a vigilância do benzeno ao Anexo X — 2.1.3 hemograma completo com plaquetas e reticulócitos; 3.1.1 a 3.1.5
+admissional, periódico a no máximo 6 meses, mudança de função, retorno diferenciado, demissional. PC 5/MS Anexo LXVIII:
+reticulócitos no protocolo de investigação de caso suspeito (4.1.4 d).
+
+**Mudado (sem efeito no motor).** `R-PKG-BZ`: reticulócitos 6M deixa a analogia com o hemograma e passa a citar o Anexo
+X (`regras.yaml` e PROTOCOLO); IN 2/1995 registrada como revogada também em `R-PKG-ASF` e §5.9. Fecha o `[A CONFERIR]`
+da IN e o da vigência da NR-07 (conferida pelo Diovanni em 01/10/2026). PROTOCOLO v122; nota em
+`DT-(sessão claude/cool-planck-niq4le)-01`. Insumo para a `-02`: na norma, reticulócitos só existem no regime do benzeno.
+
+**Verificação.** Recorte da suíte (59 arquivos que leem `regras.yaml`, `R-PKG-BZ` ou benzeno): 855 passed, 3 skipped
+(354,03 s). Só `base_normativa` e docs mudaram; `DECISOES` não tocado.

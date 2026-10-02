@@ -3904,6 +3904,13 @@ a divergência do GHE 18 fica consciente; o que fecha é anexar a FISPQ.
 pelo Anexo V 4.2.1 e pelo `R-PKG-ASF`) — a IN 2/2021 não está em `normas/`. Querosene e solvente de nafta do mesmo PGR
 sem slug: fora da `R-FDS-07` até entrarem no vocabulário.
 
+**Nota (03/10/2026) — `[A CONFERIR]` fechado.** IN MTP 2/2021 e Portaria de Consolidação MS 5/2017 subidas pelo Diovanni
+em `normas/` (`43943d2`, `89ffad4`). A IN SSST 2/1995 foi revogada pela IN MTP 2/2021 (art. 294, V); a vigilância do
+benzeno está no Anexo X dela (art. 186): hemograma completo com plaquetas e reticulócitos (2.1.3) no admissional,
+periódico a no máximo 6 meses, mudança de função e demissional (3.1). Reticulócitos 6M da `R-PKG-BZ` passam a ter base
+literal (PROTOCOLO v122). Vigência da NR-07 do acervo conferida pelo Diovanni (01/10/2026). Para a `-02`: na norma, os
+reticulócitos só aparecem no regime do benzeno (IN 2/2021 Anexo X; PC 5/MS Anexo LXVIII 4.1.4 d, investigação de caso).
+
 ### DT-(sessão `claude/cool-planck-niq4le`)-02 — Reticulócitos sem t,t-mucônico nas pinturas do acervo `[ABERTA — A MEDIR]`
 
 Varredura descartável de texto (02/10/2026) nos blocos de pintura das matrizes de `matrizes_originais/`: t,t-mucônico em 6

@@ -779,7 +779,7 @@ Ambos a 6M ±45d (7.5.13). "Obrigatório apenas no periódico" não impede o mé
 - **Quadro 2 (IBE/SC), 4 entradas:** cádmio e compostos inorgânicos; chumbo e compostos inorgânicos (Pb-S + ALA-U); inseticidas inibidores da colinesterase; flúor, ácido fluorídrico e fluoretos inorgânicos.
 - **Quadro 1 (IBE/EE):** todo o restante da tabela — solventes (tolueno, xilenos, MEK, acetona, n-hexano, estireno…), Cr⁶⁺, CO, benzeno (via SPMA/TTMA), etc.
 
-**Carcinógenos têm regime próprio no Anexo V** (gatilho: exposição >10% do LEO ou sem avaliação ambiental; prontuário 40 anos; benzeno remetido a IN SSST 02/1995 + Portaria de Consolidação 5/MS). A carcinogenicidade **não** desloca a substância para "só periódico" — o momento é decidido pelo Quadro do indicador.
+**Carcinógenos têm regime próprio no Anexo V** (gatilho: exposição >10% do LEO ou sem avaliação ambiental; prontuário 40 anos; benzeno remetido a IN SSST 02/1995 + Portaria de Consolidação 5/MS; a IN 2/1995 foi revogada pela IN MTP 2/2021, art. 294, V — vigilância hoje no Anexo X dela). A carcinogenicidade **não** desloca a substância para "só periódico" — o momento é decidido pelo Quadro do indicador.
 
 **Caso-âncora da mudança de saída (motiva nova ID, não R-BIO-02 corrigido):** o **tolueno** e os solventes comuns (xileno, MEK, acetona — os agentes mais frequentes nas matrizes reais) têm LT, não são carcinógenos, e o indicador é IBE/EE (Quadro 1) → **só periódico**. O critério de R-BIO-02 ("com LT → cinco momentos") os emitia em adm+per+RT+MR+dem → **superdimensionamento**. Como muda a matriz temporal de agentes de alta frequência → nova ID. (Cádmio NÃO serve de contra-exemplo: carcinógeno E com LT ao mesmo tempo, ambíguo nos dois baldes do critério antigo.)
 
@@ -953,10 +953,20 @@ obrigação do Anexo V: é conduta do protocolo pelo NR-07 7.5.18 (exame a crit�
 relacionado a risco classificado no PGR — a aguarrás — e justificado pela FDS). "Independente da
 concentração" (R-FDS-04) fica como conduta `[VALIDADO]`, não como texto da norma. Sem benzeno no PGR
 nem na FDS, o pacote não sai; a falta da FDS vira pendência (`R-FDS-07`).
-`[A CONFERIR]`: o Anexo V 4.2.1 cita a IN 2/1995; o Anexo 13-A (itens 7.4 e 8.1, Portaria MTP
-806/2022) remete à IN 2/2021, Anexos IX e X. A IN 2/2021 não está em `normas/` — conferir no
-Gov.br/MTE antes de citá-la em regra. Vigência da NR-07 do acervo (`nr-07-atualizada-2022-1`)
-também a conferir.
+**Conferência da IN (03/10/2026, `normas/in-2-de-8-denovembro-de-2021.pdf`).** A IN SSST 2/1995,
+que a NR-07 Anexo V 4.2.1 ainda cita, foi revogada pela IN MTP 2/2021 (art. 294, V). A vigilância
+vigente é a do Anexo X da IN MTP 2/2021 (art. 186; NR-15 Anexo 13-A 8.1, Portaria MTP 806/2022):
+item 2.1.3, exames complementares "no mínimo, hemograma completo com contagem de plaquetas e
+reticulócitos"; 3.1.1 admissional, 3.1.2 periódico "a intervalos máximos de seis meses", 3.1.3
+mudança de função igual ao admissional, 3.1.5 demissional; 3.1.4 retorno com procedimento
+diferenciado (critério do médico). Logo hemograma **e reticulócitos** 6M em adm/per/MR/dem têm base
+literal: o "6M por analogia ao hemograma" sai de `[DERIVADO — analogia]` para
+`[DERIVADO — IN MTP 2/2021 Anexo X]`. Os indicadores biológicos (2.1.5) remetem a protocolo
+MS/Fundacentro, hoje NR-07 Anexo I Quadro 1. Campo de aplicação do Anexo X (3.1): empresas do regime
+do benzeno — o limiar do Anexo 13-A item 2 continua valendo. Portaria de Consolidação MS 5/2017,
+Anexo LXVIII (`normas/`): reticulócitos aparecem no protocolo de investigação de caso suspeito
+(4.1.4 d), não como rastreio. Vigência da NR-07 do acervo (até a Portaria MTP 567/2022) conferida
+pelo Diovanni no Gov.br em 01/10/2026.
 
 ### R-PKG-ASF — Pacote Asfalto (impermeabilização) `[DERIVADO — NR-07 Anexo V + 7/7 GHEs de impermeabilização com asfalto no acervo]`
 **Predicado:** `asfalto` ou `cimento_asfaltico` no GHE (declarado no PGR ou componente de FDS).
@@ -974,7 +984,7 @@ pelo 7.5.18 (a critério do médico, tecnicamente justificado) e o clínico seme
 impermeabilização com asfalto — CMO Aurora (27/08/26), Varandas Flamboyant (16/09/26), Vistamerica
 (28/07/26 e 08/12/25), Varandas Bueno (11/08/25, 2 GHEs) e RQ.61 Viverde (06/03/25, validada).
 **Fora do pacote, por norma:** t,t-mucônico e reticulócitos são vigilância do benzeno (NR-07 Anexo V
-4.2.1 → IN 2/1995) e o regime exige benzeno ou mistura ≥1% (NR-15 Anexo 13-A item 2); asfalto não é.
+4.2.1; IN MTP 2/2021 Anexo X, que revogou a IN SSST 2/1995) e o regime exige benzeno ou mistura ≥1% (NR-15 Anexo 13-A item 2); asfalto não é.
 Pedidos nas matrizes CMO recentes (Aurora, Flamboyant, Vistamerica) — divergência consciente,
 `[INTERPRETADO — prioridade na revisão de saída]`. 1-hidroxipireno urinário (marcador de HPA) fica a
 critério do coordenador (7.5.18), não é padrão.
@@ -1249,3 +1259,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v119 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (CORREÇÃO medida em produção): §5.4 R-RX-04, parágrafo **Termos** — 4ª forma "Sulfato de cálcio — pó de Gesso" (transcrição do Gemini no T65, GHE 16 sem espirometria e RX no app). Nenhuma regra alterada. |
 | v120 | 01/10/2026 | Branch `ccr-983f0b9f-zkz16m` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b): **`R-BIO-05` ampliada** (§5.9) — risco BAIXO sem medição também vira menção no PCMSO, fora dos 9 cancerígenos de `cancerigeno_com_ibe`; medição acima do nível de ação emite sempre (NR-07 7.5.12 "b", inclusive em IRRELEVANTE). `[INTERPRETADO]` mantido. Substitui a cl.7 da D-ARQ-86. Fecha a divergência do T65 GHE 11 (MEK). |
 | v121 | 02/10/2026 | Branch `claude/cool-planck-niq4le` (IMPLEMENTAÇÃO, decisão do Diovanni — itens 2 e 3 da reavaliação do benzeno pela norma): **`R-FDS-07` CRIADA** (§4) — aguarrás sem a FDS dela no GHE e sem benzeno identificado → pendência não bloqueante ao elaborador (NR-07 7.5.5), na tela e no memorial; nenhum exame. **Nota de procedência em `R-PKG-BZ`** — abaixo de 0,1% o pacote é conduta pelo 7.5.18, não obrigação do Anexo V; comportamento inalterado. `[A CONFERIR]` IN 2/2021 (Anexo 13-A) × IN 2/1995 (Anexo V 4.2.1). |
+| v122 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 89ffad4` (CORREÇÃO de procedência, sem mudança de comportamento): IN MTP 2/2021 e Portaria de Consolidação MS 5/2017 lidas de `normas/`. **`R-PKG-BZ`**: reticulócitos 6M em adm/per/MR/dem passa de analogia ao hemograma para base literal (IN MTP 2/2021 Anexo X, 2.1.3 e 3.1); IN SSST 2/1995 registrada como revogada (art. 294, V). **`R-PKG-ASF`** e §5.9 (carcinógenos): citação da IN atualizada. Fecha os `[A CONFERIR]` da v121 (IN e vigência da NR-07). |
