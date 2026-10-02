@@ -11765,3 +11765,29 @@ Fascino GHE-16 PINTURA passa a reconhecer o termo (segue PARCIAL por outras lacu
 
 **Verificação.** `mypy --strict` alvo canônico: limpo, 54 arquivos. Suíte completa, árvore parada: **1634 passed, 6
 skipped, 0 failed** (965,72 s), +3 exato sobre 1631. `DECISOES` não tocado.
+
+## Fechamento do chat (branch `claude/cool-planck-niq4le`, `main 13b26b3`) — 03/10/2026
+
+**PRs deste chat, todos mergeados:** #430 (`R-FDS-07`), #431 (`R-PKG-BZ` cita IN MTP 2/2021 Anexo X), #432 (`R-BIO-06`,
+octoato de cobalto), #433 (querosene e solvente de nafta), #434 (correção da contagem 24/46 e `R-PKG-BZ-PRES`), #435
+(Aurora medido no app), #436 (`destilados_petroleo_hidrotratados`). Aurora 27.08.26 GHE 18 PINTURA bate com o gabarito no
+pacote do benzeno, clínico 6M e menções; divergências restantes por decisão: cobalto na urina, acuidade com DEM.
+
+**Suíte:** 1634 passed, 6 skipped, 0 failed, medida em `c6d99ea` (árvore parada). PROTOCOLO v126; DECISOES v238.
+
+**Três números clínicos:** moveram-se pelo instrumento (`regras 36/51`, `cas 80/115` em `13b26b3`); tabela do PAINEL não
+re-tirada neste fechamento — decisão declarada, 1º item do próximo chat.
+
+**Pendências abertas (íntegra):** "Destilados (Petróleo)" do R78 Naturia sem resolver `[A MEDIR]` (PDF corta o termo);
+carcinogenicidade do octoato de cobalto `[A CONFERIR]` (FDS do Fundo Zarcão é H351 no produto, não por componente);
+re-tiragem da tabela dos três números do PAINEL; demais pendências do Aurora anteriores a este chat (acuidade com DEM,
+GHE 21) seguem como registradas.
+
+**Lições de método:** (1) regex de grafia sobre `.doc → txt` perde acento e cabeçalho "GHE - NN" — a contagem "6 de 41"
+entrou numa decisão (#430) e foi corrigida para 24/46; varredura de acervo usa padrão tolerante e confere o cabeçalho.
+(2) Premissa química sem FDS do acervo errou duas vezes (hidrotratado "não é aguarrás"; pendência da nafta com a FISPQ) —
+conferir a FDS antes de afirmar. (3) Medição nos pares determinísticos antes do commit pegou a superemissão de Porto
+Araras I (opção b → b′). `/conferir` (passo 8 do ritual) não disponível neste ambiente — não rodado.
+
+**Branches:** só `main` no remoto; nenhuma branch órfã. Contexto do chat em 65%; o Diovanni segue em chat novo a partir dos
+docs vivos.
