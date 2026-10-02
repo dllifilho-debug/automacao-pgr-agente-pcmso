@@ -33,6 +33,7 @@ from agente_medico.superficie.autorizacao import (
     carregar_allowlist,
     decidir_acesso,
 )
+from agente_medico.superficie.estilos import aplicar_estilos
 from agente_medico.superficie.web_matriz import pagina_matriz
 
 st.set_page_config(
@@ -40,6 +41,7 @@ st.set_page_config(
     page_icon="🩺",
     layout="wide",
 )
+aplicar_estilos()
 
 
 def _identidade_do_provedor() -> tuple[bool, str | None] | None:

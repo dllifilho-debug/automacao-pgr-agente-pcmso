@@ -8,6 +8,7 @@ exige por D-ARQ-76. NUNCA é o entrypoint publicado: o container roda
 
 import streamlit as st
 
+from agente_medico.superficie.estilos import aplicar_estilos
 from agente_medico.superficie.web_matriz import pagina_matriz
 
 st.set_page_config(
@@ -15,5 +16,6 @@ st.set_page_config(
     page_icon="🩺",
     layout="wide",
 )
+aplicar_estilos()
 
 pagina_matriz()
