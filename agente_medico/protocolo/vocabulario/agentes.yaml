@@ -973,6 +973,20 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+  octoato_de_cobalto:
+    # R-BIO-06 [INTERPRETADO]. 2-etil-hexanoato de cobalto(II), secante de tinta/esmalte. Sal
+    # orgânico: fora do Quadro 1 da NR-07 ("Cobalto e seus compostos inorgânicos") — por isso
+    # slug próprio, não alias de `cobalto` (decisão do Diovanni, 03/10/2026). O próprio slug
+    # normaliza igual ao termo "Octoato de Cobalto" dos PGRs CMO (Aurora 27.08.26 e Vistamerica
+    # 2026-07-28, GHE da pintura, BAIXO) [MEDIDO]. CAS 136-52-7 [DERIVADO — CAS Registry].
+    # is_carcinogeno_iarc=false [A CONFERIR — IARC Vol.131 (2022) classifica sais solúveis de
+    # cobalto(II) como 2A; o octoato não foi conferido; o PGR diz "Pode provocar câncer" sem FDS
+    # legível no acervo].
+    tipo_ibe: null
+    cas: "136-52-7"
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
   fenol:               # R-BIO-04, Quadro 1 (IBE/EE): fenol → fenol na urina
     lt_nr15: {ppm: 4, mg_m3: 15, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Fenol"}
     tipo_ibe: EE
