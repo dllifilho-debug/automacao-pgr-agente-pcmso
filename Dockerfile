@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app_matriz.py .
 COPY agente_medico/ ./agente_medico/
 COPY .streamlit/ ./.streamlit/
+COPY static/ ./static/
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 

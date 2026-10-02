@@ -58,6 +58,14 @@ def test_entrypoints_aplicam_estilos(monkeypatch: pytest.MonkeyPatch, entrypoint
     assert chamadas
 
 
+def test_css_nao_carrega_nada_de_terceiros() -> None:
+    # Reversão que mata: pôr um `@import url('https://fonts.googleapis.com/...')`
+    # no CSS — reabre a requisição a terceiro que o fontFaces local eliminou.
+    # `xmlns='http://www.w3.org/2000/svg'` dos ícones é namespace, não requisição.
+    css_sem_namespace = re.sub(r"xmlns='[^']*'", "", estilos._css())
+    assert "://" not in css_sem_namespace
+
+
 # Nomes que o frontend monta por template (`stAlertContent${tipo}`,
 # `stBaseButton-${kind}`): no bundle só aparece o prefixo seguido de `${`.
 _PREFIXOS_TEMPLATE = ("stAlertContent", "stBaseButton-")

@@ -110,6 +110,11 @@ def _css() -> str:
   font-size: clamp(1.5rem, 2.4vw, 2.1rem);
   padding: 0;
 }}
+/* Mesma compensação de margem do stepper: sem isto o título invade o padding
+   de baixo da faixa (o container conta 16px a menos que a altura do h1). */
+[data-testid="stElementContainer"]:has(> [data-testid="stHeading"] h1) [data-testid="stMarkdownContainer"] {{
+  margin-bottom: 0;
+}}
 /* Esconde o ícone de âncora (link) que o Streamlit põe ao lado do título. */
 [data-testid="stElementContainer"]:has(> [data-testid="stHeading"] h1) [data-testid="stHeaderActionElements"] {{
   display: none;

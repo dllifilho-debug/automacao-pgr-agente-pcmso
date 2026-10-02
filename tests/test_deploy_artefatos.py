@@ -7,6 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import toml  # type: ignore[import-untyped]
 
 from agente_medico.superficie.materializar_secrets import (
     SegredoInvalido,
@@ -16,6 +17,7 @@ from agente_medico.superficie.materializar_secrets import (
 _RAIZ = Path(__file__).parent.parent
 _DOCKERFILE = _RAIZ / "Dockerfile"
 _ENTRYPOINT = _RAIZ / "entrypoint.sh"
+_CONFIG_STREAMLIT = _RAIZ / ".streamlit" / "config.toml"
 
 _VALORES_TESTE = {
     "PCMSO_OIDC_CLIENT_ID": "id-de-teste",
@@ -95,3 +97,32 @@ def test_entrypoint_materializa_segredo_antes_do_streamlit_run() -> None:
     assert linha_materializador < linha_streamlit
     assert "exec" in linhas[linha_streamlit]
     assert "PORT" in linhas[linha_streamlit]
+
+
+def test_dockerfile_copia_a_pasta_static() -> None:
+    # Reversão que mata: remover `COPY static/ ./static/` do Dockerfile — em
+    # produção app/static/ responde 404 e o tema cai na fonte padrão sem erro.
+    linhas = _tokens_por_linha(_DOCKERFILE.read_text(encoding="utf-8"))
+    assert ["COPY", "static/", "./static/"] in linhas
+
+
+def test_fonte_do_tema_e_servida_pelo_app_sem_terceiros() -> None:
+    # Reversão que mata: voltar `font = "Inter:https://fonts.googleapis.com/..."`,
+    # apontar o fontFaces para um arquivo que não existe em static/, desligar
+    # enableStaticServing ou apagar a licença OFL que acompanha a fonte.
+    # `toml`, não `tomllib`: é o parser que o próprio Streamlit usa no config.toml
+    # (dependência dele desde a 1.56) e roda em Python 3.10, onde tomllib não existe.
+    config = toml.loads(_CONFIG_STREAMLIT.read_text(encoding="utf-8"))
+    tema = config["theme"]
+
+    assert config["server"]["enableStaticServing"] is True
+    for chave in ("font", "headingFont"):
+        assert "://" not in tema[chave], f"{chave} carrega fonte de terceiro"
+    faces = tema["fontFaces"]
+    assert faces
+    for face in faces:
+        url = face["url"]
+        assert url.startswith("app/static/"), url
+        arquivo = _RAIZ / "static" / url.removeprefix("app/static/")
+        assert arquivo.is_file(), arquivo
+        assert (arquivo.parent / "LICENSE-Inter.txt").is_file()
