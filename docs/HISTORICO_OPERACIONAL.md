@@ -11791,3 +11791,67 @@ Araras I (opção b → b′). `/conferir` (passo 8 do ritual) não disponível 
 
 **Branches:** só `main` no remoto; nenhuma branch órfã. Contexto do chat em 65%; o Diovanni segue em chat novo a partir dos
 docs vivos.
+
+## Sessão (branch `claude/awesome-goldberg-vt1irf` sobre `main d4a3172`) — 03/10/2026 — MEDIÇÃO de custo do Gemini + IMPLEMENTAÇÃO: consumo de tokens por PGR na tela (PR #441)
+
+**Origem.** Pergunta do Diovanni: está compensando pagar o Gemini, dá para economizar token sem perder qualidade, um
+modelo aberto (Qwen) ajudaria?
+
+**Medido.** O app manda ao Gemini o texto do pdfplumber, não imagem. Texto enviado por PGR (instrução fixa + blocos):
+Aurora 158.388 caracteres em 4 chamadas, Fascino 166.914/4, Viverde 146.134/6, TOCTAO 112.651/3. Painel do AI Studio
+(prints do Diovanni): quem responde é o `gemini-3.8-flash`; gasto de R$ 4,84 em 7 dias e R$ 3,20 em outubro, contra
+teto de R$ 35,00; 4 de 10 mil requisições por dia.
+
+**Erros meus, corrigidos na sessão.** (1) Afirmei, a partir de resumo de busca, que o alias `gemini-flash-latest`
+caía no 3.5 Flash e custava o dobro — o AI Studio mostrou 3.8 Flash. A página oficial (ai.google.dev) é bloqueada pelo
+proxy deste ambiente; resumo de busca não é fonte. (2) Dei uma estimativa de custo por PGR sem medição, contra a regra
+`[A MEDIR]`. (3) A heurística de "linha repetida 3× ou mais" para ruído contou fragmentos de conteúdo; é teto, não
+medida. (4) Propus fixar a versão do modelo sem pesar a 003.EW, que trocou versão fixa por alias porque três de quatro
+versões fixas morreram.
+
+**Decisão do Diovanni.** Fazer só o item 1 (instrumentar). Descartados por custo × risco: troca de modelo, JSON com
+schema, pré-filtro de ruído, cache no Supabase, lote de cards, Qwen (o app lê texto, não imagem).
+
+**Entrega (PR #441, `48985c9`, merge `45e4e7c`).** `UsoGemini` + `medir_uso()` (ContextVar) em
+`adaptadores/transcritor_gemini.py`; `_registrar_uso` em toda resposta HTTP 200, antes do teste de finishReason, nunca
+lança. `ResumoUsoIA`, `resumir_uso`, `texto_uso` e `TempoProcessamento.uso_ia` em `superficie/web_matriz.py`; linha
+"🔢 Consumo da IA" na conferência. Limite: leitura de FDS anexada não entra na conta.
+
+**Achado lateral.** Logs INFO de `agente_medico` não aparecem no `streamlit run` (medido com script mínimo: só WARNING
+sai). O `_log.info` de tempo de processamento existente nunca chegou ao log do servidor. Não mexido.
+
+**Verificação.** 8 testes em `test_uso_gemini.py`; varredura inversa com 15 reversões, todas com ao menos um teste
+vermelho. Suíte completa, árvore parada: **1671 passed, 6 skipped, 0 failed** (771,41 s). `mypy --strict` alvo
+canônico: limpo, 55 arquivos (igual à `main d4a3172`; o 51 do CLAUDE.md é referência de 25/09).
+
+**Validação em produção (Aurora 27.08.26, após o merge).** "4 resposta(s) de gemini-3.8-flash — tokens: entrada 46.279 ·
+saída 16.736 · raciocínio 0"; 52 s no total, 41 s de IA, 11 s de leitura (antes do PR: 56/45/11 — variação da API, não
+efeito da mudança). Custo da rodada pela tabela de preços encontrada em busca (US$ 0,75/M entrada, US$ 3,75/M saída até
+31/12/2026, `[A CONFERIR na página oficial]`): cerca de US$ 0,10. "Raciocínio 0" pode ser campo ausente na resposta;
+como a saída bate com o AI Studio, não há indício de raciocínio cobrado à parte.
+
+## Sessão (mesma branch, recriada sobre `main 45e4e7c`, pós-merge do PR #441) — 03/10/2026 — MEDIÇÃO + docs: re-tiragem dos três números do PAINEL
+
+**Medido em `45e4e7c`.** `medir_painel`: `regras 36/51 (71%)`, `cas 80/115 (70%)`, `índice sincronizado`. Intenção do
+painel 34/51 (67%): saem `R-FDS-04` e `R-TEMP-01`, só citados no texto de `base_normativa` do `regras.yaml`.
+
+**Divergência painel × instrumento conciliada.** Instrumento reaplicado por `git show` a cada um dos 72 merges de `main`
+entre `a8bb4d1` (003.EZ, 22/42 reproduzido) e `45e4e7c` (clone aprofundado com `git fetch --deepen=600`). Primeiro salto:
+`a48836d` (PR #306, 003.FB), 22/42 → 23/42, entra `R-PGR-05`, denominador igual. É footprint executável:
+`regra_origem="R-PGR-05"` na pendência `fracao_sem_agente` de `motor/resolvedor_termos.py`. O instrumento estava certo; a
+tabela não foi re-tirada em 003.FB. O `[A MEDIR]` de 003.FH sobre "qual regra explica o +1" fica resolvido.
+
+**Achado, não corrigido.** A regex do instrumento (`R-[A-Z]+-[0-9]+`) não casa 11 headers ativos do PROTOCOLO:
+`R-PKG-ATIVCRIT`, `-SOLD`, `-BZ`, `-BZ-PRES`, `-ASF`, `-ASF-CO`, `-SOLD-CO`, `-ARMADOR`, `-TRANSITO`, `-PORT` e
+`R-REG-ANAC`; sete são executáveis no `regras.yaml`. Contados, seria 43/62 (69%) — script avulso, não o instrumento.
+Corrigir é decisão do Diovanni (muda o que o painel mede e `tests/test_medir_painel.py`). Faceta nova de `DH-003EC-01`(b).
+
+**Dívidas que travam produção.** O painel dizia "3" por herança; o `PENDENCIAS_CLINICAS.md` marca `DT-003L-01` e
+`DT-FDS-02` como "ABERTA. Não bloqueia" e `DT-003M-02` como (A) parcial / (B) fechada. Re-tirado como "0 declaradas
+bloqueantes".
+
+**Docs tocados.** `PAINEL_ESTADO.md` (tiragem corrente, notas `[CONCILIADO]` e `[ACHADO]`, Baseline, tabela "Os três
+números", Camada 2 por superfície, linhas de CAS) e este histórico. `DECISOES` e `PROTOCOLO` não tocados.
+
+**Lacuna registrada, não preenchida.** Os PRs #438–#440 (outro chat: estilo e paleta da tela, fonte Inter servida pelo app, smoke visual e guarda do requirements-dev)
+não têm entrada neste histórico; não reconstruo de memória.
