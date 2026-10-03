@@ -2,6 +2,11 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass
+from typing import Any
 
 import requests
 
@@ -78,6 +83,69 @@ Texto da FDS:
 """
 
 
+@dataclass(frozen=True)
+class UsoGemini:
+    """Consumo de UMA resposta HTTP 200 do Gemini, lido de `usageMetadata`.
+    `modelo` é o `modelVersion` que a API diz ter respondido — com alias
+    "-latest" na cascata, é a única forma de saber qual modelo foi cobrado;
+    sem o campo na resposta, fica o nome pedido. Campo de contagem ausente
+    vale 0 (o Gemini omite `thoughtsTokenCount` sem raciocínio e
+    `cachedContentTokenCount` sem acerto de cache)."""
+
+    modelo: str
+    entrada: int
+    saida: int
+    raciocinio: int
+    cache: int
+
+
+_USO: ContextVar[list[UsoGemini] | None] = ContextVar("uso_gemini", default=None)
+
+
+@contextmanager
+def medir_uso() -> Iterator[list[UsoGemini]]:
+    """Coleta o UsoGemini de toda resposta 200 de _chamar_gemini feita dentro
+    do bloco, na mesma thread/contexto. ContextVar e não lista global: duas
+    sessões Streamlit processando ao mesmo tempo não misturam contagens."""
+    registros: list[UsoGemini] = []
+    marca = _USO.set(registros)
+    try:
+        yield registros
+    finally:
+        _USO.reset(marca)
+
+
+def _contagem(meta: dict[str, Any], campo: str) -> int:
+    valor = meta.get(campo, 0)
+    return valor if isinstance(valor, int) and not isinstance(valor, bool) else 0
+
+
+def _registrar_uso(modelo_pedido: str, corpo: Any) -> None:
+    """Nunca lança: medir consumo não pode derrubar uma transcrição que deu
+    certo. Resposta sem `usageMetadata` registra zeros, não some — a chamada
+    aconteceu e conta."""
+    registros = _USO.get()
+    if registros is None:
+        return
+    meta: dict[str, Any] = {}
+    modelo = modelo_pedido.removeprefix("models/")
+    if isinstance(corpo, dict):
+        bruto = corpo.get("usageMetadata")
+        meta = bruto if isinstance(bruto, dict) else {}
+        versao = corpo.get("modelVersion")
+        if isinstance(versao, str) and versao.strip():
+            modelo = versao.strip()
+    registros.append(
+        UsoGemini(
+            modelo=modelo,
+            entrada=_contagem(meta, "promptTokenCount"),
+            saida=_contagem(meta, "candidatesTokenCount"),
+            raciocinio=_contagem(meta, "thoughtsTokenCount"),
+            cache=_contagem(meta, "cachedContentTokenCount"),
+        )
+    )
+
+
 class TranscricaoIndisponivel(Exception):
     """Falha de INVOCAÇÃO do transcritor-LLM (chave ausente, cascata sem
     resposta íntegra: sem 200 ou finishReason != STOP, JSON de resposta
@@ -144,6 +212,10 @@ def _chamar_gemini(prompt: str, chave: str) -> str:
                 motivos.append(f"{modelo}: HTTP {r.status_code}")
                 continue
             corpo = r.json()
+            # Antes do teste de finishReason: resposta descartada (não-STOP,
+            # ou JSON que o chamador rejeita e pede de novo) também consumiu
+            # tokens.
+            _registrar_uso(modelo, corpo)
             finish_reason = corpo["candidates"][0].get("finishReason")
             if finish_reason != "STOP":
                 motivos.append(f"{modelo}: finishReason={finish_reason}")
