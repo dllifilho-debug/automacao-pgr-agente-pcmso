@@ -3962,6 +3962,15 @@ IRRELEVANTE/BAIXO; cobalto na urina PER 6M acima. No Aurora o pedido do exame fi
 passa a sair como no gabarito. `[A CONFERIR]`: carcinogenicidade do octoato (IARC Vol.131; H350 na FDS) — reabre se a FDS
 declarar H350.
 
+**Nota (03/10/2026, branch `claude/awesome-goldberg-vt1irf`) — carcinogenicidade conferida; decisão: seguir a norma
+vigente.** LINACH (Portaria Interministerial 9/2014, PDF em `normas/`): cobalto e compostos, cobalto metálico sem carboneto
+de tungstênio e sais solúveis de Co(II) no **Grupo 2B**; octoato não citado. Pelo critério 1/2A, não cancerígeno — `R-BIO-06`
+e `R-BIO-04-cobalto` ficam como estão; o `[A CONFERIR]` acima fecha. Divergência: IARC Vol. 131 (2022/2023) deu 2A a cobalto
+metálico e sais solúveis de Co(II); a LINACH usa as monografias 1-107 (2013). **Gatilhos de reabertura:** (1) LINACH ou NR
+atualizada com o Vol. 131 — aí entram as propostas da sessão: `cobalto` em `cancerigeno_com_ibe` (`R-CLI-05`, exame no
+BAIXO) e octoato tratado como sal que libera Co(II) (NTP RoC 15ª ed. citaria o bis(2-etil-hexanoato) de cobalto como solúvel
+em fluidos biológicos `[via resumo de busca, documento não lido]`); (2) FDS com H350. Aurora 27.08.26 segue como divergência consciente.
+
 **Nota em `DT-(sessão claude/cool-planck-niq4le)-01` (03/10/2026) — querosene e solvente de nafta cadastrados.** Decisão
 do Diovanni (opção a): slugs `querosene` (CAS 8008-20-6, medido na FISPQ da aguarrás) e `solvente_de_nafta` (sem CAS),
 sem exame — NR-15 Anexo 11 e NR-07 Anexo I não os listam (conferido em `normas/`) —, com `contaminantes_a_confirmar:

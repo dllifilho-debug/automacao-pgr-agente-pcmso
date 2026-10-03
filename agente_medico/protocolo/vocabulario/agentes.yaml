@@ -1020,6 +1020,8 @@ agentes:
     termos: ["Cromo hexavalente (compostos solúveis)"]
     enquadramento_3048: {codigo: "1.0.10", tempo_exposicao: "25 anos"}  # ressalva: o Decreto não distingue valência ("Cromo e seus compostos tóxicos") — a NR-07 distingue, o Decreto não
   cobalto:             # R-BIO-04, Quadro 1 (IBE/EE): cobalto e comp. inorg. → cobalto na urina
+    # Não cancerígeno pelo critério 1/2A [DERIVADO — LINACH 2014, Grupo 2B]; IARC Vol.131 (2022/2023)
+    # deu 2A a cobalto metálico e sais solúveis de Co(II) — ver PROTOCOLO §R-BIO-06 (v127).
     tipo_ibe: EE
     cas: "7440-48-4"
     is_carcinogeno_iarc: false
@@ -1031,9 +1033,10 @@ agentes:
     # slug próprio, não alias de `cobalto` (decisão do Diovanni, 03/10/2026). O próprio slug
     # normaliza igual ao termo "Octoato de Cobalto" dos PGRs CMO (Aurora 27.08.26 e Vistamerica
     # 2026-07-28, GHE da pintura, BAIXO) [MEDIDO]. CAS 136-52-7 [DERIVADO — CAS Registry].
-    # is_carcinogeno_iarc=false [A CONFERIR — IARC Vol.131 (2022) classifica sais solúveis de
-    # cobalto(II) como 2A; o octoato não foi conferido; o PGR diz "Pode provocar câncer" sem FDS
-    # legível no acervo].
+    # is_carcinogeno_iarc=false [DERIVADO — LINACH, Portaria Interministerial 9/2014: cobalto,
+    # compostos e sais solúveis de Co(II) no Grupo 2B; octoato não citado pelo nome]. Divergência:
+    # IARC Vol.131 (2022/2023) pôs sais solúveis de Co(II) em 2A; a LINACH usa as monografias 1-107.
+    # Reabre se a LINACH ou uma NR incorporar o Vol.131 (PROTOCOLO §R-BIO-06, v127).
     tipo_ibe: null
     cas: "136-52-7"
     is_carcinogeno_iarc: false

@@ -908,10 +908,19 @@ matrizes CMO com octoato BAIXO/trivial no PGR da pintura anotam a menção ("inc
 menção no mesmo cargo — contradição interna; divergência consciente. Ramo acima de BAIXO: sem caso no
 acervo.
 
-`[A CONFERIR]`: carcinogenicidade do octoato. IARC Vol.131 (2022) classifica sais solúveis de
-cobalto(II) como 2A; o octoato não foi conferido, e o PGR do Aurora o descreve com "Pode provocar
-câncer" sem FDS legível no acervo. Se a FDS declarar H350, a `R-FDS-03` o trata como cancerígeno e a
-dispensa em BAIXO deixa de valer (mesmo corte de `cancerigeno_com_ibe`) — reabrir com a FDS.
+**Carcinogenicidade `[DERIVADO — LINACH, Portaria Interministerial MTE/MS/MPS nº 9/2014]`**, lida em
+`normas/LINACH-Portaria-Interministerial-09-2014.pdf`. A LINACH põe no **Grupo 2B** "Cobalto e compostos de cobalto (avaliados como grupo)",
+"Cobalto metálico sem carboneto de tungstênio" e "Sulfato de Cobalto e outros sais solúveis de Cobalto
+(II)"; só "Cobalto metálico com carbeto de tungstênio" é 2A. O octoato não é citado pelo nome; no máximo
+cai em 2B. O critério do projeto (Grupo 1 ou 2A, 003.DP) dá **não cancerígeno** — o comportamento acima
+fica como está (decisão do Diovanni, 03/10/2026). Divergência registrada: a LINACH se baseia nas
+monografias IARC 1 a 107 (nota 1 do anexo, abril/2013); o IARC Vol. 131 (reunião 2022, publicado 2023) classificou cobalto
+metálico e sais solúveis de cobalto(II) como **2A**, sem citar o octoato pelo nome. **Reabre** se a
+LINACH (o art. 3º prevê atualização semestral; nenhuma versão posterior encontrada em busca de 03/10/2026) ou uma NR
+incorporar o Vol. 131, ou se a FDS declarar H350 — aí a `R-FDS-03` o trata como cancerígeno e a dispensa
+em BAIXO deixa de valer (mesmo corte de `cancerigeno_com_ibe`) `[texto anterior, não verificado no código nesta sessão]`. `[A CONFERIR]`: relatório AIR do MTE
+sobre agentes químicos e cancerígenos sugere revisão normativa em andamento (não lido — Gov.br
+bloqueado no ambiente da sessão).
 
 **Origem.** Decisão do Diovanni (03/10/2026, opção B) — substitui "octoato sem cadastro" da sessão
 `claude/tender-fermat-591zah`. Implementado em `regras.yaml` (`R-BIO-06`) e `agentes.yaml`
@@ -1323,3 +1332,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v124 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main c24f319` (IMPLEMENTAÇÃO, decisão do Diovanni — opção a): **`R-FDS-07` estendida** (§4) — slugs `querosene` (CAS 8008-20-6) e `solvente_de_nafta` (sem CAS), sem regra de exame (sem LT nem IBE), com `contaminantes_a_confirmar: [benzeno]`. Com a FISPQ da aguarrás anexada, o querosene "0 - 100" passa a materialidade indeterminada bloqueante (D-ARQ-35), como a nafta da mesma FISPQ. Pares determinísticos: só Porto Araras I GHE-14 muda (+ pendência R-FDS-07); exames e status iguais. |
 | v125 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 55bd73e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b′ da `DT-(sessão claude/cool-planck-niq4le)-04`): **`R-PKG-BZ-PRES` CRIADA** (§6) — solvente de petróleo sem FDS e sem benzeno identificado → pacote do benzeno + clínico 6M sob presunção protetiva (D-ARQ-68 cl.5), matriz `PARCIAL`; IRRELEVANTE não presume. `R-FDS-07` (§4) passa a apontar para ela. Precedente corrigido: 24 de 46 pinturas (a contagem de 02/10 perdia grafias sem acento e cabeçalho "GHE - NN"). |
 | v126 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 860d3e6` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b ajustada): slug `destilados_petroleo_hidrotratados` (sem CAS, sem exame, sem `contaminantes_a_confirmar`) com as grafias de Aurora/Vistamerica, Fascino e WV Maldi ("Querosene hidratado"); o termo do nome químico sai de `aguarras_mineral`, o CAS 64742-47-8 fica nela. Nota em `R-FDS-07` (§4). Pares determinísticos: exames, status e pendências iguais; Fascino GHE-16 passa a reconhecer o termo. |
+| v127 | 03/10/2026 | Branch `claude/awesome-goldberg-vt1irf`, recriada sobre `main 0ea3413` (docs + comentário de vocabulário, decisão do Diovanni — seguir a norma vigente): `R-BIO-06` (§5.9) — o `[A CONFERIR]` da carcinogenicidade do octoato fecha por `[DERIVADO — LINACH 2014]`: cobalto, compostos e sais solúveis de Co(II) no Grupo 2B → não cancerígeno pelo critério 1/2A. Divergência com o IARC Vol. 131 (2022/2023, 2A) registrada com gatilho de reabertura. Sem efeito na matriz. PDF da LINACH em `normas/`. |
