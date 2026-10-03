@@ -6,7 +6,10 @@ from __future__ import annotations
 import io
 import re
 from contextlib import redirect_stdout
+from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from scripts.medir_painel import (
     _ids_ativos_protocolo,
@@ -88,3 +91,37 @@ def test_main_sem_flag_suite_imprime_5_linhas_no_formato_esperado() -> None:
         "indice: DIVERGENTE — rode python -m scripts.gerar_indice_darq",
     )
     assert linhas[4] == "suite: não medida (use --suite)"
+
+
+def _medir_em(tmp_path: Path, protocolo: str, regras: str, monkeypatch: pytest.MonkeyPatch) -> tuple[int, int]:
+    (tmp_path / "PROTOCOLO.md").write_text(protocolo, encoding="utf-8")
+    (tmp_path / "regras.yaml").write_text(regras, encoding="utf-8")
+    (tmp_path / "motor").mkdir()
+    monkeypatch.setattr("scripts.medir_painel._CAMINHO_PROTOCOLO", tmp_path / "PROTOCOLO.md")
+    monkeypatch.setattr("scripts.medir_painel._CAMINHO_REGRAS", tmp_path / "regras.yaml")
+    monkeypatch.setattr("scripts.medir_painel._DIR_MOTOR", tmp_path / "motor")
+    return medir_cobertura_clinica()
+
+
+def test_pacote_com_sufixo_de_letras_conta(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: voltar a regex para `R-[A-Z]+-[0-9]+` — o pacote some do
+    # numerador e do denominador e o resultado vira (1, 1).
+    protocolo = "### R-PKG-BZ-PRES — Pacote\n### R-RX-01 — RX\n"
+    regras = "- id: R-PKG-BZ-PRES\n- id: R-RX-01-adm\n"
+    assert _medir_em(tmp_path, protocolo, regras, monkeypatch) == (2, 2)
+
+
+def test_variante_minuscula_colapsa_na_familia(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: aceitar minúsculas no sufixo (`R-[A-Z]+-[A-Za-z0-9-]+`) —
+    # `R-BIO-04-cobalto` deixa de contar como `R-BIO-04` e o numerador cai para 0.
+    protocolo = "### R-BIO-04 — Indicadores biológicos\n"
+    regras = "- id: R-BIO-04-cobalto\n"
+    assert _medir_em(tmp_path, protocolo, regras, monkeypatch) == (1, 1)
+
+
+def test_pacote_longo_nao_conta_o_prefixo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: aceitar um só segmento de letras (`R-[A-Z]+-[A-Z]+`) — os dois
+    # headers viram `R-PKG-SOLD` e o resultado cai para (1, 1).
+    protocolo = "### R-PKG-SOLD — Soldador\n### R-PKG-SOLD-CO — Carboxi-hemoglobina\n"
+    regras = "- id: R-PKG-SOLD-CO\n"
+    assert _medir_em(tmp_path, protocolo, regras, monkeypatch) == (1, 2)

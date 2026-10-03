@@ -1,7 +1,8 @@
 """Medidor dos 3 números da Camada 2 do PAINEL_ESTADO.md, direto do disco.
 
-Replica o método ali descrito: `git grep` de IDs de regra (`R-[A-Z]+-[0-9]+`,
-família colapsada — `R-RX-01-adm` conta como `R-RX-01`) mede rastreabilidade
+Replica o método ali descrito: `git grep` de IDs de regra (`R-[A-Z]+-[0-9]+` ou
+`R-[A-Z]+-` + sufixo de maiúsculas, como `R-PKG-BZ-PRES`; família colapsada —
+`R-RX-01-adm` conta como `R-RX-01`) mede rastreabilidade
 (string presente em `regras.yaml`/`motor/**/*.py`), não consumo em runtime;
 é piso de rastreabilidade, não teto de função executada.
 """
@@ -20,8 +21,12 @@ from scripts.gerar_indice_darq import _CAMINHO_INDICE as _CAMINHO_INDICE_DARQ
 from scripts.gerar_indice_darq import gerar_indice
 
 _RAIZ = Path(__file__).resolve().parent.parent
-_REGEX_ID = re.compile(r"R-[A-Z]+-[0-9]+")
-_REGEX_HEADER_ID = re.compile(r"^(#{2,4}\s+(R-[A-Z]+-[0-9]+)\b.*)$", re.MULTILINE)
+# ID = família numérica (`R-RX-01`; variante em minúsculas, `R-RX-01-adm`, colapsa no
+# número) ou sufixo de maiúsculas (`R-PKG-BZ-PRES`, `R-REG-ANAC`). Sem o 2º ramo, os pacotes
+# ficavam fora do numerador e do denominador (medido em 03/10/2026: 11 regras ativas).
+_PADRAO_ID = r"R-[A-Z]+-(?:[0-9]+|[A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)*)\b"
+_REGEX_ID = re.compile(_PADRAO_ID)
+_REGEX_HEADER_ID = re.compile(rf"^(#{{2,4}}\s+({_PADRAO_ID}).*)$", re.MULTILINE)
 
 _CAMINHO_PROTOCOLO = _RAIZ / "docs" / "PROTOCOLO_AGENTE_MEDICO.md"
 _CAMINHO_REGRAS = _RAIZ / "agente_medico" / "protocolo" / "regras.yaml"
