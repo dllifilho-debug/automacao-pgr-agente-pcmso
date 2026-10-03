@@ -24,6 +24,12 @@ mypy
 # subprocesso para o portão de 100% do instrumento de varredura (003.FJ).
 coverage
 
+# `scripts/smoke_visual.py` (verificação visual antes do deploy): abre o app num
+# Chromium. O navegador NÃO vem com o pacote — uma vez por máquina:
+# `python -m playwright install chromium`. Importado só dentro das funções que
+# medem, para a suíte rodar sem ele.
+playwright
+
 # Exigidos pelo `mypy --strict` no alvo canônico. Medido em 10/09/2026: sem os
 # dois, a mesma invocação devolve `Found 2 errors in 2 files (checked 48 source
 # files)` — `motor/protocolo.py` (yaml) e `adaptadores/transcritor_gemini.py`
