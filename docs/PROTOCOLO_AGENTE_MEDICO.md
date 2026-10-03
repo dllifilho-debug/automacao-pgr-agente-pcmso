@@ -211,6 +211,15 @@ hidrotratado no PGR ("Destilados (de) Petróleo leve(mente)s tratados com hidrog
 GHE 16 (08.07.26) e WV Maldi GHE 20 (revisão de 24.09.26), solvente isolado, sem o pacote do benzeno;
 nenhuma FDS do acervo com 64742-47-8 declara benzeno. O CAS 64742-47-8 segue em `aguarras_mineral`, que
 é como as FDS do acervo o nomeiam (Textucril, Fundo Zarcão).
+Precedente em sentido contrário (v128, medido em 03/10/2026): gabarito do R78 Naturia (12.11.25, Dra.
+Carolini), GHE 07 CARPINTARIA, pede o pacote do benzeno (hemograma e reticulócitos semestrais, ácido
+t,t-mucônico). O PGR (`PGR R78 NATURIA PARTE 2 12.11.25.pdf`) traz o termo inteiro, "Destilados (Petróleo)
+leves tratados com hidrogênio.", atravessando a quebra das págs. 9–10; os outros agentes químicos do GHE
+(dióxido de titânio, tolueno, éter monobutílico de etilenoglicol, acetato de etila, etanol) não carregam
+benzeno no vocabulário — por eliminação, o destilado é a fonte provável do pacote `[INTERPRETADO]`.
+Decisão do Diovanni (03/10/2026): **mantida a v126** — o Fascino é da mesma médica e oito meses mais
+recente, e vale como conduta atual. Sem efeito em produção: o R78 é bloqueado antes da transcrição pelo
+gate de segmentação (`segmentacao_implausivel`, 1 bloco em 19 págs.).
 
 **Origem.** Aurora 27.08.26, GHE 18 PINTURA, rodado sem a FISPQ da aguarrás (01/10/2026): o
 gabarito pede t,t-mucônico e reticulócitos e o app não, em silêncio. Implementado em
@@ -1333,3 +1342,4 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 | v125 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 55bd73e` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b′ da `DT-(sessão claude/cool-planck-niq4le)-04`): **`R-PKG-BZ-PRES` CRIADA** (§6) — solvente de petróleo sem FDS e sem benzeno identificado → pacote do benzeno + clínico 6M sob presunção protetiva (D-ARQ-68 cl.5), matriz `PARCIAL`; IRRELEVANTE não presume. `R-FDS-07` (§4) passa a apontar para ela. Precedente corrigido: 24 de 46 pinturas (a contagem de 02/10 perdia grafias sem acento e cabeçalho "GHE - NN"). |
 | v126 | 03/10/2026 | Branch `claude/cool-planck-niq4le`, recriada sobre `main 860d3e6` (IMPLEMENTAÇÃO, decisão do Diovanni — opção b ajustada): slug `destilados_petroleo_hidrotratados` (sem CAS, sem exame, sem `contaminantes_a_confirmar`) com as grafias de Aurora/Vistamerica, Fascino e WV Maldi ("Querosene hidratado"); o termo do nome químico sai de `aguarras_mineral`, o CAS 64742-47-8 fica nela. Nota em `R-FDS-07` (§4). Pares determinísticos: exames, status e pendências iguais; Fascino GHE-16 passa a reconhecer o termo. |
 | v127 | 03/10/2026 | Branch `claude/awesome-goldberg-vt1irf`, recriada sobre `main 0ea3413` (docs + comentário de vocabulário, decisão do Diovanni — seguir a norma vigente): `R-BIO-06` (§5.9) — o `[A CONFERIR]` da carcinogenicidade do octoato fecha por `[DERIVADO — LINACH 2014]`: cobalto, compostos e sais solúveis de Co(II) no Grupo 2B → não cancerígeno pelo critério 1/2A. Divergência com o IARC Vol. 131 (2022/2023, 2A) registrada com gatilho de reabertura. Sem efeito na matriz. PDF da LINACH em `normas/`. |
+| v128 | 03/10/2026 | Branch `claude/awesome-goldberg-vt1irf`, recriada sobre `main fd09398` (MEDIÇÃO + docs, decisão do Diovanni — manter a v126): `R-FDS-07` (§4) — o `[A MEDIR]` do "Destilados (Petróleo)" do R78 fecha: o termo está inteiro no PDF (quebra de página), é a grafia já coberta por `destilados_petroleo_hidrotratados`. Registrado o precedente contrário do gabarito R78 12.11.25 (pacote do benzeno no GHE 07); v126 mantida pelo Fascino 08.07.26, mais recente e da mesma médica. Sem efeito em produção (R78 bloqueado pelo gate de segmentação). |
