@@ -117,6 +117,12 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[03/10/2026, carcinogenicidade do cobalto pela LINACH — docs + comentário]`:** branch
+`claude/awesome-goldberg-vt1irf` sobre `main 0ea3413` · **1671 passed, 6 skipped, 0 failed** *(MEDIDO com a árvore parada,
+1186,04 s; depois, só texto de docs e comentários do `agentes.yaml`, recorte de 455 testes que leem esses arquivos: passed)* ·
+`mypy --strict` alvo canônico **limpo, 55 arquivos** · PROTOCOLO **v127** · DECISOES v238 inalterado. `medir_painel`:
+`regras 36/51`, `cas 80/115`, `índice sincronizado` — três números não se moveram; tabela não re-tirada.
+
 **Baseline `[03/10/2026, PR #441 + re-tiragem dos três números]`:** branch `claude/awesome-goldberg-vt1irf` sobre `main
 45e4e7c` (merge do PR #441; árvore idêntica a `48985c9`, `git diff` vazio) · **1671 passed, 6 skipped, 0 failed** *(MEDIDO
 em `48985c9`, árvore parada, 771,41 s)* · `mypy --strict` alvo canônico **limpo, 55 arquivos** (igual à `main d4a3172`) ·

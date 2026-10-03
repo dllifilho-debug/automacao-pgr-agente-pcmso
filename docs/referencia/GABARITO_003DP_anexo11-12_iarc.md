@@ -73,7 +73,7 @@
 | `asbesto` | true → true | Grupo 1 - Asbestos (all forms) | true → true | Anexo 12 (poeiras minerais/asbestos) |
 | `cadmio` | true → true | Grupo 1 - Cadmium and cadmium compounds | false → false | ausente do Q1 |
 | `cloreto_de_hidrogenio` | false → false | Hydrochloric acid - Grupo 3 | true → true | Q1: Acido cloridrico 4 ppm |
-| `cobalto` | false → false | Grupo 2B (Cobalt and cobalt compounds) | false → false | ausente do Q1 |
+| `cobalto` | false → false | Grupo 2B (Cobalt and cobalt compounds) — **nota 03/10/2026:** confirmado pela LINACH 2014 (Grupo 2B, `normas/LINACH-Portaria-Interministerial-09-2014.pdf`); o IARC Vol. 131 (2022/2023), posterior à lista usada aqui, deu 2A a cobalto metálico e sais solúveis de Co(II). Mantido `false` por decisão (norma vigente primeiro) — PROTOCOLO §R-BIO-06, v127 | false → false | ausente do Q1 |
 | `cromo_hexavalente` | true → true | Grupo 1 - Chromium(VI) compounds | false → false | Q1 traz apenas Acido cromico (nevoa); Cr-VI nao nominal [INCERTO] |
 | `indutores_metahemoglobina` | false → false | classe de agentes, sem entrada IARC propria | false → false | classe, sem LT proprio no Q1 |
 | `manganes` | false → false | ausente da lista IARC | false → false | ausente do Q1 (Anexo 13 e qualitativo, nao LT) |

@@ -11855,3 +11855,40 @@ números", Camada 2 por superfície, linhas de CAS) e este histórico. `DECISOES
 
 **Lacuna registrada, não preenchida.** Os PRs #438–#440 (outro chat: estilo e paleta da tela, fonte Inter servida pelo app, smoke visual e guarda do requirements-dev)
 não têm entrada neste histórico; não reconstruo de memória.
+
+## Sessão (mesma branch, recriada sobre `main 0ea3413`, pós-upload da LINACH) — 03/10/2026 — CONFERÊNCIA: carcinogenicidade do cobalto e do octoato
+
+**Origem.** `[A CONFERIR]` de `R-BIO-06`: o octoato de cobalto é cancerígeno? Puxou a pergunta maior: o slug `cobalto`
+estava como IARC 2B pela lista de 2018 do gabarito 003.DP, e o IARC Vol. 131 (reunião 2022, publicado 2023) deu 2A a cobalto
+metálico e sais solúveis de cobalto(II).
+
+**Fontes.** IARC, NCBI e Gov.br bloqueados pela política de rede do ambiente; busca usada só para localizar. Dois
+resumos de busca sobre a LINACH estavam errados (um dizia Grupo 1, outro 2A) — não usados. O Diovanni subiu o PDF da
+Portaria Interministerial 9/2014 em `normas/` (renomeado para `LINACH-Portaria-Interministerial-09-2014.pdf`). Lido na
+ordem das colunas: Grupo 2A só "Cobalto metálico com carbeto de tungstênio"; Grupo 2B "Cobalto e compostos de cobalto",
+"Cobalto metálico sem carboneto de tungstênio" e "Sulfato de Cobalto e outros sais solúveis de Cobalto (II)". Nota 1 do
+anexo: base IARC monografias 1-107 (abril/2013). Art. 3º prevê atualização semestral; nenhuma versão posterior achada
+em busca de 03/10/2026. NTP RoC 15ª ed.: o bis(2-etil-hexanoato) de cobalto seria solúvel em fluidos biológicos `[via
+resumo de busca, documento não lido]`.
+
+**Decisão do Diovanni: seguir a norma vigente (nível 1 da hierarquia).** LINACH 2B → não cancerígeno pelo critério 1/2A
+(003.DP). `R-BIO-06` e `R-BIO-04-cobalto` sem mudança; propostas A (`cobalto` em `cancerigeno_com_ibe`) e B (octoato como sal
+solúvel) ficam como gatilho de reabertura se a LINACH ou uma NR incorporar o Vol. 131, ou se a FDS declarar H350. Aurora
+27.08.26 segue como divergência consciente.
+
+**Entrega.** PROTOCOLO v127 (§R-BIO-06: `[A CONFERIR]` → `[DERIVADO — LINACH 2014]`, divergência e gatilhos); comentários
+no `agentes.yaml` (octoato e cobalto — dados idênticos, conferido por `yaml.safe_load` antes × depois); nota na linha do
+cobalto do gabarito 003.DP; nota no `PENDENCIAS_CLINICAS.md`; PDF renomeado. Sem efeito na matriz.
+
+**`[A CONFERIR]` aberto.** Relatório AIR do MTE sobre agentes químicos e cancerígenos sugere revisão normativa em
+andamento; não lido (Gov.br bloqueado no ambiente).
+
+**Verificação.** Suíte completa, árvore parada (antes das correções da revisão): **1671 passed, 6 skipped, 0 failed**
+(1186,04 s). As correções seguintes mexeram só em texto de docs e em comentários do `agentes.yaml` (dados idênticos por
+`yaml.safe_load`); recorte depois delas: todos os testes que leem os arquivos tocados, **455 passed**. `mypy --strict` alvo
+canônico: limpo, 55 arquivos. `medir_painel`: `regras 36/51`, `cas 80/115`, `índice sincronizado` — três números não se
+moveram, tabela não re-tirada.
+
+**Lição de método.** A revisão pedida pelo Diovanni pegou três defeitos antes do commit: crase aninhada que quebrava o
+markdown, fonte (NTP) apresentada como lida sendo resumo de busca, e "nenhuma versão posterior" afirmado com base numa
+busca só. Mesma classe dos erros do início da sessão (resumo de busca tratado como fonte).
