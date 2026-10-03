@@ -76,6 +76,13 @@ fonte vai no marcador da regra.
 - Suíte completa: `python -m pytest agente_medico/tests/ tests/` (motor novo + legada)
 - Medição de suíte nunca concorrente com escrita — árvore parada, ou o número não tem
   proveniência (precedente: 003.EF)
+- Smoke visual — antes de cada deploy e sempre que a versão do Streamlit mudar:
+  `python -m scripts.smoke_visual` (sai 0 ok · 1 falha visual · 2 infraestrutura; screenshots
+  em `relatorios/smoke_visual/`). Uma vez por máquina: `python -m playwright install chromium`.
+  No container remoto o Chromium pré-instalado é de outro build que o do Playwright; passar
+  `--chromium /opt/pw-browsers/chromium-1194/chrome-linux/chrome` (medido em 03/10/2026).
+  Fora da suíte por precisar de navegador (~33 s, medido em 03/10/2026); a avaliação dele
+  roda na suíte (`tests/test_smoke_visual.py`).
 
 ## Código
 
