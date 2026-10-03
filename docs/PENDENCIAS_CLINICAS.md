@@ -4000,3 +4000,15 @@ CAS, sem exame e sem `contaminantes_a_confirmar`, com as grafias do Aurora/Vista
 Fascino e do Maldi; o CAS 64742-47-8 fica na aguarrás para a FDS seguir respondendo por ela. "Destilados (Petróleo)" do
 R78 segue sem resolver — o PDF corta o termo e não dá para afirmar a substância `[A MEDIR]`. PROTOCOLO v126.
 
+**Nota (03/10/2026, branch `claude/awesome-goldberg-vt1irf`) — "Destilados (Petróleo)" do R78 medido; v126 mantida.**
+(1) O PDF não corta o termo: ele atravessa a quebra de página — pág. 9 termina em "…leves tratados com", pág. 10 começa
+em "com hidrogênio." (o "com" sai repetido na extração). Termo inteiro: "Destilados (Petróleo) leves tratados com
+hidrogênio.", grafia já coberta por `destilados_petroleo_hidrotratados`. O "cortado" anterior veio de busca linha a linha.
+(2) No app, o R78 nem chega ao termo: `avaliar_estrutura` devolve `segmentacao_implausivel` (1 bloco GHE em 19 págs., é
+a "Parte 2" do PGR) e `preparar_ghes` para antes da transcrição. (3) Precedente contrário: gabarito R78 12.11.25 (Dra.
+Carolini), GHE 07 CARPINTARIA, com o pacote do benzeno (hemograma e reticulócitos semestrais, t,t-mucônico); os demais
+agentes químicos do GHE (dióxido de titânio, tolueno, éter monobutílico de etilenoglicol, acetato de etila, etanol) não
+carregam benzeno no vocabulário, então o destilado é a fonte provável `[INTERPRETADO]`. **Decisão do Diovanni: manter a
+v126** — o Fascino 08.07.26 é da mesma médica e mais recente. Observação: se o R78 passar do gate e a transcrição juntar
+as páginas com o "com" repetido, o termo não casa e vira pendência de vocabulário visível, não silêncio. PROTOCOLO v128.
+

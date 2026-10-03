@@ -11892,3 +11892,24 @@ moveram, tabela não re-tirada.
 **Lição de método.** A revisão pedida pelo Diovanni pegou três defeitos antes do commit: crase aninhada que quebrava o
 markdown, fonte (NTP) apresentada como lida sendo resumo de busca, e "nenhuma versão posterior" afirmado com base numa
 busca só. Mesma classe dos erros do início da sessão (resumo de busca tratado como fonte).
+
+## Sessão (mesma branch, recriada sobre `main fd09398`, pós-merge do PR #443) — 03/10/2026 — MEDIÇÃO: "Destilados (Petróleo)" do R78
+
+**Origem.** Última pendência clínica aberta: "Destilados (Petróleo)" do R78 Naturia `[A MEDIR]` ("PDF corta o termo").
+
+**Medido** (`ler_pdf` sobre `PGR R78 NATURIA PARTE 2 12.11.25.pdf`, texto e palavras com coordenadas). O termo não está
+cortado: atravessa a quebra das págs. 9–10 ("…leves tratados com" / "com hidrogênio.", "com" repetido na extração).
+Inteiro: "Destilados (Petróleo) leves tratados com hidrogênio.", grafia já em `destilados_petroleo_hidrotratados`. O
+"cortado" de antes veio de busca linha a linha. No app, o R78 para antes da transcrição: `avaliar_estrutura` →
+`segmentacao_implausivel` (1 bloco GHE em 19 págs., "Parte 2" do PGR). Gabarito R78 12.11.25 (Dra. Carolini), GHE 07
+CARPINTARIA: pacote do benzeno (hemograma e reticulócitos semestrais, t,t-mucônico) e ortocresol. Agentes químicos do GHE
+no PGR (coluna do agente, págs. 7–10): dióxido de titânio, tolueno, éter monobutílico de etilenoglicol, acetato de etila,
+etanol, destilado — só o destilado é solvente de petróleo; nenhum outro carrega benzeno no vocabulário.
+
+**Decisão do Diovanni: manter a v126** (destilado hidrotratado sem o pacote do benzeno). O Fascino 08.07.26 é da mesma
+médica, oito meses mais recente. Precedente contrário registrado em PROTOCOLO v128 (§R-FDS-07), `PENDENCIAS_CLINICAS.md` e
+comentário do slug. Sem efeito em produção.
+
+**Verificação.** Só texto de docs e comentário de `agentes.yaml` (dados idênticos por `yaml.safe_load`). Recorte:
+todos os testes que leem os arquivos tocados, **455 passed** (404 s). Suíte completa herdada (1671 passed, 6 skipped, PR
+#443). `medir_painel`: `regras 36/51`, `cas 80/115`, `índice sincronizado`.

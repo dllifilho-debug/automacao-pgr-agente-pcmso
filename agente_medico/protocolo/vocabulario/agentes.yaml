@@ -817,7 +817,8 @@ agentes:
     # sem o pacote do benzeno; nenhuma FDS do acervo com 64742-47-8 declara benzeno. cas: null
     # — o CAS 64742-47-8 fica em `aguarras_mineral`, como as FDS o nomeiam. Decisão do Diovanni,
     # 03/10/2026 (opção b ajustada). Termos [MEDIDO]: Aurora 27.08.26 e Vistamerica 2026-07-28
-    # (1º), Fascino 15.07.26 (2º), WV Maldi Entreverdes 2026-07-22 (3º).
+    # (1º), Fascino 15.07.26 (2º), WV Maldi Entreverdes 2026-07-22 (3º). Precedente contrário
+    # registrado (v128): gabarito R78 12.11.25, GHE 07, com o pacote do benzeno; v126 mantida.
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false

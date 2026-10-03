@@ -117,6 +117,11 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[03/10/2026, "Destilados (Petróleo)" do R78 — medição + docs]`:** branch `claude/awesome-goldberg-vt1irf`
+sobre `main fd09398` · suíte completa **herdada** de `0ea3413` + PR #443 (1671 passed, 6 skipped — desde então, só texto
+de docs e comentários de `agentes.yaml`); recorte desta entrada: todos os testes que leem os arquivos tocados, **455 passed** (404 s) · `medir_painel`:
+`regras 36/51`, `cas 80/115`, `índice sincronizado` · PROTOCOLO **v128** · DECISOES v238 inalterado. Três números: não movidos.
+
 **Baseline `[03/10/2026, carcinogenicidade do cobalto pela LINACH — docs + comentário]`:** branch
 `claude/awesome-goldberg-vt1irf` sobre `main 0ea3413` · **1671 passed, 6 skipped, 0 failed** *(MEDIDO com a árvore parada,
 1186,04 s; depois, só texto de docs e comentários do `agentes.yaml`, recorte de 455 testes que leem esses arquivos: passed)* ·
