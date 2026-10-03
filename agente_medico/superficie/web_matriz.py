@@ -30,7 +30,7 @@ from typing import Any, Callable, Sequence
 
 from agente_medico.adaptadores.orquestracao_fds import preparar_composicao
 from agente_medico.adaptadores.orquestracao_pgr import preparar_pgr_hidratado
-from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini
+from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini, UsoGemini, medir_uso
 from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.composicao import resolver_composicao
@@ -178,14 +178,43 @@ _log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
+class ResumoUsoIA:
+    """Soma do consumo de tokens do Gemini num processamento de PGR: quanto a
+    leitura por IA custou e qual modelo respondeu de fato (o alias "-latest"
+    da cascata não diz). `chamadas` são respostas HTTP 200, inclusive as
+    descartadas e repetidas — todas consomem tokens."""
+
+    chamadas: int
+    modelos: tuple[str, ...]
+    entrada: int
+    saida: int
+    raciocinio: int
+    cache: int
+
+
+def resumir_uso(registros: Sequence[UsoGemini]) -> ResumoUsoIA:
+    modelos = tuple(dict.fromkeys(r.modelo for r in registros))
+    return ResumoUsoIA(
+        chamadas=len(registros),
+        modelos=modelos,
+        entrada=sum(r.entrada for r in registros),
+        saida=sum(r.saida for r in registros),
+        raciocinio=sum(r.raciocinio for r in registros),
+        cache=sum(r.cache for r in registros),
+    )
+
+
+@dataclass(frozen=True)
 class TempoProcessamento:
     """Tempo da parte cara do processamento do PGR, para o operador ver onde
     o tempo vai: total, espera pela IA e motor; o resto é leitura do PDF e
-    montagem do PGR hidratado."""
+    montagem do PGR hidratado. `uso_ia` (campo aditivo) é o consumo de tokens
+    medido no mesmo processamento; None em caches montados sem passar por ele."""
 
     total_s: float
     ia_s: float
     motor_s: float
+    uso_ia: ResumoUsoIA | None = None
 
     @property
     def leitura_e_montagem_s(self) -> float:
@@ -203,6 +232,28 @@ def texto_tempo(tempo: TempoProcessamento, blocos_ia: int) -> str:
     partes.append(f"leitura do PDF e montagem: {_segundos(tempo.leitura_e_montagem_s)}")
     partes.append(f"motor: {_segundos(tempo.motor_s)}")
     return f"⏱ Processamento do PGR: {_segundos(tempo.total_s)} — " + " · ".join(partes)
+
+
+def _milhar(valor: int) -> str:
+    return f"{valor:,}".replace(",", ".")
+
+
+def texto_uso(uso: ResumoUsoIA) -> str | None:
+    """None quando nenhuma resposta do Gemini chegou — a rota determinística
+    não gasta token, e a tela não deve sugerir que gastou."""
+    if uso.chamadas == 0:
+        return None
+    tokens = [
+        f"entrada {_milhar(uso.entrada)}",
+        f"saída {_milhar(uso.saida)}",
+        f"raciocínio {_milhar(uso.raciocinio)}",
+    ]
+    if uso.cache > 0:
+        tokens.append(f"em cache {_milhar(uso.cache)}")
+    return (
+        f"🔢 Consumo da IA: {uso.chamadas} resposta(s) de {', '.join(uso.modelos)} — "
+        "tokens: " + " · ".join(tokens)
+    )
 
 
 def _protocolo_padrao() -> Protocolo:
@@ -244,20 +295,22 @@ def _rodar_parse_deterministico(
     protocolo = _protocolo_padrao()
     contador = _TranscritorContado(interno=TranscritorGeminiGHE())
     inicio = time.perf_counter()
-    pgr_hidratado, pendencias = preparar_pgr_hidratado(
-        caminho_pdf,
-        protocolo,
-        contador,
-        TranscritorGeminiCard(),
-        envelope,
-    )
+    with medir_uso() as registros:
+        pgr_hidratado, pendencias = preparar_pgr_hidratado(
+            caminho_pdf,
+            protocolo,
+            contador,
+            TranscritorGeminiCard(),
+            envelope,
+        )
+    uso = resumir_uso(registros)
     if pgr_hidratado is None:
-        tempo = TempoProcessamento(time.perf_counter() - inicio, contador.segundos, 0.0)
+        tempo = TempoProcessamento(time.perf_counter() - inicio, contador.segundos, 0.0, uso)
         return None, None, protocolo.vocabulario.exames, pendencias, None, (), contador.chamadas, tempo
     inicio_motor = time.perf_counter()
     resultado = processar_pgr(pgr_hidratado, protocolo)
     fim = time.perf_counter()
-    tempo = TempoProcessamento(fim - inicio, contador.segundos, fim - inicio_motor)
+    tempo = TempoProcessamento(fim - inicio, contador.segundos, fim - inicio_motor, uso)
     return (
         pgr_hidratado,
         tuple(resultado.matrizes),
@@ -728,6 +781,7 @@ def pagina_matriz() -> None:
         remover_produto_e_reprocessar,
         responsavel_pcmso_incompleto,
         texto_tempo,
+        texto_uso,
     )
 
     st.title("Matriz de Exames — PCMSO")
@@ -1281,6 +1335,9 @@ def pagina_matriz() -> None:
             )
         if cache.tempo is not None:
             caixa_conferencia.caption(texto_tempo(cache.tempo, cache.chamadas_ia))
+            linha_uso = texto_uso(cache.tempo.uso_ia) if cache.tempo.uso_ia is not None else None
+            if linha_uso is not None:
+                caixa_conferencia.caption(linha_uso)
 
         matriz_gerada = True
         caixa_matriz = etapa_matriz.container(border=True, key="caixa_matriz")
