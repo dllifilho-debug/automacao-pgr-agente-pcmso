@@ -11913,3 +11913,26 @@ comentário do slug. Sem efeito em produção.
 **Verificação.** Só texto de docs e comentário de `agentes.yaml` (dados idênticos por `yaml.safe_load`). Recorte:
 todos os testes que leem os arquivos tocados, **455 passed** (404 s). Suíte completa herdada (1671 passed, 6 skipped, PR
 #443). `medir_painel`: `regras 36/51`, `cas 80/115`, `índice sincronizado`.
+
+## Sessão (mesma branch, recriada sobre `main c2145f7`, pós-merge do PR #444) — 03/10/2026 — IMPLEMENTAÇÃO: instrumento do painel conta os pacotes
+
+**Origem.** Achado da 1ª tiragem do dia (PR #442): a regex `R-[A-Z]+-[0-9]+` do `scripts/medir_painel.py` não casava IDs
+com sufixo de maiúsculas, e 11 regras ativas ficavam fora do numerador e do denominador. Decisão do Diovanni: corrigir.
+
+**Medido antes de mudar.** Regex nova contra PROTOCOLO, `regras.yaml` e motor: só acrescenta (nenhum ID casado pela
+antiga se perde); os 11 entram; a variante de família em minúsculas segue colapsando (`R-BIO-04-cobalto` → `R-BIO-04`).
+Único casamento extra: `R-CATEGORIA-NN`, exemplo em prosa, que não é header e não entra na conta.
+
+**Entrega.** `_PADRAO_ID = R-[A-Z]+-(?:[0-9]+|[A-Z][A-Z0-9]*(?:-[A-Z][A-Z0-9]*)*)\b`, usado no ID e no header. Três
+testes em `tests/test_medir_painel.py`, com PROTOCOLO/`regras.yaml` temporários: pacote com sufixo conta (reversão: regex
+antiga); variante minúscula colapsa (reversão: minúsculas no sufixo); pacote longo não conta o prefixo (reversão: um só
+segmento de letras). Varredura inversa 3/3.
+
+**Efeito.** `regras` 36/51 → **44/62 (71%)**: +11 no denominador; +8 no numerador (`R-PKG-ASF`, `-ASF-CO`, `-ATIVCRIT`,
+`-BZ`, `-BZ-PRES`, `-SOLD-CO`, `-TRANSITO`, executáveis; `R-PKG-PORT`, só citação). Fora: `R-PKG-ARMADOR`, `R-PKG-SOLD`,
+`R-REG-ANAC`. Intenção do painel 34/51 → **41/62 (66%)** (saem `R-FDS-04`, `R-TEMP-01`, `R-PKG-PORT`). Tabela "Os três
+números" e Camada 2 re-tiradas; nota `[ACHADO]` marcada como corrigida.
+
+**Verificação.** Suíte completa, árvore parada: **1674 passed, 6 skipped, 0 failed** (1176,49 s), 1671 + 3 exato.
+`mypy --strict` alvo canônico limpo, 55 arquivos; `scripts/medir_painel.py` e o teste limpos com `--explicit-package-bases`
+(sem a flag, o mypy acusa o módulo com dois nomes — erro de invocação, já existia antes da mudança).
