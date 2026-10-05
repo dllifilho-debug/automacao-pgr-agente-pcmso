@@ -45,6 +45,19 @@ Criterio de confianca:
 puro do acervo (o outro e Ricco Escritorio) — contraste util contra canteiro.
 O par 16 e o unico do acervo que nao e construtora, e sim entidade setorial.
 
+### Adendo 05/10/2026 — par do Hetrin set-2026 (sessao branch `claude/gifted-cerf-0loir2`)
+
+`[MEDIDO — conteudo conferido, nao so o nome]` O par 4 e o Hetrin de mar/2025. O PGR de set/2026
+tem par proprio: as 22 funcoes que `parser_familia_grid_aiha.segmentar_documento` resolve no PGR sao
+as 22 da matriz, na mesma ordem (D-ARQ-57 peca 5, G1). `PGR_RICCO_2026_REV06.pdf` e o mesmo PGR
+(197/197 paginas com texto identico) com o adendo anexado nas paginas 197-216.
+
+| # | Obra / empresa | PGR (entrada) | Matriz assinada | Conf. |
+|---|---|---|---|---|
+| 17 | Ricco Hetrin (set/2026) | PGR(ATUALIZACAO) RICCO CONSTRUTORA HETRIN 14.09.26 (= PGR_RICCO_2026_REV06, pags. 0-196) | MATRIZ DE EXAMES(ATUALIZACAO) RICCO CONSTRUTORA HETRIN 14.09.26 (Dra. Patricia) | ALTA (mesma data, funcoes conferidas) |
+
+O adendo `ADENDO - FUNCOES FALTANTES - PGR RICCO` (8 funcoes) nao tem matriz de adendo no acervo.
+
 Contraste util no conjunto: os pares 3 e 13 sao **administrativo/escritorio**; os demais sao
 **canteiro de obra**. Serve para separar o pacote-base incondicional do pacote por risco.
 
