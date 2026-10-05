@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+import functools
 from pathlib import Path
 
 import pytest
 
+from agente_medico.motor.io_pdf import paginas_liberadas
 from agente_medico.motor.parser_familia_grid_aiha import (
     GrupoFuncaoNaoReconhecido,
     PalavraPDF,
+    localizar_intervalos_grid,
     segmentar_arquivo,
+    segmentar_documento,
+    segmentar_documento_arquivo,
     segmentar_paginas,
 )
 
@@ -257,3 +262,237 @@ def test_segmentar_arquivo_serra_dourada_paginacao_rigida_sem_resto() -> None:
     # CONTINUAÇÃO" no witness inteiro, não só na amostra de 3 funções.
     grupos = segmentar_arquivo(CAMINHO_PDF_SERRA_DOURADA, 58, 113)
     assert len(grupos) == 28
+
+
+# ---------------------------------------------------------------------------
+# Fatia G1 (D-ARQ-57 peça 5, sessão claude/gifted-cerf-0loir2): template
+# set-2026 da Ricco — cabeçalho em CAIXA ALTA, às vezes fragmentado em
+# letras; cabeçalho no meio da página, com a função anterior acima dele;
+# página sem cabeçalho dentro do grid; mais de um intervalo de grid.
+# Posições do cabeçalho copiadas da pág. 30 do Hetrin/set-2026 (rótulos
+# fragmentados), deslocadas por `topo`.
+# ---------------------------------------------------------------------------
+
+CAMINHO_PDF_RICCO_REV06 = Path("matrizes_originais/PGR_RICCO_2026_REV06.pdf")
+CAMINHO_PDF_RICCO_ADENDO = Path("matrizes_originais/ADENDO - FUNÇÕES FALTANTES - PGR RICCO.pdf")
+
+requer_pdfs_set2026 = pytest.mark.skipif(
+    not (CAMINHO_PDF_RICCO_REV06.exists() and CAMINHO_PDF_RICCO_ADENDO.exists()),
+    reason="PDFs Ricco set-2026 ausentes; harness integração fatia G1 indisponível",
+)
+
+
+def _cabecalho_caixa_alta(topo: float) -> tuple[PalavraPDF, ...]:
+    return (
+        _p("C", 178.0, topo - 6.1),
+        _p("eSocial", 203.0, topo - 6.1),
+        _p("T", 82.0, topo - 3.5),
+        _p("IP", 85.0, topo - 3.5),
+        _p("O", 90.0, topo - 3.5),
+        _p("FUNÇÃO", 39.1, topo),
+        _p("R", 84.0, topo + 3.6),
+        _p("IS", 87.0, topo + 3.6),
+        _p("P", 121.0, topo + 3.6),
+        _p("E", 124.0, topo + 3.6),
+        _p("R", 127.0, topo + 3.6),
+        _p("I", 131.0, topo + 3.6),
+        _p("G", 132.0, topo + 3.6),
+        _p("O", 136.0, topo + 3.6),
+        _p("/", 140.0, topo + 3.6),
+        _p("R", 143.0, topo + 3.6),
+        _p("IS", 147.0, topo + 3.6),
+        _p("C", 151.0, topo + 3.6),
+        _p("O", 155.0, topo + 3.6),
+        _p("E", 251.0, topo + 7.5),
+        _p("X", 254.0, topo + 7.5),
+        _p("PO", 257.0, topo + 7.5),
+        _p("SIÇÃO", 263.0, topo + 7.5),
+    )
+
+
+def _risco_caixa_alta(marcador: str, top: float) -> tuple[PalavraPDF, ...]:
+    return (_p(marcador, 110.0, top),)
+
+
+def _pagina_caixa_alta(nome: str, topo: float, riscos: tuple[str, ...]) -> tuple[PalavraPDF, ...]:
+    corpo: list[PalavraPDF] = []
+    for indice, risco in enumerate(riscos):
+        corpo.extend(_risco_caixa_alta(risco, topo + 30.0 + 10.0 * indice))
+    return (*_cabecalho_caixa_alta(topo), *corpo, _p(nome, 40.0, topo + 60.0))
+
+
+def test_g1_cabecalho_caixa_alta_fragmentado_calibra_a_pagina() -> None:
+    # Reversão que mata: _localizar_cabecalho_grid sem o fallback
+    # _localizar_cabecalho_caixa_alta (só title-case) -> GrupoFuncaoNaoReconhecido.
+    grupos = segmentar_paginas([_pagina_caixa_alta("PINTOR", 100.0, ("RUÍDO",))])
+    assert [g.nome for g in grupos] == ["PINTOR"]
+    assert [linha.texto for linha in grupos[0].linhas] == ["RUÍDO"]
+
+
+def test_g1_banda_funcao_termina_no_rotulo_tipo_fragmentado() -> None:
+    # Letra de categoria de risco ("F", coluna Tipo de Risco, x0=86) acima
+    # do nome. Reversão que mata: tipo_risco_x0 = max(a_direita) em vez de
+    # min — a letra cai na banda Função e vira o nome do grupo.
+    pagina = (*_pagina_caixa_alta("PINTOR", 100.0, ()), _p("F", 86.0, 140.0))
+    grupos = segmentar_paginas([pagina])
+    assert [g.nome for g in grupos] == ["PINTOR"]
+    assert [linha.texto for linha in grupos[0].linhas] == ["F"]
+
+
+def test_g1_tabela_de_epi_por_funcao_nao_e_cabecalho_do_grid() -> None:
+    # "FUNÇÃO" sem PERIGO e EXPOSIÇ no bloco (tabela de EPI por função,
+    # pág. 8 do adendo). Reversão que mata: tirar a checagem do texto colado
+    # do bloco — a página vira intervalo de grid.
+    pagina_epi = (
+        _p("FUNÇÃO", 39.1, 100.0),
+        _p("EPI", 200.0, 100.0),
+        _p("obrigatório", 215.0, 100.0),
+        _p("PEDREIRO", 40.0, 120.0),
+    )
+    assert localizar_intervalos_grid([pagina_epi]) == ()
+
+
+def test_g1_conteudo_acima_do_cabecalho_vai_para_a_funcao_anterior() -> None:
+    # Reversão que mata: remover o bloco `acima` de segmentar_paginas — a
+    # linha "POEIRA" (continuação de PEDREIRO no topo da página de PINTOR)
+    # some dos dois grupos.
+    pagina_a = _pagina_caixa_alta("PEDREIRO", 100.0, ("RUÍDO",))
+    pagina_b = (_p("POEIRA", 110.0, 60.0), *_pagina_caixa_alta("PINTOR", 300.0, ("CALOR",)))
+    grupos = segmentar_paginas([pagina_a, pagina_b])
+    assert [g.nome for g in grupos] == ["PEDREIRO", "PINTOR"]
+    assert [linha.texto for linha in grupos[0].linhas] == ["RUÍDO", "POEIRA"]
+    assert [linha.texto for linha in grupos[1].linhas] == ["CALOR"]
+
+
+def test_g1_pagina_sem_cabecalho_e_continuacao_sem_titulo_corrido() -> None:
+    # Pág. 32 do Hetrin/set-2026: sem cabeçalho, continuação de PINTOR,
+    # com o título corrido do PGR no topo. Reversões que matam: (a) voltar
+    # a levantar GrupoFuncaoNaoReconhecido em página sem cabeçalho; (b)
+    # tirar o filtro _sem_titulo_corrido — o título corrido entra no grupo.
+    titulo = tuple(
+        _p(texto, x, 72.4)
+        for texto, x in (
+            ("PGR", 208.0),
+            ("|", 225.0),
+            ("PROGRAMA", 228.0),
+            ("DE", 272.0),
+            ("GERENCIAMENTO", 283.0),
+            ("DE", 349.0),
+            ("RISCOS", 360.0),
+        )
+    )
+    pagina_a = _pagina_caixa_alta("PINTOR", 100.0, ("RUÍDO",))
+    pagina_sem_cabecalho = (*titulo, _p("UMIDADE", 108.6, 108.1))
+    pagina_c = _pagina_caixa_alta("PORTEIRO", 100.0, ("CALOR",))
+    grupos = segmentar_paginas([pagina_a, pagina_sem_cabecalho, pagina_c])
+    assert [g.nome for g in grupos] == ["PINTOR", "PORTEIRO"]
+    assert [linha.texto for linha in grupos[0].linhas] == ["RUÍDO", "UMIDADE"]
+
+
+def test_g1_intervalos_admitem_lacuna_de_uma_pagina_e_separam_as_maiores() -> None:
+    # Reversões que matam: _LACUNA_MAX_SEM_CABECALHO = 0 (a lacuna de 1
+    # página parte o 1º intervalo); juntar tudo num intervalo só.
+    grid = _pagina_caixa_alta("PINTOR", 100.0, ("RUÍDO",))
+    fora = (_p("texto", 100.0, 100.0),)
+    paginas = [grid, grid, fora, grid, fora, fora, fora, grid]
+    assert localizar_intervalos_grid(paginas) == ((0, 3), (7, 7))
+
+
+def test_g1_grupo_nao_continua_de_um_intervalo_para_o_seguinte() -> None:
+    # Mesmo nome nos dois intervalos (último do corpo e 1º do adendo, no
+    # REV06, são funções diferentes; aqui o caso extremo). Reversão que
+    # mata: segmentar_documento chamar segmentar_paginas uma vez só, do
+    # início do 1º ao fim do último intervalo — vira 1 grupo.
+    grid = _pagina_caixa_alta("ALFA", 100.0, ("RUÍDO",))
+    fora = (_p("texto", 100.0, 100.0),)
+    grupos = segmentar_documento([grid, fora, fora, grid])
+    assert [g.nome for g in grupos] == ["ALFA", "ALFA"]
+
+
+# Integração G1. Números medidos na sessão claude/gifted-cerf-0loir2. A
+# leitura do PDF inteiro é cara (DH-003EC-02); uma por arquivo, compartilhada.
+_NOMES_HETRIN_SET = [
+    "ENGENHEIRO CIVIL/ ENGENHEIRO RESIDENTE/ ESTAGIÁRIO DE ENGENHARIA/ APONTADOR ADMINISTRATIVO DE OBRA/ "
+    "TÉCNICO DE SEGURANÇA DO TRABALHO",
+    "ALMOXARIFE",
+    "ARMADOR",
+    "AUXILIAR DE SERVIÇOS GERAIS/ SERVIÇOS GERAIS",
+    "AZULEJISTA",
+    "CARPINTEIR O",
+    "ELETRICISTA",
+    "ENCANADOR",
+    "ENCARREGADOS",
+    "GESSEIRO",
+    "MESTRE DE OBRAS",
+    "MONTADOR",
+    "MONTADOR DE ESTRUTURAS METÁLICAS",
+    "MOTORISTA DE CAMINHÃO",
+    "OPERADOR DE BETONEIRA",
+    "OPERADOR DE RETROESCAVADEIRA",
+    "PEDREIRO",
+    "PINTOR",
+    "PORTEIRO",
+    "SERVENTE",
+    "SOLDADOR",
+    "VIGIA DIURNO/ VIGIA NOTURNO",
+]
+_NOMES_RICCO_ADENDO = [
+    "ENCARREGADO DE ELETRICISTA",
+    "ENCARREGADO DE INSTALAÇÕES E LÉ T R I C A E HIDR O S S A N I T Á R IAS",
+    "EN C AR R E G A D O D E EN C A N A D O R",
+    "ENCARREGADO DE ARMAÇÃO",
+    "ENCARREGADO DE CARPINTEIRO",
+    "ENCARREGADO DE OBRA",
+    "AUXILIAR ADMINISTRATVO",
+    "MENOS APRENDIZ",
+]
+
+
+@functools.lru_cache(maxsize=None)
+def _paginas(caminho: Path) -> tuple[tuple[PalavraPDF, ...], ...]:
+    return tuple(
+        tuple(PalavraPDF(text=w["text"], x0=w["x0"], top=w["top"]) for w in page.extract_words())
+        for page in paginas_liberadas(caminho)
+    )
+
+
+@requer_pdfs_set2026
+def test_g1_rev06_corpo_hetrin_set_e_adendo_anexado() -> None:
+    # REV06 = Hetrin/set-2026 (págs. 0-196, texto idêntico página a página)
+    # + adendo (197-216): um teste cobre os dois. As 22 funções do corpo são
+    # as da matriz 14.09.26 do acervo, na mesma ordem (a matriz abre o grupo
+    # N:1 em cargos); a pág. 32, sem cabeçalho, fica com PINTOR.
+    # Reversões que matam: só a forma title-case (nenhum intervalo); página
+    # sem cabeçalho voltar a levantar exceção; lacuna sem limite (um
+    # intervalo só, 14-204); _LACUNA_MAX_SEM_CABECALHO = 0 (a pág. 32 parte
+    # o corpo em dois).
+    paginas = _paginas(CAMINHO_PDF_RICCO_REV06)
+    assert localizar_intervalos_grid(paginas) == ((14, 36), (197, 204))
+    grupos = segmentar_documento(paginas)
+    assert [g.nome for g in grupos] == _NOMES_HETRIN_SET + _NOMES_RICCO_ADENDO
+    pintor = grupos[_NOMES_HETRIN_SET.index("PINTOR")]
+    assert any("UMIDADE" in linha.texto for linha in pintor.linhas)
+
+
+@requer_pdfs_set2026
+def test_g1_adendo_isolado_com_cabecalho_fragmentado() -> None:
+    # Reversão que mata: exigir "PERIGO/RISCO" colado (págs. 2-3 do
+    # adendo têm "PERIGO/" e "RISCO" em linhas diferentes e saem do grid).
+    paginas = _paginas(CAMINHO_PDF_RICCO_ADENDO)
+    assert localizar_intervalos_grid(paginas) == ((0, 7),)
+    assert [g.nome for g in segmentar_documento(paginas)] == _NOMES_RICCO_ADENDO
+
+
+@requer_pdfs
+def test_g1_witnesses_title_case_documento_inteiro_sem_intervalo_espurio() -> None:
+    # Não regressão da 5a pelo caminho novo (documento inteiro, sem
+    # intervalo dado): o localizador acha só o grid, e as contagens de
+    # grupos são as já medidas (63 e 28). Reversão que mata: tirar a
+    # checagem PERIGO/EXPOSIÇ do bloco CAIXA ALTA — as págs. com "FUNÇÃO"
+    # fora do grid viram intervalo.
+    hetrin_mar = _paginas(CAMINHO_PDF_HETRIN_MAR)
+    serra = _paginas(CAMINHO_PDF_SERRA_DOURADA)
+    assert localizar_intervalos_grid(hetrin_mar) == ((63, 185),)
+    assert localizar_intervalos_grid(serra) == ((58, 113),)
+    assert len(segmentar_documento(hetrin_mar)) == 63
+    assert len(segmentar_documento(serra)) == 28
