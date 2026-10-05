@@ -18,12 +18,18 @@ from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_pgr
 from agente_medico.motor.io_pdf import PaginaLida, ler_pdf, processos_padrao
 from agente_medico.motor.parser_familia_consciente import FamiliaNaoReconhecida, parsear_leitura
+from agente_medico.motor.parser_familia_grid_aiha import (
+    GrupoFuncaoNaoReconhecido,
+    PalavraPDF,
+    segmentar_documento,
+)
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor_termos import construir_indice_termos
 from agente_medico.motor.resolvedor_topo import resolver_validade
 from agente_medico.motor.revisao_envelope import serializar_envelope
 from agente_medico.motor.tipos import PGR, EnvelopeConfirmado, GHEVerbatim, Pendencia, Resultado
 from agente_medico.motor.transcritor_card import TranscritorCard, transcrever_cards
+from agente_medico.motor.transcritor_grid import TranscritorGrid, transcrever_grupos_grid
 from agente_medico.motor.transcritor_pgr import TranscritorGHE, gate_forma_ghe, transcrever_ghes
 from agente_medico.motor.transcritor_topo import TranscritorTopo, gate_forma_topo, transcrever_topo
 
@@ -45,6 +51,12 @@ from agente_medico.motor.transcritor_topo import TranscritorTopo, gate_forma_top
 # recuperar_titulos_cargo + transcrever_cards (motor/transcritor_card.py) +
 # gate_forma_ghe reusado (003.DG-3). cliente_card é injetável como cliente
 # (TranscritorGHE), nunca importado no módulo.
+#
+# D-ARQ-57 peça 5 fatia G3: rota grid (template grid AIHA da Ricco). Entra
+# DEPOIS de avaliar_estrutura, onde ela diz pgr_cargo_based: a decisão
+# precisa das palavras com posição (leitura.palavras), que avaliar_estrutura
+# — só texto — não vê. cliente_grid é opcional: sem ele, o documento segue
+# bloqueado como antes.
 
 
 _ENV_PROCESSOS_PDF = "PCMSO_PDF_PROCESSOS"
@@ -125,6 +137,7 @@ def preparar_ghes(
     cliente: TranscritorGHE,
     cliente_card: TranscritorCard,
     leitura: Sequence[PaginaLida] | None = None,
+    cliente_grid: TranscritorGrid | None = None,
 ) -> tuple[tuple[GHEVerbatim, ...], tuple[Pendencia, ...]]:
     """ler_pdf -> avaliar_estrutura -> ROTEIA (D-ARQ-57 peça 4
     fatia 4d, plug que FECHA DT-003CS-01):
@@ -169,11 +182,22 @@ def preparar_ghes(
     cliente e cliente_card são injetáveis (nunca importados no módulo) —
     quem monta o adaptador decide os dois clientes; uma rota nunca invoca o
     cliente da outra.
+
+    - Rota "grid" (D-ARQ-57 peça 5 G3): pendência de estrutura
+      pgr_cargo_based + cliente_grid presente + segmentar_documento acha
+      grupos -> transcrever_grupos_grid(cliente_grid) -> gate_forma_ghe. Sem
+      cliente_grid, ou sem grupos, a pendência pgr_cargo_based segue
+      bloqueando como antes. Grid localizado que não segmenta
+      (GrupoFuncaoNaoReconhecido) mantém o bloqueio e anexa o motivo como
+      familia_nao_medida não-bloqueante. TranscricaoIndisponivel na rota
+      grid vira transcricao_indisponivel_pgr com prefixo "[rota grid]".
     """
     if leitura is None:
         leitura = ler_pdf(caminho, processos_leitura_pdf())
     paginas = [p.texto for p in leitura]
     rota, pendencia_estrutura = avaliar_estrutura(paginas)
+    if pendencia_estrutura is not None and pendencia_estrutura.tipo == "pgr_cargo_based" and cliente_grid is not None:
+        return _preparar_grid(leitura, pendencia_estrutura, cliente_grid)
     if pendencia_estrutura is not None:
         # Gate de estrutura ANTES do recorte/transcrição (D-ARQ-57):
         # documento cargo-based ou com segmentação implausível (qualquer
@@ -252,12 +276,49 @@ def preparar_ghes(
     return aprovados, (pendencia_familia, *pend_forma)
 
 
+def _preparar_grid(
+    leitura: Sequence[PaginaLida],
+    pendencia_estrutura: Pendencia,
+    cliente_grid: TranscritorGrid,
+) -> tuple[tuple[GHEVerbatim, ...], tuple[Pendencia, ...]]:
+    paginas = [tuple(PalavraPDF(texto, x0, top) for texto, x0, top in p.palavras) for p in leitura]
+    try:
+        grupos = segmentar_documento(paginas)
+    except GrupoFuncaoNaoReconhecido as e:
+        return (), (
+            pendencia_estrutura,
+            Pendencia(
+                tipo="familia_nao_medida",
+                destinatario="extracao",
+                motivo=f"[rota grid] {e}",
+                bloqueante=False,
+                regra_origem="D-ARQ-57",
+            ),
+        )
+    if not grupos:
+        return (), (pendencia_estrutura,)
+    try:
+        candidatos = transcrever_grupos_grid(grupos, cliente_grid)
+    except TranscricaoIndisponivel as e:
+        return (), (
+            Pendencia(
+                tipo="transcricao_indisponivel_pgr",
+                destinatario="extracao",
+                motivo=f"[rota grid] {e}",
+                bloqueante=True,
+                regra_origem="D-ARQ-57",
+            ),
+        )
+    return gate_forma_ghe(candidatos)
+
+
 def preparar_pgr_hidratado(
     caminho: Path,
     protocolo: Protocolo,
     cliente: TranscritorGHE,
     cliente_card: TranscritorCard,
     envelope: EnvelopeConfirmado,
+    cliente_grid: TranscritorGrid | None = None,
 ) -> tuple[PGR | None, tuple[Pendencia, ...]]:
     """preparar_ghes -> hidratar_pgr, parando ANTES de processar_pgr (D-ARQ-49
     Parte 2 fatia 2a: split cheap/expensive — expõe o PGR hidratado para a
@@ -274,12 +335,12 @@ def preparar_pgr_hidratado(
     sinal psicossocial. preparar_envelope lê de novo, porque o seam de
     confirmação-RT entre as duas invocações é humano.
 
-    cliente e cliente_card são repassados intactos a preparar_ghes, que
-    decide a rota (ghe/card) a partir de avaliar_estrutura — este nível não
-    julga rota, só costura.
+    cliente, cliente_card e cliente_grid são repassados intactos a
+    preparar_ghes, que decide a rota (ghe/card/grid) — este nível não julga
+    rota, só costura.
     """
     leitura = ler_pdf(caminho, processos_leitura_pdf())
-    aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card, leitura)
+    aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card, leitura, cliente_grid)
     if not aprovados:
         # Parse total falho (blocos ausentes, transcrição indisponível, ou
         # todos os GHE reprovados no gate): sem verbatim para hidratar, não
@@ -309,6 +370,7 @@ def processar_arquivo_pgr(
     cliente_card: TranscritorCard,
     envelope: EnvelopeConfirmado,
     hoje: date | None = None,
+    cliente_grid: TranscritorGrid | None = None,
 ) -> tuple[Resultado | None, tuple[Pendencia, ...]]:
     """Costura completa arquivo -> Resultado (D-ARQ-52/D-ARQ-53; roteamento
     ghe/card de preparar_ghes via D-ARQ-57 peça 4 fatia 4d).
@@ -323,7 +385,7 @@ def processar_arquivo_pgr(
     na lista final devolvida — zeramento de linha por bloqueio de GHE é
     D-ARQ-31 fatia 2, fora de escopo aqui.
     """
-    pgr, pendencias = preparar_pgr_hidratado(caminho, protocolo, cliente, cliente_card, envelope)
+    pgr, pendencias = preparar_pgr_hidratado(caminho, protocolo, cliente, cliente_card, envelope, cliente_grid)
     if pgr is None:
         return None, pendencias
     resultado = processar_pgr(pgr, protocolo, hoje)
