@@ -11936,3 +11936,41 @@ números" e Camada 2 re-tiradas; nota `[ACHADO]` marcada como corrigida.
 **Verificação.** Suíte completa, árvore parada: **1674 passed, 6 skipped, 0 failed** (1176,49 s), 1671 + 3 exato.
 `mypy --strict` alvo canônico limpo, 55 arquivos; `scripts/medir_painel.py` e o teste limpos com `--explicit-package-bases`
 (sem a flag, o mypy acusa o módulo com dois nomes — erro de invocação, já existia antes da mudança).
+
+## Sessão (branch `claude/gifted-cerf-0loir2`, sobre `main 0beb7cd`, pós-merge do PR #446 e upload do acervo) — 05/10/2026 — ARQUITETURA: rota "grid" para o PGR Ricco (`D-ARQ-57` peça 5)
+
+**Origem.** O Diovanni subiu um PGR no app de produção e recebeu "Parse total falho" com `pgr_cargo_based` (5 sinais), e
+perguntou se era do Hetrin. Nenhum PDF do acervo dava 5 sinais; ele subiu o documento e mais três em `matrizes_originais/`
+(`0beb7cd`): `ADENDO - FUNÇÕES FALTANTES - PGR RICCO.pdf`, `PGR_RICCO_2026_REV06.pdf` e o par matriz/PCMSO adendo do SPE R70.
+
+**Medido** (`ler_pdf` + `avaliar_estrutura`, os mesmos do app). O print é do adendo (5 sinais). Entre os 48 PDFs do
+acervo, só 5 caem em `pgr_cargo_based`, todos Ricco no grid AIHA: Hetrin/mar-2025 (369), Hetrin/set-2026 (21), Serra
+Dourada (168), REV06 (26), adendo (5). O REV06 é Hetrin/set-2026 (197/197 páginas com texto idêntico) + adendo (20/20). O
+adendo não tem página de identificação; o grid dele tem a coluna Função em x0=102.5, contra x0=60.2 no corpo do mesmo PGR.
+Matriz/PCMSO do R70: `segmentacao_implausivel` e `numeracao_ghe_lacunar` — são matriz e PCMSO, não PGR, sem leitura clínica.
+
+**Correção de premissa no meio da sessão.** Eu tinha recomendado a rota com o argumento "3 documentos no layout novo =
+template recorrente". A medição do REV06 desmentiu: é 1 PGR reenviado com adendo. Reportei antes de escrever; o Diovanni
+manteve a decisão ("pode seguir"), com o argumento corrigido: documento de cliente ativo em produção, com gabarito.
+
+**Decisão (Diovanni).** Nota de andamento em `D-ARQ-57` peça 5 (DECISOES v239): rota `"grid"` no molde da rota card; 5a
+generalizada para o cabeçalho CAIXA ALTA (calibração por página, herança na página sem cabeçalho, mais de um intervalo);
+5b e 5c determinísticas saem, o conteúdo de cada grupo de função vai ao LLM (`TranscritorGrid`), admissão por
+`gate_forma_ghe`. Adendo sem identificação é documento de primeira classe (gera a matriz das funções que traz; empresa/obra
+pelo envelope). Fatiamento G1 → G2 → G3; `DT-(sessão claude/youthful-lamport-3kfkog)-02` fecha na G3.
+
+**Pergunta do Diovanni respondida na nota (cl.3).** "Quando mandam adendo, o app lê os GHEs como se fosse o PGR?" Os
+adendos do acervo no formato GHE (Vila Brasil 25.08.26, 96 págs.; Aurora Lago das Rosas 27.08.26, 104 págs.) são PGRs
+completos e passam o gate de estrutura sem pendência. O da Ricco é só o grid das funções novas: hoje bloqueia como o
+Hetrin; com a rota grid, gera a matriz das funções acrescentadas, que é o que a médica emite como matriz de adendo.
+
+**Docs tocados.** `DECISOES_ARQUITETURAIS.md` (nota + v239), `INDICE_DARQ.md` (regenerado), `PENDENCIAS_CLINICAS.md` (nota
+na DT), `PAINEL_ESTADO.md` (Baseline) e este histórico. Sem código, sem `R-*`, PROTOCOLO v128 inalterado.
+
+**Verificação.** `test_gerar_indice_darq.py`: 6 passed. `mypy --strict` alvo canônico: limpo, 55 arquivos. `medir_painel`
+em `0beb7cd`: `regras 44/62 (71%)`, `cas 80/115 (70%)`, `índice sincronizado` — três números não se moveram; tabela não
+re-tirada (decisão declarada, `D-ARQ-85` cl.1). Suíte completa, árvore parada (docs desta sessão já escritos, sem o número): **1674 passed, 6 skipped, 0 failed** (1062,54 s), igual a `c2145f7` — os 4 PDFs novos do acervo não mudaram a contagem.
+
+**Lição de método.** Afirmei "template recorrente" a partir de nomes de arquivo e cabeçalhos, antes de comparar o conteúdo
+dos documentos. A comparação página a página custou segundos e inverteu o argumento. Mesma classe de "resumo tratado como
+fonte" do bloco de 03/10 (LINACH).
