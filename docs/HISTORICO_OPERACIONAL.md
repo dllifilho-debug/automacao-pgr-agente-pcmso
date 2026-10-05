@@ -12037,3 +12037,28 @@ não movidos, tabela não re-tirada (`D-ARQ-85` cl.1).
 
 **Lição de método.** Um teste de composição (gate reprovando o GHE vazio do lote) foi escrito e tirado antes do commit: a
 reversão que o mataria está em `gate_forma_ghe`, código que esta fatia não toca — pela regra do `CLAUDE.md`, não entra.
+
+## Sessão (mesma branch, recriada sobre `main f23b0ba`, pós-merge do PR #449) — 05/10/2026 — IMPLEMENTAÇÃO: fatia G3 da rota grid (`D-ARQ-57` peça 5)
+
+**Foco.** Ligar a rota grid no pipeline e no app.
+
+**Decisão no código, registrada em `D-ARQ-57`.** O desvio para a rota grid ficou em `preparar_ghes`, não em
+`avaliar_estrutura` como a nota v239 previa: `avaliar_estrutura` só recebe texto, e o localizador de grid precisa das
+palavras com posição, que `preparar_ghes` já tem. `cliente_grid` entrou como parâmetro opcional em `preparar_ghes`,
+`preparar_pgr_hidratado` e `processar_arquivo_pgr` (as ~25 chamadas existentes não mudam; sem cliente, o bloqueio segue). O
+app injeta `TranscritorGeminiGrid` e soma os grupos no contador de "blocos lidos por IA". Os scripts de medição não foram
+ligados.
+
+**Entrega.** Commit `e677c34` (orquestração, app, `test_rota_grid.py`). Par 17 (Hetrin set-2026 ↔ matriz 14.09.26)
+registrado no `PAREAMENTO_ACERVO.md`, com as funções conferidas.
+
+**Verificação.** Suíte completa, árvore parada, em `e677c34`: **1698 passed, 6 skipped, 0 failed** (963,02 s), 1692 + 6
+exato. Depois, só docs; recorte: `test_gerar_indice_darq.py` e `test_particao_pendencias.py`. `mypy --strict` alvo
+canônico: limpo, 56 arquivos; orquestração e teste novo limpos com `--explicit-package-bases`. Varredura inversa 6/6.
+`medir_painel`: nenhuma `R-*` nem CAS tocados; três números não movidos, tabela não re-tirada (`D-ARQ-85` cl.1).
+
+**Pendência que fecha a DT.** e2e no app de produção com o Hetrin set-2026 contra a matriz 14.09.26 — primeira medição do
+prompt contra o Gemini real. Só o Diovanni tem o app com a chave; o resultado volta como entrada da próxima sessão.
+
+**Lição de método.** O teste inicial com `# type: ignore[arg-type]` em todas as chamadas tinha três ignores sem uso —
+o mypy `--strict` pegou antes do commit. Duplo de teste que satisfaz o Protocol por forma não precisa de ignore.

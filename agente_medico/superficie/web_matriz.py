@@ -32,6 +32,7 @@ from agente_medico.adaptadores.orquestracao_fds import preparar_composicao
 from agente_medico.adaptadores.orquestracao_pgr import preparar_pgr_hidratado
 from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini, UsoGemini, medir_uso
 from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiCard
+from agente_medico.adaptadores.transcritor_gemini_grid import TranscritorGeminiGrid
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.composicao import resolver_composicao
 from agente_medico.motor.entrada import processar_pgr
@@ -52,6 +53,7 @@ from agente_medico.motor.tipos import (
 )
 from agente_medico.motor.transcricao_fds import montar_fds
 from agente_medico.motor.transcritor_fds import TranscritorLLM
+from agente_medico.motor.transcritor_grid import EntradaGrid, TranscritorGrid
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
 from agente_medico.superficie.apresentacao import EmissaoFuturaError, validar_data_emissao
 from agente_medico.superficie.documento_matriz import (
@@ -172,6 +174,24 @@ class _TranscritorContado:
             return tuple(self.interno.transcrever(b) for b in blocos)
         finally:
             self.segundos += time.perf_counter() - inicio
+
+
+@dataclass
+class _TranscritorGridContado:
+    """Rota grid (D-ARQ-57 peça 5 G3): cada grupo de função enviado à IA soma
+    no mesmo contador da rota GHE, para a tela não informar "0 blocos" num
+    PGR da Ricco lido inteiro por IA."""
+
+    interno: TranscritorGrid
+    contador: _TranscritorContado
+
+    def transcrever_lote(self, entradas: Sequence[EntradaGrid]) -> tuple[GHEVerbatim, ...]:
+        self.contador.chamadas += len(entradas)
+        inicio = time.perf_counter()
+        try:
+            return self.interno.transcrever_lote(entradas)
+        finally:
+            self.contador.segundos += time.perf_counter() - inicio
 
 
 _log = logging.getLogger(__name__)
@@ -302,6 +322,7 @@ def _rodar_parse_deterministico(
             contador,
             TranscritorGeminiCard(),
             envelope,
+            _TranscritorGridContado(interno=TranscritorGeminiGrid(), contador=contador),
         )
     uso = resumir_uso(registros)
     if pgr_hidratado is None:
