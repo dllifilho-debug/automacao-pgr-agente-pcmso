@@ -3220,6 +3220,8 @@ peça 4/D-ARQ-65) — escopo e prioridade a definir pelo Arquiteto, não aberta 
 
 **Nota (mesma branch, recriada sobre `main f23b0ba`, 05/10/2026) — fatia G3 IMPLEMENTADA no código; DT segue ABERTA até o e2e no app.** A rota grid está ligada em `preparar_ghes` (cliente do grid opcional; o app injeta o Gemini). Com cliente simulado, o adendo da Ricco atravessa até 8 matrizes. **Para fechar esta DT:** subir o Hetrin set-2026 (ou REV06, ou o adendo) no app de produção e comparar a matriz gerada com `MATRIZ DE EXAMES(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.doc` (par 17 do `PAREAMENTO_ACERVO.md`) — é a primeira medição do prompt da G2 contra o Gemini real. Detalhe em `D-ARQ-57`, andamento G3 (DECISOES v242).
 
+**Nota (mesma branch, sobre `main 3207c80`, 05/10/2026) — 1º e2e no app; DT segue ABERTA até o 2º.** REV06 no app de produção: 30 grupos, nomes e cargos certos; matriz pobre porque 4 grafias que disparam exame não casavam no vocabulário. Aliases ancorados em norma entraram (`D-ARQ-70`, nota de aplicação, DECISOES v243); replay contra a matriz 14.09.26: 195 → 29 células ausentes. Fecha com o 2º teste no app, já com os aliases em produção. O que sobra está em `DT-(sessão claude/gifted-cerf-0loir2)-01`, abaixo.
+
 ### DT-(sessão não numerada, branch `claude/dreamy-mayer-os6jce`)-01 — Relatório de rastreabilidade/proveniência da matriz (origem de cada risco/exame, por-que da decisão do motor) `[ABERTA — proposta registrada, sem ARQUITETURA própria]`
 
 **Origem.** Pedido do usuário nesta sessão, durante a revisão da auditoria comparativa da matriz Aurora Lago das Rosas (comparativo app × matriz aprovada pelas médicas): a matriz de exames deveria vir acompanhada de um relatório explicando de onde o app tirou cada risco, de onde tirou cada exame e por que decidiu o que decidiu — não necessariamente uma "auditoria", mas rastreabilidade suficiente para a médica coordenadora entender a origem de uma decisão do app sem precisar reconstruir manualmente a cadeia PGR→regra→exame (exatamente o trabalho que a auditoria Aurora precisou fazer à mão).
@@ -4020,3 +4022,24 @@ carregam benzeno no vocabulário, então o destilado é a fonte provável `[INTE
 v126** — o Fascino 08.07.26 é da mesma médica e mais recente. Observação: se o R78 passar do gate e a transcrição juntar
 as páginas com o "com" repetido, o termo não casa e vira pendência de vocabulário visível, não silêncio. PROTOCOLO v128.
 
+### DT-(sessão `claude/gifted-cerf-0loir2`)-01 — Hetrin set-2026: o que ainda diverge da matriz 14.09.26 depois dos aliases `[ABERTA — não-bloqueante]`
+
+**Origem.** Replay do 1º e2e da rota grid (REV06 no app de produção, 05/10/2026), com os riscos de cada grupo reconstruídos do memorial do
+app e o motor real, comparado célula a célula com `MATRIZ DE EXAMES(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.doc` (Dra. Patrícia; par 17
+do `PAREAMENTO_ACERVO.md`), 22 funções do corpo. Periodicidades e momentos não foram comparados nesta medição.
+
+**Faltam (23 células reais):**
+1. **Solventes** — Acetona, Metiletilcetona, Ciclohexanol na urina e Tetrahidrofurano na urina, PER 6 meses, em Almoxarife, Encanador e Montador
+   (12 células). O PGR diz só "PRODUTOS QUÍMICOS"; o composto vem da FDS do adesivo PVC, que entra pela etapa 2 do app (`R-FDS-*`). Medir no
+   2º teste com a FDS anexada antes de concluir que falta regra.
+2. **Carboxihemoglobina** no Armador e **Manganês sanguíneo** no Soldador e no Montador de estruturas metálicas (3 células). Termos do PGR
+   não reconhecidos que podem ser a fonte: "PÓ DE FERRAGEM", "FUMOS NOCIVOS", "METÁLICA", "GASES E VAPORES" `[A MEDIR]` — qual grafia leva a
+   qual exame, e se há regra para isso.
+3. **Pacote de atividade crítica nos vigias** (Acuidade, ECG, Glicemia, Hemograma; 8 células). O PGR não lista "Quedas de altura" para os
+   vigias; a matriz pede o pacote mesmo assim `[A MEDIR]` — de onde vem.
+
+**Sobram (24 células):** `avaliacao_psicossocial` em todo grupo com trabalho em altura — `R-PSY-04` (NR-35 item 35.4.4), decisão pela norma
+já registrada em `DT-(sessão claude/cool-babbage-whh1zw)-03`; a matriz 14.09.26 não pede. Divergência consciente, não defeito.
+
+**Fora do escopo desta DT:** o adendo (8 funções) não tem matriz no acervo; RX de coluna aparece nos dois lados (diferença só de nome no
+instrumento de comparação).
