@@ -101,8 +101,8 @@ _RODAPE_MATRIZ_RISCO = "Matriz de Risco AIHA"
 #
 # (5) Página do intervalo sem cabeçalho nenhum (pág. 32 do set-2026, 327
 # palavras) é continuação da função aberta. Fora do grid, as páginas sem
-# cabeçalho vêm em sequência longa (set-2026: 37-61; REV06: 37-196); dentro,
-# a única lacuna medida é de 1 página.
+# cabeçalho vêm em sequência longa (págs. 37-196, 160 páginas, no set-2026 e
+# no REV06); dentro, a única lacuna medida é de 1 página.
 _GAP_CABECALHO_PT = 6.0  # entre 4.7 (máx. dentro) e 7.8 (mín. cabeçalho→corpo), ver (3)
 _LACUNA_MAX_SEM_CABECALHO = 1  # ver (5)
 _TITULO_CORRIDO_PGR = "PGR | PROGRAMA DE GERENCIAMENTO DE RISCOS"
