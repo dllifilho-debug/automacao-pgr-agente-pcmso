@@ -11974,3 +11974,36 @@ re-tirada (decisão declarada, `D-ARQ-85` cl.1). Suíte completa, árvore parada
 **Lição de método.** Afirmei "template recorrente" a partir de nomes de arquivo e cabeçalhos, antes de comparar o conteúdo
 dos documentos. A comparação página a página custou segundos e inverteu o argumento. Mesma classe de "resumo tratado como
 fonte" do bloco de 03/10 (LINACH).
+
+## Sessão (mesma branch, recriada sobre `main ecbb4fb`, pós-merge do PR #447) — 05/10/2026 — IMPLEMENTAÇÃO: fatia G1 da rota grid (`D-ARQ-57` peça 5)
+
+**Foco.** Ler o grid do template set-2026 da Ricco (Hetrin/set-2026, REV06, adendo) até o nível de grupos de função, sem LLM.
+
+**Medido antes do código.** Cada página do grid set-2026 abre uma função, mas o cabeçalho fica no meio da página e o que está
+acima dele é a continuação da função anterior (pág. 31: 310 palavras de PEDREIRO acima do cabeçalho de PINTOR). A pág. 32
+não tem cabeçalho: é continuação de PINTOR. Rótulos do cabeçalho em letras soltas no adendo e na pág. 30; só `FUNÇÃO` vem
+sempre inteiro. Bloco do cabeçalho: linhas a até 4.7pt entre si, 7.8pt no mínimo até o corpo (30 páginas). Duas premissas
+da nota v239 caíram aqui ("herdar calibração" e "cabeçalho no topo") e o código seguiu a medição; registrado em `D-ARQ-57`.
+
+**Entrega.** `parser_familia_grid_aiha.py`: forma CAIXA ALTA do cabeçalho; conteúdo acima do cabeçalho para o grupo aberto;
+página sem cabeçalho como continuação; `localizar_intervalos_grid` (lacuna máx. 1 página) e `segmentar_documento`. 10
+testes novos; varredura inversa 10/10. Commits `958c019` (código + testes) e o da correção do comentário (abaixo).
+
+**Resultado.** Hetrin/set-2026: 22 grupos, as mesmas funções e na mesma ordem da matriz 14.09.26. REV06: intervalos 14-36 e
+197-204, 30 grupos. Adendo: 8. Hetrin/mar-2025 e Serra Dourada: 63 e 28 (não regressão). Varredura dos 48 PDFs: grid só nos
+5 da Ricco. Durante a medição, a checagem `PERIGO/RISCO` derrubava as págs. 2-3 do adendo ("PERIGO/" e "RISCO" em linhas
+diferentes); passou a `PERIGO` + `EXPOSIÇ`.
+
+**Verificação.** Suíte completa, árvore parada, em `958c019` (código final): **1684 passed, 6 skipped, 0 failed** (1157,48
+s), 1674 + 10 exato. Depois disso só mudou o texto de um comentário do parser e docs; recorte: os testes sintéticos do
+parser (20 passed) e `test_gerar_indice_darq.py` (6 passed). `mypy --strict` alvo canônico: limpo, 55 arquivos; arquivo de
+teste novo limpo com `--explicit-package-bases`. `medir_painel`: `regras 44/62`, `cas 80/115`, `índice sincronizado` — três números não movidos,
+tabela não re-tirada (`D-ARQ-85` cl.1). Custo novo na suíte: ~170 s dos 3 testes com PDF real (DH-003EC-02).
+
+**Pendências.** `DT-(sessão claude/youthful-lamport-3kfkog)-02` segue ABERTA: G2 (`TranscritorGrid`, LLM, normaliza nomes
+como "CARPINTEIR O" e separa os cargos do grupo N:1) e G3 (rota no app + e2e contra a matriz 14.09.26).
+
+**Lições de método.** (1) Escrevi na nota v239 "gabarito da Dra. Carolini" sem abrir a matriz; ela é da Dra. Patrícia.
+Corrigido na nota G1. (2) Escrevi "25 páginas sem cabeçalho depois do grid" a partir de uma contagem por `FUNÇÃO` sozinha,
+que é outro critério; com o localizador real são 160 (37-196). Corrigido no comentário e na nota antes do commit dos docs.
+As duas são a mesma classe: número ou fato afirmado sem rodar o instrumento que o mede.

@@ -119,6 +119,11 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[05/10/2026, fatia G1 da rota grid]`:** branch `claude/gifted-cerf-0loir2` sobre `main ecbb4fb` (merge do PR #447) ·
+**1684 passed, 6 skipped, 0 failed** *(MEDIDO em `958c019`, árvore parada, 1157,48 s — 1674 + 10)* · `mypy --strict` alvo canônico
+**limpo, 55 arquivos** · PROTOCOLO v128 inalterado · DECISOES v239→**v240** (nota G1 em `D-ARQ-57`; índice regenerado). `medir_painel`:
+`regras 44/62 (71%)`, `cas 80/115 (70%)`, `índice sincronizado`. Três números: não movidos, tabela não re-tirada.
+
 **Baseline `[05/10/2026, ARQUITETURA da rota grid — só docs]`:** branch `claude/gifted-cerf-0loir2` sobre `main 0beb7cd`
 (PR #446 + upload de 4 PDFs no acervo) · **1674 passed, 6 skipped, 0 failed** *(MEDIDO com a árvore parada, 1062,54 s; igual a `c2145f7`)* · `mypy --strict` alvo canônico **limpo, 55 arquivos** · PROTOCOLO v128
 inalterado · DECISOES v238→**v239** (nota em `D-ARQ-57` peça 5; índice regenerado, `test_gerar_indice_darq.py` 6 passed).

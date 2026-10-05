@@ -78,6 +78,35 @@ _LIMIAR_QUEBRA_TITULO_PT = 10.0  # ver nota (2) acima — medido, não estimado
 # real (verbatim, medido, não hipótese).
 _RODAPE_MATRIZ_RISCO = "Matriz de Risco AIHA"
 
+# [DERIVADO — D-ARQ-57 peça 5, fatia G1 (sessão claude/gifted-cerf-0loir2)]
+# Template set-2026 da Ricco ("PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN
+# 14.09.26.pdf" págs. 14-36, o adendo "ADENDO - FUNÇÕES FALTANTES - PGR
+# RICCO.pdf" págs. 0-7, e os dois dentro de "PGR_RICCO_2026_REV06.pdf"),
+# medido com pdfplumber:
+#
+# (3) Cabeçalho em CAIXA ALTA, com rótulos às vezes fragmentados em letras
+# ("T" "IP" "O", "E" "X" "PO" "S" "I" "Ç" "Ã" "O" — adendo inteiro e pág.
+# 30 do set-2026). Só `FUNÇÃO` vem sempre inteiro (30/30 páginas). O bloco
+# do cabeçalho é a corrida de linhas físicas contíguas em torno da linha de
+# `FUNÇÃO`: dentro dele a distância entre linhas vai até 4.7pt; do
+# cabeçalho para o corpo, 7.8pt no mínimo (30 páginas). A banda Função
+# termina na palavra do bloco mais à esquerda depois de `FUNÇÃO` (rótulo
+# Tipo de Risco, inteiro ou fragmentado).
+#
+# (4) O cabeçalho não fica no topo da página: abre a função no ponto da
+# página em que ela começa, e o que vem ACIMA dele é a continuação da
+# função anterior (medido: pág. 31 do set-2026, 310 palavras de PEDREIRO
+# acima do cabeçalho de PINTOR). Na forma title-case (2 witnesses de 5a) o
+# cabeçalho repete no topo e nada acima dele é corpo — contrato mantido.
+#
+# (5) Página do intervalo sem cabeçalho nenhum (pág. 32 do set-2026, 327
+# palavras) é continuação da função aberta. Fora do grid, as páginas sem
+# cabeçalho vêm em sequência longa (págs. 37-196, 160 páginas, no set-2026 e
+# no REV06); dentro, a única lacuna medida é de 1 página.
+_GAP_CABECALHO_PT = 6.0  # entre 4.7 (máx. dentro) e 7.8 (mín. cabeçalho→corpo), ver (3)
+_LACUNA_MAX_SEM_CABECALHO = 1  # ver (5)
+_TITULO_CORRIDO_PGR = "PGR | PROGRAMA DE GERENCIAMENTO DE RISCOS"
+
 
 class GrupoFuncaoNaoReconhecido(ValueError):
     """Página do intervalo do grid AIHA sem cabeçalho reconhecível (Função
@@ -123,7 +152,63 @@ def _agrupar_linhas(palavras: Sequence[PalavraPDF]) -> list[_Linha]:
     return [_Linha(tuple(sorted(grupo, key=lambda p: p.x0))) for grupo in linhas]
 
 
-def _localizar_cabecalho_grid(
+class _Cabecalho(NamedTuple):
+    funcao_x0: float
+    tipo_risco_x0: float
+    fim_top: float
+    # None na forma title-case: nada acima do cabeçalho é corpo do grid.
+    # Na forma CAIXA ALTA, o que está acima é da função anterior (nota (4)).
+    inicio_top: Optional[float]
+
+
+def _topo(linha: _Linha) -> float:
+    return min(p.top for p in linha.palavras)
+
+
+def _localizar_cabecalho_grid(linhas: Sequence[_Linha]) -> Optional[_Cabecalho]:
+    """Cabeçalho do grid nas duas formas medidas: title-case (Hetrin/mar,
+    Serra Dourada) e CAIXA ALTA (template set-2026, nota (3) de topo)."""
+    titulo = _localizar_cabecalho_title_case(linhas)
+    if titulo is not None:
+        funcao_x0, tipo_x0, fim_top = titulo
+        return _Cabecalho(funcao_x0, tipo_x0, fim_top, None)
+    return _localizar_cabecalho_caixa_alta(linhas)
+
+
+def _localizar_cabecalho_caixa_alta(linhas: Sequence[_Linha]) -> Optional[_Cabecalho]:
+    """Bloco do cabeçalho = corrida de linhas contíguas (< _GAP_CABECALHO_PT)
+    em torno da linha que tem `FUNÇÃO`. Os rótulos podem vir fragmentados em
+    letras, então a confirmação de que é o grid (e não, por exemplo, a
+    tabela de EPI por função) é feita sobre o texto do bloco colado sem
+    espaços: precisa ter `PERIGO` e `EXPOSIÇ`. Não `PERIGO/RISCO`: nas
+    págs. 2-3 do adendo, "PERIGO/" e "RISCO" caem em linhas diferentes."""
+    for k, linha in enumerate(linhas):
+        funcao = next((p for p in linha.palavras if p.text == "FUNÇÃO"), None)
+        if funcao is None:
+            continue
+        inicio = k
+        while inicio > 0 and _topo(linhas[inicio]) - _topo(linhas[inicio - 1]) < _GAP_CABECALHO_PT:
+            inicio -= 1
+        fim = k
+        while fim + 1 < len(linhas) and _topo(linhas[fim + 1]) - _topo(linhas[fim]) < _GAP_CABECALHO_PT:
+            fim += 1
+        bloco = [p for linha_bloco in linhas[inicio : fim + 1] for p in linha_bloco.palavras]
+        colado = "".join(p.text for p in bloco)
+        if "PERIGO" not in colado or "EXPOSIÇ" not in colado:
+            continue
+        a_direita = [p.x0 for p in bloco if p.x0 > funcao.x0]
+        if not a_direita:
+            continue
+        return _Cabecalho(
+            funcao_x0=funcao.x0,
+            tipo_risco_x0=min(a_direita),
+            fim_top=max(p.top for p in linhas[fim].palavras),
+            inicio_top=_topo(linhas[inicio]),
+        )
+    return None
+
+
+def _localizar_cabecalho_title_case(
     linhas: Sequence[_Linha],
 ) -> Optional[tuple[float, float, float]]:
     """(funcao_x0, tipo_risco_x0, header_fim_top) calibrados a partir do
@@ -235,10 +320,15 @@ def segmentar_paginas(
     novo. TODAS as linhas de resto da página entram no grupo que fica
     aberto ao final da página — cada página pertence inteira a uma função.
 
-    Zero páginas -> tupla vazia. Página sem cabeçalho reconhecível, ou com
-    cabeçalho reconhecido mas sem nenhuma linha na coluna Função ->
-    GrupoFuncaoNaoReconhecido (falha explícita; roteamento decide o
-    fallback, fatia 5d, fora desta fatia).
+    Forma CAIXA ALTA (G1, notas (4)/(5) de topo): o que fica acima do
+    cabeçalho vai para o grupo aberto, e página sem cabeçalho depois de um
+    grupo aberto é continuação dele. Quem decide até onde vai o intervalo
+    é `localizar_intervalos_grid`.
+
+    Zero páginas -> tupla vazia. 1ª página sem cabeçalho reconhecível, ou
+    página com cabeçalho reconhecido mas sem nenhuma linha na coluna Função
+    -> GrupoFuncaoNaoReconhecido (falha explícita; roteamento decide o
+    fallback, fatia G3).
     """
     grupos: list[GrupoFuncaoAIHA] = []
     nome_aberto: Optional[str] = None
@@ -248,13 +338,20 @@ def segmentar_paginas(
         linhas_completas = _agrupar_linhas(palavras_pagina)
         cabecalho = _localizar_cabecalho_grid(linhas_completas)
         if cabecalho is None:
-            raise GrupoFuncaoNaoReconhecido(
-                "Página sem cabeçalho do grid AIHA (Função / Tipo de Risco / "
-                "Exposição+Propagação) reconhecível — banda de coluna não "
-                "calibrável (D-ARQ-57 peça 5 fatia 5a)"
-            )
-        funcao_x0, tipo_risco_x0, header_fim_top = cabecalho
-        limite = tipo_risco_x0 - _TOLERANCIA_COLUNA_PT
+            if nome_aberto is None:
+                raise GrupoFuncaoNaoReconhecido(
+                    "Página sem cabeçalho do grid AIHA (Função / Tipo de Risco / "
+                    "Exposição+Propagação) reconhecível — banda de coluna não "
+                    "calibrável (D-ARQ-57 peça 5 fatia 5a)"
+                )
+            buffer_grupo.extend(_sem_titulo_corrido(linhas_completas))
+            continue
+        limite = cabecalho.tipo_risco_x0 - _TOLERANCIA_COLUNA_PT
+        header_fim_top = cabecalho.fim_top
+
+        if cabecalho.inicio_top is not None and nome_aberto is not None:
+            acima = [p for p in palavras_pagina if p.top < cabecalho.inicio_top]
+            buffer_grupo.extend(_sem_titulo_corrido(_agrupar_linhas(acima)))
 
         corpo = [p for p in palavras_pagina if p.top > header_fim_top]
         palavras_funcao = [p for p in corpo if p.x0 < limite]
@@ -284,6 +381,54 @@ def segmentar_paginas(
         grupos.append(GrupoFuncaoAIHA(nome=nome_aberto, linhas=tuple(buffer_grupo)))
 
     return tuple(grupos)
+
+
+def _sem_titulo_corrido(linhas: Sequence[_Linha]) -> list[_Linha]:
+    return [linha for linha in linhas if linha.texto != _TITULO_CORRIDO_PGR]
+
+
+def localizar_intervalos_grid(
+    paginas: Sequence[Sequence[PalavraPDF]],
+) -> tuple[tuple[int, int], ...]:
+    """Intervalos (início, fim), 0-indexed e inclusivos, das páginas do grid
+    no documento inteiro: corridas de páginas com cabeçalho, admitindo
+    dentro delas lacunas de até `_LACUNA_MAX_SEM_CABECALHO` página sem
+    cabeçalho (nota (5) de topo). Lacuna maior abre intervalo novo — é outro
+    trecho do documento (REV06: o grid do adendo anexado, págs. 197-204)."""
+    com_cabecalho = [
+        indice
+        for indice, palavras in enumerate(paginas)
+        if _localizar_cabecalho_grid(_agrupar_linhas(palavras)) is not None
+    ]
+    intervalos: list[tuple[int, int]] = []
+    for indice in com_cabecalho:
+        if intervalos and indice - intervalos[-1][1] - 1 <= _LACUNA_MAX_SEM_CABECALHO:
+            intervalos[-1] = (intervalos[-1][0], indice)
+        else:
+            intervalos.append((indice, indice))
+    return tuple(intervalos)
+
+
+def segmentar_documento(
+    paginas: Sequence[Sequence[PalavraPDF]],
+) -> tuple[GrupoFuncaoAIHA, ...]:
+    """Grupos de função do documento inteiro: cada intervalo de
+    `localizar_intervalos_grid` é segmentado à parte, e um grupo nunca
+    continua de um intervalo para o seguinte."""
+    return tuple(
+        grupo
+        for inicio, fim in localizar_intervalos_grid(paginas)
+        for grupo in segmentar_paginas(paginas[inicio : fim + 1])
+    )
+
+
+def segmentar_documento_arquivo(caminho: Path) -> tuple[GrupoFuncaoAIHA, ...]:
+    """Wrapper de I/O de `segmentar_documento` (D-ARQ-09)."""
+    paginas = [
+        tuple(PalavraPDF(text=w["text"], x0=w["x0"], top=w["top"]) for w in page.extract_words())
+        for page in paginas_liberadas(caminho)
+    ]
+    return segmentar_documento(paginas)
 
 
 def segmentar_arquivo(
