@@ -32,7 +32,13 @@ agentes:
     # [MEDIDO — 003.FF, PGR ALT T65: "Queda em altura" 13 ocorrências, nenhuma resolvida;
     # predicado `altura` False em 16/16 GHEs, R-PKG-ATIVCRIT nunca disparou, 175 células do
     # gabarito assinado não emitidas. Ver docs/referencia/MEDICAO_003FF_par_T65.md §3.]
-    termos: ["Trabalho em Altura", "Queda em altura"]  # NR-35 (título) e item 35.2.1
+    # D-ARQ-70: "Quedas de altura", 28 de 30 grupos.
+    # [MEDIDO — PGR_RICCO_2026_REV06.pdf (= Hetrin set-2026 + adendo), transcrição do app de
+    # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2]. Mesma
+    # derivação de "Queda em altura" (NR-35, normas/nr-35-atualizada-2025-1.pdf, pág. 1: "...do
+    # nível inferior, onde haja risco de queda"). "Quedas de nível", no mesmo documento e em 28
+    # grupos, é queda no mesmo plano e NÃO entra aqui (teste anti-FP).
+    termos: ["Trabalho em Altura", "Queda em altura", "Quedas de altura"]  # NR-35 (título) e item 35.2.1
   # enquadramento_3048: código + tempo de exposição do Decreto 3.048/1999, Anexo IV
   # ("Classificação dos Agentes Nocivos"), quando o agente consta literalmente na
   # tabela — dado de referência previdenciária, sem consumidor no motor (DT-003BA-01
@@ -74,7 +80,11 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
-    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas", "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)", "Vibração localizada (mãos e braços)", "Vibrações localizadas (mão-braço)"]
+    # D-ARQ-70: "Vibrações localizadas (mãos e braços)" e "(braço e mãos)", 1 grupo cada.
+    # [MEDIDO — PGR_RICCO_2026_REV06.pdf (= Hetrin set-2026 + adendo), transcrição do app de
+    # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2].
+    # [DERIVADO — NR-09 Anexo I: "Vibrações em Mãos e Braços - VMB" (normas/nr-09-atualizada-2026 .pdf, pág. 4).]
+    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas", "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)", "Vibração localizada (mãos e braços)", "Vibrações localizadas (mão-braço)", "Vibrações localizadas (mãos e braços)", "Vibrações localizadas (braço e mãos)"]
     enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # mesmo item único de vibracao_corpo_inteiro
   vibracao:
     tipo_ibe: null
@@ -255,7 +265,12 @@ agentes:
     # [MEDIDO — 003.FH, correção 003.FH-C3: os mecanismos são independentes e nenhum sozinho
     # cobre duas grafias. Sem o casefold cai só a caixa-alta; sem o NFKD cai só a forma sem
     # acento. O par sufixo de `postura_inadequada` não é desta classe — ver lá.]
-    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável"]
+    # D-ARQ-70: "Poeira – Silica" (travessão, sem acento), 1 grupo.
+    # [MEDIDO — PGR_RICCO_2026_REV06.pdf (= Hetrin set-2026 + adendo), transcrição do app de
+    # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2].
+    # [DERIVADO — NR-07 Anexo III, Quadro 1: "poeira contendo sílica"; o mesmo núcleo do alias
+    # "Sílica Livre - Poeira respirável" acima.]
+    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável", "Poeira - Sílica"]
     enquadramento_3048: {codigo: "1.0.18", tempo_exposicao: "25 anos"}  # literal ("Sílica livre")
   asbesto:
     tipo_ibe: null
@@ -284,7 +299,12 @@ agentes:
     # TOCTAO ALT 65 (T65), Rev. 01 06/2026, GHE 18 COPA, 1 ocorrência]: a mesma, com
     # "outramaneira" sem espaço — erro de digitação do PGR, recusado por aproximação
     # porque este slug dispara R-RX-01/R-ESP-02 (D-ARQ-64 cl.5); vai como alias exato.
-    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)", "Particulados insolúveis ou de baixa solubilidade não especificados de outramaneira (PNOS)"]
+    # Sexta forma (D-ARQ-70): "Poeira - PNOS", 29 de 30 grupos.
+    # [MEDIDO — PGR_RICCO_2026_REV06.pdf (= Hetrin set-2026 + adendo), transcrição do app de
+    # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2]. Núcleo: a sigla PNOS,
+    # NR-07 Anexo III (normas/nr-07-atualizada-2022-1 .pdf, pág. 24: "Para ser classificado como
+    # PNOS..."). "Poeira – Silica" do mesmo documento vai para `silica`, não para cá.
+    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)", "Particulados insolúveis ou de baixa solubilidade não especificados de outramaneira (PNOS)", "Poeira - PNOS"]
   poeira_de_gesso:
     tipo_ibe: null
     # Três formas de hidratação com CAS próprio — di-hidratado 10101-41-4, hemi-hidratado
@@ -386,6 +406,14 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: []
+    # D-ARQ-70: "Ruído contínuo ou intermitente" em 29 de 30 grupos e "Ruído impulsivo ou de
+    # impacto" em 2. [MEDIDO — PGR_RICCO_2026_REV06.pdf (= Hetrin set-2026 + adendo), transcrição do app de
+    # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2].
+    # [DERIVADO — NR-15 Anexo 1, título: "LIMITES DE TOLERÂNCIA PARA RUÍDO CONTÍNUO OU
+    # INTERMITENTE"; Anexo 2, título: "LIMITES DE TOLERÂNCIA PARA RUÍDOS DE IMPACTO" —
+    # normas/nr-15-atualizada-2025 .pdf, págs. 2 e 4; vigência no Gov.br/MTE [A CONFERIR],
+    # Gov.br bloqueado no ambiente]. "Impulsivo ou de impacto" contém o núcleo do Anexo 2.
+    termos: ["Ruído contínuo ou intermitente", "Ruído de impacto", "Ruído impulsivo ou de impacto"]
     enquadramento_3048: {codigo: "2.0.1", tempo_exposicao: "25 anos"}  # literal, mesmo limiar NEN>85dB(A) de classificacao_ruido.py
   espaco_confinado:
     tipo_ibe: null

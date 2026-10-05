@@ -31,7 +31,7 @@ def indice_real() -> IndiceTermos:
 # construir_indice_termos — vocabulário real
 # ---------------------------------------------------------------------------
 
-def test_indice_real_tem_202_entradas(indice_real: IndiceTermos) -> None:
+def test_indice_real_tem_210_entradas(indice_real: IndiceTermos) -> None:
     # 114 -> 119 em 003.FH: +5 aliases de R-PGR-07 (proposta 003.FF). 119 -> 120 na
     # correção 003.FH-C3: +1 alias, a grafia singular do par de sufixo de
     # `postura_inadequada`. 120 -> 123 em 003.FL: +3 aliases de PNOS/PNOR em
@@ -93,7 +93,10 @@ def test_indice_real_tem_202_entradas(indice_real: IndiceTermos) -> None:
     # "(petróleo)" dos PGRs CMO Aurora e Vistamerica (R-FDS-07, decisão do Diovanni).
     # 199 -> 202 (mesma branch): +1 slug `destilados_petroleo_hidrotratados` e +2 termos (Fascino
     # e WV Maldi); o termo do Aurora/Vistamerica só mudou de slug (saiu de aguarras_mineral).
-    assert len(indice_real.slug_por_forma) == 202
+    # 202 -> 210 (branch `claude/gifted-cerf-0loir2`, 05/10/2026): +8 termos do grid AIHA da
+    # Ricco (REV06, rota grid no app) — 3 de `ruido` (NR-15 Anexos 1 e 2), "Poeira - PNOS",
+    # "Poeira - Sílica", "Quedas de altura" e 2 de `vibracao_mao_braco` (D-ARQ-70).
+    assert len(indice_real.slug_por_forma) == 210
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -883,3 +886,44 @@ def test_thinner_com_alcool_diacetona_nao_vira_acetona(indice_real: IndiceTermos
     # Álcool diacetona" nos termos de `acetona` junto com as formas do thinner que nomeiam a acetona.
     # ("Thinner" sozinho: test_thinner_nao_resolvido_produto_nao_e_agente.)
     assert resolver_termo("Thinner - Álcool diacetona", indice_real).slug is None
+
+
+@pytest.mark.parametrize(
+    ("termo", "slug_esperado"),
+    [
+        ("RUÍDO CONTÍNUO OU INTERMITENTE", "ruido"),
+        ("RUÍDO CONTÍNUO OU INTERMITENTE *", "ruido"),
+        ("RUÍDO IMPULSIVO OU DE IMPACTO", "ruido"),
+        ("POEIRA - PNOS", "poeira_nao_classificada"),
+        ("POEIRA – SILICA", "silica"),
+        ("QUEDAS DE ALTURA", "trabalho_altura"),
+        ("VIBRAÇÕES LOCALIZADAS (MÃOS E BRAÇOS)", "vibracao_mao_braco"),
+        ("VIBRAÇÕES LOCALIZADAS (BRAÇO E MÃOS)", "vibracao_mao_braco"),
+    ],
+)
+def test_grafias_do_grid_ricco_resolvem_por_alias(
+    indice_real: IndiceTermos, termo: str, slug_esperado: str
+) -> None:
+    # Verbatim da transcrição do app de produção, rota grid, PGR_RICCO_2026_REV06.pdf
+    # (D-ARQ-70; sessão claude/gifted-cerf-0loir2). Reversão que mata cada caso:
+    # tirar o termo correspondente do `termos:` do slug em agentes.yaml.
+    resolucao = resolver_termo(termo, indice_real)
+    assert resolucao.confianca == Confianca.EXATA
+    assert resolucao.slug == slug_esperado
+
+
+def test_quedas_de_nivel_nao_vira_trabalho_em_altura(indice_real: IndiceTermos) -> None:
+    # anti-FP D-ARQ-70 cl.1.iv: "Quedas de nível" (queda no mesmo plano), no mesmo
+    # documento e em 28 grupos, não é trabalho em altura (NR-35, "acima de 2,00 m").
+    # Reversão que mata: incluir "Quedas de nível" (ou um "Quedas" genérico) nos
+    # termos de `trabalho_altura`.
+    assert resolver_termo("QUEDAS DE NÍVEL", indice_real).slug is None
+
+
+def test_poeira_silica_nao_vira_pnos_nem_poeira_pnos_vira_silica(indice_real: IndiceTermos) -> None:
+    # anti-FP D-ARQ-70 cl.1.iv: as duas poeiras do mesmo grid ficam em slugs
+    # distintos — sílica dispara a conduta de cancerígeno, PNOS não. Reversão que
+    # mata: mover "Poeira - Sílica" de `silica` para `poeira_nao_classificada` (a
+    # duplicação nos dois já cai antes, na colisão de `construir_indice_termos`).
+    assert resolver_termo("POEIRA – SILICA", indice_real).slug != "poeira_nao_classificada"
+    assert resolver_termo("POEIRA - PNOS", indice_real).slug != "silica"
