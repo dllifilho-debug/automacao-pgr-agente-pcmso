@@ -12007,3 +12007,33 @@ como "CARPINTEIR O" e separa os cargos do grupo N:1) e G3 (rota no app + e2e con
 Corrigido na nota G1. (2) Escrevi "25 páginas sem cabeçalho depois do grid" a partir de uma contagem por `FUNÇÃO` sozinha,
 que é outro critério; com o localizador real são 160 (37-196). Corrigido no comentário e na nota antes do commit dos docs.
 As duas são a mesma classe: número ou fato afirmado sem rodar o instrumento que o mede.
+
+## Sessão (mesma branch, recriada sobre `main 7df8473`, pós-merge do PR #448) — 05/10/2026 — IMPLEMENTAÇÃO: fatia G2 da rota grid (`D-ARQ-57` peça 5)
+
+**Foco.** Levar cada grupo de função do grid (saída da G1) ao LLM e trazer de volta `GHEVerbatim`, no molde da rota card e
+do lote da rota GHE.
+
+**Entrega.** `motor/transcritor_grid.py` (`EntradaGrid`, `TranscritorGrid`, `transcrever_grupos_grid`) e
+`adaptadores/transcritor_gemini_grid.py` (`TranscritorGeminiGrid`: lote de 6, 2 tentativas, `_parsear_ghes_lote` reusado).
+`avaliacao_qualitativa` vazia na rota grid: a escala do grid AIHA não é a P×S das regras de nível, e "1 - IRRELEVANTE" na
+coluna Classificação enganaria a guarda por legenda da rota GHE; vazio vai para o lado que emite. Commit `3336b08`.
+
+**Medido.** Texto de um grupo real (pág. 14 do Hetrin/set-2026): ~2,2 mil caracteres, colunas intercaladas por linha — base
+do prompt. A matriz 14.09.26 (convertida por `soffice`) lista 5 cargos no grupo N:1 da pág. 14, com "Apontador
+Administrativo De Obra" como um cargo só: a premissa da 5b ("6 cargos distintos") cai, e a divisão nas barras basta para
+esse grupo. Registrado em `D-ARQ-57`.
+
+**Não medido.** O prompt contra o Gemini real: não há `CHAVE_API_GOOGLE` no ambiente. `[A MEDIR]` na G3.
+
+**Verificação.** Suíte completa, árvore parada, em `3336b08`: **1692 passed, 6 skipped, 0 failed** (971,18 s), 1684 + 8
+exato. Depois disso, só docs; recorte: `test_gerar_indice_darq.py` (6 passed) e `test_particao_pendencias.py`. `mypy
+--strict` alvo canônico: limpo, **56 arquivos** (+1, `motor/transcritor_grid.py`); adaptador e os dois arquivos de teste
+limpos com `--explicit-package-bases`. Varredura inversa 8/8. `medir_painel`: nenhuma `R-*` nem CAS tocados; três números
+não movidos, tabela não re-tirada (`D-ARQ-85` cl.1).
+
+**Pendências.** `DT-(sessão claude/youthful-lamport-3kfkog)-02` ABERTA até a G3: rota `"grid"` em `avaliar_estrutura` e
+`preparar_ghes`, cliente injetado no app (e um cliente offline, como as outras rotas), e2e no app contra a matriz 14.09.26
+— é onde a qualidade do prompt é medida.
+
+**Lição de método.** Um teste de composição (gate reprovando o GHE vazio do lote) foi escrito e tirado antes do commit: a
+reversão que o mataria está em `gate_forma_ghe`, código que esta fatia não toca — pela regra do `CLAUDE.md`, não entra.
