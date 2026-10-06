@@ -61,6 +61,12 @@ def transcrever_grupos_grid(
     (_restringir_avaliacao_a_escala_pxs). Vazio leva nivel_risco a None,
     o lado que emite — mesma decisão daquela guarda para bloco fora da
     escala P×S.
+
+    Todo risco sai com `avaliacao_qualitativa_aiha=True`: cada linha da
+    tabela AIHA traz a avaliação, e R-RX-01-qual (sílica, 12M) separa só
+    "com/sem avaliação qualitativa" — nota de 06/10/2026 em D-ARQ-57 peça 5.
+    Marca estrutural, não lida pelo LLM: se uma linha vier sem a avaliação,
+    o erro é 12M em vez de 24M, o lado mais protetivo.
     """
     if not grupos:
         return ()
@@ -70,11 +76,12 @@ def transcrever_grupos_grid(
             f"transcritor do grid devolveu {len(resultado)} GHEs para "
             f"{len(grupos)} grupos — alinhamento quebrado"
         )
-    return tuple(_sem_avaliacao_qualitativa(ghe) for ghe in resultado)
+    return tuple(_avaliacao_aiha(ghe) for ghe in resultado)
 
 
-def _sem_avaliacao_qualitativa(ghe: GHEVerbatim) -> GHEVerbatim:
-    if not any(risco.avaliacao_qualitativa for risco in ghe.riscos):
-        return ghe
-    riscos = tuple(dataclasses.replace(risco, avaliacao_qualitativa="") for risco in ghe.riscos)
+def _avaliacao_aiha(ghe: GHEVerbatim) -> GHEVerbatim:
+    riscos = tuple(
+        dataclasses.replace(risco, avaliacao_qualitativa="", avaliacao_qualitativa_aiha=True)
+        for risco in ghe.riscos
+    )
     return dataclasses.replace(ghe, riscos=riscos)

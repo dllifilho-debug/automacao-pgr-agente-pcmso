@@ -4069,3 +4069,7 @@ instrumento de comparação).
 2. **(b) Decidir junto com o item 2, não antes.** Mudar `R-RX-02` para 12M segue a maioria de 2026 (12 × 5 gabaritos), mas no Hetrin não teria efeito enquanto "FUMOS NOCIVOS" não for reconhecido. Ligar "FUMOS NOCIVOS" a `fumos_metalicos` é exatamente o risco de falso positivo já apontado no item 2. Recomendação: tratar fumos/solda como uma decisão só (gatilho e periodicidade).
 
 **Status:** ABERTA — itens 2, 3 e 4 (4a com proposta, aguardando decisão).
+
+**Nota (branch `claude/kind-bardeen-ajkpnr`, sobre `main e801cb6`, 06/10/2026) — item 4a DECIDIDO e IMPLEMENTADO.** O Diovanni aprovou a proposta (a). A avaliação AIHA do grid conta como avaliação qualitativa para `R-RX-01-qual`, pelo campo `avaliacao_qualitativa_aiha`, sem tocar `nivel_risco` (`D-ARQ-57` peça 5, nota de aplicação; DECISOES v245). Efeito esperado no Hetrin: azulejista 24M → 12M, igual à matriz 14.09.26. Confirmação no app `[A MEDIR]` no próximo teste. O item 4b (soldador e montador de estruturas metálicas) segue aguardando, junto com o item 2.
+
+**Status:** ABERTA — itens 2, 3 e 4b.

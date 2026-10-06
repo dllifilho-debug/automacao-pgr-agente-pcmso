@@ -12188,3 +12188,20 @@ Azulejista: a sílica tem avaliação qualitativa AIHA no PGR, que a rota grid d
 pede 12M em 12 gabaritos e 60M em 5. Proposta (a) e recomendação (b) em `PENDENCIAS_CLINICAS.md`.
 
 **Verificação.** Só docs nesta etapa. Recorte: `test_particao_pendencias.py` e `test_medir_painel.py`, **14 passed**. Suíte completa não re-rodada (sem código tocado; a última, sobre o PR #455, deu 1716 passed).
+
+## Sessão (mesma branch, recriada sobre `main e801cb6`, pós-merge do PR #456) — 06/10/2026 — IMPLEMENTAÇÃO: avaliação AIHA do grid em `R-RX-01-qual`
+
+**Decisão do Diovanni.** Piso do Streamlit mantido em 1.56.0. Proposta (a) do item 4 da `DT-(sessão claude/gifted-cerf-0loir2)-01`
+aprovada: a avaliação AIHA do grid conta como avaliação qualitativa para `R-RX-01-qual`.
+
+**Entrega.** Campo `avaliacao_qualitativa_aiha` em `RiscoVerbatim`, `RiscoPGR` e `Risco`; `transcrever_grupos_grid` marca todo
+risco do grid (marca estrutural, sem mudar o prompt); `hidratar_ghe` e `stage_2_riscos` propagam; `_helper_silica_asbesto` aceita
+a marca como avaliação qualitativa, só para sílica. `nivel_risco` segue `None` na rota grid, então `R-BIO-05` e a dispensa por
+IRRELEVANTE não mudam. `regras.yaml` (`R-RX-01-qual`: base normativa e resumo), nota de aplicação em `D-ARQ-57` peça 5 (v245),
+`INDICE_DARQ.md` regenerado, `PENDENCIAS_CLINICAS.md` (4a implementado). Commit `a5da0ef`.
+
+**Verificação.** 3 testes novos (`test_rx_silica_grid_aiha.py`). Varredura inversa 6/6. A primeira versão do teste da escala
+não discriminava: o texto falso "1 - IRRELEVANTE" nem é lido por `parsear_nivel_risco`, então a reversão "o grid deixa de
+esvaziar a avaliação" sobrevivia. Corrigido para "1 1 IRRELEVANTE" e varredura refeita. `test_gerar_indice_darq.py`: 6 passed.
+Suíte completa, árvore parada: **1719 passed, 6 skipped, 0 failed** (1040,74 s). mypy no alvo canônico: limpo, 56 arquivos.
+Efeito no app (azulejista do Hetrin 24M → 12M) `[A MEDIR]` no próximo teste.
