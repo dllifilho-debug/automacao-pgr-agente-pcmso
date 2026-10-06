@@ -12062,3 +12062,35 @@ prompt contra o Gemini real. Só o Diovanni tem o app com a chave; o resultado v
 
 **Lição de método.** O teste inicial com `# type: ignore[arg-type]` em todas as chamadas tinha três ignores sem uso —
 o mypy `--strict` pegou antes do commit. Duplo de teste que satisfaz o Protocol por forma não precisa de ignore.
+
+## Sessão (mesma branch, recriada sobre `main 3207c80`, pós-merge do PR #450) — 05/10/2026 — 1º e2e da rota grid no app + vocabulário (`D-ARQ-70`)
+
+**Origem.** O Diovanni rodou o `PGR_RICCO_2026_REV06.pdf` no app de produção e trouxe a matriz e o memorial gerados.
+
+**Medido no e2e.** 30 grupos lidos por IA (22 + 8 do adendo), 106 s, 5 respostas do `gemini-3.8-flash`. Nomes consertados e
+cargos separados como na matriz 14.09.26 — a leitura da rota funcionou, e o prompt da G2 está medido. A matriz saiu só com o
+Exame Clínico na maioria dos grupos: 514 riscos não reconhecidos em 47 grafias. Quatro que disparam exame não casavam:
+"Ruído contínuo ou intermitente" (29 grupos), "Poeira - PNOS" (29), "Quedas de altura" (28) e vibração em mãos e braços.
+
+**Entrega.** 8 aliases em `agentes.yaml` com fonte dupla (D-ARQ-70 cl.1), literais conferidos nas cópias de `normas/`: NR-15
+Anexos 1 e 2, NR-07 Anexo III, NR-35, NR-09 Anexo I. Gov.br bloqueado no ambiente (HTTP 403); vigência das cópias de
+`normas/` confirmada pelo Diovanni em 06/10/2026 (todas as normas da pasta). Testes:
+8 casos de alias + 2 anti-FP ("Quedas de nível"; as duas poeiras); guarda de inventário 202 → 210. Commit `776430d`.
+
+**Decisão revertida antes do código.** Eu tinha proposto ajustar o prompt do grid para tirar o qualificador ("Ruído contínuo ou
+intermitente" → "Ruído"), e o Diovanni aprovou. Ao reler a `D-ARQ-70` cl.3 (reconciliação de grafia é do resolvedor, não do
+LLM) e medir o efeito, retirei: "POEIRA – SILICA" viraria "Poeira" e a sílica sumiria. Os aliases resolvem as quatro grafias.
+
+**Replay.** Riscos de cada grupo reconstruídos do memorial do app, motor real, comparação célula a célula com a matriz 14.09.26
+(22 funções do corpo): células do gabarito ausentes **195 → 29** (6 são ruído do instrumento); a mais **2 → 26** (24 de
+`avaliacao_psicossocial` por `R-PSY-04`, divergência pela norma já registrada). O restante virou
+`DT-(sessão claude/gifted-cerf-0loir2)-01`.
+
+**Verificação.** Suíte completa, árvore parada, com o vocabulário e os testes desta sessão: **1708 passed, 6 skipped, 0
+failed** (941,89 s), 1698 + 10. Varredura inversa 10/10 — a reversão "duplicar 'Poeira - Sílica' nos dois slugs" cai antes,
+na colisão de `construir_indice_termos`; a que o teste anti-FP pega é mover a grafia, e o comentário do teste foi corrigido
+para dizer isso. `medir_painel`: `regras 44/62`, `cas 80/115`, `índice sincronizado` (aliases não mexem em CAS); três números
+não re-tirados. Depois da suíte, só docs; recorte: `test_gerar_indice_darq.py` e `test_particao_pendencias.py`.
+
+**Pendência.** 2º teste no app com os aliases em produção (e, se possível, com a FDS do adesivo anexada na etapa 2) fecha
+`DT-(sessão claude/youthful-lamport-3kfkog)-02`.

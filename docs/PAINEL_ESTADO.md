@@ -119,6 +119,12 @@
 > `PENDENCIAS_CLINICAS.md` (nota adicional na mesma DT) e HISTORICO_OPERACIONAL.md (bloco
 > desta sessão).
 
+**Baseline `[05/10/2026, aliases do grid da Ricco]`:** branch `claude/gifted-cerf-0loir2` sobre `main 3207c80` (merge do PR #450) ·
+**1708 passed, 6 skipped, 0 failed** *(MEDIDO com o vocabulário e os testes desta sessão, árvore parada, 941,89 s — 1698 + 10)* · `mypy
+--strict` alvo canônico **limpo, 56 arquivos** (nenhum `.py` de produção tocado) · PROTOCOLO v128 inalterado · DECISOES v242→**v243**
+(nota em `D-ARQ-70` e em `D-ARQ-57`; índice regenerado). `medir_painel`: `regras 44/62 (71%)`, `cas 80/115 (70%)`, `índice sincronizado`.
+Três números: não movidos. 1º e2e da rota grid no app medido; replay contra a matriz 14.09.26: 195 → 29 células ausentes.
+
 **Baseline `[05/10/2026, fatia G3 da rota grid]`:** branch `claude/gifted-cerf-0loir2` sobre `main f23b0ba` (merge do PR #449) ·
 **1698 passed, 6 skipped, 0 failed** *(MEDIDO em `e677c34`, árvore parada, 963,02 s — 1692 + 6)* · `mypy --strict` alvo canônico
 **limpo, 56 arquivos** · PROTOCOLO v128 inalterado · DECISOES v241→**v242** (nota G3 em `D-ARQ-57`; índice regenerado). `medir_painel`:
