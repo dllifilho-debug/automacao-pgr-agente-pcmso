@@ -12205,3 +12205,17 @@ não discriminava: o texto falso "1 - IRRELEVANTE" nem é lido por `parsear_nive
 esvaziar a avaliação" sobrevivia. Corrigido para "1 1 IRRELEVANTE" e varredura refeita. `test_gerar_indice_darq.py`: 6 passed.
 Suíte completa, árvore parada: **1719 passed, 6 skipped, 0 failed** (1040,74 s). mypy no alvo canônico: limpo, 56 arquivos.
 Efeito no app (azulejista do Hetrin 24M → 12M) `[A MEDIR]` no próximo teste.
+
+## Sessão (mesma branch, recriada sobre `main f1e8e43`, pós-merge do PR #457) — 06/10/2026 — 3º e2e da rota grid no app
+
+**Medido** (`comparar_matriz_gabarito --matriz-app` × matriz 14.09.26): **230 de 241 células reproduzidas (95,4%)**, superemissão
+24 (todas `avaliacao_psicossocial`, `R-PSY-04`), subemissão 11, momentos 0, periodicidade 2. As FDS dos adesivos foram anexadas a
+GHE-02, GHE-08 e GHE-12, e os IBEs de solvente fecharam nos três. O RX do azulejista saiu 12M por `R-RX-01-qual`, o que confirma no app
+o PR #457. Os resultados batem com a previsão feita antes do teste (subemissão 19 → 11, periodicidade 3 → 2). Evidência versionada em
+`docs/referencia/e2e_hetrin_rev06_20261006_3/`. Processamento no app: 183 s (106 s no 1º e2e); a diferença está na IA (135 s
+contra 67 s) `[A MEDIR — causa]`.
+
+**Verificação.** Só docs e evidência. Recorte: `test_particao_pendencias.py`, `test_medir_painel.py` e `test_comparar_matriz_gabarito.py`, **34 passed**.
+
+**Sobra.** `DT-(sessão claude/gifted-cerf-0loir2)-01` itens 2 (manganês e carboxihemoglobina), 3 (vigias) e 4b (RX de soldador e
+montador de estruturas metálicas).
