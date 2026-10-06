@@ -12239,3 +12239,8 @@ por lote mantidas. Rotas card, topo e FDS fazem uma chamada por item e ficaram c
 supunha a ordem das chamadas HTTP: passou a checar por conteúdo e segue morto pela reversão "sem fatiar" (conferido).
 `test_gerar_indice_darq.py` 6 passed. Smoke visual ok (desktop e mobile). Suíte completa, árvore parada: **1724 passed, 6
 skipped, 0 failed** (1154,93 s). mypy no alvo canônico: limpo, 56 arquivos. Efeito no app `[A MEDIR]` no próximo teste.
+
+**4º e2e no app (mesma branch, sobre `main 6048f6d`, 06/10/2026) — efeito dos lotes em paralelo medido.** Mesmas entradas do 3º:
+IA 135 s → **39 s**, processamento 183 s → **77 s**; consumo contado (5 respostas, entrada 38.797). Matriz idêntica célula
+por célula à do 3º e2e, 95,4% contra a 14.09.26. Evidência em `docs/referencia/e2e_hetrin_rev06_20261006_4/`; o
+`[A MEDIR]` da nota de `D-ARQ-80` virou medição.

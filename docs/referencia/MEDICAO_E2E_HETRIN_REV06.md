@@ -115,6 +115,21 @@ A primeira passada deu 25 super e 1 divergência de momentos a mais: defeito do 
 
 **O que sobra:** subemissão de 11 células, todas já registradas na `DT-(sessão claude/gifted-cerf-0loir2)-01`: `manganes_sangue` em soldador e montador de estruturas metálicas (2), `carboxihemoglobina` no armador (1) e o pacote dos vigias (8). Periodicidade: RX OIT de soldador e montador de estruturas metálicas, 60M × 12M (item 4b).
 
+## 4º e2e no app — lotes do Gemini em paralelo (PR #459)
+
+`[MEDIDO — 06/10/2026, branch claude/kind-bardeen-ajkpnr, sobre main 6048f6d]`
+
+Mesmas entradas do 3º e2e (REV06 + FDS dos adesivos em GHE-02, GHE-08 e GHE-12), com `D-ARQ-80` nota de 06/10/2026 em produção. Saída versionada sem alteração: `e2e_hetrin_rev06_20261006_4/matriz_app.docx` (`aa121a6b9431dc51…`), `memorial_app.docx` (`1d044a93759367cf…`).
+
+| | 3º e2e (lotes em série) | 4º e2e (lotes em paralelo) |
+|---|---|---|
+| Processamento do PGR | 183 s | **77 s** |
+| IA (Gemini), 30 blocos | 135 s | **39 s** |
+| Leitura do PDF e montagem | 48 s | 38 s |
+| Consumo da IA | 5 respostas; entrada 38.797, saída 22.843 | 5 respostas; entrada 38.797, saída 23.211 |
+
+**Matriz idêntica à do 3º e2e, célula por célula** (`extrair_matriz_app` dos dois arquivos: 0 diferenças em exame, prazo e momentos). Comparação contra a 14.09.26: 230/241 (95,4%), mesmos números do 3º. O consumo continua contado, então o `copy_context` funciona em produção.
+
 ## Próximo passo
 
 1. ~~Estender `scripts/comparar_matriz_gabarito.py` para aceitar a matriz DOCX exportada pelo app.~~ Feito (`--matriz-app`).
