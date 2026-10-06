@@ -116,6 +116,22 @@ _ALIAS_GRAFIA = {
 }
 
 
+# Sigla entre parênteses no meio do nome do exame: "Metil-etil-cetona (MEK) na
+# urina (PER 6 meses)", nome de exibição do próprio vocabulário, que o app
+# imprime assim. `segmentar_exames` toma "(MEK)" por grupo de momentos e parte a
+# célula em "Metil-etil-cetona (MEK)" e "na urina (PER 6 meses)": 1 superemissão
+# e 1 divergência de momentos falsas por cargo (medido no 2º e2e Hetrin). Rótulo
+# de momento isolado, "(PER)", não é sigla de nome e fica de fora.
+_SIGLA_NO_NOME = re.compile(
+    r"\((?!(?:ADM|PER|MRO|MR|RET|RT|DEM)\))([A-Z]{2,6})\)(?=[ \t]+[^\s(])"
+)
+_SIGLA_ABRE, _SIGLA_FECHA = "\u27e8", "\u27e9"
+
+
+def _proteger_sigla(texto_celula: str) -> str:
+    return _SIGLA_NO_NOME.sub(rf"{_SIGLA_ABRE}\1{_SIGLA_FECHA}", texto_celula)
+
+
 class ConversaoIndisponivel(RuntimeError):
     """LibreOffice ausente ou sem o filtro Writer — falha nomeada, nunca silêncio."""
 
@@ -190,7 +206,7 @@ def extrair_gabarito(
                 continue
             formas = [
                 resolver_slug(extrair_forma_periodicidade(seg, dict(mapa_nomes)), mapa_nomes)
-                for seg in segmentar_exames(celulas[1])
+                for seg in segmentar_exames(_proteger_sigla(celulas[1]))
             ]
             if not formas:
                 continue
@@ -211,7 +227,8 @@ def resolver_slug(
     """
     if forma.exame in mapa_nomes.values():
         return forma
-    limpo = _MOMENTO_NO_NOME.sub(" ", forma.nome_bruto)
+    nome = forma.nome_bruto.replace(_SIGLA_ABRE, "(").replace(_SIGLA_FECHA, ")")
+    limpo = _MOMENTO_NO_NOME.sub(" ", nome)
     limpo = re.sub(r"[\s,;.()]+$", "", re.sub(r"\s+", " ", limpo)).strip()
     chave = _normalizar_grafia(limpo)
     chave = _ALIAS_GRAFIA.get(chave, chave)

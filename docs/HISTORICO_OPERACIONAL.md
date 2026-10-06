@@ -12118,3 +12118,36 @@ mais 1 em cada um de `test_contaminante_a_confirmar`, `test_estilos`, `test_memo
 11748c3` (36 failed, 120 passed nesses arquivos) — não vêm deste diff. Erros dominantes: `KeyError` em `session_state`
 (`ghe_destino_fds.pdf`, `medicao_valor`, `web_matriz_cache`). Container com `streamlit 1.65.0`; a sessão anterior mediu 0
 failed. Causa (versão do Streamlit ou outra dependência do ambiente) `[A MEDIR]`. **Bloqueador reportado, não corrigido.**
+
+## Sessão (mesma branch, recriada sobre `main 435c973`, pós-merge do PR #453) — 06/10/2026 — 2º e2e da rota grid no app (Hetrin REV06 + FDS dos adesivos)
+
+**Origem.** O Diovanni rodou a REV06 no app com os aliases em produção. Na etapa 2, anexou ao GHE-08 as FDS do adesivo PVC incolor e
+do CPVC Aquatherm. Trouxe a matriz e o memorial gerados.
+
+**Medido** (`comparar_matriz_gabarito --matriz-app` × matriz 14.09.26): **222 de 241 células reproduzidas (92,1%)**, contra 52 (21,6%)
+no 1º e2e. Superemissão 24 (todas `avaliacao_psicossocial`, `R-PSY-04`), subemissão 19, momentos 0, periodicidade 3 (RX OIT: matriz
+12 meses, app 24/60). A subemissão é a que o replay previa: solventes em almoxarife e montador (FDS anexada só ao GHE-08), manganês,
+carboxihemoglobina e o pacote dos vigias. Evidência versionada em `docs/referencia/e2e_hetrin_rev06_20261006/`.
+
+**Defeito do instrumento achado e corrigido.** "Metil-etil-cetona (MEK) na urina (PER 6 meses)" partia em dois segmentos no
+"(MEK)": 1 superemissão e 1 divergência de momentos falsas. Corrigido com `_proteger_sigla`, que não protege rótulo de momento
+isolado. 2 testes novos, varredura inversa 2/2; o 1º e2e mede igual com e sem a correção.
+
+**Pendências.** `DT-(sessão claude/youthful-lamport-3kfkog)-02` RESOLVIDA. `DT-(sessão claude/gifted-cerf-0loir2)-01` segue
+ABERTA (itens 2, 3 e o novo item 4, periodicidade do RX).
+
+**Verificação.** Recorte, árvore parada: todo teste que lê `PENDENCIAS_CLINICAS`, o painel ou o comparador (6 arquivos), **182
+passed** (296 s). mypy no alvo canônico: limpo, 56 arquivos. Suíte completa não re-rodada: a desta manhã tinha 36 falhas
+pré-existentes de tela (bloqueador acima) e o diff toca só o comparador e docs.
+
+**Verificação pedida pelo Diovanni (mesma sessão, 06/10/2026) — nenhuma lógica do motor alterada.** Diff `11748c3` → `48df42e`:
+fora de `scripts/comparar_matriz_gabarito.py`, do teste dele e de docs/evidência, nenhum arquivo. Nada em `agente_medico/`,
+`protocolo/` ou `app_matriz*.py`. Efeito do comparador medido:
+- **Caminho de 4 argumentos (PGR + envelope):** Fascino rodado com o script de `11748c3` (worktree) e com o atual, mesmo envelope
+  mínimo: relatórios **idênticos byte a byte** (97,0%; subemissão 11; periodicidade 1).
+- **Extração dos 50 gabaritos de `matrizes_originais/`, antes × agora:** 41 idênticos (incluídos Fascino, Porto Araras e Vila
+  Brasil, base das medições registradas em `PENDENCIAS_CLINICAS.md`). 8 mudam só por nome cru → slug, sem prazo nem momento
+  alterado: "manganes sanguineo" → `manganes_sangue` (30 células) e, no Hetrin, "acetona"/"metiletilcetona" →
+  `acetona_urina`/`mek_urina`. 1 muda pela proteção de sigla: no gabarito Maua Participações (23.09.26), "Urina tipo (EAS) anual
+  (ADM, PER, MRO)" deixava de virar dois exames falsos ("urina tipo" sem momentos + "anual") e vira um, com os momentos; segue
+  sem slug no vocabulário nos dois casos.

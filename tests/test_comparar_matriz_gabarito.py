@@ -331,3 +331,29 @@ def test_cli_matriz_app_com_aridade_errada_e_erro_de_uso(tmp_path: Path) -> None
     with pytest.raises(SystemExit) as erro:
         main(["--matriz-app", "a.docx", "pgr.pdf", "env.json", "gab.doc", "rel.md"])
     assert erro.value.code == 2
+
+
+def test_sigla_entre_parenteses_no_meio_do_nome_nao_parte_a_celula(tmp_path: Path) -> None:
+    """R — tirar `_proteger_sigla` de `extrair_gabarito` mata este teste. O app
+    imprime o nome do vocabulário, "Metil-etil-cetona (MEK) na urina"; sem a
+    proteção, "(MEK)" vira grupo de momentos e a célula sai partida em
+    `mek_urina` sem momentos + um exame "na urina" (2º e2e Hetrin, encanador)."""
+    mapa = {"metil-etil-cetona (mek) na urina": "mek_urina", "exame clinico": "exame_clinico"}
+    celula = "Exame Clínico (ADM, PER)\nMetil-etil-cetona (MEK) na urina (PER 6 meses)"
+    app = extrair_matriz_app(_matriz_docx(tmp_path / "app.docx", [("Encanador", celula)]), mapa)
+    assert set(app["encanador"]) == {"exame_clinico", "mek_urina"}
+    mek = app["encanador"]["mek_urina"]
+    assert getattr(mek, "periodicidade_meses") == 6
+    assert {m.name for m in getattr(mek, "momentos")} == {"PER"}
+
+
+def test_rotulo_de_momento_isolado_nao_e_tomado_por_sigla(tmp_path: Path) -> None:
+    """R — tirar de `_SIGLA_NO_NOME` a exclusão dos rótulos de momento mata este
+    teste: "(PER)" seguido do exame seguinte na mesma linha seria protegido como
+    sigla e os dois exames virariam um só."""
+    mapa = {"hemograma": "hemograma", "glicemia de jejum": "glicemia"}
+    app = extrair_matriz_app(
+        _matriz_docx(tmp_path / "app.docx", [("Pedreiro", "Hemograma (PER) Glicemia de Jejum (ADM)")]),
+        mapa,
+    )
+    assert set(app["pedreiro"]) == {"hemograma", "glicemia"}
