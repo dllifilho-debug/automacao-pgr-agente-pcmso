@@ -12174,3 +12174,17 @@ todas pelo comentário do próprio teste: tirar o `except EmissaoFuturaError` (h
 explícito), tirar a checagem de laudo vazio (cópia em linha) — 3/3 vermelhas. Suíte completa, árvore parada, 1.65: **1716
 passed, 6 skipped, 0 failed** (1021,48 s). mypy no alvo canônico: limpo, 56 arquivos. **Bloqueador resolvido.**
 `requirements.txt` segue `>=1.56.0,<2.0.0`; subir o piso para 1.65 fica para decisão do Diovanni.
+
+## Sessão (mesma branch, recriada sobre `main cc7290c`, pós-merge do PR #455) — 06/10/2026 — piso do Streamlit e RX do Hetrin (medição)
+
+**Piso do Streamlit — não alterado, bloqueador reportado.** Pedido: subir `requirements.txt` para `>=1.65.0`. Medido antes:
+os 11 arquivos de tela com `streamlit[auth]==1.56.0` (venv à parte) dão **156 passed** com a correção do PR #455. Pela
+definição do piso (`D-ARQ-75`, `test_piso_de_streamlit_e_o_medido`: a menor versão em que tudo o que o repositório testa
+passa), ele segue 1.56.0. Subir muda o significado do piso → decisão do Diovanni.
+
+**RX OIT do Hetrin (`DT-(sessão claude/gifted-cerf-0loir2)-01` item 4) — medido, proposta registrada, sem código.**
+Azulejista: a sílica tem avaliação qualitativa AIHA no PGR, que a rota grid descarta (G2), e por isso cai em 24M em vez de
+`R-RX-01-qual` 12M. Soldador e montador de estruturas metálicas: o 12M do gabarito não vem de nenhuma regra atual, e o acervo de 2026
+pede 12M em 12 gabaritos e 60M em 5. Proposta (a) e recomendação (b) em `PENDENCIAS_CLINICAS.md`.
+
+**Verificação.** Só docs nesta etapa. Recorte: `test_particao_pendencias.py` e `test_medir_painel.py`, **14 passed**. Suíte completa não re-rodada (sem código tocado; a última, sobre o PR #455, deu 1716 passed).

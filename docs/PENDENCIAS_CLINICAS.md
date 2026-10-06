@@ -4053,3 +4053,19 @@ instrumento de comparação).
 4. **Novo — periodicidade do RX de tórax OIT, 3 células:** a matriz pede 12 meses; o app emite 24 meses no azulejista (`R-RX-01-sem`, sílica sem avaliação ambiental) e 60 meses em soldador e montador de estruturas metálicas (`R-RX-01-pnos-sem`, PNOS sem medição). Decisão clínica a tomar em sessão, pela hierarquia de `D-ARQ-22` Parte A.
 
 **Status:** ABERTA — itens 2, 3 e 4.
+
+**Nota (branch `claude/kind-bardeen-ajkpnr`, sobre `main cc7290c`, 06/10/2026) — item 4 medido; proposta, sem código.** `[MEDIDO]`
+
+*Hetrin cargo a cargo* (matriz do app 06/10 × 14.09.26): RX OIT bate em todos os cargos pareados (60M, via `R-RX-01-pnos-sem`), menos três:
+
+- **(a) Azulejista, 24 × 12 — não falta regra; a rota grid descarta a avaliação.** É o único grupo com sílica. O PGR traz na linha "POEIRA – SILICA" avaliação qualitativa AIHA (probabilidade, efeito "MODERADA", "NÍVEL DE RISCO 2 – DE ATENÇÃO", REV06 pág. 18). `R-RX-01-qual` (12M) dispara quando `nivel_risco` existe (`predicados._helper_silica_asbesto`), mas a rota grid esvazia `avaliacao_qualitativa` por decisão da G2 (`D-ARQ-57` peça 5 / v241: o grid não é a escala P×S, e "1 - IRRELEVANTE" na coluna Classificação enganaria a guarda de legenda). A sílica de PGR grid cai, portanto, sempre em `R-RX-01-sem` (24M).
+- **(b) Soldador e montador de estruturas metálicas, 60 × 12.** Sem sílica no PGR; o RX sai de PNOS. "FUMOS NOCIVOS" não é reconhecido (item 2). `R-RX-02` (`fumos_metalicos`, 60M, `[INTERPRETADO]`) também não daria 12M.
+
+*Acervo, soldador/serralheiro/estrutura metálica, RX por gabarito e data:* até 2025, sem RX (4 gabaritos: Engeseg 11/24, Hetrin 23.05.25 ×2, Varandas Bueno 08/25). Em 2026: **12M em 12 gabaritos** (Entreverdes ×2, SPE 0030, Floramazonia, Flamboyant, H6, Solo Vaca Brava, Consciente Construtora e Inc. SPE (adendo 09/26), Serrinha, Euro Park, Hetrin 14.09.26, Engeseg LTDA parcial); **60M em 5** (Vistamerica 07 e 09/26, Engeseg Filial, R70, Casamerica). Não há PGR pareado para separar se o 12M desses gabaritos vem de sílica ou de fumos `[A MEDIR]`.
+
+*Proposta (Claude), para decisão do Diovanni:*
+
+1. **(a) Estender `R-RX-01-qual` à avaliação qualitativa do grid AIHA.** O que a regra separa é "sem medição, com avaliação qualitativa", e não o valor do nível: o 12M é constante. Mecanismo: a rota grid passa a marcar que a linha tem avaliação qualitativa, sem preencher `nivel_risco`. Assim `R-BIO-05` e a dispensa por BAIXO/IRRELEVANTE, que leem o nível P×S, não mudam. Fonte: nível 2 (matriz Hetrin 14.09.26, Dra. Patrícia) somado ao nível 3 (analogia com a própria `R-RX-01-qual`). Segue `[INTERPRETADO]`. Toca a cláusula da G2 em `D-ARQ-57`, então a sessão de implementação regenera `INDICE_DARQ.md`.
+2. **(b) Decidir junto com o item 2, não antes.** Mudar `R-RX-02` para 12M segue a maioria de 2026 (12 × 5 gabaritos), mas no Hetrin não teria efeito enquanto "FUMOS NOCIVOS" não for reconhecido. Ligar "FUMOS NOCIVOS" a `fumos_metalicos` é exatamente o risco de falso positivo já apontado no item 2. Recomendação: tratar fumos/solda como uma decisão só (gatilho e periodicidade).
+
+**Status:** ABERTA — itens 2, 3 e 4 (4a com proposta, aguardando decisão).
