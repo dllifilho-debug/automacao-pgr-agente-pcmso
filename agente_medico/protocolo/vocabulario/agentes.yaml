@@ -411,8 +411,8 @@ agentes:
     # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2].
     # [DERIVADO — NR-15 Anexo 1, título: "LIMITES DE TOLERÂNCIA PARA RUÍDO CONTÍNUO OU
     # INTERMITENTE"; Anexo 2, título: "LIMITES DE TOLERÂNCIA PARA RUÍDOS DE IMPACTO" —
-    # normas/nr-15-atualizada-2025 .pdf, págs. 2 e 4; vigência no Gov.br/MTE [A CONFERIR],
-    # Gov.br bloqueado no ambiente]. "Impulsivo ou de impacto" contém o núcleo do Anexo 2.
+    # normas/nr-15-atualizada-2025 .pdf, págs. 2 e 4; vigência das cópias de normas/ conferida pelo
+    # Diovanni em 06/10/2026]. "Impulsivo ou de impacto" contém o núcleo do Anexo 2.
     termos: ["Ruído contínuo ou intermitente", "Ruído de impacto", "Ruído impulsivo ou de impacto"]
     enquadramento_3048: {codigo: "2.0.1", tempo_exposicao: "25 anos"}  # literal, mesmo limiar NEN>85dB(A) de classificacao_ruido.py
   espaco_confinado:
