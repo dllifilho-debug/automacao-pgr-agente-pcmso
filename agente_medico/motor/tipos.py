@@ -49,6 +49,11 @@ class RiscoPGR:
     # ("IRRELEVANTE"/"BAIXO"/"MODERADO"/"ALTO"/"CRÍTICO"); None quando o documento
     # não traz a avaliação na linha do risco. Consumidor: R-RX-01-qual (DT-003EC-01).
     nivel_risco: Optional[str] = None
+    # Linha do risco avaliada qualitativamente pela matriz AIHA do grid (Probabilidade/
+    # Efeito/Nível/Classificação), escala que não é a P×S: por isso não vira
+    # nivel_risco, e R-BIO-05 e a dispensa por IRRELEVANTE não a leem. Consumidor:
+    # R-RX-01-qual, que separa só "com/sem avaliação qualitativa" (12M constante).
+    avaliacao_qualitativa_aiha: bool = False
 
 
 @dataclass(frozen=True)
@@ -131,6 +136,9 @@ class RiscoVerbatim:
     # ("4 1 BAIXO (4)"); "" quando ausente ou não extraída pela rota. Parse do
     # nível é resolver-side (hidratacao.py), como quantificacao — DT-003EC-01.
     avaliacao_qualitativa: str = ""
+    # Marcado pela rota grid (D-ARQ-57 peça 5): toda linha da tabela AIHA traz
+    # avaliação qualitativa fora da escala P×S. Vira RiscoPGR.avaliacao_qualitativa_aiha.
+    avaliacao_qualitativa_aiha: bool = False
 
 
 @dataclass(frozen=True)
@@ -255,6 +263,8 @@ class Risco:
     # Copiado de RiscoPGR.nivel_risco na Fase A; riscos implícitos (Fase B) e de
     # composição (Fase C) não têm avaliação do PGR — ficam None (DT-003EC-01).
     nivel_risco: Optional[str] = None
+    # Copiado de RiscoPGR.avaliacao_qualitativa_aiha na Fase A; False nas Fases B e C.
+    avaliacao_qualitativa_aiha: bool = False
     # D-ARQ-88 fatia 2: RiscoPGR.termo na Fase A; None nas Fases B e C.
     termo: Optional[str] = None
     # R-FDS-07 / R-PKG-BZ-PRES: `contaminantes_a_confirmar` do vocabulário do agente.

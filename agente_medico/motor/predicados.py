@@ -204,12 +204,15 @@ def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausent
         # R-RX-01-qual (DT-003EC-01): dentro desse ramo, sílica com avaliação
         # qualitativa P×S declarada na linha do risco é estado próprio
         # (apenas_qualitativa). Só sílica — asbesto sem medição nem decisão.
+        # Avaliação AIHA do grid conta como qualitativa (D-ARQ-57 peça 5, nota de
+        # 06/10/2026): o ramo é "com/sem avaliação", não o nível.
         return Quantificacao(
             valor=None,
             unidade=None,
             relacao_LT=None,
             pct_LT=None,
-            apenas_qualitativa=risco.agente == "silica" and risco.nivel_risco is not None,
+            apenas_qualitativa=risco.agente == "silica"
+            and (risco.nivel_risco is not None or risco.avaliacao_qualitativa_aiha),
             sem_avaliacao_quantitativa=True,
         )
     if (

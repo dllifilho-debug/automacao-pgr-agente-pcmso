@@ -140,6 +140,7 @@ def hidratar_ghe(
                     quantificacao=quantificacao,
                     severidade=None,
                     nivel_risco=nivel_risco,
+                    avaliacao_qualitativa_aiha=risco_verbatim.avaliacao_qualitativa_aiha,
                     termo=risco_verbatim.agente,
                 )
             )
@@ -151,6 +152,7 @@ def hidratar_ghe(
                     quantificacao=quantificacao,
                     severidade=None,
                     nivel_risco=nivel_risco,
+                    avaliacao_qualitativa_aiha=risco_verbatim.avaliacao_qualitativa_aiha,
                     termo=risco_verbatim.agente,
                 )
             )
@@ -183,6 +185,7 @@ def hidratar_ghe(
                     severidade=None,
                     causa_nao_resolucao=resolucao.pendencia.tipo,
                     nivel_risco=nivel_risco,
+                    avaliacao_qualitativa_aiha=risco_verbatim.avaliacao_qualitativa_aiha,
                     termo=risco_verbatim.agente,
                 )
             )

@@ -63,7 +63,7 @@ def test_saida_mais_curta_que_a_entrada_levanta_value_error() -> None:
 def test_avaliacao_qualitativa_sai_vazia_mesmo_com_irrelevante_no_grid() -> None:
     # "1 - IRRELEVANTE" é da coluna Classificação do grid AIHA, não da
     # matriz P×S. Reversão que mata: devolver o resultado do cliente sem
-    # _sem_avaliacao_qualitativa.
+    # _avaliacao_aiha.
     (ghe,) = transcrever_grupos_grid([_grupo("PINTOR", "UMIDADE 1 - IRRELEVANTE")], _ClienteEco())
     assert [r.avaliacao_qualitativa for r in ghe.riscos] == [""]
     assert [r.agente for r in ghe.riscos] == ["RUÍDO"]

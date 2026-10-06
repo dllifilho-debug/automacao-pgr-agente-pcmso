@@ -305,8 +305,13 @@ regras:
       (24M, R-RX-01-sem); 12M é intervalo MENOR que o do ramo, mais protetivo, não
       contrário. Viés declarado (D-ARQ-81 cl.1): construção civil, 2 médicas; 24M
       aparece em 15/34 matrizes do acervo sem PGR para conferir o estado da sílica.
-      Só sílica: asbesto qualitativo segue em R-RX-01-sem (sem medição nem decisão)."
-    resumo_clinico: "Sílica com avaliação só qualitativa no PGR (sem medição) → RX de tórax (padrão OIT) anual. A NR-07, Anexo III, Quadro 1 indica a cada 2 anos sem avaliação quantitativa; o anual segue as matrizes das coordenadoras (Porto Araras, Vila Brasil, Fascino) — confirmar."
+      Só sílica: asbesto qualitativo segue em R-RX-01-sem (sem medição nem decisão).
+      Extensão (06/10/2026, decisão do Diovanni, D-ARQ-57 peça 5): a avaliação AIHA do
+      PGR grid (Probabilidade/Efeito/Nível/Classificação) também conta como avaliação
+      qualitativa — o ramo separa com/sem avaliação, não o nível. Precedente: matriz
+      Hetrin 14.09.26 (Patrícia), azulejista com sílica AIHA 'Nível 2 – De atenção' e
+      RX OIT PER 12M [INTERPRETADO — D-ARQ-22 Parte A, níveis 2 e 3]."
+    resumo_clinico: "Sílica com avaliação só qualitativa no PGR (sem medição; matriz P×S ou matriz AIHA) → RX de tórax (padrão OIT) anual. A NR-07, Anexo III, Quadro 1 indica a cada 2 anos sem avaliação quantitativa; o anual segue as matrizes das coordenadoras (Porto Araras, Vila Brasil, Fascino, Hetrin) — confirmar."
     status: INTERPRETADO
 
   - id: R-RX-01-baixa
