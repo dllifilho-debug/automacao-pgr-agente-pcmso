@@ -4745,6 +4745,14 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cad13ec`). Pedido do Diovan
 - Matriz inalterada: as linhas, pendências, observações e status saem idênticos; só o campo novo aparece.
 - Cada teste nomeia a reversão que o mata; varredura inversa feita antes do commit.
 
+**Aplicação — fatia 1 (06/10/2026, branch `claude/cool-ramanujan-njnp7w`, commit `eddc201`).** Cláusulas inalteradas.
+
+- **Implementado.** `motor/sugestao_aso.py::sugerir_aso`; tipos `Criterio`, `SugestaoASO`, `RelatorioASO` em `tipos.py`; `MatrizGHE.sugestao_aso` (default vazio) populado em `executar` logo após `observacoes`. Nenhum arquivo de `protocolo/` tocado.
+- **Matriz inalterada — medido.** Motor da `main cad13ec` (worktree) × branch nos 3 PGRs determinísticos do acervo (Fascino 19 GHEs, Vila Brasil 26, Porto Araras 16): `asdict` de cada `MatrizGHE` sem o campo novo, byte a byte idêntico. Os demais PGRs pedem a rota de IA (sem chave no container): `None` nos dois lados.
+- **Distribuição medida nesses 61 GHEs:** 365 OBRIGATÓRIO, 63 CONFERIR, 2 NÃO OBRIGATÓRIO; 37 GHEs com aptidão a consignar. CONFERIR: 61 `avaliacao_saude_mental` (`R-PSY-05` parte do inventário psicossocial, não de risco classificado) e 2 audiometrias com `ruido_acima_acao` presumida (D-ARQ-68 cl.5). NÃO OBRIGATÓRIO: manganês BAIXO no GHE-17 do Fascino (`manganes_sangue`, `carboxihemoglobina`).
+- **Verificação.** `test_sugestao_aso.py`, 19 testes, varredura inversa 20/20 (19 reversões de `sugestao_aso.py` + remoção da atribuição no orquestrador). Suíte completa, árvore parada: base **1724 passed, 6 skipped** (1087 s) → **1743 passed, 6 skipped** (1014 s). mypy no alvo canônico: limpo, 57 arquivos (56 na base + o módulo novo). `INDICE_DARQ.md` regenerado; `test_gerar_indice_darq.py` 6 passed.
+- **Segue:** fatia 2 (documento por cargo e botão na tela); medição nos PGRs da rota de IA `[A MEDIR]`.
+
 ---
 
 ## Histórico de revisões

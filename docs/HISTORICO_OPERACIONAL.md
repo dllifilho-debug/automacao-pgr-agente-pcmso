@@ -12244,3 +12244,21 @@ skipped, 0 failed** (1154,93 s). mypy no alvo canônico: limpo, 56 arquivos. Efe
 IA 135 s → **39 s**, processamento 183 s → **77 s**; consumo contado (5 respostas, entrada 38.797). Matriz idêntica célula
 por célula à do 3º e2e, 95,4% contra a 14.09.26. Evidência em `docs/referencia/e2e_hetrin_rev06_20261006_4/`; o
 `[A MEDIR]` da nota de `D-ARQ-80` virou medição.
+
+## Sessão `claude/cool-ramanujan-njnp7w` (sobre `main cad13ec`, pós-merge do PR #460) — 06/10/2026 — ARQUITETURA + IMPLEMENTAÇÃO: sugestão de exames para o ASO
+
+**Origem.** E-mail da Dra. Carolini (subcoordenadora de saúde) com os critérios de quais riscos/exames dos PGRs do Seconci
+migram para o ASO. Decidido com o Diovanni na sessão: a unidade é o exame da matriz, não o risco; os rótulos seguem o NR-07
+item 7.5.19.1 "d" (todo exame realizado consta no ASO), então a sugestão é "obrigatório", "não obrigatório pelo critério
+(não solicitar)" ou "conferir"; exame clínico sempre obrigatório; atividade crítica dividida pela norma (altura e espaço
+confinado obrigatórios pelo 7.5.19.2 c/c NR-35 35.4.4.1 / NR-33 33.5.19.2; motorista pela regra geral). Correções medidas
+ao pedido: o item do cancerígeno é o Anexo V 4.1.1 da NR-07; o nível de ação está em `emissao.py`/`classificacao_ruido.py`,
+não em `medicoes.py`; `tem_lt` não serve para os Anexos 13/13-A/14 da NR-15 (incoerente e sem leitor) — lacuna registrada.
+
+**Entrega.** `D-ARQ-91` (DECISOES v247) e `R-ASO-01..06` no PROTOCOLO §13 (v129). Fatia 1: `motor/sugestao_aso.py`,
+campo aditivo `MatrizGHE.sugestao_aso`, costura de uma linha em `executar`. Commit `eddc201`.
+
+**Verificação.** Varredura inversa 20/20. Matriz inalterada contra a `main` nos 3 PGRs determinísticos (61 GHEs, byte a
+byte). Suíte completa, árvore parada: **1724 → 1743 passed, 6 skipped** (1014 s). mypy no alvo canônico: limpo, 57
+arquivos. Push pendente de autorização do Diovanni.
+
