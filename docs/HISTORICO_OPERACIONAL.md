@@ -12219,3 +12219,23 @@ contra 67 s) `[A MEDIR — causa]`.
 
 **Sobra.** `DT-(sessão claude/gifted-cerf-0loir2)-01` itens 2 (manganês e carboxihemoglobina), 3 (vigias) e 4b (RX de soldador e
 montador de estruturas metálicas).
+
+## Sessão (mesma branch, recriada sobre `main e24740c`, pós-merge do PR #458) — 06/10/2026 — IMPLEMENTAÇÃO: lotes do Gemini em paralelo
+
+**Origem.** O Diovanni notou o 3º e2e mais lento (183 s; IA 135 s contra 67 s no 1º, com a mesma entrada). A paralelização
+registrada em `D-ARQ-50` (v232/v233) é da leitura do PDF, não das chamadas à IA, que iam em série. Avaliação de risco feita
+antes: no nível gratuito (RPM 5, `D-ARQ-80`), 5 lotes simultâneos bateriam no limite e a cascata cairia para o modelo de
+reserva no meio do documento. Os prints do AI Studio trazidos pelo Diovanni mostraram o plano pago: **RPM 1.000 · TPM 2M ·
+RPD 10.000**, pico de 2 RPM no dia. O risco caiu e a decisão foi implementar.
+
+**Entrega.** `_mapear_lotes` em `adaptadores/transcritor_gemini.py`: `ThreadPoolExecutor` até `_LOTES_SIMULTANEOS = 5`,
+resultado na ordem de envio, `copy_context()` por tarefa (sem ela `medir_uso` registraria zero). Usado por
+`TranscritorGeminiGHE.transcrever_lote` e `TranscritorGeminiGrid.transcrever_lote`; chave lida antes do pool; 2 tentativas
+por lote mantidas. Rotas card, topo e FDS fazem uma chamada por item e ficaram como estavam. Nota de aplicação em `D-ARQ-80`
+(v246), `INDICE_DARQ.md` regenerado. Commit `c981279`, mais o ajuste de docstring (cota do plano pago) no commit seguinte.
+
+**Verificação.** `test_lotes_paralelos.py`, 5 testes, varredura inversa 5/5 (em série; ordem de conclusão; sem
+`copy_context`; sem teto; exceção engolida); 20 repetições estáveis. `test_oito_grupos_viram_duas_requisicoes_e_saem_na_ordem`
+supunha a ordem das chamadas HTTP: passou a checar por conteúdo e segue morto pela reversão "sem fatiar" (conferido).
+`test_gerar_indice_darq.py` 6 passed. Smoke visual ok (desktop e mobile). Suíte completa, árvore parada: **1724 passed, 6
+skipped, 0 failed** (1154,93 s). mypy no alvo canônico: limpo, 56 arquivos. Efeito no app `[A MEDIR]` no próximo teste.

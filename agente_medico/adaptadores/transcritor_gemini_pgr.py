@@ -227,9 +227,11 @@ class TranscritorGeminiGHE:
     def transcrever_lote(self, blocos: Sequence[str]) -> tuple[GHEVerbatim, ...]:
         """Fatia `blocos` em lotes de _BLOCOS_POR_LOTE (=6, 003.EW): três
         requisições por documento de 18 blocos em vez de dezoito — uma falha
-        custa um terço do trabalho, não tudo. Com RPD 20, são 6 documentos
-        por dia por modelo; descer para 1 requisição é decisão de fatia
-        futura, depois de medir se a resposta única sai íntegra.
+        custa um terço do trabalho, não tudo. Com RPD 20 (nível gratuito,
+        003.EW), eram 6 documentos por dia por modelo; no plano pago (RPD
+        10.000, D-ARQ-80 nota de 06/10/2026) a cota deixou de limitar. Descer
+        para 1 requisição é decisão de fatia futura, depois de medir se a
+        resposta única sai íntegra.
 
         Cada lote tem até _TENTATIVAS_LOTE chamadas se o JSON vier malformado
         (ver nota em _TENTATIVAS_LOTE) — só a última falha levanta.
