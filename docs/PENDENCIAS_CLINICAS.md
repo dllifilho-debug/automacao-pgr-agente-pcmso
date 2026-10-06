@@ -4073,3 +4073,7 @@ instrumento de comparação).
 **Nota (branch `claude/kind-bardeen-ajkpnr`, sobre `main e801cb6`, 06/10/2026) — item 4a DECIDIDO e IMPLEMENTADO.** O Diovanni aprovou a proposta (a). A avaliação AIHA do grid conta como avaliação qualitativa para `R-RX-01-qual`, pelo campo `avaliacao_qualitativa_aiha`, sem tocar `nivel_risco` (`D-ARQ-57` peça 5, nota de aplicação; DECISOES v245). Efeito esperado no Hetrin: azulejista 24M → 12M, igual à matriz 14.09.26. Confirmação no app `[A MEDIR]` no próximo teste. O item 4b (soldador e montador de estruturas metálicas) segue aguardando, junto com o item 2.
 
 **Status:** ABERTA — itens 2, 3 e 4b.
+
+**Nota (branch `claude/kind-bardeen-ajkpnr`, sobre `main f1e8e43`, 06/10/2026) — 3º e2e no app: item 4a confirmado; solventes fechados.** Com o PR #457 em produção e as FDS dos adesivos anexadas a GHE-02, GHE-08 e GHE-12, a comparação deu **230 de 241 células reproduzidas (95,4%)**. O azulejista sai com RX 12M por `R-RX-01-qual`, e o item 1 (solventes) fecha nos três cargos. Sobram 11 células de subemissão (itens 2 e 3) e 2 de periodicidade (item 4b). Evidência em `docs/referencia/MEDICAO_E2E_HETRIN_REV06.md`.
+
+**Status:** ABERTA — itens 2, 3 e 4b.

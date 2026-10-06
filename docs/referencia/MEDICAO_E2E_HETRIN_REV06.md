@@ -93,6 +93,28 @@ A primeira passada deu 25 super e 1 divergência de momentos a mais: defeito do 
 
 **Periodicidade, 3 células, achado novo** (o app passou a imprimir prazo): RX de tórax OIT — gabarito 12 meses; app 24 meses no azulejista (`R-RX-01-sem`, sílica sem avaliação) e 60 meses em soldador e montador de estruturas metálicas (`R-RX-01-pnos-sem`, PNOS sem medição).
 
+## 3º e2e no app — `R-RX-01-qual` no grid + FDS em três GHEs
+
+`[MEDIDO — 06/10/2026, branch claude/kind-bardeen-ajkpnr, sobre main f1e8e43]`
+
+- **Rodado por:** Diovanni, no app de produção, depois do PR #457 (`R-RX-01-qual` reconhece a avaliação AIHA do grid). Na etapa 2, as duas FDS de adesivo (PVC incolor e CPVC Aquatherm) anexadas a **GHE-02 Almoxarife, GHE-08 Encanador e GHE-12 Montador** (tela impressa pelo Diovanni, págs. 3-4).
+- **Saída do app, versionada sem alteração** (sha256 conferido contra o arquivo recebido):
+  - `e2e_hetrin_rev06_20261006_3/matriz_app.docx` — `18c2acb3244df8ce…`
+  - `e2e_hetrin_rev06_20261006_3/memorial_app.docx` — `e26b958214326703…`
+- **Tela:** processamento 183 s (IA Gemini 135 s em 30 blocos); 5 respostas do `gemini-3.8-flash`, tokens de entrada 38.797, de saída 22.843. Memorial: 272 exames em 30 GHEs (186 por protocolo validado, 85 por norma ou matriz de referência, **1 por interpretação do sistema**, que é o RX 12M do azulejista por `R-RX-01-qual`).
+
+| | 1º (05/10) | 2º (06/10) | **3º (06/10)** |
+|---|---|---|---|
+| Células do gabarito reproduzidas | 52/241 = 21,6% | 222/241 = 92,1% | **230/241 = 95,4%** |
+| Superemissão | 0 | 24 | 24 (todas `avaliacao_psicossocial`, `R-PSY-04`) |
+| Subemissão | 189 | 19 | **11** |
+| Divergência de momentos | 7 | 0 | 0 |
+| Divergência de periodicidade | 0 | 3 | **2** |
+
+**O que fechou:** os 8 IBEs de solvente de almoxarife e montador (acetona, MEK, ciclohexanol e THF na urina), com as FDS anexadas aos três GHEs; e o RX do azulejista, que passou de 24M a 12M por `R-RX-01-qual` (memorial: "Sílica com avaliação só qualitativa no PGR (sem medição; matriz P×S ou matriz AIHA)").
+
+**O que sobra:** subemissão de 11 células, todas já registradas na `DT-(sessão claude/gifted-cerf-0loir2)-01`: `manganes_sangue` em soldador e montador de estruturas metálicas (2), `carboxihemoglobina` no armador (1) e o pacote dos vigias (8). Periodicidade: RX OIT de soldador e montador de estruturas metálicas, 60M × 12M (item 4b).
+
 ## Próximo passo
 
 1. ~~Estender `scripts/comparar_matriz_gabarito.py` para aceitar a matriz DOCX exportada pelo app.~~ Feito (`--matriz-app`).
