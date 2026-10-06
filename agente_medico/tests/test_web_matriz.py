@@ -339,12 +339,14 @@ _EMISSAO_RECENTE = (date.today() - timedelta(days=30)).isoformat()
 
 
 def _submeter_formulario(at: AppTest, validade: str = _EMISSAO_RECENTE) -> None:
+    # Campos do `st.form` sem `.run()` entre eles: o navegador só envia o
+    # formulário no submit, e o AppTest do Streamlit 1.65 passou a imitar isso —
+    # um rerun antes do submit descarta o valor pendente.
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
-    next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste").run()
-    next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000").run()
-    indice_validade = len(at.text_input) - 1
-    at.text_input[indice_validade].set_value(validade).run()
-    at.checkbox[0].set_value(True).run()
+    next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste")
+    next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000")
+    at.text_input[len(at.text_input) - 1].set_value(validade)
+    at.checkbox[0].set_value(True)
     at.button[0].click().run()
 
 
@@ -1358,7 +1360,8 @@ def test_aviso_de_anexo_descartado_aparece_uma_vez(monkeypatch: pytest.MonkeyPat
     at.button(key="anexar_fds_fds.pdf").click().run()
 
     validade = next(t for t in at.text_input if t.label == "Data de emissão do PGR (AAAA-MM-DD)")
-    validade.set_value((date.today() - timedelta(days=60)).isoformat()).run()
+    validade.set_value((date.today() - timedelta(days=60)).isoformat())
+    next(b for b in at.button if b.label == "Gerar matriz").click().run()
     assert any("fds (GHE-01)" in w.value for w in at.warning)
 
     at.run()
