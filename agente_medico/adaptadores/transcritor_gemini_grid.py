@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from agente_medico.adaptadores.transcritor_gemini import (
     TranscricaoIndisponivel,
     _chamar_gemini,
+    _mapear_lotes,
     _obter_chave,
 )
 from agente_medico.adaptadores.transcritor_gemini_pgr import _parsear_ghes_lote
@@ -105,15 +106,20 @@ class TranscritorGeminiGrid:
         """Fatia `entradas` em lotes de _GRUPOS_POR_LOTE. Cada lote tem até
         _TENTATIVAS_LOTE chamadas se o JSON vier malformado ou vazio; só a
         última falha levanta, como TranscricaoIndisponivel — mesmo
-        tratamento de TranscritorGeminiGHE._transcrever_um_lote."""
+        tratamento de TranscritorGeminiGHE._transcrever_um_lote. Os lotes vão
+        em paralelo (_mapear_lotes, D-ARQ-80 nota de 06/10/2026), com o
+        resultado na ordem das entradas."""
         chave = self._chave if self._chave is not None else _obter_chave()
         if not chave:
             raise TranscricaoIndisponivel("CHAVE_API_GOOGLE ausente")
-        resultado: list[GHEVerbatim] = []
-        for inicio in range(0, len(entradas), _GRUPOS_POR_LOTE):
-            lote = entradas[inicio : inicio + _GRUPOS_POR_LOTE]
-            resultado.extend(self._transcrever_um_lote(lote, chave))
-        return tuple(resultado)
+        lotes = [
+            entradas[i : i + _GRUPOS_POR_LOTE] for i in range(0, len(entradas), _GRUPOS_POR_LOTE)
+        ]
+        return tuple(
+            ghe
+            for ghes in _mapear_lotes(lambda lote: self._transcrever_um_lote(lote, chave), lotes)
+            for ghe in ghes
+        )
 
     def _transcrever_um_lote(self, lote: Sequence[EntradaGrid], chave: str) -> tuple[GHEVerbatim, ...]:
         ultimo_erro: Exception | None = None
