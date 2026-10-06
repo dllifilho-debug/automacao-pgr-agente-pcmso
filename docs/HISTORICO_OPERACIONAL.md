@@ -12073,7 +12073,8 @@ Exame Clínico na maioria dos grupos: 514 riscos não reconhecidos em 47 grafias
 "Ruído contínuo ou intermitente" (29 grupos), "Poeira - PNOS" (29), "Quedas de altura" (28) e vibração em mãos e braços.
 
 **Entrega.** 8 aliases em `agentes.yaml` com fonte dupla (D-ARQ-70 cl.1), literais conferidos nas cópias de `normas/`: NR-15
-Anexos 1 e 2, NR-07 Anexo III, NR-35, NR-09 Anexo I. Gov.br bloqueado no ambiente (HTTP 403), vigência `[A CONFERIR]`. Testes:
+Anexos 1 e 2, NR-07 Anexo III, NR-35, NR-09 Anexo I. Gov.br bloqueado no ambiente (HTTP 403); vigência das cópias de
+`normas/` confirmada pelo Diovanni em 06/10/2026 (todas as normas da pasta). Testes:
 8 casos de alias + 2 anti-FP ("Quedas de nível"; as duas poeiras); guarda de inventário 202 → 210. Commit `776430d`.
 
 **Decisão revertida antes do código.** Eu tinha proposto ajustar o prompt do grid para tirar o qualificador ("Ruído contínuo ou
