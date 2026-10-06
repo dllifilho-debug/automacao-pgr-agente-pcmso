@@ -12139,3 +12139,15 @@ ABERTA (itens 2, 3 e o novo item 4, periodicidade do RX).
 **Verificação.** Recorte, árvore parada: todo teste que lê `PENDENCIAS_CLINICAS`, o painel ou o comparador (6 arquivos), **182
 passed** (296 s). mypy no alvo canônico: limpo, 56 arquivos. Suíte completa não re-rodada: a desta manhã tinha 36 falhas
 pré-existentes de tela (bloqueador acima) e o diff toca só o comparador e docs.
+
+**Verificação pedida pelo Diovanni (mesma sessão, 06/10/2026) — nenhuma lógica do motor alterada.** Diff `11748c3` → `48df42e`:
+fora de `scripts/comparar_matriz_gabarito.py`, do teste dele e de docs/evidência, nenhum arquivo. Nada em `agente_medico/`,
+`protocolo/` ou `app_matriz*.py`. Efeito do comparador medido:
+- **Caminho de 4 argumentos (PGR + envelope):** Fascino rodado com o script de `11748c3` (worktree) e com o atual, mesmo envelope
+  mínimo: relatórios **idênticos byte a byte** (97,0%; subemissão 11; periodicidade 1).
+- **Extração dos 50 gabaritos de `matrizes_originais/`, antes × agora:** 41 idênticos (incluídos Fascino, Porto Araras e Vila
+  Brasil, base das medições registradas em `PENDENCIAS_CLINICAS.md`). 8 mudam só por nome cru → slug, sem prazo nem momento
+  alterado: "manganes sanguineo" → `manganes_sangue` (30 células) e, no Hetrin, "acetona"/"metiletilcetona" →
+  `acetona_urina`/`mek_urina`. 1 muda pela proteção de sigla: no gabarito Maua Participações (23.09.26), "Urina tipo (EAS) anual
+  (ADM, PER, MRO)" deixava de virar dois exames falsos ("urina tipo" sem momentos + "anual") e vira um, com os momentos; segue
+  sem slug no vocabulário nos dois casos.
