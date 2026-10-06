@@ -64,10 +64,39 @@ Subemissão por exame: `ecg`, `espirometria`, `glicemia`, `hemograma`, `rx_torax
 
 **Grafias do gabarito que o instrumento passou a resolver nesta sessão** (`_ALIAS_GRAFIA`, forma de saída, não decisão clínica): "Acetona" → `acetona_urina`, "Metiletilcetona" → `mek_urina`, "Manganês Sanguíneo" → `manganes_sangue`. Sem elas, 8 células saíam com nome cru e virariam super + sub falsas assim que o app emitir esses IBEs (2º teste, FDS do adesivo).
 
+## 2º e2e no app — aliases em produção + FDS dos adesivos
+
+`[MEDIDO — 06/10/2026, branch claude/kind-bardeen-ajkpnr, sobre main 435c973]`
+
+- **Rodado por:** Diovanni, no app de produção, com os aliases do PR #451 em `main`. Na etapa 2, duas FDS do acervo anexadas ao **GHE-08 (encanador)**, como diz o nome dos arquivos: `ADESIVO PLASTICO PVC- INCOLOR- TIGRE - (GHE 08 …).pdf` e `ADESIVO CPVC AQUATHERM- VERMELHO-TIGRE - (GHE 08 …).pdf`. O memorial atribui os quatro IBEs de solvente do encanador a essas FDS (`R-BIO-04-*`, NR-07 Anexo I Quadro 1).
+- **Saída do app, versionada sem alteração** (sha256 conferido contra o arquivo recebido):
+  - `e2e_hetrin_rev06_20261006/matriz_app.docx` — `f92eb3fa3229d77b…`
+  - `e2e_hetrin_rev06_20261006/memorial_app.docx` — `74454652a8834ee1…`
+- **Memorial:** 264 exames em 30 GHEs (179 por protocolo validado, 85 por norma ou matriz de referência); 422 riscos não reconhecidos (eram 514 no 1º).
+
+**Comparação** (`--matriz-app`, mesmo gabarito):
+
+| | 1º e2e (05/10) | 2º e2e (06/10) |
+|---|---|---|
+| Células do gabarito reproduzidas | 52 de 241 = 21,6% | **222 de 241 = 92,1%** |
+| Superemissão | 0 | 24 (todas `avaliacao_psicossocial`, `R-PSY-04`) |
+| Subemissão | 189 | 19 |
+| Divergência de momentos | 7 | 0 |
+| Divergência de periodicidade | 0 (app sem prazo) | 3 |
+
+A primeira passada deu 25 super e 1 divergência de momentos a mais: defeito do instrumento, não do app. O app imprime "Metil-etil-cetona (MEK) na urina (PER 6 meses)" (nome do vocabulário) e o "(MEK)" partia a célula. Corrigido nesta sessão (`_proteger_sigla`); o 1º e2e dá o mesmo número com e sem a correção.
+
+**Subemissão, 19 células** — são os itens da `DT-(sessão claude/gifted-cerf-0loir2)-01`, como o replay previu:
+- solventes em almoxarife e montador (8): a FDS foi anexada só ao GHE-08; o gabarito pede os quatro IBEs também nesses dois cargos. É escolha de entrada na etapa 2, não ausência de regra — o encanador, que recebeu a FDS, saiu com os quatro.
+- `manganes_sangue` em soldador e montador de estruturas metálicas (2) e `carboxihemoglobina` no armador (1): termos do PGR ainda não reconhecidos ("FUMOS NOCIVOS", "PÓ DE FERRAGEM").
+- pacote dos vigias (8): acuidade, ECG, glicemia e hemograma.
+
+**Periodicidade, 3 células, achado novo** (o app passou a imprimir prazo): RX de tórax OIT — gabarito 12 meses; app 24 meses no azulejista (`R-RX-01-sem`, sílica sem avaliação) e 60 meses em soldador e montador de estruturas metálicas (`R-RX-01-pnos-sem`, PNOS sem medição).
+
 ## Próximo passo
 
-1. ~~Estender `scripts/comparar_matriz_gabarito.py` para aceitar a matriz DOCX exportada pelo app.~~ Feito (`--matriz-app`), seção acima.
-2. 2º teste no app, com os aliases em produção e a FDS do adesivo PVC anexada na etapa 2. Comparar pelo instrumento do passo 1. Fecha `DT-(sessão claude/youthful-lamport-3kfkog)-02`.
+1. ~~Estender `scripts/comparar_matriz_gabarito.py` para aceitar a matriz DOCX exportada pelo app.~~ Feito (`--matriz-app`).
+2. ~~2º teste no app.~~ Feito, seção acima; fecha `DT-(sessão claude/youthful-lamport-3kfkog)-02`.
 
 ## Apêndice — script do replay
 

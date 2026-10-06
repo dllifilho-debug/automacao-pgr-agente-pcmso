@@ -3114,7 +3114,7 @@ quebras legítimas em `test_integracao_002c.py` e o `test_integracao_end_to_end`
 `test_orquestrador.py` corrigidas com causa nomeada (perdem as 2 linhas que só saíam por
 R-PSY-02 incondicional). Detalhe completo em HISTORICO_OPERACIONAL.md (bloco desta sessão).
 
-### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-02 — Segunda variante do template Ricco Hetrin quebra o reconhecedor de família AIHA `[REENQUADRADA + fix de diagnóstico IMPLEMENTADO — 17/09/2026, branch claude/fervent-brown-7dcc0y; ARQUITETURA da ingestão (peça 5) proposta — 18-19/09/2026, branch claude/dreamy-mayer-os6jce; fatiamento 5a→5b→5c→5d RATIFICADO — 19/09/2026, branch claude/blissful-knuth-riqucz; ainda ABERTA até a IMPL fechar]`
+### DT-(sessão não numerada, branch `claude/youthful-lamport-3kfkog`)-02 — Segunda variante do template Ricco Hetrin quebra o reconhecedor de família AIHA `[REENQUADRADA + fix de diagnóstico IMPLEMENTADO — 17/09/2026, branch claude/fervent-brown-7dcc0y; ARQUITETURA da ingestão (peça 5) proposta — 18-19/09/2026, branch claude/dreamy-mayer-os6jce; fatiamento 5a→5b→5c→5d RATIFICADO — 19/09/2026, branch claude/blissful-knuth-riqucz; RESOLVIDA — 2º e2e no app, 06/10/2026, branch claude/kind-bardeen-ajkpnr]`
 
 **Origem.** Diovanni reportou erro real no serviço ao tentar gerar a matriz do PGR
 `PGR(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.pdf` (197 páginas): `"Parse total falho —
@@ -3221,6 +3221,8 @@ peça 4/D-ARQ-65) — escopo e prioridade a definir pelo Arquiteto, não aberta 
 **Nota (mesma branch, recriada sobre `main f23b0ba`, 05/10/2026) — fatia G3 IMPLEMENTADA no código; DT segue ABERTA até o e2e no app.** A rota grid está ligada em `preparar_ghes` (cliente do grid opcional; o app injeta o Gemini). Com cliente simulado, o adendo da Ricco atravessa até 8 matrizes. **Para fechar esta DT:** subir o Hetrin set-2026 (ou REV06, ou o adendo) no app de produção e comparar a matriz gerada com `MATRIZ DE EXAMES(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.doc` (par 17 do `PAREAMENTO_ACERVO.md`) — é a primeira medição do prompt da G2 contra o Gemini real. Detalhe em `D-ARQ-57`, andamento G3 (DECISOES v242).
 
 **Nota (mesma branch, sobre `main 3207c80`, 05/10/2026) — 1º e2e no app; DT segue ABERTA até o 2º.** REV06 no app de produção: 30 grupos, nomes e cargos certos; matriz pobre porque 4 grafias que disparam exame não casavam no vocabulário. Aliases ancorados em norma entraram (`D-ARQ-70`, nota de aplicação, DECISOES v243); replay contra a matriz 14.09.26: 195 → 29 células ausentes. Fecha com o 2º teste no app, já com os aliases em produção. O que sobra está em `DT-(sessão claude/gifted-cerf-0loir2)-01`, abaixo.
+
+**Nota (branch `claude/kind-bardeen-ajkpnr`, sobre `main 435c973`, 06/10/2026) — 2º e2e no app; DT RESOLVIDA.** REV06 no app de produção, com os aliases em `main` e as FDS dos adesivos PVC incolor e CPVC Aquatherm anexadas ao GHE-08. Medido por `comparar_matriz_gabarito --matriz-app` contra a matriz 14.09.26: **222 de 241 células reproduzidas (92,1%)**, eram 52 (21,6%) no 1º. O documento que dava "0 bloco(s) GHE detectado(s)" sai em 30 grupos com a matriz próxima da assinada. Evidência em `docs/referencia/MEDICAO_E2E_HETRIN_REV06.md`. **Status:** RESOLVIDA. O que ainda diverge segue em `DT-(sessão claude/gifted-cerf-0loir2)-01`.
 
 ### DT-(sessão não numerada, branch `claude/dreamy-mayer-os6jce`)-01 — Relatório de rastreabilidade/proveniência da matriz (origem de cada risco/exame, por-que da decisão do motor) `[ABERTA — proposta registrada, sem ARQUITETURA própria]`
 
@@ -4043,3 +4045,11 @@ já registrada em `DT-(sessão claude/cool-babbage-whh1zw)-03`; a matriz 14.09.2
 
 **Fora do escopo desta DT:** o adendo (8 funções) não tem matriz no acervo; RX de coluna aparece nos dois lados (diferença só de nome no
 instrumento de comparação).
+
+**Nota (branch `claude/kind-bardeen-ajkpnr`, 06/10/2026) — medido no 2º e2e no app, pelo instrumento versionado.** 19 células faltando, 24 a mais (todas `avaliacao_psicossocial`), periodicidade comparada pela primeira vez. Por item:
+1. **Solventes:** o encanador (GHE-08, onde as FDS foram anexadas) saiu com os quatro IBEs, via `R-BIO-04-*`. Faltam 8 células, em almoxarife e montador, que não receberam a FDS na etapa 2. Não falta regra; é a escolha do GHE na anexação. O acervo tem `FDS ALMOXARIFE.pdf` e `FDS MONTADOR.pdf` com a composição do adesivo PVC.
+2. **Carboxihemoglobina e manganês:** sem mudança, 3 células. "FUMOS NOCIVOS" e "PÓ DE FERRAGEM" seguem não reconhecidos no memorial `[A MEDIR]`.
+3. **Pacote dos vigias:** sem mudança, 8 células `[A MEDIR]`.
+4. **Novo — periodicidade do RX de tórax OIT, 3 células:** a matriz pede 12 meses; o app emite 24 meses no azulejista (`R-RX-01-sem`, sílica sem avaliação ambiental) e 60 meses em soldador e montador de estruturas metálicas (`R-RX-01-pnos-sem`, PNOS sem medição). Decisão clínica a tomar em sessão, pela hierarquia de `D-ARQ-22` Parte A.
+
+**Status:** ABERTA — itens 2, 3 e 4.
