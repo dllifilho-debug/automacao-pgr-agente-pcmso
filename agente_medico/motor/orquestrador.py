@@ -14,6 +14,7 @@ from agente_medico.motor.estagios.riscos import stage_2_riscos
 from agente_medico.motor.predicados import PRIMITIVOS_INCONDICIONAIS
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.resolvedor import EntradaIndice
+from agente_medico.motor.sugestao_aso import sugerir_aso
 from agente_medico.motor.tipos import (
     Ausente,
     ExameEmitido,
@@ -172,6 +173,9 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     cargos=ctx.pgr_ghe.cargos,
                 )
         matriz.observacoes = tuple(ctx.observacoes)
+        matriz.sugestao_aso = sugerir_aso(
+            matriz.linhas, ctx.riscos, protocolo.vocabulario.agentes
+        )
         matrizes.append(matriz)
 
     houve_bloqueio = any(m.status in {"PARCIAL", "BLOQUEADA"} for m in matrizes)
