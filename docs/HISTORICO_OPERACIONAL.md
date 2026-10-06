@@ -12151,3 +12151,26 @@ fora de `scripts/comparar_matriz_gabarito.py`, do teste dele e de docs/evidênci
   `acetona_urina`/`mek_urina`. 1 muda pela proteção de sigla: no gabarito Maua Participações (23.09.26), "Urina tipo (EAS) anual
   (ADM, PER, MRO)" deixava de virar dois exames falsos ("urina tipo" sem momentos + "anual") e vira um, com os momentos; segue
   sem slug no vocabulário nos dois casos.
+
+## Sessão (mesma branch, recriada sobre `main c41cc83`, pós-merge do PR #454) — 06/10/2026 — as 36 falhas de tela: Streamlit 1.65
+
+**Origem.** Bloqueador registrado nesta mesma sessão: 36 falhas em 11 arquivos de tela/memorial, também em `main`.
+
+**Causa medida.** Os 11 arquivos rodados com `streamlit 1.64.0` (venv à parte): 156 passed; com `1.65.0`: 36 failed, 120 passed.
+O `AppTest` do 1.65 passou a imitar o navegador (`element_tree.get_widget_states`): `set_value` em widget de `st.form` só é
+serializado no `.run()` em que o submit daquele formulário foi clicado, e o rerun anterior descarta o valor pendente. Os
+helpers preenchiam médico, CRM e data com `.run()` entre os campos → "Preencha Médico coordenador e CRM", e o resto
+(`KeyError` em `web_matriz_cache`, `medicao_valor`, `ghe_destino_fds.pdf`) vinha em cascata. O runtime do 1.65 não mudou
+nada de formulário (diff de `runtime/state` e `scriptrunner`: navegação por histórico e threads daemon). Smoke visual no
+1.65 (`--chromium /opt/pw-browsers/chromium-1194/...`): ok em desktop e mobile, incluindo a geração da matriz.
+
+**Correção, só em teste.** `_submeter_formulario` e 3 cópias em linha (`test_bio_medicao_quantitativa`,
+`test_rx_medicao_poeira`, `test_revisao_origem`) preenchem o formulário sem `.run()` intermediário e submetem uma vez.
+`test_aviso_de_anexo_descartado_aparece_uma_vez` trocava a data sem submeter (reprocesso que só o AppTest antigo fazia);
+passa a clicar em "Gerar matriz". Nenhum código de `agente_medico/superficie/` alterado. Commit `5f00d11`.
+
+**Verificação.** Os 11 arquivos: 156 passed em 1.65 e em 1.64. Varredura inversa por amostra, uma reversão por tipo de ajuste,
+todas pelo comentário do próprio teste: tirar o `except EmissaoFuturaError` (helper), não limpar `anexos_descartados` (submit
+explícito), tirar a checagem de laudo vazio (cópia em linha) — 3/3 vermelhas. Suíte completa, árvore parada, 1.65: **1716
+passed, 6 skipped, 0 failed** (1021,48 s). mypy no alvo canônico: limpo, 56 arquivos. **Bloqueador resolvido.**
+`requirements.txt` segue `>=1.56.0,<2.0.0`; subir o piso para 1.65 fica para decisão do Diovanni.
