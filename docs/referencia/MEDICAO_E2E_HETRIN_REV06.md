@@ -40,9 +40,33 @@ Correção: aliases ancorados em norma, PR #451 (`D-ARQ-70`, nota de aplicação
 
 O que diverge depois dos aliases está em `PENDENCIAS_CLINICAS.md`, `DT-(sessão claude/gifted-cerf-0loir2)-01`.
 
+## Comparação pelo instrumento versionado (matriz do app × 14.09.26)
+
+`[MEDIDO — 06/10/2026, branch claude/kind-bardeen-ajkpnr, sobre main 11748c3]`
+
+```
+python -m scripts.comparar_matriz_gabarito --matriz-app \
+    docs/referencia/e2e_hetrin_rev06_20261005/matriz_app.docx \
+    "matrizes_originais/MATRIZ DE EXAMES(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26.doc" <relatorio.md>
+```
+
+- cargos: app 36, gabarito 28, pareados por nome 26
+- células (cargo × exame): app 46, gabarito 241
+- cargos com conjunto de exames idêntico: 0 de 26
+- células do gabarito reproduzidas por identidade de exame: 52 = 21,6%
+- superemissão: 0 · subemissão: 189 · divergência de momentos: 7 · de periodicidade: 0
+
+Subemissão por exame: `ecg`, `espirometria`, `glicemia`, `hemograma`, `rx_torax_oit` 26 cada; `acuidade_visual` 25; `audiometria` 19; `acetona_urina`, `ciclohexanol_urina`, `mek_urina`, `tetrahidrofurano_urina` 3 cada (almoxarife, encanador, montador); `manganes_sangue` 2; `carboxihemoglobina` 1. Momentos: as 7 são audiometria sem `DEM` no app (gabarito com `DEM`). Periodicidade 0 porque o app não imprimiu prazo em nenhuma célula desta matriz — não é concordância.
+
+**Cargos sem par** (visíveis, não contados como divergência): só no gabarito `encarregado`, `engenheiro presidente`; só no app `encarregados`, `engenheiro residente` e os 8 grupos do adendo (`auxiliar administratvo`, `encarregado de armação`, `… de carpinteiro`, `… de eletricista`, `… de encanador`, `… de instalações elétrica e hidrossanitárias`, `… de obra`, `menos aprendiz`), que a matriz 14.09.26 não tem.
+
+**Contra o "antes" do replay (195 ausentes / 2 a mais, 22 funções).** Mesma ordem de grandeza, número diferente: 189 / 0 em 26 cargos pareados. Fontes de diferença conhecidas: tabela em vez de `txt`, pareamento por cargo em vez de por nome de GHE, e o ruído que o replay registrou (nome do RX de coluna, linhas "Obs" como exame). Reconciliação célula a célula `[A MEDIR]` — não foi feita; o número do instrumento é o que vale daqui em diante.
+
+**Grafias do gabarito que o instrumento passou a resolver nesta sessão** (`_ALIAS_GRAFIA`, forma de saída, não decisão clínica): "Acetona" → `acetona_urina`, "Metiletilcetona" → `mek_urina`, "Manganês Sanguíneo" → `manganes_sangue`. Sem elas, 8 células saíam com nome cru e virariam super + sub falsas assim que o app emitir esses IBEs (2º teste, FDS do adesivo).
+
 ## Próximo passo
 
-1. Estender `scripts/comparar_matriz_gabarito.py` para aceitar a matriz DOCX exportada pelo app como lado "motor". Teste: rodar contra `matriz_app.docx` deste diretório e reproduzir o "antes" acima (com a diferença esperada de método: tabela em vez de `txt`).
+1. ~~Estender `scripts/comparar_matriz_gabarito.py` para aceitar a matriz DOCX exportada pelo app.~~ Feito (`--matriz-app`), seção acima.
 2. 2º teste no app, com os aliases em produção e a FDS do adesivo PVC anexada na etapa 2. Comparar pelo instrumento do passo 1. Fecha `DT-(sessão claude/youthful-lamport-3kfkog)-02`.
 
 ## Apêndice — script do replay

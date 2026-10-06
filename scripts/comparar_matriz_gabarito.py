@@ -21,6 +21,16 @@ Uso:
     python -m scripts.comparar_matriz_gabarito <pgr.pdf> <envelope.json> \
         <gabarito.doc> <relatorio.md>
 
+    python -m scripts.comparar_matriz_gabarito --matriz-app <matriz.docx> \
+        <gabarito.doc> <relatorio.md>
+
+**Lado "motor" vindo do app.** Com `--matriz-app`, o lado motor é a matriz DOCX
+exportada pelo app, não o pipeline rodado aqui. O teste e2e acontece no app (com
+a transcrição por IA que a rota offline não refaz); sem este modo, a comparação
+dele ia para script descartável — a classe de `DH-003EG-02`. A tabela do app tem
+a forma "FUNÇÃO | EXAMES SOLICITADOS" do gabarito e passa pelo mesmo extrator,
+com a mesma normalização de cargo e de grafia nos dois lados.
+
 A rota é determinística (clientes offline, D-ARQ-65): qualquer chamada a LLM
 vira pendência bloqueante nomeada, nunca mock silencioso. Sem chave de API.
 """
@@ -99,7 +109,10 @@ _ALIAS_GRAFIA = {
     "metil-etil-cetona": "metil-etil-cetona (mek) na urina",
     "metil etil cetona": "metil-etil-cetona (mek) na urina",
     "metil-etil-cetona na urina": "metil-etil-cetona (mek) na urina",
+    "metiletilcetona": "metil-etil-cetona (mek) na urina",
+    "acetona": "acetona na urina",
     "av. medica de saude mental": "avaliacao medica de saude mental",
+    "manganes sanguineo": "manganes no sangue",
 }
 
 
@@ -228,6 +241,31 @@ def extrair_motor(matrizes: Iterable[MatrizGHE]) -> dict[str, dict[str, object]]
 
 
 @dataclass(frozen=True)
+class ExameDaMatrizApp:
+    """Célula da matriz exportada pelo app, com os atributos que `comparar` lê do
+    lado motor. `FormaPeriodicidade` chama o prazo de `meses`; sem esta
+    tradução `comparar` leria `periodicidade_meses` como ausente e a
+    divergência de periodicidade sairia zero sem aviso."""
+
+    exame: str
+    periodicidade_meses: int | None
+    momentos: frozenset[Momento]
+
+
+def extrair_matriz_app(
+    caminho_docx: Path, mapa_nomes: Mapping[str, str]
+) -> dict[str, dict[str, object]]:
+    """cargo normalizado → slug de exame → `ExameDaMatrizApp`."""
+    return {
+        cargo: {
+            slug: ExameDaMatrizApp(forma.exame, forma.meses, forma.momentos)
+            for slug, forma in exames.items()
+        }
+        for cargo, exames in extrair_gabarito(caminho_docx, mapa_nomes).items()
+    }
+
+
+@dataclass(frozen=True)
 class Divergencia:
     cargo: str
     exame: str
@@ -334,11 +372,13 @@ def _secao(titulo: str, itens: Sequence[Divergencia]) -> list[str]:
     return linhas
 
 
-def gerar_relatorio(c: Comparacao, pgr: Path, gabarito: Path) -> str:
+def gerar_relatorio(
+    c: Comparacao, pgr: Path, gabarito: Path, *, rotulo_motor: str = "PGR"
+) -> str:
     linhas = [
         "# Comparação motor × matriz assinada",
         "",
-        f"- PGR: `{pgr.name}`",
+        f"- {rotulo_motor}: `{pgr.name}`",
         f"- gabarito: `{gabarito.name}`",
         "",
         "## Resultado",
@@ -360,34 +400,57 @@ def gerar_relatorio(c: Comparacao, pgr: Path, gabarito: Path) -> str:
     return "\n".join(linhas) + "\n"
 
 
-def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("pgr")
-    parser.add_argument("envelope")
-    parser.add_argument("gabarito")
-    parser.add_argument("relatorio")
-    args = parser.parse_args(argv)
-
-    pgr, gabarito_doc = Path(args.pgr), Path(args.gabarito)
-    envelope = desserializar_confirmacao(Path(args.envelope).read_text(encoding="utf-8"))
-    protocolo = carregar(_RAIZ / "agente_medico" / "protocolo")
-    resultado, _pendencias = processar_arquivo_pgr(
-        pgr, protocolo, TranscritorGHEOffline(), TranscritorCardOffline(), envelope
-    )
-    if resultado is None:
-        print("pipeline devolveu None — pendência bloqueante, nada a comparar", file=sys.stderr)
-        return 1
-
+def _comparar_com_gabarito(
+    motor: Mapping[str, Mapping[str, object]], gabarito_doc: Path
+) -> Comparacao:
     temporario = Path(tempfile.mkdtemp(prefix="cmp_gabarito_"))
     try:
         docx = converter_para_docx(gabarito_doc, temporario)
         gabarito = extrair_gabarito(docx, carregar_mapa_nome_para_slug())
     finally:
         shutil.rmtree(temporario, ignore_errors=True)
+    return comparar(motor, gabarito)
 
-    comparacao = comparar(extrair_motor(resultado.matrizes), gabarito)
-    Path(args.relatorio).write_text(
-        gerar_relatorio(comparacao, pgr, gabarito_doc), encoding="utf-8"
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--matriz-app",
+        type=Path,
+        help="matriz DOCX exportada pelo app como lado motor (dispensa pgr e envelope)",
+    )
+    parser.add_argument("posicionais", nargs="+", metavar="ARQ")
+    args = parser.parse_args(argv)
+    esperados = 2 if args.matriz_app else 4
+    if len(args.posicionais) != esperados:
+        parser.error(
+            "com --matriz-app: <gabarito> <relatorio>"
+            if args.matriz_app
+            else "<pgr> <envelope> <gabarito> <relatorio>"
+        )
+
+    if args.matriz_app:
+        origem_motor: Path = args.matriz_app
+        rotulo = "matriz do app"
+        gabarito_doc, relatorio = map(Path, args.posicionais)
+        motor = extrair_matriz_app(origem_motor, carregar_mapa_nome_para_slug())
+    else:
+        origem_motor, envelope_json, gabarito_doc, relatorio = map(Path, args.posicionais)
+        rotulo = "PGR"
+        envelope = desserializar_confirmacao(envelope_json.read_text(encoding="utf-8"))
+        protocolo = carregar(_RAIZ / "agente_medico" / "protocolo")
+        resultado, _pendencias = processar_arquivo_pgr(
+            origem_motor, protocolo, TranscritorGHEOffline(), TranscritorCardOffline(), envelope
+        )
+        if resultado is None:
+            print("pipeline devolveu None — pendência bloqueante, nada a comparar", file=sys.stderr)
+            return 1
+        motor = extrair_motor(resultado.matrizes)
+
+    comparacao = _comparar_com_gabarito(motor, gabarito_doc)
+    relatorio.write_text(
+        gerar_relatorio(comparacao, origem_motor, gabarito_doc, rotulo_motor=rotulo),
+        encoding="utf-8",
     )
     for linha in linhas_escopo(comparacao):
         print(linha)

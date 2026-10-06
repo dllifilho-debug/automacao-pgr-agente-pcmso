@@ -12094,3 +12094,27 @@ não re-tirados. Depois da suíte, só docs; recorte: `test_gerar_indice_darq.py
 
 **Pendência.** 2º teste no app com os aliases em produção (e, se possível, com a FDS do adesivo anexada na etapa 2) fecha
 `DT-(sessão claude/youthful-lamport-3kfkog)-02`.
+
+## Sessão (branch `claude/kind-bardeen-ajkpnr`, sobre `main 11748c3`, pós-merge do PR #452) — 06/10/2026 — instrumento: matriz do app como lado motor
+
+**Origem.** A comparação do 1º e2e (Hetrin REV06) foi feita em script descartável (classe `DH-003EG-02`); o próximo passo
+registrado em `MEDICAO_E2E_HETRIN_REV06.md` era levar a matriz exportada pelo app para o instrumento versionado.
+
+**Entrega.** `scripts/comparar_matriz_gabarito.py --matriz-app <matriz.docx> <gabarito> <relatorio>`. A tabela do app tem a
+forma do gabarito e passa pelo mesmo extrator; `ExameDaMatrizApp` traduz `meses` → `periodicidade_meses` (sem ela a
+divergência de periodicidade saía zero sem aviso). Três grafias do gabarito 14.09.26 em `_ALIAS_GRAFIA`: "Acetona",
+"Metiletilcetona", "Manganês Sanguíneo". Commit `b97c167`.
+
+**Medido.** `matriz_app.docx` × 14.09.26: 26 cargos pareados (app 36, gabarito 28); 52 de 241 células do gabarito
+reproduzidas (21,6%); superemissão 0, subemissão 189, momentos 7, periodicidade 0 (o app não imprimiu prazo). Detalhe em
+`docs/referencia/MEDICAO_E2E_HETRIN_REV06.md`. Diferente do replay (195/2, 22 funções); reconciliação célula a célula
+`[A MEDIR]`.
+
+**Verificação.** 6 testes novos, varredura inversa 7/7. mypy no alvo canônico: limpo, 56 arquivos. Suíte completa, árvore
+parada: **1678 passed, 6 skipped, 36 failed** (881,08 s). As 36 falhas estão em 11 arquivos de tela/memorial
+(`test_web_matriz.py` 17, `test_sugestao_vinculo.py` 7, `test_rx_medicao_poeira.py` 3, `test_bio_medicao_quantitativa.py` 2,
+mais 1 em cada um de `test_contaminante_a_confirmar`, `test_estilos`, `test_memorial_matriz`, `test_memorial_nao_reconhecidos`,
+`test_revisao_origem`, `test_tempo_processamento`, `test_uso_gemini`) e reproduzem idênticas em worktree de `origin/main
+11748c3` (36 failed, 120 passed nesses arquivos) — não vêm deste diff. Erros dominantes: `KeyError` em `session_state`
+(`ghe_destino_fds.pdf`, `medicao_valor`, `web_matriz_cache`). Container com `streamlit 1.65.0`; a sessão anterior mediu 0
+failed. Causa (versão do Streamlit ou outra dependência do ambiente) `[A MEDIR]`. **Bloqueador reportado, não corrigido.**

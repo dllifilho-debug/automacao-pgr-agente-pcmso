@@ -13,18 +13,31 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from docx import Document
 
 from scripts.comparar_matriz_gabarito import (
     ConversaoIndisponivel,
     comparar,
     converter_para_docx,
+    extrair_gabarito,
+    extrair_matriz_app,
     extrair_motor,
     gerar_relatorio,
     linhas_escopo,
+    main,
     normalizar_cargo,
     resolver_slug,
 )
-from scripts.medir_cobertura_e_forma import FormaPeriodicidade, extrair_forma_periodicidade
+from scripts.medir_cobertura_e_forma import (
+    FormaPeriodicidade,
+    carregar_mapa_nome_para_slug,
+    extrair_forma_periodicidade,
+)
+
+_MATRIZ_APP_HETRIN = (
+    Path(__file__).resolve().parents[1]
+    / "docs/referencia/e2e_hetrin_rev06_20261005/matriz_app.docx"
+)
 
 # `exames.yaml` mapeia nome_exibicao → slug; aqui só o recorte que os testes usam.
 MAPA = {
@@ -220,3 +233,101 @@ def test_grafias_de_mek_do_gabarito_resolvem_para_mek_urina() -> None:
         bruta = extrair_forma_periodicidade(grafia, mapa)
         assert resolver_slug(bruta, mapa).exame == "mek_urina", grafia
 
+
+
+def test_grafia_manganes_sanguineo_resolve_slug() -> None:
+    """R — apagar a entrada "manganes sanguineo" de `_ALIAS_GRAFIA` mata este
+    teste. Grafia do gabarito Hetrin 14.09.26; sem o alias, o exame sai como
+    nome cru em 2 subemissões (medido em 06/10/2026)."""
+    mapa = {"manganes no sangue": "manganes_sangue"}
+    bruta = extrair_forma_periodicidade("Manganês Sanguíneo (ADM, PER 6 meses)", mapa)
+    assert resolver_slug(bruta, mapa).exame == "manganes_sangue"
+
+
+def test_solventes_do_adesivo_sem_sufixo_na_urina_resolvem_slug() -> None:
+    """R — apagar a entrada "acetona" ou "metiletilcetona" de `_ALIAS_GRAFIA`
+    mata este teste. Grafias do gabarito Hetrin 14.09.26 (almoxarife, encanador,
+    montador); sem o alias, 1 subemissão por cargo sem par do outro lado."""
+    mapa = {
+        "acetona na urina": "acetona_urina",
+        "metil-etil-cetona (mek) na urina": "mek_urina",
+    }
+    for grafia, slug in (
+        ("Acetona (PER 6 meses)", "acetona_urina"),
+        ("Metiletilcetona (PER 6 meses)", "mek_urina"),
+    ):
+        bruta = extrair_forma_periodicidade(grafia, mapa)
+        assert resolver_slug(bruta, mapa).exame == slug, grafia
+
+
+def _matriz_docx(caminho: Path, linhas: list[tuple[str, str]]) -> Path:
+    """DOCX na forma "FUNÇÃO | EXAMES SOLICITADOS" que o app exporta."""
+    documento = Document()
+    tabela = documento.add_table(rows=1, cols=2)
+    tabela.rows[0].cells[0].text = "FUNÇÃO"
+    tabela.rows[0].cells[1].text = "EXAMES SOLICITADOS"
+    for cargo, exames in linhas:
+        celulas = tabela.add_row().cells
+        celulas[0].text, celulas[1].text = cargo, exames
+    documento.save(str(caminho))
+    return caminho
+
+
+def test_matriz_app_entrega_periodicidade_ao_comparador(tmp_path: Path) -> None:
+    """R — `extrair_matriz_app` devolver a `FormaPeriodicidade` crua em vez de
+    `ExameDaMatrizApp` mata este teste: `comparar` lê `periodicidade_meses` do
+    lado motor, a forma chama o prazo de `meses`, e a divergência de
+    periodicidade sairia zero sem aviso."""
+    mapa = {"espirometria": "espirometria"}
+    app = extrair_matriz_app(
+        _matriz_docx(tmp_path / "app.docx", [("Pedreiro", "Espirometria (ADM, PER 12 meses)")]),
+        mapa,
+    )
+    gabarito = {"pedreiro": {"espirometria": _forma("espirometria", 24, "ADM", "PER")}}
+    c = comparar(app, gabarito)
+    assert len(c.divergencia_periodicidade) == 1
+    assert "motor=12M gabarito=24M" in c.divergencia_periodicidade[0].detalhe
+
+
+def test_matriz_do_app_hetrin_comparada_consigo_mesma_nao_diverge() -> None:
+    """R — `ExameDaMatrizApp` construída com `momentos=frozenset()` mata este
+    teste (46 divergências de momentos, medido). Artefato real do 1º e2e (05/10/2026):
+    a mesma tabela lida como motor e como gabarito tem de parear todo cargo e
+    reproduzir toda célula — qualquer assimetria entre os dois extratores
+    apareceria aqui como divergência fabricada."""
+    mapa = carregar_mapa_nome_para_slug()
+    motor = extrair_matriz_app(_MATRIZ_APP_HETRIN, mapa)
+    c = comparar(motor, extrair_gabarito(_MATRIZ_APP_HETRIN, mapa))
+    assert len(c.cargos_pareados) == c.cargos_identicos == len(motor)
+    assert not (c.cargos_so_motor or c.cargos_so_gabarito)
+    assert not (c.superemissao or c.subemissao)
+    assert not (c.divergencia_momentos or c.divergencia_periodicidade)
+    assert set().union(*(set(e) for e in motor.values())) <= set(mapa.values()), (
+        "exame do app sem slug do vocabulário"
+    )
+
+
+def test_cli_matriz_app_rotula_o_lado_motor(tmp_path: Path) -> None:
+    """R — `main` ignorar `--matriz-app` (voltar a exigir pgr e envelope) ou
+    gerar o relatório sem `rotulo_motor` mata este teste: o relatório diria
+    "PGR: matriz_app.docx", proveniência falsa."""
+    gabarito = _matriz_docx(
+        tmp_path / "gabarito.docx", [("Pedreiro", "Exame Clínico (ADM, PER, MRO, RET, DEM)")]
+    )
+    app = _matriz_docx(
+        tmp_path / "matriz_app.docx", [("PEDREIRO", "Exame Clínico (ADM, PER, MRO, RET, DEM)")]
+    )
+    relatorio = tmp_path / "rel.md"
+    assert main(["--matriz-app", str(app), str(gabarito), str(relatorio)]) == 0
+    texto = relatorio.read_text(encoding="utf-8")
+    assert "- matriz do app: `matriz_app.docx`" in texto
+    assert "PGR:" not in texto
+    assert "pareados por nome 1" in texto
+
+
+def test_cli_matriz_app_com_aridade_errada_e_erro_de_uso(tmp_path: Path) -> None:
+    """R — apagar a checagem de quantidade de posicionais em `main` mata este
+    teste: o desempacotamento estouraria `ValueError` sem dizer a forma de uso."""
+    with pytest.raises(SystemExit) as erro:
+        main(["--matriz-app", "a.docx", "pgr.pdf", "env.json", "gab.doc", "rel.md"])
+    assert erro.value.code == 2
