@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import contextvars
 import json
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, TypeVar
 
 import requests
 
@@ -113,6 +115,36 @@ def medir_uso() -> Iterator[list[UsoGemini]]:
         yield registros
     finally:
         _USO.reset(marca)
+
+
+# Plano pago do Gemini 3.8 Flash: RPM 1.000, TPM 2.000.000, RPD 10.000
+# [MEDIDO — aistudio.google.com/rate-limit, projeto do Diovanni, 06/10/2026];
+# pico de uso no dia: 2 RPM. 5 lotes de um PGR grande (Hetrin: 30 grupos) são
+# 0,5% do RPM — não empurram a cascata para o modelo de reserva por 429.
+_LOTES_SIMULTANEOS = 5
+
+_E = TypeVar("_E")
+_S = TypeVar("_S")
+
+
+def _mapear_lotes(funcao: Callable[[_E], _S], lotes: Sequence[_E]) -> list[_S]:
+    """Aplica `funcao` a cada lote em paralelo e devolve na ordem de `lotes`
+    (D-ARQ-80, nota de 06/10/2026): a espera por resposta é rede, não CPU, e
+    em série o tempo de IA era a soma das latências.
+
+    Cada tarefa roda numa cópia do contexto de quem chama: thread de pool
+    não herda ContextVar, e sem a cópia `medir_uso` não veria nenhuma
+    chamada — a tela mostraria consumo zero sem erro. A cópia é por tarefa
+    porque um mesmo Context não entra em duas threads ao mesmo tempo; todas
+    apontam para a mesma lista de registros.
+
+    Falha de um lote propaga a exceção dele (a do primeiro na ordem), como
+    no laço em série; os lotes já disparados terminam antes do retorno."""
+    if len(lotes) <= 1:
+        return [funcao(lote) for lote in lotes]
+    with ThreadPoolExecutor(max_workers=min(_LOTES_SIMULTANEOS, len(lotes))) as pool:
+        futuros = [pool.submit(contextvars.copy_context().run, funcao, lote) for lote in lotes]
+        return [futuro.result() for futuro in futuros]
 
 
 def _contagem(meta: dict[str, Any], campo: str) -> int:

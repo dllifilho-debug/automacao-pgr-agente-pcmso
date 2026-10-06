@@ -75,12 +75,15 @@ def test_prompt_traz_o_nome_verbatim_e_as_linhas_de_cada_grupo_na_ordem() -> Non
 def test_oito_grupos_viram_duas_requisicoes_e_saem_na_ordem() -> None:
     # Lote de 6 (D-ARQ-80: o gargalo do nível gratuito é requisição).
     # Reversão que mata: mandar todas as entradas numa requisição só, sem
-    # fatiar por _GRUPOS_POR_LOTE.
+    # fatiar por _GRUPOS_POR_LOTE. Os lotes vão em paralelo, então a ordem das
+    # chamadas HTTP não é fixa — a do resultado é.
     entradas = [EntradaGrid(f"FUNCAO {i}", "RUÍDO") for i in range(8)]
     with patch(_ALVO, side_effect=_eco_do_lote) as post:
         ghes = TranscritorGeminiGrid(chave="fake").transcrever_lote(entradas)
     assert post.call_count == 2
-    assert "FUNÇÃO (como está no PDF): FUNCAO 6" in _prompt_da_chamada(post, 1)
+    prompts = [_prompt_da_chamada(post, i) for i in range(2)]
+    (segundo,) = [p for p in prompts if "FUNÇÃO (como está no PDF): FUNCAO 6" in p]
+    assert "FUNÇÃO (como está no PDF): FUNCAO 5" not in segundo
     assert [g.nome for g in ghes] == [f"FUNCAO {i}" for i in range(8)]
 
 

@@ -8,6 +8,7 @@ from agente_medico.adaptadores.transcritor_gemini import (
     TranscricaoIndisponivel,
     _chamar_gemini,
     _limpar_json,
+    _mapear_lotes,
     _obter_chave,
 )
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
@@ -235,15 +236,19 @@ class TranscritorGeminiGHE:
 
         Falha de invocação (TranscricaoIndisponivel de _chamar_gemini)
         propaga sem ser capturada — não mascara a falha de um lote como
-        resultado parcial silencioso."""
+        resultado parcial silencioso.
+
+        Os lotes vão em paralelo (_mapear_lotes, D-ARQ-80 nota de 06/10/2026)
+        e o resultado sai na ordem dos blocos."""
         chave = self._chave if self._chave is not None else _obter_chave()
         if not chave:
             raise TranscricaoIndisponivel("CHAVE_API_GOOGLE ausente")
-        resultado: list[GHEVerbatim] = []
-        for inicio in range(0, len(blocos), _BLOCOS_POR_LOTE):
-            lote = blocos[inicio : inicio + _BLOCOS_POR_LOTE]
-            resultado.extend(self._transcrever_um_lote(lote, chave))
-        return tuple(resultado)
+        lotes = [blocos[i : i + _BLOCOS_POR_LOTE] for i in range(0, len(blocos), _BLOCOS_POR_LOTE)]
+        return tuple(
+            ghe
+            for ghes in _mapear_lotes(lambda lote: self._transcrever_um_lote(lote, chave), lotes)
+            for ghe in ghes
+        )
 
     def _transcrever_um_lote(self, lote: Sequence[str], chave: str) -> tuple[GHEVerbatim, ...]:
         ultimo_erro: Exception | None = None

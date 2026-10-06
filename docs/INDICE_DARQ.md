@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v245 · 90 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v246 · 90 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -87,14 +87,14 @@ Fonte: DECISOES_ARQUITETURAIS.md v245 · 90 decisões
 | D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3582 | 4842 |
 | D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3656 | 7609 |
 | D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3763 | 1691 |
-| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3794 | 7663 |
-| D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3906 | 2897 |
-| D-ARQ-82 | O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz |  | 3950 | 15506 |
-| D-ARQ-83 | Termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para NÃO resolver, com pendência de causa e destinatário próprios |  | 4163 | 9623 |
-| D-ARQ-84 | Conferência factual é obrigação sem declaração; julgamento permanece gate declarado — os dois instrumentos separam-se pela natureza da falha, não pelo momento | DECISÃO DE MÉTODO (META) | 4212 | 10201 |
-| D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4261 | 4834 |
-| D-ARQ-86 | Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (25/09/2026), com Q1–Q4 resolvidas (ver "Ratificação" abaixo) | 4295 | 15495 |
-| D-ARQ-87 | Memorial de raciocínio da matriz: cada `Motivo` guarda o que a própria regra pediu, antes do piso da consolidação | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO da fatia 1 (26/09/2026) | 4389 | 6516 |
-| D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4433 | 9422 |
-| D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 (29/09/2026) e 2 (30/09/2026) | 4491 | 7135 |
-| D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4539 | 11320 |
+| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3794 | 9438 |
+| D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3908 | 2897 |
+| D-ARQ-82 | O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz |  | 3952 | 15506 |
+| D-ARQ-83 | Termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para NÃO resolver, com pendência de causa e destinatário próprios |  | 4165 | 9623 |
+| D-ARQ-84 | Conferência factual é obrigação sem declaração; julgamento permanece gate declarado — os dois instrumentos separam-se pela natureza da falha, não pelo momento | DECISÃO DE MÉTODO (META) | 4214 | 10201 |
+| D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4263 | 4834 |
+| D-ARQ-86 | Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (25/09/2026), com Q1–Q4 resolvidas (ver "Ratificação" abaixo) | 4297 | 15495 |
+| D-ARQ-87 | Memorial de raciocínio da matriz: cada `Motivo` guarda o que a própria regra pediu, antes do piso da consolidação | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO da fatia 1 (26/09/2026) | 4391 | 6516 |
+| D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4435 | 9422 |
+| D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 (29/09/2026) e 2 (30/09/2026) | 4493 | 7135 |
+| D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4541 | 11320 |
