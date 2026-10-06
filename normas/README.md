@@ -4,6 +4,9 @@ PDFs oficiais das normas usadas nas regras do agente médico. Fonte única:
 Gov.br/MTE (Normas Regulamentadoras Vigentes) e Gov.br/Fundacentro (biblioteca de
 NHOs). Não usar cópia de terceiros nem texto em consulta pública.
 
+**Última conferência de vigência:** 06/10/2026, pelo Diovanni — todas as normas desta pasta estão
+vigentes. Quem substituir ou acrescentar arquivo atualiza esta linha.
+
 **Nome fixo, sem data.** Quando a norma for atualizada, substitua o arquivo no mesmo
 caminho. O histórico do git guarda a versão anterior e permite dizer qual texto
 sustentava cada regra em cada data.
