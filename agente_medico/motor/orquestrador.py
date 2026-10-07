@@ -174,7 +174,7 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                 )
         matriz.observacoes = tuple(ctx.observacoes)
         matriz.sugestao_aso = sugerir_aso(
-            matriz.linhas, ctx.riscos, protocolo.vocabulario.agentes
+            matriz.linhas, ctx.riscos, ghe.riscos, protocolo.vocabulario.agentes
         )
         matrizes.append(matriz)
 

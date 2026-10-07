@@ -396,6 +396,19 @@ def linhas_da_tabela(bloco: BlocoMemorial) -> list[tuple[str, str, str, str]]:
     return [("\n".join(exames), porque, certeza, "") for (porque, certeza), exames in grupos.items()]
 
 
+RODAPE_CONFIDENCIAL = "Uso interno — confidencial"
+
+
+def aplicar_rodape_confidencial(documento: Any) -> None:
+    """Anexos para as médicas (memorial, riscos para o ASO) não vão ao cliente: o rodapé
+    de cada página marca o sigilo. A matriz assinada não leva o rodapé."""
+    for secao in documento.sections:
+        paragrafo = secao.footer.paragraphs[0]
+        paragrafo.text = RODAPE_CONFIDENCIAL
+        paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        paragrafo.runs[0].font.size = Pt(8)
+
+
 def _tabela(documento: Any, colunas: Sequence[tuple[str, float]], linhas: Sequence[Sequence[str]]) -> None:
     tabela = documento.add_table(rows=1, cols=len(colunas))
     tabela.style = "Table Grid"
@@ -428,6 +441,7 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         secao.page_width, secao.page_height = secao.page_height, secao.page_width
         secao.top_margin = secao.bottom_margin = Cm(1.5)
         secao.left_margin = secao.right_margin = Cm(1.5)
+    aplicar_rodape_confidencial(documento)
 
     titulo = documento.add_paragraph()
     titulo.alignment = WD_ALIGN_PARAGRAPH.CENTER

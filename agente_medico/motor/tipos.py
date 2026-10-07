@@ -397,28 +397,34 @@ class GHEContext:
     observacoes: list[Observacao] = field(default_factory=list)
 
 
-# D-ARQ-91: sugestão de exames para o ASO, por linha da matriz.
-Veredito = Literal["OBRIGATORIO", "CONFERIR", "NAO_OBRIGATORIO"]
+# D-ARQ-91 (emenda de 07/10/2026): sugestão dos riscos que constam no ASO, por risco do GHE.
+VereditoASO = Literal["CONSTA", "CONFERIR", "NAO_CONSTA"]
 
 
 @dataclass(frozen=True)
 class Criterio:
-    veredito: Veredito
+    veredito: VereditoASO
     regra: str
     texto: str
 
 
 @dataclass(frozen=True)
 class SugestaoASO:
-    exame: str
-    veredito: Veredito
+    # Slug do agente, ou o termo do PGR quando reconhecido=False.
+    risco: str
+    reconhecido: bool
+    veredito: VereditoASO
     criterios: tuple[Criterio, ...]
+    # Informativo: exames da matriz cuja origem é o agente.
+    exames: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class RelatorioASO:
-    linhas: tuple[SugestaoASO, ...] = ()
+    riscos: tuple[SugestaoASO, ...] = ()
     aptidoes: tuple[str, ...] = ()
+    # NR-07 7.5.19.1 "c", "ou a sua inexistência" (R-ASO-07).
+    inexistencia: bool = False
 
 
 @dataclass
@@ -443,7 +449,7 @@ class MatrizGHE:
     nome_ghe: str = ""
     cargos: tuple[str, ...] = ()
     observacoes: tuple[Observacao, ...] = ()
-    # D-ARQ-91: sugestão por linha, calculada depois da consolidação; não muda linha nenhuma.
+    # D-ARQ-91: sugestão por risco, calculada depois da consolidação; não muda linha nenhuma.
     sugestao_aso: RelatorioASO = field(default_factory=RelatorioASO)
 
 

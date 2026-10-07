@@ -147,8 +147,8 @@ def avaliar(medidas: dict[str, Any], cenario: str) -> list[str]:
     for d in medidas["downloads"]:
         if d["largura"] < d["coluna"] - TOL_ALTURA:
             falhas.append(f"download '{d['rotulo']}' com {round(d['largura'])}px numa coluna de {round(d['coluna'])}px")
-    if cenario == "matriz" and len(medidas["downloads"]) != 3:
-        falhas.append(f"{len(medidas['downloads'])} botões de download, esperados 3")
+    if cenario == "matriz" and len(medidas["downloads"]) != 4:
+        falhas.append(f"{len(medidas['downloads'])} botões de download, esperados 4")
 
     alturas_botoes = [b["altura"] for b in medidas["botoes"]]
     if alturas_botoes and max(alturas_botoes) - min(alturas_botoes) > TOL_ALTURA:

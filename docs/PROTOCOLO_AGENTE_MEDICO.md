@@ -1211,33 +1211,35 @@ Todas as 6 lacunas levantadas na v1 foram resolvidas pela Dra. Carolini:
 
 ---
 
-## 13. SUGESTÃO DE EXAMES PARA O ASO (D-ARQ-91)
+## 13. RISCOS QUE CONSTAM NO ASO (D-ARQ-91, emenda de 07/10/2026)
 
-Sugestão por linha da matriz gerada: OBRIGATÓRIO (consta no ASO — NR-07 item 7.5.19.1 "d"), NÃO OBRIGATÓRIO pelo critério (sugestão: não solicitar) ou CONFERIR (o app não tem o dado). Um critério que obrigue basta (cada item da NR-07 obriga sozinho). Não muda emissão nem periodicidade; a médica valida depois. Código: `agente_medico/motor/sugestao_aso.py`.
+Sugestão por **risco** do GHE: CONSTA no ASO, NÃO CONSTA pelo critério ou CONFERIR (o app não tem o dado). O ASO traz "a descrição dos perigos ou fatores de risco identificados e classificados no PGR que necessitem de controle médico previsto no PCMSO, ou a sua inexistência" (NR-07 item 7.5.19.1 "c"); os exames entram no ASO pela alínea "d", sem filtro. O PCMSO continua com todos os riscos. Um critério que faça constar basta (cada item da NR-07 obriga sozinho); várias linhas do PGR do mesmo agente contam juntas. Não muda emissão nem periodicidade; a médica valida depois. Código: `agente_medico/motor/sugestao_aso.py`; documento: `agente_medico/superficie/relatorio_aso.py`.
 
-### R-ASO-01 — Exame clínico consta sempre `[DERIVADO — NR-07 item 7.5.19.1 "d"]`
+### R-ASO-01 — Exame clínico consta sempre `[DEPRECATED — emenda D-ARQ-91 de 07/10/2026: a unidade passou a ser o risco; o exame clínico entra no ASO pela alínea "d", fora desta seção]`
 
-O ASO é emitido a partir do exame clínico (NR-07 item 7.5.19) e indica os exames realizados.
+### R-ASO-02 — Poeira mineral consta `[DERIVADO — NR-07 Anexo III item 1]`
 
-### R-ASO-02 — Poeira mineral: RX OIT e espirometria obrigatórios `[DERIVADO — NR-07 Anexo III item 1]`
+Agentes do composto `poeira_mineral` (sílica, asbesto, PNOS), que `R-RX-01` e `R-ESP-02` levam ao Anexo III: constam, qualquer que seja a classificação ou a medição. Outros agentes pulmonares (gesso, madeira, fumos) seguem `R-ASO-04`/`R-ASO-06`.
 
-Linha emitida por `R-RX-01-*` ou `R-ESP-02` (regras que materializam o Anexo III): obrigatória, qualquer que seja a classificação ou a medição. Outros agentes pulmonares (`R-RX-02/03/04`, `R-ESP-03/04`) seguem `R-ASO-04`/`R-ASO-06` — o Anexo III item 3.2 só obriga a espirometria deles com sinais ou sintomas.
+### R-ASO-03 — Altura e espaço confinado constam, com a aptidão `[DERIVADO — NR-07 item 7.5.19.2; NR-35 item 35.4.4.1; NR-33 item 33.5.19.2]`
 
-### R-ASO-03 — Aptidão para altura e espaço confinado `[DERIVADO — NR-07 item 7.5.19.2; NR-35 item 35.4.4.1; NR-33 item 33.5.19.2]`
-
-Exame emitido por risco de origem `trabalho_altura` ou `espaco_confinado`: obrigatório; o GHE ganha a linha "consignar aptidão". Motorista de equipamento pesado (também em `atividade_critica`) não tem NR que mande consignar a aptidão no ASO e segue `R-ASO-06`.
+`trabalho_altura` e `espaco_confinado`: constam sempre (o PCMSO prevê controle médico para a aptidão), e o GHE ganha a linha "consignar aptidão". Motorista de equipamento pesado não tem NR que mande consignar a aptidão no ASO e segue `R-ASO-06`.
 
 ### R-ASO-04 — Cancerígeno `[DERIVADO — NR-07 Anexo V item 4.1.1]`
 
-Obrigatório acima de 10% do limite de exposição ou sem avaliação ambiental; até 10% não obriga por este item (outro critério pode obrigar). "Cancerígeno conforme informado no PGR" é lido pelo `is_carcinogeno_iarc` do vocabulário — o PGR não traz o campo. Medição sem limite de referência: CONFERIR.
+Consta acima de 10% do limite de exposição ou sem avaliação ambiental; até 10% não consta por este item (outro critério pode fazer constar). "Cancerígeno conforme informado no PGR" é lido pelo `is_carcinogeno_iarc` do vocabulário — o PGR não traz o campo. Medição sem limite de referência: CONFERIR.
 
-### R-ASO-05 — Audiometria `[DERIVADO — NR-07 Anexo II itens 2 e 7; NR-09 item 9.6.1 "c"; e-mail da Dra. Carolini]`
+### R-ASO-05 — Ruído `[DERIVADO — NR-07 Anexo II itens 2 e 7; NR-09 item 9.6.1 "c"; e-mail da Dra. Carolini]`
 
-Obrigatória com ruído medido ≥ 80 dB(A) (`R-RUIDO-01`), classificado moderado ou acima, ou classificado BAIXO com ototóxico ou vibração no GHE. A perna "BAIXO com ototóxico/vibração" vem do e-mail (nível 2 de D-ARQ-22): o Anexo II item 7 pede "especial atenção", sem obrigar. Ruído sem classificação: CONFERIR. Audiometria sem ruído no GHE (só ototóxico, vibração ou motorista) segue o critério do agente de origem.
+Consta com medição ≥ 80 dB(A) (`R-RUIDO-01`), classificação moderada ou acima, ou classificação BAIXO com ototóxico ou vibração no GHE. A perna "BAIXO com ototóxico/vibração" vem do e-mail (nível 2 de D-ARQ-22): o Anexo II item 7 pede "especial atenção", sem obrigar. Sem classificação: CONFERIR.
 
-### R-ASO-06 — Regra geral `[DERIVADO — NR-07 item 7.5.12 "b"; NR-09 item 9.6.1 "b" e Anexo I itens 5.2.2/5.3.2; e-mail da Dra. Carolini]`
+### R-ASO-06 — Regra geral, todos os grupos de risco `[DERIVADO — NR-07 item 7.5.12 "b"; NR-09 item 9.6.1 "b" e Anexo I itens 5.2.2/5.3.2; e-mail da Dra. Carolini]`
 
-Obrigatório com medição acima do nível de ação (químico: 50% do LT da NR-15 Anexo 11; vibração: aren 2,5 m/s² mãos e braços, 0,5 m/s² corpo inteiro) ou classificação do PGR moderada ou acima. BAIXO/IRRELEVANTE: não obrigatório, com o motivo "passa a obrigatório se o PGR indicar monitoramento desde a classificação baixa ou medidas de prevenção imediatas (NR-07 item 7.5.12 'a'/'b')". Sem classificação, avaliado na matriz AIHA, presumido ou sem risco de origem: CONFERIR (D-ARQ-22). Vibração isolada por esta regra: `[INTERPRETADO — prioridade na revisão de saída]` (o e-mail a cita como exceção sem critério próprio).
+Consta com medição acima do nível de ação (químico: 50% do LT da NR-15 Anexo 11; vibração: aren 2,5 m/s² mãos e braços, 0,5 m/s² corpo inteiro) ou classificação do PGR moderada ou acima — **de qualquer grupo, inclusive acidente e ergonômico, com ou sem exame na matriz** (leitura literal do e-mail, decisão do Diovanni em 07/10/2026). BAIXO/IRRELEVANTE: não consta, com o motivo "passa a constar se o PGR indicar monitoramento desde a classificação baixa ou medidas de prevenção imediatas (NR-07 item 7.5.12 'a'/'b')". Sem classificação, avaliado na matriz AIHA ou termo do PGR não reconhecido pelo app: CONFERIR (D-ARQ-22). Vibração isolada por esta regra: `[INTERPRETADO — prioridade na revisão de saída]` (o e-mail a cita como exceção sem critério próprio).
+
+### R-ASO-07 — Inexistência `[DERIVADO — NR-07 item 7.5.19.1 "c"]`
+
+Quando todo risco do GHE sai NÃO CONSTA, o relatório sugere a inexistência de perigos ou fatores de risco que necessitem de controle médico. Havendo um CONFERIR, a inexistência não é sugerida.
 
 ---
 
@@ -1374,3 +1376,4 @@ Obrigatório com medição acima do nível de ação (químico: 50% do LT da NR-
 | v127 | 03/10/2026 | Branch `claude/awesome-goldberg-vt1irf`, recriada sobre `main 0ea3413` (docs + comentário de vocabulário, decisão do Diovanni — seguir a norma vigente): `R-BIO-06` (§5.9) — o `[A CONFERIR]` da carcinogenicidade do octoato fecha por `[DERIVADO — LINACH 2014]`: cobalto, compostos e sais solúveis de Co(II) no Grupo 2B → não cancerígeno pelo critério 1/2A. Divergência com o IARC Vol. 131 (2022/2023, 2A) registrada com gatilho de reabertura. Sem efeito na matriz. PDF da LINACH em `normas/`. |
 | v128 | 03/10/2026 | Branch `claude/awesome-goldberg-vt1irf`, recriada sobre `main fd09398` (MEDIÇÃO + docs, decisão do Diovanni — manter a v126): `R-FDS-07` (§4) — o `[A MEDIR]` do "Destilados (Petróleo)" do R78 fecha: o termo está inteiro no PDF (quebra de página), é a grafia já coberta por `destilados_petroleo_hidrotratados`. Registrado o precedente contrário do gabarito R78 12.11.25 (pacote do benzeno no GHE 07); v126 mantida pelo Fascino 08.07.26, mais recente e da mesma médica. Sem efeito em produção (R78 bloqueado pelo gate de segmentação). |
 | v129 | 06/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, sobre `main cad13ec` (IMPLEMENTAÇÃO, decisão do Diovanni — D-ARQ-91): **§13 criada — `R-ASO-01` a `R-ASO-06`** (sugestão de exames para o ASO por linha da matriz; cada uma com o item da norma no marcador). Nenhuma regra de emissão criada ou alterada. |
+| v130 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main 6d3075f` (IMPLEMENTAÇÃO, decisão do Diovanni — emenda D-ARQ-91): **§13 reescrita por risco** — o ASO traz o risco (NR-07 7.5.19.1 "c"), não o exame. `R-ASO-01` DEPRECATED; `R-ASO-02..06` reescritas sobre o risco; `R-ASO-06` vale para todo grupo, inclusive acidente e ergonômico (leitura literal); **`R-ASO-07` CRIADA** (inexistência). Nenhuma regra de emissão alterada. |
