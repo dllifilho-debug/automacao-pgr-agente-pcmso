@@ -12349,3 +12349,11 @@ de categoria era redundante, porque toda categoria começa na coluna GRUPO. Remo
 nos 3 PGRs determinísticos (61 GHEs). Smoke visual ok. Suíte completa, árvore parada: **1765 → 1772 passed, 6 skipped** (1064 s). mypy no alvo canônico: limpo, 58 arquivos.
 `test_gerar_indice_darq.py` 6 passed. Limite declarado: PGR das rotas da IA (GHE e grid) sai com agravo "—" até a
 fatia 2, na sessão com a chave.
+
+## Sessão (mesma branch, recriada sobre `main e97ad13`, pós-merge do PR #464) — 07/10/2026 — DOCS: e-mail da Dra. Carolini sobre o ASO salvo na íntegra
+
+**Origem.** Antes de abrir chat novo para as observações da Dra. Carolini, o Diovanni lembrou que o e-mail que originou o
+relatório do ASO só existia na conversa; o disco tinha apenas o resumo na `D-ARQ-91`. Salvo verbatim em
+`docs/referencia/EMAIL_CAROLINI_ASO.md`, com procedência (entrada no projeto em 06/10/2026; data de envio `[A MEDIR]`),
+onde cada critério virou decisão (`D-ARQ-91`, PROTOCOLO §13) e as notas de conferência normativa. Só docs; nenhum código,
+regra ou D-ARQ alterado.
