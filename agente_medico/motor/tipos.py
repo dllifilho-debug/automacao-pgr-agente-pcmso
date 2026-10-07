@@ -202,9 +202,19 @@ class EnvelopeConfirmado:
 
 
 @dataclass(frozen=True)
+class FraseH:
+    """D-ARQ-92: frase de perigo à saúde (H3xx do GHS) como a FDS escreve. `texto` vazio
+    quando o código aparece sem o texto legível no PDF."""
+    codigo: str
+    texto: str
+
+
+@dataclass(frozen=True)
 class FDS:
     composicao: tuple[Componente, ...]
     composicao_verbatim: tuple[BlocoComponente, ...] = ()
+    # D-ARQ-92 fatia 3: agravos à saúde da FDS, para os anexos das médicas. O motor não lê.
+    agravos: tuple[FraseH, ...] = ()
 
 
 @dataclass(frozen=True)

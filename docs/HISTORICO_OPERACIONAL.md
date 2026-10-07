@@ -12290,3 +12290,37 @@ vazio até quando o H está na seção 3 (as 9 FDS); (2) o recorte manda só a s
 implementar:** `frases_h` não é só exibição — o motor já a lê (D-ARQ-55: bypass do corte de 5% para H350/H340/H360 e
 materialidade em `estagios/riscos.py`). Passar a preenchê-la muda matriz: precisa de D-ARQ própria, medição antes/depois e
 decisão do Diovanni. Texto dos agravos: pela tabela oficial de frases H (ABNT NBR 14725), não por texto gerado pela IA.
+
+## Sessão (mesma branch, recriada sobre `main e3a5369`, pós-merge do PR #462) — 07/10/2026 — ARQUITETURA + IMPLEMENTAÇÃO: frases H da FDS como agravos à saúde (D-ARQ-92)
+
+**Origem.** Pedido do Diovanni: seguir com as frases H da FDS ("elas são os agravos da saúde também?") e, no meio da
+sessão, "os agravos, para o nosso documento final, são mais importantes que as frases H". Decisões dele na sessão:
+agravos no relatório Riscos para o ASO e no memorial, por GHE, a partir das FDS vinculadas; matriz assinada intocada;
+coluna AGRAVO do PGR para sessão própria.
+
+**Resposta à pergunta.** Sim para as H3xx: no GHS (ABNT NBR 14725), H2xx são perigos físicos, H3xx perigos à saúde e
+H4xx ao ambiente; as H3xx dizem o efeito no exposto e são, na FDS, a fonte do "agravo à saúde".
+
+**Medido.** O "H" de cada componente sai em branco porque `_parsear_blocos` só lê `cas` e `nome` e o prompt só pede
+esses dois — a D-ARQ-55 Parte 1 previa a IA transcrevendo os H por membro, mas o cliente real nunca os pediu (o mapa
+H334/H317 → sensibilizante só dispara com digitação manual do RT). Nas 36 FDS em PDF do acervo, a leitura nova acha
+H3xx em 24, 145 frases, todas com texto; 12 sem H legível `[A MEDIR — imagem/FISPQ antiga/escaneado]`. O leitor de PGR
+por coordenadas usa "AGRAVO" só como limite de coluna, sem guardar o texto. Sem chave da IA no container.
+
+**Entrega.** `D-ARQ-92` (DECISOES v249) + nota de aplicação (v250). Fatia 1: `extracao_fds.extrair_agravos_saude`
+(determinística, todas as páginas, texto como a FDS escreve, corte no 1º ponto final e no próximo código), tipo
+`FraseH`, bloco "Agravos à saúde" na tela da FDS com cache por hash; rótulo "H do componente" na linha de cada
+componente. Fatia 3 (antecipada): `FDS.agravos` (o motor não lê), gravado no "Anexar"; `agravos_do_ghe` (agravo em
+texto + código H entre parênteses) no memorial e no relatório do ASO. Fatia 2 (`frases_h` por componente via IA, muda
+matriz) segue condicionada a medição com a chave e decisão do Diovanni. Commits `cf42e6e` e `b688ca0`.
+
+**Regressão pega pela suíte (registrada em D-ARQ-92).** A 1ª suíte completa deu 25 falhas em testes de tela que enviam
+FDS falsa com a composição dublada: a leitura nova abria o PDF de verdade. Eu tinha descartado o caso na revisão
+achando que a composição falharia antes — errado (cache ou dublê). Corrigido: PDF que o pdfplumber não abre sai sem
+frase, com o aviso de conferir. Lição: "outro trecho já falharia antes" não é argumento sem teste.
+
+**Verificação.** `test_agravos_fds.py`, 15 testes, varredura inversa 21/21. Matriz completa (inclusive `sugestao_aso`)
+idêntica à da `main e3a5369` nos 3 PGRs determinísticos (61 GHEs). Smoke visual ok. Suíte completa, árvore parada:
+**1750 → 1765 passed, 6 skipped** (995 s). mypy no alvo canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6
+passed. Limites declarados: frase cortada na quebra de linha; resíduo de coluna que o PDF põe na mesma linha ("H334 —
+…de asma ou for fácil."); FDS vinculada numa sessão aberta antes desta versão chega sem agravos até ser vinculada de novo.

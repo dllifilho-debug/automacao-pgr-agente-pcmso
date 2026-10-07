@@ -28,6 +28,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
+from pdfplumber.utils.exceptions import PdfminerException
+
 from agente_medico.adaptadores.orquestracao_fds import preparar_composicao
 from agente_medico.adaptadores.orquestracao_pgr import preparar_pgr_hidratado
 from agente_medico.adaptadores.transcritor_gemini import TranscritorGemini, UsoGemini, medir_uso
@@ -36,6 +38,7 @@ from agente_medico.adaptadores.transcritor_gemini_grid import TranscritorGeminiG
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.composicao import resolver_composicao
 from agente_medico.motor.entrada import processar_pgr
+from agente_medico.motor.extracao_fds import extrair_agravos_saude_pdf
 from agente_medico.motor.leo_resolver import limite_quimico
 from agente_medico.motor.medicoes import aplicar_medicoes
 from agente_medico.motor.protocolo import Protocolo, carregar
@@ -45,6 +48,7 @@ from agente_medico.motor.tipos import (
     PGR,
     BlocoVerbatim,
     EnvelopeConfirmado,
+    FraseH,
     GHEVerbatim,
     MatrizGHE,
     MedicaoInformada,
@@ -737,6 +741,39 @@ def preparar_composicao_cacheada(
     return resultado
 
 
+AVISO_SEM_AGRAVOS = (
+    "Nenhuma frase H de saúde (H3xx) legível no texto desta FDS — conferir a seção 2 no documento "
+    "(pode estar em imagem ou a FDS ser anterior ao GHS)."
+)
+
+
+def extrair_agravos_cacheado(
+    caminho: Path, conteudo: bytes, cache: dict[str, tuple[FraseH, ...]]
+) -> tuple[FraseH, ...]:
+    """D-ARQ-92: agravos à saúde memoizados pelo hash do conteúdo — a leitura de todas as
+    páginas é determinística e não precisa repetir a cada rerun do Streamlit. PDF que o
+    pdfplumber não abre não derruba a tela da FDS: sai sem frase, e a tela mostra o aviso
+    de conferir no documento (D-ARQ-22)."""
+    chave = hashlib.sha256(conteudo).hexdigest()
+    if chave not in cache:
+        try:
+            cache[chave] = extrair_agravos_saude_pdf(caminho)
+        except PdfminerException as erro:
+            _log.warning("agravos da FDS %s não lidos: %s", caminho.name, erro)
+            cache[chave] = ()
+    return cache[chave]
+
+
+def linhas_agravos(frases: tuple[FraseH, ...]) -> tuple[str, ...]:
+    """D-ARQ-92 cl.3: o que a tela mostra; sem frase, o aviso de conferir (D-ARQ-22)."""
+    if not frases:
+        return (AVISO_SEM_AGRAVOS,)
+    return tuple(
+        f"- {f.codigo} — {_sanitizar(f.texto)}" if f.texto else f"- {f.codigo} (texto não legível na FDS)"
+        for f in frases
+    )
+
+
 # Estado do passo no indicador de etapas → ícone. O mesmo estado vira a key
 # `passo_<n>_<estado>` que estilos.py colore.
 ICONE_PASSO: dict[str, str] = {
@@ -763,7 +800,7 @@ def pagina_matriz() -> None:
         titulo_ghe,
         renderizar_docx,
     )
-    from agente_medico.motor.tipos import BlocoVerbatim, Fracao, MedicaoInformada, ProcedenciaMedicao
+    from agente_medico.motor.tipos import BlocoVerbatim, Fracao, FraseH, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.memorial_matriz import (
         contaminantes_a_confirmar,
         montar_memorial,
@@ -794,8 +831,10 @@ def pagina_matriz() -> None:
         agentes_mensuraveis,
         anexar_produto_em_ghes,
         executar_rota_determinista_cacheada,
+        extrair_agravos_cacheado,
         ghes_com_produto,
         linha_pendencia,
+        linhas_agravos,
         linhas_sugestao,
         listar_produtos_anexados,
         montar_envelope,
@@ -856,13 +895,16 @@ def pagina_matriz() -> None:
                 "PDF(s) da FDS/FISPQ", type="pdf", accept_multiple_files=True, key="fds_avulsas"
             )
         cache_fds: dict[str, ComposicaoFDS] = st.session_state.setdefault("web_matriz_cache_fds", {})
+        cache_agravos: dict[str, tuple[FraseH, ...]] = st.session_state.setdefault("web_matriz_cache_agravos", {})
 
         # Anexar/Remover rodam em on_click: o Streamlit executa o callback ANTES do
         # rerun. Inline, o clique só era processado quando o script chegava ao
         # botão — se o rerun era interrompido antes (página lenta com 16 FDS e o
         # usuário já mexendo no widget seguinte), o clique se perdia sem aviso
         # (medido em produção, Aurora, 25/09/2026: aguarrás não anexada).
-        def _anexar(nome_arquivo: str, blocos: tuple[BlocoVerbatim, ...]) -> None:
+        def _anexar(
+            nome_arquivo: str, blocos: tuple[BlocoVerbatim, ...], agravos: tuple[FraseH, ...] = ()
+        ) -> None:
             atual: CacheMatrizes | None = st.session_state.get("web_matriz_cache")
             if atual is None or atual.pgr_hidratado is None:
                 return
@@ -880,7 +922,8 @@ def pagina_matriz() -> None:
                 )
             if novos:
                 st.session_state["web_matriz_cache"] = anexar_produto_em_ghes(
-                    atual, _protocolo_padrao(), novos, nome, montar_fds(blocos)
+                    atual, _protocolo_padrao(), novos, nome,
+                    dataclasses.replace(montar_fds(blocos), agravos=agravos),
                 )
                 mensagens.append(("success", f"Produto '{nome}' anexado a {', '.join(novos)}."))
             st.session_state[f"anexo_mensagens_{nome_arquivo}"] = mensagens
@@ -975,6 +1018,7 @@ def pagina_matriz() -> None:
                             blocos_fds, pendencias_fds = preparar_composicao_cacheada(
                                 caminho_fds, conteudo_fds, TranscritorGemini(), cache_fds
                             )
+                        agravos_fds = extrair_agravos_cacheado(caminho_fds, conteudo_fds, cache_agravos)
                     # Rótulo fixo: rótulo que muda (ex.: com o status do anexo) faz o
                     # Streamlit tratar o expander como outro elemento e fechá-lo no
                     # rerun do próprio clique em Anexar.
@@ -984,9 +1028,12 @@ def pagina_matriz() -> None:
                         st.write(f"Faixa: {bloco_fds.faixa}")
                         for membro in bloco_fds.membros:
                             frases_h = ", ".join(membro.frases_h) or "—"
-                            st.write(f"- CAS {membro.cas} | {membro.nome} | H: {frases_h}")
+                            st.write(f"- CAS {membro.cas} | {membro.nome} | H do componente: {frases_h}")
                     for p in pendencias_fds:
                         st.write(linha_pendencia(p))
+                    st.write("**Agravos à saúde (frases H do produto, como a FDS escreve):**")
+                    for linha_agravo in linhas_agravos(agravos_fds):
+                        st.write(linha_agravo)
 
                     # Casamento manual FDS<->produto (D-ARQ-49 Parte 2 fatia 2b, decisão
                     # ratificada v199/v200: RT escolhe o GHE e nomeia o produto na tela —
@@ -1046,7 +1093,7 @@ def pagina_matriz() -> None:
                             "Anexar aos GHEs selecionados",
                             key=f"anexar_fds_{arquivo_fds.name}",
                             on_click=_anexar,
-                            args=(arquivo_fds.name, blocos_fds),
+                            args=(arquivo_fds.name, blocos_fds, agravos_fds),
                         )
                         for tipo, texto in st.session_state.pop(f"anexo_mensagens_{arquivo_fds.name}", []):
                             (st.success if tipo == "success" else st.warning)(texto)
@@ -1300,7 +1347,9 @@ def pagina_matriz() -> None:
                 # D-ARQ-91 fatia 2: riscos para o ASO, anexo não assinado.
                 destino_aso = Path(tmp) / "riscos_aso.docx"
                 renderizar_relatorio_aso_docx(
-                    montar_relatorio_aso(cache.matrizes, cache.exames_vocab), cabecalho, destino_aso
+                    montar_relatorio_aso(cache.matrizes, cache.exames_vocab, pgr=cache.pgr_hidratado),
+                    cabecalho,
+                    destino_aso,
                 )
                 aso_bytes = destino_aso.read_bytes()
 

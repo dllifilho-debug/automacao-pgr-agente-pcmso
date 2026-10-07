@@ -4769,6 +4769,53 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cad13ec`). Pedido do Diovan
 
 ---
 
+## D-ARQ-92 — Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida
+
+**Status:** DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS"). Fatia 1 implementada na mesma sessão; fatia 2 condicionada a medição com a chave da IA e à decisão do Diovanni.
+
+Sessão branch `claude/cool-ramanujan-njnp7w` (`main e3a5369`). Origem: na tela, o campo "H" de cada componente da FDS sai em branco (observação do Diovanni, registrada no HISTORICO da sessão de 07/10).
+
+**Contexto medido (07/10/2026, 36 FDS em PDF de `fds_originais/`).**
+
+- **Por que o "H" sai em branco.** `_parsear_blocos` (`adaptadores/transcritor_gemini.py`) só lê `cas` e `nome` da resposta, e o prompt só pede esses dois campos: `MembroVerbatim.frases_h` fica sempre `()` pela IA. A D-ARQ-55 Parte 1 decidiu que o transcritor transcreveria os códigos H por membro; o contrato (`transcritor_fds.py`) e o mapa resolver-side (`mapear_frases_h`) existem, mas o cliente real nunca os pediu. Consequência: o mapa H334/H317 → `is_sensibilizante` só dispara quando o RT digita os códigos à mão na revisão.
+- **Onde os códigos estão.** Em 24 FDS há código H no texto; em 9, na região de composição (seção 3) que vai para a IA; em 15, só fora dela (seção 2, perigos do produto inteiro). 12 FDS não têm código H legível no texto `[A MEDIR — imagem, FISPQ antiga ou PDF escaneado]`.
+- **Formato.** Varia por fabricante: "- H319: texto", "H303 – texto", "H315 Provoca…", listas "H226, H305, …", duas colunas fundidas na mesma linha, frase quebrada na linha seguinte.
+
+**Frase H e agravo à saúde.** No GHS (ABNT NBR 14725), H2xx são perigos físicos, **H3xx perigos à saúde** e H4xx perigos ao ambiente. As H3xx dizem o efeito que o produto pode causar em quem se expõe (irritação, sensibilização, toxicidade aguda, câncer, efeito em órgão-alvo): são, na FDS, a fonte do "agravo à saúde" que o PGR escreve na coluna de agravos.
+
+**Decisão.**
+
+**cl.1 — Duas coisas separadas.** (a) **Agravos à saúde do produto** — as H3xx declaradas em qualquer parte da FDS, para a médica e o RT lerem; (b) **`frases_h` por componente** — entrada do motor (D-ARQ-55: sensibilizante → materialidade). (a) não alimenta (b).
+
+**cl.2 — (a) é leitura determinística, sem IA.** O código H é token de forma fixa; o texto vai **como a FDS escreve** — nunca de tabela externa nem gerado pela IA. Um código por frase; entre as ocorrências, vale o texto que termina em ponto final e, depois, o mais longo. O texto é cortado no primeiro ponto final e no próximo código H da linha (o resto é a outra coluna do PDF). Frase quebrada no fim da linha fica cortada: juntar a linha seguinte trouxe texto da outra coluna no acervo (H334 "…de asma ou for fácil."), e texto errado é pior que texto cortado.
+
+**cl.3 — (a) é só exibição.** Aparece na tela da FDS, abaixo da composição: "Agravos à saúde (frases H do produto, como a FDS escreve)". FDS sem H3xx legível mostra o aviso de conferir a seção 2 no documento (D-ARQ-22) — nunca some calado. Não muda matriz, memorial, regra nem `frases_h`.
+
+**cl.4 — (b) fica para a fatia 2, medida.** Pedir `frases_h` no prompt muda matriz (sensibilizante abaixo de 5% passa a material, D-ARQ-34/55). Só entra com: medição antes/depois no app com a chave (a sessão não tem), lista dos GHEs e exames que mudam, e decisão do Diovanni.
+
+**Limites medidos da fatia 1 (D-ARQ-22).** Frase cortada na quebra de linha ("H317 — Pode provocar"); resíduo de coluna que o próprio PDF põe na mesma linha e termina em ponto ("H334 — …de asma ou for fácil.", pacote ALMOXARIFE/ENCANADOR/MONTADOR); FDS que escreve a frase sem ponto final. O código H é a referência; o texto é verbatim.
+
+**Fronteiras.**
+- **D-ARQ-55** intacta: `frases_h`, `mapear_frases_h` e o gate de forma não mudam. A lacuna "o cliente real não pede `frases_h`" fica nomeada aqui e vira a fatia 2.
+- **D-ARQ-42/47:** o recorte da composição (seção 3) e o contrato do transcritor não mudam; a leitura da fatia 1 é outra função, sobre todas as páginas.
+- **Motor de emissão intocado.**
+
+**Fatias.**
+1. `motor/extracao_fds.py::extrair_agravos_saude` (núcleo puro sobre o texto das páginas) + `extrair_agravos_saude_pdf`; tipo `FraseH`; exibição na tela da FDS com cache pelo hash do conteúdo.
+2. **Condicional:** `frases_h` por componente no prompt e em `_parsear_blocos`, medida no app (antes/depois, GHEs e exames que mudam), com decisão do Diovanni.
+3. **Opcional:** agravos dos produtos anexados no memorial, por GHE.
+
+**Critério de aceite da fatia 1.** Matriz inalterada contra a `main` nos PGRs determinísticos; suíte sem regressão; cada teste com a reversão que o mata; nas FDS do acervo, os agravos medidos acima (24 FDS, 145 frases, todas com texto).
+
+**Aplicação — fatias 1 e 3 (07/10/2026, branch `claude/cool-ramanujan-njnp7w`).**
+
+- **Fatia 3 antecipada (decisão do Diovanni na sessão):** "os agravos, para o nosso documento final, são mais importantes que as frases H". Escolhas dele: agravos no **relatório Riscos para o ASO e no memorial**, por GHE, a partir das **FDS vinculadas**; a matriz assinada (RQ.61) fica como está; a coluna AGRAVO do PGR fica para sessão própria — medido: o leitor por coordenadas usa "AGRAVO" só como limite de coluna e não guarda o texto.
+- **Implementado.** `FDS.agravos` (default vazio; o motor só lê `composicao`/`composicao_verbatim`, e o `dataclasses.replace` da composição preserva o campo); "Anexar" grava os agravos lidos da FDS no produto; `memorial_matriz.agravos_do_ghe` — uma linha por produto, o agravo em texto e o código H entre parênteses ("Aguarrás: Pode ser fatal se ingerido e penetrar nas vias respiratórias (H304); …"); FDS vinculada sem frase legível vira "conferir a seção 2" (D-ARQ-22). Na tela da FDS, a linha de cada componente passa a dizer "H do componente" — o campo da fatia 2, ainda vazio pela IA.
+- **Regressão pega pela suíte e corrigida.** A 1ª suíte completa da fatia 1 deu **25 falhas** (`test_web_matriz.py` 15, `test_sugestao_vinculo.py` 10): os testes de tela enviam bytes falsos de FDS com a composição dublada, e a leitura nova abria o PDF de verdade (`PdfminerException`, "No /Root object"). Na revisão eu tinha descartado esse caso por achar que a composição falharia antes — errado, porque a composição pode vir de cache ou de dublê. Corrigido em `extrair_agravos_cacheado`: PDF que o pdfplumber não abre sai sem frase, com o aviso de conferir, e não derruba a tela. Teste com a reversão nomeada.
+- **Verificação.** `test_agravos_fds.py`, 15 testes, varredura inversa 21/21 (11 da fatia 1, 1 do PDF ilegível, 9 da fatia 3). Matriz, suíte e mypy: ver HISTORICO desta sessão.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -5021,3 +5068,5 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cad13ec`). Pedido do Diovan
 | v246 | 06/10/2026 | Branch `claude/kind-bardeen-ajkpnr`, recriada sobre `main e24740c` (IMPLEMENTAÇÃO — desempenho, decisão do Diovanni): **nota de aplicação em `D-ARQ-80`** — limites do plano pago medidos (RPM 1.000, TPM 2M, RPD 10.000); lotes do Gemini das rotas GHE e grid em paralelo (`_mapear_lotes`, até 5 simultâneos, ordem preservada, `copy_context` para `medir_uso`). Cláusulas inalteradas. |
 | v247 | 06/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, sobre `main cad13ec` (ARQUITETURA + IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-91` adicionada** — sugestão de exames para o ASO por linha da matriz (OBRIGATÓRIO / NÃO OBRIGATÓRIO / CONFERIR), pelo critério normativo de obrigatoriedade (NR-07 7.5.19.1 "d", 7.5.12, 7.5.19.2, Anexos II, III e V; NR-09 9.6.1 e Anexo I) e pelo e-mail da Dra. Carolini; regras `R-ASO-01..06` no PROTOCOLO §13. Fatia 1: `motor/sugestao_aso.py` + campo aditivo `MatrizGHE.sugestao_aso`; emissão intocada. |
 | v248 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main 6d3075f` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-91`** — a unidade passa a ser o risco (NR-07 7.5.19.1 "c"), não o exame; regra geral pela leitura literal (acidente e ergonômico moderado+ constam); inexistência (cl.7); fatia 2 entregue (documento "Riscos para o ASO" + botão) com rodapé "Uso interno — confidencial" no memorial e no relatório. Matriz inalterada contra a `main` (61 GHEs). |
+| v249 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main e3a5369` (ARQUITETURA + IMPLEMENTAÇÃO, pedido do Diovanni): **`D-ARQ-92` adicionada** — frases H de saúde (H3xx) da FDS como agravos à saúde do produto, lidas de forma determinística e só exibidas; `frases_h` por componente (entrada do motor) fica para fatia medida com a chave da IA. Medido: o cliente real nunca pediu `frases_h` (lacuna da D-ARQ-55 P1). |
+| v250 | 07/10/2026 | Mesma branch (IMPLEMENTAÇÃO, decisão do Diovanni): **nota de aplicação em `D-ARQ-92`** — fatia 3 antecipada: agravos das FDS vinculadas no relatório Riscos para o ASO e no memorial, por GHE (texto + código H); matriz assinada intocada; coluna AGRAVO do PGR para sessão própria. Regressão de 25 testes de tela (PDF falso) pega pela suíte e corrigida. |

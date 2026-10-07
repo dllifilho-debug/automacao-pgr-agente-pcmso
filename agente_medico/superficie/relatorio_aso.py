@@ -16,7 +16,7 @@ from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 
-from agente_medico.motor.tipos import MatrizGHE, SugestaoASO, VereditoASO
+from agente_medico.motor.tipos import PGR, MatrizGHE, SugestaoASO, VereditoASO
 from agente_medico.superficie.documento_matriz import (
     _COR_DESTAQUE,
     CabecalhoDocumento,
@@ -25,10 +25,12 @@ from agente_medico.superficie.documento_matriz import (
     titulo_ghe,
 )
 from agente_medico.superficie.memorial_matriz import (
+    TITULO_AGRAVOS,
     _agente_exibicao,
     _nome_exame,
     _tabela,
     _termo_exibicao,
+    agravos_do_ghe,
     aplicar_rodape_confidencial,
     data_exibicao,
 )
@@ -70,6 +72,7 @@ class BlocoRiscos:
     linhas: tuple[LinhaRisco, ...]
     aptidoes: tuple[str, ...]
     inexistencia: bool
+    agravos: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -88,7 +91,10 @@ def _linha(s: SugestaoASO, exames_vocab: dict[str, Any]) -> LinhaRisco:
     )
 
 
-def montar_relatorio_aso(matrizes: Sequence[MatrizGHE], exames_vocab: dict[str, Any]) -> RelatorioRiscosASO:
+def montar_relatorio_aso(
+    matrizes: Sequence[MatrizGHE], exames_vocab: dict[str, Any], pgr: PGR | None = None
+) -> RelatorioRiscosASO:
+    ghes_pgr = {g.id: g for g in pgr.ghes} if pgr is not None else {}
     contagem: Counter[VereditoASO] = Counter()
     blocos: list[BlocoRiscos] = []
     for matriz in matrizes:
@@ -102,6 +108,7 @@ def montar_relatorio_aso(matrizes: Sequence[MatrizGHE], exames_vocab: dict[str, 
                 linhas=tuple(_linha(s, exames_vocab) for s in sugestoes),
                 aptidoes=matriz.sugestao_aso.aptidoes,
                 inexistencia=matriz.sugestao_aso.inexistencia,
+                agravos=agravos_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
             )
         )
     return RelatorioRiscosASO(
@@ -157,4 +164,8 @@ def renderizar_relatorio_aso_docx(
             documento.add_paragraph(TEXTO_INEXISTENCIA)
         for aptidao in bloco.aptidoes:
             documento.add_paragraph(aptidao, style="List Bullet")
+        if bloco.agravos:
+            documento.add_paragraph(TITULO_AGRAVOS)
+            for texto in bloco.agravos:
+                documento.add_paragraph(texto, style="List Bullet")
     documento.save(str(destino))
