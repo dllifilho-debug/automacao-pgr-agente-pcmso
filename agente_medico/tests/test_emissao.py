@@ -334,7 +334,9 @@ def test_protocolo_real_todo_motivo_tem_status_regra_valido() -> None:
         ),
     )
     proto = carregar(_PROTOCOLO_DIR)
-    assert stage_1_gates(pgr) == []
+    # PGR de 07/09/2026 sem inventário psicossocial: só o alerta não bloqueante da
+    # R-PSY-07 (NR-01 1.5.3.1.4, desde 07/10/2026); nenhum gate bloqueia.
+    assert [(p.regra_origem, p.bloqueante) for p in stage_1_gates(pgr)] == [("R-PSY-07", False)]
 
     ghe = pgr.ghes[0]
     ctx = GHEContext(pgr_ghe=ghe)

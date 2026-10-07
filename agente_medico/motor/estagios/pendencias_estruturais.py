@@ -1,10 +1,44 @@
 from __future__ import annotations
 
+import re
+import unicodedata
+
 from agente_medico.motor.predicados import riscos_com_contaminante_sem_fds
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import GHEContext, Pendencia
 
 TIPO_CONTAMINANTE_A_CONFIRMAR = "contaminante_a_confirmar"
+TIPO_MENOR_APRENDIZ_COM_RUIDO = "menor_aprendiz_com_ruido"
+
+# "menos aprendiz" é a grafia do próprio adendo Hetrin (pág. 8), não erro de leitura.
+_MENOR_APRENDIZ = re.compile(r"\bmeno[rs]\s+aprendiz\b")
+
+
+def _sem_acento(texto: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", texto) if not unicodedata.combining(c)).casefold()
+
+
+def _menor_aprendiz_com_ruido(ctx: GHEContext) -> None:
+    """R-AUD-05: o PGR declara ruído no GHE de um menor aprendiz. A audiometria segue
+    R-AUD-01 (o e-mail da Dra. Carolini pede audiometria com risco moderado ou acima);
+    o alerta leva à revisão médica a exposição de menor de 18 anos a ruído, que a
+    matriz das médicas do Hetrin 30/09/2026 tratou sem audiometria. Não bloqueia."""
+    cargos = [c for c in ctx.pgr_ghe.cargos if _MENOR_APRENDIZ.search(_sem_acento(c))]
+    if not cargos or not any(r.agente == "ruido" for r in ctx.riscos):
+        return
+    ctx.pendencias.append(
+        Pendencia(
+            tipo=TIPO_MENOR_APRENDIZ_COM_RUIDO,
+            destinatario="medico",
+            motivo=(
+                f"{', '.join(cargos)} em {ctx.pgr_ghe.id}: o PGR declara exposição a ruído para menor "
+                "aprendiz — conferir a exposição de menor de 18 anos e a audiometria"
+            ),
+            bloqueante=False,
+            regra_origem="R-AUD-05",
+            ghe_id=ctx.pgr_ghe.id,
+        )
+    )
 
 
 def _contaminantes_a_confirmar(ctx: GHEContext) -> None:
@@ -37,6 +71,7 @@ def _contaminantes_a_confirmar(ctx: GHEContext) -> None:
 
 def stage_3_pendencias_estruturais(ctx: GHEContext, proto: Protocolo) -> None:
     _contaminantes_a_confirmar(ctx)
+    _menor_aprendiz_com_ruido(ctx)
     for produto in ctx.pgr_ghe.produtos_quimicos:
         if produto.fds is None:
             ctx.pendencias.append(

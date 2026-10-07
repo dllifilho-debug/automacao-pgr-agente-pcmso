@@ -13,6 +13,18 @@ predicados_compostos:
       - altura
       - espaco_confinado
 
+  # R-PSY-06 (sucede R-PSY-04): altura só com inventário psicossocial no PGR;
+  # espaço confinado sem essa condição.
+  altura_com_inventario_psicossocial:
+    e:
+      - altura
+      - psicossocial
+
+  aptidao_psicossocial_com_inventario:
+    ou:
+      - altura_com_inventario_psicossocial
+      - espaco_confinado
+
   vibracao_qualquer:
     ou:
       - vibracao_corpo_inteiro
