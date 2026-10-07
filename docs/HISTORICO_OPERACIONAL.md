@@ -12262,3 +12262,31 @@ campo aditivo `MatrizGHE.sugestao_aso`, costura de uma linha em `executar`. Comm
 byte). Suíte completa, árvore parada: **1724 → 1743 passed, 6 skipped** (1014 s). mypy no alvo canônico: limpo, 57
 arquivos. Push pendente de autorização do Diovanni.
 
+## Sessão (mesma branch, recriada sobre `main 6d3075f`, pós-merge do PR #461) — 07/10/2026 — IMPLEMENTAÇÃO: emenda da D-ARQ-91 (risco, não exame) + fatia 2 + rodapé confidencial
+
+**Origem.** O Diovanni corrigiu a unidade decidida em 06/10: no ASO sai o risco, não o exame (NR-07 7.5.19.1 "c"; o
+e-mail diz o mesmo). Decidido na sessão: regra geral pela leitura literal — risco de qualquer grupo, inclusive acidente e
+ergonômico, classificado moderado ou acima consta, mesmo sem exame na matriz. Pedido junto: fatia 2 (documento) e o rodapé
+"Uso interno — confidencial" nos anexos das médicas (conversa sobre o risco de cópia do app a partir do memorial).
+
+**Entrega.** Emenda em `D-ARQ-91` (DECISOES v248); PROTOCOLO §13 reescrita por risco (v130): `R-ASO-01` DEPRECATED,
+`R-ASO-02..06` sobre o risco, `R-ASO-07` (inexistência) criada. `motor/sugestao_aso.py` por agente do GHE + termos do PGR
+não reconhecidos (CONFERIR); `superficie/relatorio_aso.py` (documento "Riscos para o ASO", por GHE com os cargos) e botão
+"Baixar riscos para o ASO" na tela; `aplicar_rodape_confidencial` no memorial e no relatório — a matriz assinada não leva.
+Smoke visual: a contagem de botões de download esperada sobe de 3 para 4 (`scripts/smoke_visual.py` e o caso de
+`tests/test_smoke_visual.py`) — mudança pedida pela entrega, não remoção de checagem.
+
+**Verificação.** Varredura inversa 24/24 (`test_sugestao_aso.py`, 21 testes) e 8/8 (`test_relatorio_aso.py`, 5 testes).
+Matriz inalterada contra a `main 6d3075f` nos 3 PGRs determinísticos (61 GHEs, byte a byte). Distribuição nesses 61 GHEs:
+147 CONSTA, 197 NÃO CONSTA, 237 CONFERIR (todos termos não reconhecidos), 0 inexistência, 37 aptidões. Smoke visual ok
+(desktop e mobile; 4 botões cabem). Suíte completa, árvore parada: **1743 → 1750 passed, 6 skipped** (1142 s; −19 testes por exame, +21 por risco, +5 da fatia 2). mypy no alvo canônico: limpo, **58 arquivos** (57 + `relatorio_aso.py`). `test_gerar_indice_darq.py` 6 passed.
+
+**Observação registrada, sem código (pedido do Diovanni: implementar depois) — frases H da FDS saem em branco.** Medido
+em 07/10/2026 nas 36 FDS em PDF de `fds_originais/`: 24 trazem códigos H no texto; 9 os trazem na região de composição
+(seção 3) que vai para a IA; 15 só fora dela (seção 2, perigos do produto inteiro). Duas causas: (1) o prompt de
+`adaptadores/transcritor_gemini.py` não pede `frases_h` — o formato de saída só tem `cas` e `nome` —, então o campo sai
+vazio até quando o H está na seção 3 (as 9 FDS); (2) o recorte manda só a seção 3, e o H do produto (seção 2) nunca chega.
+12 FDS não têm código H legível no texto `[A MEDIR — imagem, FISPQ antiga ou PDF escaneado]`. **Cuidado para a sessão que
+implementar:** `frases_h` não é só exibição — o motor já a lê (D-ARQ-55: bypass do corte de 5% para H350/H340/H360 e
+materialidade em `estagios/riscos.py`). Passar a preenchê-la muda matriz: precisa de D-ARQ própria, medição antes/depois e
+decisão do Diovanni. Texto dos agravos: pela tabela oficial de frases H (ABNT NBR 14725), não por texto gerado pela IA.
