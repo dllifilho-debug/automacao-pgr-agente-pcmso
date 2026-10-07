@@ -12357,3 +12357,35 @@ relatório do ASO só existia na conversa; o disco tinha apenas o resumo na `D-A
 `docs/referencia/EMAIL_CAROLINI_ASO.md`, com procedência (entrada no projeto em 06/10/2026; data de envio `[A MEDIR]`),
 onde cada critério virou decisão (`D-ARQ-91`, PROTOCOLO §13) e as notas de conferência normativa. Só docs; nenhum código,
 regra ou D-ARQ alterado.
+
+## Sessão `claude/fervent-shannon-1nq8hw` (sobre `main 7381098`, pós-merge do PR #465) — 07/10/2026 — ANÁLISE + IMPLEMENTAÇÃO: revisão de saída da Dra. Carolini (psicossocial; moderados do ASO) — emenda 2 de D-ARQ-91
+
+**Origem.** Duas observações da Dra. Carolini trazidas pelo Diovanni: (1) folha manuscrita sobre a avaliação psicossocial
+na matriz; (2) "no relatório do ASO os moderados não saíram". Pedido: classificar pela hierarquia de D-ARQ-22, medir o
+comportamento atual, propor e esperar decisão. A sessão abriu sobre `e97ad13`; o e-mail na íntegra chegou pelo PR #465 e a
+branch foi avançada por fast-forward até `7381098`.
+
+**Item 1 — sem código.** Folha transcrita com 2 leituras incertas e 4 lacunas; comportamento atual (`R-PSY-04`/`R-PSY-05`)
+comparado; medido que o inventário psicossocial tem fator MODERADO nos 4 PGRs abertos (Fascino, Aurora, Vila Brasil, Porto
+Araras), então um gatilho por nível máximo do PGR não mudaria saída. Perguntas registradas em PENDENCIAS
+(DT-(sessão `claude/fervent-shannon-1nq8hw`)-01).
+
+**Item 2 — revisado e implementado (decisão do Diovanni).** A 1ª proposta (termo não reconhecido MODERADO consta, o resto
+conferir) foi revista a pedido do Diovanni ("é a melhor solução?"): a medição mostrou que o parser já lia a coluna GRUPO e a
+descartava, e que a citação da NR-07 7.5.12 "b" para o corte moderado era indevida. Entrega: `RiscoVerbatim.grupo` →
+`RiscoPGR.tipo` (parser por coordenadas; hidratação nos 3 estados); `_criterio_termo` em `sugestao_aso.py`; motivo da
+classificação citando o e-mail e a NR-07 7.5.19.1 "c". Emenda 2 de `D-ARQ-91` (DECISOES v252), `R-ASO-06` (PROTOCOLO v131),
+`INDICE_DARQ.md` regenerado.
+
+**Medido.** Matriz idêntica antes × depois nos 3 PGRs determinísticos (61 GHEs). Relatório: termos não reconhecidos 237
+CONFERIR → 44 CONSTA, 89 NÃO CONSTA, 104 CONFERIR; reconhecidos inalterados; inexistência sugerida 0 → 14 GHEs
+administrativos. Primeira comparação da matriz deu "diferente": artefato da foto (conjuntos serializados por `str`, ordem
+de hash) — refeita com os conjuntos ordenados, idêntica.
+
+**Verificação.** Varredura inversa 15/15 (11 reversões em `sugestao_aso.py`, 1 no parser, 3 na hidratação). Suíte
+completa, árvore parada: base **1772 passed, 6 skipped** (1208 s) → **1785 passed, 6 skipped** (1208 s). mypy no alvo
+canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: nenhuma mudança de tela nem de
+versão do Streamlit.
+
+**Sem decisão, comportamento anterior mantido:** fatores psicossociais MODERADO no relatório do ASO; "Ausência de agente
+nocivo"; item 1 inteiro.
