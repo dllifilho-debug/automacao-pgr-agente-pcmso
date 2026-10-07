@@ -12324,3 +12324,28 @@ idêntica à da `main e3a5369` nos 3 PGRs determinísticos (61 GHEs). Smoke visu
 **1750 → 1765 passed, 6 skipped** (995 s). mypy no alvo canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6
 passed. Limites declarados: frase cortada na quebra de linha; resíduo de coluna que o PDF põe na mesma linha ("H334 —
 …de asma ou for fácil."); FDS vinculada numa sessão aberta antes desta versão chega sem agravos até ser vinculada de novo.
+
+## Sessão (mesma branch, recriada sobre `main cc17dc2`, pós-merge do PR #463) — 07/10/2026 — ARQUITETURA + IMPLEMENTAÇÃO: coluna AGRAVO do PGR (D-ARQ-93)
+
+**Origem.** Pedido do Diovanni, na ordem recomendada na sessão: revisão das médicas em paralelo; próxima sessão de
+código = coluna AGRAVO do PGR pela rota por coordenadas; rotas da IA numa sessão "com chave".
+
+**Medido.** O leitor da família Consciente/Fascino usava "AGRAVO" só como limite direito da coluna FONTE. Nos 3 PGRs
+determinísticos (Fascino 237 riscos, Vila Brasil 178, Porto Araras 172): agravo em todos os 587 riscos (49, 30 e 37
+textos distintos); o texto continua muito além do recorte de agente/fonte (533, 420 e 324 linhas só com agravo).
+Recorte pela linha inteira da tabela sem resíduo de cabeçalho de página, legenda ou rodapé.
+
+**Entrega.** `D-ARQ-93` (DECISOES v251). `RiscoVerbatim.agravo` → `RiscoPGR.agravo` (verbatim; o motor não lê);
+`parser_familia_consciente._agravo_da_linha` (faixa AGRAVO até a avaliação S·P·NÍVEL, da linha da categoria até a
+próxima linha que começa na coluna GRUPO; sem avaliação localizada, vazio) sem tocar o recorte de agente/fonte. Relatório
+Riscos para o ASO: coluna "Agravo à saúde (PGR)" por risco (casa pelo agente ou, no termo não reconhecido, pelo termo).
+Memorial: "Agravos à saúde declarados no PGR para os riscos deste GHE", ao lado dos agravos das FDS. No Fascino, as 237
+linhas do relatório saem com agravo.
+
+**Revisão que mudou o código.** A varredura inversa achou uma condição sem teste que a distinguisse: a parada no token
+de categoria era redundante, porque toda categoria começa na coluna GRUPO. Removida; fica só a parada pela coluna GRUPO.
+
+**Verificação.** `test_agravo_pgr.py`, 7 testes, varredura inversa 12/12. Matriz completa idêntica à da `main cc17dc2`
+nos 3 PGRs determinísticos (61 GHEs). Smoke visual ok. Suíte completa, árvore parada: **1765 → 1772 passed, 6 skipped** (1064 s). mypy no alvo canônico: limpo, 58 arquivos.
+`test_gerar_indice_darq.py` 6 passed. Limite declarado: PGR das rotas da IA (GHE e grid) sai com agravo "—" até a
+fatia 2, na sessão com a chave.
