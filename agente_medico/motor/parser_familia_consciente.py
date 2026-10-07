@@ -326,6 +326,36 @@ def _banda(
     return None
 
 
+def _agravo_da_linha(
+    linhas: Sequence[_Linha],
+    inicio: int,
+    agravo_x: float,
+    avaliacao: Optional[tuple[float, float]],
+    grupo_x: float,
+) -> str:
+    """D-ARQ-93: texto da coluna AGRAVO na linha inteira da tabela — da linha da categoria
+    até a próxima linha que começa na coluna GRUPO (próxima categoria ou legenda). O agravo
+    continua muito além do recorte de agente/fonte (medido: 533 linhas só de agravo no
+    Fascino), por isso não usa aquele recorte, e aquele recorte não muda. Limite direito
+    = início da avaliação S·P·NÍVEL; sem ela localizada, "" (sem limite medido não se chuta)."""
+    if avaliacao is None:
+        return ""
+    palavras: list[str] = []
+    for k in range(inicio, len(linhas)):
+        linha = linhas[k]
+        primeira = linha.palavras[0] if linha.palavras else None
+        # A coluna GRUPO só carrega categoria ou o início da legenda: linha que começa nela
+        # é o próximo risco ou o fim da tabela.
+        if k != inicio and primeira is not None and abs(primeira.x0 - grupo_x) <= _TOLERANCIA_COLUNA_PT:
+            break
+        palavras.extend(
+            p.text
+            for p in linha.palavras
+            if agravo_x - _TOLERANCIA_COLUNA_PT <= p.x0 < avaliacao[0] - _TOLERANCIA_COLUNA_PT
+        )
+    return " ".join(palavras).strip()
+
+
 def _extrair_riscos(
     linhas: Sequence[_Linha],
     agente_x: float,
@@ -406,6 +436,7 @@ def _extrair_riscos(
                 quantificacao="",
                 fonte_geradora=" ".join(fonte_palavras).strip(),
                 avaliacao_qualitativa=" ".join(avaliacao_palavras).strip(),
+                agravo=_agravo_da_linha(linhas, i, agravo_x, avaliacao, grupo_x) if grupo_x is not None else "",
             )
         )
         i = j

@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v250 · 92 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v251 · 93 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -100,3 +100,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v250 · 92 decisões
 | D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4541 | 11320 |
 | D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4702 | 10208 |
 | D-ARQ-92 | Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS") | 4772 | 6543 |
+| D-ARQ-93 | Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave) | 4819 | 3021 |
