@@ -3,13 +3,24 @@ teste nomeia a reversão de código que o deixa vermelho."""
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
+from typing import Any
 
 import pytest
+from docx import Document
 from streamlit.testing.v1 import AppTest
 
 from agente_medico.motor.extracao_fds import extrair_agravos_saude, extrair_agravos_saude_pdf
-from agente_medico.motor.tipos import FraseH
+from agente_medico.motor.tipos import FDS, GHEPGR, PGR, FraseH, MatrizGHE, ProdutoQuimico
+from agente_medico.superficie.documento_matriz import CabecalhoDocumento
+from agente_medico.superficie.memorial_matriz import (
+    TITULO_AGRAVOS,
+    agravos_do_ghe,
+    montar_memorial,
+    renderizar_memorial_docx,
+)
+from agente_medico.superficie.relatorio_aso import montar_relatorio_aso, renderizar_relatorio_aso_docx
 from agente_medico.superficie import web_matriz
 from agente_medico.superficie.web_matriz import (
     AVISO_SEM_AGRAVOS,
@@ -112,6 +123,16 @@ def test_cache_pelo_conteudo_nao_rele_o_pdf(monkeypatch: pytest.MonkeyPatch, tmp
     assert len(chamadas) == 1
 
 
+def test_pdf_ilegivel_nao_derruba_a_tela(tmp_path: Path) -> None:
+    # Reversão: tirar o `try/except PdfminerException` de `extrair_agravos_cacheado` —
+    # o PdfminerException sobe e a tela da FDS cai (os testes de tela com FDS falsa caíram
+    # assim, 25 falhas medidas em 07/10/2026).
+    caminho = tmp_path / "f.pdf"
+    caminho.write_bytes(b"conteudo qualquer")
+    cache: dict[str, tuple[FraseH, ...]] = {}
+    assert extrair_agravos_cacheado(caminho, b"conteudo qualquer", cache) == ()
+
+
 def test_tela_da_fds_mostra_os_agravos(monkeypatch: pytest.MonkeyPatch) -> None:
     # Reversão: remover o bloco "Agravos à saúde" do expander da FDS em pagina_matriz —
     # as frases não aparecem na tela.
@@ -124,3 +145,85 @@ def test_tela_da_fds_mostra_os_agravos(monkeypatch: pytest.MonkeyPatch) -> None:
     texto = "\n".join(el.value for el in at.markdown)
     assert "Agravos à saúde" in texto
     assert "H315 — Provoca irritação à pele." in texto
+
+
+_AGRAVOS_AGUARRAS = (
+    FraseH("H304", "Pode ser fatal se ingerido e penetrar nas vias respiratórias."),
+    FraseH("H351", ""),
+)
+
+
+def _ghe(*produtos: ProdutoQuimico) -> GHEPGR:
+    return GHEPGR(
+        id="GHE-01", nome="PINTURA", cargos=("Pintor",), riscos=(), epis=(),
+        produtos_quimicos=produtos, psicossocial=False,
+    )
+
+
+def test_agravo_em_texto_com_codigo_entre_parenteses() -> None:
+    # Reversões: inverter para "código — texto" (o agravo deixa de vir primeiro);
+    # tirar o ramo de FDS sem frase (o produto vinculado some calado, D-ARQ-22);
+    # incluir produto sem FDS (o produto declarado só no PGR viraria linha vazia).
+    ghe = _ghe(
+        ProdutoQuimico("Aguarrás", FDS(composicao=(), agravos=_AGRAVOS_AGUARRAS)),
+        ProdutoQuimico("Cimento", FDS(composicao=())),
+        ProdutoQuimico("Óleo do PGR", None),
+    )
+    assert agravos_do_ghe(ghe) == (
+        "Aguarrás: Pode ser fatal se ingerido e penetrar nas vias respiratórias (H304); "
+        "H351 (texto não legível na FDS).",
+        "Cimento: a FDS não traz frase H de saúde legível — conferir a seção 2.",
+    )
+
+
+def test_agravos_saem_no_memorial_e_no_relatorio_do_aso(tmp_path: Path) -> None:
+    # Reversões: não passar `agravos=` em montar_memorial ou em montar_relatorio_aso;
+    # remover o bloco `if bloco.agravos` de um dos dois renderizadores.
+    pgr = PGR(validade=date(2030, 1, 1), assinatura_engenheiro=True, ghes=(
+        _ghe(ProdutoQuimico("Aguarrás", FDS(composicao=(), agravos=_AGRAVOS_AGUARRAS))),
+    ))
+    matriz = MatrizGHE(ghe_id="GHE-01", nome_ghe="PINTURA", cargos=("Pintor",))
+    cab = CabecalhoDocumento("CMO", "AURORA", "Adendo", "2026-10-07", "Dra. X", "CRM")
+    memorial = tmp_path / "memorial.docx"
+    renderizar_memorial_docx(montar_memorial([matriz], {}, {}, pgr=pgr), cab, memorial)
+    aso = tmp_path / "riscos_aso.docx"
+    renderizar_relatorio_aso_docx(montar_relatorio_aso([matriz], {}, pgr=pgr), cab, aso)
+
+    for caminho in (memorial, aso):
+        paragrafos = [p.text for p in Document(str(caminho)).paragraphs]
+        assert TITULO_AGRAVOS in paragrafos
+        assert any(p.startswith("Aguarrás: Pode ser fatal se ingerido") for p in paragrafos)
+
+
+def test_anexar_grava_os_agravos_no_produto_sem_mudar_a_matriz(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversões: não passar `agravos_fds` nos `args` do botão Anexar (ou não fazer o
+    # `dataclasses.replace(..., agravos=...)` em `_anexar`) — o produto chega sem agravos.
+    # A matriz sai igual à do mesmo anexo sem agravos: o motor não lê o campo.
+    from agente_medico.tests.test_web_matriz import (
+        _FDS_TOLUENO,
+        _ghe_pgr,
+        _pgr_sintetico,
+        _submeter_formulario,
+    )
+
+    pgr_sintetico = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)))
+    monkeypatch.setattr(web_matriz, "preparar_pgr_hidratado", lambda *a, **k: (pgr_sintetico, ()))
+    monkeypatch.setattr(web_matriz, "preparar_composicao", lambda *a, **k: ((_FDS_TOLUENO,), ()))
+
+    def _anexar_com(agravos: tuple[FraseH, ...]) -> tuple[Any, list[MatrizGHE]]:
+        monkeypatch.setattr(web_matriz, "extrair_agravos_saude_pdf", lambda caminho: agravos)
+        at = AppTest.from_function(pagina_matriz)
+        at.run()
+        _submeter_formulario(at)
+        at.file_uploader[1].set_value([("fds.pdf", b"conteudo qualquer", "application/pdf")]).run()
+        at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
+        at.button(key="anexar_fds_fds.pdf").click().run()
+        assert not at.exception
+        cache = at.session_state["web_matriz_cache"]
+        return cache.pgr_hidratado.ghes[0].produtos_quimicos[0], list(cache.matrizes)
+
+    produto, matrizes = _anexar_com(_AGRAVOS_AGUARRAS)
+    _, matrizes_sem = _anexar_com(())
+    assert produto.fds.agravos == _AGRAVOS_AGUARRAS
+    assert matrizes == matrizes_sem
+

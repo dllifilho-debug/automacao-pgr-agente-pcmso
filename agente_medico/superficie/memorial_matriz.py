@@ -101,6 +101,7 @@ class BlocoMemorial:
     nao_pedidos: tuple[str, ...]
     nao_reconhecidos: tuple[str, ...] = ()
     a_confirmar: tuple[str, ...] = ()
+    agravos: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -286,6 +287,25 @@ def contaminantes_a_confirmar(matriz: MatrizGHE) -> tuple[str, ...]:
     )
 
 
+def agravos_do_ghe(ghe: GHEPGR) -> tuple[str, ...]:
+    """D-ARQ-92 fatia 3: agravos à saúde das FDS vinculadas ao GHE, uma linha por produto —
+    o agravo em texto, como a FDS escreve, e o código H entre parênteses. FDS vinculada sem
+    frase H de saúde legível também aparece, para conferir (D-ARQ-22)."""
+    linhas: list[str] = []
+    for produto in ghe.produtos_quimicos:
+        if produto.fds is None:
+            continue
+        if not produto.fds.agravos:
+            linhas.append(f"{produto.nome}: a FDS não traz frase H de saúde legível — conferir a seção 2.")
+            continue
+        partes = (
+            f"{f.texto.rstrip('.')} ({f.codigo})" if f.texto else f"{f.codigo} (texto não legível na FDS)"
+            for f in produto.fds.agravos
+        )
+        linhas.append(f"{produto.nome}: {'; '.join(partes)}.")
+    return tuple(dict.fromkeys(_sanitizar(linha) for linha in linhas))
+
+
 def riscos_nao_reconhecidos(ghe: GHEPGR, pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
     """Riscos que o PGR declara no GHE e que não viraram agente: nenhum exame sai
     deles, e sem esta lista a lacuna não aparece no anexo que a médica revisa
@@ -370,6 +390,7 @@ def montar_memorial(
                     else ()
                 ),
                 a_confirmar=contaminantes_a_confirmar(matriz),
+                agravos=agravos_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
             )
         )
     return Memorial(
@@ -397,6 +418,7 @@ def linhas_da_tabela(bloco: BlocoMemorial) -> list[tuple[str, str, str, str]]:
 
 
 RODAPE_CONFIDENCIAL = "Uso interno — confidencial"
+TITULO_AGRAVOS = "Agravos à saúde declarados nas FDS dos produtos deste GHE:"
 
 
 def aplicar_rodape_confidencial(documento: Any) -> None:
@@ -510,6 +532,10 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         if bloco.a_confirmar:
             documento.add_paragraph("FDS a pedir ao elaborador do PGR (contaminante a confirmar):")
             for texto in bloco.a_confirmar:
+                documento.add_paragraph(texto, style="List Bullet")
+        if bloco.agravos:
+            documento.add_paragraph(TITULO_AGRAVOS)
+            for texto in bloco.agravos:
                 documento.add_paragraph(texto, style="List Bullet")
 
     documento.add_heading("3. Regras usadas nesta matriz — norma e origem de cada conduta", level=1)
