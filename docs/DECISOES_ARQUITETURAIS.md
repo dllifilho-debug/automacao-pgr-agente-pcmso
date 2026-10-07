@@ -3268,6 +3268,27 @@ arquivos), "Carboxihemoglobina" (17 contra 7), "RX de Coluna Lombo-Sacra". Efeit
 728; pares fora de ordem 11,7% → 7,4%. Commit `9b0c1ad`. Ordem não é conduta (cabeçalho do `exames.yaml`); nenhum exame,
 periodicidade ou momento muda. Cláusula de ordem cravada como dado mantida — só o dado mudou.
 
+**Emenda (07/10/2026, branch `claude/fervent-shannon-1nq8hw` — leiaute do Word igual ao das matrizes das médicas, decisão do
+Diovanni).** Pedido: "cor, fonte e disposição, é para sair igual, menos o nome do Seconci — elas podem colocar qualquer
+empresa lá"; referência: as 4 matrizes mais novas do acervo (Vila Brasil 24/09, T65 24/09, Engeseg 22/09 e Varandas
+16/09/2026, esta validada pela Dra. Carolini), convertidas por LibreOffice e medidas no XML. As 4 têm o mesmo leiaute:
+- **Cabeçalho de página** (toda página): faixa "SISTEMA DE GESTÃO DA QUALIDADE - NBR ISO 9001:2015 / RQ – REGISTRO DA
+  QUALIDADE" (Arial 11, 1ª linha em negrito) com o logo ao lado; quadro com "MATRIZ FUNÇÃO – EXAMES PCMSO" (Arial 16,
+  negrito e itálico), Identificação RQ.61, Página N / M, Revisão 20/10/2024, Versão 06 (Arial 9).
+- **Identificação**: Empresa | Obra Nova / Atualização / Adendo / Funções Iniciais com (X); Obra | Data; Médico(a)
+  Coordenador(a) do PCMSO | nome e CRM.
+- **GHEs**: tabela contínua (as quebras de tabela do `.doc` são de página: 7 a 13 tabelas para 15 a 26 GHEs); faixa do
+  GHE mesclada, fundo azul `#83CAEB`, "GHE 01 - NOME" em negrito; FUNÇÃO | EXAMES SOLICITADOS em negrito, sem fundo;
+  Calibri 11, preto, bordas simples. Rodapé em negrito. A4, margens 2 / 2 / 1,35 / 1,2 cm.
+- **Fora, por decisão do Diovanni:** o logo (célula vazia, sem moldura) e o texto em vermelho das matrizes, que é
+  correção das médicas (exclusões riscadas, "Adendo (X)" e data marcados na revisão), não formatação.
+
+Aplicação: `renderizar_docx` reescrito; o HTML da tela, o memorial e o relatório do ASO mantêm a paleta anterior. O tipo
+digitado marca o (X) da opção correspondente (sem diferenciar acento e maiúscula); texto fora das 4 opções sai como
+"Outro: …" (D-ARQ-22). Conteúdo inalterado — medido: o extrator do `comparar_matriz_gabarito` lê o Word antigo e o novo
+com resultado idêntico nos 3 PGRs determinísticos (41, 86 e 52 cargos). Testes de forma do estilo verde substituídos
+pelos do leiaute novo, cada um com a reversão nomeada; varredura inversa 20/20.
+
 ## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003.EQ). Não cria nem altera
@@ -4767,6 +4788,20 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cad13ec`). Pedido do Diovan
 - **Ponto para a revisão de saída:** poeira de madeira e dióxido de titânio BAIXO saem CONSTA por `R-ASO-04` (cancerígeno sem avaliação ambiental). O vocabulário marca `is_carcinogeno_iarc` sem distinguir o grupo IARC (madeira é grupo 1; TiO₂, 2B) — a médica decide se 2B conta como "cancerígeno informado no PGR".
 - **Verificação.** `test_sugestao_aso.py` reescrito (21 testes, varredura inversa 24/24) e `test_relatorio_aso.py` novo (5 testes, varredura inversa 8/8). Suíte completa e mypy: ver HISTORICO desta sessão.
 
+
+**Emenda 2 (07/10/2026, branch `claude/fervent-shannon-1nq8hw` sobre `main 7381098`) — o termo não reconhecido decide pela classificação e pelo grupo do PGR.** Origem: revisão de saída da Dra. Carolini ("no relatório do ASO os moderados não saíram"), conferida contra o e-mail na íntegra (`docs/referencia/EMAIL_CAROLINI_ASO.md`). Decisão do Diovanni na sessão (item 2 revisado).
+
+- **Causa medida.** O ramo do termo do PGR que o app não reconhece punha CONFERIR fixo, sem ler a classificação: 44 riscos MODERADO nos 3 PGRs determinísticos (Fascino 10, Vila Brasil 8, Porto Araras 26 — "Máquinas e equipamentos", "Arranjo físico inadequado (perfuração)", "Piso irregular", "Violência física", choque elétrico, trabalho a quente, microrganismos, alquenil amina) saíam "Conferir", contra o 1º parágrafo do e-mail ("migraremos somente aqueles classificados como iguais ou superiores a moderados"). Os 121 moderados com agente reconhecido já saíam CONSTA.
+- **Dado que faltava, já lido e descartado.** Toda linha de risco do PGR começa pela coluna GRUPO (FISICO/QUIMICO/ERGONOMICO/ACIDENTE/BIOLOGICO); o parser por coordenadas usava o token só para achar o início da linha. Passa a guardá-lo, verbatim: `RiscoVerbatim.grupo` → `RiscoPGR.tipo` (campo existente desde 003.BQ, `""` por convenção e sem consumidor no motor). Rotas da IA: `""`.
+- **Regra do termo não reconhecido (R-ASO-06).** Moderado ou acima → CONSTA, com o nível no motivo. ACIDENTE/ERGONÔMICO abaixo de moderado → NÃO CONSTA: nenhuma exceção do e-mail (ruído, vibração, químicos, poeiras, cancerígenos, agentes sem LT da NR-15 Anexos 13/13-A/14) alcança esses grupos. QUÍMICO/FÍSICO/BIOLÓGICO abaixo de moderado → CONFERIR (a exceção depende do agente). Sem classificação ou sem grupo → CONFERIR. Guarda: termo ACIDENTE que cite altura ou espaço confinado sai CONFERIR por `R-ASO-03` (a aptidão consta sempre), nunca NÃO CONSTA — nenhum caso nos 3 PGRs, guarda por D-ARQ-22. Várias linhas do mesmo termo contam juntas (cl.2).
+- **Fonte corrigida.** O corte "moderado ou acima" é nível 2 de D-ARQ-22 (o e-mail), sobre a NR-07 item 7.5.19.1 "c", que não fixa nível. O motivo da classificação citava a NR-07 item 7.5.12 "b", que trata dos exames laboratoriais: passa a citar o e-mail e o 7.5.19.1 "c". O 7.5.12 "b" fica no critério de medição acima do nível de ação.
+- **Fica como estava (sem decisão).** "Ausência de agente nocivo" (8 linhas sem nível, Porto Araras) segue CONFERIR. Fatores psicossociais MODERADO do inventário do PGR não entram no relatório (seção fora das tabelas por GHE) — decisão aberta, registrada em PENDENCIAS. "Poeira respirável" não reconhecida segue CONFERIR (lacuna de vocabulário, DT-003EB-01 classe 2).
+
+**Aplicação da emenda 2 (07/10/2026).**
+- **Matriz inalterada — medido.** Antes × depois nos 3 PGRs determinísticos (61 GHEs): `asdict` de cada `MatrizGHE` sem `sugestao_aso`, idêntico (conjuntos de momentos comparados ordenados).
+- **Relatório, medido nesses 61 GHEs:** termos não reconhecidos 237 CONFERIR → 44 CONSTA, 89 NÃO CONSTA, 104 CONFERIR; agentes reconhecidos inalterados (147 CONSTA, 197 NÃO CONSTA). GHEs com inexistência sugerida: 0 → 14 (GHE-06 Administração do Fascino e 13 GHEs administrativos do Vila Brasil, todos os riscos BAIXO). Ressalva: se os fatores psicossociais MODERADO passarem a constar, esses GHEs perdem a inexistência.
+- **Verificação.** 9 testes novos em `test_sugestao_aso.py` (12 casos com a parametrização) e 1 em `test_hidratacao.py`; varredura inversa 15/15. Suíte e mypy: ver HISTORICO desta sessão.
+
 ---
 
 ## D-ARQ-92 — Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida
@@ -5100,3 +5135,5 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cc17dc2`). Antecedente: D-A
 | v249 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main e3a5369` (ARQUITETURA + IMPLEMENTAÇÃO, pedido do Diovanni): **`D-ARQ-92` adicionada** — frases H de saúde (H3xx) da FDS como agravos à saúde do produto, lidas de forma determinística e só exibidas; `frases_h` por componente (entrada do motor) fica para fatia medida com a chave da IA. Medido: o cliente real nunca pediu `frases_h` (lacuna da D-ARQ-55 P1). |
 | v250 | 07/10/2026 | Mesma branch (IMPLEMENTAÇÃO, decisão do Diovanni): **nota de aplicação em `D-ARQ-92`** — fatia 3 antecipada: agravos das FDS vinculadas no relatório Riscos para o ASO e no memorial, por GHE (texto + código H); matriz assinada intocada; coluna AGRAVO do PGR para sessão própria. Regressão de 25 testes de tela (PDF falso) pega pela suíte e corrigida. |
 | v251 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main cc17dc2` (ARQUITETURA + IMPLEMENTAÇÃO, pedido do Diovanni): **`D-ARQ-93` adicionada** — agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela (rota por coordenadas); sai no relatório do ASO e no memorial, matriz intocada; rota da IA na sessão com a chave. |
+| v252 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, sobre `main 7381098` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-91`** — termo do PGR não reconhecido decide pela classificação e pela coluna GRUPO (moderado+ consta; acidente/ergonômico abaixo não consta; químico/físico/biológico baixo e sem grupo conferem); grupo do PGR guardado em `RiscoPGR.tipo`; fonte do corte moderado corrigida para o e-mail sobre a NR-07 7.5.19.1 "c". Matriz inalterada. |
+| v253 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-73`** — o Word da matriz sai no leiaute das matrizes RQ.61 das médicas (4 de setembro/2026): cabeçalho de página do formulário sem o logo, tabela de identificação com o (X) do tipo, GHEs numa tabela contínua com faixa azul `#83CAEB`, Calibri 11. Texto vermelho das médicas fora (é correção). Conteúdo inalterado. |

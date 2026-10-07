@@ -421,3 +421,21 @@ def test_causa_nao_resolucao_pareia_com_tipo_da_pendencia_no_corpus_real(
     for risco in ghe_pgr.riscos:
         if risco.agente is not None:
             assert risco.causa_nao_resolucao is None
+
+
+def test_grupo_do_pgr_vira_tipo_nos_tres_estados(indice_real: IndiceTermos) -> None:
+    # D-ARQ-91 emenda 2. Reversões: voltar `tipo=""` em qualquer dos três RiscoPGR de
+    # hidratar_ghe (EXATA, FUZZY, NAO_RESOLVIDO) — o grupo daquele risco some.
+    ghe = _ghe_verbatim(
+        riscos=(
+            RiscoVerbatim(agente="Ruído", quantificacao="", fonte_geradora="", grupo="FISICO"),
+            RiscoVerbatim(agente="Microrganismo", quantificacao="", fonte_geradora="", grupo="BIOLOGICO"),
+            RiscoVerbatim(agente="Piso irregular ou em desnível", quantificacao="", fonte_geradora="", grupo="ACIDENTE"),
+        )
+    )
+    ghe_pgr, pendencias = hidratar_ghe(ghe, indice_real, posicao=1)
+
+    assert [p.tipo for p in pendencias][:1] == ["resolucao_fuzzy"]
+    assert [(r.agente is None, r.tipo) for r in ghe_pgr.riscos] == [
+        (False, "FISICO"), (False, "BIOLOGICO"), (True, "ACIDENTE"),
+    ]

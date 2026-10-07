@@ -32,6 +32,9 @@ class Quantificacao:
 
 @dataclass(frozen=True)
 class RiscoPGR:
+    # Grupo do risco no PGR (coluna GRUPO, verbatim: "ACIDENTE", "QUIMICO"...); ""
+    # quando a rota não o lê. O motor não lê; consumidor: sugestão do ASO (D-ARQ-91
+    # emenda 2), para o termo não reconhecido.
     tipo: str
     # D-ARQ-51: None = termo não resolvido a slug pela hidratação (D-ARQ-50 P2 / D-ARQ-14).
     # Espelha Componente.agente: Optional[str]. Risco NUNCA descartado; None vira revisão, não slug inventado (D-ARQ-22).
@@ -144,6 +147,9 @@ class RiscoVerbatim:
     avaliacao_qualitativa_aiha: bool = False
     # D-ARQ-93: coluna AGRAVO da linha do risco, verbatim; "" quando a rota não a lê.
     agravo: str = ""
+    # D-ARQ-91 emenda 2: coluna GRUPO da linha do risco ("ACIDENTE", "QUIMICO"...),
+    # verbatim; "" quando a rota não a lê. Vira RiscoPGR.tipo.
+    grupo: str = ""
 
 
 @dataclass(frozen=True)

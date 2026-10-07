@@ -4077,3 +4077,50 @@ instrumento de comparação).
 **Nota (branch `claude/kind-bardeen-ajkpnr`, sobre `main f1e8e43`, 06/10/2026) — 3º e2e no app: item 4a confirmado; solventes fechados.** Com o PR #457 em produção e as FDS dos adesivos anexadas a GHE-02, GHE-08 e GHE-12, a comparação deu **230 de 241 células reproduzidas (95,4%)**. O azulejista sai com RX 12M por `R-RX-01-qual`, e o item 1 (solventes) fecha nos três cargos. Sobram 11 células de subemissão (itens 2 e 3) e 2 de periodicidade (item 4b). Evidência em `docs/referencia/MEDICAO_E2E_HETRIN_REV06.md`.
 
 **Status:** ABERTA — itens 2, 3 e 4b.
+
+### DT-(sessão `claude/fervent-shannon-1nq8hw`)-01 — Revisão de saída da Dra. Carolini, 07/10/2026: folha do psicossocial e moderados do ASO `[ABERTA — item 2 IMPLEMENTADO (emenda 2 de D-ARQ-91); item 1 e dois pontos do item 2 aguardando decisão do Diovanni]`
+
+**Origem.** Duas observações da Dra. Carolini sobre a saída, trazidas pelo Diovanni: (1) folha manuscrita sobre a avaliação psicossocial na matriz (foto enviada na sessão, não guardada no acervo); (2) "no relatório do ASO os moderados não saíram", conferida contra `docs/referencia/EMAIL_CAROLINI_ASO.md`.
+
+**Item 1 — transcrição da folha (leitura da sessão, sem suposição).**
+- "Risco Psicossocial → Moderado = Avaliação Médica de Saúde Mental", com seta para baixo e um "≥" sublinhado sob "Moderado".
+- "Risco Psicossocial → Baixo, alto, médio, substancial, elevado, superior ⊕ trabalho em altura = Avaliação Médica de Saúde Mental + Av. Psicossocial".
+- "Espaço Confinado = Avaliação Psicossocial."
+- Leitura incerta: o "≥" (lido como "moderado ou acima"); a palavra lida como "superior".
+
+**Hoje.** `R-PSY-04` (altura ou espaço confinado → Av. Psicossocial, com ou sem inventário, NR-35 35.4.4 / NR-33 33.5.19.1) e `R-PSY-05` (PGR com inventário psicossocial → Saúde Mental para todo GHE, sem nível). Espaço confinado e a Av. Psicossocial na altura já batem com a folha.
+
+**Medido (07/10/2026).** O inventário traz nível por fator, numa tabela só, sem diferenciar GHE: Fascino, Aurora, Vila Brasil e Porto Araras têm ao menos um fator MODERADO (Porto Araras com outra escala que a COPSOQ). Um gatilho "nível ≥ moderado" pelo maior fator do PGR não mudaria a saída em nenhum desses 4.
+
+**Para o Diovanni decidir (as que mudam saída primeiro):** (b) altura num PGR sem inventário (caso Hetrin) leva Saúde Mental?; (c) espaço confinado leva Saúde Mental?; (a) inventário só BAIXO e sem altura: nenhum exame?; (d) o nível é o maior fator do inventário, para o PGR inteiro? Mais as duas leituras incertas.
+
+**Item 2 — implementado.** Ver emenda 2 de `D-ARQ-91`. Ficaram sem decisão, com o comportamento anterior:
+- **Fatores psicossociais MODERADO do inventário não aparecem no relatório do ASO** (seção fora das tabelas por GHE). Pela leitura literal ("qualquer grupo"), constariam — e então os 14 GHEs administrativos que passaram a ter inexistência sugerida a perderiam. Pode ser parte do "os moderados não saíram".
+- **"Ausência de agente nocivo"** (8 linhas sem nível, Porto Araras) segue CONFERIR; proposta da sessão: tirar do relatório e tratar como sinal de inexistência.
+
+**Status:** ABERTA — item 1 inteiro e os dois pontos acima.
+
+**Atualização (07/10/2026) — medição na rota da IA: Hetrin, adendo "Funções Faltantes", gerado pelo Diovanni no app com a chave.**
+Entrada: `matrizes_originais/ADENDO - FUNÇÕES FALTANTES - PGR RICCO.pdf` (20 páginas, 8 funções); gabarito:
+`MATRIZ DE EXAMES(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 30.09.26.doc` (36 cargos, PGR base + adendo; validação Dra. Carolini).
+Arquivos do app (matriz, memorial, riscos para o ASO) recebidos no chat, versão em produção anterior a esta branch.
+- **Cobertura:** o app sai com os 8 cargos do adendo, nenhum GHE perdido. "Menos Aprendiz" (pág. 8) e "Auxiliar
+  Administratvo" (pág. 7) são grafias do próprio PDF, copiadas verbatim.
+- **Contra o gabarito, nos 8 cargos** (`comparar_matriz_gabarito` + pareamento manual dos 2 de grafia diferente):
+  subemissão 0; divergência de momentos 0; divergência de periodicidade 0; superemissão 8 células.
+- **Superemissão 1 — Avaliação Psicossocial nos 6 encarregados e no Auxiliar Administrativo (7 células),** por `R-PSY-04`
+  (origem "QUEDAS DE ALTURA", NR-35 35.4.4). O PGR não tem inventário psicossocial e a matriz das médicas não traz nem
+  Psicossocial nem Saúde Mental. É a pergunta (b) do item 1 ("altura num PGR sem inventário"): resposta das médicas
+  aqui = nenhum dos dois, como no Hetrin 14/09 (Pedreiro com altura, zero psicossocial em 28/28). n=2, mesmo cliente.
+  Hierarquia: a NR-35 manda considerar os fatores psicossociais na aptidão, sem prescrever exame separado; a conduta das
+  médicas é precedente de nível 2. Decisão do Diovanni: `R-PSY-04` passa a exigir o inventário, ou fica como está.
+- **Superemissão 2 — Audiometria no Menor Aprendiz (1 célula),** por `R-AUD-01` (ruído listado sem medição, pedido por
+  precaução — D-ARQ-68). O gabarito dá só o Exame Clínico ao menor aprendiz. Decisão do Diovanni: menor aprendiz como
+  exceção à presunção de ruído, ou não.
+- **Riscos para o ASO:** 14 CONSTA, 137 CONFERIR (105 termos não reconhecidos, 18 avaliados na matriz AIHA, 14 de
+  composição de FDS). O PGR classifica em AIHA, nível não lido pelo app (D-ARQ-57 peça 5): a emenda 2 de D-ARQ-91 não
+  muda esses termos (sem nível → CONFERIR). Ler o nível AIHA é sessão própria, se o Diovanni quiser.
+- O "315 = 100%" do resumo do comparador conta cargos não pareados; a medida válida é a dos 8 cargos acima.
+
+**Status:** ABERTA — item 1 (agora com a evidência acima para a pergunta (b)), Menor Aprendiz × `R-AUD-01`, psicossocial
+MODERADO no ASO, "Ausência de agente nocivo", leitura do nível AIHA.

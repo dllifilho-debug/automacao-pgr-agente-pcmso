@@ -48,6 +48,13 @@ _RUIDO_ACIMA_ACAO = frozenset({"entre_acao_LT", "acima_LT", "acima_acao"})
 _NIVEL_MODERADO = NIVEIS_RISCO_PXS.index("MODERADO")
 _PCT_CANCERIGENO = 10.0
 
+_NOTA_MODERADO = "moderado ou acima consta (e-mail da Dra. Carolini; NR-07 item 7.5.19.1 \"c\")"
+
+# R-ASO-06 (D-ARQ-91 emenda 2): grupos do PGR que nenhuma exceção do e-mail (ruído,
+# vibração, químicos, poeiras, cancerígenos, agentes sem LT) alcança.
+_GRUPOS_SEM_EXCECAO = frozenset({"ACIDENTE", "ERGONOMICO"})
+_MARCAS_APTIDAO = ("altura", "confinad")
+
 _NOTA_BAIXO = (
     "passa a constar se o PGR indicar monitoramento desde a classificação baixa ou "
     "medidas de prevenção imediatas (NR-07 item 7.5.12 \"a\"/\"b\") — o app não lê isso do PGR"
@@ -132,10 +139,11 @@ def _medicao_acima_nivel_acao(risco: Risco, agentes_vocab: Mapping[str, Any]) ->
 
 
 def _criterio_geral(risco: Risco, agentes_vocab: Mapping[str, Any]) -> Criterio:
-    """R-ASO-06 — consta com medição acima do nível de ação da NR-09 ou classificação do
-    PGR moderada ou acima, de qualquer grupo de risco, inclusive acidente e ergonômico
-    (NR-07 item 7.5.12 "b"; e-mail da Dra. Carolini, regra geral, leitura literal).
-    Baixo/irrelevante: não consta pelo critério. Sem nível: conferir."""
+    """R-ASO-06 — consta com medição acima do nível de ação da NR-09 (NR-07 item 7.5.12
+    "b") ou classificação do PGR moderada ou acima, de qualquer grupo de risco, inclusive
+    acidente e ergonômico (e-mail da Dra. Carolini, regra geral, leitura literal — o corte
+    é do e-mail; a NR-07 item 7.5.19.1 "c" não fixa nível). Baixo/irrelevante: não consta
+    pelo critério. Sem nível: conferir."""
     acima = _medicao_acima_nivel_acao(risco, agentes_vocab)
     if acima is not None:
         return Criterio("CONSTA", "R-ASO-06", acima)
@@ -143,8 +151,47 @@ def _criterio_geral(risco: Risco, agentes_vocab: Mapping[str, Any]) -> Criterio:
     if nivel is None:
         return _sem_classificacao(risco)
     if _moderado_ou_acima(nivel):
-        return Criterio("CONSTA", "R-ASO-06", f"classificado {nivel} no PGR (NR-07 item 7.5.12 \"b\")")
+        return Criterio("CONSTA", "R-ASO-06", f"classificado {nivel} no PGR; {_NOTA_MODERADO}")
     return Criterio("NAO_CONSTA", "R-ASO-06", f"classificado {nivel} no PGR; {_NOTA_BAIXO}")
+
+
+def _criterio_termo(risco_pgr: RiscoPGR) -> Criterio:
+    """R-ASO-06 para o termo do PGR que o app não reconheceu (D-ARQ-91 emenda 2). A regra
+    geral do e-mail decide pela classificação e pelo grupo, sem o agente: moderado ou
+    acima consta; abaixo disso, acidente e ergonômico não constam (nenhuma exceção do
+    e-mail os alcança); químico, físico e biológico baixos podem cair numa exceção que o
+    app não decide sem o agente — conferir. Grupo não lido (rotas da IA): conferir."""
+    nivel = risco_pgr.nivel_risco
+    grupo = risco_pgr.tipo
+    if nivel is None:
+        return Criterio("CONFERIR", "R-ASO-06", "risco do PGR não reconhecido pelo app, sem classificação — classificar à mão")
+    if _moderado_ou_acima(nivel):
+        return Criterio("CONSTA", "R-ASO-06", f"classificado {nivel} no PGR; {_NOTA_MODERADO}")
+    termo = (risco_pgr.termo or "").lower()
+    # R-ASO-03: altura e espaço confinado constam sempre, pela aptidão. Variante que o
+    # app não reconheceu não pode sair "não consta" só por ser ACIDENTE baixo.
+    if any(marca in termo for marca in _MARCAS_APTIDAO):
+        return Criterio(
+            "CONFERIR", "R-ASO-03",
+            f"{grupo or 'risco'} {nivel} não reconhecido que cita altura ou espaço confinado — conferir a aptidão",
+        )
+    if grupo in _GRUPOS_SEM_EXCECAO:
+        return Criterio(
+            "NAO_CONSTA", "R-ASO-06",
+            f"{grupo} classificado {nivel} no PGR — abaixo de moderado, fora das exceções do e-mail "
+            "(ruído, vibração, químicos, poeiras)",
+        )
+    if grupo:
+        return Criterio(
+            "CONFERIR", "R-ASO-06",
+            f"{grupo} classificado {nivel} no PGR, não reconhecido pelo app — conferir se cabe exceção do "
+            "e-mail (químico com monitoramento desde a classificação baixa, poeira mineral, cancerígeno, "
+            "ruído com ototóxico/vibração, agente sem limite de tolerância)",
+        )
+    return Criterio(
+        "CONFERIR", "R-ASO-06",
+        f"classificado {nivel} no PGR, não reconhecido pelo app e sem grupo lido — classificar à mão",
+    )
 
 
 def _criterio_ruido(riscos: Sequence[Risco], agentes_vocab: Mapping[str, Any]) -> list[Criterio]:
@@ -231,11 +278,10 @@ def sugerir_aso(
         )
         sugestoes.append(SugestaoASO(agente, True, veredito, criterios, exames))
     for termo in dict.fromkeys(r.termo for r in riscos_pgr if r.agente is None and r.termo):
-        sugestoes.append(SugestaoASO(
-            termo, False, "CONFERIR",
-            (Criterio("CONFERIR", "R-ASO-06", "risco do PGR não reconhecido pelo app — classificar à mão"),),
-            (),
-        ))
+        veredito, criterios = _consolidar(
+            [_criterio_termo(r) for r in riscos_pgr if r.agente is None and r.termo == termo]
+        )
+        sugestoes.append(SugestaoASO(termo, False, veredito, criterios, ()))
     aptidoes = tuple(
         f"Consignar aptidão para {_APTIDAO_NR[agente]}"
         for agente in _APTIDAO_NR

@@ -12357,3 +12357,64 @@ relatório do ASO só existia na conversa; o disco tinha apenas o resumo na `D-A
 `docs/referencia/EMAIL_CAROLINI_ASO.md`, com procedência (entrada no projeto em 06/10/2026; data de envio `[A MEDIR]`),
 onde cada critério virou decisão (`D-ARQ-91`, PROTOCOLO §13) e as notas de conferência normativa. Só docs; nenhum código,
 regra ou D-ARQ alterado.
+
+## Sessão `claude/fervent-shannon-1nq8hw` (sobre `main 7381098`, pós-merge do PR #465) — 07/10/2026 — ANÁLISE + IMPLEMENTAÇÃO: revisão de saída da Dra. Carolini (psicossocial; moderados do ASO) — emenda 2 de D-ARQ-91
+
+**Origem.** Duas observações da Dra. Carolini trazidas pelo Diovanni: (1) folha manuscrita sobre a avaliação psicossocial
+na matriz; (2) "no relatório do ASO os moderados não saíram". Pedido: classificar pela hierarquia de D-ARQ-22, medir o
+comportamento atual, propor e esperar decisão. A sessão abriu sobre `e97ad13`; o e-mail na íntegra chegou pelo PR #465 e a
+branch foi avançada por fast-forward até `7381098`.
+
+**Item 1 — sem código.** Folha transcrita com 2 leituras incertas e 4 lacunas; comportamento atual (`R-PSY-04`/`R-PSY-05`)
+comparado; medido que o inventário psicossocial tem fator MODERADO nos 4 PGRs abertos (Fascino, Aurora, Vila Brasil, Porto
+Araras), então um gatilho por nível máximo do PGR não mudaria saída. Perguntas registradas em PENDENCIAS
+(DT-(sessão `claude/fervent-shannon-1nq8hw`)-01).
+
+**Item 2 — revisado e implementado (decisão do Diovanni).** A 1ª proposta (termo não reconhecido MODERADO consta, o resto
+conferir) foi revista a pedido do Diovanni ("é a melhor solução?"): a medição mostrou que o parser já lia a coluna GRUPO e a
+descartava, e que a citação da NR-07 7.5.12 "b" para o corte moderado era indevida. Entrega: `RiscoVerbatim.grupo` →
+`RiscoPGR.tipo` (parser por coordenadas; hidratação nos 3 estados); `_criterio_termo` em `sugestao_aso.py`; motivo da
+classificação citando o e-mail e a NR-07 7.5.19.1 "c". Emenda 2 de `D-ARQ-91` (DECISOES v252), `R-ASO-06` (PROTOCOLO v131),
+`INDICE_DARQ.md` regenerado.
+
+**Medido.** Matriz idêntica antes × depois nos 3 PGRs determinísticos (61 GHEs). Relatório: termos não reconhecidos 237
+CONFERIR → 44 CONSTA, 89 NÃO CONSTA, 104 CONFERIR; reconhecidos inalterados; inexistência sugerida 0 → 14 GHEs
+administrativos. Primeira comparação da matriz deu "diferente": artefato da foto (conjuntos serializados por `str`, ordem
+de hash) — refeita com os conjuntos ordenados, idêntica.
+
+**Verificação.** Varredura inversa 15/15 (11 reversões em `sugestao_aso.py`, 1 no parser, 3 na hidratação). Suíte
+completa, árvore parada: base **1772 passed, 6 skipped** (1208 s) → **1785 passed, 6 skipped** (1208 s). mypy no alvo
+canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: nenhuma mudança de tela nem de
+versão do Streamlit.
+
+**Sem decisão, comportamento anterior mantido:** fatores psicossociais MODERADO no relatório do ASO; "Ausência de agente
+nocivo"; item 1 inteiro.
+
+## Sessão (mesma branch `claude/fervent-shannon-1nq8hw`) — 07/10/2026 — IMPLEMENTAÇÃO: Word da matriz no leiaute das matrizes das médicas (emenda de D-ARQ-73)
+
+**Origem.** Pedido do Diovanni: a matriz Word sair com a mesma cor, fonte e disposição da matriz modelo, "menos o nome do
+Seconci"; referência: as 4 matrizes mais novas do acervo (Vila Brasil 24/09, T65 24/09, Engeseg 22/09, Varandas 16/09);
+texto vermelho fora ("deve ser alguma correção das Dras." — medido: são exclusões riscadas e marcações da revisão).
+
+**Medido.** As 4 convertidas por LibreOffice têm o mesmo leiaute (faixa do GHE `#83CAEB`, Calibri 11, bordas simples,
+A4 com margens 2/2/1,35/1,2 cm, cabeçalho de página RQ.61 com logo, tabela de identificação, GHEs numa tabela contínua
+partida só pela paginação). A matriz modelo do Hetrin 30/09/2026 (subida pelo Diovanni, `cdefd9e`) segue o mesmo
+formulário, com faixa única "SETOR: HETRIN" e cargo em negrito.
+
+**Entrega.** `renderizar_docx` reescrito (cabeçalho de página sem logo, com campos PAGE/NUMPAGES; identificação com o (X) do
+tipo e "Outro:" para texto fora das 4 opções; tabela contínua de GHEs; rodapé em negrito); dica das opções no campo "Tipo
+de documento" da tela. HTML da tela, memorial e relatório do ASO com a paleta anterior. Emenda em `D-ARQ-73` (DECISOES
+v253), `INDICE_DARQ.md` regenerado.
+
+**Verificação.** Conteúdo inalterado: o extrator do `comparar_matriz_gabarito` lê o Word antigo e o novo com resultado
+idêntico nos 3 PGRs determinísticos (41, 86 e 52 cargos). 6 testes de forma do estilo verde substituídos por 8 do leiaute
+novo; varredura inversa 20/20. Smoke visual ok (desktop e mobile). Suíte completa, árvore parada: **1785 → 1787 passed,
+6 skipped** (1194 s). mypy no alvo canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6 passed.
+
+**Push.** Autorizado pelo Diovanni; recusado pelo GitHub com "Internal Server Error" (500) em 5 tentativas, aceito na
+tentativa seguinte, junto com o commit do leiaute (`7e299f6`).
+
+**Medição na rota da IA (Hetrin, adendo "Funções Faltantes", gerado pelo Diovanni no app).** 8 cargos, nenhum GHE
+perdido; contra a matriz 30.09.26: subemissão 0, momentos 0, periodicidade 0, superemissão 8 (Psicossocial por `R-PSY-04`
+em 7 cargos; Audiometria por `R-AUD-01` no Menor Aprendiz). Detalhe e decisões pendentes em PENDENCIAS,
+DT-(sessão `claude/fervent-shannon-1nq8hw`)-01.
