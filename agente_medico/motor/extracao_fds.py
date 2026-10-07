@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from agente_medico.motor.io_pdf import paginas_liberadas
+from agente_medico.motor.tipos import FraseH
 
 
 def extrair_tabelas_fds(caminho: Path) -> list[list[list[Optional[str]]]]:
@@ -125,3 +126,54 @@ def extrair_texto_fds(caminho: Path) -> Optional[str]:
     """
     paginas = [page.extract_text() or "" for page in paginas_liberadas(caminho)]
     return _recortar_composicao(paginas)
+
+
+# D-ARQ-92: H3xx são as frases de perigo à saúde do GHS (H2xx físicos, H4xx ambiente).
+# O lookbehind recusa "EUH0xx" e códigos colados em palavra; o lookahead, "H3001".
+_CODIGO_H_SAUDE = re.compile(r"(?<![A-Za-z0-9])H\s?(3\d{2})(?!\d)")
+_QUALQUER_CODIGO_H = re.compile(r"(?<![A-Za-z0-9])H\s?\d{3}(?!\d)")
+_SEPARADOR_INICIAL = re.compile(r"^[\s:–—\-.]+")
+_PONTO_SOLTO = re.compile(r"\s+\.")
+_FIM_DE_FRASE = re.compile(r"\.(?=\s|$)")
+
+
+def _texto_apos(linha: str, fim_codigo: int) -> str:
+    """Texto da frase depois do código, até o próximo código H da linha e o primeiro ponto
+    final: o que vem depois é a outra coluna do PDF fundida na mesma linha ("Nocivo se
+    ingerido. for fácil. Caso a irritação…"). Frase que quebrou no fim da linha fica
+    cortada: juntar a linha seguinte trazia texto da outra coluna (medido no acervo, H334
+    "…de asma ou for fácil."). Vazio quando o que vem depois não é frase."""
+    resto = linha[fim_codigo:]
+    seguinte = _QUALQUER_CODIGO_H.search(resto)
+    if seguinte is not None:
+        resto = resto[: seguinte.start()]
+    texto = _PONTO_SOLTO.sub(".", _SEPARADOR_INICIAL.sub("", resto)).strip().rstrip(";,+").strip()
+    if not texto or not texto[0].isupper() or len(texto.split()) < 2:
+        return ""
+    fim = _FIM_DE_FRASE.search(texto)
+    return texto[: fim.start() + 1] if fim else texto
+
+
+def extrair_agravos_saude(paginas: Sequence[str]) -> tuple[FraseH, ...]:
+    """D-ARQ-92: frases de perigo à saúde (H3xx) declaradas em qualquer parte da FDS, com o
+    texto como a FDS escreve — nunca texto de tabela externa nem gerado. Um código por
+    frase; entre as ocorrências, vale o texto que termina em ponto final e, depois, o mais
+    longo. Ordem crescente de código. Determinístico, sem LLM; não alimenta `frases_h`."""
+    textos: dict[str, list[str]] = {}
+    for linha in (linha for pagina in paginas for linha in pagina.splitlines()):
+        for achado in _CODIGO_H_SAUDE.finditer(linha):
+            codigo = f"H{achado.group(1)}"
+            textos.setdefault(codigo, [])
+            texto = _texto_apos(linha, achado.end())
+            if texto:
+                textos[codigo].append(texto)
+    return tuple(
+        FraseH(codigo, max(opcoes, key=lambda t: (t.endswith("."), len(t))) if opcoes else "")
+        for codigo, opcoes in sorted(textos.items())
+    )
+
+
+def extrair_agravos_saude_pdf(caminho: Path) -> tuple[FraseH, ...]:
+    """Wrapper de I/O de extrair_agravos_saude: todas as páginas, texto puro."""
+    return extrair_agravos_saude([page.extract_text() or "" for page in paginas_liberadas(caminho)])
+

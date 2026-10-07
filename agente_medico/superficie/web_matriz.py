@@ -35,6 +35,7 @@ from agente_medico.adaptadores.transcritor_gemini_card import TranscritorGeminiC
 from agente_medico.adaptadores.transcritor_gemini_grid import TranscritorGeminiGrid
 from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGHE
 from agente_medico.motor.composicao import resolver_composicao
+from agente_medico.motor.extracao_fds import extrair_agravos_saude_pdf
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.leo_resolver import limite_quimico
 from agente_medico.motor.medicoes import aplicar_medicoes
@@ -45,6 +46,7 @@ from agente_medico.motor.tipos import (
     PGR,
     BlocoVerbatim,
     EnvelopeConfirmado,
+    FraseH,
     GHEVerbatim,
     MatrizGHE,
     MedicaoInformada,
@@ -737,6 +739,33 @@ def preparar_composicao_cacheada(
     return resultado
 
 
+AVISO_SEM_AGRAVOS = (
+    "Nenhuma frase H de saúde (H3xx) legível no texto desta FDS — conferir a seção 2 no documento "
+    "(pode estar em imagem ou a FDS ser anterior ao GHS)."
+)
+
+
+def extrair_agravos_cacheado(
+    caminho: Path, conteudo: bytes, cache: dict[str, tuple[FraseH, ...]]
+) -> tuple[FraseH, ...]:
+    """D-ARQ-92: agravos à saúde memoizados pelo hash do conteúdo — a leitura de todas as
+    páginas é determinística e não precisa repetir a cada rerun do Streamlit."""
+    chave = hashlib.sha256(conteudo).hexdigest()
+    if chave not in cache:
+        cache[chave] = extrair_agravos_saude_pdf(caminho)
+    return cache[chave]
+
+
+def linhas_agravos(frases: tuple[FraseH, ...]) -> tuple[str, ...]:
+    """D-ARQ-92 cl.3: o que a tela mostra; sem frase, o aviso de conferir (D-ARQ-22)."""
+    if not frases:
+        return (AVISO_SEM_AGRAVOS,)
+    return tuple(
+        f"- {f.codigo} — {_sanitizar(f.texto)}" if f.texto else f"- {f.codigo} (texto não legível na FDS)"
+        for f in frases
+    )
+
+
 # Estado do passo no indicador de etapas → ícone. O mesmo estado vira a key
 # `passo_<n>_<estado>` que estilos.py colore.
 ICONE_PASSO: dict[str, str] = {
@@ -794,8 +823,10 @@ def pagina_matriz() -> None:
         agentes_mensuraveis,
         anexar_produto_em_ghes,
         executar_rota_determinista_cacheada,
+        extrair_agravos_cacheado,
         ghes_com_produto,
         linha_pendencia,
+        linhas_agravos,
         linhas_sugestao,
         listar_produtos_anexados,
         montar_envelope,
@@ -856,6 +887,7 @@ def pagina_matriz() -> None:
                 "PDF(s) da FDS/FISPQ", type="pdf", accept_multiple_files=True, key="fds_avulsas"
             )
         cache_fds: dict[str, ComposicaoFDS] = st.session_state.setdefault("web_matriz_cache_fds", {})
+        cache_agravos: dict[str, tuple[FraseH, ...]] = st.session_state.setdefault("web_matriz_cache_agravos", {})
 
         # Anexar/Remover rodam em on_click: o Streamlit executa o callback ANTES do
         # rerun. Inline, o clique só era processado quando o script chegava ao
@@ -975,6 +1007,7 @@ def pagina_matriz() -> None:
                             blocos_fds, pendencias_fds = preparar_composicao_cacheada(
                                 caminho_fds, conteudo_fds, TranscritorGemini(), cache_fds
                             )
+                        agravos_fds = extrair_agravos_cacheado(caminho_fds, conteudo_fds, cache_agravos)
                     # Rótulo fixo: rótulo que muda (ex.: com o status do anexo) faz o
                     # Streamlit tratar o expander como outro elemento e fechá-lo no
                     # rerun do próprio clique em Anexar.
@@ -987,6 +1020,9 @@ def pagina_matriz() -> None:
                             st.write(f"- CAS {membro.cas} | {membro.nome} | H: {frases_h}")
                     for p in pendencias_fds:
                         st.write(linha_pendencia(p))
+                    st.write("**Agravos à saúde (frases H do produto, como a FDS escreve):**")
+                    for linha_agravo in linhas_agravos(agravos_fds):
+                        st.write(linha_agravo)
 
                     # Casamento manual FDS<->produto (D-ARQ-49 Parte 2 fatia 2b, decisão
                     # ratificada v199/v200: RT escolhe o GHE e nomeia o produto na tela —

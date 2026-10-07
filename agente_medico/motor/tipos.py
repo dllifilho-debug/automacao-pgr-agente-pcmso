@@ -397,6 +397,14 @@ class GHEContext:
     observacoes: list[Observacao] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class FraseH:
+    """D-ARQ-92: frase de perigo à saúde (H3xx do GHS) como a FDS escreve. `texto` vazio
+    quando o código aparece sem o texto legível no PDF."""
+    codigo: str
+    texto: str
+
+
 # D-ARQ-91 (emenda de 07/10/2026): sugestão dos riscos que constam no ASO, por risco do GHE.
 VereditoASO = Literal["CONSTA", "CONFERIR", "NAO_CONSTA"]
 
