@@ -13,11 +13,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
+import unicodedata
+
 from docx import Document
+from docx.enum.table import WD_ALIGN_VERTICAL, WD_ROW_HEIGHT_RULE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Cm, Pt, RGBColor
+from docx.shared import Cm, Pt, RGBColor, Twips
 
 from agente_medico.motor.tipos import ExameEmitido, MatrizGHE, Momento, Observacao
 
@@ -67,6 +70,17 @@ def titulo_ghe(ghe_id: str, nome_ghe: str) -> str:
     return f"{codigo} — {nome}" if nome else codigo
 
 
+def titulo_ghe_rq61(ghe_id: str, nome_ghe: str) -> str:
+    """Faixa do GHE como as matrizes RQ.61 a escrevem ("GHE 01 - BETONEIRA"): código
+    com espaço e número, hífen, nome sem repetir o código."""
+    numero = re.search(r"\d+", ghe_id)
+    codigo = f"GHE {numero[0]}" if numero else ghe_id
+    nome = nome_ghe
+    if numero:
+        nome = re.sub(rf"^GHE[\s-]*0*{int(numero[0])}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
+    return f"{codigo} - {nome}" if nome else codigo
+
+
 # D-ARQ-73, nota de aplicação desta sessão: paleta reaproveitada de
 # `modules/modulo_pcmso.py::gerar_docx_rq61`
 # (v9.5, já em produção no legado) — não é identidade visual de terceiro, é só a
@@ -77,6 +91,23 @@ TITULO_MATRIZ = "MATRIZ FUNÇÃO – EXAMES PCMSO"
 _COR_DESTAQUE = RGBColor(0x08, 0x4D, 0x22)
 _COR_DESTAQUE_HEX = "084D22"
 _COR_TEXTO_SOBRE_DESTAQUE = RGBColor(0xFF, 0xFF, 0xFF)
+
+# D-ARQ-73, emenda de 07/10/2026: a matriz Word segue o leiaute das matrizes RQ.61 das
+# médicas (medido em 4 de setembro/2026: Vila Brasil 24/09, T65 24/09, Engeseg 22/09,
+# Varandas 16/09). O memorial e o relatório do ASO seguem com a paleta acima.
+# Larguras em twips, como no modelo; o logo da empresa fica fora (célula vazia).
+_COR_FAIXA_GHE_HEX = "83CAEB"
+_FONTE_CORPO = "Calibri"
+_FONTE_CABECALHO = "Arial"
+_FAIXA_QUALIDADE = ("SISTEMA DE GESTÃO DA QUALIDADE - NBR ISO 9001:2015", "RQ – REGISTRO DA QUALIDADE")
+_IDENTIFICACAO_RQ61 = "RQ.61"
+_REVISAO_RQ61 = "20/10/2024"
+_VERSAO_RQ61 = "06"
+_TIPOS_DOCUMENTO = ("Obra Nova", "Atualização", "Adendo", "Funções Iniciais")
+_LARGURAS_FAIXA = (7292, 2347)
+_LARGURAS_TITULO = (7300, 1417, 1068)
+_LARGURAS_IDENTIFICACAO = (4931, 598, 4110)
+_LARGURAS_GHE = (4962, 4677)
 
 
 def _aplicar_fundo(celula: Any, cor_hex: str) -> None:
@@ -110,12 +141,17 @@ class CabecalhoDocumento:
     medico_coordenador: str
     crm: str
 
-    def linha_coordenador(self) -> str:
-        """Rótulo das matrizes RQ.61 do acervo; o CRM digitado só com o número ganha o
-        prefixo "CRM", sem duplicar quando já vem escrito ("CRM-GO 14.949")."""
+    def crm_formatado(self) -> str:
+        """O CRM digitado só com o número ganha o prefixo "CRM", sem duplicar quando já
+        vem escrito ("CRM-GO 14.949")."""
         crm = self.crm.strip()
         if crm and not crm.upper().startswith("CRM"):
             crm = f"CRM {crm}"
+        return crm
+
+    def linha_coordenador(self) -> str:
+        """Rótulo das matrizes RQ.61 do acervo."""
+        crm = self.crm_formatado()
         identificacao = " — ".join(parte for parte in (self.medico_coordenador.strip(), crm) if parte)
         return f"Médico(a) Coordenador(a) do PCMSO: {identificacao}".rstrip()
 
@@ -279,66 +315,222 @@ def renderizar_html(doc: DocumentoMatriz) -> str:
     return "\n".join(partes)
 
 
-def renderizar_docx(doc: DocumentoMatriz, destino: Path) -> None:
-    """Mesma DocumentoMatriz da fatia 2 — não recalcula nada, só renderiza.
-    Uma tabela por GHE (2 colunas, FUNÇÃO | EXAMES SOLICITADOS); a forma do
-    gabarito é um exame por PARÁGRAFO dentro da célula, não uma célula-frase
-    concatenada por vírgula — um emissor ingênuo (`", ".join(...)`) passaria
-    numa checagem de "tem uma tabela por GHE" mas erraria a forma real.
+def _sem_acento(texto: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", texto) if not unicodedata.combining(c)).casefold()
 
-    Estilo (D-ARQ-73, nota de aplicação desta sessão): borda, cabeçalho de
-    coluna com fundo e texto brancos, título e cabeçalho de GHE coloridos —
-    portado de `modulo_pcmso.py::gerar_docx_rq61` (legado). Conteúdo e
-    contagem de tabelas/linhas idênticos às fatias 1-3; só a aparência muda.
-    """
-    c = doc.cabecalho
-    r = doc.rodape
-    documento = Document()
 
-    for secao in documento.sections:
-        secao.top_margin = secao.bottom_margin = Cm(2)
-        secao.left_margin = secao.right_margin = Cm(2)
+def _tipo_marcado(tipo_documento: str) -> str | None:
+    """Qual das quatro opções do RQ.61 o tipo digitado marca; None se nenhuma."""
+    digitado = _sem_acento(tipo_documento.strip())
+    if not digitado:
+        return None
+    return next((t for t in _TIPOS_DOCUMENTO if digitado.startswith(_sem_acento(t))), None)
 
-    titulo_documento = documento.add_paragraph()
-    titulo_documento.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run_titulo = titulo_documento.add_run(TITULO_MATRIZ)
-    run_titulo.bold = True
-    run_titulo.font.size = Pt(16)
-    run_titulo.font.color.rgb = _COR_DESTAQUE
 
-    documento.add_paragraph(f"Empresa: {c.empresa}")
-    documento.add_paragraph(f"Obra: {c.obra}")
-    if c.tipo_documento.strip():
-        documento.add_paragraph(f"Tipo: {c.tipo_documento}")
-    documento.add_paragraph(f"Data: {c.data}")
-    documento.add_paragraph(c.linha_coordenador())
+def _larguras(tabela: Any, larguras: Sequence[int]) -> None:
+    tabela.autofit = False
+    grade = tabela._tbl.tblGrid
+    for coluna, largura in zip(grade.findall(qn("w:gridCol")), larguras):
+        coluna.set(qn("w:w"), str(largura))
+    for linha in tabela.rows:
+        for celula, largura in zip(linha.cells, larguras):
+            celula.width = Twips(largura)
 
-    for bloco in doc.blocos:
-        cabecalho_ghe = documento.add_heading(titulo_ghe(bloco.ghe_id, bloco.nome_ghe), level=2)
-        if cabecalho_ghe.runs:
-            cabecalho_ghe.runs[0].font.color.rgb = _COR_DESTAQUE
 
-        tabela = documento.add_table(rows=1, cols=2)
-        tabela.style = "Table Grid"
-        cabecalho_linha = tabela.rows[0].cells
-        for indice, rotulo in enumerate(("FUNÇÃO", "EXAMES SOLICITADOS")):
-            celula = cabecalho_linha[indice]
-            celula.text = rotulo
-            paragrafo = celula.paragraphs[0]
-            paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            if paragrafo.runs:
-                paragrafo.runs[0].bold = True
-                paragrafo.runs[0].font.color.rgb = _COR_TEXTO_SOBRE_DESTAQUE
-            _aplicar_fundo(celula, _COR_DESTAQUE_HEX)
+def _altura(linha: Any, twips: int, regra: WD_ROW_HEIGHT_RULE = WD_ROW_HEIGHT_RULE.AT_LEAST) -> None:
+    linha.height = Twips(twips)
+    linha.height_rule = regra
+
+
+def _sem_bordas(celula: Any) -> None:
+    bordas = OxmlElement("w:tcBorders")
+    for lado in ("top", "right", "bottom"):
+        borda = OxmlElement(f"w:{lado}")
+        borda.set(qn("w:val"), "nil")
+        bordas.append(borda)
+    celula._tc.get_or_add_tcPr().append(bordas)
+
+
+def _escrever(
+    paragrafo: Any,
+    texto: str,
+    *,
+    negrito: bool = False,
+    italico: bool = False,
+    tamanho: float | None = None,
+    fonte: str | None = None,
+) -> Any:
+    run = paragrafo.add_run(texto)
+    run.bold = negrito
+    run.italic = italico
+    if tamanho is not None:
+        run.font.size = Pt(tamanho)
+    if fonte is not None:
+        run.font.name = fonte
+    return run
+
+
+def _campo(paragrafo: Any, instrucao: str, *, tamanho: float, fonte: str) -> None:
+    """Campo do Word (PAGE / NUMPAGES), recalculado ao abrir o documento."""
+    campo = OxmlElement("w:fldSimple")
+    campo.set(qn("w:instr"), instrucao)
+    run = _escrever(paragrafo, "1", negrito=True, tamanho=tamanho, fonte=fonte)
+    run._r.addprevious(campo)
+    campo.append(run._r)
+
+
+def _celula_rotulo_valor(celula: Any, rotulo: str, valor: str, *, campo_pagina: bool = False) -> None:
+    celula.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    _escrever(celula.paragraphs[0], rotulo, tamanho=9, fonte=_FONTE_CABECALHO)
+    paragrafo = celula.add_paragraph()
+    paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if campo_pagina:
+        _campo(paragrafo, "PAGE", tamanho=9, fonte=_FONTE_CABECALHO)
+        _escrever(paragrafo, " / ", negrito=True, tamanho=9, fonte=_FONTE_CABECALHO)
+        _campo(paragrafo, "NUMPAGES", tamanho=9, fonte=_FONTE_CABECALHO)
+    else:
+        _escrever(paragrafo, valor, negrito=True, tamanho=9, fonte=_FONTE_CABECALHO)
+
+
+def _cabecalho_de_pagina(secao: Any) -> None:
+    """Cabeçalho repetido em toda página, como o RQ.61: faixa do sistema da qualidade
+    (o espaço do logo fica vazio — a empresa varia) e o quadro do título com
+    identificação, página, revisão e versão do formulário."""
+    cabecalho = secao.header
+    cabecalho.is_linked_to_previous = False
+    paragrafo_final = cabecalho.paragraphs[0]
+
+    faixa = cabecalho.add_table(rows=1, cols=2, width=Twips(sum(_LARGURAS_FAIXA)))
+    faixa.style = "Table Grid"
+    _larguras(faixa, _LARGURAS_FAIXA)
+    _altura(faixa.rows[0], 846, WD_ROW_HEIGHT_RULE.EXACTLY)
+    caixa, logo = faixa.rows[0].cells
+    caixa.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    for indice, texto in enumerate(_FAIXA_QUALIDADE):
+        paragrafo = caixa.paragraphs[0] if indice == 0 else caixa.add_paragraph()
+        paragrafo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        _escrever(paragrafo, texto, negrito=indice == 0, tamanho=11, fonte=_FONTE_CABECALHO)
+    _sem_bordas(logo)
+
+    espaco = cabecalho.add_paragraph()
+    espaco.paragraph_format.line_spacing = Pt(6)
+
+    quadro = cabecalho.add_table(rows=2, cols=3, width=Twips(sum(_LARGURAS_TITULO)))
+    quadro.style = "Table Grid"
+    _larguras(quadro, _LARGURAS_TITULO)
+    for linha in quadro.rows:
+        _altura(linha, 420)
+    titulo = quadro.cell(0, 0).merge(quadro.cell(1, 0))
+    titulo.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    titulo.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _escrever(titulo.paragraphs[0], TITULO_MATRIZ, negrito=True, italico=True, tamanho=16, fonte=_FONTE_CABECALHO)
+    _celula_rotulo_valor(quadro.cell(0, 1), "Identificação:", _IDENTIFICACAO_RQ61)
+    _celula_rotulo_valor(quadro.cell(0, 2), "Página:", "", campo_pagina=True)
+    _celula_rotulo_valor(quadro.cell(1, 1), "Revisão:", _REVISAO_RQ61)
+    _celula_rotulo_valor(quadro.cell(1, 2), "Versão:", _VERSAO_RQ61)
+
+    # O cabeçalho do Word termina num parágrafo: o vazio que já vem nele vai para o fim.
+    cabecalho._element.append(paragrafo_final._p)
+
+
+def _tabela_identificacao(documento: Any, c: CabecalhoDocumento) -> None:
+    tabela = documento.add_table(rows=3, cols=3)
+    tabela.style = "Table Grid"
+    _larguras(tabela, _LARGURAS_IDENTIFICACAO)
+    for linha, altura in zip(tabela.rows, (425, 425, 692)):
+        _altura(linha, altura)
+        for celula in linha.cells:
+            celula.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+    empresa = tabela.cell(0, 0).merge(tabela.cell(0, 1))
+    _escrever(empresa.paragraphs[0], "Empresa:", negrito=True)
+    _escrever(empresa.add_paragraph(), c.empresa, negrito=True)
+
+    marcado = _tipo_marcado(c.tipo_documento)
+    tipos = tabela.cell(0, 2)
+    for indice, par_de_tipos in enumerate((_TIPOS_DOCUMENTO[:2], _TIPOS_DOCUMENTO[2:])):
+        paragrafo = tipos.paragraphs[0] if indice == 0 else tipos.add_paragraph()
+        for posicao, tipo in enumerate(par_de_tipos):
+            if posicao:
+                _escrever(paragrafo, "      ")
+            _escrever(paragrafo, f"{tipo} ({'X' if tipo == marcado else '  '})", negrito=tipo == marcado)
+    # Tipo digitado fora das quatro opções do formulário não some (D-ARQ-22).
+    if c.tipo_documento.strip() and marcado is None:
+        _escrever(tipos.add_paragraph(), f"Outro: {c.tipo_documento.strip()}", negrito=True)
+
+    obra = tabela.cell(1, 0).merge(tabela.cell(1, 1))
+    _escrever(obra.paragraphs[0], f"Obra: {c.obra}".rstrip(), negrito=True)
+    data = tabela.cell(1, 2)
+    data.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _escrever(data.paragraphs[0], f"Data: {c.data}".rstrip(), negrito=True)
+
+    _escrever(tabela.cell(2, 0).paragraphs[0], "Médico(a) Coordenador(a) do PCMSO", negrito=True)
+    medico = tabela.cell(2, 1).merge(tabela.cell(2, 2))
+    medico.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _escrever(medico.paragraphs[0], c.medico_coordenador.strip())
+    crm = medico.add_paragraph()
+    crm.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    _escrever(crm, c.crm_formatado())
+
+
+def _tabela_ghes(documento: Any, blocos: Sequence[BlocoGHE]) -> None:
+    """Uma tabela contínua, como as matrizes das médicas: por GHE, a faixa azul com o
+    nome, o cabeçalho FUNÇÃO | EXAMES SOLICITADOS e um cargo por linha, um exame por
+    parágrafo."""
+    tabela = documento.add_table(rows=0, cols=2)
+    tabela.style = "Table Grid"
+    for bloco in blocos:
+        faixa = tabela.add_row().cells
+        celula_ghe = faixa[0].merge(faixa[1])
+        celula_ghe.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+        celula_ghe.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        _escrever(celula_ghe.paragraphs[0], titulo_ghe_rq61(bloco.ghe_id, bloco.nome_ghe), negrito=True)
+        _aplicar_fundo(celula_ghe, _COR_FAIXA_GHE_HEX)
+
+        cabecalho_colunas = tabela.add_row().cells
+        for celula, rotulo in zip(cabecalho_colunas, ("FUNÇÃO", "EXAMES SOLICITADOS")):
+            celula.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            celula.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            _escrever(celula.paragraphs[0], rotulo, negrito=True)
+
         for linha in bloco.linhas:
-            celulas_linha = tabela.add_row().cells
-            celulas_linha[0].text = linha.cargo
-            celula_exames = celulas_linha[1]
+            celula_cargo, celula_exames = tabela.add_row().cells
+            celula_cargo.text = linha.cargo
             if linha.celulas:
                 celula_exames.paragraphs[0].text = linha.celulas[0]
                 for exame_formatado in linha.celulas[1:]:
                     celula_exames.add_paragraph(exame_formatado)
+    _larguras(tabela, _LARGURAS_GHE)
 
-    for linha_rodape in r.linhas():
-        documento.add_paragraph(linha_rodape)
+
+def renderizar_docx(doc: DocumentoMatriz, destino: Path) -> None:
+    """Mesma DocumentoMatriz da fatia 2 — não recalcula nada, só renderiza, no leiaute
+    das matrizes RQ.61 das médicas (D-ARQ-73, emenda de 07/10/2026): cabeçalho de
+    página com o quadro do formulário, tabela de identificação (empresa, tipo,
+    obra, data, coordenador) e uma tabela contínua com os GHEs. A forma é um exame
+    por PARÁGRAFO dentro da célula, não uma frase concatenada por vírgula.
+    """
+    documento = Document()
+
+    normal = documento.styles["Normal"]
+    normal.font.name = _FONTE_CORPO
+    normal.font.size = Pt(11)
+    normal.paragraph_format.space_before = Pt(0)
+    normal.paragraph_format.space_after = Pt(0)
+    normal.paragraph_format.line_spacing = 1.0
+
+    for secao in documento.sections:
+        secao.page_width, secao.page_height = Cm(21), Cm(29.7)
+        secao.left_margin = secao.right_margin = Cm(2)
+        secao.top_margin, secao.bottom_margin = Cm(1.35), Cm(1.2)
+        secao.header_distance = Cm(1.25)
+        _cabecalho_de_pagina(secao)
+
+    _tabela_identificacao(documento, doc.cabecalho)
+    documento.add_paragraph()
+    _tabela_ghes(documento, doc.blocos)
+    documento.add_paragraph()
+
+    for linha_rodape in doc.rodape.linhas():
+        _escrever(documento.add_paragraph(), linha_rodape, negrito=True)
     documento.save(str(destino))

@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v252 · 93 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v253 · 93 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -80,24 +80,24 @@ Fonte: DECISOES_ARQUITETURAIS.md v252 · 93 decisões
 | D-ARQ-70 | Alias de corpus medido entra no vocabulário só ancorado em literal normativo, com fonte dupla e teste anti-FP |  | 3065 | 5635 |
 | D-ARQ-71 | Perna `Ausente` absorvida por `ou` verdadeiro gera pendência não-bloqueante anexada à linha; o tri-estado não se move |  | 3087 | 5506 |
 | D-ARQ-72 | Apresentação-de-saída da matriz é superfície própria em `superficie/`, apresentação-pura herdando D-ARQ-54 P1; o status de validação da regra atravessa até `Motivo` | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 0-2, sessão 003 | 3112 | 2928 |
-| D-ARQ-73 | Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003 | 3137 | 10523 |
-| D-ARQ-74 | Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 3271 | 3033 |
-| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 3323 | 13256 |
-| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3507 | 5109 |
-| D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3582 | 4842 |
-| D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3656 | 7609 |
-| D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3763 | 1691 |
-| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3794 | 9602 |
-| D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3908 | 2897 |
-| D-ARQ-82 | O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz |  | 3952 | 15506 |
-| D-ARQ-83 | Termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para NÃO resolver, com pendência de causa e destinatário próprios |  | 4165 | 9623 |
-| D-ARQ-84 | Conferência factual é obrigação sem declaração; julgamento permanece gate declarado — os dois instrumentos separam-se pela natureza da falha, não pelo momento | DECISÃO DE MÉTODO (META) | 4214 | 10201 |
-| D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4263 | 4834 |
-| D-ARQ-86 | Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (25/09/2026), com Q1–Q4 resolvidas (ver "Ratificação" abaixo) | 4297 | 15495 |
-| D-ARQ-87 | Memorial de raciocínio da matriz: cada `Motivo` guarda o que a própria regra pediu, antes do piso da consolidação | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO da fatia 1 (26/09/2026) | 4391 | 6516 |
-| D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4435 | 9422 |
-| D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 (29/09/2026) e 2 (30/09/2026) | 4493 | 7135 |
-| D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4541 | 11320 |
-| D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4702 | 13746 |
-| D-ARQ-92 | Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS") | 4786 | 6543 |
-| D-ARQ-93 | Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave) | 4833 | 3021 |
+| D-ARQ-73 | Emissor de saída no formato do escritório: estrutura intermediária única com N renderizadores; expansão GHE→cargo é apresentação; ordem de exibição é dado cravado, não literal solto; cabeçalho/rodapé são seam humano | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (fatias 1-3, sessão 003 | 3137 | 12591 |
+| D-ARQ-74 | Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003 | 3292 | 3033 |
+| D-ARQ-75 | Hospedagem por consumo, não por tier; autenticação é gate com allowlist própria; o que sobe é o app novo, com dependências medidas | DECISÃO DE ARQUITETURA | 3344 | 13256 |
+| D-ARQ-76 | O gate de acesso mora no entrypoint; a decisão é núcleo puro; a fronteira do provedor de identidade normaliza antes de decidir | DECISÃO DE ARQUITETURA | 3528 | 5109 |
+| D-ARQ-77 | Mecanismo de build é o Dockerfile; o segredo é materializado antes do servidor | DECISÃO DE ARQUITETURA | 3603 | 4842 |
+| D-ARQ-78 | Destino do deploy é o Streamlit Community Cloud; o nome do arquivo de dependências é contrato da plataforma; o gate próprio permanece porque a allowlist nativa é transitiva | DECISÃO DE ARQUITETURA | 3677 | 7609 |
+| D-ARQ-79 | Entrypoint de desenvolvimento sem gate é porta deliberada, travada por teste no entrypoint de produção | DECISÃO DE ARQUITETURA | 3784 | 1691 |
+| D-ARQ-80 | No nível gratuito o gargalo é requisição, não token: a unidade de invocação do transcritor é o lote | DECISÃO DE ARQUITETURA | 3815 | 9602 |
+| D-ARQ-81 | Precedente de corpus enviesado não amplia universo normativo; regra refutada é estado próprio, distinto de sucedida |  | 3929 | 2897 |
+| D-ARQ-82 | O selo `VÁLIDA` computa sobre a CAUSA da não-resolução, nunca sobre sua contagem; não-resolução que é acerto do motor não rebaixa a matriz |  | 3973 | 15506 |
+| D-ARQ-83 | Termo reconhecido-como-não-agente é categoria própria do vocabulário: entra para NÃO resolver, com pendência de causa e destinatário próprios |  | 4186 | 9623 |
+| D-ARQ-84 | Conferência factual é obrigação sem declaração; julgamento permanece gate declarado — os dois instrumentos separam-se pela natureza da falha, não pelo momento | DECISÃO DE MÉTODO (META) | 4235 | 10201 |
+| D-ARQ-85 | Baseline e números clínicos do painel têm relógios distintos: o que envelhece a cada commit é re-tirado a cada fechamento | DECISÃO DE MÉTODO (META) | 4284 | 4834 |
+| D-ARQ-86 | Medição quantitativa informada na tela é entrada de primeira classe por (GHE, agente), com procedência de laudo; dispensa de IBE em BAIXO só com medição abaixo do nível de ação | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (25/09/2026), com Q1–Q4 resolvidas (ver "Ratificação" abaixo) | 4318 | 15495 |
+| D-ARQ-87 | Memorial de raciocínio da matriz: cada `Motivo` guarda o que a própria regra pediu, antes do piso da consolidação | DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO da fatia 1 (26/09/2026) | 4412 | 6516 |
+| D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4456 | 9422 |
+| D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 (29/09/2026) e 2 (30/09/2026) | 4514 | 7135 |
+| D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4562 | 11320 |
+| D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4723 | 13746 |
+| D-ARQ-92 | Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS") | 4807 | 6543 |
+| D-ARQ-93 | Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave) | 4854 | 3021 |

@@ -3268,6 +3268,27 @@ arquivos), "Carboxihemoglobina" (17 contra 7), "RX de Coluna Lombo-Sacra". Efeit
 728; pares fora de ordem 11,7% → 7,4%. Commit `9b0c1ad`. Ordem não é conduta (cabeçalho do `exames.yaml`); nenhum exame,
 periodicidade ou momento muda. Cláusula de ordem cravada como dado mantida — só o dado mudou.
 
+**Emenda (07/10/2026, branch `claude/fervent-shannon-1nq8hw` — leiaute do Word igual ao das matrizes das médicas, decisão do
+Diovanni).** Pedido: "cor, fonte e disposição, é para sair igual, menos o nome do Seconci — elas podem colocar qualquer
+empresa lá"; referência: as 4 matrizes mais novas do acervo (Vila Brasil 24/09, T65 24/09, Engeseg 22/09 e Varandas
+16/09/2026, esta validada pela Dra. Carolini), convertidas por LibreOffice e medidas no XML. As 4 têm o mesmo leiaute:
+- **Cabeçalho de página** (toda página): faixa "SISTEMA DE GESTÃO DA QUALIDADE - NBR ISO 9001:2015 / RQ – REGISTRO DA
+  QUALIDADE" (Arial 11, 1ª linha em negrito) com o logo ao lado; quadro com "MATRIZ FUNÇÃO – EXAMES PCMSO" (Arial 16,
+  negrito e itálico), Identificação RQ.61, Página N / M, Revisão 20/10/2024, Versão 06 (Arial 9).
+- **Identificação**: Empresa | Obra Nova / Atualização / Adendo / Funções Iniciais com (X); Obra | Data; Médico(a)
+  Coordenador(a) do PCMSO | nome e CRM.
+- **GHEs**: tabela contínua (as quebras de tabela do `.doc` são de página: 7 a 13 tabelas para 15 a 26 GHEs); faixa do
+  GHE mesclada, fundo azul `#83CAEB`, "GHE 01 - NOME" em negrito; FUNÇÃO | EXAMES SOLICITADOS em negrito, sem fundo;
+  Calibri 11, preto, bordas simples. Rodapé em negrito. A4, margens 2 / 2 / 1,35 / 1,2 cm.
+- **Fora, por decisão do Diovanni:** o logo (célula vazia, sem moldura) e o texto em vermelho das matrizes, que é
+  correção das médicas (exclusões riscadas, "Adendo (X)" e data marcados na revisão), não formatação.
+
+Aplicação: `renderizar_docx` reescrito; o HTML da tela, o memorial e o relatório do ASO mantêm a paleta anterior. O tipo
+digitado marca o (X) da opção correspondente (sem diferenciar acento e maiúscula); texto fora das 4 opções sai como
+"Outro: …" (D-ARQ-22). Conteúdo inalterado — medido: o extrator do `comparar_matriz_gabarito` lê o Word antigo e o novo
+com resultado idêntico nos 3 PGRs determinísticos (41, 86 e 52 cargos). Testes de forma do estilo verde substituídos
+pelos do leiaute novo, cada um com a reversão nomeada; varredura inversa 20/20.
+
 ## D-ARQ-74 — Superfície que emite artefato assinável lê o status do Resultado e nunca emite documento sem conteúdo clínico
 
 **Status:** DECISÃO DE ARQUITETURA + IMPLEMENTAÇÃO (sessão 003.EQ). Não cria nem altera
@@ -5115,3 +5136,4 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cc17dc2`). Antecedente: D-A
 | v250 | 07/10/2026 | Mesma branch (IMPLEMENTAÇÃO, decisão do Diovanni): **nota de aplicação em `D-ARQ-92`** — fatia 3 antecipada: agravos das FDS vinculadas no relatório Riscos para o ASO e no memorial, por GHE (texto + código H); matriz assinada intocada; coluna AGRAVO do PGR para sessão própria. Regressão de 25 testes de tela (PDF falso) pega pela suíte e corrigida. |
 | v251 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main cc17dc2` (ARQUITETURA + IMPLEMENTAÇÃO, pedido do Diovanni): **`D-ARQ-93` adicionada** — agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela (rota por coordenadas); sai no relatório do ASO e no memorial, matriz intocada; rota da IA na sessão com a chave. |
 | v252 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, sobre `main 7381098` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-91`** — termo do PGR não reconhecido decide pela classificação e pela coluna GRUPO (moderado+ consta; acidente/ergonômico abaixo não consta; químico/físico/biológico baixo e sem grupo conferem); grupo do PGR guardado em `RiscoPGR.tipo`; fonte do corte moderado corrigida para o e-mail sobre a NR-07 7.5.19.1 "c". Matriz inalterada. |
+| v253 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-73`** — o Word da matriz sai no leiaute das matrizes RQ.61 das médicas (4 de setembro/2026): cabeçalho de página do formulário sem o logo, tabela de identificação com o (X) do tipo, GHEs numa tabela contínua com faixa azul `#83CAEB`, Calibri 11. Texto vermelho das médicas fora (é correção). Conteúdo inalterado. |

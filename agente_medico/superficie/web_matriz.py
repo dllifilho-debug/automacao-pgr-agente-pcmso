@@ -1229,7 +1229,10 @@ def pagina_matriz() -> None:
                 st.markdown("**Identificação do documento**")
                 empresa = st.text_input("Empresa")
                 obra = st.text_input("Obra")
-                tipo_documento = st.text_input("Tipo de documento")
+                tipo_documento = st.text_input(
+                    "Tipo de documento",
+                    help="Obra Nova, Atualização, Adendo ou Funções Iniciais — marca o (X) no documento.",
+                )
                 data_documento = st.text_input("Data")
                 medico_coordenador = st.text_input("Médico coordenador")
                 crm = st.text_input("CRM")

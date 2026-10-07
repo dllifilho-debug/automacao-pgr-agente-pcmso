@@ -7,14 +7,13 @@ from pathlib import Path
 import pytest
 from docx import Document as DocxDocument
 from docx.oxml.ns import qn
+from docx.shared import Pt
 
 from agente_medico.adaptadores.orquestracao_pgr import processar_arquivo_pgr
 from agente_medico.motor.protocolo import carregar
 from agente_medico.motor.tipos import EnvelopeConfirmado, ExameEmitido, GHEVerbatim, MatrizGHE, Momento
 from agente_medico.superficie.documento_matriz import (
-    _COR_DESTAQUE,
-    _COR_DESTAQUE_HEX,
-    _COR_TEXTO_SOBRE_DESTAQUE,
+    _COR_FAIXA_GHE_HEX,
     _ROTULO_MOMENTO,
     TITULO_MATRIZ,
     CabecalhoDocumento,
@@ -296,20 +295,36 @@ def test_html_escapa_conteudo_de_dado() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_docx_tem_uma_tabela_por_ghe(tmp_path: Path) -> None:
-    # Reversão que mata: emitir uma tabela única concatenando todos os GHEs
-    # (ex.: `add_table` só uma vez, fora do loop de blocos).
-    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
-    m1 = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
-    m2 = MatrizGHE(ghe_id="GHE-02", linhas=[_exame("exame_clinico")], cargos=("B",))
-    m3 = MatrizGHE(ghe_id="GHE-03", linhas=[_exame("exame_clinico")], cargos=("C",))
-    doc = montar_documento([m1, m2, m3], vocab, _cabecalho(), _rodape())
-
+def _docx(tmp_path: Path, documento: object) -> DocxDocument:  # type: ignore[valid-type]
     destino = tmp_path / "matriz.docx"
-    renderizar_docx(doc, destino)
+    renderizar_docx(documento, destino)  # type: ignore[arg-type]
+    return DocxDocument(str(destino))
 
-    reaberto = DocxDocument(str(destino))
-    assert len(reaberto.tables) == 3
+
+def _fundo(celula: object) -> str | None:
+    tcPr = celula._tc.tcPr  # type: ignore[attr-defined]
+    sombreado = None if tcPr is None else tcPr.find(qn("w:shd"))
+    return None if sombreado is None else str(sombreado.get(qn("w:fill"))).upper()
+
+
+def test_docx_ghes_numa_tabela_continua_com_faixa_azul_por_ghe(tmp_path: Path) -> None:
+    # D-ARQ-73, emenda de 07/10/2026: leiaute das matrizes RQ.61 das médicas — a
+    # identificação e, abaixo, uma tabela contínua em que cada GHE abre com a faixa
+    # azul mesclada. Reversões que matam: (1) voltar a uma tabela por GHE — o corpo
+    # sai com 4 tabelas; (2) tirar `_aplicar_fundo` da faixa — sem cor; (3) não mesclar
+    # a faixa — a 2ª célula da linha deixa de ser a mesma.
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matrizes = [
+        MatrizGHE(ghe_id=f"GHE-0{n}", linhas=[_exame("exame_clinico")], cargos=(c,))
+        for n, c in ((1, "A"), (2, "B"), (3, "C"))
+    ]
+    reaberto = _docx(tmp_path, montar_documento(matrizes, vocab, _cabecalho(), _rodape()))
+
+    assert len(reaberto.tables) == 2
+    faixas = [linha for linha in reaberto.tables[1].rows if linha.cells[0].text.startswith("GHE ")]
+    assert [f.cells[0].text for f in faixas] == ["GHE 01", "GHE 02", "GHE 03"]
+    assert all(_fundo(f.cells[0]) == _COR_FAIXA_GHE_HEX for f in faixas)
+    assert all(f.cells[0]._tc is f.cells[1]._tc for f in faixas)
 
 
 def test_docx_celula_de_exames_preserva_quebra_por_exame(tmp_path: Path) -> None:
@@ -333,8 +348,8 @@ def test_docx_celula_de_exames_preserva_quebra_por_exame(tmp_path: Path) -> None
     renderizar_docx(doc, destino)
 
     reaberto = DocxDocument(str(destino))
-    tabela = reaberto.tables[0]
-    celula_exames = tabela.rows[1].cells[1]
+    tabela = reaberto.tables[1]
+    celula_exames = tabela.rows[2].cells[1]
     assert len(celula_exames.paragraphs) == 3
     textos = [p.text for p in celula_exames.paragraphs]
     assert textos[0].startswith("Exame Clínico")
@@ -343,71 +358,78 @@ def test_docx_celula_de_exames_preserva_quebra_por_exame(tmp_path: Path) -> None
 
 
 # ---------------------------------------------------------------------------
-# D-ARQ-73, nota de aplicação desta sessão — estilo visual portado de
-# modulo_pcmso.py::gerar_docx_rq61 (legado). Conteúdo/contagem de tabelas e
-# linhas não muda; só a aparência.
+# D-ARQ-73, emenda de 07/10/2026 — leiaute das matrizes RQ.61 das médicas
+# (Vila Brasil 24/09, T65 24/09, Engeseg 22/09, Varandas 16/09/2026), sem o logo
+# da empresa. Substitui o estilo verde portado do legado; conteúdo inalterado.
 # ---------------------------------------------------------------------------
 
 
-def test_docx_tabela_por_ghe_usa_estilo_com_borda(tmp_path: Path) -> None:
-    # Reversão que mata: tirar `tabela.style = "Table Grid"` -> volta ao
-    # estilo default do python-docx (sem nome, sem borda visível).
+def test_docx_tabelas_usam_estilo_com_borda(tmp_path: Path) -> None:
+    # Reversão que mata: tirar `tabela.style = "Table Grid"` da identificação ou da
+    # tabela dos GHEs -> volta ao estilo default do python-docx (sem borda visível).
     vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
     matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
-    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    reaberto = _docx(tmp_path, montar_documento([matriz], vocab, _cabecalho(), _rodape()))
 
-    destino = tmp_path / "matriz.docx"
-    renderizar_docx(doc, destino)
-
-    reaberto = DocxDocument(str(destino))
-    tabela = reaberto.tables[0]
-    assert tabela.style is not None
-    assert tabela.style.name == "Table Grid"
+    assert [t.style.name for t in reaberto.tables] == ["Table Grid", "Table Grid"]
 
 
-def test_docx_cabecalho_de_coluna_tem_fundo_e_texto_destacados(tmp_path: Path) -> None:
-    # Reversão que mata: tirar a chamada de `_aplicar_fundo` e a cor do texto
-    # do cabeçalho de coluna -> célula fica sem `w:shd` no XML e o texto sai
-    # na cor padrão (preto), não branco.
+def test_docx_cabecalho_de_coluna_em_negrito_sem_fundo(tmp_path: Path) -> None:
+    # Como no modelo: FUNÇÃO | EXAMES SOLICITADOS em negrito, centralizado, sem cor.
+    # Reversões que matam: (1) voltar o fundo verde e o texto branco do legado; (2)
+    # tirar o negrito.
     vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
     matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
-    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    reaberto = _docx(tmp_path, montar_documento([matriz], vocab, _cabecalho(), _rodape()))
 
-    destino = tmp_path / "matriz.docx"
-    renderizar_docx(doc, destino)
-
-    reaberto = DocxDocument(str(destino))
-    tabela = reaberto.tables[0]
-    celula_funcao = tabela.rows[0].cells[0]
-
-    tcPr = celula_funcao._tc.tcPr
-    assert tcPr is not None
-    sombreado = tcPr.find(qn("w:shd"))
-    assert sombreado is not None
-    assert sombreado.get(qn("w:fill")).upper() == _COR_DESTAQUE_HEX
-
-    run_cabecalho = celula_funcao.paragraphs[0].runs[0]
-    assert run_cabecalho.bold is True
-    assert run_cabecalho.font.color.rgb == _COR_TEXTO_SOBRE_DESTAQUE
+    cabecalho_colunas = reaberto.tables[1].rows[1].cells
+    assert [c.text for c in cabecalho_colunas] == ["FUNÇÃO", "EXAMES SOLICITADOS"]
+    for celula in cabecalho_colunas:
+        assert _fundo(celula) is None
+        run = celula.paragraphs[0].runs[0]
+        assert run.bold is True
+        assert run.font.color.rgb is None
 
 
-def test_docx_titulo_e_cabecalho_de_ghe_usam_cor_de_destaque(tmp_path: Path) -> None:
-    # Reversão que mata: tirar `run_titulo.font.color.rgb = _COR_DESTAQUE` (e
-    # o equivalente no cabeçalho de GHE) -> cor volta a None (preto padrão).
+def test_docx_cabecalho_de_pagina_do_rq61(tmp_path: Path) -> None:
+    # Cabeçalho repetido em toda página: faixa do sistema da qualidade (sem o logo) e
+    # o quadro do título com identificação, página (campos PAGE/NUMPAGES), revisão e
+    # versão. Reversões que matam: (1) não chamar `_cabecalho_de_pagina` — o
+    # cabeçalho sai vazio; (2) escrever o número da página como texto fixo em vez do
+    # campo; (3) tirar o itálico/Arial 16 do título.
     vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
     matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
-    doc = montar_documento([matriz], vocab, _cabecalho(), _rodape())
+    reaberto = _docx(tmp_path, montar_documento([matriz], vocab, _cabecalho(), _rodape()))
 
-    destino = tmp_path / "matriz.docx"
-    renderizar_docx(doc, destino)
+    cabecalho = reaberto.sections[0].header
+    faixa, quadro = cabecalho.tables
+    assert faixa.rows[0].cells[0].text == "SISTEMA DE GESTÃO DA QUALIDADE - NBR ISO 9001:2015\nRQ – REGISTRO DA QUALIDADE"
+    assert faixa.rows[0].cells[1].text == ""
+    # Espaço do logo sem moldura. Reversão que mata: tirar `_sem_bordas(logo)`.
+    bordas_logo = faixa.rows[0].cells[1]._tc.tcPr.find(qn("w:tcBorders"))
+    assert bordas_logo is not None and bordas_logo.find(qn("w:top")).get(qn("w:val")) == "nil"
+    titulo = quadro.cell(0, 0)
+    assert titulo.text == TITULO_MATRIZ and titulo._tc is quadro.cell(1, 0)._tc
+    run = titulo.paragraphs[0].runs[0]
+    assert (run.bold, run.italic, run.font.name, run.font.size) == (True, True, "Arial", Pt(16))
+    assert [quadro.cell(0, 1).text, quadro.cell(1, 1).text, quadro.cell(1, 2).text] == [
+        "Identificação:\nRQ.61", "Revisão:\n20/10/2024", "Versão:\n06",
+    ]
+    campos = [c.get(qn("w:instr")) for c in quadro.cell(0, 2)._tc.iter(qn("w:fldSimple"))]
+    assert campos == ["PAGE", "NUMPAGES"]
 
-    reaberto = DocxDocument(str(destino))
-    titulo_documento = reaberto.paragraphs[0]
-    assert titulo_documento.runs[0].font.color.rgb == _COR_DESTAQUE
 
-    cabecalhos_ghe = [p for p in reaberto.paragraphs if p.style.name == "Heading 2"]
-    assert len(cabecalhos_ghe) == 1
-    assert cabecalhos_ghe[0].runs[0].font.color.rgb == _COR_DESTAQUE
+def test_docx_fonte_e_margens_do_modelo(tmp_path: Path) -> None:
+    # Calibri 11 no corpo, A4 com as margens do modelo. Reversões que matam: tirar a
+    # fonte do estilo Normal (volta ao tema do python-docx); voltar margens de 2 cm.
+    vocab = {"exame_clinico": {"nome_exibicao": "Exame Clínico", "ordem_exibicao": 1}}
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    reaberto = _docx(tmp_path, montar_documento([matriz], vocab, _cabecalho(), _rodape()))
+
+    normal = reaberto.styles["Normal"]
+    assert (normal.font.name, normal.font.size) == ("Calibri", Pt(11))
+    secao = reaberto.sections[0]
+    assert (round(secao.top_margin.cm, 2), round(secao.bottom_margin.cm, 2)) == (1.35, 1.2)
 
 
 # ---------------------------------------------------------------------------
@@ -518,7 +540,7 @@ def test_docx_mostra_hifen_no_nome_do_ghe_com_nul(tmp_path: Path) -> None:
     destino = tmp_path / "matriz.docx"
     renderizar_docx(doc, destino)
 
-    texto = "\n".join(par.text for par in DocxDocument(str(destino)).paragraphs)
+    texto = "\n".join(c.text for t in DocxDocument(str(destino)).tables for r in t.rows for c in r.cells)
     assert "ASSISTENCIA TECNICA MANUTENÇÃO - ENERGIZADA" in texto
 
 
@@ -549,39 +571,50 @@ def test_html_tem_titulo_rq61_e_tipo_em_linha_propria() -> None:
     assert "<p>Tipo: Atualização</p>" in saida
 
 
-def test_docx_titulo_e_o_do_rq61_nao_o_tipo_digitado(tmp_path: Path) -> None:
-    # Reversões que matam: (1) `add_run(c.tipo_documento)` no título — volta a
-    # sair "Atualização" (ou o que for digitado) como título; (2) tirar a linha
-    # "Tipo:" — o tipo some do documento.
-    destino = tmp_path / "matriz.docx"
-    renderizar_docx(_documento_t65(), destino)  # type: ignore[arg-type]
+def _identificacao(tmp_path: Path, documento: object) -> list[list[str]]:
+    tabela = _docx(tmp_path, documento).tables[0]
+    return [[c.text for c in linha.cells] for linha in tabela.rows]
 
-    textos = [p.text for p in DocxDocument(str(destino)).paragraphs]
-    assert textos[0] == TITULO_MATRIZ
-    assert "Tipo: Atualização" in textos
+
+def test_docx_tipo_marca_a_opcao_do_rq61(tmp_path: Path) -> None:
+    # O tipo digitado marca (X) uma das quatro opções do formulário, como o modelo;
+    # o título segue o do RQ.61. Reversões que matam: (1) não marcar o X; (2) casar
+    # com acento — "atualizacao" digitado não marcaria.
+    linhas = _identificacao(tmp_path, _documento_t65(tipo="atualizacao"))
+
+    assert linhas[0][2] == "Obra Nova (  )      Atualização (X)\nAdendo (  )      Funções Iniciais (  )"
+    assert linhas[0][0] == "Empresa:\nE"
+    assert linhas[1][0] == "Obra: O" and linhas[1][2] == "Data: 01/10/2026"
+
+
+def test_docx_tipo_fora_das_opcoes_nao_some(tmp_path: Path) -> None:
+    # D-ARQ-22: texto que não casa com nenhuma opção sai como "Outro:". Reversão que
+    # mata: tirar o ramo `marcado is None` — o tipo digitado some do documento.
+    linhas = _identificacao(tmp_path, _documento_t65(tipo="Revisão anual"))
+
+    assert "(X)" not in linhas[0][2]
+    assert linhas[0][2].endswith("Outro: Revisão anual")
 
 
 def test_tipo_vazio_nao_gera_linha_sem_valor(tmp_path: Path) -> None:
-    # Reversão que mata: emitir "Tipo:" sem a condição — linha rótulo-sem-valor
-    # no HTML e no Word quando o campo fica em branco.
-    destino = tmp_path / "matriz.docx"
+    # Reversões que matam: emitir "Tipo:" no HTML sem a condição; no Word, tratar o
+    # vazio como "Outro:" (rótulo sem valor) ou marcar uma opção.
     documento = _documento_t65(tipo="  ")
-    renderizar_docx(documento, destino)  # type: ignore[arg-type]
 
     assert "Tipo:" not in renderizar_html(documento)  # type: ignore[arg-type]
-    assert not any(p.text.startswith("Tipo:") for p in DocxDocument(str(destino)).paragraphs)
+    tipos = _identificacao(tmp_path, documento)[0][2]
+    assert "(X)" not in tipos and "Outro" not in tipos
 
 
 def test_cabecalho_do_ghe_nao_repete_o_codigo(tmp_path: Path) -> None:
-    # Reversão que mata: voltar a `f"GHE {ghe_id} {nome_ghe}"` no HTML ou no
-    # Word — sai "GHE GHE-01 GHE 01 - ENGENHARIA/PRODUÇÃO".
+    # Reversões que matam: voltar a `f"GHE {ghe_id} {nome_ghe}"` no HTML ou no Word —
+    # sai "GHE GHE-01 GHE 01 - ENGENHARIA/PRODUÇÃO"; usar `titulo_ghe` no Word — sai
+    # "GHE-01 — …", fora da grafia do modelo ("GHE 01 - …").
     documento = _documento_t65()
-    destino = tmp_path / "matriz.docx"
-    renderizar_docx(documento, destino)  # type: ignore[arg-type]
 
     assert "<h2>GHE-01 — ENGENHARIA/PRODUÇÃO</h2>" in renderizar_html(documento)  # type: ignore[arg-type]
-    cabecalhos = [p.text for p in DocxDocument(str(destino)).paragraphs if p.style.name == "Heading 2"]
-    assert cabecalhos == ["GHE-01 — ENGENHARIA/PRODUÇÃO"]
+    faixa = _docx(tmp_path, documento).tables[1].rows[0].cells[0]
+    assert faixa.text == "GHE 01 - ENGENHARIA/PRODUÇÃO"
 
 
 def test_rodape_sai_com_os_rotulos_do_rq61(tmp_path: Path) -> None:
@@ -599,7 +632,10 @@ def test_rodape_sai_com_os_rotulos_do_rq61(tmp_path: Path) -> None:
     ]
     saida = renderizar_html(documento)  # type: ignore[arg-type]
     assert all(f"<p>{linha}</p>" in saida for linha in esperado)
-    assert [p.text for p in DocxDocument(str(destino)).paragraphs][-3:] == esperado
+    rodape = DocxDocument(str(destino)).paragraphs[-3:]
+    assert [p.text for p in rodape] == esperado
+    # Negrito, como no modelo. Reversão que mata: escrever o rodapé sem negrito.
+    assert all(run.bold for p in rodape for run in p.runs)
 
 
 def test_rodape_em_branco_mantem_o_rotulo() -> None:
@@ -627,15 +663,18 @@ def test_linha_do_coordenador_tem_rotulo_e_crm(medico: str, crm: str, esperado: 
     assert CabecalhoDocumento("E", "O", "", "", medico, crm).linha_coordenador() == esperado
 
 
-def test_html_e_word_usam_a_linha_do_coordenador(tmp_path: Path) -> None:
-    # Reversão que mata: voltar a f"{medico} | {crm}" no HTML ou no Word.
+def test_html_e_word_trazem_coordenador_e_crm(tmp_path: Path) -> None:
+    # Reversões que matam: voltar a f"{medico} | {crm}" no HTML; no Word, imprimir o
+    # CRM cru — "14949" sem o prefixo.
     documento = _documento_t65()
-    destino = tmp_path / "matriz.docx"
-    renderizar_docx(documento, destino)  # type: ignore[arg-type]
-
     linha = "Médico(a) Coordenador(a) do PCMSO: Dra. Teste — CRM-GO 0000"
     assert f"<p>{linha}</p>" in renderizar_html(documento)  # type: ignore[arg-type]
-    assert linha in [p.text for p in DocxDocument(str(destino)).paragraphs]
+
+    matriz = MatrizGHE(ghe_id="GHE-01", linhas=[_exame("exame_clinico")], cargos=("A",))
+    cabecalho = CabecalhoDocumento("E", "O", "", "", "DRA. PATRÍCIA", "14949")
+    coordenador = _identificacao(tmp_path, montar_documento([matriz], _VOCAB_CLINICO, cabecalho, _rodape()))[2]
+    assert coordenador[0] == "Médico(a) Coordenador(a) do PCMSO"
+    assert coordenador[1] == "DRA. PATRÍCIA\nCRM 14949"
 
 
 # D-ARQ-73, nota de 01/10/2026 (decisão do Diovanni): ordem e nomes medidos em 32

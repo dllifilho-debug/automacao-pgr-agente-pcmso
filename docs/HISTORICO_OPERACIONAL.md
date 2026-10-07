@@ -12389,3 +12389,26 @@ versão do Streamlit.
 
 **Sem decisão, comportamento anterior mantido:** fatores psicossociais MODERADO no relatório do ASO; "Ausência de agente
 nocivo"; item 1 inteiro.
+
+## Sessão (mesma branch `claude/fervent-shannon-1nq8hw`) — 07/10/2026 — IMPLEMENTAÇÃO: Word da matriz no leiaute das matrizes das médicas (emenda de D-ARQ-73)
+
+**Origem.** Pedido do Diovanni: a matriz Word sair com a mesma cor, fonte e disposição da matriz modelo, "menos o nome do
+Seconci"; referência: as 4 matrizes mais novas do acervo (Vila Brasil 24/09, T65 24/09, Engeseg 22/09, Varandas 16/09);
+texto vermelho fora ("deve ser alguma correção das Dras." — medido: são exclusões riscadas e marcações da revisão).
+
+**Medido.** As 4 convertidas por LibreOffice têm o mesmo leiaute (faixa do GHE `#83CAEB`, Calibri 11, bordas simples,
+A4 com margens 2/2/1,35/1,2 cm, cabeçalho de página RQ.61 com logo, tabela de identificação, GHEs numa tabela contínua
+partida só pela paginação). A matriz modelo do Hetrin 30/09/2026 (subida pelo Diovanni, `cdefd9e`) segue o mesmo
+formulário, com faixa única "SETOR: HETRIN" e cargo em negrito.
+
+**Entrega.** `renderizar_docx` reescrito (cabeçalho de página sem logo, com campos PAGE/NUMPAGES; identificação com o (X) do
+tipo e "Outro:" para texto fora das 4 opções; tabela contínua de GHEs; rodapé em negrito); dica das opções no campo "Tipo
+de documento" da tela. HTML da tela, memorial e relatório do ASO com a paleta anterior. Emenda em `D-ARQ-73` (DECISOES
+v253), `INDICE_DARQ.md` regenerado.
+
+**Verificação.** Conteúdo inalterado: o extrator do `comparar_matriz_gabarito` lê o Word antigo e o novo com resultado
+idêntico nos 3 PGRs determinísticos (41, 86 e 52 cargos). 6 testes de forma do estilo verde substituídos por 8 do leiaute
+novo; varredura inversa 20/20. Smoke visual ok (desktop e mobile). Suíte completa, árvore parada: **1785 → 1787 passed,
+6 skipped** (1194 s). mypy no alvo canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6 passed.
+
+**Push.** Autorizado pelo Diovanni; recusado pelo GitHub com "Internal Server Error" (500) em 5 tentativas nesta sessão.
