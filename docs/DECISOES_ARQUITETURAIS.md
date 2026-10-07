@@ -4816,6 +4816,35 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main e3a5369`). Origem: na tela,
 
 ---
 
+## D-ARQ-93 — Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas
+
+**Status:** DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave). Fatia 1 implementada na mesma sessão.
+
+Sessão branch `claude/cool-ramanujan-njnp7w` (`main cc17dc2`). Antecedente: D-ARQ-92 (agravos das FDS) — o Diovanni disse que o agravo "geralmente pega do PGR" e que os agravos são, no documento final, mais importantes que as frases H.
+
+**Contexto medido (07/10/2026).**
+- O leitor por coordenadas da família Consciente/Fascino (`parser_familia_consciente.py`) usa "AGRAVO" só como **limite direito da coluna FONTE**; o texto da coluna não é guardado. As rotas da IA (GHE e grid) também não pedem o agravo.
+- Nos 3 PGRs determinísticos do acervo (Fascino 237 riscos, Vila Brasil 178, Porto Araras 172): **0 risco com agravo vazio**; 49, 30 e 37 textos distintos. O texto é longo e **continua muito além das linhas de agente e fonte** (533, 420 e 324 linhas só com agravo depois do fim do recorte de agente/fonte).
+- Recorte pela linha inteira da tabela (da linha da categoria até a próxima categoria ou até a linha que começa na coluna GRUPO, como a legenda): nenhum resíduo de cabeçalho de página, legenda ou rodapé; o último risco de cada bloco termina no lugar certo.
+
+**Decisão.**
+
+**cl.1 — O agravo é guardado verbatim, por risco.** `RiscoVerbatim.agravo` → `RiscoPGR.agravo` (texto como o PGR escreve; vazio quando a rota não o lê). Não é normalizado nem classificado.
+
+**cl.2 — Recorte pela linha inteira da tabela, sem mexer no de agente e fonte.** Faixa AGRAVO = do x de "AGRAVO" até o início da avaliação S·P·NÍVEL, calibrada no cabeçalho de cada bloco, como as demais; linhas = da linha da categoria até a próxima categoria ou a linha que começa na coluna GRUPO. O recorte de agente/fonte — que define a matriz — fica exatamente como está. Bloco sem a avaliação localizável: agravo vazio (sem limite direito medido não se chuta).
+
+**cl.3 — Só para os anexos das médicas.** O agravo sai no relatório Riscos para o ASO (coluna por risco, casando o risco pelo agente ou, para o termo não reconhecido, pelo termo do PGR) e no memorial (por GHE). Não entra na matriz assinada, nem em regra, nem em predicado: matriz idêntica é critério de aceite.
+
+**cl.4 — Rota da IA na sessão com a chave.** Pedir o agravo nos prompts das rotas GHE e grid só entra com medição da resposta no app.
+
+**Fronteiras.** D-ARQ-65 (família Consciente) — calibração por bloco reaproveitada, nenhuma fronteira de agente/fonte muda. D-ARQ-92 — os agravos das FDS seguem por produto; os do PGR entram por risco, lado a lado. D-ARQ-22 — risco sem agravo lido não some (a coluna fica "—").
+
+**Fatias.** 1. Rota por coordenadas + documentos. 2. Rotas da IA (GHE e grid), com a chave.
+
+**Critério de aceite da fatia 1.** Matriz completa idêntica à da `main` nos PGRs determinísticos; suíte sem regressão; cada teste com a reversão que o mata; nos 3 PGRs, agravo não vazio nos 587 riscos.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -5070,3 +5099,4 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main e3a5369`). Origem: na tela,
 | v248 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main 6d3075f` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-91`** — a unidade passa a ser o risco (NR-07 7.5.19.1 "c"), não o exame; regra geral pela leitura literal (acidente e ergonômico moderado+ constam); inexistência (cl.7); fatia 2 entregue (documento "Riscos para o ASO" + botão) com rodapé "Uso interno — confidencial" no memorial e no relatório. Matriz inalterada contra a `main` (61 GHEs). |
 | v249 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main e3a5369` (ARQUITETURA + IMPLEMENTAÇÃO, pedido do Diovanni): **`D-ARQ-92` adicionada** — frases H de saúde (H3xx) da FDS como agravos à saúde do produto, lidas de forma determinística e só exibidas; `frases_h` por componente (entrada do motor) fica para fatia medida com a chave da IA. Medido: o cliente real nunca pediu `frases_h` (lacuna da D-ARQ-55 P1). |
 | v250 | 07/10/2026 | Mesma branch (IMPLEMENTAÇÃO, decisão do Diovanni): **nota de aplicação em `D-ARQ-92`** — fatia 3 antecipada: agravos das FDS vinculadas no relatório Riscos para o ASO e no memorial, por GHE (texto + código H); matriz assinada intocada; coluna AGRAVO do PGR para sessão própria. Regressão de 25 testes de tela (PDF falso) pega pela suíte e corrigida. |
+| v251 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main cc17dc2` (ARQUITETURA + IMPLEMENTAÇÃO, pedido do Diovanni): **`D-ARQ-93` adicionada** — agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela (rota por coordenadas); sai no relatório do ASO e no memorial, matriz intocada; rota da IA na sessão com a chave. |

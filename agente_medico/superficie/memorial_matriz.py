@@ -102,6 +102,7 @@ class BlocoMemorial:
     nao_reconhecidos: tuple[str, ...] = ()
     a_confirmar: tuple[str, ...] = ()
     agravos: tuple[str, ...] = ()
+    agravos_pgr: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -287,6 +288,17 @@ def contaminantes_a_confirmar(matriz: MatrizGHE) -> tuple[str, ...]:
     )
 
 
+def agravos_pgr_do_ghe(ghe: GHEPGR) -> tuple[str, ...]:
+    """D-ARQ-93: agravo que o PGR escreve na linha de cada risco do GHE, verbatim — uma linha
+    por risco com agravo lido ("Ruido: A exposição ao ruído…"), sem repetir a mesma."""
+    linhas = (
+        f"{_termo_exibicao(risco.termo or risco.agente or '')}: {_termo_exibicao(risco.agravo)}"
+        for risco in ghe.riscos
+        if risco.agravo
+    )
+    return tuple(dict.fromkeys(linhas))
+
+
 def agravos_do_ghe(ghe: GHEPGR) -> tuple[str, ...]:
     """D-ARQ-92 fatia 3: agravos à saúde das FDS vinculadas ao GHE, uma linha por produto —
     o agravo em texto, como a FDS escreve, e o código H entre parênteses. FDS vinculada sem
@@ -391,6 +403,7 @@ def montar_memorial(
                 ),
                 a_confirmar=contaminantes_a_confirmar(matriz),
                 agravos=agravos_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
+                agravos_pgr=agravos_pgr_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
             )
         )
     return Memorial(
@@ -419,6 +432,7 @@ def linhas_da_tabela(bloco: BlocoMemorial) -> list[tuple[str, str, str, str]]:
 
 RODAPE_CONFIDENCIAL = "Uso interno — confidencial"
 TITULO_AGRAVOS = "Agravos à saúde declarados nas FDS dos produtos deste GHE:"
+TITULO_AGRAVOS_PGR = "Agravos à saúde declarados no PGR para os riscos deste GHE:"
 
 
 def aplicar_rodape_confidencial(documento: Any) -> None:
@@ -532,6 +546,10 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         if bloco.a_confirmar:
             documento.add_paragraph("FDS a pedir ao elaborador do PGR (contaminante a confirmar):")
             for texto in bloco.a_confirmar:
+                documento.add_paragraph(texto, style="List Bullet")
+        if bloco.agravos_pgr:
+            documento.add_paragraph(TITULO_AGRAVOS_PGR)
+            for texto in bloco.agravos_pgr:
                 documento.add_paragraph(texto, style="List Bullet")
         if bloco.agravos:
             documento.add_paragraph(TITULO_AGRAVOS)

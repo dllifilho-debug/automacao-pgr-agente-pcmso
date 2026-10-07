@@ -54,6 +54,9 @@ class RiscoPGR:
     # nivel_risco, e R-BIO-05 e a dispensa por IRRELEVANTE não a leem. Consumidor:
     # R-RX-01-qual, que separa só "com/sem avaliação qualitativa" (12M constante).
     avaliacao_qualitativa_aiha: bool = False
+    # D-ARQ-93: agravo à saúde que o PGR escreve na linha do risco, verbatim, para os
+    # anexos das médicas. O motor não lê.
+    agravo: str = ""
 
 
 @dataclass(frozen=True)
@@ -139,6 +142,8 @@ class RiscoVerbatim:
     # Marcado pela rota grid (D-ARQ-57 peça 5): toda linha da tabela AIHA traz
     # avaliação qualitativa fora da escala P×S. Vira RiscoPGR.avaliacao_qualitativa_aiha.
     avaliacao_qualitativa_aiha: bool = False
+    # D-ARQ-93: coluna AGRAVO da linha do risco, verbatim; "" quando a rota não a lê.
+    agravo: str = ""
 
 
 @dataclass(frozen=True)

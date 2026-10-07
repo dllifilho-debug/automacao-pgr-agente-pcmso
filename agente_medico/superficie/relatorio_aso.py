@@ -16,7 +16,7 @@ from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 
-from agente_medico.motor.tipos import PGR, MatrizGHE, SugestaoASO, VereditoASO
+from agente_medico.motor.tipos import GHEPGR, PGR, MatrizGHE, SugestaoASO, VereditoASO
 from agente_medico.superficie.documento_matriz import (
     _COR_DESTAQUE,
     CabecalhoDocumento,
@@ -48,11 +48,12 @@ TEXTO_INEXISTENCIA = (
 )
 
 _COLUNAS: tuple[tuple[str, float], ...] = (
-    ("Risco", 5.0),
-    ("Sugestão", 2.8),
-    ("Motivo", 9.6),
-    ("Exames na matriz", 4.0),
-    ("Correção", 3.5),
+    ("Risco", 4.0),
+    ("Sugestão", 2.4),
+    ("Motivo", 6.6),
+    ("Agravo à saúde (PGR)", 6.6),
+    ("Exames na matriz", 2.8),
+    ("Correção", 2.5),
 )
 
 
@@ -62,6 +63,7 @@ class LinhaRisco:
     sugestao: str
     motivo: str
     exames: str
+    agravo: str = "—"
 
 
 @dataclass(frozen=True)
@@ -81,13 +83,28 @@ class RelatorioRiscosASO:
     contagem: tuple[tuple[str, int], ...]
 
 
-def _linha(s: SugestaoASO, exames_vocab: dict[str, Any]) -> LinhaRisco:
+def _agravo_pgr(s: SugestaoASO, ghe: GHEPGR | None) -> str:
+    """D-ARQ-93: agravo que o PGR escreve para o risco — casado pelo agente resolvido ou,
+    no termo não reconhecido, pelo termo do PGR. Linhas do PGR do mesmo agente com agravos
+    diferentes saem todas; nenhum agravo lido: "—" (D-ARQ-22)."""
+    if ghe is None:
+        return "—"
+    agravos = (
+        _termo_exibicao(r.agravo)
+        for r in ghe.riscos
+        if r.agravo and ((r.agente == s.risco) if s.reconhecido else (r.agente is None and r.termo == s.risco))
+    )
+    return "\n".join(dict.fromkeys(agravos)) or "—"
+
+
+def _linha(s: SugestaoASO, exames_vocab: dict[str, Any], ghe: GHEPGR | None = None) -> LinhaRisco:
     risco = _agente_exibicao(s.risco) if s.reconhecido else f"{_termo_exibicao(s.risco)} (termo do PGR)"
     return LinhaRisco(
         risco=risco,
         sugestao=ROTULO_VEREDITO[s.veredito],
         motivo=_sanitizar("\n".join(f"{c.texto} (ref. {c.regra})" for c in s.criterios)),
         exames=", ".join(_nome_exame(e, exames_vocab) for e in s.exames) or "—",
+        agravo=_agravo_pgr(s, ghe),
     )
 
 
@@ -105,7 +122,7 @@ def montar_relatorio_aso(
                 ghe_id=matriz.ghe_id,
                 nome_ghe=nome_ghe_exibicao(matriz.nome_ghe),
                 cargos=tuple(_sanitizar(c) for c in matriz.cargos),
-                linhas=tuple(_linha(s, exames_vocab) for s in sugestoes),
+                linhas=tuple(_linha(s, exames_vocab, ghes_pgr.get(matriz.ghe_id)) for s in sugestoes),
                 aptidoes=matriz.sugestao_aso.aptidoes,
                 inexistencia=matriz.sugestao_aso.inexistencia,
                 agravos=agravos_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
@@ -158,7 +175,7 @@ def renderizar_relatorio_aso_docx(
             _tabela(
                 documento,
                 _COLUNAS,
-                [(ln.risco, ln.sugestao, ln.motivo, ln.exames, "") for ln in bloco.linhas],
+                [(ln.risco, ln.sugestao, ln.motivo, ln.agravo, ln.exames, "") for ln in bloco.linhas],
             )
         if bloco.inexistencia:
             documento.add_paragraph(TEXTO_INEXISTENCIA)
