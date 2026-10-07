@@ -437,6 +437,7 @@ def _extrair_riscos(
                 fonte_geradora=" ".join(fonte_palavras).strip(),
                 avaliacao_qualitativa=" ".join(avaliacao_palavras).strip(),
                 agravo=_agravo_da_linha(linhas, i, agravo_x, avaliacao, grupo_x) if grupo_x is not None else "",
+                grupo=primeira.text,
             )
         )
         i = j

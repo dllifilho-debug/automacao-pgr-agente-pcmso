@@ -135,7 +135,7 @@ def hidratar_ghe(
         if resolucao.confianca == Confianca.EXATA:
             riscos.append(
                 RiscoPGR(
-                    tipo="",
+                    tipo=risco_verbatim.grupo,
                     agente=resolucao.slug,
                     quantificacao=quantificacao,
                     severidade=None,
@@ -148,7 +148,7 @@ def hidratar_ghe(
         elif resolucao.confianca == Confianca.FUZZY:
             riscos.append(
                 RiscoPGR(
-                    tipo="",
+                    tipo=risco_verbatim.grupo,
                     agente=resolucao.slug,
                     quantificacao=quantificacao,
                     severidade=None,
@@ -181,7 +181,7 @@ def hidratar_ghe(
             # pendência aqui — em vez de descartá-lo, ele viaja com o risco.
             riscos.append(
                 RiscoPGR(
-                    tipo="",
+                    tipo=risco_verbatim.grupo,
                     agente=None,
                     quantificacao=quantificacao,
                     severidade=None,

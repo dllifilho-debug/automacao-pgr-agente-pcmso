@@ -26,6 +26,11 @@ from agente_medico.motor.tipos import (
 )
 
 _PROTOCOLO_DIR = Path(__file__).parent.parent / "protocolo"
+_PGR_FASCINO = (
+    Path(__file__).parent.parent.parent
+    / "matrizes_originais"
+    / "PGR - CONSCIENTE CONSTRUTORA E INCORPORADORA SPE 0030 - FASCINO  (15.07.26).pdf"
+)
 _HOJE = date(2026, 7, 1)
 
 
@@ -211,6 +216,101 @@ def test_termo_nao_reconhecido_sai_conferir(vocab: dict[str, Any]) -> None:
     relatorio = _relatorio(vocab, _risco("tolueno", "BAIXO"), riscos_pgr=(termo,))
     s = _do(relatorio, "Poeira de gesso acartonado")
     assert (s.reconhecido, s.veredito) == (False, "CONFERIR")
+
+
+def _termo(termo: str, grupo: str, nivel: str | None) -> RiscoPGR:
+    return RiscoPGR(tipo=grupo, agente=None, quantificacao=None, severidade=None, termo=termo, nivel_risco=nivel)
+
+
+def _do_termo(vocab: dict[str, Any], *termos: RiscoPGR) -> SugestaoASO:
+    (s,) = _relatorio(vocab, riscos_pgr=termos).riscos
+    return s
+
+
+def test_termo_nao_reconhecido_moderado_consta_com_o_nivel(vocab: dict[str, Any]) -> None:
+    # D-ARQ-91 emenda 2, e-mail: "iguais ou superiores a moderados". Reversões: o ramo do
+    # termo com CONFERIR fixo (como antes); tirar o teste `_moderado_ou_acima` de
+    # `_criterio_termo` (ACIDENTE MODERADO cai em não consta); tirar o nível do motivo.
+    s = _do_termo(vocab, _termo("Máquinas e equipamentos", "ACIDENTE", "MODERADO"))
+    assert (s.reconhecido, s.veredito, _regras(s)) == (False, "CONSTA", {"R-ASO-06"})
+    assert "MODERADO" in s.criterios[0].texto
+
+
+@pytest.mark.parametrize("grupo", ["ACIDENTE", "ERGONOMICO"])
+def test_termo_nao_reconhecido_acidente_ou_ergonomico_baixo_nao_consta(vocab: dict[str, Any], grupo: str) -> None:
+    # Nenhuma exceção do e-mail alcança acidente e ergonômico. Reversão: tirar o grupo
+    # de `_GRUPOS_SEM_EXCECAO` — aquele grupo volta a sair conferir.
+    s = _do_termo(vocab, _termo("Piso irregular ou em desnível", grupo, "BAIXO"))
+    assert s.veredito == "NAO_CONSTA"
+
+
+@pytest.mark.parametrize("grupo", ["QUIMICO", "FISICO", "BIOLOGICO"])
+def test_termo_nao_reconhecido_baixo_que_pode_ser_excecao_sai_conferir(vocab: dict[str, Any], grupo: str) -> None:
+    # Químico (monitoramento desde baixo, poeira, cancerígeno), físico (ruído/vibração) e
+    # biológico (sem LT, NR-15 Anexo 14) baixos podem constar. Reversão: tratar todo
+    # grupo lido como sem exceção (`if grupo:` dando não consta) — sai NAO_CONSTA.
+    s = _do_termo(vocab, _termo("Poeira respirável", grupo, "BAIXO"))
+    assert s.veredito == "CONFERIR"
+
+
+def test_termo_nao_reconhecido_sem_grupo_lido_sai_conferir(vocab: dict[str, Any]) -> None:
+    # Rotas da IA não leem o grupo. Reversão: decidir por lista de exceção (grupo fora de
+    # QUIMICO/FISICO/BIOLOGICO dá não consta) — o grupo vazio sai NAO_CONSTA.
+    s = _do_termo(vocab, _termo("Máquinas e equipamentos", "", "BAIXO"))
+    assert s.veredito == "CONFERIR"
+
+
+def test_termo_nao_reconhecido_sem_nivel_sai_conferir_mesmo_acidente(vocab: dict[str, Any]) -> None:
+    # Reversão: tirar o ramo `nivel is None` de `_criterio_termo` — ACIDENTE sem nível
+    # cai em não consta.
+    s = _do_termo(vocab, _termo("Ausência de agente nocivo", "ACIDENTE", None))
+    assert s.veredito == "CONFERIR"
+
+
+def test_termo_acidente_baixo_que_cita_altura_nao_sai_nao_consta(vocab: dict[str, Any]) -> None:
+    # R-ASO-03: altura consta sempre, pela aptidão. Reversão: tirar o ramo
+    # `_MARCAS_APTIDAO` — a variante não reconhecida sairia NAO_CONSTA.
+    s = _do_termo(vocab, _termo("Trabalho em Altura (andaime)", "ACIDENTE", "BAIXO"))
+    assert (s.veredito, _regras(s)) == ("CONFERIR", {"R-ASO-03"})
+
+
+def test_linhas_do_mesmo_termo_basta_uma_constar(vocab: dict[str, Any]) -> None:
+    # Reversão: decidir o termo só pela 1ª linha do PGR — BAIXO primeiro dá NAO_CONSTA.
+    s = _do_termo(
+        vocab,
+        _termo("Máquinas e equipamentos", "ACIDENTE", "BAIXO"),
+        _termo("Máquinas e equipamentos", "ACIDENTE", "MODERADO"),
+    )
+    assert s.veredito == "CONSTA"
+
+
+def test_classificacao_moderada_cita_o_item_do_aso_nao_o_dos_exames_laboratoriais(vocab: dict[str, Any]) -> None:
+    # O corte "moderado ou acima" é do e-mail; o item da NR-07 que diz o que vai no ASO é
+    # o 7.5.19.1 "c" (o 7.5.12 trata dos exames laboratoriais). Reversão: voltar o motivo
+    # da classificação a citar o 7.5.12 "b".
+    s = _do(_relatorio(vocab, _risco("queda_de_materiais", "MODERADO")), "queda_de_materiais")
+    (texto,) = [c.texto for c in s.criterios]
+    assert "7.5.19.1" in texto and "7.5.12" not in texto
+
+
+def test_pgr_real_fascino_termos_pelo_grupo_e_nivel(proto: Protocolo) -> None:
+    # Fim a fim pelo PDF: parser -> hidratação -> sugestão. Reversões: não passar
+    # `grupo=` no RiscoVerbatim de `_extrair_riscos`, ou `tipo=""` no NAO_RESOLVIDO de
+    # hidratar_ghe — "Piso irregular" (ACIDENTE BAIXO) volta a sair conferir.
+    from agente_medico.motor.hidratacao import hidratar_pgr
+    from agente_medico.motor.parser_familia_consciente import parsear_arquivo
+    from agente_medico.motor.resolvedor_termos import construir_indice_termos
+
+    indice = construir_indice_termos(
+        proto.vocabulario.agentes, fracoes_sem_agente=proto.vocabulario.fracoes_sem_agente
+    )
+    pgr, _ = hidratar_pgr(parsear_arquivo(_PGR_FASCINO), indice, date(2027, 1, 1), True)
+    assert {r.tipo for g in pgr.ghes for r in g.riscos} == {"FISICO", "QUIMICO", "ERGONOMICO", "ACIDENTE", "BIOLOGICO"}
+
+    matrizes = {m.nome_ghe: m for m in executar(pgr, proto, hoje=_HOJE).matrizes}
+    adm = {s.risco: s.veredito for s in matrizes["ADMINISTRAÇÃO"].sugestao_aso.riscos}
+    assert adm["Piso irregular ou em desnível"] == "NAO_CONSTA"
+    assert matrizes["ADMINISTRAÇÃO"].sugestao_aso.inexistencia is True
 
 
 def test_inexistencia_so_quando_tudo_nao_consta(vocab: dict[str, Any]) -> None:
