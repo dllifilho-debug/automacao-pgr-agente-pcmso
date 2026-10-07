@@ -4699,6 +4699,62 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
 
 ---
 
+## D-ARQ-91 — Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois
+
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7.5.19.1 "d"; exame clínico sempre obrigatório; atividade crítica dividida pela norma). Fatia 1 implementada na mesma sessão.
+
+Sessão branch `claude/cool-ramanujan-njnp7w` (`main cad13ec`). Pedido do Diovanni a partir do e-mail da Dra. Carolini (subcoordenadora de saúde) sobre quais riscos/exames dos PGRs elaborados no Seconci migram para o ASO.
+
+**Contexto.** O e-mail separa PCMSO (recebe todos os riscos) de ASO (só o que precisa de controle médico) e lista critérios: regra geral "moderado ou acima"; químicos acima do nível de ação da NR-09, ou com medidas imediatas no levantamento preliminar, ou quando a classificação do PGR indicar; poeiras pelo Anexo III da NR-07; cancerígenos acima de 10% do limite ou sem avaliação ambiental; agentes sem LT (NR-15 Anexos 13, 13-A e 14); audiometria com ≥ 80 dB(A), moderado ou acima, ou baixo com ototóxico e/ou vibração.
+
+**Texto normativo conferido em `normas/` (vigência conferida pelo Diovanni em 06/10/2026).**
+
+- NR-07 item 7.5.19.1 "d": o ASO indica "os exames ocupacionais clínicos e complementares **a que foi submetido o empregado**". Todo exame realizado consta no ASO; "realizado mas fora do ASO" contraria a norma.
+- NR-07 item 7.5.12 "a"/"b": exames complementares laboratoriais obrigatórios com medidas de prevenção imediatas no levantamento preliminar, exposição acima do nível de ação da NR-09 ou quando a classificação de riscos do PGR indicar.
+- NR-07 item 7.5.19.2: aptidão para atividades específicas, quando definida em NR, consignada no ASO — NR-35 item 35.4.4.1 (altura) e NR-33 item 33.5.19.2 (espaço confinado).
+- NR-07 Anexo II itens 2 e 7; Anexo III item 1; **Anexo V item 4.1.1** (o e-mail cita "Anexo 4"; na NR-07 vigente o item do cancerígeno é o 4.1.1 do Anexo V).
+- NR-09 item 9.6.1 "b" (químico: metade do LT) e "c" (ruído: metade da dose — 80 dB(A) com q=5 da NR-15); NR-09 Anexo I itens 5.2.2 (mãos e braços, aren 2,5 m/s²) e 5.3.2 (corpo inteiro, aren 0,5 m/s²).
+
+**Decisão.**
+
+**cl.1 — Unidade: a linha de exame da matriz gerada.** Para cada exame de cada GHE, o app sugere OBRIGATÓRIO (consta no ASO), NÃO OBRIGATÓRIO pelo critério (sugestão: não solicitar — sem exame, nada consta) ou CONFERIR (o app não tem o dado para decidir), com o critério e o item da norma. É sugestão, revisada pela médica como a matriz (D-ARQ-22 Parte B). A sugestão **não muda** emissão, periodicidade, dispensa nem status da matriz.
+
+**cl.2 — Cada item da NR-07 obriga sozinho.** O exame é obrigatório se **qualquer** critério de qualquer regra que o emitiu obrigar; senão CONFERIR, se algum critério não pôde decidir; senão NÃO OBRIGATÓRIO. Regras `R-ASO-01` a `R-ASO-06` no PROTOCOLO §13.
+
+**cl.3 — Só dado que o motor já tem.** Entradas: `ExameEmitido.motivos` (regra e `OrigemRisco`, D-ARQ-88), `Risco.nivel_risco`, `avaliacao_qualitativa_aiha`, `quantificacao`, `is_ototoxico`, e o vocabulário (`is_carcinogeno_iarc`, `is_ototoxico`, `lt_nr15`). Medição pelos avaliadores existentes (`avaliar_medicao_quimica`, `classificar_ruido`). Nenhum campo novo na tela, nenhuma leitura nova do PDF.
+
+**cl.4 — O que o app não lê vira texto do motivo, não campo.** "Monitoramento desde a classificação baixa" e "medidas de prevenção imediatas" (NR-07 item 7.5.12 "a"/"b") não são lidos do PGR: o exame de risco BAIXO sai NÃO OBRIGATÓRIO com o motivo dizendo que passa a obrigatório se o PGR indicar uma das duas. A médica resolve na revisão.
+
+**cl.5 — D-ARQ-22.** Risco sem classificação (rota sem avaliação, risco implícito, composição de FDS), avaliado na matriz AIHA (nível não guardado, D-ARQ-57 peça 5) ou presumido (D-ARQ-68 cl.5) sai CONFERIR, nunca some.
+
+**cl.6 — Aptidão.** GHE com trabalho em altura ou espaço confinado ganha a linha "consignar aptidão" (NR-07 7.5.19.2 c/c NR-35 35.4.4.1 / NR-33 33.5.19.2), além dos exames.
+
+**Lacuna registrada.** NR-15 Anexos 13, 13-A e 14 ("sempre que reconhecidos") não têm marca confiável: nenhuma das 87 `base_normativa` de `regras.yaml` cita esses anexos, e `tem_lt` está incoerente (tolueno, xileno e chumbo `false`, com LT no Anexo 11) e não é lido pelo motor. Cobertura parcial por `R-ASO-04` (cancerígenos do vocabulário, ex.: benzeno); o resto cai em `R-ASO-06`. Marca própria fica para fatia futura, se a revisão das médicas pedir.
+
+**Fronteiras.**
+- **Motor de emissão intocado:** `sugerir_aso` roda depois da consolidação, sobre as linhas já consolidadas; `MatrizGHE` ganha o campo aditivo `sugestao_aso` (default vazio). Nenhuma regra de `regras.yaml`, predicado ou vocabulário muda.
+- **R-BIO-05** inalterado: exame dispensado por menção documental não é linha da matriz e não entra na sugestão.
+- **Universalidade (D-ARQ-06):** vale para todo PGR — é sugestão revisada, não há perfil por origem.
+
+**Fatias.**
+1. **Núcleo** `motor/sugestao_aso.py::sugerir_aso` + campo `MatrizGHE.sugestao_aso` populado em `executar`. Testes com reversão nomeada.
+2. **Documento** por cargo (exame | sugestão | critério), ao lado da matriz e do memorial, com o botão de download na tela.
+
+**Critério de aceite da fatia 1.**
+- Suíte completa sem regressão contra a linha de base da sessão (árvore parada).
+- Matriz inalterada: as linhas, pendências, observações e status saem idênticos; só o campo novo aparece.
+- Cada teste nomeia a reversão que o mata; varredura inversa feita antes do commit.
+
+**Aplicação — fatia 1 (06/10/2026, branch `claude/cool-ramanujan-njnp7w`, commit `eddc201`).** Cláusulas inalteradas.
+
+- **Implementado.** `motor/sugestao_aso.py::sugerir_aso`; tipos `Criterio`, `SugestaoASO`, `RelatorioASO` em `tipos.py`; `MatrizGHE.sugestao_aso` (default vazio) populado em `executar` logo após `observacoes`. Nenhum arquivo de `protocolo/` tocado.
+- **Matriz inalterada — medido.** Motor da `main cad13ec` (worktree) × branch nos 3 PGRs determinísticos do acervo (Fascino 19 GHEs, Vila Brasil 26, Porto Araras 16): `asdict` de cada `MatrizGHE` sem o campo novo, byte a byte idêntico. Os demais PGRs pedem a rota de IA (sem chave no container): `None` nos dois lados.
+- **Distribuição medida nesses 61 GHEs:** 365 OBRIGATÓRIO, 63 CONFERIR, 2 NÃO OBRIGATÓRIO; 37 GHEs com aptidão a consignar. CONFERIR: 61 `avaliacao_saude_mental` (`R-PSY-05` parte do inventário psicossocial, não de risco classificado) e 2 audiometrias com `ruido_acima_acao` presumida (D-ARQ-68 cl.5). NÃO OBRIGATÓRIO: manganês BAIXO no GHE-17 do Fascino (`manganes_sangue`, `carboxihemoglobina`).
+- **Verificação.** `test_sugestao_aso.py`, 19 testes, varredura inversa 20/20 (19 reversões de `sugestao_aso.py` + remoção da atribuição no orquestrador). Suíte completa, árvore parada: base **1724 passed, 6 skipped** (1087 s) → **1743 passed, 6 skipped** (1014 s). mypy no alvo canônico: limpo, 57 arquivos (56 na base + o módulo novo). `INDICE_DARQ.md` regenerado; `test_gerar_indice_darq.py` 6 passed.
+- **Segue:** fatia 2 (documento por cargo e botão na tela); medição nos PGRs da rota de IA `[A MEDIR]`.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -4949,3 +5005,4 @@ Cláusulas cl.1–cl.5 inalteradas; duas precisões decididas pelo Diovanni na s
 | v244 | 06/10/2026 | Branch `claude/gifted-cerf-0loir2` (docs, informação do Diovanni): **correção na nota de aplicação de `D-ARQ-70` (v243)** — a vigência das cópias de `normas/` usadas como âncora dos aliases do grid da Ricco deixa de ser `[A CONFERIR]`: o Diovanni conferiu em 06/10/2026 que todas as normas da pasta estão vigentes (registrado também em `normas/README.md`). Decisões seguem em **90**. |
 | v245 | 06/10/2026 | Branch `claude/kind-bardeen-ajkpnr`, recriada sobre `main e801cb6` (IMPLEMENTAÇÃO, decisão do Diovanni): **nota de aplicação em `D-ARQ-57` peça 5** — avaliação AIHA do grid conta como avaliação qualitativa para `R-RX-01-qual` (campo `avaliacao_qualitativa_aiha`, sem tocar `nivel_risco`); sílica de PGR grid sem medição passa de 24M a 12M. Nenhuma cláusula alterada. |
 | v246 | 06/10/2026 | Branch `claude/kind-bardeen-ajkpnr`, recriada sobre `main e24740c` (IMPLEMENTAÇÃO — desempenho, decisão do Diovanni): **nota de aplicação em `D-ARQ-80`** — limites do plano pago medidos (RPM 1.000, TPM 2M, RPD 10.000); lotes do Gemini das rotas GHE e grid em paralelo (`_mapear_lotes`, até 5 simultâneos, ordem preservada, `copy_context` para `medir_uso`). Cláusulas inalteradas. |
+| v247 | 06/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, sobre `main cad13ec` (ARQUITETURA + IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-91` adicionada** — sugestão de exames para o ASO por linha da matriz (OBRIGATÓRIO / NÃO OBRIGATÓRIO / CONFERIR), pelo critério normativo de obrigatoriedade (NR-07 7.5.19.1 "d", 7.5.12, 7.5.19.2, Anexos II, III e V; NR-09 9.6.1 e Anexo I) e pelo e-mail da Dra. Carolini; regras `R-ASO-01..06` no PROTOCOLO §13. Fatia 1: `motor/sugestao_aso.py` + campo aditivo `MatrizGHE.sugestao_aso`; emissão intocada. |

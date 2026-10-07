@@ -397,6 +397,30 @@ class GHEContext:
     observacoes: list[Observacao] = field(default_factory=list)
 
 
+# D-ARQ-91: sugestão de exames para o ASO, por linha da matriz.
+Veredito = Literal["OBRIGATORIO", "CONFERIR", "NAO_OBRIGATORIO"]
+
+
+@dataclass(frozen=True)
+class Criterio:
+    veredito: Veredito
+    regra: str
+    texto: str
+
+
+@dataclass(frozen=True)
+class SugestaoASO:
+    exame: str
+    veredito: Veredito
+    criterios: tuple[Criterio, ...]
+
+
+@dataclass(frozen=True)
+class RelatorioASO:
+    linhas: tuple[SugestaoASO, ...] = ()
+    aptidoes: tuple[str, ...] = ()
+
+
 @dataclass
 class MatrizGHE:
     ghe_id: str
@@ -419,6 +443,8 @@ class MatrizGHE:
     nome_ghe: str = ""
     cargos: tuple[str, ...] = ()
     observacoes: tuple[Observacao, ...] = ()
+    # D-ARQ-91: sugestão por linha, calculada depois da consolidação; não muda linha nenhuma.
+    sugestao_aso: RelatorioASO = field(default_factory=RelatorioASO)
 
 
 @dataclass
