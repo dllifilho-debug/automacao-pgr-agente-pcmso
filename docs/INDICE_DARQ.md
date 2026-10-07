@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v247 · 91 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v248 · 91 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -98,4 +98,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v247 · 91 decisões
 | D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4435 | 9422 |
 | D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 (29/09/2026) e 2 (30/09/2026) | 4493 | 7135 |
 | D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4541 | 11320 |
-| D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4702 | 7035 |
+| D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4702 | 10208 |

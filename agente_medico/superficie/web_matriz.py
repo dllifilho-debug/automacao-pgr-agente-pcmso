@@ -770,6 +770,10 @@ def pagina_matriz() -> None:
         renderizar_memorial_docx,
         resumos_do_protocolo,
     )
+    from agente_medico.superficie.relatorio_aso import (
+        montar_relatorio_aso,
+        renderizar_relatorio_aso_docx,
+    )
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.sugestao_vinculo import (
         AVISO_SEM_CASAMENTO,
@@ -1273,6 +1277,7 @@ def pagina_matriz() -> None:
 
             docx_bytes = None
             memorial_bytes = None
+            aso_bytes = None
             if doc is not None:
                 destino_docx = Path(tmp) / "matriz.docx"
                 renderizar_docx(doc, destino_docx)
@@ -1292,6 +1297,12 @@ def pagina_matriz() -> None:
                     destino_memorial,
                 )
                 memorial_bytes = destino_memorial.read_bytes()
+                # D-ARQ-91 fatia 2: riscos para o ASO, anexo não assinado.
+                destino_aso = Path(tmp) / "riscos_aso.docx"
+                renderizar_relatorio_aso_docx(
+                    montar_relatorio_aso(cache.matrizes, cache.exames_vocab), cabecalho, destino_aso
+                )
+                aso_bytes = destino_aso.read_bytes()
 
         st.session_state["web_matriz_cache"] = cache
 
@@ -1366,7 +1377,7 @@ def pagina_matriz() -> None:
             st.subheader("4. Matriz e downloads")
             # Chamada via `st.download_button` dentro de `with coluna`, nunca
             # `coluna.download_button`: os testes espionam o atributo do módulo.
-            col_docx, col_html, col_memorial = st.columns(3)
+            col_docx, col_html, col_memorial, col_aso = st.columns(4)
             if docx_bytes is not None:
                 with col_docx:
                     st.download_button(
@@ -1386,6 +1397,15 @@ def pagina_matriz() -> None:
                         file_name="memorial.docx",
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         help="Anexo para as médicas: por que cada exame e periodicidade. Não entra na matriz assinada.",
+                    )
+            if aso_bytes is not None:
+                with col_aso:
+                    st.download_button(
+                        "Baixar riscos para o ASO",
+                        aso_bytes,
+                        file_name="riscos_aso.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        help="Anexo para as médicas: quais riscos do PGR constam no ASO (NR-07 7.5.19.1 \"c\"). Sugestão a validar.",
                     )
 
             for bloco in doc.blocos:

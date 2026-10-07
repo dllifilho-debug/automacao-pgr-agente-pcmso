@@ -1,0 +1,160 @@
+"""Relatório "riscos para o ASO" (D-ARQ-91 fatia 2): anexo para as médicas, ao lado da
+matriz e do memorial. Por GHE, com os cargos: cada risco com a sugestão (consta no ASO,
+conferir, não consta), o motivo com a regra R-ASO e os exames da matriz que o risco
+motiva. Apresentação-pura sobre `MatrizGHE.sugestao_aso` (D-ARQ-72): nenhuma decisão aqui.
+"""
+
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Sequence
+
+from docx import Document
+from docx.enum.section import WD_ORIENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Cm, Pt
+
+from agente_medico.motor.tipos import MatrizGHE, SugestaoASO, VereditoASO
+from agente_medico.superficie.documento_matriz import (
+    _COR_DESTAQUE,
+    CabecalhoDocumento,
+    _sanitizar,
+    nome_ghe_exibicao,
+    titulo_ghe,
+)
+from agente_medico.superficie.memorial_matriz import (
+    _agente_exibicao,
+    _nome_exame,
+    _tabela,
+    _termo_exibicao,
+    aplicar_rodape_confidencial,
+    data_exibicao,
+)
+
+ROTULO_VEREDITO: dict[VereditoASO, str] = {
+    "CONSTA": "Consta no ASO",
+    "CONFERIR": "Conferir",
+    "NAO_CONSTA": "Não consta",
+}
+_ORDEM: dict[VereditoASO, int] = {"CONSTA": 0, "CONFERIR": 1, "NAO_CONSTA": 2}
+
+TEXTO_INEXISTENCIA = (
+    "Sugestão para o ASO: inexistência de perigos ou fatores de risco que necessitem de "
+    "controle médico previsto no PCMSO (NR-07 item 7.5.19.1 \"c\")."
+)
+
+_COLUNAS: tuple[tuple[str, float], ...] = (
+    ("Risco", 5.0),
+    ("Sugestão", 2.8),
+    ("Motivo", 9.6),
+    ("Exames na matriz", 4.0),
+    ("Correção", 3.5),
+)
+
+
+@dataclass(frozen=True)
+class LinhaRisco:
+    risco: str
+    sugestao: str
+    motivo: str
+    exames: str
+
+
+@dataclass(frozen=True)
+class BlocoRiscos:
+    ghe_id: str
+    nome_ghe: str
+    cargos: tuple[str, ...]
+    linhas: tuple[LinhaRisco, ...]
+    aptidoes: tuple[str, ...]
+    inexistencia: bool
+
+
+@dataclass(frozen=True)
+class RelatorioRiscosASO:
+    blocos: tuple[BlocoRiscos, ...]
+    contagem: tuple[tuple[str, int], ...]
+
+
+def _linha(s: SugestaoASO, exames_vocab: dict[str, Any]) -> LinhaRisco:
+    risco = _agente_exibicao(s.risco) if s.reconhecido else f"{_termo_exibicao(s.risco)} (termo do PGR)"
+    return LinhaRisco(
+        risco=risco,
+        sugestao=ROTULO_VEREDITO[s.veredito],
+        motivo=_sanitizar("\n".join(f"{c.texto} (ref. {c.regra})" for c in s.criterios)),
+        exames=", ".join(_nome_exame(e, exames_vocab) for e in s.exames) or "—",
+    )
+
+
+def montar_relatorio_aso(matrizes: Sequence[MatrizGHE], exames_vocab: dict[str, Any]) -> RelatorioRiscosASO:
+    contagem: Counter[VereditoASO] = Counter()
+    blocos: list[BlocoRiscos] = []
+    for matriz in matrizes:
+        sugestoes = sorted(matriz.sugestao_aso.riscos, key=lambda s: _ORDEM[s.veredito])
+        contagem.update(s.veredito for s in sugestoes)
+        blocos.append(
+            BlocoRiscos(
+                ghe_id=matriz.ghe_id,
+                nome_ghe=nome_ghe_exibicao(matriz.nome_ghe),
+                cargos=tuple(_sanitizar(c) for c in matriz.cargos),
+                linhas=tuple(_linha(s, exames_vocab) for s in sugestoes),
+                aptidoes=matriz.sugestao_aso.aptidoes,
+                inexistencia=matriz.sugestao_aso.inexistencia,
+            )
+        )
+    return RelatorioRiscosASO(
+        blocos=tuple(blocos),
+        contagem=tuple((ROTULO_VEREDITO[v], contagem[v]) for v in _ORDEM if contagem[v]),
+    )
+
+
+def renderizar_relatorio_aso_docx(
+    relatorio: RelatorioRiscosASO, cabecalho: CabecalhoDocumento, destino: Path
+) -> None:
+    documento = Document()
+    for secao in documento.sections:
+        secao.orientation = WD_ORIENT.LANDSCAPE
+        secao.page_width, secao.page_height = secao.page_height, secao.page_width
+        secao.top_margin = secao.bottom_margin = Cm(1.5)
+        secao.left_margin = secao.right_margin = Cm(1.5)
+    aplicar_rodape_confidencial(documento)
+
+    titulo = documento.add_paragraph()
+    titulo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = titulo.add_run("Riscos para o ASO — sugestão")
+    run.bold = True
+    run.font.size = Pt(16)
+    run.font.color.rgb = _COR_DESTAQUE
+    documento.add_paragraph(
+        f"Empresa: {cabecalho.empresa} · Obra: {cabecalho.obra} · Data: {data_exibicao(cabecalho.data)}"
+    )
+    documento.add_paragraph(
+        "O ASO traz \"a descrição dos perigos ou fatores de risco identificados e classificados no PGR que "
+        "necessitem de controle médico previsto no PCMSO, ou a sua inexistência\" (NR-07 item 7.5.19.1 \"c\"). "
+        "O PCMSO continua com todos os riscos; esta é a sugestão de quais constam no ASO, pelos critérios da "
+        "coordenação e da NR-07, para a médica validar. \"Conferir\": o sistema não tem o dado para decidir. "
+        "Os exames aparecem só como informação — no ASO vai o risco. Para corrigir, escreva na coluna Correção."
+    )
+
+    documento.add_heading("Resumo", level=1)
+    for rotulo, n in relatorio.contagem:
+        documento.add_paragraph(f"{rotulo}: {n}", style="List Bullet")
+
+    for bloco in relatorio.blocos:
+        cabecalho_ghe = documento.add_heading(titulo_ghe(bloco.ghe_id, bloco.nome_ghe), level=2)
+        if cabecalho_ghe.runs:
+            cabecalho_ghe.runs[0].font.color.rgb = _COR_DESTAQUE
+        documento.add_paragraph(f"Cargos: {', '.join(bloco.cargos) or '—'}")
+        if bloco.linhas:
+            _tabela(
+                documento,
+                _COLUNAS,
+                [(ln.risco, ln.sugestao, ln.motivo, ln.exames, "") for ln in bloco.linhas],
+            )
+        if bloco.inexistencia:
+            documento.add_paragraph(TEXTO_INEXISTENCIA)
+        for aptidao in bloco.aptidoes:
+            documento.add_paragraph(aptidao, style="List Bullet")
+    documento.save(str(destino))
