@@ -12418,3 +12418,31 @@ tentativa seguinte, junto com o commit do leiaute (`7e299f6`).
 perdido; contra a matriz 30.09.26: subemissão 0, momentos 0, periodicidade 0, superemissão 8 (Psicossocial por `R-PSY-04`
 em 7 cargos; Audiometria por `R-AUD-01` no Menor Aprendiz). Detalhe e decisões pendentes em PENDENCIAS,
 DT-(sessão `claude/fervent-shannon-1nq8hw`)-01.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main 8739c3b`, pós-merge do PR #466) — 07/10/2026 — CONHECIMENTO + IMPLEMENTAÇÃO: R-PSY-06, R-PSY-07, R-AUD-05 (D-ARQ-94)
+
+**Origem.** Decisões pendentes da medição do adendo Hetrin: Avaliação Psicossocial por altura em PGR sem inventário
+(R-PSY-04) e Audiometria no menor aprendiz (R-AUD-01). O Diovanni pediu a conferência do raciocínio contra as normas e as
+anotações das médicas antes de decidir.
+
+**Conferência que mudou a proposta.** Norma: NR-35 35.4.4 e NR-33 33.5.19.1 sem exame separado; NR-07 sem menção a
+fatores psicossociais; NR-01 1.5.3.1.4 obriga o inventário desde 26/05/2026 (daí o alerta R-PSY-07, que não estava na
+1ª proposta). Médicas: Vila Brasil 24/09 com a Psicossocial mantida nos 9 GHEs com altura/confinado e riscada nos 17
+sem; Hetrin 30/09 sem Psicossocial nem Saúde Mental. Menor aprendiz: o "3 de 3" caiu (R70 com o menor só no escritório,
+sem risco no PCMSO; Nova Suíça sem PGR) — a proposta de exceção virou alerta, mantendo a audiometria pelo critério do
+e-mail. Decreto 6.481/2008 `[A CONFERIR]` (Planalto bloqueado no ambiente).
+
+**Entrega.** `regras.yaml`: R-PSY-04 DEPRECATED, R-PSY-06 nova; compostos `altura_com_inventario_psicossocial` (o 1º `e`
+do protocolo) e `aptidao_psicossocial_com_inventario`. `gates.py`: R-PSY-07 (pendência global não bloqueante).
+`pendencias_estruturais.py`: R-AUD-05 (pendência de GHE não bloqueante, grafias "menor"/"menos aprendiz"). Memorial
+(aviso do PGR no Resumo; alertas no Resumo e no GHE) e tela ("Alertas para a revisão médica"). PROTOCOLO v132, DECISOES
+v254 (`D-ARQ-94`), `INDICE_DARQ.md` regenerado, PENDENCIAS atualizada.
+
+**Medido.** Linha de base `8739c3b`: 1787 passed, 6 skipped (1196 s). Nos 3 PGRs determinísticos (com inventário):
+exames, periodicidade e momentos idênticos nos 61 GHEs; 37 motivos R-PSY-04 → R-PSY-06; status, pendências e sugestão do
+ASO idênticos; nenhum alerta novo. Rota da IA (Hetrin) `[A MEDIR — com o Diovanni]`.
+
+**Verificação.** 1ª suíte com 2 falhas de causa nomeada (fixture de 07/09/2026 sem inventário recebe o alerta R-PSY-07;
+`espaco_confinado` passa a ser avaliado pelo composto novo) — asserções atualizadas com a causa escrita, sem afrouxar o
+"nenhum gate bloqueia". Varredura inversa 25/25. Suíte completa, árvore parada: **1787 → 1799 passed, 6 skipped**
+(1225 s). mypy no alvo canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual ok.

@@ -4880,6 +4880,29 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cc17dc2`). Antecedente: D-A
 
 ---
 
+## D-ARQ-94 — Avaliação Psicossocial da altura condicionada ao inventário do PGR; alertas para a revisão médica sem mudar exame
+
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (07/10/2026, na sessão: "aprovo os dois, pode implementar"). Implementada na mesma sessão.
+
+Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b`. Origem: medição do adendo Hetrin "Funções Faltantes" gerado no app contra a matriz das médicas de 30/09/2026 (PENDENCIAS, DT da sessão): superemissão de Avaliação Psicossocial (R-PSY-04) em 7 cargos com altura e de Audiometria (R-AUD-01) no menor aprendiz.
+
+**Conferência feita antes da decisão (normas/ e acervo, 07/10/2026).**
+- NR-35 35.4.4 e NR-33 33.5.19.1 mandam considerar os fatores psicossociais na aptidão, sem prescrever exame separado; a NR-07 não menciona fatores psicossociais. Nível 1 de D-ARQ-22 não resolve.
+- Médicas (nível 2): Hetrin 14/09 e 30/09 (PGR sem inventário) sem Psicossocial nem Saúde Mental, inclusive em cargos com altura; Vila Brasil 24/09 (com inventário) com a Psicossocial mantida nos 9 GHEs com altura/espaço confinado e riscada nos 17 sem; folha da Dra. Carolini com o ramo da altura partindo do risco psicossocial.
+- NR-01 1.5.3.1.4 (vigente desde 26/05/2026): o gerenciamento abrange os fatores psicossociais — PGR posterior sem inventário está em desacordo.
+- Menor aprendiz: o precedente "3 de 3 sem audiometria" não se sustentou (R70: menor só no escritório, sem risco no PCMSO; Nova Suíça sem PGR no acervo); resta o Hetrin, n=1, contra o critério escrito do e-mail (audiometria com risco ≥ moderado).
+
+**Decisão.**
+- **cl.1 — R-PSY-06 sucede R-PSY-04.** Altura só com inventário psicossocial no PGR (composto `altura_com_inventario_psicossocial`, `e`); espaço confinado sem a condição (`[INTERPRETADO]`). Primeiro composto do protocolo com `e`; nomeado, não literal na regra.
+- **cl.2 — Alerta, não exame, quando o dado do PGR conflita com a norma ou com a conduta.** R-PSY-07: pendência global não bloqueante para PGR emitido desde 26/05/2026 sem inventário. R-AUD-05: pendência de GHE não bloqueante para menor aprendiz com ruído; a audiometria segue R-AUD-01. Nenhum dos dois muda status da matriz (pendência não bloqueante, D-ARQ-71 cl.3).
+- **cl.3 — O alerta chega à médica.** Tela (pendências globais; bloco "Alertas para a revisão médica") e memorial (aviso do PGR no Resumo; alertas no Resumo e no bloco do GHE). A matriz assinada não muda.
+
+**Aplicação (07/10/2026).**
+- **Medido nos 3 PGRs determinísticos (61 GHEs, com inventário):** exames, periodicidade e momentos idênticos; em 37 linhas de Avaliação Psicossocial o motivo passa de R-PSY-04 para R-PSY-06; status, pendências e sugestão do ASO idênticos; nenhum alerta novo. O efeito em PGR sem inventário (Hetrin) se mede na rota da IA, com o Diovanni `[A MEDIR]`.
+- **Verificação.** `test_alertas_revisao.py` (10 casos) e 5 testes de R-PSY-06 em `test_orquestrador.py`; 2 testes de integração atualizados com a causa escrita (7→6 linhas; espaço confinado avaliado). Varredura inversa 23/23. Suíte e mypy: ver HISTORICO.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -5137,3 +5160,4 @@ Sessão branch `claude/cool-ramanujan-njnp7w` (`main cc17dc2`). Antecedente: D-A
 | v251 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main cc17dc2` (ARQUITETURA + IMPLEMENTAÇÃO, pedido do Diovanni): **`D-ARQ-93` adicionada** — agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela (rota por coordenadas); sai no relatório do ASO e no memorial, matriz intocada; rota da IA na sessão com a chave. |
 | v252 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, sobre `main 7381098` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-91`** — termo do PGR não reconhecido decide pela classificação e pela coluna GRUPO (moderado+ consta; acidente/ergonômico abaixo não consta; químico/físico/biológico baixo e sem grupo conferem); grupo do PGR guardado em `RiscoPGR.tipo`; fonte do corte moderado corrigida para o e-mail sobre a NR-07 7.5.19.1 "c". Matriz inalterada. |
 | v253 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-73`** — o Word da matriz sai no leiaute das matrizes RQ.61 das médicas (4 de setembro/2026): cabeçalho de página do formulário sem o logo, tabela de identificação com o (X) do tipo, GHEs numa tabela contínua com faixa azul `#83CAEB`, Calibri 11. Texto vermelho das médicas fora (é correção). Conteúdo inalterado. |
+| v254 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-94` adicionada** — Avaliação Psicossocial da altura condicionada ao inventário psicossocial do PGR (R-PSY-06 sucede R-PSY-04); alertas para a revisão médica sem mudar exame: PGR sem inventário depois da vigência na NR-01 (R-PSY-07) e menor aprendiz com ruído (R-AUD-05). |

@@ -4124,3 +4124,16 @@ Arquivos do app (matriz, memorial, riscos para o ASO) recebidos no chat, versão
 
 **Status:** ABERTA — item 1 (agora com a evidência acima para a pergunta (b)), Menor Aprendiz × `R-AUD-01`, psicossocial
 MODERADO no ASO, "Ausência de agente nocivo", leitura do nível AIHA.
+
+**Decidido e implementado (07/10/2026, D-ARQ-94, decisão do Diovanni após conferência na norma e no acervo).**
+- **Pergunta (b) — altura sem inventário:** `R-PSY-06` sucede `R-PSY-04`; a Avaliação Psicossocial da altura passa a
+  exigir o inventário psicossocial do PGR; espaço confinado segue sem a condição (`[INTERPRETADO]`). PGR emitido desde
+  26/05/2026 sem inventário ganha o alerta `R-PSY-07` (NR-01 1.5.3.1.4).
+- **Menor aprendiz × `R-AUD-01`:** sem exceção. A audiometria segue `R-AUD-01` (critério do e-mail: risco ≥ moderado) e
+  o alerta `R-AUD-05` leva o caso à revisão médica. Conferência que mudou a proposta: o "3 de 3" não se sustentou (R70:
+  menor só no escritório, sem risco; Nova Suíça sem PGR no acervo).
+- **Base legal do menor:** Decreto 6.481/2008 (Lista TIP) `[A CONFERIR — fora de normas/, Planalto bloqueado no
+  ambiente]`.
+
+**Status:** ABERTA — item 1 da folha (perguntas (a), (c), (d) e as leituras incertas), psicossocial MODERADO no ASO,
+"Ausência de agente nocivo", leitura do nível AIHA, medição de R-PSY-06/R-PSY-07 na rota da IA (Hetrin, com o Diovanni).
