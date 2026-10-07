@@ -21,7 +21,11 @@ from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 
-from agente_medico.motor.estagios.pendencias_estruturais import TIPO_CONTAMINANTE_A_CONFIRMAR
+from agente_medico.motor.estagios.gates import TIPO_PGR_SEM_INVENTARIO_PSICOSSOCIAL
+from agente_medico.motor.estagios.pendencias_estruturais import (
+    TIPO_CONTAMINANTE_A_CONFIRMAR,
+    TIPO_MENOR_APRENDIZ_COM_RUIDO,
+)
 from agente_medico.motor.tipos import (
     GHEPGR,
     PGR,
@@ -103,6 +107,7 @@ class BlocoMemorial:
     a_confirmar: tuple[str, ...] = ()
     agravos: tuple[str, ...] = ()
     agravos_pgr: tuple[str, ...] = ()
+    alertas: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -118,6 +123,7 @@ class Memorial:
     blocos: tuple[BlocoMemorial, ...]
     contagem_certeza: tuple[tuple[str, int], ...]
     regras_usadas: tuple[RegraUsada, ...]
+    avisos_pgr: tuple[str, ...] = ()
 
 
 _LEGENDA_MOMENTOS = (
@@ -288,6 +294,26 @@ def contaminantes_a_confirmar(matriz: MatrizGHE) -> tuple[str, ...]:
     )
 
 
+def alertas_do_ghe(matriz: MatrizGHE) -> tuple[str, ...]:
+    """R-AUD-05: alerta para a revisão médica que não muda exame (menor aprendiz com ruído
+    declarado no PGR); sem esta lista ele ficaria só na pendência, fora do anexo."""
+    return tuple(
+        _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
+        for p in matriz.pendencias
+        if p.tipo == TIPO_MENOR_APRENDIZ_COM_RUIDO
+    )
+
+
+def avisos_do_pgr(pendencias_globais: Sequence[Pendencia]) -> tuple[str, ...]:
+    """R-PSY-07: aviso sobre o PGR inteiro (sem inventário psicossocial depois da vigência
+    na NR-01), no resumo do memorial."""
+    return tuple(
+        _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
+        for p in pendencias_globais
+        if p.tipo == TIPO_PGR_SEM_INVENTARIO_PSICOSSOCIAL
+    )
+
+
 def agravos_pgr_do_ghe(ghe: GHEPGR) -> tuple[str, ...]:
     """D-ARQ-93: agravo que o PGR escreve na linha de cada risco do GHE, verbatim — uma linha
     por risco com agravo lido ("Ruido: A exposição ao ruído…"), sem repetir a mesma."""
@@ -379,6 +405,7 @@ def montar_memorial(
     resumos: Mapping[str, str],
     pgr: PGR | None = None,
     pendencias: Sequence[Pendencia] = (),
+    pendencias_globais: Sequence[Pendencia] = (),
 ) -> Memorial:
     ghes_pgr = {g.id: g for g in pgr.ghes} if pgr is not None else {}
     blocos: list[BlocoMemorial] = []
@@ -404,6 +431,7 @@ def montar_memorial(
                 a_confirmar=contaminantes_a_confirmar(matriz),
                 agravos=agravos_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
                 agravos_pgr=agravos_pgr_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
+                alertas=alertas_do_ghe(matriz),
             )
         )
     return Memorial(
@@ -418,6 +446,7 @@ def montar_memorial(
             )
             for regra_id, motivo in sorted(usadas.items())
         ),
+        avisos_pgr=avisos_do_pgr(pendencias_globais),
     )
 
 
@@ -502,6 +531,8 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
     documento.add_paragraph(f"{total} exames na matriz, em {len(memorial.blocos)} GHEs. Base de cada um:")
     for rotulo, n in memorial.contagem_certeza:
         documento.add_paragraph(f"{rotulo}: {n}", style="List Bullet")
+    for aviso in memorial.avisos_pgr:
+        documento.add_paragraph(aviso, style="List Bullet")
     nao_pedidos = sum(len(b.nao_pedidos) for b in memorial.blocos)
     if nao_pedidos:
         documento.add_paragraph(f"Exames dispensados pelo nível de risco do PGR: {nao_pedidos}", style="List Bullet")
@@ -518,6 +549,12 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         documento.add_paragraph(
             f"FDS a pedir ao elaborador do PGR para confirmar contaminante: "
             f"{', '.join(b.ghe_id for b in a_confirmar)}.",
+            style="List Bullet",
+        )
+    com_alerta = [b for b in memorial.blocos if b.alertas]
+    if com_alerta:
+        documento.add_paragraph(
+            f"Alertas para a revisão médica: {', '.join(b.ghe_id for b in com_alerta)}.",
             style="List Bullet",
         )
 
@@ -546,6 +583,10 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
         if bloco.a_confirmar:
             documento.add_paragraph("FDS a pedir ao elaborador do PGR (contaminante a confirmar):")
             for texto in bloco.a_confirmar:
+                documento.add_paragraph(texto, style="List Bullet")
+        if bloco.alertas:
+            documento.add_paragraph("Alertas para a revisão médica:")
+            for texto in bloco.alertas:
                 documento.add_paragraph(texto, style="List Bullet")
         if bloco.agravos_pgr:
             documento.add_paragraph(TITULO_AGRAVOS_PGR)

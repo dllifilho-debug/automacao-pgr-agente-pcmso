@@ -435,6 +435,13 @@ emite por outro gatilho, ao lado. Veículo: `D-ARQ-66` (emissão incondicional, 
 `todo_trabalhador`) — a linha incondicional não conta para o tri-estado (cl.2); GHE sem nenhum
 risco resolvido continua BLOQUEADA.
 
+#### R-AUD-05 — Menor aprendiz com ruído declarado no PGR: alerta para a revisão médica `[INTERPRETADO — prioridade na revisão de saída]`
+**Predicado:** cargo do GHE com "menor aprendiz" (sem acento e maiúscula; "menos aprendiz" também, grafia do adendo Hetrin, pág. 8) e ruído entre os riscos do GHE.
+
+**Consequência:** pendência não bloqueante (`menor_aprendiz_com_ruido`), na conferência da tela e no memorial (Resumo e bloco do GHE). **Não muda exame:** a audiometria segue `R-AUD-01`, como pede o e-mail da Dra. Carolini ("audiometria [...] risco classificado como igual ou superior a moderado"). Status da matriz inalterado.
+
+**Por que alerta e não exceção (decisão do Diovanni, 07/10/2026).** A matriz das médicas do Hetrin 30/09/2026 deu só o Exame Clínico ao menor aprendiz, cujo cartão no PGR declara ruído MODERADO habitual com protetor auricular — um caso, contra o critério escrito do e-mail. Os outros dois "menor aprendiz" sem audiometria do acervo não são precedente: o da R70 22/09/2026 trabalha "exclusivamente dentro do escritório" e o PCMSO não lhe atribui risco; o da Nova Suíça C 181 não tem PGR nem PCMSO no acervo. A exposição de menor de 18 anos a ruído pode ser restrição legal (Decreto 6.481/2008, Lista TIP) `[A CONFERIR — texto não está em normas/, Planalto bloqueado no ambiente]`; por isso vai à médica, sem decisão do app.
+
 ### 5.3 Espirometria
 
 #### R-ESP-01 — Default e exceção via EPI `[DEPRECATED — sucedida por R-ESP-02 em 003.EI]`
@@ -711,7 +718,7 @@ Trabalhador de GHE cujo PGR documenta a seção de inventário de risco psicosso
 
 **Deprecada em 30/09/2026 (decisão do Diovanni, sobre a norma).** Os dois exames têm fundamentos diferentes e passam a ter gatilhos diferentes: a Avaliação Psicossocial vem da NR-35 e da NR-33 (R-PSY-04); a Av. Médica de Saúde Mental, do inventário psicossocial do PGR (R-PSY-05). Corpo preservado por rastreabilidade.
 
-#### R-PSY-04 — Avaliação Psicossocial para trabalho em altura ou em espaço confinado `[DERIVADO — NR-35 item 35.4.4; NR-33 item 33.5.19.1; Resolução CFP n.º 2/2022]`
+#### R-PSY-04 — Avaliação Psicossocial para trabalho em altura ou em espaço confinado `[DEPRECATED — 07/10/2026, sucedida por R-PSY-06: a altura passa a exigir o inventário psicossocial do PGR]`
 GHE com **trabalho em altura** ou **espaço confinado** (composto `aptidao_psicossocial_nr`) → **Avaliação Psicossocial**, 12 meses, **adm/per/MR**, com ou sem inventário psicossocial no PGR.
 
 **Base normativa `[CONFERIDO — normas/, 30/09/2026]`.** NR-35 **35.4.4**: *"Cabe à organização avaliar o estado de saúde dos empregados que exercem atividades de trabalho em altura de acordo com o estabelecido na NR-07 […], considerando patologias que poderão originar mal súbito e queda de altura, bem como os fatores psicossociais."* NR-33 **33.5.19.1**: *"Os trabalhadores designados para atividades em espaços confinados devem ser avaliados quanto à aptidão física e mental, considerando os fatores de riscos psicossociais."* A avaliação feita por psicólogo nos exames ocupacionais, conforme as NRs, é regulamentada pela Resolução CFP n.º 2/2022 (DOU 26/01/2022). A norma obriga a considerar os fatores psicossociais na aptidão; o exame é a forma da coordenação. Vigência: o texto vale na revisão dos arquivos de `normas/`, que o Diovanni mantém atualizados a partir do Gov.br/MTE (`normas/README.md`: o arquivo é substituído no mesmo caminho quando a norma muda).
@@ -719,6 +726,26 @@ GHE com **trabalho em altura** ou **espaço confinado** (composto `aptidao_psico
 **Fora da regra.** Operação de equipamento pesado (terceira perna de `atividade_critica`): nenhuma NR a associa a fatores psicossociais — varridos os 32 arquivos de NR de `normas/`. Equipe de resposta a emergências com inflamáveis (NR-20 **20.15.6**): exige os fatores psicossociais, mas não há agente no vocabulário — `DT-(sessão claude/keen-curie-xdm7kb)-04`.
 
 **Precedente e divergência medida.** Gabarito T65 24.09.26 (PDF com a OBS de adequação ao protocolo psicossocial de 14/09/2026) e planilha da Dra. Patrícia: Psicossocial só em altura/espaço confinado. Nas 22 matrizes de set/2026 (14 a 24/09/2026), 15 documentos — entre eles a versão `.doc` do mesmo T65 — dão a Psicossocial também fora dessas atividades, 261 de 1.113 cargos: conduta acima do mínimo normativo, não contrária.
+
+**Deprecada em 07/10/2026 (decisão do Diovanni).** Ver R-PSY-06. Corpo preservado por rastreabilidade.
+
+#### R-PSY-06 — Avaliação Psicossocial para trabalho em altura com inventário psicossocial, ou em espaço confinado `[DERIVADO — NR-35 item 35.4.4; NR-33 item 33.5.19.1; matrizes das médicas]`
+GHE com **trabalho em altura e inventário psicossocial no PGR** (composto `altura_com_inventario_psicossocial`), ou com **espaço confinado** (composto `aptidao_psicossocial_com_inventario`) → **Avaliação Psicossocial**, 12 meses, **adm/per/MR**.
+
+**Norma `[CONFERIDO — normas/, 07/10/2026]`.** NR-35 **35.4.4**: a avaliação de saúde de quem trabalha em altura segue a NR-07, item 7.5.3, *"considerando patologias que poderão originar mal súbito e queda de altura, bem como os fatores psicossociais"*. NR-33 **33.5.19.1**: *"aptidão física e mental, considerando os fatores de riscos psicossociais"*. Nenhuma das duas prescreve exame separado, e a NR-07 não menciona fatores psicossociais: a norma não decide a forma (nível 1 de D-ARQ-22 não resolve).
+
+**Precedente das médicas (nível 2) — altura só com inventário.** Hetrin 14/09/2026: 0 de 28 cargos com Psicossocial, Pedreiro com altura no PGR; Hetrin 30/09/2026: 0 de 36, encarregados com altura; os dois PGRs sem inventário (o replay de 05/10 já medira 24 células de Psicossocial a mais por R-PSY-04 contra a matriz de 14/09). Vila Brasil 24/09/2026, PGR com inventário: Psicossocial mantida nos 9 GHEs com altura/espaço confinado e riscada pela Dra. nos 17 sem. Folha da Dra. Carolini de 07/10/2026: o ramo "altura → Saúde Mental + Avaliação Psicossocial" parte de "Risco Psicossocial".
+
+**Espaço confinado sem a condição `[INTERPRETADO]`.** A folha o escreve em linha própria ("Espaço Confinado = Avaliação Psicossocial"); nenhum caso do acervo separa espaço confinado de altura.
+
+**Sem inventário em PGR emitido a partir de 26/05/2026:** alerta de R-PSY-07. Sucede R-PSY-04 (mudança de escopo exige ID nova).
+
+#### R-PSY-07 — PGR sem inventário psicossocial depois da vigência na NR-01: alerta `[DERIVADO — NR-01 item 1.5.3.1.4]`
+**Predicado:** PGR emitido a partir de **26/05/2026** (vigência do item, Portaria MTE 765/2025) sem o inventário de riscos psicossociais (`detectar_psicossocial` falso no PGR inteiro).
+
+**Consequência:** pendência global não bloqueante (`pgr_sem_inventario_psicossocial`), na conferência da tela e no Resumo do memorial. Não gera nem tira exame; sem ela, a falta do inventário — que tira a Saúde Mental (R-PSY-05) e a Psicossocial da altura (R-PSY-06) — passaria em silêncio.
+
+**Norma `[CONFERIDO — normas/nr-01-atualizada-2025-i-3, 07/10/2026]`.** NR-01 **1.5.3.1.4**: *"O gerenciamento de riscos ocupacionais deve abranger os riscos que decorrem dos agentes físicos, químicos, biológicos, riscos de acidentes e riscos relacionados aos fatores ergonômicos, incluindo os fatores de risco psicossociais relacionados ao trabalho."* Vigência a conferir no Gov.br/MTE.
 
 #### R-PSY-05 — Av. Médica de Saúde Mental, condicionada ao inventário psicossocial do PGR `[INTERPRETADO]`
 Trabalhador de GHE cujo PGR documenta a seção de inventário de risco psicossocial (mesmo sinal da R-PSY-03, `detectar_psicossocial`) → **Av. Médica de Saúde Mental**, 12 meses, **adm/per/MR**.
@@ -1380,3 +1407,4 @@ Quando todo risco do GHE sai NÃO CONSTA, o relatório sugere a inexistência de
 | v129 | 06/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, sobre `main cad13ec` (IMPLEMENTAÇÃO, decisão do Diovanni — D-ARQ-91): **§13 criada — `R-ASO-01` a `R-ASO-06`** (sugestão de exames para o ASO por linha da matriz; cada uma com o item da norma no marcador). Nenhuma regra de emissão criada ou alterada. |
 | v130 | 07/10/2026 | Branch `claude/cool-ramanujan-njnp7w`, recriada sobre `main 6d3075f` (IMPLEMENTAÇÃO, decisão do Diovanni — emenda D-ARQ-91): **§13 reescrita por risco** — o ASO traz o risco (NR-07 7.5.19.1 "c"), não o exame. `R-ASO-01` DEPRECATED; `R-ASO-02..06` reescritas sobre o risco; `R-ASO-06` vale para todo grupo, inclusive acidente e ergonômico (leitura literal); **`R-ASO-07` CRIADA** (inexistência). Nenhuma regra de emissão alterada. |
 | v131 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, sobre `main 7381098` (IMPLEMENTAÇÃO, decisão do Diovanni — emenda 2 de D-ARQ-91): **`R-ASO-06`** — termo do PGR não reconhecido decide pela classificação e pela coluna GRUPO, em vez de CONFERIR fixo; marcador corrigido (o corte moderado é do e-mail, nível 2, sobre a NR-07 7.5.19.1 "c"; o 7.5.12 "b" fica só na medição). Nenhuma regra de emissão alterada. |
+| v132 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b` (IMPLEMENTAÇÃO, decisão do Diovanni — D-ARQ-94): **`R-PSY-04` DEPRECATED, sucedida por `R-PSY-06`** (altura só com inventário psicossocial no PGR; espaço confinado inalterado); **`R-PSY-07` criada** (alerta: PGR emitido desde 26/05/2026 sem inventário, NR-01 1.5.3.1.4); **`R-AUD-05` criada** (alerta: menor aprendiz com ruído declarado; audiometria mantida). |

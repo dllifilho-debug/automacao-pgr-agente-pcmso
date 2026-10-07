@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v253 · 93 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v254 · 94 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -101,3 +101,4 @@ Fonte: DECISOES_ARQUITETURAIS.md v253 · 93 decisões
 | D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4723 | 13746 |
 | D-ARQ-92 | Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS") | 4807 | 6543 |
 | D-ARQ-93 | Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave) | 4854 | 3021 |
+| D-ARQ-94 | Avaliação Psicossocial da altura condicionada ao inventário do PGR; alertas para a revisão médica sem mudar exame | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (07/10/2026, na sessão: "aprovo os dois, pode implementar") | 4883 | 2970 |

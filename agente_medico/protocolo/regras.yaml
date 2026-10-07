@@ -109,6 +109,34 @@ regras:
       Equipamento pesado fora: nenhuma NR o associa a fatores psicossociais. Brigada de
       inflamáveis (NR-20 20.15.6) sem agente no vocabulário — DT própria."
     resumo_clinico: "Trabalho em altura ou em espaço confinado → avaliação psicossocial anual. A NR-35 (item 35.4.4) e a NR-33 (item 33.5.19.1) mandam considerar os fatores psicossociais na avaliação de aptidão; a avaliação é feita por psicólogo (Resolução CFP n.º 2/2022)."
+    # [DEPRECATED — 07/10/2026, decisão do Diovanni] Altura passa a exigir o inventário
+    # psicossocial no PGR (R-PSY-06): matrizes das médicas Hetrin 14/09 e 30/09 (PGR
+    # sem inventário, altura sem psicossocial) e Vila Brasil 24/09 (com inventário,
+    # mantida nos 9 GHEs com altura/espaço confinado, riscada nos 17 sem), e a folha
+    # da Dra. Carolini (ramo da altura parte do risco psicossocial). Mudança de escopo
+    # exige ID nova (convenção R-PSY-01→02→03→04).
+    status: DEPRECATED
+
+  - id: R-PSY-06
+    quando: aptidao_psicossocial_com_inventario
+    emite:
+      - {exame: avaliacao_psicossocial, periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "NR-35 item 35.4.4 (a avaliação de saúde de quem trabalha em altura
+      segue a NR-07, item 7.5.3, 'considerando patologias que poderão originar mal
+      súbito e queda de altura, bem como os fatores psicossociais') e NR-33 item
+      33.5.19.1 (espaço confinado: 'aptidão física e mental, considerando os fatores
+      de riscos psicossociais'), textos conferidos em normas/ em 07/10/2026; nenhuma
+      das duas prescreve exame separado e a NR-07 não menciona fatores psicossociais.
+      Sucede R-PSY-04 (DEPRECATED). Altura: só com inventário psicossocial no PGR
+      [DERIVADO — precedente das médicas: Hetrin 14/09 (0 de 28 cargos, Pedreiro com
+      altura) e 30/09 (0 de 36; encarregados com altura), PGR sem inventário; Vila
+      Brasil 24/09, com inventário, psicossocial mantida nos 9 GHEs com altura/espaço
+      confinado e riscada nos 17 sem; folha da Dra. Carolini de 07/10/2026, ramo da
+      altura a partir do risco psicossocial]. Espaço confinado: sem condição de
+      inventário [INTERPRETADO — a folha o escreve em linha própria; nenhum caso do
+      acervo separa espaço confinado de altura]. PGR sem inventário emitido a partir
+      de 26/05/2026 gera o alerta de R-PSY-07 (NR-01 item 1.5.3.1.4)."
+    resumo_clinico: "Trabalho em altura com inventário de riscos psicossociais no PGR, ou trabalho em espaço confinado → avaliação psicossocial anual. A NR-35 (item 35.4.4) e a NR-33 (item 33.5.19.1) mandam considerar os fatores psicossociais na aptidão; a exigência do inventário para a altura segue as matrizes das médicas."
     status: DERIVADO
 
   - id: R-PSY-05

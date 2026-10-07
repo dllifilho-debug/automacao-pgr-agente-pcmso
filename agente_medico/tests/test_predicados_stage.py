@@ -61,7 +61,9 @@ def test_popula_primitivos_referenciados() -> None:
     # curto-circuita assim que altura=True é encontrado. Decisão arquitetural:
     # Stage 4 preserva semântica preguiçosa, cacheia apenas o caminho real de
     # avaliação. Ver docs/HISTORICO_OPERACIONAL.md § Sessão 002.D2.
-    assert "espaco_confinado" not in ctx.predicados
+    # 07/10/2026 (R-PSY-06): o composto da psicossocial exige o inventário na perna
+    # da altura; sem ele o `ou` segue e avalia espaco_confinado, que entra no cache.
+    assert ctx.predicados["espaco_confinado"] is False
 
     # motorista_equipamento_pesado (003.ED, substitui maquina_pesada em
     # atividade_critica.ou) É avaliado mesmo com o curto-circuito acima,

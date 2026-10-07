@@ -47,7 +47,9 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     proto = carregar(_PROTOCOLO_DIR)
 
     pendencias_globais = stage_1_gates(pgr)
-    assert pendencias_globais == []
+    # PGR de 07/09/2026 sem inventário psicossocial: só o alerta não bloqueante da
+    # R-PSY-07 (NR-01 1.5.3.1.4, desde 07/10/2026); nenhum gate bloqueia.
+    assert [(p.regra_origem, p.bloqueante) for p in pendencias_globais] == [("R-PSY-07", False)]
 
     ghe = pgr.ghes[0]
     ctx = GHEContext(pgr_ghe=ghe)
@@ -62,7 +64,9 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     # R-VIB-01, R-AUD-01, R-AUD-02, R-VIB-02 adicionam vibracao_corpo_inteiro, ruido_acima_acao, ruido
     # ao cache a partir de 002.E.
     assert {"altura", "atividade_critica"}.issubset(ctx.predicados.keys())
-    assert "espaco_confinado" not in ctx.predicados
+    # 07/10/2026 (R-PSY-06): a perna da altura do composto da psicossocial exige o
+    # inventário; sem ele o `ou` segue e avalia espaco_confinado, que entra no cache.
+    assert ctx.predicados["espaco_confinado"] is False
     # motorista_equipamento_pesado (003.ED, substitui maquina_pesada em
     # atividade_critica.ou) ENTRA no cache apesar do curto-circuito acima,
     # porque R-AUD-01 também o referencia diretamente em seu "quando".
@@ -84,7 +88,8 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     # GHEPGR.psicossocial=True. 30/09/2026: a avaliação psicossocial volta a
     # sair aqui por outra via — R-PSY-04, trabalho em altura (NR-35 35.4.4) —;
     # a saúde mental (R-PSY-05) segue dependendo do inventário.
-    assert "avaliacao_psicossocial" in nomes
+    # 07/10/2026: R-PSY-06 sucede R-PSY-04 — altura sem inventário não a emite mais.
+    assert "avaliacao_psicossocial" not in nomes
     assert "avaliacao_saude_mental" not in nomes
 
     # R-AUD-04 (piso incondicional todo_trabalhador) foi DEPRECATED em 003.EZ
@@ -92,7 +97,7 @@ def test_pipeline_gates_emissao_consolidacao_atividade_critica() -> None:
     # ruído, então R-AUD-01/02 não disparam (nem emitem, nem bloqueiam) — a
     # audiometria volta a sair só por R-PKG-ATIVCRIT (adm/per/MR, sem dem) e
     # cai no loop genérico abaixo, junto dos outros 4 exames do pacote.
-    _FORA_DO_PACOTE = {"exame_clinico", "avaliacao_psicossocial"}  # R-CLI-01; R-PSY-04 (altura)
+    _FORA_DO_PACOTE = {"exame_clinico"}  # R-CLI-01
     exames_ativcrit = [e for e in exames_final if e.exame.strip().lower() not in _FORA_DO_PACOTE]
     for e in exames_ativcrit:
         assert e.periodicidade_meses == 12

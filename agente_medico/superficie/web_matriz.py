@@ -802,6 +802,7 @@ def pagina_matriz() -> None:
     )
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, FraseH, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.memorial_matriz import (
+        alertas_do_ghe,
         contaminantes_a_confirmar,
         montar_memorial,
         renderizar_memorial_docx,
@@ -1342,6 +1343,7 @@ def pagina_matriz() -> None:
                         resumos_do_protocolo(_protocolo_padrao().regras),
                         pgr=cache.pgr_hidratado,
                         pendencias=cache.pendencias,
+                        pendencias_globais=cache.pendencias_globais,
                     ),
                     cabecalho,
                     destino_memorial,
@@ -1391,7 +1393,15 @@ def pagina_matriz() -> None:
                 for p in pendencias:
                     st.write(linha_pendencia(p))
 
-        if not cache.pendencias_globais and not pendencias and not a_confirmar:
+        # R-AUD-05: alerta por GHE para a revisão médica.
+        alertas = [texto for m in cache.matrizes or () for texto in alertas_do_ghe(m)]
+        if alertas:
+            with caixa_conferencia:
+                st.markdown("**Alertas para a revisão médica**")
+                for texto in alertas:
+                    st.write(f"- {texto}")
+
+        if not cache.pendencias_globais and not pendencias and not a_confirmar and not alertas:
             caixa_conferencia.caption("Nenhuma pendência a confirmar.")
 
         # Elo C: guarda anti-documento-vazio, independente do gate — documento
