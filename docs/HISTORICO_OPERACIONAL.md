@@ -12411,4 +12411,10 @@ idêntico nos 3 PGRs determinísticos (41, 86 e 52 cargos). 6 testes de forma do
 novo; varredura inversa 20/20. Smoke visual ok (desktop e mobile). Suíte completa, árvore parada: **1785 → 1787 passed,
 6 skipped** (1194 s). mypy no alvo canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6 passed.
 
-**Push.** Autorizado pelo Diovanni; recusado pelo GitHub com "Internal Server Error" (500) em 5 tentativas nesta sessão.
+**Push.** Autorizado pelo Diovanni; recusado pelo GitHub com "Internal Server Error" (500) em 5 tentativas, aceito na
+tentativa seguinte, junto com o commit do leiaute (`7e299f6`).
+
+**Medição na rota da IA (Hetrin, adendo "Funções Faltantes", gerado pelo Diovanni no app).** 8 cargos, nenhum GHE
+perdido; contra a matriz 30.09.26: subemissão 0, momentos 0, periodicidade 0, superemissão 8 (Psicossocial por `R-PSY-04`
+em 7 cargos; Audiometria por `R-AUD-01` no Menor Aprendiz). Detalhe e decisões pendentes em PENDENCIAS,
+DT-(sessão `claude/fervent-shannon-1nq8hw`)-01.

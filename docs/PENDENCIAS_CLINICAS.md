@@ -4099,3 +4099,28 @@ instrumento de comparação).
 - **"Ausência de agente nocivo"** (8 linhas sem nível, Porto Araras) segue CONFERIR; proposta da sessão: tirar do relatório e tratar como sinal de inexistência.
 
 **Status:** ABERTA — item 1 inteiro e os dois pontos acima.
+
+**Atualização (07/10/2026) — medição na rota da IA: Hetrin, adendo "Funções Faltantes", gerado pelo Diovanni no app com a chave.**
+Entrada: `matrizes_originais/ADENDO - FUNÇÕES FALTANTES - PGR RICCO.pdf` (20 páginas, 8 funções); gabarito:
+`MATRIZ DE EXAMES(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 30.09.26.doc` (36 cargos, PGR base + adendo; validação Dra. Carolini).
+Arquivos do app (matriz, memorial, riscos para o ASO) recebidos no chat, versão em produção anterior a esta branch.
+- **Cobertura:** o app sai com os 8 cargos do adendo, nenhum GHE perdido. "Menos Aprendiz" (pág. 8) e "Auxiliar
+  Administratvo" (pág. 7) são grafias do próprio PDF, copiadas verbatim.
+- **Contra o gabarito, nos 8 cargos** (`comparar_matriz_gabarito` + pareamento manual dos 2 de grafia diferente):
+  subemissão 0; divergência de momentos 0; divergência de periodicidade 0; superemissão 8 células.
+- **Superemissão 1 — Avaliação Psicossocial nos 6 encarregados e no Auxiliar Administrativo (7 células),** por `R-PSY-04`
+  (origem "QUEDAS DE ALTURA", NR-35 35.4.4). O PGR não tem inventário psicossocial e a matriz das médicas não traz nem
+  Psicossocial nem Saúde Mental. É a pergunta (b) do item 1 ("altura num PGR sem inventário"): resposta das médicas
+  aqui = nenhum dos dois, como no Hetrin 14/09 (Pedreiro com altura, zero psicossocial em 28/28). n=2, mesmo cliente.
+  Hierarquia: a NR-35 manda considerar os fatores psicossociais na aptidão, sem prescrever exame separado; a conduta das
+  médicas é precedente de nível 2. Decisão do Diovanni: `R-PSY-04` passa a exigir o inventário, ou fica como está.
+- **Superemissão 2 — Audiometria no Menor Aprendiz (1 célula),** por `R-AUD-01` (ruído listado sem medição, pedido por
+  precaução — D-ARQ-68). O gabarito dá só o Exame Clínico ao menor aprendiz. Decisão do Diovanni: menor aprendiz como
+  exceção à presunção de ruído, ou não.
+- **Riscos para o ASO:** 14 CONSTA, 137 CONFERIR (105 termos não reconhecidos, 18 avaliados na matriz AIHA, 14 de
+  composição de FDS). O PGR classifica em AIHA, nível não lido pelo app (D-ARQ-57 peça 5): a emenda 2 de D-ARQ-91 não
+  muda esses termos (sem nível → CONFERIR). Ler o nível AIHA é sessão própria, se o Diovanni quiser.
+- O "315 = 100%" do resumo do comparador conta cargos não pareados; a medida válida é a dos 8 cargos acima.
+
+**Status:** ABERTA — item 1 (agora com a evidência acima para a pergunta (b)), Menor Aprendiz × `R-AUD-01`, psicossocial
+MODERADO no ASO, "Ausência de agente nocivo", leitura do nível AIHA.
