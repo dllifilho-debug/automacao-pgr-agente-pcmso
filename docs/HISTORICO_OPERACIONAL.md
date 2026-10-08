@@ -12509,3 +12509,19 @@ gerados, "Mecânico" como grupo).
 
 **Verificação.** 1 teste, varredura inversa 3/3. Suíte completa, árvore parada: **1825 → 1826 passed, 6 skipped** (1621 s).
 mypy no alvo canônico: limpo, 59 arquivos; `transcritor_gemini_pgr.py` limpo. `test_gerar_indice_darq.py` 6 passed.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main dce7bf4`, pós-merge do PR #470) — 08/10/2026 — IMPLEMENTAÇÃO: nome dos arquivos gerados
+
+**Origem.** Pedido do Diovanni: os downloads saíam com nome genérico ("matriz.docx", "matriz.html", "memorial.docx",
+"riscos_aso.docx") mesmo com Empresa, Obra, Tipo e Data preenchidos.
+
+**Medido.** Quase todas as matrizes de `matrizes_originais/` seguem `MATRIZ DE EXAMES(TIPO)EMPRESA OBRA DD.MM.AA`. Padrão
+aprovado pelo Diovanni.
+
+**Entrega.** `nome_arquivo` em `superficie/web_matriz.py`: tipo em maiúsculas entre parênteses, empresa, obra e data como
+digitadas (barra → ponto), caracteres proibidos no Windows retirados, campos vazios de fora, nada digitado → nome genérico.
+Os quatro downloads usam a função. `_submeter_formulario` (teste) aceita campos extras. PENDENCIAS: item resolvido.
+
+**Verificação.** `test_nome_arquivo.py` (5 casos), varredura inversa 8/8. Suíte completa, árvore parada: **1826 → 1831
+passed, 6 skipped** (984 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke visual não rodado: a tela não muda, só o nome
+do arquivo baixado.
