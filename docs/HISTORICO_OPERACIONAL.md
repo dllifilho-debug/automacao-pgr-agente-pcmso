@@ -12563,3 +12563,27 @@ de `matrizes_originais/`), `normas/README.md` atualizado. PROTOCOLO v134 (R-AUD-
 **Verificação.** `test_alertas_revisao.py` 12 casos, varredura inversa 9/9. 3 PGRs determinísticos: nenhum "menor
 aprendiz" (Fascino tem "Aprendiz Administrativo de Obra", sem idade no PGR), 0 alertas. Suíte completa, árvore parada:
 **1832 → 1834 passed, 6 skipped** (1015 s). mypy no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main 6572b9b`, pós-merge do PR #473) — 08/10/2026 — CONHECIMENTO + IMPLEMENTAÇÃO: espirometria por produtos domissanitários (R-ESP-05)
+
+**Levantamento.** NR-07 Anexo III: item 3.1 obriga espirometria só para poeira mineral; item 3.2 manda os expostos a outros
+agressores pulmonares fazer espirometria se desenvolverem sinais ou sintomas respiratórios. Censo: 9 PGRs do acervo com
+domissanitários na tabela de riscos. Cruzamento com as matrizes das médicas: em todo GHE de limpeza com poeira mineral
+(Fascino, Porto Araras I, CMO Aurora e adendo, Verde Maris, Vistamerica, Hetrin 2025) a espirometria já sai por R-ESP-02;
+WV Maldi (sem poeira) teve espirometria e RX 60M, que o produto não explica; só a Vila Brasil escritório (GHE 07, sem
+poeira) tem espirometria de rotina explicada pelo domissanitário, nas 3 versões. Opções A (exame), B (norma) e C (alerta)
+propostas; recomendação B, aprovada pelo Diovanni.
+
+**Entrega.** Agente `domissanitarios` (5 termos do censo); regra R-ESP-05 com `mencao_condicional` — não emite; a matriz
+leva "produtos domissanitários no PGR — espirometria somente se houver sinais ou sintomas respiratórios (NR-07 Anexo III
+item 3.2)", o memorial explica o não pedido; a observação sai quando outra regra pede o exame no GHE.
+`Observacao.condicao` (None = R-BIO-05). PROTOCOLO v135, PENDENCIAS.
+
+**Medido.** 3 PGRs determinísticos contra a `main` (worktree no scratchpad): exames, status e pendências iguais; os 3 GHEs
+de limpeza passam a resolver `domissanitarios`; só a Vila Brasil GHE-07 ganha a observação (Fascino e Porto Araras GHE-05
+seguem com espirometria por R-ESP-02, sem observação).
+
+**Verificação.** `test_esp_domissanitarios.py` 6 casos, varredura inversa 6/6 (a reversão "regra fora" refeita apagando o
+bloco: a 1ª tentativa, `status: DEPRECATED`, era sobrescrita pelo `status` do fim do bloco). 1ª suíte: 1 falha, a guarda do
+índice de termos 210 → 216 — duas grafias redundantes saíram do vocabulário e a guarda foi atualizada com a origem. Suíte
+completa refeita, árvore parada: **1834 → 1840 passed, 6 skipped** (945 s). mypy no alvo canônico: limpo, 59 arquivos.
