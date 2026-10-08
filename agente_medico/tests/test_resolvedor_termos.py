@@ -96,7 +96,9 @@ def test_indice_real_tem_210_entradas(indice_real: IndiceTermos) -> None:
     # 202 -> 210 (branch `claude/gifted-cerf-0loir2`, 05/10/2026): +8 termos do grid AIHA da
     # Ricco (REV06, rota grid no app) — 3 de `ruido` (NR-15 Anexos 1 e 2), "Poeira - PNOS",
     # "Poeira - Sílica", "Quedas de altura" e 2 de `vibracao_mao_braco` (D-ARQ-70).
-    assert len(indice_real.slug_por_forma) == 210
+    # 210 -> 216 (branch `claude/fervent-shannon-1nq8hw`, 08/10/2026): +1 slug `domissanitarios`
+    # (R-ESP-05) e +5 termos do censo de 9 PGRs (Fascino, Vila Brasil, Porto Araras I, Sinduscon-GO).
+    assert len(indice_real.slug_por_forma) == 216
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(

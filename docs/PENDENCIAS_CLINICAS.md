@@ -4176,6 +4176,11 @@ agora em `normas/D6481.pdf`. R-TIP-01 sucede R-AUD-05: alerta do menor aprendiz 
 reconhece (itens 55, 82, 83, 84, 85), com as exceções dos Arts. 2º e 3º e o item 58 no texto (emenda em D-ARQ-94). O
 `[A CONFERIR]` do decreto sai.
 
+**Espirometria por produtos domissanitários — decidida (08/10/2026, opção B).** Levantamento: 9 PGRs com domissanitários;
+nos GHEs de limpeza com poeira mineral a espirometria já sai por R-ESP-02; só a Vila Brasil escritório (GHE 07, sem poeira)
+tem espirometria de rotina nas matrizes das médicas. NR-07 Anexo III 3.2: só com sinais ou sintomas. R-ESP-05: sem exame
+de rotina, condição em observação na matriz. A divergência da Vila Brasil fica para a revisão de saída; se outro cliente
+sem poeira repetir, volta a opção A.
+
 **Status:** ABERTA — item 1 da folha ((a), (c), (d), leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
-nocivo", 3ª rodada do ALT T65 2024-2026, "Mecânico" como grupo, espirometria por produtos domissanitários, parser de
-coordenadas e a ALT 65.
+nocivo", 3ª rodada do ALT T65 2024-2026, "Mecânico" como grupo, parser de coordenadas e a ALT 65.

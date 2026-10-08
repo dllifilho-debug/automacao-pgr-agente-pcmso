@@ -172,7 +172,13 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
                     nome_ghe=ctx.pgr_ghe.nome,
                     cargos=ctx.pgr_ghe.cargos,
                 )
-        matriz.observacoes = tuple(ctx.observacoes)
+        # R-ESP-05: se outra regra já pede o exame (sílica no mesmo GHE → R-ESP-02), a
+        # menção "só com sintomas" contradiria a linha emitida e sai.
+        emitidos = {ln.exame for ln in matriz.linhas}
+        matriz.observacoes = tuple(
+            o for o in ctx.observacoes
+            if o.condicao is None or not set(o.exames_dispensados) <= emitidos
+        )
         matriz.sugestao_aso = sugerir_aso(
             matriz.linhas, ctx.riscos, ghe.riscos, protocolo.vocabulario.agentes,
             protocolo.vocabulario.niveis_risco,
