@@ -12446,3 +12446,30 @@ ASO idênticos; nenhum alerta novo. Rota da IA (Hetrin) `[A MEDIR — com o Diov
 `espaco_confinado` passa a ser avaliado pelo composto novo) — asserções atualizadas com a causa escrita, sem afrouxar o
 "nenhum gate bloqueia". Varredura inversa 25/25. Suíte completa, árvore parada: **1787 → 1799 passed, 6 skipped**
 (1225 s). mypy no alvo canônico: limpo, 58 arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual ok.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main a9a4427`, pós-merge do PR #467) — 07-08/10/2026 — CONHECIMENTO + IMPLEMENTAÇÃO: nível de risco do PGR em qualquer escala para o ASO (D-ARQ-95)
+
+**Origem.** Pedido do Diovanni: ler o nível AIHA (Hetrin com 137 "Conferir" no ASO). Ao ver a 1ª proposta (escala AIHA
+da Ricco, só a rota grid), o Diovanni lembrou que "tem que valer para qualquer PGR" — a proposta virou desenho genérico.
+
+**Medido.** Legenda AIHA no próprio PGR (item 4.1.1, pág. 12 do Hetrin 14.09.26): nível Trivial…Muito Alto e
+Classificação Irrelevante/De atenção/Crítica/Não tolerável. Censo dos 32 PGRs do acervo
+(`docs/referencia/CENSO_NIVEIS_RISCO.md`): 5 escalas com ordem na legenda (P×S, BS 8800, AIHA Ricco, Sinduscon-GO, Ricco
+Administração); "superior" e "elevado" não são nível no acervo; "Médio" só na posição do Moderado. Decisões do Diovanni:
+desenho genérico, Médio no corte `[INTERPRETADO]`, Tolerável pela legenda.
+
+**Entrega.** `vocabulario/niveis_risco.yaml` (carregado pelo protocolo, validado, opcional); `motor/niveis_pgr.py`
+(`classificar_nivel_pgr`: mais longo primeiro, conflito ou desconhecido → None); `nivel_pgr` em RiscoVerbatim → RiscoPGR
+→ Risco (hidratação: campo da IA ou o texto de `avaliacao_qualitativa`); prompts GHE (unitário e lote) e grid pedem o
+rótulo, o grid também a letra do TIPO DE RISCO → grupo; `sugestao_aso` (R-ASO-05/06 e termo não reconhecido) usa o
+rótulo quando não há nível P×S. `avaliacao_qualitativa`, `nivel_risco` e as guardas P×S intocados. DECISOES v255
+(`D-ARQ-95`), PROTOCOLO v133, `INDICE_DARQ.md` regenerado, PENDENCIAS atualizada.
+
+**Medido.** Linha de base: 1799 passed, 6 skipped (árvore de `0dbce8c` = `main a9a4427`, medida na sessão). Nos 3 PGRs
+determinísticos (P×S): matriz, relatório do ASO e pendências idênticos à `main` (cópia limpa da main no scratchpad).
+Rotas da IA `[A MEDIR — com o Diovanni e a chave]`.
+
+**Verificação.** `test_niveis_pgr.py` (24 casos), varredura inversa 20/20. 1ª suíte: 4 falhas em testes com protocolo
+mínimo sem o YAML novo — o arquivo passou a opcional (ausente → sem rótulos → conferir); a reversão "obrigatório" é a que
+eles pegam. Suíte completa, árvore parada: **1799 → 1823 passed, 6 skipped** (1405 s). mypy no alvo canônico: limpo, 59
+arquivos (58 + `niveis_pgr.py`). `test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: nenhuma mudança de tela.

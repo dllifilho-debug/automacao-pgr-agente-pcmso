@@ -4903,6 +4903,27 @@ Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b`. O
 
 ---
 
+## D-ARQ-95 — Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO
+
+**Status:** DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (08/10/2026, na sessão: desenho genérico aprovado — "tem que valer para qualquer PGR"; "Médio" no corte `[INTERPRETADO]` e "Tolerável" pela legenda, pela recomendação). Implementada na mesma sessão.
+
+Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427`. Origem: o relatório do ASO do Hetrin (rota grid) saía com 137 "Conferir" porque o nível AIHA era descartado; o Diovanni lembrou que a solução tem de valer para qualquer PGR (D-ARQ-06).
+
+**Medido antes da decisão.** Censo dos 32 PGRs do acervo (`docs/referencia/CENSO_NIVEIS_RISCO.md`): cinco escalas, todas com a ordem na legenda do próprio PGR — P×S (Irrelevante…Crítico), BS 8800 (Trivial…Intolerável), AIHA Ricco (Trivial…Muito Alto, com a Classificação de prioridade à parte), Sinduscon-GO (Irrelevante…Médio…Crítico) e Ricco Administração (Baixo…Médio…Crítico). "Superior" e "elevado" não são nível no acervo. Rotas: a de coordenadas e a da IA GHE já transcrevem o nível P×S em `avaliacao_qualitativa`, de propósito só na escala P×S (regra 6b do prompt e `_restringir_avaliacao_a_escala_pxs`, que protegem R-BIO-05 e R-RX-01); o grid descarta o nível (D-ARQ-57 peça 5).
+
+**Decisão.**
+- **cl.1 — Rótulo verbatim em campo próprio.** `nivel_pgr` (RiscoVerbatim → RiscoPGR → Risco) guarda o rótulo do nível como o PGR escreve, em qualquer escala. Rotas da IA: campo novo nos prompts GHE e grid (no grid, também a letra do TIPO DE RISCO → grupo). Rota de coordenadas e P×S: o texto de `avaliacao_qualitativa`. `avaliacao_qualitativa`, `nivel_risco` e as guardas P×S não mudam: o motor de emissão continua só na P×S.
+- **cl.2 — Posição por vocabulário, não por código.** `vocabulario/niveis_risco.yaml`: rótulo → `abaixo` ou `corte` (em relação ao "iguais ou superiores a moderados" do e-mail), com a escala de origem. Validado no carregamento. Escala nova = entrada nova no YAML, com a legenda.
+- **cl.3 — Nunca adivinhar.** Rótulo fora do vocabulário, ou rótulos de posições diferentes no mesmo texto: sem posição → CONFERIR (D-ARQ-22). Casamento do rótulo mais longo ao mais curto ("Não tolerável" não vira "Tolerável").
+- **cl.4 — Só a sugestão do ASO lê.** R-ASO-05/06 e o termo não reconhecido: com nível P×S, decidem como antes; sem ele, pelo vocabulário. Ruído de outra escala abaixo do corte com ototóxico ou vibração consta (o "mesmo baixo" do e-mail); na P×S segue só BAIXO.
+- **cl.5 — Fora.** Rota card (EBSERH) não transcreve nível — sem mudança. Coluna de Classificação AIHA não é lida (é prioridade de ação, não nível).
+
+**Aplicação (08/10/2026).**
+- **Medido nos 3 PGRs determinísticos (P×S):** matriz, relatório do ASO e pendências idênticos à `main a9a4427` (cópia de trabalho limpa da main no scratchpad). O efeito está nas rotas da IA (Hetrin pelo grid; PGRs BS 8800 pela rota GHE) `[A MEDIR — com o Diovanni e a chave]`.
+- **Verificação.** `test_niveis_pgr.py` (24 casos), varredura inversa 20/20. Suíte e mypy: ver HISTORICO.
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -5161,3 +5182,4 @@ Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b`. O
 | v252 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, sobre `main 7381098` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-91`** — termo do PGR não reconhecido decide pela classificação e pela coluna GRUPO (moderado+ consta; acidente/ergonômico abaixo não consta; químico/físico/biológico baixo e sem grupo conferem); grupo do PGR guardado em `RiscoPGR.tipo`; fonte do corte moderado corrigida para o e-mail sobre a NR-07 7.5.19.1 "c". Matriz inalterada. |
 | v253 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-73`** — o Word da matriz sai no leiaute das matrizes RQ.61 das médicas (4 de setembro/2026): cabeçalho de página do formulário sem o logo, tabela de identificação com o (X) do tipo, GHEs numa tabela contínua com faixa azul `#83CAEB`, Calibri 11. Texto vermelho das médicas fora (é correção). Conteúdo inalterado. |
 | v254 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-94` adicionada** — Avaliação Psicossocial da altura condicionada ao inventário psicossocial do PGR (R-PSY-06 sucede R-PSY-04); alertas para a revisão médica sem mudar exame: PGR sem inventário depois da vigência na NR-01 (R-PSY-07) e menor aprendiz com ruído (R-AUD-05). |
+| v255 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-95` adicionada** — nível de risco do PGR em qualquer escala para a sugestão do ASO: rótulo verbatim (`nivel_pgr`), vocabulário `niveis_risco.yaml` do censo de 32 PGRs (5 escalas), desconhecido → conferir; motor de emissão intocado. |

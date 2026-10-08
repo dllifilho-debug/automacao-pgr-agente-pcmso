@@ -4137,3 +4137,12 @@ MODERADO no ASO, "Ausência de agente nocivo", leitura do nível AIHA.
 
 **Status:** ABERTA — item 1 da folha (perguntas (a), (c), (d) e as leituras incertas), psicossocial MODERADO no ASO,
 "Ausência de agente nocivo", leitura do nível AIHA, medição de R-PSY-06/R-PSY-07 na rota da IA (Hetrin, com o Diovanni).
+
+**Leitura do nível AIHA — implementada de forma genérica (08/10/2026, D-ARQ-95).** O nível de risco do PGR, em qualquer
+escala do acervo (P×S, BS 8800, AIHA Ricco, Sinduscon-GO, Ricco Administração — censo em
+`docs/referencia/CENSO_NIVEIS_RISCO.md`), passa a decidir a sugestão do ASO quando não há nível P×S; "Médio" no corte
+`[INTERPRETADO]`. Matriz de exames intocada. Medido nos 3 PGRs determinísticos: sem mudança (P×S). Pendente: medição na
+rota da IA (Hetrin pelo grid, PGRs BS 8800 pela rota GHE) com o Diovanni; rota card (EBSERH) segue sem nível.
+
+**Status:** ABERTA — item 1 da folha ((a), (c), (d), leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
+nocivo", medição das rotas da IA (R-PSY-06/07 e D-ARQ-95), Decreto 6.481/2008 `[A CONFERIR]`.
