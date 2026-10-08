@@ -473,6 +473,30 @@ regras:
     resumo_clinico: "Solda no GHE → espirometria a cada 2 anos. A NR-07, Anexo III, item 3.2 pede espirometria para fumos metálicos só com sintomas respiratórios; o exame de rotina segue a planilha atualizada da Dra. Patrícia e as serralherias das matrizes de set/2026 (NR-07, item 7.5.18) — confirmar."
     status: INTERPRETADO
 
+  # R-ESP-05 [DERIVADO — NR-07 Anexo III item 3.2]: domissanitários são "outros agentes
+  # agressores pulmonares" — espirometria só com sinais ou sintomas respiratórios, achado do
+  # exame clínico que o motor não vê (D-ARQ-09). mencao_condicional não emite: a matriz leva a
+  # condição em observação; se outra regra já pede o exame no GHE, a observação sai.
+  - id: R-ESP-05
+    quando: domissanitarios
+    mencao_condicional: "produtos domissanitários no PGR — espirometria somente se houver sinais ou sintomas respiratórios (NR-07 Anexo III item 3.2)"
+    emite:
+      - exame: espirometria
+        periodicidade_meses: 24
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "NR-07 Anexo III (texto oficial em normas/nr-07): item 3.1 obriga espirometria
+      para poeiras minerais; item 3.2 — 'outros agentes agressores pulmonares indicados no
+      inventário de riscos do PGR, que não as poeiras minerais, deverão ser submetidos a
+      espirometria se desenvolverem sinais ou sintomas respiratórios'. Saneantes domissanitários
+      (água sanitária, hipoclorito, detergente) caem no 3.2: sem exame de rotina, a condição vai
+      na matriz. Decisão do Diovanni (08/10/2026, opção B) sobre o levantamento de 9 PGRs: em todo
+      GHE de limpeza com poeira mineral a espirometria já sai por R-ESP-02; só a Vila Brasil
+      escritório (GHE 07, sem poeira) tem espirometria de rotina nas matrizes das médicas — um
+      cliente, contra a norma; a revisão delas decide."
+    resumo_clinico: "Produtos de limpeza (domissanitários) no PGR → espirometria só se o trabalhador tiver sinais ou sintomas respiratórios (NR-07, Anexo III, item 3.2). A matriz leva a observação; não é exame de rotina."
+    status: DERIVADO
+
   - id: R-RX-02
     quando: fumos_metalicos
     emite:

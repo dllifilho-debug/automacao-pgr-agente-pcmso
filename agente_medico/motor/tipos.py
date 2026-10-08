@@ -398,6 +398,9 @@ class Observacao:
     medicao: Optional[str] = None
     # D-ARQ-88 fatia 2 (Q4): termos do PGR dos riscos do agente, na ordem.
     termos: tuple[str, ...] = ()
+    # R-ESP-05: a norma condiciona o exame a um achado do exame clínico (NR-07 Anexo III
+    # item 3.2: sinais ou sintomas respiratórios); a condição sai na menção. None = R-BIO-05.
+    condicao: Optional[str] = None
 
 
 @dataclass(frozen=True)

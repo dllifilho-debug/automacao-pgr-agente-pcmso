@@ -263,6 +263,8 @@ def _linha(
 def _nao_pedido(obs: Observacao, exames_vocab: dict[str, Any]) -> str:
     exames = ", ".join(_nome_exame(slug, exames_vocab) for slug in obs.exames_dispensados)
     agente = "; ".join(dict.fromkeys(_termo_exibicao(t) for t in obs.termos)) or _agente_exibicao(obs.agente)
+    if obs.condicao is not None:
+        return _sanitizar(f"{exames}: não pedido de rotina — {agente}: {obs.condicao}. (ref. {obs.regra_dispensa})")
     motivo = f"{agente} com risco {obs.nivel_risco.lower()} no PGR"
     if obs.medicao is not None:
         motivo += f" e medição abaixo do nível de ação ({obs.medicao})"

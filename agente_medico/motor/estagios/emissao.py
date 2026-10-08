@@ -307,6 +307,24 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
         if not resultado:
             continue
 
+        if "mencao_condicional" in regra:
+            ctx.observacoes.append(
+                Observacao(
+                    regra_id=str(regra["id"]),
+                    regra_dispensa=str(regra["id"]),
+                    agente=str(regra["quando"]),
+                    nivel_risco="",
+                    exames_dispensados=tuple(str(item["exame"]) for item in regra["emite"]),
+                    termos=tuple(
+                        dict.fromkeys(
+                            r.termo for r in ctx.riscos if r.agente == regra["quando"] and r.termo
+                        )
+                    ),
+                    condicao=str(regra["mencao_condicional"]),
+                )
+            )
+            continue
+
         nivel: str | None = None
         medicao: str | None = None
         if "mencao_documental" in regra and not _medicao_acima_do_nivel_de_acao(

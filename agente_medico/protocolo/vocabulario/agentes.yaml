@@ -514,6 +514,21 @@ agentes:
     protocolos_especiais: []
     disparador_clinico: false
     fuzzy_permitido: true
+  domissanitarios:
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: [R-ESP-05]
+    # R-ESP-05: saneantes domissanitários (classe de produto, sem CAS único). Grafias medidas
+    # no censo de 08/10/2026 (9 PGRs): "Produtos DomissanItários" (Fascino p. 41, Vila Brasil
+    # 25.08.26 p. 31 e 06.10.26 p. 35, Vistamerica 28.07 p. 41/101, CMO Aurora p. 48),
+    # "Produtos Domissantários" (Porto Araras I p. 40), "Produtos Saneantes e Domissanitários"
+    # (Sinduscon-GO 27.08.26 p. 37/41). Hipoclorito de sódio fica fora: é substância com CAS,
+    # não a classe.
+    # "Produtos DomissanItários" e "Domissanitários" não entram: a normalização (casefold) já os
+    # leva a "Produtos Domissanitários" e ao próprio slug.
+    termos: ["Produtos Domissanitários", "Produtos Domissantários", "Saneantes domissanitários", "Produtos Saneantes e Domissanitários", "Produtos saneantes"]
   postura_inadequada:
     tipo_ibe: null
     cas: null
