@@ -12473,3 +12473,20 @@ Rotas da IA `[A MEDIR — com o Diovanni e a chave]`.
 mínimo sem o YAML novo — o arquivo passou a opcional (ausente → sem rótulos → conferir); a reversão "obrigatório" é a que
 eles pegam. Suíte completa, árvore parada: **1799 → 1823 passed, 6 skipped** (1405 s). mypy no alvo canônico: limpo, 59
 arquivos (58 + `niveis_pgr.py`). `test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: nenhuma mudança de tela.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main 66cf0e8`, pós-merge do PR #468) — 08/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: rotas da IA e regra 6d (emenda em D-ARQ-95)
+
+**Medido (rodada do Diovanni no app, relatórios do ASO e matrizes enviados no chat).** Hetrin, adendo "Funções
+Faltantes" (rota grid): nível e grupo lidos; 81 consta, 2 conferir (UV Físico Baixo), 54 não consta; amostra conferida
+contra o PDF. R-PSY-06 coerente nos dois PGRs (adendo sem inventário → sem Avaliação Psicossocial na altura; ALT 65 com
+inventário → com). TOCTAO ALT 65 é P×S (não BS 8800) e caiu na rota GHE porque o parser de coordenadas recusou o cabeçalho
+(AGENTE em x≈122 contra ~113): nível lido, mas 37 conferir "sem grupo lido" — o prompt GHE não pedia a coluna GRUPO.
+
+**Entrega.** Regra 6d nos prompts GHE (unitário e lote) e conversão do texto do grupo pelo radical em `_ghe_de_dict`
+(texto desconhecido → sem grupo; sem texto → letra do grid). DECISOES v256 (emenda em `D-ARQ-95`), `INDICE_DARQ.md`
+regenerado, PENDENCIAS atualizada (nova rodada da ALT 65 e de um PGR BS 8800, memorial do Hetrin, parser e a ALT 65).
+
+**Verificação.** 2 testes em `test_niveis_pgr.py`, varredura inversa 6/6. Suíte completa, árvore parada: **1823 → 1825
+passed, 6 skipped** (1791 s; a base 1823 é a do PR #468 — `66cf0e8` só acrescenta um PDF). mypy no alvo canônico: limpo,
+59 arquivos; `transcritor_gemini_pgr.py` limpo. `test_gerar_indice_darq.py` 6 passed. Efeito real da 6d `[A MEDIR — nova
+rodada no app, com o Diovanni]`.

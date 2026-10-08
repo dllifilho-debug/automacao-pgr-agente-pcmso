@@ -4144,5 +4144,16 @@ escala do acervo (P×S, BS 8800, AIHA Ricco, Sinduscon-GO, Ricco Administração
 `[INTERPRETADO]`. Matriz de exames intocada. Medido nos 3 PGRs determinísticos: sem mudança (P×S). Pendente: medição na
 rota da IA (Hetrin pelo grid, PGRs BS 8800 pela rota GHE) com o Diovanni; rota card (EBSERH) segue sem nível.
 
+**Medição nas rotas da IA (08/10/2026, rodada do Diovanni no app).** Hetrin, adendo (grid): nível e grupo lidos, 81
+consta / 2 conferir (UV Físico Baixo) / 54 não consta, amostra bate com o PDF; R-PSY-06 coerente (sem inventário → sem
+Avaliação Psicossocial na altura). TOCTAO ALT 65 (P×S, caiu na rota GHE): nível lido, R-PSY-06 coerente (com inventário →
+com Avaliação Psicossocial), mas 37 conferir "sem grupo lido" → corrigido pela regra 6d (emenda em D-ARQ-95).
+- **Pendente:** nova rodada da ALT 65 e de um PGR BS 8800 (ex.: "PGR - ALT T65 2024.2026.pdf"); memorial do Hetrin para os
+  alertas R-PSY-07 e R-AUD-05.
+- **Parser de coordenadas e a ALT 65:** recusada pela checagem do cabeçalho (AGENTE em x≈122 contra ~113 medidos na família
+  Consciente). Aceitá-la tira a IA da rota (custo zero, reprodutível), mas o afrouxamento tem de ser medido contra os 32 PGRs
+  antes — a checagem existe para recusar outra família.
+
 **Status:** ABERTA — item 1 da folha ((a), (c), (d), leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
-nocivo", medição das rotas da IA (R-PSY-06/07 e D-ARQ-95), Decreto 6.481/2008 `[A CONFERIR]`.
+nocivo", nova rodada da ALT 65 e de um PGR BS 8800, memorial do Hetrin, parser de coordenadas e a ALT 65, Decreto
+6.481/2008 `[A CONFERIR]`.

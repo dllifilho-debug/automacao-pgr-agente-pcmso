@@ -116,6 +116,31 @@ def test_prompts_pedem_o_nivel_e_o_grid_pede_a_letra() -> None:
     assert '"nivel_pgr"' in _PROMPT_GRID_LOTE and '"tipo_risco"' in _PROMPT_GRID_LOTE
 
 
+def test_resposta_da_ia_por_ghe_traz_o_texto_do_grupo() -> None:
+    # Emenda D-ARQ-95 (regra 6d), medida na ALT 65 (08/10/2026): 37 "sem grupo lido".
+    # Reversões que matam: (1) não ler `grupo` em _ghe_de_dict (só a letra do grid);
+    # (2) comparar sem tirar o acento ("ERGONÔMICO" não abre por "ERGONOMIC");
+    # (3) aceitar texto fora dos cinco grupos como grupo; (4) deixar de cair na letra
+    # do grid quando o texto do grupo não vem.
+    ghe = _ghe_de_dict({
+        "nome": "ENGENHARIA",
+        "cargos": ["ENGENHEIRO"],
+        "riscos": [
+            {"agente": "Queda de mesmo nível", "nivel_pgr": "BAIXO", "grupo": "Acidentes"},
+            {"agente": "Postural", "nivel_pgr": "BAIXO", "grupo": "Ergonômico"},
+            {"agente": "Assédio", "nivel_pgr": "BAIXO", "grupo": "Psicossocial"},
+            {"agente": "RUÍDO", "nivel_pgr": "2 - MODERADO", "tipo_risco": "F"},
+        ],
+    })
+    assert [r.grupo for r in ghe.riscos] == ["ACIDENTE", "ERGONOMICO", "", "FISICO"]
+
+
+def test_prompts_ghe_pedem_o_grupo() -> None:
+    # Reversão que mata: tirar o campo grupo do formato pedido no prompt GHE unitário ou
+    # no em lote (o de produção).
+    assert '"grupo"' in _PROMPT_GHE and '"grupo"' in _PROMPT_GHE_LOTE
+
+
 # --- Sugestão do ASO -------------------------------------------------------------
 
 
