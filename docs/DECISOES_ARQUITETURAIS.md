@@ -4922,6 +4922,21 @@ Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427`. O
 - **Medido nos 3 PGRs determinísticos (P×S):** matriz, relatório do ASO e pendências idênticos à `main a9a4427` (cópia de trabalho limpa da main no scratchpad). O efeito está nas rotas da IA (Hetrin pelo grid; PGRs BS 8800 pela rota GHE) `[A MEDIR — com o Diovanni e a chave]`.
 - **Verificação.** `test_niveis_pgr.py` (24 casos), varredura inversa 20/20. Suíte e mypy: ver HISTORICO.
 
+**Emenda (08/10/2026) — regra 6d: o grupo na rota por GHE.** Aprovada pelo Diovanni na sessão.
+- **Medido no app (rodada do Diovanni, 08/10/2026).** Hetrin, adendo "Funções Faltantes" (rota grid): nível e grupo lidos;
+  81 consta, 2 conferir (UV Físico Baixo — exceção do e-mail que a médica decide), 54 não consta; amostra conferida contra o
+  PDF (umidade e UV Moderado, intempérie Baixo, ruído Moderado). TOCTAO ALT 65 (P×S; recusada pelo parser de coordenadas —
+  AGENTE em x≈122 contra ~113 — e transcrita pela rota GHE): nível lido, mas **37 conferir "sem grupo lido"** — o prompt GHE
+  não pedia a coluna GRUPO; só o grid preenchia o grupo (cl.1 cobria o grupo só no grid).
+- **Decisão.** Regra 6d nos prompts GHE (unitário e lote): `grupo` = texto da coluna GRUPO/TIPO/CATEGORIA de risco da linha,
+  como o PGR escreve, sem deduzir pelo agente. `_ghe_de_dict` converte pelo radical sem acento (FISIC, QUIMIC, BIOLOGIC,
+  ERGONOMIC, ACIDENTE) no token da família Consciente; texto fora dos cinco → sem grupo (conferir, cl.3); sem texto → letra
+  do grid, como antes. É leitura de dado, não decisão clínica.
+- **Fora.** Aceitar a ALT 65 no parser de coordenadas (custo zero de IA, reprodutível) fica em PENDENCIAS: exige medir o
+  afrouxamento da checagem de cabeçalho contra os 32 PGRs.
+- **Verificação.** 2 testes em `test_niveis_pgr.py`, varredura inversa 6/6. Efeito real `[A MEDIR — nova rodada da ALT 65 e
+  de um PGR BS 8800 no app, com o Diovanni]`.
+
 ---
 
 ## Histórico de revisões
@@ -5183,3 +5198,4 @@ Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427`. O
 | v253 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-73`** — o Word da matriz sai no leiaute das matrizes RQ.61 das médicas (4 de setembro/2026): cabeçalho de página do formulário sem o logo, tabela de identificação com o (X) do tipo, GHEs numa tabela contínua com faixa azul `#83CAEB`, Calibri 11. Texto vermelho das médicas fora (é correção). Conteúdo inalterado. |
 | v254 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-94` adicionada** — Avaliação Psicossocial da altura condicionada ao inventário psicossocial do PGR (R-PSY-06 sucede R-PSY-04); alertas para a revisão médica sem mudar exame: PGR sem inventário depois da vigência na NR-01 (R-PSY-07) e menor aprendiz com ruído (R-AUD-05). |
 | v255 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-95` adicionada** — nível de risco do PGR em qualquer escala para a sugestão do ASO: rótulo verbatim (`nivel_pgr`), vocabulário `niveis_risco.yaml` do censo de 32 PGRs (5 escalas), desconhecido → conferir; motor de emissão intocado. |
+| v256 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 66cf0e8` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-95`** — regra 6d: a rota por GHE transcreve a coluna GRUPO do PGR (medida: 37 "sem grupo lido" no ASO da ALT 65), convertida pelo radical no token de grupo; texto desconhecido → sem grupo. |
