@@ -4163,6 +4163,14 @@ grupo lido" por "Ergnômico" no PGR → emenda 2 em D-ARQ-95. Memorial do Hetrin
 - **"Mecânico" como grupo** (~15 PDFs do acervo): sinônimo de Acidentes em parte dos PGRs; mapear é interpretação, não
   erro de digitação — fica sem grupo (conferir) até decisão.
 
+**PGR novo da Vila Brasil escritório no app (08/10/2026), contra a matriz das médicas de 24/09/2026.** A Avaliação
+Psicossocial dos 70 cargos sem altura está riscada em vermelho pelas médicas (76 riscos) — a saída do app bate com a versão
+final delas. Periodicidades iguais. Restam 3 divergências já registradas: Acuidade dos vigias (fora por precedente
+dividido, R-VIS-02), Espirometria do Auxiliar de Serviços Gerais por "Produtos Domissanitários" (termo não resolvido, sem
+decisão de regra) e "Polímeros de fenol" na observação do encanador/instalador (fora de propósito). Título do GHE
+"01 - ADMINISTRAÇÃO 01" saía "GHE 01 - 01 - ADMINISTRAÇÃO 01" → corrigido (decisão do Diovanni).
+- **Pendente:** espirometria por produtos domissanitários (decisão de regra).
+
 **Status:** ABERTA — item 1 da folha ((a), (c), (d), leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
-nocivo", 3ª rodada do ALT T65 2024-2026, "Mecânico" como grupo, parser de coordenadas e a ALT
-65, Decreto 6.481/2008 `[A CONFERIR]`.
+nocivo", 3ª rodada do ALT T65 2024-2026, "Mecânico" como grupo, espirometria por produtos domissanitários, parser de
+coordenadas e a ALT 65, Decreto 6.481/2008 `[A CONFERIR]`.
