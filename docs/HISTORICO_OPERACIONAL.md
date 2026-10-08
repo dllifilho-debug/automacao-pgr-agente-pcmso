@@ -12525,3 +12525,19 @@ Os quatro downloads usam a função. `_submeter_formulario` (teste) aceita campo
 **Verificação.** `test_nome_arquivo.py` (5 casos), varredura inversa 8/8. Suíte completa, árvore parada: **1826 → 1831
 passed, 6 skipped** (984 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke visual não rodado: a tela não muda, só o nome
 do arquivo baixado.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main 5c7d60e`, pós-merge do PR #471) — 08/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: Vila Brasil escritório no app e título do GHE
+
+**Medido.** PGR novo da Vila Brasil escritório (06.10.26) rodado pelo Diovanni no app, contra as matrizes das médicas de
+24/09/2026 e 06/10/2026: a Avaliação Psicossocial dos cargos sem altura está riscada em vermelho por elas (76 e 80 riscos) —
+a saída do app bate com a versão final. Periodicidades iguais; cargos iguais à de 06/10 salvo grafia. Restam 3
+divergências já registradas (acuidade dos vigias, espirometria por produtos domissanitários, polímeros de fenol na
+observação). Relatório do ASO: 51 consta, 26 conferir (todos previstos), 97 não consta. O nome "(MATRIZ EXAME)" do arquivo
+veio do campo Tipo digitado; o Streamlit 1.65 manda espaços e parênteses no nome (`starlette_routes.py`).
+
+**Entrega.** Título do GHE: o PGR chama o GHE de "01 - ADMINISTRAÇÃO 01" e saía "GHE 01 - 01 - ADMINISTRAÇÃO 01"; o
+número do próprio GHE seguido de hífen sai do começo do nome (`_nome_sem_codigo`, usado por `titulo_ghe` e
+`titulo_ghe_rq61`). Decisão do Diovanni. Nos 3 PGRs determinísticos: 0 títulos mudam.
+
+**Verificação.** 1 teste em `test_documento_matriz.py`, varredura inversa 3/3. Suíte completa, árvore parada: **1831 →
+1832 passed, 6 skipped** (996 s). mypy no alvo canônico: limpo, 59 arquivos.
