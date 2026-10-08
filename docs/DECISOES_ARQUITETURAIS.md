@@ -4901,6 +4901,23 @@ Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b`. O
 - **Medido nos 3 PGRs determinísticos (61 GHEs, com inventário):** exames, periodicidade e momentos idênticos; em 37 linhas de Avaliação Psicossocial o motivo passa de R-PSY-04 para R-PSY-06; status, pendências e sugestão do ASO idênticos; nenhum alerta novo. O efeito em PGR sem inventário (Hetrin) se mede na rota da IA, com o Diovanni `[A MEDIR]`.
 - **Verificação.** `test_alertas_revisao.py` (10 casos) e 5 testes de R-PSY-06 em `test_orquestrador.py`; 2 testes de integração atualizados com a causa escrita (7→6 linhas; espaço confinado avaliado). Varredura inversa 23/23. Suíte e mypy: ver HISTORICO.
 
+**Emenda (08/10/2026) — base legal do alerta do menor: Decreto 6.481/2008.** Aprovada pelo Diovanni ("se está dentro das
+normas eu aprovo os quatro").
+- **Medido.** Texto oficial do Decreto 6.481/2008 (Planalto, impresso em 08/10/2026), agora em `normas/D6481.pdf`. Art. 2º:
+  trabalho do menor de 18 anos proibido nas atividades da Lista TIP, salvo autorização do MTE a partir dos 16 anos ou
+  parecer técnico depositado no MTE (§ 1º). Art. 3º: trabalho técnico ou administrativo só fora das áreas de risco. Itens
+  que o app reconhece pelo agente: 82 (altura > 2 m), 83 (ruído acima do nível legal ou de impacto), 84 (arsênico,
+  asbestos, benzeno, metais pesados, silicatos… acima dos limites de tolerância), 85 (espaço confinado), 55 (vibração;
+  na construção, item 58). Item 58: construção civil e pesada como atividade inteira.
+- **Decisão.** R-TIP-01 sucede R-AUD-05: o alerta da cl.2 passa a cobrir qualquer agente da Lista TIP mapeado em
+  `vocabulario/lista_tip.yaml` (conferido contra `agentes.yaml` no carregamento), cita o item de cada risco e leva no
+  texto as exceções (Arts. 2º e 3º) e o item 58. Continua alerta: o PGR não diz se a exposição passa do limite legal nem
+  se há autorização ou parecer. Nenhum exame muda.
+- **Fora.** Classes abertas do item 84 (hidrocarbonetos, compostos de carbono, critério da OMS) e sílica — sem decisão
+  automática; na construção, cobertas pelo texto do item 58.
+- **Verificação.** `test_alertas_revisao.py` (12 casos), varredura inversa 9/9. 3 PGRs determinísticos: nenhum "menor
+  aprendiz", 0 alertas.
+
 ---
 
 ## D-ARQ-95 — Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO
@@ -5215,3 +5232,4 @@ raciocínio pedida por ele.
 | v255 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-95` adicionada** — nível de risco do PGR em qualquer escala para a sugestão do ASO: rótulo verbatim (`nivel_pgr`), vocabulário `niveis_risco.yaml` do censo de 32 PGRs (5 escalas), desconhecido → conferir; motor de emissão intocado. |
 | v256 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 66cf0e8` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-95`** — regra 6d: a rota por GHE transcreve a coluna GRUPO do PGR (medida: 37 "sem grupo lido" no ASO da ALT 65), convertida pelo radical no token de grupo; texto desconhecido → sem grupo. |
 | v257 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ed3698f` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-95`** — grupo com erro de digitação do PGR ("Ergnômico") aceito a até 1 edição de um dos cinco grupos, depois da leitura pelo radical; censo de 49 PDFs fixa o limite (palavras de outro sentido a 2 edições). 2ª rodada no app medida. |
+| v258 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ca17062` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-94`** — alerta do menor aprendiz com base no Decreto 6.481/2008 (Lista TIP): R-TIP-01 sucede R-AUD-05, itens 55/82/83/84/85 pelo agente, exceções dos Arts. 2º e 3º e item 58 no texto; decreto em `normas/D6481.pdf`. |
