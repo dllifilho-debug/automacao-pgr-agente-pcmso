@@ -18,6 +18,8 @@ class Vocabulario:
     fracoes_sem_agente: tuple[str, ...] = ()
     # D-ARQ-95: rótulos de nível de risco dos PGRs e a posição em relação ao corte moderado.
     niveis_risco: dict[str, Any] = field(default_factory=dict)
+    # R-TIP-01: item da Lista TIP (Decreto 6.481/2008) → descrição e agentes.
+    lista_tip: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -39,6 +41,21 @@ def _carregar_niveis_risco(path: Path) -> dict[str, Any]:
         if not isinstance(entrada, dict) or entrada.get("posicao") not in ("abaixo", "corte"):
             raise ValueError(f"{path}: nível {rotulo!r} sem posicao 'abaixo' ou 'corte'")
     return niveis
+
+
+def _carregar_lista_tip(path: Path, agentes: dict[str, Any]) -> dict[str, Any]:
+    """R-TIP-01: agente fora de agentes.yaml faria o alerta nunca disparar sem ninguém ver;
+    falha no carregamento. Arquivo ausente (protocolo mínimo): sem itens, sem alerta."""
+    if not path.exists():
+        return {}
+    itens: dict[str, Any] = _exigir_chave(_load_yaml(path), "lista_tip", path) or {}
+    for item, entrada in itens.items():
+        if not isinstance(entrada, dict) or not entrada.get("descricao") or not entrada.get("agentes"):
+            raise ValueError(f"{path}: item {item!r} sem descricao ou agentes")
+        desconhecidos = [a for a in entrada["agentes"] if a not in agentes]
+        if desconhecidos:
+            raise ValueError(f"{path}: item {item!r} cita agentes fora de agentes.yaml: {desconhecidos}")
+    return itens
 
 
 def _load_yaml(path: Path) -> Any:
@@ -70,6 +87,7 @@ def carregar(diretorio: Path | str) -> Protocolo:
         epis=_exigir_chave(_load_yaml(vocab_dir / "epis.yaml"), "epis", vocab_dir / "epis.yaml") or {},
         fracoes_sem_agente=tuple(agentes_yaml.get("fracoes_sem_agente") or ()),
         niveis_risco=_carregar_niveis_risco(vocab_dir / "niveis_risco.yaml"),
+        lista_tip=_carregar_lista_tip(vocab_dir / "lista_tip.yaml", agentes_yaml.get("agentes") or {}),
     )
 
     pred_path = raiz / "predicados_compostos.yaml"

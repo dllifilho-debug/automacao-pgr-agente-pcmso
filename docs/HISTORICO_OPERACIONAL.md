@@ -12541,3 +12541,25 @@ número do próprio GHE seguido de hífen sai do começo do nome (`_nome_sem_cod
 
 **Verificação.** 1 teste em `test_documento_matriz.py`, varredura inversa 3/3. Suíte completa, árvore parada: **1831 →
 1832 passed, 6 skipped** (996 s). mypy no alvo canônico: limpo, 59 arquivos.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main ca17062`, pós-merge do PR #472) — 08/10/2026 — CONHECIMENTO + IMPLEMENTAÇÃO: Decreto 6.481/2008 e o alerta do menor aprendiz (R-TIP-01)
+
+**Origem.** O Diovanni subiu o Decreto 6.481/2008 (impresso do Planalto em 08/10/2026), que fechava o `[A CONFERIR]` da
+R-AUD-05. Leitura integral: o decreto proíbe ao menor de 18 anos as atividades da Lista TIP (Art. 2º, exceções no § 1º) e
+só admite trabalho técnico ou administrativo fora das áreas de risco (Art. 3º); além do ruído (item 83), alcança altura
+(82), químicos nomeados (84), espaço confinado (85), vibração (55) e a construção civil inteira (58). Proposta (base
+legal, alerta ampliado, texto fixo do item 58, decreto em `normas/`) aprovada pelo Diovanni ("se está dentro das normas").
+
+**Conferência que mudou a proposta.** Os itens da Lista TIP são agrupados por atividade: o 55 (vibração) é da indústria
+de transformação — na construção, a vibração está no item 58, e o alerta cita os dois. Sílica não é silicato (item 84) e o
+item 20 é da indústria extrativa: fica fora do automático, coberta pelo texto do item 58.
+
+**Entrega.** `vocabulario/lista_tip.yaml` (itens 55, 82, 83, 84, 85 → agentes; conferido contra `agentes.yaml` no
+carregamento; ausente → sem itens); `_menor_aprendiz_lista_tip` no estágio 3 (R-TIP-01, pendência
+`menor_aprendiz_lista_tip`, não bloqueante, nenhum exame muda); memorial e tela com o novo tipo. `normas/D6481.pdf` (movido
+de `matrizes_originais/`), `normas/README.md` atualizado. PROTOCOLO v134 (R-AUD-05 DEPRECATED → R-TIP-01), DECISOES v258
+(emenda em D-ARQ-94), `INDICE_DARQ.md` regenerado, PENDENCIAS.
+
+**Verificação.** `test_alertas_revisao.py` 12 casos, varredura inversa 9/9. 3 PGRs determinísticos: nenhum "menor
+aprendiz" (Fascino tem "Aprendiz Administrativo de Obra", sem idade no PGR), 0 alertas. Suíte completa, árvore parada:
+**1832 → 1834 passed, 6 skipped** (1015 s). mypy no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed.

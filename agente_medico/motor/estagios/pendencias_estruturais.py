@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Mapping
+from typing import Any
 
 from agente_medico.motor.predicados import riscos_com_contaminante_sem_fds
 from agente_medico.motor.protocolo import Protocolo
 from agente_medico.motor.tipos import GHEContext, Pendencia
 
 TIPO_CONTAMINANTE_A_CONFIRMAR = "contaminante_a_confirmar"
-TIPO_MENOR_APRENDIZ_COM_RUIDO = "menor_aprendiz_com_ruido"
+TIPO_MENOR_APRENDIZ_LISTA_TIP = "menor_aprendiz_lista_tip"
 
 # "menos aprendiz" é a grafia do próprio adendo Hetrin (pág. 8), não erro de leitura.
 _MENOR_APRENDIZ = re.compile(r"\bmeno[rs]\s+aprendiz\b")
@@ -18,24 +20,36 @@ def _sem_acento(texto: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFD", texto) if not unicodedata.combining(c)).casefold()
 
 
-def _menor_aprendiz_com_ruido(ctx: GHEContext) -> None:
-    """R-AUD-05: o PGR declara ruído no GHE de um menor aprendiz. A audiometria segue
-    R-AUD-01 (o e-mail da Dra. Carolini pede audiometria com risco moderado ou acima);
-    o alerta leva à revisão médica a exposição de menor de 18 anos a ruído, que a
-    matriz das médicas do Hetrin 30/09/2026 tratou sem audiometria. Não bloqueia."""
+def _menor_aprendiz_lista_tip(ctx: GHEContext, lista_tip: Mapping[str, Any]) -> None:
+    """R-TIP-01 (Decreto 6.481/2008, Arts. 2º e 3º e Lista TIP): menor aprendiz em GHE com
+    agente de um item da Lista TIP. O trabalho é proibido ao menor de 18 anos salvo as
+    exceções do Art. 2º § 1º, que o PGR não informa — vai à médica, sem mudar exame (a
+    audiometria segue R-AUD-01, como pede o e-mail da Dra. Carolini). Não bloqueia."""
     cargos = [c for c in ctx.pgr_ghe.cargos if _MENOR_APRENDIZ.search(_sem_acento(c))]
-    if not cargos or not any(r.agente == "ruido" for r in ctx.riscos):
+    if not cargos:
+        return
+    agentes = {r.agente for r in ctx.riscos}
+    itens = [
+        f"{entrada['descricao']} (item {item})"
+        for item, entrada in sorted(lista_tip.items(), key=lambda par: int(par[0]))
+        if agentes & set(entrada["agentes"])
+    ]
+    if not itens:
         return
     ctx.pendencias.append(
         Pendencia(
-            tipo=TIPO_MENOR_APRENDIZ_COM_RUIDO,
+            tipo=TIPO_MENOR_APRENDIZ_LISTA_TIP,
             destinatario="medico",
             motivo=(
-                f"{', '.join(cargos)} em {ctx.pgr_ghe.id}: o PGR declara exposição a ruído para menor "
-                "aprendiz — conferir a exposição de menor de 18 anos e a audiometria"
+                f"{', '.join(cargos)} em {ctx.pgr_ghe.id}: o PGR declara para menor aprendiz risco da "
+                f"Lista TIP (Decreto 6.481/2008) — {'; '.join(itens)}. Proibido ao menor de 18 anos, "
+                "salvo autorização do MTE a partir dos 16 anos ou parecer técnico depositado no MTE "
+                "(Art. 2º § 1º); fora disso, só trabalho técnico ou administrativo fora das áreas de "
+                "risco (Art. 3º). Construção civil é atividade da lista (item 58). Conferir a exposição "
+                "e a aptidão"
             ),
             bloqueante=False,
-            regra_origem="R-AUD-05",
+            regra_origem="R-TIP-01",
             ghe_id=ctx.pgr_ghe.id,
         )
     )
@@ -71,7 +85,7 @@ def _contaminantes_a_confirmar(ctx: GHEContext) -> None:
 
 def stage_3_pendencias_estruturais(ctx: GHEContext, proto: Protocolo) -> None:
     _contaminantes_a_confirmar(ctx)
-    _menor_aprendiz_com_ruido(ctx)
+    _menor_aprendiz_lista_tip(ctx, proto.vocabulario.lista_tip)
     for produto in ctx.pgr_ghe.produtos_quimicos:
         if produto.fds is None:
             ctx.pendencias.append(

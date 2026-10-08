@@ -4171,6 +4171,11 @@ decisão de regra) e "Polímeros de fenol" na observação do encanador/instalad
 "01 - ADMINISTRAÇÃO 01" saía "GHE 01 - 01 - ADMINISTRAÇÃO 01" → corrigido (decisão do Diovanni).
 - **Pendente:** espirometria por produtos domissanitários (decisão de regra).
 
+**Decreto 6.481/2008 — conferido (08/10/2026).** O Diovanni subiu o texto oficial (Planalto, impresso em 08/10/2026),
+agora em `normas/D6481.pdf`. R-TIP-01 sucede R-AUD-05: alerta do menor aprendiz para os riscos da Lista TIP que o app
+reconhece (itens 55, 82, 83, 84, 85), com as exceções dos Arts. 2º e 3º e o item 58 no texto (emenda em D-ARQ-94). O
+`[A CONFERIR]` do decreto sai.
+
 **Status:** ABERTA — item 1 da folha ((a), (c), (d), leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
 nocivo", 3ª rodada do ALT T65 2024-2026, "Mecânico" como grupo, espirometria por produtos domissanitários, parser de
-coordenadas e a ALT 65, Decreto 6.481/2008 `[A CONFERIR]`.
+coordenadas e a ALT 65.

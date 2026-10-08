@@ -1,0 +1,28 @@
+# Itens da Lista TIP (Decreto 6.481/2008, Anexo, I — trabalhos prejudiciais à saúde e à
+# segurança) que o app reconhece pelo agente do GHE. Texto em normas/D6481.pdf, impresso do
+# Planalto em 08/10/2026. R-TIP-01: menor aprendiz em GHE com um destes agentes → alerta
+# para a revisão médica, sem mudar exame.
+#
+# Fora daqui, de propósito: "hidrocarbonetos", "outros compostos de carbono" e "substâncias
+# nocivas conforme a OMS" (item 84) são classes abertas — o app não decide quais agentes
+# entram; sílica não é silicato (item 84) e o item 20 é da indústria extrativa. O item 58
+# (construção civil e pesada) é a atividade inteira e vai no texto fixo do alerta.
+#
+# Cada agente é conferido contra agentes.yaml no carregamento.
+
+lista_tip:
+  "55":
+    descricao: vibrações localizadas ou de corpo inteiro (na construção, item 58)
+    agentes: [vibracao, vibracao_mao_braco, vibracao_corpo_inteiro]
+  "82":
+    descricao: trabalho em alturas superiores a 2,0 metros
+    agentes: [trabalho_altura]
+  "83":
+    descricao: ruído contínuo ou intermitente acima do nível previsto na legislação, ou ruído de impacto
+    agentes: [ruido]
+  "84":
+    descricao: arsênico, asbestos, benzeno, metais pesados (cádmio, chumbo, mercúrio) ou silicatos acima dos limites de tolerância
+    agentes: [arsenio, asbesto, benzeno, cadmio, chumbo, chumbo_tetraetila, mercurio, silicato_tricalcico, silicato_dicalcico, silicato_de_aluminio_hidratado, silicato_de_potassio]
+  "85":
+    descricao: espaços confinados
+    agentes: [espaco_confinado]

@@ -5,7 +5,8 @@ Gov.br/MTE (Normas Regulamentadoras Vigentes) e Gov.br/Fundacentro (biblioteca d
 NHOs). Não usar cópia de terceiros nem texto em consulta pública.
 
 **Última conferência de vigência:** 06/10/2026, pelo Diovanni — todas as normas desta pasta estão
-vigentes. Quem substituir ou acrescentar arquivo atualiza esta linha.
+vigentes. 08/10/2026: acrescentado `D6481.pdf` (Decreto 6.481/2008, Lista TIP), impresso do Planalto
+nessa data pelo Diovanni. Quem substituir ou acrescentar arquivo atualiza esta linha.
 
 **Nome fixo, sem data.** Quando a norma for atualizada, substitua o arquivo no mesmo
 caminho. O histórico do git guarda a versão anterior e permite dizer qual texto

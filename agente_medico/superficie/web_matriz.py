@@ -1420,7 +1420,7 @@ def pagina_matriz() -> None:
                 for p in pendencias:
                     st.write(linha_pendencia(p))
 
-        # R-AUD-05: alerta por GHE para a revisão médica.
+        # R-TIP-01: alerta por GHE para a revisão médica.
         alertas = [texto for m in cache.matrizes or () for texto in alertas_do_ghe(m)]
         if alertas:
             with caixa_conferencia:

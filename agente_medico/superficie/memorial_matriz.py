@@ -24,7 +24,7 @@ from docx.shared import Cm, Pt
 from agente_medico.motor.estagios.gates import TIPO_PGR_SEM_INVENTARIO_PSICOSSOCIAL
 from agente_medico.motor.estagios.pendencias_estruturais import (
     TIPO_CONTAMINANTE_A_CONFIRMAR,
-    TIPO_MENOR_APRENDIZ_COM_RUIDO,
+    TIPO_MENOR_APRENDIZ_LISTA_TIP,
 )
 from agente_medico.motor.tipos import (
     GHEPGR,
@@ -295,12 +295,12 @@ def contaminantes_a_confirmar(matriz: MatrizGHE) -> tuple[str, ...]:
 
 
 def alertas_do_ghe(matriz: MatrizGHE) -> tuple[str, ...]:
-    """R-AUD-05: alerta para a revisão médica que não muda exame (menor aprendiz com ruído
-    declarado no PGR); sem esta lista ele ficaria só na pendência, fora do anexo."""
+    """R-TIP-01: alerta para a revisão médica que não muda exame (menor aprendiz em GHE com
+    risco da Lista TIP); sem esta lista ele ficaria só na pendência, fora do anexo."""
     return tuple(
         _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
         for p in matriz.pendencias
-        if p.tipo == TIPO_MENOR_APRENDIZ_COM_RUIDO
+        if p.tipo == TIPO_MENOR_APRENDIZ_LISTA_TIP
     )
 
 
