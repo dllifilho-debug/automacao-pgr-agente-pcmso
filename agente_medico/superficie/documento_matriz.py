@@ -59,14 +59,23 @@ def nome_ghe_exibicao(nome: str) -> str:
     return _sanitizar(nome.replace(" \x00 ", " - "))
 
 
+def _nome_sem_codigo(ghe_id: str, nome_ghe: str) -> str:
+    """Tira do nome o código que o PGR escreve na frente: "GHE 01 - ADMINISTRAÇÃO" ou,
+    sem a palavra GHE, "01 - ADMINISTRAÇÃO 01" (Vila Brasil escritório, 08/10/2026). Sem
+    a palavra GHE, só com o hífen depois do número — "10 PAVIMENTOS" não é código."""
+    numero = re.search(r"\d+", ghe_id)
+    if not numero:
+        return nome_ghe
+    n = int(numero[0])
+    nome = re.sub(rf"^GHE[\s-]*0*{n}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
+    return re.sub(rf"^0*{n}(?!\d)\s*[-–—]\s*", "", nome)
+
+
 def titulo_ghe(ghe_id: str, nome_ghe: str) -> str:
     """Código do GHE uma vez só: o nome que o PGR escreve com o próprio código na
     frente ("GHE 01 - ADMINISTRAÇÃO" no GHE-01) perde a repetição."""
     codigo = ghe_id if ghe_id.upper().startswith("GHE") else f"GHE {ghe_id}"
-    numero = re.search(r"\d+", ghe_id)
-    nome = nome_ghe
-    if numero:
-        nome = re.sub(rf"^GHE[\s-]*0*{int(numero[0])}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
+    nome = _nome_sem_codigo(ghe_id, nome_ghe)
     return f"{codigo} — {nome}" if nome else codigo
 
 
@@ -75,9 +84,7 @@ def titulo_ghe_rq61(ghe_id: str, nome_ghe: str) -> str:
     com espaço e número, hífen, nome sem repetir o código."""
     numero = re.search(r"\d+", ghe_id)
     codigo = f"GHE {numero[0]}" if numero else ghe_id
-    nome = nome_ghe
-    if numero:
-        nome = re.sub(rf"^GHE[\s-]*0*{int(numero[0])}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
+    nome = _nome_sem_codigo(ghe_id, nome_ghe)
     return f"{codigo} - {nome}" if nome else codigo
 
 

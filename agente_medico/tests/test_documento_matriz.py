@@ -22,6 +22,8 @@ from agente_medico.superficie.documento_matriz import (
     nome_ghe_exibicao,
     renderizar_docx,
     renderizar_html,
+    titulo_ghe,
+    titulo_ghe_rq61,
 )
 
 
@@ -615,6 +617,17 @@ def test_cabecalho_do_ghe_nao_repete_o_codigo(tmp_path: Path) -> None:
     assert "<h2>GHE-01 — ENGENHARIA/PRODUÇÃO</h2>" in renderizar_html(documento)  # type: ignore[arg-type]
     faixa = _docx(tmp_path, documento).tables[1].rows[0].cells[0]
     assert faixa.text == "GHE 01 - ENGENHARIA/PRODUÇÃO"
+
+
+def test_titulo_tira_o_numero_do_ghe_escrito_sem_a_palavra_ghe() -> None:
+    # Vila Brasil escritório (08/10/2026): o PGR chama o GHE de "01 - ADMINISTRAÇÃO 01" e
+    # saía "GHE 01 - 01 - ADMINISTRAÇÃO 01". Reversões que matam: (1) tirar o 2º `re.sub`
+    # de `_nome_sem_codigo` (o número fica); (2) aceitar o número sem hífen ("10 PAVIMENTOS"
+    # perde o "10"); (3) não comparar com o número do GHE ("10 - X" no GHE-01 perde o "10").
+    assert titulo_ghe_rq61("GHE-01", "01 - ADMINISTRAÇÃO 01") == "GHE 01 - ADMINISTRAÇÃO 01"
+    assert titulo_ghe("GHE-01", "01 - ADMINISTRAÇÃO 01") == "GHE-01 — ADMINISTRAÇÃO 01"
+    assert titulo_ghe_rq61("GHE-10", "10 PAVIMENTOS") == "GHE 10 - 10 PAVIMENTOS"
+    assert titulo_ghe_rq61("GHE-01", "10 - X") == "GHE 01 - 10 - X"
 
 
 def test_rodape_sai_com_os_rotulos_do_rq61(tmp_path: Path) -> None:
