@@ -1,0 +1,52 @@
+# Rótulos de nível de risco escritos nos PGRs, e a posição de cada um em relação ao corte
+# "iguais ou superiores a moderados" do e-mail da Dra. Carolini (R-ASO-06). D-ARQ-95.
+#
+# Só a sugestão do ASO lê este arquivo. `nivel_risco` (escala P×S, que alimenta R-BIO-05,
+# R-CLI-05 e R-RX-01-qual) não muda: a ordem de outra escala não vira P×S (D-ARQ-57).
+#
+# Fonte de cada posição: a legenda do próprio PGR, medida no censo de 08/10/2026 sobre os 32
+# PGRs do acervo (docs/referencia/CENSO_NIVEIS_RISCO.md). Rótulo fora desta lista não tem
+# posição e a sugestão sai CONFERIR (D-ARQ-22) — escala nova entra aqui, com a legenda dela.
+#
+# posicao: abaixo | corte (corte = no nível "moderado" da escala ou acima dele).
+
+niveis_risco:
+  IRRELEVANTE:
+    posicao: abaixo
+    escalas: [P×S (Irrelevante < Baixo < Moderado < Alto < Crítico), Sinduscon-GO]
+  TRIVIAL:
+    posicao: abaixo
+    escalas: [BS 8800 (Trivial < Tolerável < Moderado < Substancial < Intolerável), AIHA Ricco]
+  TOLERÁVEL:
+    posicao: abaixo
+    escalas: [BS 8800]
+  BAIXO:
+    posicao: abaixo
+    escalas: [P×S, AIHA Ricco (Trivial < Baixo < Moderado < Alto < Muito Alto), Sinduscon-GO, Ricco Administração]
+  MODERADO:
+    posicao: corte
+    escalas: [P×S, BS 8800, AIHA Ricco]
+  MÉDIO:
+    posicao: corte
+    escalas: [Sinduscon-GO (Irrelevante < Baixo < Médio < Alto < Crítico), Ricco Administração (Baixo < Médio < Alto < Crítico)]
+    # [INTERPRETADO] — degrau logo acima de Baixo, a posição do Moderado nas duas escalas;
+    # decisão do Diovanni (08/10/2026), as médicas revisam na saída.
+    interpretado: true
+  ALTO:
+    posicao: corte
+    escalas: [P×S, AIHA Ricco, Sinduscon-GO, Ricco Administração]
+  MUITO ALTO:
+    posicao: corte
+    escalas: [AIHA Ricco]
+  SUBSTANCIAL:
+    posicao: corte
+    escalas: [BS 8800]
+  CRÍTICO:
+    posicao: corte
+    escalas: [P×S, Sinduscon-GO, Ricco Administração]
+  INTOLERÁVEL:
+    posicao: corte
+    escalas: [BS 8800]
+  NÃO TOLERÁVEL:
+    posicao: corte
+    escalas: [BS 8800 adaptada em duas classes (Tolerável / Não tolerável), CMO]

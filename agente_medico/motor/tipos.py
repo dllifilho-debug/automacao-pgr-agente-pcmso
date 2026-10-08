@@ -60,6 +60,8 @@ class RiscoPGR:
     # D-ARQ-93: agravo à saúde que o PGR escreve na linha do risco, verbatim, para os
     # anexos das médicas. O motor não lê.
     agravo: str = ""
+    # D-ARQ-95: rótulo do nível como o PGR escreve, em qualquer escala; o motor não lê.
+    nivel_pgr: str = ""
 
 
 @dataclass(frozen=True)
@@ -150,6 +152,9 @@ class RiscoVerbatim:
     # D-ARQ-91 emenda 2: coluna GRUPO da linha do risco ("ACIDENTE", "QUIMICO"...),
     # verbatim; "" quando a rota não a lê. Vira RiscoPGR.tipo.
     grupo: str = ""
+    # D-ARQ-95: rótulo do nível de risco como o PGR escreve, em qualquer escala ("2 -
+    # MODERADO", "TOLERÁVEL"); "" quando a rota não o lê. Só a sugestão do ASO o usa.
+    nivel_pgr: str = ""
 
 
 @dataclass(frozen=True)
@@ -290,6 +295,8 @@ class Risco:
     termo: Optional[str] = None
     # R-FDS-07 / R-PKG-BZ-PRES: `contaminantes_a_confirmar` do vocabulário do agente.
     contaminantes_a_confirmar: tuple[str, ...] = ()
+    # D-ARQ-95: RiscoPGR.nivel_pgr na Fase A; "" nas Fases B e C. Só a sugestão do ASO lê.
+    nivel_pgr: str = ""
 
 
 @dataclass(frozen=True)

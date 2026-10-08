@@ -65,7 +65,11 @@ ordem e separados por espaço (ex.: "1 4 MODERADO", "1 1 IRRELEVANTE"), SOMENTE 
 matriz P×S cuja legenda é Irrelevante/Baixo/Moderado/Alto/Crítico. Deixe "" em qualquer outro caso — \
 inclusive quando a classificação usa escore somado ou classes como Trivial/Tolerável/Substancial/\
 Intolerável. NÃO calcule nem deduza o nível: só copie o que está na linha.
-7. RUÍDO — NÃO transcreva (exceto o que a regra 6b pede): o grid de classificação de risco (colunas de \
+6c. nivel_pgr = o rótulo do NÍVEL (ou classe, ou grau) DE RISCO da linha do risco, como o documento o \
+escreve, em QUALQUER escala (ex.: "MODERADO", "Tolerável", "SUBSTANCIAL", "2 - MODERADO", "Médio"). Só o \
+rótulo do nível: não a probabilidade, não a severidade, não a classificação de prioridade de ação. Deixe \
+"" quando a linha não traz nível. NÃO calcule nem deduza: só copie.
+7. RUÍDO — NÃO transcreva (exceto o que as regras 6b e 6c pedem): o grid de classificação de risco (colunas de \
 letras/números I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
 EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/rodapé repetido de página \
 (razão social, CNPJ, "INVENTÁRIO E CLASSIFICAÇÃO DOS RISCOS OCUPACIONAIS", numeração de página) e o \
@@ -74,11 +78,16 @@ EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/r
 Retorne APENAS JSON válido, sem markdown, sem texto adicional, neste formato exato:
 {{"nome": "Pintura", "cargos": ["pintor", "meio oficial de pintor", "servente"], "riscos": \
 [{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão", \
-"avaliacao_qualitativa": ""}}]}}
+"avaliacao_qualitativa": "", "nivel_pgr": ""}}]}}
 
 Texto do bloco GHE:
 {bloco}
 """
+
+
+# D-ARQ-95: letra da coluna TIPO DE RISCO do grid AIHA → token de grupo da família
+# Consciente (o mesmo de RiscoVerbatim.grupo). Letra desconhecida: sem grupo.
+_GRUPO_POR_LETRA = {"F": "FISICO", "Q": "QUIMICO", "B": "BIOLOGICO", "E": "ERGONOMICO", "A": "ACIDENTE"}
 
 
 def _ghe_de_dict(dados: dict[str, Any]) -> GHEVerbatim:
@@ -89,6 +98,8 @@ def _ghe_de_dict(dados: dict[str, Any]) -> GHEVerbatim:
             quantificacao=str(risco_raw.get("quantificacao", "") or ""),
             fonte_geradora=str(risco_raw.get("fonte_geradora", "") or ""),
             avaliacao_qualitativa=str(risco_raw.get("avaliacao_qualitativa", "") or ""),
+            nivel_pgr=str(risco_raw.get("nivel_pgr", "") or ""),
+            grupo=_GRUPO_POR_LETRA.get(str(risco_raw.get("tipo_risco", "") or "").strip().upper(), ""),
         )
         for risco_raw in dados.get("riscos", []) or []
     )
@@ -155,7 +166,11 @@ ordem e separados por espaço (ex.: "1 4 MODERADO", "1 1 IRRELEVANTE"), SOMENTE 
 matriz P×S cuja legenda é Irrelevante/Baixo/Moderado/Alto/Crítico. Deixe "" em qualquer outro caso — \
 inclusive quando a classificação usa escore somado ou classes como Trivial/Tolerável/Substancial/\
 Intolerável. NÃO calcule nem deduza o nível: só copie o que está na linha.
-7. RUÍDO — NÃO transcreva (exceto o que a regra 6b pede): o grid de classificação de risco (colunas de \
+6c. nivel_pgr = o rótulo do NÍVEL (ou classe, ou grau) DE RISCO da linha do risco, como o documento o \
+escreve, em QUALQUER escala (ex.: "MODERADO", "Tolerável", "SUBSTANCIAL", "2 - MODERADO", "Médio"). Só o \
+rótulo do nível: não a probabilidade, não a severidade, não a classificação de prioridade de ação. Deixe \
+"" quando a linha não traz nível. NÃO calcule nem deduza: só copie.
+7. RUÍDO — NÃO transcreva (exceto o que as regras 6b e 6c pedem): o grid de classificação de risco (colunas de \
 letras/números I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
 EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/rodapé repetido de página \
 (razão social, CNPJ, "INVENTÁRIO E CLASSIFICAÇÃO DOS RISCOS OCUPACIONAIS", numeração de página) e o \
@@ -166,7 +181,7 @@ bloco, NA MESMA ORDEM dos blocos abaixo (posição 1 do array = BLOCO 1, posiç�
 diante), neste formato exato:
 [{{"nome": "Pintura", "cargos": ["pintor", "meio oficial de pintor", "servente"], "riscos": \
 [{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão", \
-"avaliacao_qualitativa": ""}}]}}]
+"avaliacao_qualitativa": "", "nivel_pgr": ""}}]}}]
 
 Blocos GHE:
 {blocos}
