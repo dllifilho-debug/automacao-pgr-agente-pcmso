@@ -4937,6 +4937,21 @@ Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427`. O
 - **Verificação.** 2 testes em `test_niveis_pgr.py`, varredura inversa 6/6. Efeito real `[A MEDIR — nova rodada da ALT 65 e
   de um PGR BS 8800 no app, com o Diovanni]`.
 
+**Emenda 2 (08/10/2026) — grafia do grupo com erro de digitação.** Aprovada pelo Diovanni na sessão, depois de revisão do
+raciocínio pedida por ele.
+- **Medido no app (2ª rodada).** ALT 65: conferir 37 → 9, os 9 previstos (7 químicos de FDS Irrelevante, 2 radiação não
+  ionizante Física Baixo). ALT T65 2024-2026 (BS 8800): escala lida (37 Trivial, 21 Tolerável, 41 Moderado), Trivial e
+  Tolerável não constam, Moderado consta; 3 "sem grupo lido" — o PGR escreve "Ergnômico" (págs. 24, 27 e 29). Memorial do
+  Hetrin: alertas R-PSY-07 e R-AUD-05 saem.
+- **Censo das grafias (49 PDFs do repositório, palavras do texto inteiro, não só da coluna GRUPO).** Erros de digitação
+  a 1 edição de um grupo: "Ergnômico" (2 PGRs: ALT T65, EURO Setor C), "Fisixo", "Qumico", "Acident". Palavras de outro
+  sentido a 2 edições: "Paciente(s)" → Acidente, "Econômico" → Ergonômico, "Básico"/"Típico" → Físico.
+- **Decisão.** Mantida a leitura pelo radical; quando ela falha, a 1ª palavra sem plural a até **1** edição de um dos
+  cinco grupos dá o grupo. O limite não sobe (margem de um passo para as palavras de outro sentido).
+- **Fora.** "Psicossocial" como grupo (pendência do psicossocial no ASO) e "Mecânico" como sinônimo de Acidentes
+  (interpretação, não erro de digitação).
+- **Verificação.** 1 teste em `test_niveis_pgr.py`, varredura inversa 3/3.
+
 ---
 
 ## Histórico de revisões
@@ -5199,3 +5214,4 @@ Sessão branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427`. O
 | v254 | 07/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 8739c3b` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-94` adicionada** — Avaliação Psicossocial da altura condicionada ao inventário psicossocial do PGR (R-PSY-06 sucede R-PSY-04); alertas para a revisão médica sem mudar exame: PGR sem inventário depois da vigência na NR-01 (R-PSY-07) e menor aprendiz com ruído (R-AUD-05). |
 | v255 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427` (IMPLEMENTAÇÃO, decisão do Diovanni): **`D-ARQ-95` adicionada** — nível de risco do PGR em qualquer escala para a sugestão do ASO: rótulo verbatim (`nivel_pgr`), vocabulário `niveis_risco.yaml` do censo de 32 PGRs (5 escalas), desconhecido → conferir; motor de emissão intocado. |
 | v256 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 66cf0e8` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-95`** — regra 6d: a rota por GHE transcreve a coluna GRUPO do PGR (medida: 37 "sem grupo lido" no ASO da ALT 65), convertida pelo radical no token de grupo; texto desconhecido → sem grupo. |
+| v257 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ed3698f` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-95`** — grupo com erro de digitação do PGR ("Ergnômico") aceito a até 1 edição de um dos cinco grupos, depois da leitura pelo radical; censo de 49 PDFs fixa o limite (palavras de outro sentido a 2 edições). 2ª rodada no app medida. |

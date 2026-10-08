@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import unicodedata
 from collections.abc import Sequence
 from typing import Any
@@ -12,6 +13,7 @@ from agente_medico.adaptadores.transcritor_gemini import (
     _mapear_lotes,
     _obter_chave,
 )
+from agente_medico.motor.resolvedor_termos import _levenshtein
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 
 # [DERIVADO — D-ARQ-49 P3, D-ARQ-50 C3/P2; molde D-ARQ-48/transcritor_gemini.py]
@@ -101,12 +103,31 @@ _GRUPO_POR_RADICAL = (
 )
 
 
+# Grafia com erro de digitação na própria coluna do PGR ("Ergnômico" no ALT T65 e no EURO
+# Setor C; "Fisixo", "Qumico", "Acident"): 1ª palavra sem plural a até 1 edição de um grupo.
+# Censo de 08/10/2026 (49 PDFs): os vizinhos de outro sentido ficam a 2 edições ("Pacientes" →
+# ACIDENTE, "Econômico" → ERGONOMICO, "Básico" → FISICO) — o limite não sobe.
+_EDICOES_MAXIMAS_GRUPO = 1
+
+
+def _grupo_por_grafia_proxima(texto: str) -> str:
+    palavra = re.split(r"[^A-Z]+", texto, maxsplit=1)[0]
+    if palavra.endswith("S"):
+        palavra = palavra[:-1]
+    return next(
+        (token for _, token in _GRUPO_POR_RADICAL if _levenshtein(palavra, token) <= _EDICOES_MAXIMAS_GRUPO), ""
+    )
+
+
 def _grupo(risco_raw: dict[str, Any]) -> str:
     texto = "".join(
         c for c in unicodedata.normalize("NFD", str(risco_raw.get("grupo", "") or "")) if not unicodedata.combining(c)
     ).strip().upper()
     if texto:
-        return next((token for radical, token in _GRUPO_POR_RADICAL if texto.startswith(radical)), "")
+        return next(
+            (token for radical, token in _GRUPO_POR_RADICAL if texto.startswith(radical)),
+            _grupo_por_grafia_proxima(texto),
+        )
     return _GRUPO_POR_LETRA.get(str(risco_raw.get("tipo_risco", "") or "").strip().upper(), "")
 
 

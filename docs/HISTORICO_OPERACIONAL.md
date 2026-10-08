@@ -12490,3 +12490,22 @@ regenerado, PENDENCIAS atualizada (nova rodada da ALT 65 e de um PGR BS 8800, me
 passed, 6 skipped** (1791 s; a base 1823 é a do PR #468 — `66cf0e8` só acrescenta um PDF). mypy no alvo canônico: limpo,
 59 arquivos; `transcritor_gemini_pgr.py` limpo. `test_gerar_indice_darq.py` 6 passed. Efeito real da 6d `[A MEDIR — nova
 rodada no app, com o Diovanni]`.
+
+## Sessão (branch `claude/fervent-shannon-1nq8hw` recriada sobre `main ed3698f`, pós-merge do PR #469) — 08/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: 2ª rodada no app e grafia do grupo (emenda 2 em D-ARQ-95)
+
+**Medido (2ª rodada do Diovanni no app).** ALT 65: conferir 37 → 9, os 9 previstos. ALT T65 2024-2026 (BS 8800): escala lida
+(37 Trivial, 21 Tolerável, 41 Moderado), Trivial/Tolerável não constam, Moderado consta, R-PSY-06 coerente (sem inventário);
+3 "sem grupo lido" porque o PGR escreve "Ergnômico". Memorial do Hetrin: alertas R-PSY-07 e R-AUD-05 saem.
+
+**Revisão do raciocínio (pedida pelo Diovanni).** A 1ª proposta (trocar o radical por tolerância de 1 letra) se apoiava num
+PGR só e testava a segurança contra "Biomecânico" (5 edições). Censo de 49 PDFs: "Ergnômico" em 2 PGRs, mais "Fisixo",
+"Qumico", "Acident"; os vizinhos de outro sentido ficam a 2 edições ("Pacientes", "Econômico", "Básico"). Proposta revista
+e aprovada: radical mantido, tolerância de 1 edição só quando ele falha, limite travado em teste. No acervo medido, a
+leitura pelo radical e a tolerância cobrem as mesmas formas corretas; manter o radical é garantia de não regressão.
+
+**Entrega.** `_grupo_por_grafia_proxima` em `transcritor_gemini_pgr.py` (reusa `_levenshtein` do resolvedor de termos).
+DECISOES v257 (emenda 2 em `D-ARQ-95`), `INDICE_DARQ.md` regenerado, PENDENCIAS (3ª rodada do ALT T65, nome dos arquivos
+gerados, "Mecânico" como grupo).
+
+**Verificação.** 1 teste, varredura inversa 3/3. Suíte completa, árvore parada: **1825 → 1826 passed, 6 skipped** (1621 s).
+mypy no alvo canônico: limpo, 59 arquivos; `transcritor_gemini_pgr.py` limpo. `test_gerar_indice_darq.py` 6 passed.

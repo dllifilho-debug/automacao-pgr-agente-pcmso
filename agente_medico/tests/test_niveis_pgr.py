@@ -135,6 +135,21 @@ def test_resposta_da_ia_por_ghe_traz_o_texto_do_grupo() -> None:
     assert [r.grupo for r in ghe.riscos] == ["ACIDENTE", "ERGONOMICO", "", "FISICO"]
 
 
+def test_grupo_com_erro_de_digitacao_do_pgr() -> None:
+    # Medido no app (08/10/2026): "Ergnômico" do ALT T65 2024-2026 saía "sem grupo lido".
+    # Censo de 49 PDFs: vizinhos de outro sentido a 2 edições. Reversões que matam: (1) tirar
+    # a tolerância (Ergnômico/Fisixo/Acident ficam sem grupo); (2) não tirar o plural
+    # ("Ergnômicos" fica a 2 edições); (3) subir o limite para 2 (Pacientes vira ACIDENTE,
+    # Econômico vira ERGONOMICO, Básico vira FISICO).
+    textos = ["Ergnômico", "Ergnômicos", "Fisixo", "Acident", "Pacientes", "Econômico", "Básico"]
+    ghe = _ghe_de_dict({
+        "nome": "G",
+        "cargos": [],
+        "riscos": [{"agente": "X", "nivel_pgr": "Trivial", "grupo": texto} for texto in textos],
+    })
+    assert [r.grupo for r in ghe.riscos] == ["ERGONOMICO", "ERGONOMICO", "FISICO", "ACIDENTE", "", "", ""]
+
+
 def test_prompts_ghe_pedem_o_grupo() -> None:
     # Reversão que mata: tirar o campo grupo do formato pedido no prompt GHE unitário ou
     # no em lote (o de produção).
