@@ -22,6 +22,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import logging
+import re
 import time
 from dataclasses import dataclass
 from datetime import date
@@ -87,6 +88,7 @@ __all__ = [
     "linhas_sugestao",
     "listar_produtos_anexados",
     "montar_envelope",
+    "nome_arquivo",
     "montar_fds",
     "pagina_matriz",
     "preparar_composicao",
@@ -100,6 +102,30 @@ def linha_pendencia(p: Pendencia, com_regra: bool = False) -> str:
     """D-ARQ-89 cl.5 (DH-003EG-01): o motivo pode citar texto do PGR com NUL."""
     regra = f" ({p.regra_origem})" if com_regra else ""
     return f"- `{p.tipo}`{regra}: {_sanitizar(p.motivo)}"
+
+# Proibidos em nome de arquivo no Windows, mais controles.
+_PROIBIDOS_NO_NOME = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
+
+
+def nome_arquivo(documento: str, cabecalho: CabecalhoDocumento, extensao: str, generico: str) -> str:
+    """Nome do download no padrão das médicas no acervo, montado com o que foi digitado:
+    "MATRIZ DE EXAMES(ATUALIZAÇÃO)RICCO CONSTRUTORA HETRIN 14.09.26". A barra da data vira
+    ponto. Sem tipo, empresa, obra nem data, sai o nome genérico."""
+
+    def limpo(texto: str) -> str:
+        return " ".join(_PROIBIDOS_NO_NOME.sub("", texto).split())
+
+    tipo = limpo(cabecalho.tipo_documento).upper()
+    corpo = " ".join(
+        parte
+        for parte in (limpo(cabecalho.empresa), limpo(cabecalho.obra), limpo(cabecalho.data.replace("/", ".")))
+        if parte
+    )
+    if not tipo and not corpo:
+        return generico
+    titulo = f"{documento}({tipo})" if tipo else f"{documento} "
+    return f"{titulo}{corpo}.{extensao}"
+
 
 def montar_envelope(
     validade_iso: str, assinatura: bool, hoje: date | None = None
@@ -840,6 +866,7 @@ def pagina_matriz() -> None:
         listar_produtos_anexados,
         montar_envelope,
         montar_fds,
+        nome_arquivo,
         preparar_composicao_cacheada,
         registrar_medicao_e_reprocessar,
         remover_medicao_e_reprocessar,
@@ -1445,18 +1472,23 @@ def pagina_matriz() -> None:
                     st.download_button(
                         "Baixar DOCX",
                         docx_bytes,
-                        file_name="matriz.docx",
+                        file_name=nome_arquivo("MATRIZ DE EXAMES", cabecalho, "docx", "matriz.docx"),
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         type="primary",
                     )
             with col_html:
-                st.download_button("Baixar HTML", html, file_name="matriz.html", mime="text/html")
+                st.download_button(
+                    "Baixar HTML",
+                    html,
+                    file_name=nome_arquivo("MATRIZ DE EXAMES", cabecalho, "html", "matriz.html"),
+                    mime="text/html",
+                )
             if memorial_bytes is not None:
                 with col_memorial:
                     st.download_button(
                         "Baixar memorial de raciocínio",
                         memorial_bytes,
-                        file_name="memorial.docx",
+                        file_name=nome_arquivo("MEMORIAL DE RACIOCÍNIO", cabecalho, "docx", "memorial.docx"),
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         help="Anexo para as médicas: por que cada exame e periodicidade. Não entra na matriz assinada.",
                     )
@@ -1465,7 +1497,7 @@ def pagina_matriz() -> None:
                     st.download_button(
                         "Baixar riscos para o ASO",
                         aso_bytes,
-                        file_name="riscos_aso.docx",
+                        file_name=nome_arquivo("RISCOS PARA O ASO", cabecalho, "docx", "riscos_aso.docx"),
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         help="Anexo para as médicas: quais riscos do PGR constam no ASO (NR-07 7.5.19.1 \"c\"). Sugestão a validar.",
                     )
