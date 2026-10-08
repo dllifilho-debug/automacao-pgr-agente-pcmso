@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import unicodedata
 from collections.abc import Sequence
 from typing import Any
 
@@ -69,7 +70,10 @@ Intolerável. NÃO calcule nem deduza o nível: só copie o que está na linha.
 escreve, em QUALQUER escala (ex.: "MODERADO", "Tolerável", "SUBSTANCIAL", "2 - MODERADO", "Médio"). Só o \
 rótulo do nível: não a probabilidade, não a severidade, não a classificação de prioridade de ação. Deixe \
 "" quando a linha não traz nível. NÃO calcule nem deduza: só copie.
-7. RUÍDO — NÃO transcreva (exceto o que as regras 6b e 6c pedem): o grid de classificação de risco (colunas de \
+6d. grupo = o texto da coluna GRUPO (ou TIPO, ou CATEGORIA) DE RISCO da linha do risco, como o documento o \
+escreve (ex.: "Físico", "Químico", "Biológico", "Ergonômico", "Acidentes"). Deixe "" quando a linha não \
+traz essa coluna. NÃO deduza o grupo pelo nome do agente: só copie.
+7. RUÍDO — NÃO transcreva (exceto o que as regras 6b, 6c e 6d pedem): o grid de classificação de risco (colunas de \
 letras/números I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
 EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/rodapé repetido de página \
 (razão social, CNPJ, "INVENTÁRIO E CLASSIFICAÇÃO DOS RISCOS OCUPACIONAIS", numeração de página) e o \
@@ -78,7 +82,7 @@ EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/r
 Retorne APENAS JSON válido, sem markdown, sem texto adicional, neste formato exato:
 {{"nome": "Pintura", "cargos": ["pintor", "meio oficial de pintor", "servente"], "riscos": \
 [{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão", \
-"avaliacao_qualitativa": "", "nivel_pgr": ""}}]}}
+"avaliacao_qualitativa": "", "nivel_pgr": "", "grupo": "Químico"}}]}}
 
 Texto do bloco GHE:
 {bloco}
@@ -88,6 +92,22 @@ Texto do bloco GHE:
 # D-ARQ-95: letra da coluna TIPO DE RISCO do grid AIHA → token de grupo da família
 # Consciente (o mesmo de RiscoVerbatim.grupo). Letra desconhecida: sem grupo.
 _GRUPO_POR_LETRA = {"F": "FISICO", "Q": "QUIMICO", "B": "BIOLOGICO", "E": "ERGONOMICO", "A": "ACIDENTE"}
+
+# Regra 6d (emenda D-ARQ-95): texto da coluna GRUPO da rota por GHE ("Acidentes",
+# "Ergonômico"...) → o mesmo token, pelo radical. Texto que não abre por um deles: sem grupo.
+_GRUPO_POR_RADICAL = (
+    ("FISIC", "FISICO"), ("QUIMIC", "QUIMICO"), ("BIOLOGIC", "BIOLOGICO"),
+    ("ERGONOMIC", "ERGONOMICO"), ("ACIDENTE", "ACIDENTE"),
+)
+
+
+def _grupo(risco_raw: dict[str, Any]) -> str:
+    texto = "".join(
+        c for c in unicodedata.normalize("NFD", str(risco_raw.get("grupo", "") or "")) if not unicodedata.combining(c)
+    ).strip().upper()
+    if texto:
+        return next((token for radical, token in _GRUPO_POR_RADICAL if texto.startswith(radical)), "")
+    return _GRUPO_POR_LETRA.get(str(risco_raw.get("tipo_risco", "") or "").strip().upper(), "")
 
 
 def _ghe_de_dict(dados: dict[str, Any]) -> GHEVerbatim:
@@ -99,7 +119,7 @@ def _ghe_de_dict(dados: dict[str, Any]) -> GHEVerbatim:
             fonte_geradora=str(risco_raw.get("fonte_geradora", "") or ""),
             avaliacao_qualitativa=str(risco_raw.get("avaliacao_qualitativa", "") or ""),
             nivel_pgr=str(risco_raw.get("nivel_pgr", "") or ""),
-            grupo=_GRUPO_POR_LETRA.get(str(risco_raw.get("tipo_risco", "") or "").strip().upper(), ""),
+            grupo=_grupo(risco_raw),
         )
         for risco_raw in dados.get("riscos", []) or []
     )
@@ -170,7 +190,10 @@ Intolerável. NÃO calcule nem deduza o nível: só copie o que está na linha.
 escreve, em QUALQUER escala (ex.: "MODERADO", "Tolerável", "SUBSTANCIAL", "2 - MODERADO", "Médio"). Só o \
 rótulo do nível: não a probabilidade, não a severidade, não a classificação de prioridade de ação. Deixe \
 "" quando a linha não traz nível. NÃO calcule nem deduza: só copie.
-7. RUÍDO — NÃO transcreva (exceto o que as regras 6b e 6c pedem): o grid de classificação de risco (colunas de \
+6d. grupo = o texto da coluna GRUPO (ou TIPO, ou CATEGORIA) DE RISCO da linha do risco, como o documento o \
+escreve (ex.: "Físico", "Químico", "Biológico", "Ergonômico", "Acidentes"). Deixe "" quando a linha não \
+traz essa coluna. NÃO deduza o grupo pelo nome do agente: só copie.
+7. RUÍDO — NÃO transcreva (exceto o que as regras 6b, 6c e 6d pedem): o grid de classificação de risco (colunas de \
 letras/números I/O/T/EP/PE/EC/CP/P/GV/EA/S, probabilidade/severidade/grau-de-risco/classe do risco), a lista de \
 EPIs/controles ("CONTROLE DOS RISCOS", "RISCO FÍSICO:" e afins), o cabeçalho/rodapé repetido de página \
 (razão social, CNPJ, "INVENTÁRIO E CLASSIFICAÇÃO DOS RISCOS OCUPACIONAIS", numeração de página) e o \
@@ -181,7 +204,7 @@ bloco, NA MESMA ORDEM dos blocos abaixo (posição 1 do array = BLOCO 1, posiç�
 diante), neste formato exato:
 [{{"nome": "Pintura", "cargos": ["pintor", "meio oficial de pintor", "servente"], "riscos": \
 [{{"agente": "Etanol", "quantificacao": "4,4 ppm", "fonte_geradora": "Thinner/Zarcão", \
-"avaliacao_qualitativa": "", "nivel_pgr": ""}}]}}]
+"avaliacao_qualitativa": "", "nivel_pgr": "", "grupo": "Químico"}}]}}]
 
 Blocos GHE:
 {blocos}
