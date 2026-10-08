@@ -1,6 +1,7 @@
 """Alertas para a revisão médica, sem mudar exame (07/10/2026, decisão do Diovanni):
 R-PSY-07 — PGR emitido a partir de 26/05/2026 sem inventário psicossocial (NR-01 item
-1.5.3.1.4); R-AUD-05 — PGR declara ruído para menor aprendiz (adendo Hetrin, pág. 8).
+1.5.3.1.4); R-TIP-01 (sucede R-AUD-05, 08/10/2026) — menor aprendiz em GHE com risco da
+Lista TIP, Decreto 6.481/2008 (adendo Hetrin, pág. 8: ruído).
 Cada teste nomeia a reversão que o deixa vermelho."""
 
 from __future__ import annotations
@@ -70,7 +71,7 @@ def _alertas_nr01(resultado: Resultado) -> list[Pendencia]:
 
 
 def _alertas_menor(resultado: Resultado) -> list[Pendencia]:
-    return [p for m in resultado.matrizes for p in m.pendencias if p.regra_origem == "R-AUD-05"]
+    return [p for m in resultado.matrizes for p in m.pendencias if p.regra_origem == "R-TIP-01"]
 
 
 # --- R-PSY-07 ---------------------------------------------------------------
@@ -98,21 +99,32 @@ def test_alerta_vale_a_partir_da_vigencia(proto: Protocolo, emissao: date, alert
     assert bool(_alertas_nr01(_resultado(proto, _pgr(proto, emissao=emissao)[0]))) is alerta
 
 
-# --- R-AUD-05 ---------------------------------------------------------------
+# --- R-TIP-01 ---------------------------------------------------------------
 
 
 @pytest.mark.parametrize("cargo", ["MENOS APRENDIZ", "Menor Aprendiz (menor ou igual a 18 anos)"])
 def test_menor_aprendiz_com_ruido_alerta_e_mantem_audiometria(proto: Protocolo, cargo: str) -> None:
     # "MENOS APRENDIZ" é a grafia do adendo Hetrin. Reversões que matam: (1) tirar a
-    # chamada de `_menor_aprendiz_com_ruido` no estágio 3; (2) regex só com "menor" — a
+    # chamada de `_menor_aprendiz_lista_tip` no estágio 3; (2) regex só com "menor" — a
     # grafia do adendo escapa; (3) `bloqueante=True` — a matriz cairia para PARCIAL.
     resultado = _resultado(proto, _pgr(proto, cargos=(cargo,), psicossocial=True)[0])
 
     (alerta,) = _alertas_menor(resultado)
-    assert not alerta.bloqueante and cargo in alerta.motivo
+    assert not alerta.bloqueante and cargo in alerta.motivo and "(item 83)" in alerta.motivo
     (matriz,) = resultado.matrizes
     assert "audiometria" in {ln.exame for ln in matriz.linhas}
     assert matriz.status == "VÁLIDA"
+
+
+def test_alerta_cita_cada_item_da_lista_tip_e_as_excecoes(proto: Protocolo) -> None:
+    # Decreto 6.481/2008. Reversões que matam: (1) só olhar o ruído (altura, espaço
+    # confinado e benzeno somem); (2) tirar um item de lista_tip.yaml; (3) tirar do texto o
+    # Art. 2º § 1º, o Art. 3º ou o item 58 (construção civil).
+    termos = ("Ruído", "Trabalho em altura", "Espaço confinado", "Benzeno", "Vibração")
+    (alerta,) = _alertas_menor(_resultado(proto, _pgr(proto, cargos=("Menor Aprendiz",), termos=termos)[0]))
+    posicoes = [alerta.motivo.index(f"(item {n})") for n in ("55", "82", "83", "84", "85")]
+    assert posicoes == sorted(posicoes)
+    assert all(trecho in alerta.motivo for trecho in ("Art. 2º § 1º", "Art. 3º", "item 58"))
 
 
 def test_jovem_aprendiz_com_ruido_nao_alerta(proto: Protocolo) -> None:
@@ -121,11 +133,23 @@ def test_jovem_aprendiz_com_ruido_nao_alerta(proto: Protocolo) -> None:
     assert _alertas_menor(_resultado(proto, _pgr(proto, cargos=("Jovem Aprendiz",))[0])) == []
 
 
-def test_menor_aprendiz_sem_ruido_nao_alerta(proto: Protocolo) -> None:
-    # Menor aprendiz só no escritório, sem risco (R70 22/09/2026). Reversão que mata:
-    # tirar a condição de ruído — o alerta sairia sem exposição declarada.
+def test_menor_aprendiz_sem_risco_da_lista_nao_alerta(proto: Protocolo) -> None:
+    # Menor aprendiz só no escritório (R70 22/09/2026): postura não é item da Lista TIP.
+    # Reversão que mata: tirar a condição `if not itens` — o alerta sairia sem risco da lista.
     pgr, _ = _pgr(proto, cargos=("Menor Aprendiz",), termos=("Postura inadequada",))
     assert _alertas_menor(_resultado(proto, pgr)) == []
+
+
+def test_lista_tip_com_agente_fora_do_vocabulario_falha_no_carregamento(tmp_path: Path) -> None:
+    # Reversão que mata: tirar a conferência contra agentes.yaml — um slug errado faria o
+    # alerta nunca disparar sem ninguém ver.
+    from agente_medico.motor.protocolo import _carregar_lista_tip
+
+    arquivo = tmp_path / "lista_tip.yaml"
+    arquivo.write_text('lista_tip:\n  "83":\n    descricao: ruído\n    agentes: [ruidoo]\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="ruidoo"):
+        _carregar_lista_tip(arquivo, {"ruido": {}})
+    assert _carregar_lista_tip(tmp_path / "ausente.yaml", {"ruido": {}}) == {}
 
 
 # --- Memorial e tela ---------------------------------------------------------
@@ -148,7 +172,7 @@ def test_memorial_traz_os_dois_alertas(proto: Protocolo, tmp_path: Path) -> None
     )
     (bloco,) = memorial.blocos
     (aviso,) = memorial.avisos_pgr
-    assert bloco.alertas[0].endswith("(ref. R-AUD-05)") and aviso.endswith("(ref. R-PSY-07)")
+    assert bloco.alertas[0].endswith("(ref. R-TIP-01)") and aviso.endswith("(ref. R-PSY-07)")
 
     destino = tmp_path / "memorial.docx"
     renderizar_memorial_docx(memorial, CabecalhoDocumento("RICCO", "HETRIN", "Adendo", "30/09/2026", "Dra. X", "CRM"), destino)
@@ -172,6 +196,6 @@ def test_tela_mostra_alerta_do_menor_e_aviso_da_nr01(monkeypatch: pytest.MonkeyP
 
     textos = [el.value for el in at.markdown]
     assert "**Alertas para a revisão médica**" in textos
-    assert any("R-AUD-05" in t and "MENOS APRENDIZ" in t for t in textos)
+    assert any("R-TIP-01" in t and "MENOS APRENDIZ" in t for t in textos)
     escritos = [str(el.value) for el in at.markdown] + [str(getattr(el, "value", "")) for el in at.main]
     assert any("R-PSY-07" in t for t in escritos)
