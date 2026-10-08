@@ -4157,11 +4157,12 @@ com Avaliação Psicossocial), mas 37 conferir "sem grupo lido" → corrigido pe
 **2ª rodada no app (08/10/2026).** ALT 65: conferir 37 → 9 (previstos). ALT T65 2024-2026 (BS 8800): escala lida, 3 "sem
 grupo lido" por "Ergnômico" no PGR → emenda 2 em D-ARQ-95. Memorial do Hetrin: R-PSY-07 e R-AUD-05 saem.
 - **Pendente:** 3ª rodada do ALT T65 2024-2026 para confirmar os 3 grupos.
-- **Nome dos arquivos gerados (pedido do Diovanni, 08/10/2026):** os documentos (matriz, riscos do ASO, memorial) saem com
-  nome genérico; devem sair com o nome digitado no app.
+- **Nome dos arquivos gerados (pedido do Diovanni, 08/10/2026) — RESOLVIDO (08/10/2026):** os quatro downloads saem no
+  padrão das médicas no acervo, com o que foi digitado: `MATRIZ DE EXAMES(TIPO)EMPRESA OBRA DATA`, `MEMORIAL DE
+  RACIOCÍNIO(...)`, `RISCOS PARA O ASO(...)`; barra da data vira ponto; nada digitado → nome genérico.
 - **"Mecânico" como grupo** (~15 PDFs do acervo): sinônimo de Acidentes em parte dos PGRs; mapear é interpretação, não
   erro de digitação — fica sem grupo (conferir) até decisão.
 
 **Status:** ABERTA — item 1 da folha ((a), (c), (d), leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
-nocivo", 3ª rodada do ALT T65 2024-2026, nome dos arquivos gerados, "Mecânico" como grupo, parser de coordenadas e a ALT
+nocivo", 3ª rodada do ALT T65 2024-2026, "Mecânico" como grupo, parser de coordenadas e a ALT
 65, Decreto 6.481/2008 `[A CONFERIR]`.

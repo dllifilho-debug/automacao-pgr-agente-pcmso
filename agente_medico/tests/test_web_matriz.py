@@ -4,7 +4,7 @@ carrega, junto, a reversão de código que deve deixá-lo vermelho."""
 from __future__ import annotations
 
 import ast
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
@@ -338,11 +338,15 @@ def test_troca_de_cabecalho_regenera_documento_sem_reprocessar(
 _EMISSAO_RECENTE = (date.today() - timedelta(days=30)).isoformat()
 
 
-def _submeter_formulario(at: AppTest, validade: str = _EMISSAO_RECENTE) -> None:
+def _submeter_formulario(
+    at: AppTest, validade: str = _EMISSAO_RECENTE, campos: Mapping[str, str] | None = None
+) -> None:
     # Campos do `st.form` sem `.run()` entre eles: o navegador só envia o
     # formulário no submit, e o AppTest do Streamlit 1.65 passou a imitar isso —
     # um rerun antes do submit descarta o valor pendente.
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    for rotulo, valor in (campos or {}).items():
+        next(t for t in at.text_input if t.label == rotulo).set_value(valor)
     next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste")
     next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000")
     at.text_input[len(at.text_input) - 1].set_value(validade)
