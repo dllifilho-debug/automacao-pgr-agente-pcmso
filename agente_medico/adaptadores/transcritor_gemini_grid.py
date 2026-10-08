@@ -68,8 +68,15 @@ pela extração. NUNCA emita código/slug, NUNCA traduza, NUNCA junte dois perig
 quando não traz — o caso normal desta tabela. Não calcule nem converta.
    c. fonte_geradora = "" (esta tabela não tem coluna de fonte geradora).
    d. avaliacao_qualitativa = "" sempre.
-4. RUÍDO — use para separar as linhas, mas NÃO transcreva como campo: a letra do TIPO DE RISCO, o \
-CÓDIGO eSocial, TEMPO DE EXPOSIÇÃO, MEIO DE PROPAGAÇÃO, PROBABILIDADE, EFEITO, NÍVEL DE RISCO, \
+   e. nivel_pgr = o texto da coluna NÍVEL DE RISCO da linha, juntando as linhas em que a célula quebrou e \
+consertando só o espaço quebrado (ex.: "2 -" + "MODERAD" + "O" -> "2 - MODERADO"; "1 - BAIXO"). Só o NÍVEL \
+DE RISCO — nunca a PROBABILIDADE, o EFEITO nem a CLASSIFICAÇÃO ("2 - DE ATENÇÃO", "1 - IRRELEVANTE" são \
+CLASSIFICAÇÃO). "" quando a célula está vazia.
+   f. tipo_risco = a letra da coluna TIPO DE RISCO do bloco a que a linha pertence (F, Q, B, E ou A). A \
+letra aparece uma vez, centrada no bloco de linhas do mesmo tipo: repita-a em todas as linhas desse bloco. \
+"" quando não dá para saber.
+4. RUÍDO — use para separar as linhas, mas NÃO transcreva como campo (exceto o que as regras 3e e 3f \
+pedem): o CÓDIGO eSocial, TEMPO DE EXPOSIÇÃO, MEIO DE PROPAGAÇÃO, PROBABILIDADE, EFEITO, \
 CLASSIFICAÇÃO, os EPIs e medidas de controle, o travessão "—", e cabeçalho/rodapé de página \
 ("PGR | PROGRAMA DE GERENCIAMENTO DE RISCOS", "Matriz de Risco AIHA").
 5. Grupo sem nenhuma linha de perigo é resultado legítimo: riscos = [].
@@ -79,7 +86,7 @@ grupo, NA MESMA ORDEM dos grupos abaixo (posição 1 do array = GRUPO 1, e assim
 formato exato:
 [{{"nome": "VIGIA DIURNO/ VIGIA NOTURNO", "cargos": ["VIGIA DIURNO", "VIGIA NOTURNO"], "riscos": \
 [{{"agente": "RUÍDO CONTÍNUO OU INTERMITENTE", "quantificacao": "", "fonte_geradora": "", \
-"avaliacao_qualitativa": ""}}]}}]
+"avaliacao_qualitativa": "", "nivel_pgr": "2 - MODERADO", "tipo_risco": "F"}}]}}]
 
 Grupos:
 {grupos}

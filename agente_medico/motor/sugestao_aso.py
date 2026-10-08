@@ -14,6 +14,7 @@ from typing import Any
 
 from agente_medico.motor.classificacao_ruido import classificar_ruido
 from agente_medico.motor.leo_resolver import PNOS, SILICA, avaliar_medicao_quimica
+from agente_medico.motor.niveis_pgr import classificar_nivel_pgr
 from agente_medico.motor.tipos import (
     NIVEIS_RISCO_PXS,
     Criterio,
@@ -63,6 +64,18 @@ _NOTA_BAIXO = (
 
 def _moderado_ou_acima(nivel: str) -> bool:
     return nivel in NIVEIS_RISCO_PXS and NIVEIS_RISCO_PXS.index(nivel) >= _NIVEL_MODERADO
+
+
+def _nivel(
+    nivel_risco: str | None, nivel_pgr: str, niveis: Mapping[str, Any]
+) -> tuple[str, bool] | None:
+    """(rótulo, moderado ou acima). O nível P×S, quando há, decide como sempre; sem ele,
+    o rótulo que o PGR escreve em outra escala, pelo vocabulário `niveis_risco.yaml`
+    (D-ARQ-95). Rótulo desconhecido ou conflitante: None — conferir."""
+    if nivel_risco is not None:
+        return nivel_risco, _moderado_ou_acima(nivel_risco)
+    achado = classificar_nivel_pgr(nivel_pgr, niveis)
+    return (achado.rotulo, achado.posicao == "corte") if achado is not None else None
 
 
 def _pct_limite(risco: Risco, agentes_vocab: Mapping[str, Any]) -> float | None:
@@ -138,34 +151,36 @@ def _medicao_acima_nivel_acao(risco: Risco, agentes_vocab: Mapping[str, Any]) ->
     return None
 
 
-def _criterio_geral(risco: Risco, agentes_vocab: Mapping[str, Any]) -> Criterio:
+def _criterio_geral(risco: Risco, agentes_vocab: Mapping[str, Any], niveis: Mapping[str, Any]) -> Criterio:
     """R-ASO-06 — consta com medição acima do nível de ação da NR-09 (NR-07 item 7.5.12
     "b") ou classificação do PGR moderada ou acima, de qualquer grupo de risco, inclusive
     acidente e ergonômico (e-mail da Dra. Carolini, regra geral, leitura literal — o corte
     é do e-mail; a NR-07 item 7.5.19.1 "c" não fixa nível). Baixo/irrelevante: não consta
-    pelo critério. Sem nível: conferir."""
+    pelo critério. Sem nível: conferir. Nível de outra escala que não a P×S: D-ARQ-95."""
     acima = _medicao_acima_nivel_acao(risco, agentes_vocab)
     if acima is not None:
         return Criterio("CONSTA", "R-ASO-06", acima)
-    nivel = risco.nivel_risco
+    nivel = _nivel(risco.nivel_risco, risco.nivel_pgr, niveis)
     if nivel is None:
         return _sem_classificacao(risco)
-    if _moderado_ou_acima(nivel):
-        return Criterio("CONSTA", "R-ASO-06", f"classificado {nivel} no PGR; {_NOTA_MODERADO}")
-    return Criterio("NAO_CONSTA", "R-ASO-06", f"classificado {nivel} no PGR; {_NOTA_BAIXO}")
+    rotulo, corte = nivel
+    if corte:
+        return Criterio("CONSTA", "R-ASO-06", f"classificado {rotulo} no PGR; {_NOTA_MODERADO}")
+    return Criterio("NAO_CONSTA", "R-ASO-06", f"classificado {rotulo} no PGR; {_NOTA_BAIXO}")
 
 
-def _criterio_termo(risco_pgr: RiscoPGR) -> Criterio:
+def _criterio_termo(risco_pgr: RiscoPGR, niveis: Mapping[str, Any]) -> Criterio:
     """R-ASO-06 para o termo do PGR que o app não reconheceu (D-ARQ-91 emenda 2). A regra
     geral do e-mail decide pela classificação e pelo grupo, sem o agente: moderado ou
     acima consta; abaixo disso, acidente e ergonômico não constam (nenhuma exceção do
     e-mail os alcança); químico, físico e biológico baixos podem cair numa exceção que o
     app não decide sem o agente — conferir. Grupo não lido (rotas da IA): conferir."""
-    nivel = risco_pgr.nivel_risco
+    achado = _nivel(risco_pgr.nivel_risco, risco_pgr.nivel_pgr, niveis)
     grupo = risco_pgr.tipo
-    if nivel is None:
+    if achado is None:
         return Criterio("CONFERIR", "R-ASO-06", "risco do PGR não reconhecido pelo app, sem classificação — classificar à mão")
-    if _moderado_ou_acima(nivel):
+    nivel, corte = achado
+    if corte:
         return Criterio("CONSTA", "R-ASO-06", f"classificado {nivel} no PGR; {_NOTA_MODERADO}")
     termo = (risco_pgr.termo or "").lower()
     # R-ASO-03: altura e espaço confinado constam sempre, pela aptidão. Variante que o
@@ -194,7 +209,9 @@ def _criterio_termo(risco_pgr: RiscoPGR) -> Criterio:
     )
 
 
-def _criterio_ruido(riscos: Sequence[Risco], agentes_vocab: Mapping[str, Any]) -> list[Criterio]:
+def _criterio_ruido(
+    riscos: Sequence[Risco], agentes_vocab: Mapping[str, Any], niveis: Mapping[str, Any]
+) -> list[Criterio]:
     """R-ASO-05 — ruído consta com medição ≥ 80 dB(A) (NR-07 Anexo II item 2; NR-09 item
     9.6.1 "c", R-RUIDO-01), classificação moderada ou acima, ou classificação baixa com
     ototóxico ou vibração no GHE (Anexo II item 7; e-mail da Dra. Carolini)."""
@@ -208,17 +225,21 @@ def _criterio_ruido(riscos: Sequence[Risco], agentes_vocab: Mapping[str, Any]) -
     for risco in (r for r in riscos if r.agente == RUIDO):
         q = risco.quantificacao
         relacao = classificar_ruido(q).relacao_LT if q is not None else None
-        nivel = risco.nivel_risco
+        achado = _nivel(risco.nivel_risco, risco.nivel_pgr, niveis)
+        nivel, corte = achado if achado is not None else (None, False)
+        # Na escala P×S só BAIXO conta como "mesmo baixo" do e-mail (IRRELEVANTE não);
+        # em outra escala, todo rótulo abaixo do corte — o lado protetivo (D-ARQ-95).
+        baixo = risco.nivel_risco == "BAIXO" or (risco.nivel_risco is None and nivel is not None)
         if q is not None and q.valor is not None and relacao in _RUIDO_ACIMA_ACAO:
             criterios.append(
                 Criterio("CONSTA", "R-ASO-05", f"{q.valor:g} dB(A), ≥ 80 dB(A) (NR-07 Anexo II item 2)")
             )
-        elif nivel is not None and _moderado_ou_acima(nivel):
+        elif nivel is not None and corte:
             criterios.append(Criterio("CONSTA", "R-ASO-05", f"classificado {nivel} no PGR"))
-        elif nivel == "BAIXO" and agravante:
+        elif baixo and agravante:
             criterios.append(Criterio(
                 "CONSTA", "R-ASO-05",
-                "classificado BAIXO com ototóxico ou vibração no GHE (NR-07 Anexo II item 7)",
+                f"classificado {nivel} com ototóxico ou vibração no GHE (NR-07 Anexo II item 7)",
             ))
         elif nivel is not None:
             complemento = "" if agravante else ", sem ototóxico nem vibração no GHE"
@@ -232,20 +253,20 @@ def _criterio_ruido(riscos: Sequence[Risco], agentes_vocab: Mapping[str, Any]) -
 
 
 def _criterios_do_agente(
-    agente: str, riscos: Sequence[Risco], agentes_vocab: Mapping[str, Any]
+    agente: str, riscos: Sequence[Risco], agentes_vocab: Mapping[str, Any], niveis: Mapping[str, Any]
 ) -> list[Criterio]:
     if agente in _POEIRA_MINERAL:
         return [Criterio("CONSTA", "R-ASO-02", "poeira mineral (NR-07 Anexo III item 1)")]
     if agente in _APTIDAO_NR:
         return [Criterio("CONSTA", "R-ASO-03", f"aptidão para {_APTIDAO_NR[agente]}")]
     if agente == RUIDO:
-        return _criterio_ruido(riscos, agentes_vocab)
+        return _criterio_ruido(riscos, agentes_vocab, niveis)
     criterios: list[Criterio] = []
     for risco in (r for r in riscos if r.agente == agente):
         cancerigeno = _criterio_cancerigeno(risco, agentes_vocab)
         if cancerigeno is not None:
             criterios.append(cancerigeno)
-        criterios.append(_criterio_geral(risco, agentes_vocab))
+        criterios.append(_criterio_geral(risco, agentes_vocab, niveis))
     return criterios
 
 
@@ -264,13 +285,16 @@ def sugerir_aso(
     riscos: Sequence[Risco],
     riscos_pgr: Sequence[RiscoPGR],
     agentes_vocab: Mapping[str, Any],
+    niveis_risco: Mapping[str, Any] | None = None,
 ) -> RelatorioASO:
     """Uma sugestão por agente do GHE (linhas do PGR do mesmo agente juntas) e uma por
     termo do PGR que não virou agente (CONFERIR, D-ARQ-22). `exames` é informativo: os
-    exames da matriz cuja origem é o agente — o ASO traz o risco, não o exame."""
+    exames da matriz cuja origem é o agente — o ASO traz o risco, não o exame.
+    `niveis_risco`: vocabulário de rótulos de nível de outras escalas (D-ARQ-95)."""
+    niveis: Mapping[str, Any] = niveis_risco or {}
     sugestoes: list[SugestaoASO] = []
     for agente in dict.fromkeys(r.agente for r in riscos):
-        veredito, criterios = _consolidar(_criterios_do_agente(agente, riscos, agentes_vocab))
+        veredito, criterios = _consolidar(_criterios_do_agente(agente, riscos, agentes_vocab, niveis))
         exames = tuple(
             linha.exame
             for linha in linhas
@@ -279,7 +303,7 @@ def sugerir_aso(
         sugestoes.append(SugestaoASO(agente, True, veredito, criterios, exames))
     for termo in dict.fromkeys(r.termo for r in riscos_pgr if r.agente is None and r.termo):
         veredito, criterios = _consolidar(
-            [_criterio_termo(r) for r in riscos_pgr if r.agente is None and r.termo == termo]
+            [_criterio_termo(r, niveis) for r in riscos_pgr if r.agente is None and r.termo == termo]
         )
         sugestoes.append(SugestaoASO(termo, False, veredito, criterios, ()))
     aptidoes = tuple(

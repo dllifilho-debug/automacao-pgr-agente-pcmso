@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +16,8 @@ class Vocabulario:
     exames: dict[str, Any]
     epis: dict[str, Any]
     fracoes_sem_agente: tuple[str, ...] = ()
+    # D-ARQ-95: rótulos de nível de risco dos PGRs e a posição em relação ao corte moderado.
+    niveis_risco: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -24,6 +26,19 @@ class Protocolo:
     predicados_compostos: dict[str, Any]
     regras: list[dict[str, Any]]
     regimes: dict[str, Any]
+
+
+def _carregar_niveis_risco(path: Path) -> dict[str, Any]:
+    """D-ARQ-95: posição só pode ser `abaixo` ou `corte` — valor fora disso faria a
+    sugestão do ASO decidir com dado inválido; falha no carregamento, não em silêncio.
+    Arquivo ausente (protocolo mínimo): sem rótulos, e a sugestão sai conferir (D-ARQ-22)."""
+    if not path.exists():
+        return {}
+    niveis: dict[str, Any] = _exigir_chave(_load_yaml(path), "niveis_risco", path) or {}
+    for rotulo, entrada in niveis.items():
+        if not isinstance(entrada, dict) or entrada.get("posicao") not in ("abaixo", "corte"):
+            raise ValueError(f"{path}: nível {rotulo!r} sem posicao 'abaixo' ou 'corte'")
+    return niveis
 
 
 def _load_yaml(path: Path) -> Any:
@@ -54,6 +69,7 @@ def carregar(diretorio: Path | str) -> Protocolo:
         exames=_exigir_chave(_load_yaml(vocab_dir / "exames.yaml"), "exames", vocab_dir / "exames.yaml") or {},
         epis=_exigir_chave(_load_yaml(vocab_dir / "epis.yaml"), "epis", vocab_dir / "epis.yaml") or {},
         fracoes_sem_agente=tuple(agentes_yaml.get("fracoes_sem_agente") or ()),
+        niveis_risco=_carregar_niveis_risco(vocab_dir / "niveis_risco.yaml"),
     )
 
     pred_path = raiz / "predicados_compostos.yaml"

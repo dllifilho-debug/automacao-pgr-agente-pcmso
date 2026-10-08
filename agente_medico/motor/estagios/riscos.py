@@ -40,6 +40,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     nivel_risco=risco_pgr.nivel_risco,
                     avaliacao_qualitativa_aiha=risco_pgr.avaliacao_qualitativa_aiha,
                     termo=risco_pgr.termo,
+                    nivel_pgr=risco_pgr.nivel_pgr,
                     contaminantes_a_confirmar=_contaminantes(meta),
                 )
             )
@@ -54,6 +55,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     nivel_risco=risco_pgr.nivel_risco,
                     avaliacao_qualitativa_aiha=risco_pgr.avaliacao_qualitativa_aiha,
                     termo=risco_pgr.termo,
+                    nivel_pgr=risco_pgr.nivel_pgr,
                 )
             )
             ctx.pendencias.append(

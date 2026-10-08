@@ -143,6 +143,7 @@ def hidratar_ghe(
                     avaliacao_qualitativa_aiha=risco_verbatim.avaliacao_qualitativa_aiha,
                     termo=risco_verbatim.agente,
                     agravo=risco_verbatim.agravo,
+                    nivel_pgr=risco_verbatim.nivel_pgr or risco_verbatim.avaliacao_qualitativa,
                 )
             )
         elif resolucao.confianca == Confianca.FUZZY:
@@ -156,6 +157,7 @@ def hidratar_ghe(
                     avaliacao_qualitativa_aiha=risco_verbatim.avaliacao_qualitativa_aiha,
                     termo=risco_verbatim.agente,
                     agravo=risco_verbatim.agravo,
+                    nivel_pgr=risco_verbatim.nivel_pgr or risco_verbatim.avaliacao_qualitativa,
                 )
             )
             pendencias.append(
@@ -190,6 +192,7 @@ def hidratar_ghe(
                     avaliacao_qualitativa_aiha=risco_verbatim.avaliacao_qualitativa_aiha,
                     termo=risco_verbatim.agente,
                     agravo=risco_verbatim.agravo,
+                    nivel_pgr=risco_verbatim.nivel_pgr or risco_verbatim.avaliacao_qualitativa,
                 )
             )
             pendencias.append(dataclasses.replace(resolucao.pendencia, ghe_id=ghe_id))
