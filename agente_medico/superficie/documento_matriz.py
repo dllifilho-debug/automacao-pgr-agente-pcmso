@@ -60,14 +60,15 @@ def nome_ghe_exibicao(nome: str) -> str:
 
 
 def _nome_sem_codigo(ghe_id: str, nome_ghe: str) -> str:
-    """Tira do nome o código que o PGR escreve na frente: "GHE 01 - ADMINISTRAÇÃO" ou,
-    sem a palavra GHE, "01 - ADMINISTRAÇÃO 01" (Vila Brasil escritório, 08/10/2026). Sem
+    """Tira do nome o código que o PGR escreve na frente: "GHE 01 - ADMINISTRAÇÃO", "GHE: 03 -
+    SUPERVISÃO DE EQUIPE" (Quasar Bueno, 09/10/2026) ou, sem a palavra GHE, "01 -
+    ADMINISTRAÇÃO 01" (Vila Brasil escritório, 08/10/2026). Sem
     a palavra GHE, só com o hífen depois do número — "10 PAVIMENTOS" não é código."""
     numero = re.search(r"\d+", ghe_id)
     if not numero:
         return nome_ghe
     n = int(numero[0])
-    nome = re.sub(rf"^GHE[\s-]*0*{n}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
+    nome = re.sub(rf"^GHE[\s:-]*0*{n}(?!\d)\s*[-–—]?\s*", "", nome_ghe, flags=re.IGNORECASE)
     return re.sub(rf"^0*{n}(?!\d)\s*[-–—]\s*", "", nome)
 
 

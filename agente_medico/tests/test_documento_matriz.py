@@ -630,6 +630,15 @@ def test_titulo_tira_o_numero_do_ghe_escrito_sem_a_palavra_ghe() -> None:
     assert titulo_ghe_rq61("GHE-01", "10 - X") == "GHE 01 - 10 - X"
 
 
+def test_titulo_tira_o_codigo_do_ghe_escrito_com_dois_pontos() -> None:
+    # Quasar Bueno (09/10/2026): o PGR escreve "GHE: 03 - SUPERVISÃO DE EQUIPE" e saía
+    # "GHE 03 - GHE: 03 - SUPERVISÃO DE EQUIPE" na matriz, no memorial e no relatório do ASO.
+    # Reversão que mata: tirar o ":" da classe de separadores do 1º `re.sub` de
+    # `_nome_sem_codigo`.
+    assert titulo_ghe_rq61("GHE-03", "GHE: 03 - SUPERVISÃO DE EQUIPE") == "GHE 03 - SUPERVISÃO DE EQUIPE"
+    assert titulo_ghe("GHE-04", "GHE: 04 - SESMT") == "GHE-04 — SESMT"
+
+
 def test_rodape_sai_com_os_rotulos_do_rq61(tmp_path: Path) -> None:
     # DT-(sessão claude/keen-curie-xdm7kb)-03, rodapé. Reversões que matam: voltar a
     # emitir só o valor, sem rótulo, no HTML ou no Word — três linhas soltas que a

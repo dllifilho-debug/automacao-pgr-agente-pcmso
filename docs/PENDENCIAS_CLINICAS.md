@@ -4212,3 +4212,14 @@ Quasar vai pela rota da IA (parser de coordenadas recusa o cabeçalho, AGENTE x�
 **Status:** ABERTA — item 1 da folha (decisão sobre (a), (c), (d) com a medição acima), inventário psicossocial sem avaliação,
 Data e Tipo do formulário, psicossocial MODERADO no ASO, "Ausência de agente nocivo", "Mecânico" como grupo, parser de
 coordenadas (ALT 65 e Quasar), rodada do Quasar no app.
+
+**Quasar Bueno no app (09/10/2026, após o PR #475) — conferido contra o PDF.** Referência extraída do PDF (12 GHEs, 22
+cargos, 130 riscos, contagem igual por três vias). Matriz, memorial e relatório do ASO do Diovanni: em todo GHE, o mesmo
+número de riscos e os mesmos níveis; nada das págs. 52–57 no GHE 12; ruído medido da Carpintaria (82,28 dB(A)) lido —
+audiometria no DEM e ruído no ASO por R-ASO-05; Saúde Mental nos 12 GHEs, Avaliação Psicossocial nos 10 com altura; 48
+riscos não reconhecidos, o número previsto. Sem gabarito — a matriz vai às médicas para validação.
+- **Título "GHE 03 - GHE: 03 - SUPERVISÃO DE EQUIPE" — RESOLVIDO:** o PGR escreve "GHE: 03"; o ":" passa a ser aceito.
+- **Para a revisão das médicas:** Armador (GHE 08) sem espirometria/RX — "Poeira respirável" e "Poeira Metálica" não
+  reconhecidas; "Agentes patogênicos" MODERADO na Limpeza consta no ASO sem exame; "2 - propanona" (acetona, GHEs 10 e
+  12) não reconhecida, sem efeito na saída.
+- **Formulário:** CRM digitado 14864 (na Vila Brasil, 14854) — conferir com o Diovanni; Data do PGR vazia.
