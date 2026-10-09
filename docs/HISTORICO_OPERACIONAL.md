@@ -12660,3 +12660,18 @@ avaliados têm fator MODERADO (dedução da medição acima, não nova rodada). 
 "R-PSY-08 só por `psicossocial_moderado`" e "composto sem a perna da altura" o deixam vermelho; "quando: psicossocial"
 segue derrubando o teste "só BAIXO, sem altura". Suíte completa, árvore parada: **1853 → 1854 passed, 6 skipped** (1132 s).
 `test_gerar_indice_darq.py` 6 passed.
+
+## Sessão (branch `claude/confident-fermat-n74hux` recriada sobre `main 1d74936`, pós-merge do PR #477) — 09/10/2026 — IMPLEMENTAÇÃO: Tipo e Data do formulário
+
+**Origem.** Medido na 3ª rodada e no Quasar Bueno: o campo Tipo recebia o nome do documento ("MATRIZ DE EXAMES"), o arquivo
+saía "MATRIZ DE EXAMES(MATRIZ DE EXAMES)…" e nenhum (X) era marcado; a Data digitada em ISO saía "2026-10-09" na matriz e
+no nome do arquivo e 09/10/2026 no memorial e no ASO. Propostas aprovadas pelo Diovanni.
+
+**Entrega.** `web_matriz.py`: Tipo como `st.selectbox` (Obra Nova, Atualização, Adendo, Funções Iniciais, Outro; vazio com
+"Escolha o tipo") + campo "Outro tipo"; `tipo_do_formulario` e `data_do_formulario` (reusa `data_exibicao`) montam o
+cabeçalho. `documento_matriz.py`, `nome_arquivo` e o (X) intocados. Helper de teste `_submeter_formulario` preenche lista
+ou texto pelo rótulo.
+
+**Verificação.** `test_formulario_tipo_data.py` (3 testes), varredura inversa 5/5. Smoke visual ok (desktop e mobile;
+o 1º rodou com "Choose an option" na lista — trocado por "Escolha o tipo" e o smoke refeito). Suíte completa, árvore
+parada: **1854 → 1857 passed, 6 skipped** (1096 s). mypy no alvo canônico: limpo, 59 arquivos.

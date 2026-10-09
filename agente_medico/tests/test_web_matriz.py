@@ -346,7 +346,11 @@ def _submeter_formulario(
     # um rerun antes do submit descarta o valor pendente.
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
     for rotulo, valor in (campos or {}).items():
-        next(t for t in at.text_input if t.label == rotulo).set_value(valor)
+        lista = next((s for s in at.selectbox if s.label == rotulo), None)
+        if lista is not None:
+            lista.set_value(valor)
+        else:
+            next(t for t in at.text_input if t.label == rotulo).set_value(valor)
     next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste")
     next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000")
     at.text_input[len(at.text_input) - 1].set_value(validade)
