@@ -65,10 +65,12 @@ from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
     DocumentoMatriz,
     RodapeDocumento,
+    _TIPOS_DOCUMENTO,
     _sanitizar,
     montar_documento,
     renderizar_html,
 )
+from agente_medico.superficie.memorial_matriz import data_exibicao
 from agente_medico.superficie.sugestao_vinculo import SugestaoVinculo
 
 __all__ = [
@@ -90,6 +92,9 @@ __all__ = [
     "montar_envelope",
     "nome_arquivo",
     "montar_fds",
+    "OPCOES_TIPO_DOCUMENTO",
+    "data_do_formulario",
+    "tipo_do_formulario",
     "pagina_matriz",
     "preparar_composicao",
     "preparar_composicao_cacheada",
@@ -102,6 +107,24 @@ def linha_pendencia(p: Pendencia, com_regra: bool = False) -> str:
     """D-ARQ-89 cl.5 (DH-003EG-01): o motivo pode citar texto do PGR com NUL."""
     regra = f" ({p.regra_origem})" if com_regra else ""
     return f"- `{p.tipo}`{regra}: {_sanitizar(p.motivo)}"
+
+OPCOES_TIPO_DOCUMENTO = (*_TIPOS_DOCUMENTO, "Outro")
+
+
+def tipo_do_formulario(escolha: str | None, outro: str) -> str:
+    """Tipo vindo da lista do formulário; "Outro" usa o texto digitado ao lado. Antes era
+    texto livre e recebia o nome do documento ("MATRIZ DE EXAMES"): arquivo "MATRIZ DE
+    EXAMES(MATRIZ DE EXAMES)…" e nenhum (X) marcado (Quasar Bueno, 09/10/2026)."""
+    if escolha == "Outro":
+        return outro.strip()
+    return escolha or ""
+
+
+def data_do_formulario(texto: str) -> str:
+    """Data digitada em ISO (aaaa-mm-dd) vira dd/mm/aaaa uma vez só, no cabeçalho: a matriz e o
+    nome do arquivo saíam "2026-10-09" enquanto o memorial e o ASO mostravam 09/10/2026."""
+    return data_exibicao(texto.strip())
+
 
 # Proibidos em nome de arquivo no Windows, mais controles.
 _PROIBIDOS_NO_NOME = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
@@ -852,11 +875,13 @@ def pagina_matriz() -> None:
     )
     from agente_medico.superficie.web_matriz import (
         ICONE_PASSO,
+        OPCOES_TIPO_DOCUMENTO,
         CacheMatrizes,
         TranscritorGemini,
         _protocolo_padrao,
         agentes_mensuraveis,
         anexar_produto_em_ghes,
+        data_do_formulario,
         executar_rota_determinista_cacheada,
         extrair_agravos_cacheado,
         ghes_com_produto,
@@ -874,6 +899,7 @@ def pagina_matriz() -> None:
         responsavel_pcmso_incompleto,
         texto_tempo,
         texto_uso,
+        tipo_do_formulario,
     )
 
     st.title("Matriz de Exames — PCMSO")
@@ -1257,10 +1283,14 @@ def pagina_matriz() -> None:
                 st.markdown("**Identificação do documento**")
                 empresa = st.text_input("Empresa")
                 obra = st.text_input("Obra")
-                tipo_documento = st.text_input(
+                tipo_escolhido = st.selectbox(
                     "Tipo de documento",
-                    help="Obra Nova, Atualização, Adendo ou Funções Iniciais — marca o (X) no documento.",
+                    OPCOES_TIPO_DOCUMENTO,
+                    index=None,
+                    placeholder="Escolha o tipo",
+                    help="Marca o (X) no documento e entra no nome do arquivo.",
                 )
+                tipo_outro = st.text_input("Outro tipo (se escolheu Outro)")
                 data_documento = st.text_input("Data")
                 medico_coordenador = st.text_input("Médico coordenador")
                 crm = st.text_input("CRM")
@@ -1308,8 +1338,8 @@ def pagina_matriz() -> None:
         cabecalho = CabecalhoDocumento(
             empresa=empresa,
             obra=obra,
-            tipo_documento=tipo_documento,
-            data=data_documento,
+            tipo_documento=tipo_do_formulario(tipo_escolhido, tipo_outro),
+            data=data_do_formulario(data_documento),
             medico_coordenador=medico_coordenador,
             crm=crm,
         )

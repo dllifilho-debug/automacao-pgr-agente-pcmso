@@ -4238,3 +4238,11 @@ o alerta R-PSY-07; Fascino, Porto Araras e Vila Brasil 25.08 saem iguais à `mai
 **Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas; (a) e (d) resolvidas pela D), Data e Tipo do
 formulário, psicossocial MODERADO no ASO, "Ausência de agente nocivo", "Mecânico" como grupo, parser de coordenadas (ALT
 65 e Quasar).
+
+**Data e Tipo do formulário — RESOLVIDO (09/10/2026, decisão do Diovanni).** Tipo de documento vira lista (Obra Nova,
+Atualização, Adendo, Funções Iniciais, Outro + campo "Outro tipo"); a Data digitada em ISO vira DD/MM/AAAA ao montar o
+cabeçalho, e matriz (Word e HTML), memorial, relatório do ASO e nome do arquivo ("05.10.2026") passam a coincidir. Data
+digitada de outro jeito segue como digitada.
+
+**Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
+nocivo", "Mecânico" como grupo, parser de coordenadas (ALT 65 e Quasar).
