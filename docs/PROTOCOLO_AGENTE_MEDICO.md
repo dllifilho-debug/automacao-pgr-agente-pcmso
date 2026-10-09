@@ -754,19 +754,34 @@ GHE com **trabalho em altura e inventário psicossocial no PGR** (composto `altu
 
 **Sem inventário em PGR emitido a partir de 26/05/2026:** alerta de R-PSY-07. Sucede R-PSY-04 (mudança de escopo exige ID nova).
 
-#### R-PSY-07 — PGR sem inventário psicossocial depois da vigência na NR-01: alerta `[DERIVADO — NR-01 item 1.5.3.1.4]`
-**Predicado:** PGR emitido a partir de **26/05/2026** (vigência do item, Portaria MTE 765/2025) sem o inventário de riscos psicossociais (`detectar_psicossocial` falso no PGR inteiro).
+**Inventário = inventário avaliado (09/10/2026, solução D).** Conta o PGR com ao menos uma linha de fator "Psicossocial …" com rótulo de nível (`avaliar_inventario_psicossocial`), não o que só cita o FRPRT. Medido no acervo: 4 de 14 PGRs marcados só citam (Sinduscon 27.08.26, SPE QD. E-13, Verde Maris, Seconci REV4) e saem da perna da altura.
 
-**Consequência:** pendência global não bloqueante (`pgr_sem_inventario_psicossocial`), na conferência da tela e no Resumo do memorial. Não gera nem tira exame; sem ela, a falta do inventário — que tira a Saúde Mental (R-PSY-05) e a Psicossocial da altura (R-PSY-06) — passaria em silêncio.
+#### R-PSY-07 — PGR sem inventário psicossocial depois da vigência na NR-01: alerta `[DERIVADO — NR-01 item 1.5.3.1.4]`
+**Predicado:** PGR emitido a partir de **26/05/2026** (vigência do item, Portaria MTE 765/2025) sem o inventário de riscos psicossociais avaliado (`avaliar_inventario_psicossocial`: sem linha de fator com nível no PGR inteiro; até 09/10/2026, `detectar_psicossocial`).
+
+**Consequência:** pendência global não bloqueante (`pgr_sem_inventario_psicossocial`), na conferência da tela e no Resumo do memorial. Não gera nem tira exame; sem ela, a falta do inventário — que tira a Saúde Mental (R-PSY-08, antes R-PSY-05) e a Psicossocial da altura (R-PSY-06) — passaria em silêncio.
 
 **Norma `[CONFERIDO — normas/nr-01-atualizada-2025-i-3, 07/10/2026]`.** NR-01 **1.5.3.1.4**: *"O gerenciamento de riscos ocupacionais deve abranger os riscos que decorrem dos agentes físicos, químicos, biológicos, riscos de acidentes e riscos relacionados aos fatores ergonômicos, incluindo os fatores de risco psicossociais relacionados ao trabalho."* Vigência a conferir no Gov.br/MTE.
 
-#### R-PSY-05 — Av. Médica de Saúde Mental, condicionada ao inventário psicossocial do PGR `[INTERPRETADO]`
+#### R-PSY-08 — Av. Médica de Saúde Mental, com inventário psicossocial avaliado e fator moderado ou acima `[DERIVADO — folha da Dra. Carolini 07/10/2026; matriz Sinduscon 27.08.26]`
+GHE cujo PGR traz o inventário psicossocial **avaliado** com ao menos um fator no corte **"moderado ou acima"** de `niveis_risco.yaml` (primitivo `psicossocial_moderado`), **ou** GHE com **trabalho em altura** e o inventário avaliado em qualquer nível (composto `saude_mental_psicossocial`) → **Av. Médica de Saúde Mental**, 12 meses, **adm/per/MR**.
+
+**Norma.** NR-01 itens 1.5.3.1.4 e 1.5.3.2.1 e NR-07 item 7.5.1, como a R-PSY-05; nenhuma NR prescreve o exame (nível 1 não resolve).
+
+**Precedente (nível 2).** Folha da Dra. Carolini de 07/10/2026: *"Risco Psicossocial → Moderado = Avaliação Médica de Saúde Mental"* (o "≥" sob "Moderado" tem leitura incerta) e *"Risco Psicossocial → Baixo, alto, médio, substancial, elevado, superior ⊕ trabalho em altura = Avaliação Médica de Saúde Mental + Av. Psicossocial"* (transcrição em PENDENCIAS, DT da revisão de 07/10/2026; a foto não está no acervo). Matriz da Sinduscon 27.08.26 (Dra. Patrícia, mesma data do PGR, que só anuncia a avaliação "em documento específico"): sem Saúde Mental em nenhum cargo.
+
+**Medido (09/10/2026).** 10 PGRs do acervo com inventário avaliado, todos com fator MODERADO (só BAIXO e MODERADO aparecem): saída igual à da R-PSY-05. 4 PGRs só citam o FRPRT: perdem a Saúde Mental e ganham o alerta de R-PSY-07.
+
+**Altura com inventário só BAIXO (decisão do Diovanni, 09/10/2026: "pode seguir a folha").** Saúde Mental (R-PSY-08) e Avaliação Psicossocial (R-PSY-06). Nenhum PGR do acervo tem inventário só BAIXO: sem efeito na saída medida.
+
+#### R-PSY-05 — Av. Médica de Saúde Mental, condicionada ao inventário psicossocial do PGR `[DEPRECATED — 09/10/2026, sucedida por R-PSY-08]`
 Trabalhador de GHE cujo PGR documenta a seção de inventário de risco psicossocial (mesmo sinal da R-PSY-03, `detectar_psicossocial`) → **Av. Médica de Saúde Mental**, 12 meses, **adm/per/MR**.
 
 **Base normativa.** NR-01 itens 1.5.3.1.4 e 1.5.3.2.1 (o PGR inventaria e gerencia os fatores psicossociais) e NR-07 item 7.5.1 (o PCMSO considera os riscos identificados e classificados pelo PGR). Nenhuma NR prescreve o exame.
 
 **Por que `[INTERPRETADO]`.** A conduta vem das matrizes: 1.001 de 1.113 cargos nas 22 matrizes de 14 a 24/09/2026; o T65 a dá aos 18 GHEs. Sucede a R-PSY-03 na perna da saúde mental, mesmo gatilho.
+
+**Deprecada em 09/10/2026 (decisão do Diovanni, solução D).** O gatilho passa a exigir inventário avaliado e fator moderado ou acima (R-PSY-08). Corpo preservado por rastreabilidade.
 
 ### 5.8 Vibração
 
@@ -1427,3 +1442,4 @@ Quando todo risco do GHE sai NÃO CONSTA, o relatório sugere a inexistência de
 | v133 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main a9a4427` (IMPLEMENTAÇÃO, decisão do Diovanni — D-ARQ-95): **`R-ASO-06`** (e R-ASO-05) — sem nível P×S, a sugestão usa o rótulo de nível do PGR em qualquer escala, pelo vocabulário `niveis_risco.yaml`; Médio no corte `[INTERPRETADO]`; desconhecido → conferir. Nenhuma regra de emissão alterada. |
 | v134 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ca17062` (IMPLEMENTAÇÃO, decisão do Diovanni — emenda em D-ARQ-94): **`R-AUD-05` DEPRECATED, sucedida por `R-TIP-01`** — base legal conferida no Decreto 6.481/2008 (Lista TIP), alerta ampliado a vibração, altura, ruído, químicos nomeados e espaço confinado, com as exceções dos Arts. 2º e 3º e o item 58 no texto. Nenhuma regra de emissão alterada. |
 | v135 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 6572b9b` (IMPLEMENTAÇÃO, decisão do Diovanni — opção B): **`R-ESP-05` criada** — produtos domissanitários sem espirometria de rotina (NR-07 Anexo III item 3.2); a matriz leva a condição em observação, que sai quando outra regra pede o exame. Agente `domissanitarios` em `agentes.yaml`. |
+| v136 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 1702f49` (IMPLEMENTAÇÃO, decisão do Diovanni — solução D, emenda em D-ARQ-94): **`R-PSY-05` DEPRECATED, sucedida por `R-PSY-08`** — Saúde Mental só com inventário psicossocial avaliado e fator moderado ou acima (folha da Dra. Carolini; matriz Sinduscon 27.08.26). R-PSY-06 e R-PSY-07 passam a ler o inventário avaliado (linha de fator com nível), não a citação do FRPRT. Na altura, Saúde Mental com o inventário avaliado em qualquer nível (folha). Medido: 4 de 14 PGRs marcados só citam. |

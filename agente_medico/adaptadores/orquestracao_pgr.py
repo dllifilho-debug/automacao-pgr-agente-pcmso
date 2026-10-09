@@ -8,7 +8,7 @@ from pathlib import Path
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
-    detectar_psicossocial,
+    avaliar_inventario_psicossocial,
     recortar_blocos_ghe,
     recortar_cards_cargo,
     recortar_topo,
@@ -350,15 +350,19 @@ def preparar_pgr_hidratado(
         protocolo.vocabulario.agentes,
         fracoes_sem_agente=protocolo.vocabulario.fracoes_sem_agente,
     )
-    # R-PSY-05 (ex-R-PSY-03): psicossocial é sinal de PGR inteiro (D-ARQ-49 P2
-    # aplicado), replicado a todo GHE via hidratar_pgr; sai da mesma leitura.
-    psicossocial = detectar_psicossocial([p.texto for p in leitura])
+    # R-PSY-06/R-PSY-08: o inventário psicossocial é sinal de PGR inteiro (D-ARQ-49 P2
+    # aplicado), replicado a todo GHE via hidratar_pgr; sai da mesma leitura. Conta só o
+    # inventário avaliado (linha de fator com nível), não a citação do FRPRT.
+    inventario = avaliar_inventario_psicossocial(
+        [p.texto for p in leitura], protocolo.vocabulario.niveis_risco
+    )
     pgr, pend_hidr = hidratar_pgr(
         aprovados,
         indice,
         envelope.validade,
         envelope.assinatura_engenheiro,
-        psicossocial,
+        inventario.avaliado,
+        inventario.moderado_ou_acima,
     )
     return pgr, (*pend_forma, *tuple(pend_hidr))
 

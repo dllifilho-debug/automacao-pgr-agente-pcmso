@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal, NamedTuple
 
 from agente_medico.motor.io_pdf import paginas_liberadas
+from agente_medico.motor.niveis_pgr import classificar_nivel_pgr
 from agente_medico.motor.tipos import Pendencia
 
 # D-ARQ-57 peça 4 fatia 4d: rota de roteamento devolvida por avaliar_estrutura
@@ -70,6 +71,34 @@ def detectar_psicossocial(paginas: Sequence[str]) -> bool:
     PGR."""
     texto = "\n".join(paginas).lower()
     return any(marcador in texto for marcador in _MARCADORES_PSICOSSOCIAL)
+
+
+class InventarioPsicossocial(NamedTuple):
+    avaliado: bool
+    moderado_ou_acima: bool
+
+
+_LINHA_FATOR_PSICOSSOCIAL = re.compile(r"^\s*psicossocia", re.IGNORECASE)
+
+
+def avaliar_inventario_psicossocial(
+    paginas: Sequence[str], niveis: Mapping[str, Any]
+) -> InventarioPsicossocial:
+    """Inventário psicossocial avaliado: o marcador de detectar_psicossocial e ao menos uma
+    linha de fator "Psicossocial …" com rótulo de nível de `niveis_risco.yaml`. PGR que só
+    cita o FRPRT ("Antecipação Técnica", "Em avaliação", "detalhada em documento
+    específico") não conta — medido em 4 de 14 PGRs marcados no acervo, 09/10/2026.
+    moderado_ou_acima: algum fator no corte (R-PSY-08, folha da Dra. Carolini)."""
+    if not detectar_psicossocial(paginas):
+        return InventarioPsicossocial(avaliado=False, moderado_ou_acima=False)
+    posicoes = [
+        nivel.posicao
+        for pagina in paginas
+        for linha in pagina.splitlines()
+        if _LINHA_FATOR_PSICOSSOCIAL.match(linha)
+        and (nivel := classificar_nivel_pgr(linha, niveis)) is not None
+    ]
+    return InventarioPsicossocial(avaliado=bool(posicoes), moderado_ou_acima="corte" in posicoes)
 
 
 def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:

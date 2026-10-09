@@ -12627,3 +12627,36 @@ relatório do ASO, tela): `_nome_sem_codigo` aceita ":" entre "GHE" e o número.
 
 **Verificação.** 1 teste em `test_documento_matriz.py`, varredura inversa 1/1. Suíte completa, árvore parada: **1844 → 1845
 passed, 6 skipped** (1252 s; base 1844 medida nesta sessão no PR #475). mypy no alvo canônico: limpo, 59 arquivos.
+
+## Sessão (branch `claude/confident-fermat-n74hux` recriada sobre `main 1702f49`, pós-merge do PR #476) — 09/10/2026 — CONHECIMENTO + IMPLEMENTAÇÃO: inventário psicossocial avaliado e R-PSY-08 (emenda 2 em D-ARQ-94)
+
+**Origem.** Medição desta sessão: `detectar_psicossocial` marcava o PGR pela citação do FRPRT; 4 de 14 PGRs marcados no
+acervo só citam (Sinduscon 27.08.26, SPE QD. E-13, Verde Maris, Seconci REV4) e recebiam Saúde Mental e Psicossocial da
+altura, sem o alerta R-PSY-07. Precedente: matriz da Sinduscon 27.08.26 sem Saúde Mental. O Diovanni pediu a origem da
+proposta e mais quatro soluções; cinco apresentadas (A–E), **D escolhida**. Instrução do Diovanni: não alterar código que
+funciona — a mudança entrou por acréscimo (`detectar_psicossocial`, `niveis_pgr.py`, `niveis_risco.yaml` e o código de
+R-PSY-07 intocados).
+
+**Entrega.** `avaliar_inventario_psicossocial` (marcador + linha de fator com nível); `GHEPGR.psicossocial_moderado`
+(default False) e primitivo `psicossocial_moderado`; orquestrador usa a função nova; R-PSY-05 DEPRECATED → R-PSY-08.
+PROTOCOLO v136, DECISOES v260 (emenda 2 em `D-ARQ-94`), `INDICE_DARQ.md` regenerado, PENDENCIAS (perguntas (a) e (d) da
+folha resolvidas; ponto em aberto: Saúde Mental na altura com inventário só BAIXO).
+
+**Medido.** Função nova nos 35 PDFs de PGR: 10 avaliados (todos com fator MODERADO), os 4 só citados fora. `main` ×
+branch nos 3 PGRs determinísticos (Fascino 19 GHEs, Porto Araras 16, Vila Brasil 25.08 26): matriz e pendências iguais,
+só o ID da Saúde Mental muda (R-PSY-05 → R-PSY-08).
+
+**Verificação.** `test_inventario_psicossocial.py` (7 casos) e 2 testes da R-PSY-08 em `test_orquestrador.py` (troca
+registrada do teste da R-PSY-05); varredura inversa: 12 reversões nomeadas, todas com vermelho, 9/9 casos derrubados.
+Suíte completa, árvore parada: **1845 → 1853 passed, 6 skipped** (1148 s). Depois dela, só a docstring da função nova
+mudou ("4 de 13 PDFs" → "4 de 14 PGRs"): recorte `test_inventario_psicossocial.py` + `test_orquestrador.py` verde. mypy
+no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed.
+
+**Complemento (mesma sessão) — altura com inventário só BAIXO, seguindo a folha.** O Diovanni mandou seguir a folha da
+Dra. Carolini também neste ponto ("Baixo … ⊕ trabalho em altura = Saúde Mental + Av. Psicossocial"), pela transcrição
+em PENDENCIAS (a foto não está no acervo). Composto `saude_mental_psicossocial` (`psicossocial_moderado` ou
+`altura_com_inventario_psicossocial`) como gatilho da R-PSY-08; só YAML. Efeito no acervo: nenhum — os 10 inventários
+avaliados têm fator MODERADO (dedução da medição acima, não nova rodada). 1 teste em `test_orquestrador.py`; reversões
+"R-PSY-08 só por `psicossocial_moderado`" e "composto sem a perna da altura" o deixam vermelho; "quando: psicossocial"
+segue derrubando o teste "só BAIXO, sem altura". Suíte completa, árvore parada: **1853 → 1854 passed, 6 skipped** (1132 s).
+`test_gerar_indice_darq.py` 6 passed.

@@ -4223,3 +4223,18 @@ riscos não reconhecidos, o número previsto. Sem gabarito — a matriz vai às 
   reconhecidas; "Agentes patogênicos" MODERADO na Limpeza consta no ASO sem exame; "2 - propanona" (acetona, GHEs 10 e
   12) não reconhecida, sem efeito na saída.
 - **Formulário:** CRM digitado 14864 (na Vila Brasil, 14854) — conferir com o Diovanni; Data do PGR vazia.
+
+**Inventário psicossocial sem avaliação — RESOLVIDO (09/10/2026, solução D, emenda 2 em D-ARQ-94).** Cinco soluções
+propostas (A inventário avaliado; B frases de "não avaliado"; C só alerta; D nível do inventário; E confirmação na tela);
+o Diovanni escolheu a D. Conta só o inventário com linha de fator "Psicossocial … nível"; Saúde Mental por R-PSY-08
+(sucede R-PSY-05) com fator moderado ou acima; R-PSY-06 e R-PSY-07 leem o inventário avaliado. Medido: os 4 PGRs que só
+citam (Sinduscon 27.08.26, SPE QD. E-13, Verde Maris, Seconci REV4) perdem Saúde Mental e Psicossocial da altura e ganham
+o alerta R-PSY-07; Fascino, Porto Araras e Vila Brasil 25.08 saem iguais à `main` (só o ID da regra muda).
+- **Perguntas (a) e (d) da folha:** respondidas pela D — inventário só BAIXO e sem altura: nenhum exame; o nível é o
+  maior fator do PGR inteiro.
+- **Altura com inventário só BAIXO — seguindo a folha (decisão do Diovanni):** Saúde Mental (R-PSY-08) e Avaliação
+  Psicossocial (R-PSY-06). Sem caso no acervo. A foto da folha não está no acervo; a regra segue a transcrição acima.
+
+**Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas; (a) e (d) resolvidas pela D), Data e Tipo do
+formulário, psicossocial MODERADO no ASO, "Ausência de agente nocivo", "Mecânico" como grupo, parser de coordenadas (ALT
+65 e Quasar).
