@@ -258,6 +258,7 @@ class GHEPGR:
     produtos_quimicos: tuple[ProdutoQuimico, ...]
     psicossocial: bool
     cenario: Optional[CenarioExposicao] = None  # contexto fático p/ LEO-resolver (D-ARQ-24)
+    psicossocial_moderado: bool = False  # R-PSY-08: fator do inventário no corte "moderado"
 
 
 @dataclass(frozen=True)

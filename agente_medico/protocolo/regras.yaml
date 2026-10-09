@@ -151,7 +151,28 @@ regras:
       14 a 24/09/2026, saúde mental em 1.001 de 1.113 cargos; o T65 24.09.26 a dá aos 18
       GHEs]."
     resumo_clinico: "PGR com inventário de riscos psicossociais → avaliação médica de saúde mental anual, para todos. A NR-01 manda gerenciar esses riscos e a NR-07 manda o PCMSO considerá-los, mas nenhuma norma define exame; segue as matrizes das coordenadoras — confirmar."
-    status: INTERPRETADO
+    # [DEPRECATED — 09/10/2026, decisão do Diovanni, solução D] A saúde mental passa a
+    # exigir inventário avaliado com fator no corte "moderado ou acima" (R-PSY-08). Mudança
+    # de escopo exige ID nova (convenção R-PSY-01→02→03).
+    status: DEPRECATED
+
+  - id: R-PSY-08
+    quando: psicossocial_moderado
+    emite:
+      - {exame: avaliacao_saude_mental, periodicidade_meses: 12, momentos: [adm, per, MR]}
+    base_normativa: "NR-01 itens 1.5.3.1.4 e 1.5.3.2.1 (o PGR inventaria e gerencia os
+      fatores de risco psicossociais) e NR-07 item 7.5.1 (o PCMSO considera os riscos
+      identificados e classificados pelo PGR); nenhuma NR prescreve o exame. Sucede
+      R-PSY-05 (DEPRECATED). Gatilho: inventário psicossocial AVALIADO (linha de fator com
+      nível, não só a citação do FRPRT) com ao menos um fator no corte 'moderado ou acima'
+      de niveis_risco.yaml (avaliar_inventario_psicossocial). [DERIVADO — anotação das
+      médicas no acervo: folha da Dra. Carolini de 07/10/2026 ('Risco Psicossocial →
+      Moderado = Avaliação Médica de Saúde Mental', leitura do '≥' incerta); matriz da
+      Sinduscon 27.08.26 sem saúde mental para PGR que só anuncia a avaliação]. Medido em
+      09/10/2026: os 10 inventários avaliados do acervo têm fator MODERADO; 4 PGRs só citam
+      o FRPRT (Sinduscon 27.08.26, SPE QD. E-13, Verde Maris, Seconci REV4)."
+    resumo_clinico: "Inventário de riscos psicossociais avaliado no PGR, com algum fator moderado ou acima → avaliação médica de saúde mental anual, para todos. A NR-01 manda gerenciar esses riscos e a NR-07 manda o PCMSO considerá-los, mas nenhuma norma define exame; o corte segue a anotação da Dra. Carolini."
+    status: DERIVADO
 
   - id: R-PKG-ATIVCRIT
     quando: atividade_critica

@@ -52,6 +52,7 @@ def _ghe(
     ghe_id: str = "GHE-01",
     riscos: tuple[RiscoPGR, ...] = (),
     psicossocial: bool = False,
+    psicossocial_moderado: bool = False,
 ) -> GHEPGR:
     return GHEPGR(
         id=ghe_id,
@@ -61,6 +62,7 @@ def _ghe(
         epis=(),
         produtos_quimicos=(),
         psicossocial=psicossocial,
+        psicossocial_moderado=psicossocial_moderado,
     )
 
 
@@ -579,6 +581,10 @@ def test_raud01_raud02_presuncao_promove_bloqueada_para_parcial_com_linha_de_ris
 # confinado emitem sem inventário) assertava o escopo que esta sessão restringe;
 # redação antiga no git (main 8739c3b).
 #
+# Troca registrada (D-ARQ-06, 09/10/2026): o teste da R-PSY-05 (inventário emite só a
+# saúde mental) assertava o gatilho sem nível que a R-PSY-08 restringe ao fator
+# "moderado ou acima"; redação antiga no git (main 1702f49).
+#
 # Troca registrada, não apagamento silencioso (D-ARQ-06): os dois testes da
 # R-PSY-03 (emite as duas com psicossocial=True; não emite sem) assertavam o
 # gatilho único que esta sessão separa. Redação antiga preservada no git
@@ -588,9 +594,12 @@ def test_raud01_raud02_presuncao_promove_bloqueada_para_parcial_com_linha_de_ris
 _MOMENTOS_PSY = {Momento.ADM, Momento.PER, Momento.MR}
 
 
-def _nomes(riscos: tuple[RiscoPGR, ...], psicossocial: bool) -> dict[str, ExameEmitido]:
+def _nomes(
+    riscos: tuple[RiscoPGR, ...], psicossocial: bool, psicossocial_moderado: bool = False
+) -> dict[str, ExameEmitido]:
     proto = carregar(_PROTOCOLO_DIR)
-    resultado = executar(_pgr(ghes=(_ghe(riscos=riscos, psicossocial=psicossocial),)), proto, hoje=HOJE)
+    ghe = _ghe(riscos=riscos, psicossocial=psicossocial, psicossocial_moderado=psicossocial_moderado)
+    resultado = executar(_pgr(ghes=(ghe,)), proto, hoje=HOJE)
     return {ln.exame: ln for ln in resultado.matrizes[0].linhas}
 
 
@@ -641,16 +650,22 @@ def test_rpsy06_equipamento_pesado_sozinho_nao_emite_psicossocial() -> None:
     assert "avaliacao_psicossocial" not in linhas
 
 
-def test_rpsy05_inventario_psicossocial_emite_so_saude_mental() -> None:
-    # Administrativo com inventário psicossocial no PGR (T65 GHE 03). Reversões
-    # que matam: (1) devolver a avaliação psicossocial à R-PSY-05 — ela voltaria
-    # a sair sem altura; (2) `status: DEPRECATED` na R-PSY-05 — a saúde mental some.
-    linhas = _nomes((), psicossocial=True)
+def test_rpsy08_inventario_com_fator_moderado_emite_so_saude_mental() -> None:
+    # Administrativo com inventário avaliado e fator moderado (Vila Brasil escritório).
+    # Reversões que matam: (1) `status: DEPRECATED` na R-PSY-08 — a saúde mental some;
+    # (2) a R-PSY-08 emitir também a avaliação psicossocial — sairia sem altura.
+    linhas = _nomes((), psicossocial=True, psicossocial_moderado=True)
 
     saude_mental = linhas["avaliacao_saude_mental"]
     assert (saude_mental.periodicidade_meses, saude_mental.momentos) == (12, _MOMENTOS_PSY)
-    assert [m.regra_id for m in saude_mental.motivos] == ["R-PSY-05"]
+    assert [m.regra_id for m in saude_mental.motivos] == ["R-PSY-08"]
     assert "avaliacao_psicossocial" not in linhas
+
+
+def test_rpsy08_inventario_so_com_fatores_baixos_nao_emite_saude_mental() -> None:
+    # Folha da Dra. Carolini: saúde mental a partir de moderado. Reversões que matam:
+    # (1) `quando: psicossocial` na R-PSY-08; (2) tirar o DEPRECATED da R-PSY-05.
+    assert "avaliacao_saude_mental" not in _nomes((), psicossocial=True)
 
 
 def test_rpsy05_sem_inventario_nao_emite_saude_mental() -> None:

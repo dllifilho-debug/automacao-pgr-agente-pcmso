@@ -26,7 +26,7 @@ REGISTRO_PRIMITIVOS: dict[str, Callable[[GHEContext], ResultadoPredicado]] = {}
 # PRIMITIVOS_SEM_RISCO (gatilho de GHE ou de cargo, sem risco a apontar).
 REGISTRO_RISCOS: dict[str, RiscosDoPrimitivo] = {}
 PRIMITIVOS_SEM_RISCO: frozenset[str] = frozenset(
-    {"todo_trabalhador", "psicossocial", "cargo_porteiro"}
+    {"todo_trabalhador", "psicossocial", "psicossocial_moderado", "cargo_porteiro"}
 )
 
 # Predicados incondicionais (sempre True, independente de risco) — usados pelo
@@ -253,10 +253,17 @@ _por_filtro("fumos_metalicos", lambda r: r.agente == "fumos_metalicos")
 
 @primitivo("psicossocial")
 def _psicossocial(ctx: GHEContext) -> bool:
-    """R-PSY-05 (ex-R-PSY-03); NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — sinal
-    PGR-documenta-psicossocial (GHEPGR.psicossocial, extraído por
-    detectar_psicossocial em extracao_pgr.py)."""
+    """R-PSY-06 (perna da altura); NR-01 itens 1.5.3.1.4/1.5.3.2.1/1.5.4.4.5.3 — inventário
+    psicossocial avaliado no PGR (GHEPGR.psicossocial, de avaliar_inventario_psicossocial
+    em extracao_pgr.py)."""
     return ctx.pgr_ghe.psicossocial
+
+
+@primitivo("psicossocial_moderado")
+def _psicossocial_moderado(ctx: GHEContext) -> bool:
+    """R-PSY-08 — fator do inventário psicossocial avaliado no corte "moderado ou acima"
+    (GHEPGR.psicossocial_moderado, de avaliar_inventario_psicossocial em extracao_pgr.py)."""
+    return ctx.pgr_ghe.psicossocial_moderado
 
 
 # R-RX-03/R-ESP-03; agente carcinogênico (IARC Grupo 1) fora dos Quadros 1 e 2

@@ -18,8 +18,8 @@ do texto S·P·NÍVEL da avaliação qualitativa P×S por parsear_nivel_risco;
 texto não reconhecido vira Pendencia avaliacao_qualitativa_nao_parseada
 não-bloqueante, pelo mesmo motivo da quantificação.
 EPIs, produtos_quimicos e cenario ficam em default (diferidos, D-ARQ-49 P2).
-psicossocial (R-PSY-05, ex-R-PSY-03) é populado por parâmetro — o extrator
-(detectar_psicossocial, extracao_pgr.py) roda sobre o texto cru do PGR
+psicossocial e psicossocial_moderado (R-PSY-06/R-PSY-08) são populados por parâmetro —
+o extrator (avaliar_inventario_psicossocial, extracao_pgr.py) roda sobre o texto cru do PGR
 inteiro, fora do escopo por-GHE desta hidratação; o valor chega já resolvido
 e é replicado para todo GHEPGR do documento, default False para chamador que
 não o repassa. Risco NUNCA descartado (D-ARQ-31/35 P3): tri-estado do
@@ -69,6 +69,7 @@ def hidratar_ghe(
     indice: IndiceTermos,
     posicao: int,
     psicossocial: bool = False,
+    psicossocial_moderado: bool = False,
 ) -> tuple[GHEPGR, list[Pendencia]]:
     """Hidrata um bloco GHE transcrito em GHEPGR + pendências (D-ARQ-51).
 
@@ -206,6 +207,7 @@ def hidratar_ghe(
         produtos_quimicos=(),
         psicossocial=psicossocial,
         cenario=None,
+        psicossocial_moderado=psicossocial_moderado,
     )
     return ghe_pgr, pendencias
 
@@ -216,6 +218,7 @@ def hidratar_pgr(
     validade: date,
     assinatura_engenheiro: bool,
     psicossocial: bool = False,
+    psicossocial_moderado: bool = False,
 ) -> tuple[PGR, list[Pendencia]]:
     """Hidrata a sequência de blocos GHE transcritos em PGR (D-ARQ-51 costura plural).
 
@@ -230,7 +233,7 @@ def hidratar_pgr(
     pendencias: list[Pendencia] = []
 
     for posicao, ghe in enumerate(ghes, start=1):
-        ghe_pgr, pendencias_ghe = hidratar_ghe(ghe, indice, posicao, psicossocial)
+        ghe_pgr, pendencias_ghe = hidratar_ghe(ghe, indice, posicao, psicossocial, psicossocial_moderado)
         ghes_pgr.append(ghe_pgr)
         pendencias.extend(pendencias_ghe)
 

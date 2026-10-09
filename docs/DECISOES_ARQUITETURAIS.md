@@ -4922,6 +4922,23 @@ normas eu aprovo os quatro").
 - **Verificação.** `test_alertas_revisao.py` (12 casos), varredura inversa 9/9. 3 PGRs determinísticos: nenhum "menor
   aprendiz", 0 alertas.
 
+**Emenda 2 (branch `claude/confident-fermat-n74hux`, sobre `main 1702f49`, 09/10/2026; decisão do Diovanni, solução D) —
+inventário psicossocial avaliado e corte "moderado ou acima" para a Saúde Mental.**
+- **Medido.** `detectar_psicossocial` marcava o PGR por citação ("inventário de riscos psicossociais", "copsoq",
+  "frprt"). Dos 14 PGRs do acervo marcados, 4 só citam: SPE QD. E-13 e Verde Maris ("Antecipação Técnica… não foi
+  realizada"), Sinduscon 27.08.26 ("detalhada em documento específico"), Seconci REV4 ("Em avaliação"). Os 10 com
+  inventário avaliado têm 9 a 18 linhas "Psicossocial … nível", só BAIXO e MODERADO, e todos ao menos um MODERADO.
+- **Precedente (nível 2).** Matriz da Sinduscon 27.08.26 sem Saúde Mental; folha da Dra. Carolini ("Risco Psicossocial
+  → Moderado = Avaliação Médica de Saúde Mental"). Cinco soluções propostas (A inventário avaliado; B lista de frases de
+  "não avaliado"; C só alerta; D nível do inventário; E confirmação na tela); D escolhida.
+- **Entrega.** `avaliar_inventario_psicossocial` (extracao_pgr.py): marcador de `detectar_psicossocial` (intocada) e
+  linha de fator com rótulo de `niveis_risco.yaml` (`classificar_nivel_pgr`, intocada) → `avaliado` e
+  `moderado_ou_acima`. `GHEPGR.psicossocial` passa a significar inventário avaliado; `GHEPGR.psicossocial_moderado`
+  (default False) e o primitivo `psicossocial_moderado`. R-PSY-05 DEPRECATED → **R-PSY-08** (Saúde Mental com fator no
+  corte). R-PSY-06 e R-PSY-07 sem mudança de código: leem o inventário avaliado.
+- **Ponto em aberto.** A folha dá também Saúde Mental na altura com inventário só BAIXO; a D aprovada não. Sem caso no
+  acervo — vai à revisão de saída se aparecer.
+
 ---
 
 ## D-ARQ-95 — Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO
@@ -5238,3 +5255,4 @@ raciocínio pedida por ele.
 | v257 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ed3698f` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-95`** — grupo com erro de digitação do PGR ("Ergnômico") aceito a até 1 edição de um dos cinco grupos, depois da leitura pelo radical; censo de 49 PDFs fixa o limite (palavras de outro sentido a 2 edições). 2ª rodada no app medida. |
 | v258 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ca17062` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-94`** — alerta do menor aprendiz com base no Decreto 6.481/2008 (Lista TIP): R-TIP-01 sucede R-AUD-05, itens 55/82/83/84/85 pelo agente, exceções dos Arts. 2º e 3º e item 58 no texto; decreto em `normas/D6481.pdf`. |
 | v259 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 3491d9e` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-57`** — página sem texto (anexo escaneado) fora da densidade do gate de segmentação, numerador e denominador; origem: PGR Quasar Bueno recusado (35/80 = 43,8%, 22 págs. escaneadas na cauda do GHE 12). 35 PGRs do acervo medidos antes × depois: só o Quasar muda. Nota em DT-003DK-01 (subclasse "cauda sem texto"; DT segue aberta). Limiar intocado. Nenhuma R-* criada/alterada. |
+| v260 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 1702f49` (IMPLEMENTAÇÃO, decisão do Diovanni — solução D): **emenda 2 em `D-ARQ-94`** — inventário psicossocial avaliado (linha de fator com nível, não a citação do FRPRT) e R-PSY-05 → R-PSY-08 (Saúde Mental com fator moderado ou acima). Medido: 4 de 14 PGRs marcados só citam; os 10 avaliados têm fator MODERADO. |
