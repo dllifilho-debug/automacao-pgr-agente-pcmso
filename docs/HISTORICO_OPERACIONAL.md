@@ -12651,3 +12651,12 @@ registrada do teste da R-PSY-05); varredura inversa: 12 reversões nomeadas, tod
 Suíte completa, árvore parada: **1845 → 1853 passed, 6 skipped** (1148 s). Depois dela, só a docstring da função nova
 mudou ("4 de 13 PDFs" → "4 de 14 PGRs"): recorte `test_inventario_psicossocial.py` + `test_orquestrador.py` verde. mypy
 no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed.
+
+**Complemento (mesma sessão) — altura com inventário só BAIXO, seguindo a folha.** O Diovanni mandou seguir a folha da
+Dra. Carolini também neste ponto ("Baixo … ⊕ trabalho em altura = Saúde Mental + Av. Psicossocial"), pela transcrição
+em PENDENCIAS (a foto não está no acervo). Composto `saude_mental_psicossocial` (`psicossocial_moderado` ou
+`altura_com_inventario_psicossocial`) como gatilho da R-PSY-08; só YAML. Efeito no acervo: nenhum — os 10 inventários
+avaliados têm fator MODERADO (dedução da medição acima, não nova rodada). 1 teste em `test_orquestrador.py`; reversões
+"R-PSY-08 só por `psicossocial_moderado`" e "composto sem a perna da altura" o deixam vermelho; "quando: psicossocial"
+segue derrubando o teste "só BAIXO, sem altura". Suíte completa, árvore parada: **1853 → 1854 passed, 6 skipped** (1132 s).
+`test_gerar_indice_darq.py` 6 passed.

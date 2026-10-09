@@ -662,6 +662,16 @@ def test_rpsy08_inventario_com_fator_moderado_emite_so_saude_mental() -> None:
     assert "avaliacao_psicossocial" not in linhas
 
 
+def test_rpsy08_altura_com_inventario_so_baixo_emite_saude_mental() -> None:
+    # Folha da Dra. Carolini: "Baixo … ⊕ trabalho em altura = Saúde Mental + Av.
+    # Psicossocial". Reversão que mata: `quando: psicossocial_moderado` na R-PSY-08 (sem a
+    # perna da altura do composto saude_mental_psicossocial).
+    linhas = _nomes((_risco("trabalho_altura"),), psicossocial=True)
+
+    assert [m.regra_id for m in linhas["avaliacao_saude_mental"].motivos] == ["R-PSY-08"]
+    assert [m.regra_id for m in linhas["avaliacao_psicossocial"].motivos] == ["R-PSY-06"]
+
+
 def test_rpsy08_inventario_so_com_fatores_baixos_nao_emite_saude_mental() -> None:
     # Folha da Dra. Carolini: saúde mental a partir de moderado. Reversões que matam:
     # (1) `quando: psicossocial` na R-PSY-08; (2) tirar o DEPRECATED da R-PSY-05.

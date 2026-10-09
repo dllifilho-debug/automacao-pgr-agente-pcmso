@@ -4936,8 +4936,9 @@ inventário psicossocial avaliado e corte "moderado ou acima" para a Saúde Ment
   `moderado_ou_acima`. `GHEPGR.psicossocial` passa a significar inventário avaliado; `GHEPGR.psicossocial_moderado`
   (default False) e o primitivo `psicossocial_moderado`. R-PSY-05 DEPRECATED → **R-PSY-08** (Saúde Mental com fator no
   corte). R-PSY-06 e R-PSY-07 sem mudança de código: leem o inventário avaliado.
-- **Ponto em aberto.** A folha dá também Saúde Mental na altura com inventário só BAIXO; a D aprovada não. Sem caso no
-  acervo — vai à revisão de saída se aparecer.
+- **Altura com inventário só BAIXO.** A folha dá Saúde Mental + Avaliação Psicossocial; a D aprovada dava só a
+  Psicossocial. O Diovanni mandou seguir a folha (pela transcrição; a foto não está no acervo): composto
+  `saude_mental_psicossocial` = `psicossocial_moderado` ou `altura_com_inventario_psicossocial`. Sem caso no acervo.
 
 ---
 
@@ -5255,4 +5256,4 @@ raciocínio pedida por ele.
 | v257 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ed3698f` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 2 em `D-ARQ-95`** — grupo com erro de digitação do PGR ("Ergnômico") aceito a até 1 edição de um dos cinco grupos, depois da leitura pelo radical; censo de 49 PDFs fixa o limite (palavras de outro sentido a 2 edições). 2ª rodada no app medida. |
 | v258 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ca17062` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-94`** — alerta do menor aprendiz com base no Decreto 6.481/2008 (Lista TIP): R-TIP-01 sucede R-AUD-05, itens 55/82/83/84/85 pelo agente, exceções dos Arts. 2º e 3º e item 58 no texto; decreto em `normas/D6481.pdf`. |
 | v259 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 3491d9e` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-57`** — página sem texto (anexo escaneado) fora da densidade do gate de segmentação, numerador e denominador; origem: PGR Quasar Bueno recusado (35/80 = 43,8%, 22 págs. escaneadas na cauda do GHE 12). 35 PGRs do acervo medidos antes × depois: só o Quasar muda. Nota em DT-003DK-01 (subclasse "cauda sem texto"; DT segue aberta). Limiar intocado. Nenhuma R-* criada/alterada. |
-| v260 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 1702f49` (IMPLEMENTAÇÃO, decisão do Diovanni — solução D): **emenda 2 em `D-ARQ-94`** — inventário psicossocial avaliado (linha de fator com nível, não a citação do FRPRT) e R-PSY-05 → R-PSY-08 (Saúde Mental com fator moderado ou acima). Medido: 4 de 14 PGRs marcados só citam; os 10 avaliados têm fator MODERADO. |
+| v260 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 1702f49` (IMPLEMENTAÇÃO, decisão do Diovanni — solução D): **emenda 2 em `D-ARQ-94`** — inventário psicossocial avaliado (linha de fator com nível, não a citação do FRPRT) e R-PSY-05 → R-PSY-08 (Saúde Mental com fator moderado ou acima; na altura, em qualquer nível, pela folha). Medido: 4 de 14 PGRs marcados só citam; os 10 avaliados têm fator MODERADO. |

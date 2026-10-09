@@ -25,6 +25,13 @@ predicados_compostos:
       - altura_com_inventario_psicossocial
       - espaco_confinado
 
+  # R-PSY-08 (folha da Dra. Carolini, 07/10/2026): Saúde Mental com fator do inventário
+  # moderado ou acima; na altura, com inventário avaliado em qualquer nível.
+  saude_mental_psicossocial:
+    ou:
+      - psicossocial_moderado
+      - altura_com_inventario_psicossocial
+
   vibracao_qualquer:
     ou:
       - vibracao_corpo_inteiro

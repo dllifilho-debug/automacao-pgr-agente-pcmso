@@ -4232,8 +4232,8 @@ citam (Sinduscon 27.08.26, SPE QD. E-13, Verde Maris, Seconci REV4) perdem Saúd
 o alerta R-PSY-07; Fascino, Porto Araras e Vila Brasil 25.08 saem iguais à `main` (só o ID da regra muda).
 - **Perguntas (a) e (d) da folha:** respondidas pela D — inventário só BAIXO e sem altura: nenhum exame; o nível é o
   maior fator do PGR inteiro.
-- **Ponto em aberto (revisão de saída):** a folha também dá Saúde Mental na altura com inventário só BAIXO; a D não.
-  Nenhum PGR do acervo tem inventário só BAIXO.
+- **Altura com inventário só BAIXO — seguindo a folha (decisão do Diovanni):** Saúde Mental (R-PSY-08) e Avaliação
+  Psicossocial (R-PSY-06). Sem caso no acervo. A foto da folha não está no acervo; a regra segue a transcrição acima.
 
 **Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas; (a) e (d) resolvidas pela D), Data e Tipo do
 formulário, psicossocial MODERADO no ASO, "Ausência de agente nocivo", "Mecânico" como grupo, parser de coordenadas (ALT
