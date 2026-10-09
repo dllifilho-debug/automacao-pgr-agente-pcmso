@@ -311,6 +311,46 @@ def test_avaliar_segmentacao_viverde_e_none(paginas: list[str]) -> None:
     assert avaliar_segmentacao(paginas) is None
 
 
+def test_avaliar_segmentacao_paginas_sem_texto_dentro_do_ultimo_bloco_nao_contam() -> None:
+    # Molde do Quasar Bueno: anexos escaneados (sem texto) entre o último GHE e
+    # o rodapé final. Contando as vazias: 17 de 29 págs. (58,6%) → pendência;
+    # só com texto: 5 de 17 (29,4%) → sem pendência.
+    paginas = [
+        *_construir_paginas(16, {1: "GHE 1", 5: "GHE 2", 9: "GHE 3", 13: "GHE 4"}),
+        *([""] * 12),
+        "Página 26 de 26",
+    ]
+    assert avaliar_segmentacao(paginas) is None
+
+
+def test_avaliar_segmentacao_paginas_sem_texto_nao_diluem_bloco_denso() -> None:
+    # 20 págs. vazias antes de 12 com texto; o 2º bloco tem 11 das 12 com
+    # texto (91,7%). Com as vazias no denominador cairia para 11/32 (34,4%)
+    # e o bloco implausível passaria.
+    paginas = [*([""] * 20), *_construir_paginas(12, {1: "GHE 1", 2: "GHE 2"})]
+    pendencia = avaliar_segmentacao(paginas)
+    assert pendencia is not None
+    assert pendencia.tipo == "segmentacao_implausivel"
+    assert "11 de 12 páginas com texto" in pendencia.motivo
+
+
+def test_avaliar_segmentacao_piso_de_massa_conta_so_paginas_com_texto() -> None:
+    # 8 págs. com texto (abaixo do piso de 10) depois de 12 vazias: o 2º bloco
+    # tem 7 de 8 (87,5%), mas doc pequeno não é julgado pela densidade. Com o
+    # piso sobre as 20 páginas totais, sairia pendência.
+    paginas = [*([""] * 12), *_construir_paginas(8, {1: "GHE 1", 2: "GHE 2"})]
+    assert avaliar_segmentacao(paginas) is None
+
+
+def test_avaliar_estrutura_quasar_bueno_real_sem_pendencia() -> None:
+    # PGR Quasar Bueno (80 págs., 12 GHEs, págs. 58–79 escaneadas): o último
+    # bloco media 35/80 = 43,8% e o app recusava o PGR. Só com texto: 13/58.
+    paginas_quasar = extrair_texto_pgr(
+        Path("matrizes_originais/PGR - COOPERATIVA HABITACIONAL QUASAR BUENO.pdf")
+    )
+    assert avaliar_estrutura(paginas_quasar) == ("ghe", None)
+
+
 # ---------------------------------------------------------------------------
 # eh_sinal_cargo / avaliar_familia / avaliar_estrutura — família cargo-based
 # (D-ARQ-57 peça 3, DT-003CM-01): 3 formas medidas em 003.CQ sobre o acervo.

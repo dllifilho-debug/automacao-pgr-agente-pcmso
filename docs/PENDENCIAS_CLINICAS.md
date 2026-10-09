@@ -4184,3 +4184,31 @@ sem poeira repetir, volta a opção A.
 
 **Status:** ABERTA — item 1 da folha ((a), (c), (d), leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
 nocivo", 3ª rodada do ALT T65 2024-2026, "Mecânico" como grupo, parser de coordenadas e a ALT 65.
+
+**3ª rodada no app (09/10/2026, arquivos do Diovanni no chat).** ALT T65 2024-2026: 0 "sem grupo lido" (eram 3, "Ergnômico"),
+níveis iguais à 2ª rodada (37 Trivial, 21 Tolerável, 41 Moderado), 10 conferir, todos termos não reconhecidos. Adendo Hetrin:
+alerta R-TIP-01 sai no "MENOS APRENDIZ" com o item 83; R-PSY-07 sai. Vila Brasil escritório: observação da R-ESP-05 só no GHE 07
+(Auxiliar de Serviços Gerais). Os três itens fecham.
+- **Achado de formulário (decisão do Diovanni):** a Data digitada em ISO ("2026-10-09") sai assim na matriz (Word e HTML) e no
+  nome dos arquivos, mas como 09/10/2026 no memorial e no ASO (`data_exibicao`). O campo Tipo recebeu o nome do documento
+  ("MATRIZ DE EXAMES", "MATRIZ EXAME ADENDO"): arquivo "MATRIZ DE EXAMES(MATRIZ DE EXAMES)…" e nenhum (X) marcado (o Hetrin, pelo
+  código, sai "Outro: MATRIZ EXAME ADENDO"). Propostas: mesma conversão da data na matriz e no nome; Tipo como lista
+  (4 opções + Outro), o que exige smoke visual.
+
+**Inventário psicossocial sem avaliação detectado como inventário (medido em 09/10/2026, aguardando decisão).**
+`detectar_psicossocial` marca 13 PDFs do acervo; em 4 o PGR só cita o FRPRT, sem avaliar: SPE QD. E-13 e Verde Maris
+("Antecipação Técnica", avaliação não realizada), Sinduscon 27.08.26 ("detalhada em documento específico") e Seconci REV4
+("Em avaliação"). Nesses, R-PSY-05 dá Saúde Mental a todos, R-PSY-06 dá Psicossocial na altura e R-PSY-07 não alerta.
+Precedente nível 2: matriz das médicas da Sinduscon 27.08.26 (mesma data do PGR) sem Saúde Mental. Critério candidato —
+exigir linha "Psicossocial … nível" — medido com o leitor do app: 9 com linha avaliada, 4 sem, separação sem erro. Os 9 reais
+têm todos ≥1 fator MODERADO: as perguntas (a) e (d) da folha não mudam saída no acervo; (c) espaço confinado — NR-33 33.5.19.1
+pede aptidão física e mental sem prescrever exame; a folha diz só Avaliação Psicossocial, como o app já faz.
+
+**PGR Quasar Bueno recusado no app (09/10/2026) — RESOLVIDO (emenda em D-ARQ-57).** "Segmentação implausível: maior bloco GHE
+ocupa 35 de 80 páginas (43.8%)": os 12 GHEs eram reconhecidos; a cauda do GHE 12 levava 22 páginas escaneadas (58–79). Página
+sem texto saiu da densidade (decisão do Diovanni, solução A). Medido no acervo: só o Quasar muda. Pendente: rodada no app — o
+Quasar vai pela rota da IA (parser de coordenadas recusa o cabeçalho, AGENTE x≈104), `[A MEDIR — com o Diovanni e a chave]`.
+
+**Status:** ABERTA — item 1 da folha (decisão sobre (a), (c), (d) com a medição acima), inventário psicossocial sem avaliação,
+Data e Tipo do formulário, psicossocial MODERADO no ASO, "Ausência de agente nocivo", "Mecânico" como grupo, parser de
+coordenadas (ALT 65 e Quasar), rodada do Quasar no app.

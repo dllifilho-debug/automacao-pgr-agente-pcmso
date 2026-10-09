@@ -652,15 +652,21 @@ def _avaliar_spans(
     if n_blocos == 0:
         return None
 
+    # Página sem texto (anexo escaneado: ART, documentos) não conta na
+    # densidade — numerador e denominador. Sem isso, as 22 págs.-imagem no fim
+    # do PGR Quasar Bueno inflavam o último bloco GHE para 43,8% (D-ARQ-57,
+    # emenda de 09/10/2026; medida contra os PGRs do acervo).
+    com_texto = [bool(pagina.strip()) for pagina in paginas]
+    paginas_com_texto = sum(com_texto)
     limites = [*indices_ancora, len(linhas_com_pagina)]
     maior_extensao_paginas = max(
-        linhas_com_pagina[fim - 1][0] - linhas_com_pagina[inicio][0] + 1
+        sum(com_texto[linhas_com_pagina[inicio][0] - 1 : linhas_com_pagina[fim - 1][0]])
         for inicio, fim in zip(limites, limites[1:])
     )
-    percentual_maior_bloco = (maior_extensao_paginas / total_paginas) * 100
+    percentual_maior_bloco = (maior_extensao_paginas / paginas_com_texto) * 100
 
     if (
-        total_paginas > _LIMIAR_PAGINAS_DOC_MINIMO
+        paginas_com_texto > _LIMIAR_PAGINAS_DOC_MINIMO
         and percentual_maior_bloco > _LIMIAR_DENSIDADE_PCT
     ):
         return Pendencia(
@@ -668,7 +674,7 @@ def _avaliar_spans(
             destinatario="extracao",
             motivo=(
                 f"Segmentação implausível: maior {rotulo_singular} ocupa "
-                f"{maior_extensao_paginas} de {total_paginas} páginas "
+                f"{maior_extensao_paginas} de {paginas_com_texto} páginas com texto "
                 f"({percentual_maior_bloco:.1f}%)"
             ),
             bloqueante=True,
@@ -735,9 +741,10 @@ def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
     - Contagem: <= 1 bloco (inclui zero âncoras) num documento com mais de
       _LIMIAR_PAGINAS_DOC_MINIMO páginas — massa insuficiente para um único
       bloco cobrir o documento inteiro ser plausível.
-    - Densidade: maior bloco ocupa mais de _LIMIAR_DENSIDADE_PCT% do total de
-      páginas do documento — só avaliada em doc com mais de
-      _LIMIAR_PAGINAS_DOC_MINIMO páginas; abaixo disso um bloco único
+    - Densidade: maior bloco ocupa mais de _LIMIAR_DENSIDADE_PCT% das
+      páginas com texto do documento (página sem texto não conta em nenhum
+      dos dois lados) — só avaliada em doc com mais de
+      _LIMIAR_PAGINAS_DOC_MINIMO páginas com texto; abaixo disso um bloco único
       legítimo satura o percentual por definição e seria falso-implausível
       (mesmo piso já presente no teste de contagem).
 
