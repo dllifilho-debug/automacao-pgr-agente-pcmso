@@ -12587,3 +12587,30 @@ seguem com espirometria por R-ESP-02, sem observação).
 bloco: a 1ª tentativa, `status: DEPRECATED`, era sobrescrita pelo `status` do fim do bloco). 1ª suíte: 1 falha, a guarda do
 índice de termos 210 → 216 — duas grafias redundantes saíram do vocabulário e a guarda foi atualizada com a origem. Suíte
 completa refeita, árvore parada: **1834 → 1840 passed, 6 skipped** (945 s). mypy no alvo canônico: limpo, 59 arquivos.
+
+## Sessão (branch `claude/confident-fermat-n74hux`, sobre `main 3491d9e`, pós-merge do PR #474 + upload do PGR Quasar Bueno) — 09/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: 3ª rodada no app e PGR Quasar Bueno (emenda em D-ARQ-57)
+
+**Medido (3ª rodada do Diovanni no app, 4 .docx no chat).** ALT T65 2024-2026: 0 "sem grupo lido" (eram 3), níveis iguais à 2ª
+rodada (37/21/41), 10 conferir por termo não reconhecido. Adendo Hetrin: R-TIP-01 com o item 83 e R-PSY-07 saem. Vila Brasil
+escritório: observação da R-ESP-05 só no GHE 07. Achado de formulário (Data ISO na matriz e no nome; Tipo preenchido com o nome
+do documento) e inventário psicossocial sem avaliação detectado como inventário (4 de 13 PDFs; precedente Sinduscon 27.08.26
+sem Saúde Mental) — registrados em PENDENCIAS, aguardando decisão.
+
+**Origem da implementação.** O Diovanni subiu o PGR da Quasar Bueno (80 págs.) e o app recusou: "maior bloco GHE ocupa 35 de 80
+páginas (43.8%)". Medido: 12 GHEs reconhecidos, 01–12 completos; o último bloco (GHE 12, pág. 46) ia até o fim e as págs. 58–79
+são anexos escaneados sem texto. Soluções propostas (A: página sem texto fora da densidade; B: âncora de fim; C: limiar;
+contorno sem as págs. escaneadas); A aprovada.
+
+**Entrega.** `_avaliar_spans`: numerador, denominador e piso de massa da densidade contam só páginas com texto; teste de contagem
+e limiar intocados; motivo diz "páginas com texto". DECISOES v259 (emenda em `D-ARQ-57`, nota em DT-003DK-01, que segue aberta
+para cauda com texto), `INDICE_DARQ.md` regenerado, PENDENCIAS.
+
+**Medido.** `avaliar_estrutura` nos 35 PDFs de PGR, worktree da `main` × branch, mesmo texto extraído: só o Quasar muda (→ sem
+pendência, 13/58); Ricco-Adm, Floramazônia e HUMAP seguem barrados. Rota completa offline do Quasar: o parser de coordenadas
+recusa o cabeçalho (AGENTE x≈104 contra ~113) e a transcrição vai para a IA — efeito na matriz `[A MEDIR — no app]`.
+
+**Verificação.** 4 testes em `test_extracao_pgr.py` (3 sintéticos, 1 real); varredura inversa 4/4 (código antigo derruba 3;
+"piso sobre o total de páginas" derruba o 4º, acrescentado na revisão do diff — a 1ª suíte foi interrompida para incluí-lo).
+Suíte completa, árvore parada: **1840 → 1844 passed, 6 skipped** (1341 s; a base 1840 é a registrada no PR #474, não medida
+nesta sessão — `3491d9e` só acrescenta o PDF). mypy no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed.
+Smoke visual não rodado: nenhuma mudança de tela.
