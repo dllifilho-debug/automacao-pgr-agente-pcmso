@@ -12614,3 +12614,16 @@ recusa o cabeçalho (AGENTE x≈104 contra ~113) e a transcrição vai para a IA
 Suíte completa, árvore parada: **1840 → 1844 passed, 6 skipped** (1341 s; a base 1840 é a registrada no PR #474, não medida
 nesta sessão — `3491d9e` só acrescenta o PDF). mypy no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed.
 Smoke visual não rodado: nenhuma mudança de tela.
+
+## Sessão (branch `claude/confident-fermat-n74hux` recriada sobre `main 1ac79fc`, pós-merge do PR #475) — 09/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: Quasar Bueno no app e título do GHE com "GHE:"
+
+**Medido.** Referência do PGR Quasar Bueno extraída do PDF (leitor do app; coluna PERIGO por coordenada): 12 GHEs, 22
+cargos, 130 riscos — contagem igual por linhas de risco, níveis e marcadores P×S. Contra a matriz, o memorial e o relatório
+do ASO gerados no app pelo Diovanni (rota da IA): mesmo número de riscos e mesmos níveis nos 12 GHEs; medição de ruído da
+Carpintaria (82,28 dB(A)) lida; 48 não reconhecidos, o número previsto pelo vocabulário. Detalhe em PENDENCIAS.
+
+**Entrega.** O PGR escreve "GHE: 03 - SUPERVISÃO DE EQUIPE" e o título saía "GHE 03 - GHE: 03 - …" (matriz, memorial,
+relatório do ASO, tela): `_nome_sem_codigo` aceita ":" entre "GHE" e o número. Decisão do Diovanni.
+
+**Verificação.** 1 teste em `test_documento_matriz.py`, varredura inversa 1/1. Suíte completa, árvore parada: **1844 → 1845
+passed, 6 skipped** (1252 s; base 1844 medida nesta sessão no PR #475). mypy no alvo canônico: limpo, 59 arquivos.
