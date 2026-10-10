@@ -2897,6 +2897,38 @@ Cláusula 5 e sua nota de aplicação **estendem** o recorte medido, no mesmo mo
 D-ARQ-57 peça 1 usou para acrescentar as formas 4 e 5 de âncora GHE sem abrir uma decisão
 nova a cada forma de template descoberta.
 
+**Emenda (branch `claude/brave-galileo-c7m46o`, sobre `main 43a9047`, 10/10/2026; decisão do Diovanni, opção A
+revisada) — a mesma tabela em três posições, categoria em caixa mista e recusas que protegem a saída.**
+- **Medido.** Dos 35 PGRs em PDF do acervo (leitor do app), 19 chegam ao parser. A tabela GRUPO/PERIGO/FONTE/AGRAVO
+  aparece com AGENTE em x≈113 (Fascino, Porto Araras I, Vila Brasil 25.08.26), x≈104 (Quasar Bueno, SPE QD. E-13,
+  Vila Brasil 06.10.26, CMO Aurora) e x≈122 (TOCTAO ALT 65; um bloco da Vistamerica 2026 e um da WV Maldi); as outras
+  10 famílias que chegam ao parser não têm esse cabeçalho. Só afrouxando a posição, a ALT 65 saía com 3 de 141 riscos e
+  Quasar, SPE QD. E-13 e Vila Brasil 06.10.26 com 0: as famílias x≈104/x≈122 escrevem a categoria em caixa mista
+  ("Físico", "Acidentes", às vezes em x=75), e `gate_forma_ghe` aprova GHE sem risco (`all()` de vazio). A checagem de
+  posição era a única barreira contra matriz vazia nesses documentos.
+- **Decisão.** (1) AGENTE aceito em ~104, ~113 ou ~122 (±5; na prática a faixa 99–127). (2) A 1ª palavra vira token de
+  categoria sem acento, caixa e plural **só na coluna GRUPO** (antes do AGENTE do bloco): no Quasar, GHE 07, uma
+  continuação da FONTE começa com "químico" e viraria risco falso. (3) O bloco é recusado — vai para a IA, como antes —
+  quando: a tabela tem linhas com nível e nenhuma é lida como risco; uma linha com nível tem na coluna GRUPO algo fora
+  das cinco categorias (Vistamerica 2026, PRODUÇÃO 04: "Cimento Portland" na coluna GRUPO, que seria fundido ao risco
+  anterior); ou a coluna de avaliação quantitativa traz valor com unidade (Quasar: NEN de 82,28 dB(A) na Carpintaria —
+  a rota grava `quantificacao=""` e a IA lê o valor). A varredura para na "Legenda": o inventário psicossocial que vem
+  depois tem linhas "Psicossocial" com nível. Fonte: medição do acervo (nível 2 de D-ARQ-22); a leitura da categoria
+  pelo radical já existia na rota da IA (emenda em D-ARQ-95), mesma conversão.
+- **Efeito medido (cadeia completa offline, `main` × branch, 35 PGRs).** Fascino, Porto Araras I e Vila Brasil 25.08.26
+  byte a byte iguais (matriz, relatório do ASO, observações, pendências); os outros 27 não mudam de rota. Passam da IA
+  para coordenadas: ALT 65 (18 GHEs, 141 riscos, 61 cargos, 9 "conferir" no ASO — os da 2ª rodada no app; 97,2% das
+  células da matriz SPE T65 08.07.26), Vila Brasil 06.10.26 (as 80 subemissões contra a matriz das médicas são 77
+  Avaliações Psicossociais riscadas por elas, sem 3 cargos não pareados por grafia, e as divergências já registradas de
+  acuidade e espirometria), SPE QD. E-13 (sem Saúde Mental, com R-PSY-07, como na emenda 2 em D-ARQ-94) e WV Maldi
+  (95,8% das células da matriz WVM 05 20.07.26). Quasar e Vistamerica 2026 seguem na IA, pelas recusas acima.
+- **Fora.** Ler o NEN da coluna quantitativa (tiraria o Quasar da IA): passo próprio, com medição. `gate_forma_ghe`
+  intocado. Efeito no app `[A MEDIR — rodada do Diovanni com ALT 65 e Vila Brasil 06.10.26]`.
+- **Verificação.** `test_parser_familias_irmas.py`, 13 testes (10 sintéticos, 3 com PDF real); varredura inversa: 12
+  reversões, todas com vermelho, 13/13 testes derrubados. A 1ª suíte completa deu 6 falhas: a recusa de bloco sem risco
+  rejeitava os blocos sintéticos (cabeçalho sem linha) dos testes de título e cargo; corrigida para exigir linha com
+  nível, testes existentes intocados.
+
 ## D-ARQ-66 — Emissão incondicional é regra de primeira classe; o tri-estado de D-ARQ-31 computa sobre contribuições de risco, não sobre linhas emitidas
 
 **Contexto.** Até 003.EC toda emissão era condicionada a predicado de risco. R-CLI-01
@@ -5257,3 +5289,4 @@ raciocínio pedida por ele.
 | v258 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main ca17062` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-94`** — alerta do menor aprendiz com base no Decreto 6.481/2008 (Lista TIP): R-TIP-01 sucede R-AUD-05, itens 55/82/83/84/85 pelo agente, exceções dos Arts. 2º e 3º e item 58 no texto; decreto em `normas/D6481.pdf`. |
 | v259 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 3491d9e` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda em `D-ARQ-57`** — página sem texto (anexo escaneado) fora da densidade do gate de segmentação, numerador e denominador; origem: PGR Quasar Bueno recusado (35/80 = 43,8%, 22 págs. escaneadas na cauda do GHE 12). 35 PGRs do acervo medidos antes × depois: só o Quasar muda. Nota em DT-003DK-01 (subclasse "cauda sem texto"; DT segue aberta). Limiar intocado. Nenhuma R-* criada/alterada. |
 | v260 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 1702f49` (IMPLEMENTAÇÃO, decisão do Diovanni — solução D): **emenda 2 em `D-ARQ-94`** — inventário psicossocial avaliado (linha de fator com nível, não a citação do FRPRT) e R-PSY-05 → R-PSY-08 (Saúde Mental com fator moderado ou acima; na altura, em qualquer nível, pela folha). Medido: 4 de 14 PGRs marcados só citam; os 10 avaliados têm fator MODERADO. |
+| v261 | 10/10/2026 | Branch `claude/brave-galileo-c7m46o`, sobre `main 43a9047` (IMPLEMENTAÇÃO, decisão do Diovanni — opção A revisada): **emenda em `D-ARQ-65`** — AGENTE em ~104/~113/~122, categoria em caixa mista lida só na coluna GRUPO, recusa (vai para a IA) com linhas de nível sem risco lido, grupo desconhecido em linha com nível ou valor na coluna quantitativa. Medido nos 35 PGRs: 3 determinísticos iguais à `main`; ALT 65, SPE QD. E-13, Vila Brasil 06.10.26 e WV Maldi saem da IA; Quasar e Vistamerica 2026 seguem nela. |

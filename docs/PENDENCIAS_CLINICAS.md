@@ -4246,3 +4246,19 @@ digitada de outro jeito segue como digitada.
 
 **Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
 nocivo", "Mecânico" como grupo, parser de coordenadas (ALT 65 e Quasar).
+
+**Parser de coordenadas: ALT 65 e Quasar — RESOLVIDO (10/10/2026, opção A revisada, emenda em D-ARQ-65).** Medido nos 35
+PGRs: a recusa não era só a posição do AGENTE (x≈122 na ALT 65, x≈104 no Quasar, contra ~113) — essas famílias escrevem a
+categoria em caixa mista ("Físico", "Acidentes") e, só afrouxando a posição, saíam com 3 e 0 riscos. Agora: três posições
+medidas, categoria lida só na coluna GRUPO, e o bloco vai para a IA quando a tabela tem linhas de nível sem risco lido,
+quando há grupo desconhecido em linha com nível ou valor na coluna quantitativa. Fascino, Porto Araras I e Vila Brasil
+25.08.26 iguais à `main` na cadeia completa.
+- **Saem da IA:** ALT 65 (9 "conferir", os da 2ª rodada), SPE QD. E-13, Vila Brasil 06.10.26 (mesmo resultado da rodada
+  de 08/10 contra a matriz das médicas), WV Maldi.
+- **Seguem na IA:** Quasar Bueno (NEN de ruído na coluna quantitativa — a conferência de 09/10 fica valendo) e Vistamerica
+  2026 ("Cimento Portland" escrito na coluna GRUPO do GHE PRODUÇÃO 04 — achado para a revisão de saída).
+- **Pendente:** rodada no app com ALT 65 e Vila Brasil 06.10.26 pela rota de coordenadas `[A MEDIR — com o Diovanni]`;
+  ler o NEN da coluna quantitativa (Quasar fora da IA) só como passo próprio.
+
+**Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
+nocivo", "Mecânico" como grupo, rodada no app da ALT 65 e da Vila Brasil 06.10.26 pela rota de coordenadas.

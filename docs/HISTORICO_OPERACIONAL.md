@@ -12675,3 +12675,30 @@ ou texto pelo rótulo.
 **Verificação.** `test_formulario_tipo_data.py` (3 testes), varredura inversa 5/5. Smoke visual ok (desktop e mobile;
 o 1º rodou com "Choose an option" na lista — trocado por "Escolha o tipo" e o smoke refeito). Suíte completa, árvore
 parada: **1854 → 1857 passed, 6 skipped** (1096 s). mypy no alvo canônico: limpo, 59 arquivos.
+
+## Sessão (branch `claude/brave-galileo-c7m46o`, sobre `main 43a9047`, pós-merge do PR #478) — 09-10/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: parser de coordenadas aceita ALT 65 e família x≈104 (emenda em D-ARQ-65)
+
+**Medido.** 35 PGRs em PDF no acervo (o censo de 08/10 tinha 32); 19 chegam ao parser. AGENTE em ~113, ~104 e ~122, mesma
+tabela; com a posição neutralizada a ALT 65 dava 3 de 141 riscos e Quasar, SPE QD. E-13 e Vila Brasil 06.10.26 davam 0
+(categoria em caixa mista; `gate_forma_ghe` aprova GHE vazio). Quatro opções propostas (A–D); a pedido do Diovanni, revisão
+de impacto antes de codar: cadeia completa offline `main` × proposta nos 35 PGRs e comparação com as rodadas no app e as
+matrizes das médicas. A revisão trocou a recusa quantitativa (só na coluna; na linha inteira recusava a WV Maldi por
+"diluído a 0,1%") e retirou B e C. **A revisada aprovada.**
+
+**Entrega.** `parser_familia_consciente.py`: `_X_AGENTE_MEDIDOS` (104/113/122) na checagem de posição; funções novas
+`_token_categoria`, `_normalizar_coluna_grupo`, `_eh_linha_com_nivel`, `_tem_linha_com_nivel`, `_motivo_recusa_tabela`;
+`_extrair_riscos` e `gate_forma_ghe` intocados. Com o código real, a recusa de grupo desconhecido pegou "Cimento Portland"
+na coluna GRUPO da Vistamerica 2026 (a simulação o fundiria ao risco anterior): segue na IA. DECISOES v261 (emenda em
+`D-ARQ-65`), `INDICE_DARQ.md` regenerado, PENDENCIAS.
+
+**Medido depois.** Cadeia completa nos 35 PGRs: Fascino, Porto Araras I e Vila Brasil 25.08.26 byte a byte iguais à `main`,
+27 sem mudança de rota; ALT 65 (18 GHEs, 61 cargos, 9 "conferir" — os da 2ª rodada; 97,2% das células da matriz SPE T65
+08.07.26), Vila Brasil 06.10.26 (subemissões = Avaliações Psicossociais riscadas pelas médicas + acuidade e espirometria já
+registradas), SPE QD. E-13 (sem Saúde Mental, com R-PSY-07) e WV Maldi (95,8%) saem da IA.
+
+**Verificação.** `test_parser_familias_irmas.py`, 13 testes; varredura inversa 12 reversões, todas com vermelho, 13/13. 1ª
+suíte completa: 6 falhas — a recusa de bloco sem risco rejeitava os blocos sintéticos (cabeçalho sem linha) de
+`test_parser_familia_consciente.py`; corrigida para exigir linha com nível (commit `3ffeb42`), testes existentes intocados.
+Suíte completa refeita, árvore parada: **1857 → 1870 passed, 6 skipped** (1253 s; a base 1857 é a registrada no PR #478,
+não medida nesta sessão). mypy no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual
+não rodado: nenhuma mudança de tela.
