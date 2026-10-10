@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections.abc import Sequence
 from pathlib import Path
 from typing import NamedTuple, Optional
@@ -38,7 +39,12 @@ from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 # @~113 são estáveis nas 19 páginas-âncora medidas (003.DZ) e servem só de
 # SANITY-CHECK contra família errada, nunca de fronteira de atribuição.
 _X_GRUPO_ESPERADO = 57.0
-_X_AGENTE_ESPERADO = 113.0
+# Emenda em D-ARQ-65 (10/10/2026): a mesma tabela aparece com AGENTE em três posições
+# medidas nos PGRs do acervo — ~113 (Fascino, Porto Araras I, Vila Brasil 25.08.26),
+# ~104 (Quasar Bueno, SPE QD. E-13, Vila Brasil 06.10.26) e ~122 (TOCTAO ALT 65; um bloco
+# da Vistamerica 2026 e um da WV Maldi). Outra família é recusada pelo cabeçalho, pela
+# categoria e por `_motivo_recusa_tabela`, não só pela posição.
+_X_AGENTE_MEDIDOS = (104.0, 113.0, 122.0)
 _TOLERANCIA_SANITY_PT = 5.0
 
 # Tolerância de atribuição de coluna: varredura-invariante sobre os 19
@@ -444,6 +450,91 @@ def _extrair_riscos(
     return tuple(riscos)
 
 
+def _token_categoria(texto: str) -> Optional[str]:
+    """Categoria como o template escreve na coluna GRUPO ("Físico", "Acidentes",
+    "QUIMICO") -> token da família Consciente; None fora dos cinco. Exata após tirar
+    acento, caixa e plural: grafia com erro não vira categoria aqui (a recusa de
+    `_motivo_recusa_tabela` manda o bloco para a IA, que tolera 1 edição)."""
+    sem_acento = "".join(
+        c for c in unicodedata.normalize("NFD", texto) if not unicodedata.combining(c)
+    ).upper()
+    if sem_acento in _TOKENS_CATEGORIA:
+        return sem_acento
+    if sem_acento.endswith("S") and sem_acento[:-1] in _TOKENS_CATEGORIA:
+        return sem_acento[:-1]
+    return None
+
+
+def _normalizar_coluna_grupo(linhas: Sequence[_Linha], agente_x: float) -> list[_Linha]:
+    """Troca a 1ª palavra pelo token só quando ela está na coluna GRUPO (antes do
+    AGENTE do bloco). Fora dela não: no Quasar (GHE 07) uma continuação da coluna FONTE
+    começa com "químico" e viraria risco falso."""
+    limite = agente_x - _TOLERANCIA_COLUNA_PT
+    normalizadas: list[_Linha] = []
+    for linha in linhas:
+        primeira = linha.palavras[0] if linha.palavras else None
+        token = _token_categoria(primeira.text) if primeira is not None and primeira.x0 < limite else None
+        if primeira is not None and token is not None and token != primeira.text:
+            linha = _Linha((primeira._replace(text=token), *linha.palavras[1:]))
+        normalizadas.append(linha)
+    return normalizadas
+
+
+# Valor medido na coluna quantitativa (Quasar: "(NEN) = 82,28 dB(A)"). Só na coluna:
+# no corpo da tabela há concentração de produto ("diluído a 0,1%", WV Maldi).
+_VALOR_COM_UNIDADE = re.compile(r"\d+[,.]\d+\s*(?:%|ppm|mg/m|dB|m/s|f/cm|°C)")
+
+
+def _motivo_recusa_tabela(
+    linhas: Sequence[_Linha],
+    agente_x: float,
+    avaliacao: Optional[tuple[float, float]],
+) -> Optional[str]:
+    """Forma que a rota por coordenadas não lê sem perder dado (emenda em D-ARQ-65):
+
+    - linha com nível (algarismo na coluna S·P·NÍVEL) cuja coluna GRUPO não é uma
+      das cinco categorias — `_extrair_riscos` a descartaria ou fundiria ao risco
+      anterior;
+    - valor com unidade na coluna de avaliação quantitativa — a rota grava
+      quantificacao="" (ruído medido do Quasar, que a IA lê).
+
+    Tabela = da 1ª linha de categoria até a "Legenda"; o inventário psicossocial que
+    vem depois dela (linhas "Psicossocial" com nível) fica fora."""
+    limite_grupo = agente_x - _TOLERANCIA_COLUNA_PT
+    inicio = next(
+        (k for k, linha in enumerate(linhas) if linha.palavras and linha.palavras[0].text in _TOKENS_CATEGORIA),
+        None,
+    )
+    if inicio is None:
+        return None
+    x_quantitativa = min(
+        (p.x0 for linha in linhas[:inicio] for p in linha.palavras if p.text == "QUANTITATIVA"),
+        default=None,
+    )
+    for linha in linhas[inicio:]:
+        primeira = linha.palavras[0] if linha.palavras else None
+        if primeira is None:
+            continue
+        if primeira.text.startswith("Legenda"):
+            break
+        if (
+            avaliacao is not None
+            and primeira.x0 < limite_grupo
+            and primeira.text not in _TOKENS_CATEGORIA
+            and any(
+                avaliacao[0] - _TOLERANCIA_COLUNA_PT <= p.x0 < avaliacao[1] - _TOLERANCIA_COLUNA_PT
+                and any(c.isdigit() for c in p.text)
+                for p in linha.palavras
+            )
+        ):
+            return f"linha de risco com grupo não reconhecido ({primeira.text!r})"
+        if x_quantitativa is not None and _VALOR_COM_UNIDADE.search(
+            " ".join(p.text for p in linha.palavras if p.x0 >= x_quantitativa - _TOLERANCIA_COLUNA_PT)
+        ):
+            return "valor medido na coluna de avaliação quantitativa"
+    return None
+
+
 def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
     ancora = linhas_bloco[0]
     nome = _extrair_titulo_ancora(ancora.texto)
@@ -461,24 +552,36 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
             "não localizado — bloqueador de calibração por bloco (D-ARQ-65 fatia 1)"
         )
     grupo_x, agente_x, fonte_x, agravo_x = cabecalho
-    if (
-        abs(grupo_x - _X_GRUPO_ESPERADO) > _TOLERANCIA_SANITY_PT
-        or abs(agente_x - _X_AGENTE_ESPERADO) > _TOLERANCIA_SANITY_PT
+    if abs(grupo_x - _X_GRUPO_ESPERADO) > _TOLERANCIA_SANITY_PT or all(
+        abs(agente_x - x) > _TOLERANCIA_SANITY_PT for x in _X_AGENTE_MEDIDOS
     ):
         raise FamiliaNaoReconhecida(
-            f"Bloco {nome!r}: cabeçalho fora do sanity-check GRUPO~57/AGENTE~113 "
+            f"Bloco {nome!r}: cabeçalho fora do sanity-check GRUPO~57/AGENTE~104|113|122 "
             f"(medido grupo={grupo_x}, agente={agente_x}) — família pode não ser "
             "Consciente/Fascino (D-ARQ-65 fatia 1)"
         )
+
+    linhas_bloco = _normalizar_coluna_grupo(linhas_bloco, agente_x)
+    avaliacao = _localizar_colunas_avaliacao(linhas_bloco)
+    motivo = _motivo_recusa_tabela(linhas_bloco, agente_x, avaliacao)
+    if motivo is not None:
+        raise FamiliaNaoReconhecida(f"Bloco {nome!r}: {motivo} (emenda em D-ARQ-65)")
 
     riscos = _extrair_riscos(
         linhas_bloco,
         agente_x,
         fonte_x,
         agravo_x,
-        _localizar_colunas_avaliacao(linhas_bloco),
+        avaliacao,
         grupo_x,
     )
+    if not riscos:
+        # gate_forma_ghe aprova GHE sem risco (all() de vazio): sem esta recusa, um
+        # template com a mesma tabela e categoria em outra grafia vira matriz vazia.
+        raise FamiliaNaoReconhecida(
+            f"Bloco {nome!r}: tabela de riscos localizada, nenhuma linha de risco lida "
+            "(emenda em D-ARQ-65)"
+        )
     return GHEVerbatim(nome=nome, cargos=cargos, riscos=riscos)
 
 
