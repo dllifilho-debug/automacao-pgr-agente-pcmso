@@ -108,12 +108,22 @@ def test_agente_fora_das_posicoes_medidas_recusa() -> None:
         parsear_paginas([pagina])
 
 
-def test_tabela_sem_linha_de_risco_recusa() -> None:
-    # Reversão que mata: tirar o `if not riscos` de _parsear_bloco (GHE vazio aprovado
-    # por gate_forma_ghe -> matriz vazia sem aviso).
-    pagina = [*_cabecalho(113.0), _p("Página", 28.0, 50.0), _p("2", 40.0, 50.0)]
-    with pytest.raises(FamiliaNaoReconhecida, match="nenhuma linha de risco"):
+def test_linhas_de_nivel_sem_categoria_lida_recusa() -> None:
+    # Forma do Quasar antes da normalização: categoria em grafia que o parser não lê em
+    # nenhuma linha. Reversão que mata: tirar a recusa de bloco sem risco de
+    # _parsear_bloco (GHE vazio aprovado por gate_forma_ghe -> matriz vazia sem aviso).
+    pagina = [*_cabecalho(113.0), *_risco("Mecânico", 57.0, "Máquinas", 113.0, 50.0)]
+    with pytest.raises(FamiliaNaoReconhecida, match="nenhuma lida como risco"):
         parsear_paginas([pagina])
+
+
+def test_tabela_sem_linha_alguma_segue_aceita() -> None:
+    # Blocos sintéticos dos testes de título e cargo (test_parser_familia_consciente.py)
+    # têm cabeçalho e nenhuma linha. Reversão que mata: recusar todo bloco sem risco,
+    # sem exigir linha com nível.
+    pagina = [*_cabecalho(113.0), _p("Página", 28.0, 50.0), _p("2", 40.0, 50.0)]
+    (ghe,) = parsear_paginas([pagina])
+    assert ghe.riscos == ()
 
 
 def test_linha_com_nivel_e_grupo_desconhecido_recusa() -> None:

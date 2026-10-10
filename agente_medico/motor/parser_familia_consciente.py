@@ -485,6 +485,36 @@ def _normalizar_coluna_grupo(linhas: Sequence[_Linha], agente_x: float) -> list[
 _VALOR_COM_UNIDADE = re.compile(r"\d+[,.]\d+\s*(?:%|ppm|mg/m|dB|m/s|f/cm|°C)")
 
 
+def _eh_linha_com_nivel(
+    linha: _Linha, limite_grupo: float, avaliacao: Optional[tuple[float, float]]
+) -> bool:
+    """Linha que abre na coluna GRUPO e tem algarismo na coluna S·P·NÍVEL — forma de
+    linha de risco, qualquer que seja o texto do grupo."""
+    primeira = linha.palavras[0] if linha.palavras else None
+    return (
+        avaliacao is not None
+        and primeira is not None
+        and primeira.x0 < limite_grupo
+        and any(
+            avaliacao[0] - _TOLERANCIA_COLUNA_PT <= p.x0 < avaliacao[1] - _TOLERANCIA_COLUNA_PT
+            and any(c.isdigit() for c in p.text)
+            for p in linha.palavras
+        )
+    )
+
+
+def _tem_linha_com_nivel(
+    linhas: Sequence[_Linha], agente_x: float, avaliacao: Optional[tuple[float, float]]
+) -> bool:
+    limite_grupo = agente_x - _TOLERANCIA_COLUNA_PT
+    for linha in linhas:
+        if linha.palavras and linha.palavras[0].text.startswith("Legenda"):
+            return False
+        if _eh_linha_com_nivel(linha, limite_grupo, avaliacao):
+            return True
+    return False
+
+
 def _motivo_recusa_tabela(
     linhas: Sequence[_Linha],
     agente_x: float,
@@ -517,16 +547,7 @@ def _motivo_recusa_tabela(
             continue
         if primeira.text.startswith("Legenda"):
             break
-        if (
-            avaliacao is not None
-            and primeira.x0 < limite_grupo
-            and primeira.text not in _TOKENS_CATEGORIA
-            and any(
-                avaliacao[0] - _TOLERANCIA_COLUNA_PT <= p.x0 < avaliacao[1] - _TOLERANCIA_COLUNA_PT
-                and any(c.isdigit() for c in p.text)
-                for p in linha.palavras
-            )
-        ):
+        if primeira.text not in _TOKENS_CATEGORIA and _eh_linha_com_nivel(linha, limite_grupo, avaliacao):
             return f"linha de risco com grupo não reconhecido ({primeira.text!r})"
         if x_quantitativa is not None and _VALOR_COM_UNIDADE.search(
             " ".join(p.text for p in linha.palavras if p.x0 >= x_quantitativa - _TOLERANCIA_COLUNA_PT)
@@ -575,11 +596,11 @@ def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
         avaliacao,
         grupo_x,
     )
-    if not riscos:
+    if not riscos and _tem_linha_com_nivel(linhas_bloco, agente_x, avaliacao):
         # gate_forma_ghe aprova GHE sem risco (all() de vazio): sem esta recusa, um
         # template com a mesma tabela e categoria em outra grafia vira matriz vazia.
         raise FamiliaNaoReconhecida(
-            f"Bloco {nome!r}: tabela de riscos localizada, nenhuma linha de risco lida "
+            f"Bloco {nome!r}: tabela com linhas de nível, nenhuma lida como risco "
             "(emenda em D-ARQ-65)"
         )
     return GHEVerbatim(nome=nome, cargos=cargos, riscos=riscos)
