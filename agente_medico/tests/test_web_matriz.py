@@ -339,7 +339,7 @@ _EMISSAO_RECENTE = (date.today() - timedelta(days=30)).isoformat()
 
 
 def _submeter_formulario(
-    at: AppTest, validade: str = _EMISSAO_RECENTE, campos: Mapping[str, str] | None = None
+    at: AppTest, validade: str = _EMISSAO_RECENTE, campos: Mapping[str, str | date] | None = None
 ) -> None:
     # Campos do `st.form` sem `.run()` entre eles: o navegador só envia o
     # formulário no submit, e o AppTest do Streamlit 1.65 passou a imitar isso —
@@ -349,6 +349,8 @@ def _submeter_formulario(
         lista = next((s for s in at.selectbox if s.label == rotulo), None)
         if lista is not None:
             lista.set_value(valor)
+        elif isinstance(valor, date):
+            next(d for d in at.date_input if d.label == rotulo).set_value(valor)
         else:
             next(t for t in at.text_input if t.label == rotulo).set_value(valor)
     next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste")

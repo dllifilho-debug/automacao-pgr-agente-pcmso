@@ -1291,7 +1291,9 @@ def pagina_matriz() -> None:
                     help="Marca o (X) no documento e entra no nome do arquivo.",
                 )
                 tipo_outro = st.text_input("Outro tipo (se escolheu Outro)")
-                data_documento = st.text_input("Data")
+                # Calendário: "10/01/2026" digitado no lugar de 10/10 saiu sem aviso (Vila Brasil,
+                # 10/10/2026); as matrizes das médicas trazem sempre a data completa no cabeçalho.
+                data_documento = st.date_input("Data", value=None, format="DD/MM/YYYY")
                 medico_coordenador = st.text_input("Médico coordenador")
                 crm = st.text_input("CRM")
 
@@ -1299,7 +1301,8 @@ def pagina_matriz() -> None:
                 st.markdown("**Responsáveis**")
                 responsavel_preenchimento = st.text_input("Responsável pelo preenchimento")
                 medico_validador = st.text_input("Médica validadora")
-                data_pgr = st.text_input("Data do PGR no rodapé (texto livre)")
+                # Texto livre: 14 de 50 matrizes das médicas escrevem só mês/ano ("JUN/2026").
+                data_pgr = st.text_input("Data do PGR no rodapé (DD/MM/AAAA ou MÊS/AAAA)")
 
             with col_pgr:
                 st.markdown("**Dados do PGR**")
@@ -1339,14 +1342,14 @@ def pagina_matriz() -> None:
             empresa=empresa,
             obra=obra,
             tipo_documento=tipo_do_formulario(tipo_escolhido, tipo_outro),
-            data=data_do_formulario(data_documento),
+            data=data_do_formulario(data_documento.isoformat() if data_documento else ""),
             medico_coordenador=medico_coordenador,
             crm=crm,
         )
         rodape = RodapeDocumento(
             responsavel_preenchimento=responsavel_preenchimento,
             medico_validador=medico_validador,
-            data_pgr=data_pgr,
+            data_pgr=data_do_formulario(data_pgr),
         )
 
         with tempfile.TemporaryDirectory() as tmp:

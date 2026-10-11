@@ -12782,3 +12782,18 @@ documento). Condição de reabertura em PENDENCIAS.
 
 **Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
 `test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
+
+## Sessão (branch `claude/busy-thompson-lepmze` recriada sobre `main d88c6a4`, pós-merge do PR #484) — 10-11/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: campos de data do formulário
+
+**Medido.** 50 matrizes .doc das médicas (LibreOffice → texto): cabeçalho sempre DD/MM/AAAA; rodapé 18 DD/MM/AAAA, 14
+mês/ano, 18 sem data. Quatro soluções (A–D); a B aprovada pelo Diovanni.
+
+**Entrega.** `web_matriz.py`: "Data" em `st.date_input` (formato DD/MM/YYYY, vazio por padrão), convertida pelo mesmo
+`data_do_formulario`; "Data do PGR no rodapé (DD/MM/AAAA ou MÊS/AAAA)" passa por `data_do_formulario`. Helper
+`_submeter_formulario` (`test_web_matriz.py`) preenche calendário quando o valor é `date`.
+
+**Verificação.** Os 2 testes que digitavam "Data" passam a usar o calendário (autorizado pelo Diovanni); em
+`test_nome_arquivo.py` o sufixo esperado vai de "08.10.26" a "08.10.2026" — o calendário dá o ano com 4 dígitos. 1 teste
+novo (rodapé ISO). Varredura inversa 3 reversões (rodapé cru; cabeçalho com a data crua; "Data" de volta a texto), 3/3.
+Suíte completa, árvore parada: **1876 → 1877 passed, 6 skipped** (1281 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke
+visual (`--chromium /opt/pw-browsers/chromium-1194/chrome-linux/chrome`): ok, 6/6 telas (desktop e mobile).
