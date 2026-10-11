@@ -4320,3 +4320,14 @@ as 21 pendências de vocabulário do mesmo termo na tela (solução B, sem decis
 
 **Status:** ABERTA — "Mecânico" como grupo, campos de data do formulário, rodada no app pela rota da IA (linha psicossocial
 e "Ausência de agente nocivo").
+
+**"Mecânico" como grupo — RESOLVIDO sem código (10/10/2026, decisão do Diovanni, solução A).** O "~15 PDFs" vinha do censo
+de palavras do texto inteiro (emenda 2 de D-ARQ-95), não da coluna GRUPO. Medido com o leitor do app: "mecânic…" em 30 PGRs,
+nenhum com "Mecânico" sozinho como grupo de risco — EPI ("luva contra agentes mecânicos", ALT T65 2024-2026 e EURO Setor C),
+legenda do método ("Riscos Mecânicos / Ergonômicos / …"), "ventilador mecânico" e "Engenheiro Mecânico" (EBSERH HUMAP),
+texto sobre acidentes (Ricco). A Cjr Engenharia escreve "Acidente / Mecanico" e "Ergonomico / Biomecanico": o radical já
+lê ACIDENTE e ERGONÔMICO. 3ª rodada no app (ALT T65): 0 "sem grupo lido". Mapear por precaução (solução B) seria
+interpretação sem documento. Reabre com um PGR que escreva "Mecânico" sozinho na coluna GRUPO — a legenda dele decide.
+
+**Status:** ABERTA — campos de data do formulário, rodada no app pela rota da IA (linha psicossocial e "Ausência de agente
+nocivo").

@@ -12770,3 +12770,15 @@ PROTOCOLO v138, DECISOES v263 (emenda 4 em D-ARQ-91), `INDICE_DARQ.md` regenerad
 (autorizado pelo Diovanni). 2 testes novos; varredura inversa 3 reversões, 3/3, inclusive a do teste antigo. Suíte
 completa, árvore parada: **1874 → 1876 passed, 6 skipped** (1382 s). mypy no alvo canônico: limpo, 59 arquivos.
 `test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: só o documento baixado muda.
+
+## Sessão (branch `claude/busy-thompson-lepmze` recriada sobre `main f0b6d18`, pós-merge do PR #483) — 10-11/10/2026 — MEDIÇÃO: "Mecânico" como grupo
+
+**Medido.** Leitor do app no acervo: "mecânic…" em 30 PGRs, nenhum com "Mecânico" sozinho na coluna GRUPO (EPI, legenda do
+método, termos clínicos, texto corrido); a Cjr escreve "Acidente / Mecanico" e "Ergonomico / Biomecanico", que o radical já
+lê. O "~15 PDFs" registrado em 08/10 era censo de palavras do texto inteiro.
+
+**Decisão.** Fechada sem código (decisão do Diovanni, solução A; B — mapear por precaução — descartada por não ter
+documento). Condição de reabertura em PENDENCIAS.
+
+**Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
+`test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
