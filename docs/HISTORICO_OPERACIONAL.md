@@ -12718,5 +12718,6 @@ do protocolo sem as grafias, fora do repositório) reproduz 51/26/97. Cinco solu
 (manter não consta: NR-07 7.5.19.1 "c" com o Anexo III item 3.2; e-mail da R-ASO-06). Achado de formulário (campos de data)
 registrado em PENDENCIAS, sem decisão.
 
-**Verificação.** Sessão só de docs. Recorte: testes que leem os docs vivos (`test_particao_pendencias.py` e vizinhos), ver
-PR. DECISOES não tocada. Smoke visual não rodado: nenhuma mudança de tela.
+**Verificação.** Sessão só de docs. Recorte: os 6 arquivos de teste que leem os docs vivos (`test_particao_pendencias.py`,
+`test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`, `test_extracao_pgr.py`, `test_integracao_002c.py`,
+`test_predicados_stage.py`), árvore parada: 159 passed (389 s). DECISOES não tocada. Smoke visual não rodado: nenhuma mudança de tela.
