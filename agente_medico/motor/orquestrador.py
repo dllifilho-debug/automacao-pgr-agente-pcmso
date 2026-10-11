@@ -182,6 +182,8 @@ def executar(pgr: PGR, protocolo: Protocolo, hoje: date | None = None) -> Result
         matriz.sugestao_aso = sugerir_aso(
             matriz.linhas, ctx.riscos, ghe.riscos, protocolo.vocabulario.agentes,
             protocolo.vocabulario.niveis_risco,
+            psicossocial=ctx.pgr_ghe.psicossocial,
+            psicossocial_moderado=ctx.pgr_ghe.psicossocial_moderado,
         )
         matrizes.append(matriz)
 

@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v261 · 95 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v262 · 95 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -98,8 +98,8 @@ Fonte: DECISOES_ARQUITETURAIS.md v261 · 95 decisões
 | D-ARQ-88 | A origem do risco é coletada por passada de explicação separada, sobre as pernas verdadeiras da regra que emitiu | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 e 2 (mesma data; fatia 2 ratificada à parte, Q1–Q4 da fatia 2 como recomendado) | 4492 | 9422 |
 | D-ARQ-89 | Glifo que o gerador do PDF não mapeia é restaurado na extração, por tabela verificada; a apresentação sanitiza o resto | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (29/09/2026, Q1–Q4 como recomendado) + IMPLEMENTAÇÃO das fatias 1 (29/09/2026) e 2 (30/09/2026) | 4550 | 7135 |
 | D-ARQ-90 | Sugestão de vínculo FDS↔GHE por agente em comum; o RT confirma | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (30/09/2026, Q1–Q5 como recomendado: sinal só por agente em comum, sem nome de arquivo nem cargo; nunca pré-marcar, botão explícito; sem limiar; aviso não bloqueante para FDS sem casamento; fonte geradora adiada até a fatia 1 medir a falta) | 4598 | 11320 |
-| D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4759 | 13746 |
-| D-ARQ-92 | Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS") | 4843 | 6543 |
-| D-ARQ-93 | Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave) | 4890 | 3021 |
-| D-ARQ-94 | Avaliação Psicossocial da altura condicionada ao inventário do PGR; alertas para a revisão médica sem mudar exame | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (07/10/2026, na sessão: "aprovo os dois, pode implementar") | 4919 | 6392 |
-| D-ARQ-95 | Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (08/10/2026, na sessão: desenho genérico aprovado — "tem que valer para qualquer PGR"; "Médio" no corte `[INTERPRETADO]` e "Tolerável" pela legenda, pela recomendação) | 4977 | 5807 |
+| D-ARQ-91 | Sugestão de exames para o ASO: por linha da matriz, pelo critério normativo de obrigatoriedade; a médica valida depois | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (06/10/2026, na sessão: unidade = exame da matriz; rótulos pelo item 7 | 4759 | 15250 |
+| D-ARQ-92 | Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS") | 4849 | 6543 |
+| D-ARQ-93 | Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave) | 4896 | 3021 |
+| D-ARQ-94 | Avaliação Psicossocial da altura condicionada ao inventário do PGR; alertas para a revisão médica sem mudar exame | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (07/10/2026, na sessão: "aprovo os dois, pode implementar") | 4925 | 6392 |
+| D-ARQ-95 | Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (08/10/2026, na sessão: desenho genérico aprovado — "tem que valer para qualquer PGR"; "Médio" no corte `[INTERPRETADO]` e "Tolerável" pela legenda, pela recomendação) | 4983 | 5807 |

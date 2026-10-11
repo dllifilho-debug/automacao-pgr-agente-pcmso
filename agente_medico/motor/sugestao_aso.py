@@ -56,6 +56,10 @@ _NOTA_MODERADO = "moderado ou acima consta (e-mail da Dra. Carolini; NR-07 item 
 _GRUPOS_SEM_EXCECAO = frozenset({"ACIDENTE", "ERGONOMICO"})
 _MARCAS_APTIDAO = ("altura", "confinad")
 
+# R-ASO-06 aplicada ao inventário psicossocial (emenda 3 de D-ARQ-91): o inventário é um
+# só para o PGR inteiro (D-ARQ-49 P2), então a linha sai igual em todo GHE.
+FATORES_PSICOSSOCIAIS = "fatores de risco psicossociais (inventário do PGR)"
+
 _NOTA_BAIXO = (
     "passa a constar se o PGR indicar monitoramento desde a classificação baixa ou "
     "medidas de prevenção imediatas (NR-07 item 7.5.12 \"a\"/\"b\") — o app não lê isso do PGR"
@@ -270,6 +274,21 @@ def _criterios_do_agente(
     return criterios
 
 
+def _criterio_psicossocial(moderado_ou_acima: bool) -> Criterio:
+    """R-ASO-06 — o fator psicossocial do inventário avaliado segue a regra geral pelo maior
+    nível do inventário: moderado ou acima consta (e-mail da Dra. Carolini; NR-07 item
+    7.5.19.1 "c" — é o fator que leva a Saúde Mental ao PCMSO, R-PSY-08); abaixo, não consta."""
+    if moderado_ou_acima:
+        return Criterio(
+            "CONSTA", "R-ASO-06",
+            f"inventário psicossocial do PGR com fator classificado moderado ou acima; {_NOTA_MODERADO}",
+        )
+    return Criterio(
+        "NAO_CONSTA", "R-ASO-06",
+        f"inventário psicossocial do PGR só com fatores abaixo de moderado; {_NOTA_BAIXO}",
+    )
+
+
 def _consolidar(criterios: Sequence[Criterio]) -> tuple[VereditoASO, tuple[Criterio, ...]]:
     """Um critério que faça constar basta (cada item da NR-07 obriga sozinho); senão
     conferir, se algum critério não pôde decidir; senão não consta."""
@@ -286,11 +305,15 @@ def sugerir_aso(
     riscos_pgr: Sequence[RiscoPGR],
     agentes_vocab: Mapping[str, Any],
     niveis_risco: Mapping[str, Any] | None = None,
+    psicossocial: bool = False,
+    psicossocial_moderado: bool = False,
 ) -> RelatorioASO:
     """Uma sugestão por agente do GHE (linhas do PGR do mesmo agente juntas) e uma por
     termo do PGR que não virou agente (CONFERIR, D-ARQ-22). `exames` é informativo: os
     exames da matriz cuja origem é o agente — o ASO traz o risco, não o exame.
-    `niveis_risco`: vocabulário de rótulos de nível de outras escalas (D-ARQ-95)."""
+    `niveis_risco`: vocabulário de rótulos de nível de outras escalas (D-ARQ-95).
+    `psicossocial`/`psicossocial_moderado`: inventário psicossocial avaliado e fator no corte
+    (GHEPGR, avaliar_inventario_psicossocial) — uma linha a mais, pela R-ASO-06."""
     niveis: Mapping[str, Any] = niveis_risco or {}
     sugestoes: list[SugestaoASO] = []
     for agente in dict.fromkeys(r.agente for r in riscos):
@@ -306,6 +329,12 @@ def sugerir_aso(
             [_criterio_termo(r, niveis) for r in riscos_pgr if r.agente is None and r.termo == termo]
         )
         sugestoes.append(SugestaoASO(termo, False, veredito, criterios, ()))
+    if psicossocial:
+        criterio = _criterio_psicossocial(psicossocial_moderado)
+        exames = tuple(
+            linha.exame for linha in linhas if any(m.regra_id.startswith("R-PSY-") for m in linha.motivos)
+        )
+        sugestoes.append(SugestaoASO(FATORES_PSICOSSOCIAIS, True, criterio.veredito, (criterio,), exames))
     aptidoes = tuple(
         f"Consignar aptidão para {_APTIDAO_NR[agente]}"
         for agente in _APTIDAO_NR

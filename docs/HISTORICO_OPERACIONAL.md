@@ -12721,3 +12721,21 @@ registrado em PENDENCIAS, sem decisão.
 **Verificação.** Sessão só de docs. Recorte: os 6 arquivos de teste que leem os docs vivos (`test_particao_pendencias.py`,
 `test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`, `test_extracao_pgr.py`, `test_integracao_002c.py`,
 `test_predicados_stage.py`), árvore parada: 159 passed (389 s). DECISOES não tocada. Smoke visual não rodado: nenhuma mudança de tela.
+
+## Sessão (branch `claude/busy-thompson-lepmze` recriada sobre `main 2ea334e`, pós-merge do PR #480) — 10-11/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: psicossocial MODERADO no relatório do ASO (emenda 3 em D-ARQ-91)
+
+**Medido.** Leitor do app no acervo: 10 PGRs com inventário psicossocial avaliado, todos com fator MODERADO. Nos 6 da rota
+determinística, todo GHE tem Saúde Mental na matriz e 29 recebiam a frase de inexistência (Vila Brasil 06.10 e 25.08, 13
+cada; ALT 65, 2; Fascino, 1). Quatro soluções (A–D); a A aprovada pelo Diovanni.
+
+**Entrega.** `sugestao_aso.py`: `_criterio_psicossocial`, parâmetros `psicossocial`/`psicossocial_moderado` em
+`sugerir_aso`, linha "fatores de risco psicossociais (inventário do PGR)" em todo GHE do PGR com inventário avaliado;
+`orquestrador.py` passa o inventário do GHE. Sem agravo na linha (decisão do Diovanni). PROTOCOLO v137 (R-ASO-06), DECISOES
+v262 (emenda 3 em D-ARQ-91), `INDICE_DARQ.md` regenerado, PENDENCIAS.
+
+**Medido depois.** Nos 6 PGRs: inexistência 29 → 0, +1 CONSTA por GHE (127), nenhum outro veredito muda (ALT 65 48/9/83 →
+66/9/83; Vila Brasil 06.10 51/25/98 → 77/25/98).
+
+**Verificação.** 4 testes em `test_sugestao_aso.py`; varredura inversa 5 reversões, 4/4 derrubados. Suíte completa, árvore
+parada: **1870 → 1874 passed, 6 skipped** (1376 s; a base 1870 é a registrada no PR #479). mypy no alvo canônico: limpo, 59
+arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: a linha nova só sai no documento baixado.
