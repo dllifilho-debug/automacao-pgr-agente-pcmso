@@ -4262,3 +4262,26 @@ quando há grupo desconhecido em linha com nível ou valor na coluna quantitativ
 
 **Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
 nocivo", "Mecânico" como grupo, rodada no app da ALT 65 e da Vila Brasil 06.10.26 pela rota de coordenadas.
+
+**Rodada no app da ALT 65 e da Vila Brasil 06.10.26 pela rota de coordenadas — RESOLVIDA (10-11/10/2026, `main a9cd05e`).**
+Arquivos do Diovanni (matriz, memorial, riscos para o ASO e print) comparados com a cadeia offline na mesma `main`, com o
+mesmo formulário: o texto dos três .docx sai idêntico nos dois PGRs; 0 blocos lidos por IA (a linha de tempo não traz "IA").
+- **ALT 65:** 18 GHEs, 61 cargos, 48 pendências; ASO 48 consta, 9 conferir, 83 não consta — os 9 da 2ª rodada (2 radiação
+  não ionizante, 7 químicos de FDS do GHE-15).
+- **Vila Brasil 06.10.26:** 26 GHEs, 92 cargos, 66 pendências. Contra a matriz das médicas de 06.10.26
+  (`comparar_matriz_gabarito --matriz-app`): 80 subemissões = 77 Avaliações Psicossociais riscadas por elas + acuidade dos
+  2 vigias + espirometria do Auxiliar de Serviços Gerais; 3 cargos não pareados só por grafia; periodicidade e momentos sem
+  divergência — o resultado de 08/10.
+- **ASO da Vila Brasil 51/25/98 (em 08/10, 51/26/97):** o "Produtos DomissanItários" do GHE-07 passou de conferir a não
+  consta porque o termo passou a ser reconhecido pela R-ESP-05 (`716cf2d`, posterior à rodada de 08/10). Contrafactual
+  medido: a cadeia atual sem as grafias de domissanitários dá 51/26/97. Mantido "não consta" (decisão do Diovanni, solução
+  1 de 5): NR-07 7.5.19.1 "c" com o Anexo III item 3.2 (sem controle de rotina) e o e-mail da R-ASO-06 (BAIXO, fora das
+  exceções). A médica inclui na coluna Correção se o PCMSO do cliente prever a espirometria de rotina.
+
+**Campos de data do formulário — ABERTO (achado da rodada de 10/10/2026, sem decisão).** "Data" (cabeçalho, memorial, ASO e
+nome do arquivo) converte AAAA-MM-DD em DD/MM/AAAA e deixa qualquer outro texto como digitado, sem conferir dia e mês (a Vila
+Brasil saiu 10/01/2026); "Data do PGR no rodapé (texto livre)" não converte (ALT 65: "2026-10-01"; Vila Brasil: vazio). Só
+"Data de emissão do PGR" mostra o formato no rótulo. Comportamento da `main`; nenhum exame muda.
+
+**Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
+nocivo", "Mecânico" como grupo, campos de data do formulário.
