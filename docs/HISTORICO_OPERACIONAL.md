@@ -12702,3 +12702,21 @@ suíte completa: 6 falhas — a recusa de bloco sem risco rejeitava os blocos si
 Suíte completa refeita, árvore parada: **1857 → 1870 passed, 6 skipped** (1253 s; a base 1857 é a registrada no PR #478,
 não medida nesta sessão). mypy no alvo canônico: limpo, 59 arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual
 não rodado: nenhuma mudança de tela.
+
+## Sessão (branch `claude/busy-thompson-lepmze`, sobre `main a9cd05e`, pós-merge do PR #479) — 10-11/10/2026 — MEDIÇÃO: rodada no app da ALT 65 e da Vila Brasil 06.10.26 pela rota de coordenadas
+
+**Medido.** O Diovanni mandou, para cada PGR, matriz, memorial, riscos para o ASO e print da tela. A cadeia offline na
+`a9cd05e`, com o mesmo formulário, gera o mesmo texto nos três .docx dos dois PGRs; 0 blocos por IA. ALT 65: 18 GHEs, 61
+cargos, 9 conferir (os da 2ª rodada), 48 pendências. Vila Brasil 06.10.26: 26 GHEs, 92 cargos, 66 pendências; contra a
+matriz das médicas de 06.10.26, as mesmas 80 subemissões (77 Psicossociais riscadas, acuidade dos vigias, espirometria do
+ASG) e 3 cargos só de grafia — o resultado de 08/10. O efeito no app que a emenda de 10/10 em D-ARQ-65 deixou `[A MEDIR]` é
+este.
+
+**Diferença tratada como bloqueador e resolvida sem código.** ASO da Vila Brasil 51/25/98 contra 51/26/97 em 08/10: o
+domissanitários do GHE-07 é reconhecido desde a R-ESP-05 (`716cf2d`, depois de 08/10) e sai não consta. Contrafactual (cópia
+do protocolo sem as grafias, fora do repositório) reproduz 51/26/97. Cinco soluções propostas; o Diovanni escolheu a 1
+(manter não consta: NR-07 7.5.19.1 "c" com o Anexo III item 3.2; e-mail da R-ASO-06). Achado de formulário (campos de data)
+registrado em PENDENCIAS, sem decisão.
+
+**Verificação.** Sessão só de docs. Recorte: testes que leem os docs vivos (`test_particao_pendencias.py` e vizinhos), ver
+PR. DECISOES não tocada. Smoke visual não rodado: nenhuma mudança de tela.
