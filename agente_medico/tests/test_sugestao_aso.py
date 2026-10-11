@@ -11,7 +11,7 @@ import pytest
 
 from agente_medico.motor.orquestrador import executar
 from agente_medico.motor.protocolo import Protocolo, carregar
-from agente_medico.motor.sugestao_aso import sugerir_aso
+from agente_medico.motor.sugestao_aso import FATORES_PSICOSSOCIAIS, sugerir_aso
 from agente_medico.motor.tipos import (
     GHEPGR,
     PGR,
@@ -352,3 +352,62 @@ def test_orquestrador_leva_sugestao_para_a_matriz(proto: Protocolo) -> None:
     s = _do(matriz.sugestao_aso, "ruido")
     assert s.veredito == "CONSTA"
     assert "audiometria" in s.exames
+
+
+# R-ASO-06 aplicada ao inventário psicossocial (emenda 3 de D-ARQ-91).
+
+
+def test_inventario_com_fator_moderado_consta_e_afasta_a_inexistencia(vocab: dict[str, Any]) -> None:
+    # Reversão: apagar o bloco `if psicossocial:` de sugerir_aso — a linha some e o GHE
+    # só com tolueno BAIXO volta a sugerir inexistência (29 GHEs no acervo, 10/10/2026).
+    saude_mental = ExameEmitido(
+        exame="avaliacao_saude_mental",
+        periodicidade_meses=12,
+        motivos=[Motivo("R-PSY-08", "saude_mental_psicossocial", None, None)],
+    )
+    relatorio = sugerir_aso(
+        [saude_mental], [_risco("tolueno", "BAIXO")], (), vocab,
+        psicossocial=True, psicossocial_moderado=True,
+    )
+    s = _do(relatorio, FATORES_PSICOSSOCIAIS)
+    assert s.veredito == "CONSTA"
+    assert s.exames == ("avaliacao_saude_mental",)
+    assert relatorio.inexistencia is False
+
+
+def test_inventario_so_com_fatores_baixos_nao_consta(vocab: dict[str, Any]) -> None:
+    # Reversão: _criterio_psicossocial devolver CONSTA sem olhar `moderado_ou_acima` —
+    # o inventário só BAIXO passaria a constar e tiraria a inexistência.
+    relatorio = sugerir_aso(
+        [], [_risco("tolueno", "BAIXO")], (), vocab, psicossocial=True, psicossocial_moderado=False
+    )
+    assert _do(relatorio, FATORES_PSICOSSOCIAIS).veredito == "NAO_CONSTA"
+    assert relatorio.inexistencia is True
+
+
+def test_pgr_sem_inventario_avaliado_nao_ganha_a_linha(vocab: dict[str, Any]) -> None:
+    # Reversão: `if True:` no lugar de `if psicossocial:` — PGR sem inventário (Hetrin)
+    # ganharia uma linha de fator que o documento não avaliou.
+    relatorio = sugerir_aso([], [_risco("tolueno", "BAIXO")], (), vocab)
+    assert all(s.risco != FATORES_PSICOSSOCIAIS for s in relatorio.riscos)
+
+
+def test_orquestrador_passa_o_inventario_do_ghe(proto: Protocolo) -> None:
+    # Reversão: tirar `psicossocial=`/`psicossocial_moderado=` da chamada a sugerir_aso
+    # em executar — o inventário do GHEPGR não chega à sugestão e a linha some.
+    ghe = GHEPGR(
+        id="GHE-01",
+        nome="ADMINISTRAÇÃO",
+        cargos=("Assistente Administrativo",),
+        riscos=(),
+        epis=(),
+        produtos_quimicos=(),
+        psicossocial=True,
+        psicossocial_moderado=True,
+    )
+    pgr = PGR(validade=date(2026, 12, 31), assinatura_engenheiro=True, ghes=(ghe,))
+
+    (matriz,) = executar(pgr, proto, hoje=_HOJE).matrizes
+
+    assert _do(matriz.sugestao_aso, FATORES_PSICOSSOCIAIS).veredito == "CONSTA"
+    assert matriz.sugestao_aso.inexistencia is False

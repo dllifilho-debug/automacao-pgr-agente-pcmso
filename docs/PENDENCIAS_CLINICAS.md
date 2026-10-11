@@ -4285,3 +4285,14 @@ Brasil saiu 10/01/2026); "Data do PGR no rodapé (texto livre)" não converte (A
 
 **Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), psicossocial MODERADO no ASO, "Ausência de agente
 nocivo", "Mecânico" como grupo, campos de data do formulário.
+
+**Psicossocial MODERADO no relatório do ASO — RESOLVIDO (10/10/2026, solução A, emenda 3 de D-ARQ-91).** Medido: 10 PGRs com
+inventário psicossocial avaliado, todos com fator MODERADO; nos 6 da rota determinística, 29 GHEs recebiam a frase de
+inexistência com Saúde Mental na matriz (R-PSY-08). Agora todo GHE de PGR com inventário avaliado traz a linha "fatores de
+risco psicossociais (inventário do PGR)" — CONSTA com fator moderado ou acima, NÃO CONSTA só com fatores abaixo (R-ASO-06;
+NR-07 7.5.19.1 "c" e o e-mail). Efeito: inexistência 29 → 0, +127 CONSTA, nenhum outro veredito muda; matriz intocada. A
+linha sai sem agravo (decisão do Diovanni: o agravo fica só nos riscos que já o têm). Rota da IA (Quasar, CMO Aurora ×2,
+Vistamerica 2026) `[A MEDIR — no app]`.
+
+**Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), "Ausência de agente nocivo", "Mecânico" como
+grupo, campos de data do formulário, linha psicossocial no app pela rota da IA.
