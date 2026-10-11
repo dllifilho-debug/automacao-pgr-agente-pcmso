@@ -263,7 +263,31 @@ def test_termo_nao_reconhecido_sem_grupo_lido_sai_conferir(vocab: dict[str, Any]
 def test_termo_nao_reconhecido_sem_nivel_sai_conferir_mesmo_acidente(vocab: dict[str, Any]) -> None:
     # Reversão: tirar o ramo `nivel is None` de `_criterio_termo` — ACIDENTE sem nível
     # cai em não consta.
-    s = _do_termo(vocab, _termo("Ausência de agente nocivo", "ACIDENTE", None))
+    # O exemplo era "Ausência de agente nocivo", que passou a ser declaração de ausência
+    # (R-ASO-07, 10/10/2026); trocado por termo neutro, mesma assertiva.
+    s = _do_termo(vocab, _termo("Máquinas e equipamentos", "ACIDENTE", None))
+    assert s.veredito == "CONFERIR"
+
+
+def test_declaracao_de_ausencia_de_agente_nao_consta_e_permite_inexistencia(vocab: dict[str, Any]) -> None:
+    # R-ASO-07, NR-07 7.5.19.1 "c": a linha "BIOLOGICO | Ausência de agente nocivo | NA |
+    # NÃO DEFINIDO" (Porto Araras I, WV Maldi) não é fator de risco. Reversão: apagar o
+    # `if _DECLARACAO_AUSENCIA.match` de `_criterio_termo` — volta a sair conferir (sem
+    # nível) e a inexistência do GHE deixa de ser sugerida.
+    declaracao = RiscoPGR(
+        tipo="BIOLOGICO", agente=None, quantificacao=None, severidade=None,
+        termo="Ausência de agente nocivo", nivel_pgr="NÃO DEFINIDO",
+    )
+    relatorio = _relatorio(vocab, riscos_pgr=(declaracao,))
+    (s,) = relatorio.riscos
+    assert (s.veredito, _regras(s)) == ("NAO_CONSTA", {"R-ASO-07"})
+    assert relatorio.inexistencia is True
+
+
+def test_termo_que_so_cita_ausencia_de_agente_segue_a_regra_geral(vocab: dict[str, Any]) -> None:
+    # Só a declaração que começa por "Ausência de agente" conta. Reversão: `.search` no
+    # lugar de `.match` em `_criterio_termo` — este químico BAIXO sairia não consta.
+    s = _do_termo(vocab, _termo("Limpeza na ausência de agente de ventilação", "QUIMICO", "BAIXO"))
     assert s.veredito == "CONFERIR"
 
 

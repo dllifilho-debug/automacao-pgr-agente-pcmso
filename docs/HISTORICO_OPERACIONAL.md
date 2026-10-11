@@ -12753,3 +12753,20 @@ Condições de reabertura em PENDENCIAS.
 
 **Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
 `test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
+
+## Sessão (branch `claude/busy-thompson-lepmze` recriada sobre `main 3ef348a`, pós-merge do PR #482) — 10-11/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: "Ausência de agente nocivo" no relatório do ASO (emenda 4 em D-ARQ-91)
+
+**Medido.** Cadeia sem IA em 7 PGRs: a linha "Ausência de agente nocivo | NA | NÃO DEFINIDO" em Porto Araras I (6 GHEs) e WV
+Maldi (13), 19 CONFERIR no relatório e 21 pendências de vocabulário; nos outros 5, nenhuma. Quatro soluções (A–D); a A
+aprovada pelo Diovanni.
+
+**Entrega.** `sugestao_aso.py`: `_DECLARACAO_AUSENCIA` e o ramo em `_criterio_termo` (R-ASO-07, NÃO CONSTA com motivo).
+PROTOCOLO v138, DECISOES v263 (emenda 4 em D-ARQ-91), `INDICE_DARQ.md` regenerado, PENDENCIAS.
+
+**Medido depois.** `main` × branch nos 7 PGRs: 19 CONFERIR → NÃO CONSTA, nenhuma outra mudança; inexistência inalterada.
+
+**Verificação.** 1ª execução do arquivo: 1 falha — `test_termo_nao_reconhecido_sem_nivel_sai_conferir_mesmo_acidente` usava
+"Ausência de agente nocivo" como exemplo de termo sem nível; o exemplo passou a "Máquinas e equipamentos", mesma assertiva
+(autorizado pelo Diovanni). 2 testes novos; varredura inversa 3 reversões, 3/3, inclusive a do teste antigo. Suíte
+completa, árvore parada: **1874 → 1876 passed, 6 skipped** (1382 s). mypy no alvo canônico: limpo, 59 arquivos.
+`test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: só o documento baixado muda.

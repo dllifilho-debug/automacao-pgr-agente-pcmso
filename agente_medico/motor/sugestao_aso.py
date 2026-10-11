@@ -9,6 +9,7 @@ depois, como valida a matriz.
 """
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -55,6 +56,10 @@ _NOTA_MODERADO = "moderado ou acima consta (e-mail da Dra. Carolini; NR-07 item 
 # vibração, químicos, poeiras, cancerígenos, agentes sem LT) alcança.
 _GRUPOS_SEM_EXCECAO = frozenset({"ACIDENTE", "ERGONOMICO"})
 _MARCAS_APTIDAO = ("altura", "confinad")
+
+# R-ASO-07: linha em que o PGR declara não haver agente no grupo ("BIOLOGICO | Ausência de
+# agente nocivo | NA | NÃO DEFINIDO | Não aplicável" — Porto Araras I, WV Maldi).
+_DECLARACAO_AUSENCIA = re.compile(r"\s*aus[eê]ncia\s+de\s+agente", re.IGNORECASE)
 
 # R-ASO-06 aplicada ao inventário psicossocial (emenda 3 de D-ARQ-91): o inventário é um
 # só para o PGR inteiro (D-ARQ-49 P2), então a linha sai igual em todo GHE.
@@ -179,6 +184,12 @@ def _criterio_termo(risco_pgr: RiscoPGR, niveis: Mapping[str, Any]) -> Criterio:
     acima consta; abaixo disso, acidente e ergonômico não constam (nenhuma exceção do
     e-mail os alcança); químico, físico e biológico baixos podem cair numa exceção que o
     app não decide sem o agente — conferir. Grupo não lido (rotas da IA): conferir."""
+    if _DECLARACAO_AUSENCIA.match(risco_pgr.termo or ""):
+        return Criterio(
+            "NAO_CONSTA", "R-ASO-07",
+            "o PGR declara ausência de agente nocivo nesse grupo — não é fator de risco identificado e "
+            "classificado (NR-07 item 7.5.19.1 \"c\")",
+        )
     achado = _nivel(risco_pgr.nivel_risco, risco_pgr.nivel_pgr, niveis)
     grupo = risco_pgr.tipo
     if achado is None:

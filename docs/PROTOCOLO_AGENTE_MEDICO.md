@@ -1303,6 +1303,8 @@ Consta com medição acima do nível de ação (químico: 50% do LT da NR-15 Ane
 
 Quando todo risco do GHE sai NÃO CONSTA, o relatório sugere a inexistência de perigos ou fatores de risco que necessitem de controle médico. Havendo um CONFERIR, a inexistência não é sugerida.
 
+**Declaração de ausência de agente (emenda 4 de D-ARQ-91, 10/10/2026).** Linha do PGR cujo termo começa por "Ausência de agente" (ex.: "BIOLOGICO | Ausência de agente nocivo | NA | NÃO DEFINIDO | Não aplicável", Porto Araras I e WV Maldi) sai NÃO CONSTA por esta regra: o PGR declara que não há agente no grupo, não identifica nem classifica fator de risco (NR-07 item 7.5.19.1 "c"). Antes saía CONFERIR por falta de nível. Termo que só cita a expressão no meio do texto segue a `R-ASO-06`.
+
 ---
 
 ## Histórico de revisões
@@ -1446,3 +1448,4 @@ Quando todo risco do GHE sai NÃO CONSTA, o relatório sugere a inexistência de
 | v135 | 08/10/2026 | Branch `claude/fervent-shannon-1nq8hw`, recriada sobre `main 6572b9b` (IMPLEMENTAÇÃO, decisão do Diovanni — opção B): **`R-ESP-05` criada** — produtos domissanitários sem espirometria de rotina (NR-07 Anexo III item 3.2); a matriz leva a condição em observação, que sai quando outra regra pede o exame. Agente `domissanitarios` em `agentes.yaml`. |
 | v136 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 1702f49` (IMPLEMENTAÇÃO, decisão do Diovanni — solução D, emenda em D-ARQ-94): **`R-PSY-05` DEPRECATED, sucedida por `R-PSY-08`** — Saúde Mental só com inventário psicossocial avaliado e fator moderado ou acima (folha da Dra. Carolini; matriz Sinduscon 27.08.26). R-PSY-06 e R-PSY-07 passam a ler o inventário avaliado (linha de fator com nível), não a citação do FRPRT. Na altura, Saúde Mental com o inventário avaliado em qualquer nível (folha). Medido: 4 de 14 PGRs marcados só citam. |
 | v137 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 2ea334e` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A, emenda 3 de D-ARQ-91): **`R-ASO-06`** — fatores de risco psicossociais do inventário avaliado entram no relatório do ASO em todo GHE (moderado ou acima consta; abaixo não consta). Medido: 29 GHEs com inexistência sugerida apesar da Saúde Mental na matriz passam a 0 nos 6 PGRs determinísticos. Nenhuma regra de emissão alterada. |
+| v138 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 3ef348a` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A, emenda 4 de D-ARQ-91): **`R-ASO-07`** — a linha "Ausência de agente…" do PGR sai NÃO CONSTA (declaração de ausência, não fator de risco), em vez de CONFERIR. Medido: 19 linhas em 2 PGRs determinísticos (Porto Araras I 6, WV Maldi 13), nada mais muda. Nenhuma regra de emissão alterada. |
