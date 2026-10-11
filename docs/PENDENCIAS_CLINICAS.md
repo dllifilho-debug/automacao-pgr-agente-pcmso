@@ -4310,3 +4310,13 @@ Mental em espaço confinado sem inventário.
 
 **Status:** ABERTA — "Ausência de agente nocivo", "Mecânico" como grupo, campos de data do formulário, linha psicossocial
 no app pela rota da IA.
+
+**"Ausência de agente nocivo" — RESOLVIDO (10/10/2026, solução A, emenda 4 de D-ARQ-91).** A linha "BIOLOGICO | Ausência de
+agente nocivo | NA | NÃO DEFINIDO | Não aplicável" (Porto Araras I, 6 GHEs; WV Maldi, 13) saía CONFERIR por falta de nível.
+Passa a NÃO CONSTA pela R-ASO-07, com motivo explícito, e continua no relatório: o PGR declara ausência de agente, não
+identifica nem classifica fator de risco (NR-07 7.5.19.1 "c"). Medido: 19 CONFERIR → NÃO CONSTA, nada mais muda. Fica:
+as 21 pendências de vocabulário do mesmo termo na tela (solução B, sem decisão); rota da IA (Vistamerica 2026, Auro)
+`[A MEDIR — no app]`.
+
+**Status:** ABERTA — "Mecânico" como grupo, campos de data do formulário, rodada no app pela rota da IA (linha psicossocial
+e "Ausência de agente nocivo").
