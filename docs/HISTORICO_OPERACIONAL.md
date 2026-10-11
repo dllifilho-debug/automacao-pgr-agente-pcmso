@@ -12739,3 +12739,17 @@ v262 (emenda 3 em D-ARQ-91), `INDICE_DARQ.md` regenerado, PENDENCIAS.
 **Verificação.** 4 testes em `test_sugestao_aso.py`; varredura inversa 5 reversões, 4/4 derrubados. Suíte completa, árvore
 parada: **1870 → 1874 passed, 6 skipped** (1376 s; a base 1870 é a registrada no PR #479). mypy no alvo canônico: limpo, 59
 arquivos. `test_gerar_indice_darq.py` 6 passed. Smoke visual não rodado: a linha nova só sai no documento baixado.
+
+## Sessão (branch `claude/busy-thompson-lepmze` recriada sobre `main 6e2bff3`, pós-merge do PR #481) — 10-11/10/2026 — MEDIÇÃO: item 1 da folha, pergunta (c) e leituras incertas
+
+**Medido.** Leitor do app no acervo: espaço confinado como risco de GHE em 3 PGRs (Viverde V02, Vistamerica Ver.02, EURO
+Setor C), todos sem inventário psicossocial; nos outros 21 com "confinad", só texto padrão. Matrizes das médicas Viverde
+06.03.2025 e Vistamerica 08.12.25: Avaliação Psicossocial no GHE de espaço confinado, Saúde Mental 0 vezes — o mesmo que a
+folha e a R-PSY-06. Nos 10 inventários avaliados, o maior fator é MODERADO.
+
+**Decisão.** Pergunta (c) e as leituras "≥" e "superior" fechadas sem código (decisão do Diovanni, após revisão das
+alternativas: Saúde Mental pela "aptidão mental" da NR-33 — contra o nível 2; alerta no memorial — sem dúvida real).
+Condições de reabertura em PENDENCIAS.
+
+**Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
+`test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.

@@ -4296,3 +4296,17 @@ Vistamerica 2026) `[A MEDIR — no app]`.
 
 **Status:** ABERTA — item 1 da folha (pergunta (c) e leituras incertas), "Ausência de agente nocivo", "Mecânico" como
 grupo, campos de data do formulário, linha psicossocial no app pela rota da IA.
+
+**Item 1 da folha, pergunta (c) e leituras incertas — RESOLVIDO sem código (10/10/2026, decisão do Diovanni).** Medido com o
+leitor do app: "confinad" em 24 PGRs, em 21 só texto padrão (lista de NRs, treinamento, cadastro); espaço confinado como
+risco de GHE em 3, todos sem inventário psicossocial — Viverde V02 (GHE 09, manta asfáltica), Vistamerica Ver.02 (GHE 12,
+manta asfáltica) e EURO Setor C ("Operações em espaço confinado", Moderado). Com fator moderado, a R-PSY-08 já dá Saúde
+Mental a todo GHE; a (c) só mudaria esses 3. Nível 1: NR-33 33.5.19.1 pede aptidão física e mental sem prescrever exame.
+Nível 2: a folha ("Espaço Confinado = Avaliação Psicossocial") e as matrizes Viverde 06.03.2025 (validada pela Dra.
+Carolini) e Vistamerica 08.12.25 — Avaliação Psicossocial, Saúde Mental 0 vezes; EURO sem matriz. O app já faz isso
+(R-PSY-06). Leituras: "≥" — nos 10 inventários o maior fator é MODERADO, "≥" e "=" dão a mesma saída; "superior" está no
+ramo da altura "em qualquer nível", não muda saída. Reabre com fator ALTO num inventário ou matriz das médicas com Saúde
+Mental em espaço confinado sem inventário.
+
+**Status:** ABERTA — "Ausência de agente nocivo", "Mecânico" como grupo, campos de data do formulário, linha psicossocial
+no app pela rota da IA.
