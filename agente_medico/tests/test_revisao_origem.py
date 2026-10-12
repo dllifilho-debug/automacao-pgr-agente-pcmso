@@ -206,7 +206,7 @@ def test_pagina_matriz_mostra_revisao_com_origem_e_decreto_3048(
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
     next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste")
     next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000")
-    at.text_input[len(at.text_input) - 1].set_value((date.today() - timedelta(days=30)).isoformat())
+    next(d for d in at.date_input if d.label == "Data de emissão do PGR").set_value(date.today() - timedelta(days=30))
     at.checkbox[0].set_value(True)
     at.button[0].click().run()
     assert not at.exception

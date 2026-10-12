@@ -128,7 +128,7 @@ def test_cor_do_passo_acompanha_o_icone_com_bloqueio() -> None:
     # ficaria com a cor de "ativo" enquanto a etapa está bloqueada.
     at = AppTest.from_function(pagina_matriz)
     at.run()
-    _submeter_formulario(at, validade=(date.today() + timedelta(days=200)).isoformat())
+    _submeter_formulario(at, validade=date.today() + timedelta(days=200))
 
     assert not at.exception
     assert _passos(at)["passo_1_bloqueado"] == "⛔ **1. PGR e identificação**"

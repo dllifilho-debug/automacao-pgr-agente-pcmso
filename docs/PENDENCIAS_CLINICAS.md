@@ -4340,3 +4340,8 @@ digitado sai DD/MM/AAAA. "Data de emissão do PGR (AAAA-MM-DD)" intocada (valida
 
 **Status:** ABERTA — rodada no app pela rota da IA (linha psicossocial e "Ausência de agente nocivo": Quasar, CMO Aurora ×2,
 Vistamerica 2026, Auro).
+
+**Campos de data — complemento (11/10/2026, decisão do Diovanni).** "Data de emissão do PGR" também vira calendário
+(dd/mm/aaaa), para as datas completas da tela ficarem no mesmo formato. A data escolhida vai em ISO à mesma validação da
+R-PGR-06 (intocada); a mensagem de emissão no futuro mostra DD/MM/AAAA; calendário vazio pede a data. Tela de envelope e
+linha de comando inalteradas.

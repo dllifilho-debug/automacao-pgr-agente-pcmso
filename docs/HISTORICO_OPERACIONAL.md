@@ -12797,3 +12797,14 @@ mês/ano, 18 sem data. Quatro soluções (A–D); a B aprovada pelo Diovanni.
 novo (rodapé ISO). Varredura inversa 3 reversões (rodapé cru; cabeçalho com a data crua; "Data" de volta a texto), 3/3.
 Suíte completa, árvore parada: **1876 → 1877 passed, 6 skipped** (1281 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke
 visual (`--chromium /opt/pw-browsers/chromium-1194/chrome-linux/chrome`): ok, 6/6 telas (desktop e mobile).
+
+**Complemento (mesma branch, 11/10/2026) — "Data de emissão do PGR" em calendário.** Pergunta do Diovanni: "Data" com dia
+primeiro e a emissão com ano primeiro confundem. Emissão em `st.date_input` (DD/MM/YYYY), convertida a ISO antes de
+`montar_envelope` (R-PGR-06 intocada); erro de emissão futura com `data_exibicao`; vazio → "Informe a data de emissão do PGR".
+Adaptação autorizada em duas etapas, depois de recontagem: helper `_preencher_emissao`/`_submeter_formulario` e 8 pontos de
+teste em 5 arquivos passam a preencher o calendário (o rótulo esperado de `test_campo_pede_a_data_de_emissao_do_pgr` perde
+o "(AAAA-MM-DD)"); `scripts/smoke_visual.py` digita no campo segmentado (clique no grupo, dígitos, Esc — o calendário aberto
+cobria o checkbox). Erro de implementação pego pelos testes antes do commit: `data_exibicao` sem import dentro de
+`pagina_matriz` (o AppTest roda a função isolada; no app real o import do módulo cobria). 2 testes novos (mensagem em
+DD/MM; emissão vazia); varredura inversa 3 reversões, 3/3 (voltar a texto derruba 30). Suíte completa, árvore parada:
+**1877 → 1879 passed, 6 skipped** (1282 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke visual: ok, 6/6.

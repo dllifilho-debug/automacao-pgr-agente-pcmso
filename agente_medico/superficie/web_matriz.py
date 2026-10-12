@@ -853,6 +853,7 @@ def pagina_matriz() -> None:
     from agente_medico.superficie.memorial_matriz import (
         alertas_do_ghe,
         contaminantes_a_confirmar,
+        data_exibicao,
         montar_memorial,
         renderizar_memorial_docx,
         resumos_do_protocolo,
@@ -913,7 +914,7 @@ def pagina_matriz() -> None:
     # na ordem de EXECUÇÃO de sempre: callbacks, leitura do cache e returns
     # antecipados não mudam. AppTest indexa widgets pela posição na tela, então
     # esta ordem é contrato dos testes (file_uploader[0] = PGR, button[0] =
-    # Gerar matriz; antes de gerar a matriz, text_input[-1] = validade).
+    # Gerar matriz; a emissão é o date_input "Data de emissão do PGR").
     indicador = st.empty()
     # `key=` só dá a classe CSS `st-key-<key>` usada em estilos.py; não é widget.
     etapa_pgr = st.container(border=True, key="etapa_pgr")
@@ -1306,7 +1307,8 @@ def pagina_matriz() -> None:
 
             with col_pgr:
                 st.markdown("**Dados do PGR**")
-                validade = st.text_input("Data de emissão do PGR (AAAA-MM-DD)")
+                # Calendário, como "Data": as datas completas da tela no mesmo formato (10/10/2026).
+                emissao = st.date_input("Data de emissão do PGR", value=None, format="DD/MM/YYYY")
                 st.caption(
                     "Data em que o PGR foi emitido, não a de vencimento. PGR emitido há "
                     "2 anos ou mais é rejeitado (R-PGR-06)."
@@ -1327,10 +1329,15 @@ def pagina_matriz() -> None:
             bloqueio = "preencha médico coordenador e CRM na etapa 1"
             return
 
+        if emissao is None:
+            etapa_pgr.error("Informe a data de emissão do PGR (R-PGR-06).")
+            bloqueio = "corrija a data de emissão do PGR na etapa 1"
+            return
+        validade = emissao.isoformat()
         try:
             envelope = montar_envelope(validade, assinatura)
         except EmissaoFuturaError:
-            etapa_pgr.error(MENSAGEM_EMISSAO_FUTURA.format(validade))
+            etapa_pgr.error(MENSAGEM_EMISSAO_FUTURA.format(data_exibicao(validade)))
             bloqueio = "corrija a data de emissão do PGR na etapa 1"
             return
         except ValueError:

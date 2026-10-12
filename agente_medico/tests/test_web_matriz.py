@@ -335,11 +335,15 @@ def test_troca_de_cabecalho_regenera_documento_sem_reprocessar(
 
 # Emissão relativa a hoje: data futura é recusada (EmissaoFuturaError) e data
 # fixa no passado envelheceria até cair em R-PGR-06.
-_EMISSAO_RECENTE = (date.today() - timedelta(days=30)).isoformat()
+_EMISSAO_RECENTE = date.today() - timedelta(days=30)
+
+
+def _preencher_emissao(at: AppTest, emissao: date) -> AppTest:
+    return next(d for d in at.date_input if d.label == "Data de emissão do PGR").set_value(emissao)
 
 
 def _submeter_formulario(
-    at: AppTest, validade: str = _EMISSAO_RECENTE, campos: Mapping[str, str | date] | None = None
+    at: AppTest, validade: date = _EMISSAO_RECENTE, campos: Mapping[str, str | date] | None = None
 ) -> None:
     # Campos do `st.form` sem `.run()` entre eles: o navegador só envia o
     # formulário no submit, e o AppTest do Streamlit 1.65 passou a imitar isso —
@@ -355,7 +359,7 @@ def _submeter_formulario(
             next(t for t in at.text_input if t.label == rotulo).set_value(valor)
     next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste")
     next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000")
-    at.text_input[len(at.text_input) - 1].set_value(validade)
+    _preencher_emissao(at, validade)
     at.checkbox[0].set_value(True)
     at.button[0].click().run()
 
@@ -373,10 +377,41 @@ def test_emissao_no_futuro_mostra_erro_proprio_e_nao_processa(
     monkeypatch.setattr("agente_medico.superficie.web_matriz.preparar_pgr_hidratado", _preparar_espiao)
     at = AppTest.from_function(pagina_matriz)
     at.run()
-    _submeter_formulario(at, validade=(date.today() + timedelta(days=200)).isoformat())
+    _submeter_formulario(at, validade=date.today() + timedelta(days=200))
 
     assert not at.exception
     assert any("Data de emissão no futuro" in e.value for e in at.error)
+    assert chamadas == []
+
+
+def test_emissao_no_futuro_mostra_a_data_em_dia_mes_ano() -> None:
+    # Reversão que mata: formatar a mensagem com `validade` (ISO) em vez de
+    # `data_exibicao(validade)` — a tela volta a mostrar "2027-…", o formato que o
+    # calendário deixou de usar (10/10/2026).
+    futura = date.today() + timedelta(days=200)
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at, validade=futura)
+
+    assert any(futura.strftime("%d/%m/%Y") in e.value for e in at.error)
+
+
+def test_sem_data_de_emissao_pede_a_data_e_nao_processa(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Reversão que mata: apagar o `if emissao is None` — `None.isoformat()` derruba a
+    # tela com exceção em vez de pedir a data.
+    chamadas: list[int] = []
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado", lambda *a, **k: chamadas.append(1)
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    next(t for t in at.text_input if t.label == "Médico coordenador").set_value("Dra. Teste")
+    next(t for t in at.text_input if t.label == "CRM").set_value("CRM-GO 0000")
+    at.button[0].click().run()
+
+    assert not at.exception
+    assert any("Informe a data de emissão do PGR" in e.value for e in at.error)
     assert chamadas == []
 
 
@@ -410,7 +445,7 @@ def test_sem_medico_coordenador_e_crm_nao_processa_o_pgr(
     at = AppTest.from_function(pagina_matriz)
     at.run()
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
-    at.text_input[len(at.text_input) - 1].set_value(_EMISSAO_RECENTE).run()
+    _preencher_emissao(at, _EMISSAO_RECENTE).run()
     at.checkbox[0].set_value(True).run()
     at.button[0].click().run()
 
@@ -427,7 +462,7 @@ def test_campo_pede_a_data_de_emissao_do_pgr() -> None:
     at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
 
     assert not at.exception
-    assert any(t.label == "Data de emissão do PGR (AAAA-MM-DD)" for t in at.text_input)
+    assert any(d.label == "Data de emissão do PGR" for d in at.date_input)
 
 
 def test_status_rejeitado_mostra_motivo_e_nao_oferece_download(
@@ -1369,8 +1404,7 @@ def test_aviso_de_anexo_descartado_aparece_uma_vez(monkeypatch: pytest.MonkeyPat
     at.multiselect(key="ghe_destino_fds.pdf").set_value(["GHE-01"]).run()
     at.button(key="anexar_fds_fds.pdf").click().run()
 
-    validade = next(t for t in at.text_input if t.label == "Data de emissão do PGR (AAAA-MM-DD)")
-    validade.set_value((date.today() - timedelta(days=60)).isoformat())
+    _preencher_emissao(at, date.today() - timedelta(days=60))
     next(b for b in at.button if b.label == "Gerar matriz").click().run()
     assert any("fds (GHE-01)" in w.value for w in at.warning)
 
