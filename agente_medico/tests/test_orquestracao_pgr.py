@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import json
 from datetime import date
 from pathlib import Path
@@ -621,7 +622,20 @@ def test_preparar_ghes_viverde_real_familia_nao_reconhecida_aciona_fallback_llm(
     aprovados, pendencias = preparar_ghes(_PDF_VIVERDE, mock, _CLIENTE_CARD_NUNCA_CHAMADO)
 
     assert len(mock.blocos_recebidos) > 0
-    assert aprovados == tuple(_GHE_VALIDO for _ in mock.blocos_recebidos)
+    # Nome pelo cabeçalho quando há título (nota de 12/10/2026 em D-ARQ-49):
+    # no Viverde, só os 6 últimos blocos ("GHE 01- Engenharia...") trazem.
+    assert [dataclasses.replace(g, nome=_GHE_VALIDO.nome) for g in aprovados] == [
+        _GHE_VALIDO for _ in mock.blocos_recebidos
+    ]
+    assert [g.nome for g in aprovados[-6:]] == [
+        "Engenharia planejamento de obra",
+        "Segurança do trabalho",
+        "Execução de obra",
+        "Supervisão Rejunte/limpeza",
+        "Administração de campo",
+        "Almoxarifado",
+    ]
+    assert {g.nome for g in aprovados[:-6]} == {_GHE_VALIDO.nome}
     tipos_pendencia = [p.tipo for p in pendencias]
     assert "familia_nao_medida" in tipos_pendencia
     pendencia_familia = next(p for p in pendencias if p.tipo == "familia_nao_medida")

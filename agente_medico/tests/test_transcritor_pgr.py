@@ -6,7 +6,7 @@ import pytest
 
 from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe, extrair_texto_pgr, recortar_blocos_ghe
 from agente_medico.motor.tipos import GHEVerbatim, Pendencia, RiscoVerbatim
-from agente_medico.motor.transcritor_pgr import gate_forma_ghe, transcrever_ghes
+from agente_medico.motor.transcritor_pgr import TranscritorGHE, gate_forma_ghe, transcrever_ghes
 
 CAMINHO_PGR = Path("matrizes_originais/PGR VIVERDE V02 - 03.02.25.pdf")
 
@@ -165,6 +165,84 @@ def test_transcrever_ghes_alinhamento_quebrado_levanta_value_error() -> None:
 
     assert "2" in str(exc.value)
     assert "3" in str(exc.value)
+
+
+# ---------------------------------------------------------------------------
+# Nota de 12/10/2026 em D-ARQ-49 — nome do GHE pelo título do cabeçalho do
+# bloco; sem título no cabeçalho, fica o da IA.
+# ---------------------------------------------------------------------------
+
+_SELECIONE = "-- Selecione o Setor --"
+
+
+@pytest.mark.parametrize("com_lote", [False, True], ids=["unitario", "lote"])
+def test_transcrever_ghes_nome_vem_do_titulo_do_cabecalho(com_lote: bool) -> None:
+    # Reversão que mata: tirar _nome_pelo_cabecalho do return de
+    # transcrever_ghes (os dois ids) ou aplicá-lo só no ramo unitário (id
+    # "lote"); trocar dataclasses.replace por GHEVerbatim(nome=titulo,
+    # cargos=(), riscos=()) mata pela igualdade de cargos/riscos.
+    bloco = f"GHE 07 - CREMALHEIRA\n{_SELECIONE}\nOperador de Elevador"
+    da_ia = _ghe(nome=_SELECIONE, cargos=("Operador de Elevador",), riscos=(_risco(),))
+    cliente: TranscritorGHE
+    if com_lote:
+        cliente = MockTranscritorGHEEmLote(resultado=(da_ia,))
+    else:
+        cliente = MockTranscritorGHESemLote({bloco: da_ia})
+
+    saida = transcrever_ghes([bloco], cliente)
+
+    assert saida == (_ghe(nome="CREMALHEIRA", cargos=da_ia.cargos, riscos=da_ia.riscos),)
+
+
+def test_transcrever_ghes_cabecalho_sem_titulo_mantem_nome_da_ia() -> None:
+    # Reversão que mata: tirar o `if not titulo: return ghe` de
+    # _nome_pelo_cabecalho — o nome vira "" e o GHE seria reprovado no gate.
+    bloco = "GHE 12\nSETOR/FUNÇÃO Pedreiro/Servente"
+    da_ia = _ghe(nome="Pedreiro/Servente")
+
+    saida = transcrever_ghes([bloco], MockTranscritorGHESemLote({bloco: da_ia}))
+
+    assert saida == (da_ia,)
+
+
+def test_transcrever_ghes_nome_vazio_da_ia_segue_vazio_para_o_gate() -> None:
+    # Reversão que mata: tirar o `if not ghe.nome.strip(): return ghe` de
+    # _nome_pelo_cabecalho — o GHE que a IA não leu ganharia o título e
+    # passaria no gate de forma sem nenhum risco.
+    bloco = "GHE 07 - CREMALHEIRA\nOperador de Elevador"
+    vazio = _ghe(nome="")
+
+    saida = transcrever_ghes([bloco], MockTranscritorGHEEmLote(resultado=(vazio,)))
+
+    assert saida == (vazio,)
+    assert gate_forma_ghe(saida)[0] == ()
+
+
+CAMINHO_VISTAMERICA_2026 = Path(
+    "matrizes_originais/PGR_CMO_CONSTRUTORA_RESIDENCIAL_VISTAMERICA_2026-07-28.pdf"
+)
+
+
+@pytest.mark.skipif(not CAMINHO_VISTAMERICA_2026.exists(), reason="PGR Vistamerica 2026 ausente")
+def test_vistamerica_2026_ghes_07_a_12_saem_com_o_titulo_do_pdf() -> None:
+    # Achado da rodada de 12/10/2026: a IA devolveu "-- Selecione o Setor --"
+    # como nome dos GHEs 07 a 12. Reversão que mata: a mesma do teste
+    # unitário acima (tirar _nome_pelo_cabecalho do return).
+    blocos = recortar_blocos_ghe(extrair_texto_pgr(CAMINHO_VISTAMERICA_2026))
+    mock = MockTranscritorGHE(padrao=_ghe(nome=_SELECIONE, riscos=(_risco(),)))
+
+    nomes = [g.nome for g in transcrever_ghes(blocos, mock)]
+
+    assert len(nomes) == 28
+    assert nomes[6:12] == [
+        "CREMALHEIRA",
+        "SINALIZAÇÃO DE GRUA",
+        "PRODUÇÃO 02",
+        "MANUTENÇÃO",
+        "SESMT",
+        "SUPERVISÃO DE EQUIPES",
+    ]
+    assert _SELECIONE not in nomes
 
 
 def test_gate_forma_ghe_aprova_ghe_valido() -> None:

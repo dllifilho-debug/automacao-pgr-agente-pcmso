@@ -1647,6 +1647,20 @@ determinística em `transcrever_ghes` (`_restringir_avaliacao_a_escala_pxs`): n�
 em bloco com a legenda "Irrelevante" — medido 109/109 blocos aceitos na escala P×S e 0/318 na de
 escore, onde o padrão S·P·NÍVEL casaria falsos níveis. Nenhuma cláusula alterada.]
 
+[NOTA (branch `claude/wizardly-wozniak-whgb0q`, sobre `main 2d51b37`, 12/10/2026; decisão do Diovanni — solução A)
+— na rota LLM, o `nome` do GHE passa a vir do título da linha-âncora do bloco ("GHE 07 - CREMALHEIRA"), a 1ª linha
+do bloco por construção de `recortar_blocos_ghe`, lido por `extrair_titulo_ancora` — o mesmo da rota determinística,
+movido de `parser_familia_consciente` para `extracao_pgr`, ao lado de `eh_cabecalho_ghe`. Cabeçalho sem título ("GHE
+12", "INVENTÁRIO DE RISCO GHE 12", "INFORMAÇÕES SOBRE CARGOS/FUNÇÕES NN") mantém o nome da IA; nome vazio da
+IA (bloco não transcrito, faltante no lote) segue vazio, para `gate_forma_ghe` reprovar; cargos e riscos intocados. Guarda em `transcrever_ghes` (`_nome_pelo_cabecalho`), depois da IA, nos caminhos unitário e em lote.
+Origem: Vistamerica 2026, campo de setor não preenchido ("-- Selecione o Setor --") lido pela IA como nome em 6 de 28
+GHEs. Medido no acervo (leitor do app): 15 PGRs chegam à IA nesta rota — 11 com título no cabeçalho de todos os blocos,
+4 sem (ALT T65 2024-2026, EURO Setor C, Ricco 2026 Administração; Viverde em 25 de 31 blocos); Ricco 2025
+Administração para antes, no gate de densidade. Os títulos dos 11 saem limpos. Dois PCMSO do acervo (Vistamerica
+08.12.25, R78 Naturia) também cairiam nesta rota se enviados como PGR, e neles a linha "GHE NN -" mistura colunas da
+tabela de exames — não são entrada do app. Afasta a alternativa de corrigir pelo prompt: a IA não é reprodutível
+(rodada de 12/10/2026). Nenhuma cláusula alterada.]
+
 *Parte 4 — princípio do gabarito + mecanismo adiado por medição.* Gabarito: `pgr_viverde.py` ↔ PGR Viverde real (par em disco), campos verificáveis deterministicamente ancoram (`id`/`nome` de GHE; presença de cargos/riscos por GHE), LLM fixado/mockado, **nunca testa API**. Como no lado-FDS (D-ARQ-42 P4), campos texto-livre-de-LLM (nome cru de cargo/risco) NÃO são gabaritáveis por `==` — critério de aceitação próprio. **ADIADO POR MEDIÇÃO** (molde D-ARQ-42→003.AN e D-ARQ-41 P3): o mecanismo fino `termo→slug` — as 3 saídas candidatas de D-ARQ-41 P3 [(a) LLM verbatim + resolvedor-agressivo + sinônimos; (b) LLM normaliza para termo-conceito + resolvedor conceito→slug; (c) híbrido dicionário + candidato-LLM de baixa confiança]; a granularidade da fronteira (quanto o LLM normaliza); o prompt; o parse-doc de `.docx` (XML de tabela) vs. `.pdf`. DT-003L-01 mapeou só as formas QUÍMICAS do PGR; a disposição de GHE/cargo/risco/quantificação em PGR real ainda não foi medida — a medição é sessão CONHECIMENTO própria. Adiamento por dado ausente, não indecisão. `[DERIVADO — molde D-ARQ-42 P4 / D-ARQ-41 P3; DT-003L-01]`.
 
 **Consequência.**
@@ -5304,3 +5318,4 @@ raciocínio pedida por ele.
 | v261 | 10/10/2026 | Branch `claude/brave-galileo-c7m46o`, sobre `main 43a9047` (IMPLEMENTAÇÃO, decisão do Diovanni — opção A revisada): **emenda em `D-ARQ-65`** — AGENTE em ~104/~113/~122, categoria em caixa mista lida só na coluna GRUPO, recusa (vai para a IA) com linhas de nível sem risco lido, grupo desconhecido em linha com nível ou valor na coluna quantitativa. Medido nos 35 PGRs: 3 determinísticos iguais à `main`; ALT 65, SPE QD. E-13, Vila Brasil 06.10.26 e WV Maldi saem da IA; Quasar e Vistamerica 2026 seguem nela. |
 | v262 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 2ea334e` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A): **emenda 3 em `D-ARQ-91`** — fatores psicossociais do inventário avaliado entram no relatório do ASO em todo GHE (R-ASO-06). Medido nos 6 PGRs determinísticos: inexistência 29 → 0, +1 CONSTA por GHE, nenhum outro veredito muda. |
 | v263 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 3ef348a` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A): **emenda 4 em `D-ARQ-91`** — "Ausência de agente nocivo" sai NÃO CONSTA (R-ASO-07), não CONFERIR. Medido: 19 linhas em 2 PGRs determinísticos, nada mais muda. |
+| v264 | 12/10/2026 | Branch `claude/wizardly-wozniak-whgb0q`, sobre `main 2d51b37` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A): **nota em `D-ARQ-49`** — na rota LLM, o nome do GHE vem do título do cabeçalho do bloco (`extrair_titulo_ancora`, movido para `extracao_pgr`); sem título, fica o da IA. Corrige os 6 GHEs "-- Selecione o Setor --" da Vistamerica 2026. |

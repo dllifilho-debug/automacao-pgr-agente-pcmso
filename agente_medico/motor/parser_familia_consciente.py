@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import NamedTuple, Optional
 
-from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe
+from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe, extrair_titulo_ancora
 from agente_medico.motor.io_pdf import PaginaLida, paginas_liberadas
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 
@@ -106,32 +106,6 @@ def _agrupar_linhas(palavras: Sequence[PalavraPDF]) -> list[_Linha]:
             topo_atual = p.top
         linhas[-1].append(p)
     return [_Linha(tuple(sorted(grupo, key=lambda p: p.x0))) for grupo in linhas]
-
-
-# Extração do título — NÃO duplica o reconhecimento de âncora (eh_cabecalho_ghe,
-# extracao_pgr.py, D-ARQ-57 peça 1); só recorta o que sobra depois do "GHE NN"
-# reconhecido. Separador de layout (espaço/traço/NUL) imediatamente após o
-# número é descartado; U+0000 embutido no título em si (ex.: "HIDRO\x00SANITÁRIAS",
-# GHE 10) SOBREVIVE — não é normalização, é o mesmo glifo-de-fonte já
-# documentado em D-ARQ-57 peça 1 / 003.DS.
-_PADRAO_TITULO_ANCORA = re.compile(r"GHE:?\s*\d+\s*[-\x00]\s*(?P<titulo>.+)")
-# Forma 6 de eh_cabecalho_ghe (separador ANTES do número, título pode vir só
-# após espaço): "GHE - 14 PINTURA", "GHE\x00 01 \x00 ADMINISTRAÇÃO 01" —
-# DT-(sessão claude/hopeful-newton-yjv3k7)-01. Padrão à parte para não
-# alargar o de cima, que exige separador depois do número.
-_PADRAO_TITULO_ANCORA_SEPARADOR_ANTES = re.compile(
-    r"GHE\s*[-\x00]\s*\d+(?:\s*[-\x00]\s*|\s+)(?P<titulo>.+)"
-)
-
-
-def _extrair_titulo_ancora(linha_texto: str) -> str:
-    """nome = resto da linha-âncora, VERBATIM (U+0000 preservado)."""
-    m = _PADRAO_TITULO_ANCORA.match(linha_texto) or (
-        _PADRAO_TITULO_ANCORA_SEPARADOR_ANTES.match(linha_texto)
-    )
-    if m is None:
-        return ""
-    return m.group("titulo").strip()
 
 
 def _eh_linha_rotulo_cargo(linha: _Linha) -> bool:
@@ -558,7 +532,7 @@ def _motivo_recusa_tabela(
 
 def _parsear_bloco(linhas_bloco: Sequence[_Linha]) -> GHEVerbatim:
     ancora = linhas_bloco[0]
-    nome = _extrair_titulo_ancora(ancora.texto)
+    nome = extrair_titulo_ancora(ancora.texto)
 
     cargos: tuple[str, ...] = ()
     for idx_linha, linha in enumerate(linhas_bloco[1:], start=1):

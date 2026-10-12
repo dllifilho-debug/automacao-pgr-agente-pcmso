@@ -4369,3 +4369,14 @@ PRODUÇÃO 02, MANUTENÇÃO, SESMT… O PGR traz, abaixo de cada cabeçalho "GHE
 pela linha de cabeçalho que o app já reconhece (como na rota determinística) — `[A MEDIR — efeito nos PGRs da rota da IA]`.
 
 **Status:** ABERTA — título "-- Selecione o Setor --" na rota da IA.
+
+**Título "-- Selecione o Setor --" — RESOLVIDO no código (12/10/2026, solução A, decisão do Diovanni).** Defeito de
+extração, não regra clínica: a fonte é o próprio PDF. Na rota da IA, o nome do GHE vem do título do cabeçalho do bloco
+("GHE 07 - CREMALHEIRA"), lido como na rota determinística; cabeçalho sem título mantém o nome da IA; cargos e riscos
+intocados (nota em D-ARQ-49). Medido com o leitor do app: na Vistamerica 2026 os 28 cabeçalhos trazem título, e os GHEs
+07 a 12 passam a CREMALHEIRA, SINALIZAÇÃO DE GRUA, PRODUÇÃO 02, MANUTENÇÃO, SESMT e SUPERVISÃO DE EQUIPES. No acervo, 15
+PGRs chegam à IA nesta rota: 11 com título em todos os blocos; ALT T65 2024-2026, EURO Setor C e Ricco 2026
+Administração sem título (inalterados); Viverde com título em 6 de 31 blocos. Comparação com os arquivos do app de 12/10
+não refeita nesta sessão (não estão no disco) `[A MEDIR — no app, rodar a Vistamerica 2026 de novo após o deploy]`.
+
+**Status:** ABERTA — conferência no app da Vistamerica 2026 após o deploy (título pelo cabeçalho do bloco).
