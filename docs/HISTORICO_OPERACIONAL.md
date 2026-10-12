@@ -12808,3 +12808,18 @@ cobria o checkbox). Erro de implementação pego pelos testes antes do commit: `
 `pagina_matriz` (o AppTest roda a função isolada; no app real o import do módulo cobria). 2 testes novos (mensagem em
 DD/MM; emissão vazia); varredura inversa 3 reversões, 3/3 (voltar a texto derruba 30). Suíte completa, árvore parada:
 **1877 → 1879 passed, 6 skipped** (1282 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke visual: ok, 6/6.
+
+## Sessão (branch `claude/busy-thompson-lepmze` sobre `main 01c988c`, pós-merge do PR #485) — 12/10/2026 — MEDIÇÃO: rodada no app pela rota da IA
+
+**Medido.** Cinco PGRs da rota da IA rodados pelo Diovanni (Quasar Bueno, CMO Aurora, adendo Aurora Lago das Rosas, Vistamerica
+2026, Auro), conferidos contra o PDF com o leitor do app. A linha psicossocial (emenda 3 de D-ARQ-91) sai CONSTA em todo GHE dos
+quatro com inventário avaliado e não sai na Auro (sem inventário); "Ausência de agente nocivo" (emenda 4) sai NÃO CONSTA na
+Vistamerica (11 GHEs) e na Auro (6). Inexistência 0 nos cinco.
+
+**Achados.** Título "-- Selecione o Setor --" em 6 GHEs da Vistamerica (campo vazio do PGR lido como nome pela IA) — aberto em
+PENDENCIAS. Não reprodutibilidade da IA: o mesmo PDF da Aurora deu um termo com e sem "(maçaricos)"; a Auro perdeu a declaração de
+ausência em 12 de 18 GHEs — sem efeito na saída. Contagem da Quasar: 19 cargos no PDF, contra os 22 registrados em 09/10.
+GHE-07 da Aurora: 7 cargos na lista, 8 na descrição (para a revisão das médicas).
+
+**Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
+`test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
