@@ -12849,3 +12849,13 @@ return (mata unitário, lote, Vistamerica real e Viverde); aplicá-lo só no ram
 título e o Viverde); tirar o `if not ghe.nome.strip()` (mata o nome vazio e `test_aprovacao_parcial…`). Suíte completa
 (2ª rodada, árvore parada): 1884 passed, 6 skipped (19 min 47 s). mypy no alvo canônico: limpo, 59 arquivos (sem arquivo novo no alvo). `test_gerar_indice_darq.py`: 6 passed.
 Smoke visual não rodado: a tela não muda.
+
+## Sessão (branch `claude/wizardly-wozniak-whgb0q` recriada sobre `main 835890f`, pós-merge do PR #487) — 12/10/2026 — CONFERÊNCIA no app: título do GHE pelo cabeçalho
+
+**Medido.** Vistamerica 2026 rodada pelo Diovanni no app após o deploy (28 blocos pela IA). Nos três arquivos baixados
+(matriz, memorial, riscos para o ASO), os 28 títulos de GHE são iguais aos do cabeçalho do PDF, lidos por
+`extrair_titulo_ancora` na sessão anterior; GHEs 07 a 12 corretos; "Selecione" ausente. Item fechado em PENDENCIAS.
+
+**Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
+`test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
+

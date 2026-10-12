@@ -4380,3 +4380,10 @@ Administração sem título (inalterados); Viverde com título em 6 de 31 blocos
 não refeita nesta sessão (não estão no disco) `[A MEDIR — no app, rodar a Vistamerica 2026 de novo após o deploy]`.
 
 **Status:** ABERTA — conferência no app da Vistamerica 2026 após o deploy (título pelo cabeçalho do bloco).
+
+**Título pelo cabeçalho — CONFERIDO no app (12/10/2026, pós-merge do PR #487).** Vistamerica 2026 rodada de novo pela rota
+da IA (28 blocos): matriz, memorial e relatório do ASO trazem os 28 GHEs com o título do cabeçalho do PDF, 07 a 12 como
+CREMALHEIRA, SINALIZAÇÃO DE GRUA, PRODUÇÃO 02, MANUTENÇÃO, SESMT e SUPERVISÃO DE EQUIPES; "Selecione" não aparece em
+nenhum dos três. Os outros 4 PGRs da rodada de 12/10 não foram rodadas de novo.
+
+**Status:** sem item aberto nesta frente.
