@@ -12859,3 +12859,14 @@ Smoke visual não rodado: a tela não muda.
 **Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
 `test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
 
+## Sessão (branch `claude/wizardly-wozniak-whgb0q` recriada sobre `main 7a887da`, pós-merge do PR #488) — 12/10/2026 — MEDIÇÃO (por transcript): efeito do título pelo cabeçalho nos outros 4 PGRs da rodada
+
+**Medido.** Os arquivos do app de 12/10 ficaram no container da sessão anterior; a comparação foi recuperada do transcript
+dela (`list_events`), saída gravada do script: Quasar, CMO Aurora, adendo Aurora e Auro sem diferença contra o cabeçalho do
+PDF (comparação em maiúsculas); Vistamerica 2026, 6 (GHEs 07 a 12). O "[A MEDIR — no app]" da entrada de implementação fica
+respondido. O mesmo script pulava arquivos com "PCMSO"/"MATRIZ" no nome — explica parte da divergência de contagem do
+acervo (17 → 15 PGRs); o Ricco 2025 Administração não se reconstrói pelo trecho lido.
+
+**Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
+`test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
+
