@@ -4391,7 +4391,7 @@ nenhum dos três. Os outros 4 PGRs da rodada de 12/10 não foram rodados de novo
 **Título pelo cabeçalho — efeito nos outros 4 PGRs da rodada (12/10/2026).** Lido no transcript da sessão anterior
 (`claude/busy-thompson-lepmze`), saída gravada do script que comparou o "Riscos para o ASO" gerado pelo app em 12/10 com os
 títulos do cabeçalho do PDF (comparação em maiúsculas): Quasar 12/12, CMO Aurora 22/22, adendo Aurora 22/22 e Auro 19/19
-iguais; Vistamerica 2026 com 6 diferentes (GHEs 07 a 12). Nos 4, a correção só muda a caixa onde a IA não seguiu o PDF —
-citado na Auro, "Montagem" → "MONTAGEM"; o número exato de nomes só com diferença de caixa não está na saída gravada.
+iguais; Vistamerica 2026 com 6 diferentes (GHEs 07 a 12). Refeito na sessão anterior a pedido, sem ignorar a caixa: único
+nome que difere só na caixa é Auro GHE 19, "Montagem" → "MONTAGEM". Nos 4 PGRs, a correção muda só esse nome.
 
 **Status:** sem item aberto nesta frente.
