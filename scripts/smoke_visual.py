@@ -293,7 +293,11 @@ def _executar_cenario(pagina: Any, cenario: str) -> None:
     pagina.get_by_label("Médico coordenador").fill("Dra. Teste", timeout=30_000)
     pagina.get_by_label("CRM").fill("CRM-GO 0000")
     emissao = date.today() + (timedelta(days=200) if cenario == "bloqueio" else -timedelta(days=30))
-    pagina.get_by_label("Data de emissão do PGR (AAAA-MM-DD)").fill(emissao.isoformat())
+    # O date_input do Streamlit 1.65 é um campo segmentado (dia, mês, ano), sem <input>
+    # de texto: clica no grupo e digita os dígitos, que o campo distribui pelos segmentos.
+    pagina.get_by_role("group", name="Data de emissão do PGR").click()
+    pagina.keyboard.type(emissao.strftime("%d%m%Y"))
+    pagina.keyboard.press("Escape")  # fecha o calendário, que cobre o checkbox abaixo
     pagina.get_by_text("Assinado por engenheiro de segurança").click()
     pagina.get_by_role("button", name="Gerar matriz").click()
     alvo = ".st-key-passo_1_bloqueado" if cenario == "bloqueio" else "text=Baixar HTML"

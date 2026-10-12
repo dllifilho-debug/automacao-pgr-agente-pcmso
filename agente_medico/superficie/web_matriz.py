@@ -853,6 +853,7 @@ def pagina_matriz() -> None:
     from agente_medico.superficie.memorial_matriz import (
         alertas_do_ghe,
         contaminantes_a_confirmar,
+        data_exibicao,
         montar_memorial,
         renderizar_memorial_docx,
         resumos_do_protocolo,
@@ -913,7 +914,7 @@ def pagina_matriz() -> None:
     # na ordem de EXECUÇÃO de sempre: callbacks, leitura do cache e returns
     # antecipados não mudam. AppTest indexa widgets pela posição na tela, então
     # esta ordem é contrato dos testes (file_uploader[0] = PGR, button[0] =
-    # Gerar matriz; antes de gerar a matriz, text_input[-1] = validade).
+    # Gerar matriz; a emissão é o date_input "Data de emissão do PGR").
     indicador = st.empty()
     # `key=` só dá a classe CSS `st-key-<key>` usada em estilos.py; não é widget.
     etapa_pgr = st.container(border=True, key="etapa_pgr")
@@ -1291,7 +1292,9 @@ def pagina_matriz() -> None:
                     help="Marca o (X) no documento e entra no nome do arquivo.",
                 )
                 tipo_outro = st.text_input("Outro tipo (se escolheu Outro)")
-                data_documento = st.text_input("Data")
+                # Calendário: "10/01/2026" digitado no lugar de 10/10 saiu sem aviso (Vila Brasil,
+                # 10/10/2026); as matrizes das médicas trazem sempre a data completa no cabeçalho.
+                data_documento = st.date_input("Data", value=None, format="DD/MM/YYYY")
                 medico_coordenador = st.text_input("Médico coordenador")
                 crm = st.text_input("CRM")
 
@@ -1299,11 +1302,13 @@ def pagina_matriz() -> None:
                 st.markdown("**Responsáveis**")
                 responsavel_preenchimento = st.text_input("Responsável pelo preenchimento")
                 medico_validador = st.text_input("Médica validadora")
-                data_pgr = st.text_input("Data do PGR no rodapé (texto livre)")
+                # Texto livre: 14 de 50 matrizes das médicas escrevem só mês/ano ("JUN/2026").
+                data_pgr = st.text_input("Data do PGR no rodapé (DD/MM/AAAA ou MÊS/AAAA)")
 
             with col_pgr:
                 st.markdown("**Dados do PGR**")
-                validade = st.text_input("Data de emissão do PGR (AAAA-MM-DD)")
+                # Calendário, como "Data": as datas completas da tela no mesmo formato (10/10/2026).
+                emissao = st.date_input("Data de emissão do PGR", value=None, format="DD/MM/YYYY")
                 st.caption(
                     "Data em que o PGR foi emitido, não a de vencimento. PGR emitido há "
                     "2 anos ou mais é rejeitado (R-PGR-06)."
@@ -1324,10 +1329,15 @@ def pagina_matriz() -> None:
             bloqueio = "preencha médico coordenador e CRM na etapa 1"
             return
 
+        if emissao is None:
+            etapa_pgr.error("Informe a data de emissão do PGR (R-PGR-06).")
+            bloqueio = "corrija a data de emissão do PGR na etapa 1"
+            return
+        validade = emissao.isoformat()
         try:
             envelope = montar_envelope(validade, assinatura)
         except EmissaoFuturaError:
-            etapa_pgr.error(MENSAGEM_EMISSAO_FUTURA.format(validade))
+            etapa_pgr.error(MENSAGEM_EMISSAO_FUTURA.format(data_exibicao(validade)))
             bloqueio = "corrija a data de emissão do PGR na etapa 1"
             return
         except ValueError:
@@ -1339,14 +1349,14 @@ def pagina_matriz() -> None:
             empresa=empresa,
             obra=obra,
             tipo_documento=tipo_do_formulario(tipo_escolhido, tipo_outro),
-            data=data_do_formulario(data_documento),
+            data=data_do_formulario(data_documento.isoformat() if data_documento else ""),
             medico_coordenador=medico_coordenador,
             crm=crm,
         )
         rodape = RodapeDocumento(
             responsavel_preenchimento=responsavel_preenchimento,
             medico_validador=medico_validador,
-            data_pgr=data_pgr,
+            data_pgr=data_do_formulario(data_pgr),
         )
 
         with tempfile.TemporaryDirectory() as tmp:

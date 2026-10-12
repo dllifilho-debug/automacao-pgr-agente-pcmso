@@ -4331,3 +4331,17 @@ interpretação sem documento. Reabre com um PGR que escreva "Mecânico" sozinho
 
 **Status:** ABERTA — campos de data do formulário, rodada no app pela rota da IA (linha psicossocial e "Ausência de agente
 nocivo").
+
+**Campos de data do formulário — RESOLVIDO (10/10/2026, solução B, decisão do Diovanni).** Medido nas 50 matrizes .doc das
+médicas: "Data" do cabeçalho sempre com dia, mês e ano (DD/MM/AAAA); "Data do PGR" do rodapé 18 DD/MM/AAAA, 14 mês/ano
+("JUN/2026", "abr/2026", "06/2026"), 18 sem data. "Data" vira calendário (dd/mm/aaaa, como a "Data da medição"): impede a
+troca dia/mês da Vila Brasil ("10/01/2026"). O rodapé segue texto livre, rótulo "(DD/MM/AAAA ou MÊS/AAAA)", e AAAA-MM-DD
+digitado sai DD/MM/AAAA. "Data de emissão do PGR (AAAA-MM-DD)" intocada (validação da R-PGR-06).
+
+**Status:** ABERTA — rodada no app pela rota da IA (linha psicossocial e "Ausência de agente nocivo": Quasar, CMO Aurora ×2,
+Vistamerica 2026, Auro).
+
+**Campos de data — complemento (11/10/2026, decisão do Diovanni).** "Data de emissão do PGR" também vira calendário
+(dd/mm/aaaa), para as datas completas da tela ficarem no mesmo formato. A data escolhida vai em ISO à mesma validação da
+R-PGR-06 (intocada); a mensagem de emissão no futuro mostra DD/MM/AAAA; calendário vazio pede a data. Tela de envelope e
+linha de comando inalteradas.

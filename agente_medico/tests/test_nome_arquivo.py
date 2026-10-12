@@ -4,6 +4,7 @@ Diovanni, 08/10/2026). Cada teste nomeia a reversão que o deixa vermelho."""
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Any
 
 import pytest
@@ -61,10 +62,10 @@ def test_tela_usa_o_nome_digitado_nos_quatro_downloads(monkeypatch: pytest.Monke
     )
     at = AppTest.from_function(pagina_matriz)
     at.run()
-    _submeter_formulario(at, campos={"Empresa": "RICCO", "Obra": "HETRIM", "Tipo de documento": "Atualização", "Data": "08/10/26"})
+    _submeter_formulario(at, campos={"Empresa": "RICCO", "Obra": "HETRIM", "Tipo de documento": "Atualização", "Data": date(2026, 10, 8)})
 
     assert not at.exception
-    sufixo = "(ATUALIZAÇÃO)RICCO HETRIM 08.10.26"
+    sufixo = "(ATUALIZAÇÃO)RICCO HETRIM 08.10.2026"
     assert set(nomes) == {
         f"MATRIZ DE EXAMES{sufixo}.docx",
         f"MATRIZ DE EXAMES{sufixo}.html",
