@@ -5,6 +5,7 @@ import re
 from collections.abc import Sequence
 from typing import Protocol
 
+from agente_medico.motor.extracao_pgr import extrair_titulo_ancora
 from agente_medico.motor.tipos import GHEVerbatim, Pendencia
 
 # [DERIVADO — D-ARQ-49 P3 / D-ARQ-50 C3; molde D-ARQ-47]
@@ -67,6 +68,24 @@ def _restringir_avaliacao_a_escala_pxs(bloco: str, ghe: GHEVerbatim) -> GHEVerba
     return dataclasses.replace(ghe, riscos=riscos)
 
 
+def _nome_pelo_cabecalho(bloco: str, ghe: GHEVerbatim) -> GHEVerbatim:
+    """Nome do GHE pelo título da linha-âncora ("GHE 07 - CREMALHEIRA"), que
+    é a 1ª linha do bloco por construção de recortar_blocos_ghe — mesma fonte
+    da rota determinística. Sem título no cabeçalho ("GHE 12", "INVENTÁRIO DE
+    RISCO GHE 12"), fica o nome da IA. Nome vazio da IA (bloco não
+    transcrito, ou faltante no lote) segue vazio, para gate_forma_ghe
+    reprovar: o título não aprova um GHE que a IA não leu. Origem:
+    Vistamerica 2026, 6 de 28 GHEs com o campo de setor não preenchido
+    ("-- Selecione o Setor --") lido pela IA como nome (nota de 12/10/2026
+    em D-ARQ-49)."""
+    if not ghe.nome.strip():
+        return ghe
+    titulo = extrair_titulo_ancora(bloco.split("\n", 1)[0])
+    if not titulo:
+        return ghe
+    return dataclasses.replace(ghe, nome=titulo)
+
+
 def transcrever_ghes(
     blocos: Sequence[str], cliente: TranscritorGHE
 ) -> tuple[GHEVerbatim, ...]:
@@ -83,7 +102,8 @@ def transcrever_ghes(
     transcrever_lote, cai no caminho unitário de sempre: delega bloco a
     bloco, na ordem, sem retry/telemetria. Nos dois caminhos, a
     avaliacao_qualitativa só sobrevive em bloco da escala P×S
-    (_restringir_avaliacao_a_escala_pxs, DT-003EC-01/DT-003EB-02). Saída é
+    (_restringir_avaliacao_a_escala_pxs, DT-003EC-01/DT-003EB-02) e o nome
+    vem do título do cabeçalho do bloco quando há (_nome_pelo_cabecalho). Saída é
     CANDIDATA: a admissão fica para fatia futura (revisão a jusante).
     """
     em_lote = getattr(cliente, "transcrever_lote", None)
@@ -97,7 +117,8 @@ def transcrever_ghes(
     else:
         resultado = tuple(cliente.transcrever(bloco) for bloco in blocos)
     return tuple(
-        _restringir_avaliacao_a_escala_pxs(bloco, ghe) for bloco, ghe in zip(blocos, resultado)
+        _nome_pelo_cabecalho(bloco, _restringir_avaliacao_a_escala_pxs(bloco, ghe))
+        for bloco, ghe in zip(blocos, resultado)
     )
 
 

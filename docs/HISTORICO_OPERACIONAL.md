@@ -12823,3 +12823,29 @@ GHE-07 da Aurora: 7 cargos na lista, 8 na descrição (para a revisão das médi
 
 **Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
 `test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
+
+## Sessão (branch `claude/wizardly-wozniak-whgb0q` sobre `main 2d51b37`, pós-merge do PR #486) — 12/10/2026 — IMPLEMENTAÇÃO: título do GHE pelo cabeçalho na rota da IA
+
+**Decisão.** Solução A, aprovada pelo Diovanni: na rota da IA, quando o bloco começa por "GHE NN - NOME", o nome do GHE
+vem desse cabeçalho (`_nome_pelo_cabecalho` em `transcrever_ghes`, depois da IA); sem título, fica o da IA.
+`extrair_titulo_ancora` saiu de `parser_familia_consciente` para `extracao_pgr`, usado pelas duas rotas. Nota em D-ARQ-49
+(DECISOES v264), `INDICE_DARQ.md` regenerado, PENDENCIAS.
+
+**Medido** (leitor do app, `recortar_blocos_ghe` + `extrair_titulo_ancora`). 17 PDFs do acervo chegam à IA na rota por
+GHE: 15 PGRs (11 com título em todos os blocos; ALT T65 2024-2026, EURO Setor C, Ricco 2026 Administração sem título;
+Viverde 6 de 31) e 2 PCMSO (Vistamerica 08.12.25, R78 Naturia), em que a linha "GHE NN -" mistura colunas da tabela de
+exames — não são entrada do app. Ricco 2025 Administração para no gate de densidade. Diverge da contagem levada à sessão
+("11 com título, 5 sem", Ricco ×2 entre os sem): registrado como medido aqui, não ajustado. Vistamerica 2026: 28
+cabeçalhos com título; GHEs 07 a 12 conferidos. Comparação com a saída do app de 12/10 não refeita (arquivos fora do disco).
+
+**Achado da suíte.** 1ª rodada completa: 1881 passed, 2 failed (`test_orquestracao_pgr.py`). Um era defeito da mudança:
+GHE que a IA não leu (nome vazio, o "faltante" do lote) ganhava o título do cabeçalho e passava no gate de forma sem
+riscos. Corrigido: só nome não vazio da IA é trocado. O outro (Viverde real com IA simulada) esperava o nome da IA nos 6
+blocos com título; expectativa ajustada para o nome do cabeçalho.
+
+**Verificação.** Testes novos em `test_transcritor_pgr.py` (5), varredura inversa: tirar `_nome_pelo_cabecalho` do
+return (mata unitário, lote, Vistamerica real e Viverde); aplicá-lo só no ramo unitário (mata o lote); trocar
+`dataclasses.replace` por GHEVerbatim novo (mata pela igualdade de cargos/riscos); tirar o `if not titulo` (mata o sem
+título e o Viverde); tirar o `if not ghe.nome.strip()` (mata o nome vazio e `test_aprovacao_parcial…`). Suíte completa
+(2ª rodada, árvore parada): 1884 passed, 6 skipped (19 min 47 s). mypy no alvo canônico: limpo, 59 arquivos (sem arquivo novo no alvo). `test_gerar_indice_darq.py`: 6 passed.
+Smoke visual não rodado: a tela não muda.
