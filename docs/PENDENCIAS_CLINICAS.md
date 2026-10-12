@@ -4345,3 +4345,27 @@ Vistamerica 2026, Auro).
 (dd/mm/aaaa), para as datas completas da tela ficarem no mesmo formato. A data escolhida vai em ISO à mesma validação da
 R-PGR-06 (intocada); a mensagem de emissão no futuro mostra DD/MM/AAAA; calendário vazio pede a data. Tela de envelope e
 linha de comando inalteradas.
+
+**Rodada no app pela rota da IA (12/10/2026, `main 01c988c`) — linha psicossocial e "Ausência de agente nocivo": RESOLVIDA.**
+Arquivos do Diovanni (matriz, memorial, riscos para o ASO e print) conferidos contra o PDF, PGR por PGR:
+- **Quasar Bueno** (12 blocos por IA): linha psicossocial CONSTA nos 12 GHEs, inexistência 0; 130 riscos, os de 09/10. Cargos:
+  19 no app e **19 no PDF** (linha "Cargo / Função", medido em 12/10); o "22 cargos" registrado em 09/10 não se reproduz
+  contra o PDF (decisão do Diovanni: fica registrado assim).
+- **CMO Aurora** (22 blocos) e **adendo Aurora Lago das Rosas 27.08.26** (mesmo PDF, byte a byte): linha psicossocial
+  CONSTA nos 22 GHEs, inexistência 0. Entre as duas execuções, um termo do GHE-22 saiu "Trabalho a quente" e "Trabalho a
+  quente (maçaricos)" — a IA não é reprodutível palavra a palavra; mesma sugestão (ACIDENTE MODERADO, consta).
+  Achado do PGR para a revisão das médicas: GHE-07 lista 7 cargos em "Função / Cargo" e descreve 8 — "Encarregado de
+  Encanador" (CBO 7201-45) só na descrição; o app segue a lista declarada.
+- **Vistamerica 2026** (28 blocos): linha psicossocial CONSTA nos 28; "Ausência de agente nocivo" NÃO CONSTA (R-ASO-07)
+  nos 11 GHEs que a trazem.
+- **Auro** (19 blocos, PGR de 10/2025, sem inventário): sem linha psicossocial, sem Saúde Mental, sem R-PSY-07 (anterior a
+  26/05/2026); "Ausência de agente nocivo" NÃO CONSTA nas 6 linhas transcritas — a IA omitiu a declaração em 12 dos 18 GHEs
+  que a trazem no PDF (texto quebrado em 3 linhas); sem efeito na saída.
+
+**Título "-- Selecione o Setor --" na rota da IA — ABERTO (achado de 12/10/2026, sem decisão).** Vistamerica 2026: os GHEs
+07 a 12 saem com esse título na matriz, no memorial e no relatório do ASO; no PDF são CREMALHEIRA, SINALIZAÇÃO DE GRUA,
+PRODUÇÃO 02, MANUTENÇÃO, SESMT… O PGR traz, abaixo de cada cabeçalho "GHE NN - NOME", um campo de setor não preenchido
+("-- Selecione o Setor --", 28 vezes) e a IA o tomou por nome em 6 blocos. Cargos e riscos corretos. Candidato: nome do GHE
+pela linha de cabeçalho que o app já reconhece (como na rota determinística) — `[A MEDIR — efeito nos PGRs da rota da IA]`.
+
+**Status:** ABERTA — título "-- Selecione o Setor --" na rota da IA.
