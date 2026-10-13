@@ -17,10 +17,12 @@ from agente_medico.motor.extracao_pgr import (
     eh_cabecalho_ghe,
     eh_sinal_cargo,
     extrair_texto_pgr,
+    extrair_titulo_ancora,
     recortar_blocos_ghe,
     recortar_cards_cargo,
     recortar_topo,
     recuperar_titulos_cargo,
+    reconhecedor_ghe,
 )
 
 # PDF é tracked no git (matrizes_originais/) — ausência é falha explícita,
@@ -1059,3 +1061,106 @@ def test_numeracao_ghe_pega_porto_araras_real_sem_a_forma_6(monkeypatch: pytest.
     assert pendencia is not None
     assert "(14)" in pendencia.motivo
 
+
+
+# --- Repertório suplente de cabeçalho GHE (PGR Soft Connect15 v04, out/2026) ---
+# Formas medidas no PDF real (pdfplumber, 467 págs.): travessão U+2013 como
+# separador (19 linhas), dois-pontos depois do número e "GHE:" sem separador.
+
+
+@pytest.mark.parametrize(
+    ("cabecalhos", "titulos", "reconhecedor_revertido"),
+    [
+        (
+            ("GHE: 01 \u2013 SUPERVISÃO DE EQUIPES", "GHE 02 \u2013 CARPINTARIA"),
+            ["SUPERVISÃO DE EQUIPES", "CARPINTARIA"],
+            "_reconhece_cabecalho_ghe_suplente_separador",
+        ),
+        (
+            ("GHE 17: PINTURA", "GHE 18: ELEVADOR DE CREMALHEIRA"),
+            ["PINTURA", "ELEVADOR DE CREMALHEIRA"],
+            "_reconhece_cabecalho_ghe_suplente_separador",
+        ),
+        (
+            ("GHE: 17 PINTURA", "GHE: 18 IMPERMEABILIZAÇÃO"),
+            ["PINTURA", "IMPERMEABILIZAÇÃO"],
+            "_reconhece_cabecalho_ghe_suplente_dois_pontos",
+        ),
+    ],
+)
+def test_suplente_recorta_documento_sem_ancora_do_repertorio_principal(
+    cabecalhos: tuple[str, str], titulos: list[str], reconhecedor_revertido: str
+) -> None:
+    # Reversão que mata: tirar `reconhecedor_revertido` de
+    # _RECONHECEDORES_GHE_SUPLENTES — o documento volta a 0 blocos.
+    blocos = recortar_blocos_ghe([f"{cabecalhos[0]}\nlinha", f"{cabecalhos[1]}\nlinha"])
+    assert [extrair_titulo_ancora(b.split("\n", 1)[0]) for b in blocos] == titulos
+
+
+def test_titulo_suplente_vem_do_padrao_suplente() -> None:
+    # Reversão que mata: tirar o ramo de _PADRAO_TITULO_ANCORA_SUPLENTE de
+    # extrair_titulo_ancora — o título sai "".
+    assert extrair_titulo_ancora("GHE: 20 \u2013 PRODUÇÃO \u2013 PRODUÇÃO MARMORARIA") == (
+        "PRODUÇÃO \u2013 PRODUÇÃO MARMORARIA"
+    )
+
+
+def test_suplente_nao_vale_em_documento_com_ancora_principal() -> None:
+    # Floramazônia: linha de histórico de revisão com travessão não vira âncora
+    # quando o documento já tem cabeçalho do repertório principal. Reversão que
+    # mata: reconhecedor_ghe devolver sempre eh_cabecalho_ghe_suplente.
+    paginas = ["GHE 01 - A\nGHE 20 \u2013 Gesso \u2192 passou a ser GHE 19 \u2013 Gesso", "GHE 02 - B"]
+    assert len(recortar_blocos_ghe(paginas)) == 2
+
+
+def test_suplente_sem_dois_pontos_e_sem_separador_nao_e_cabecalho() -> None:
+    # Reversão que mata: aceitar "GHE:?" em _reconhece_cabecalho_ghe_suplente_
+    # dois_pontos — "GHE 22 SECONC" (rodapé) viraria âncora.
+    eh_ancora = reconhecedor_ghe(["GHE 22 SECONC"])
+    assert not eh_ancora("GHE 22 SECONC")
+
+
+def test_numeracao_usa_o_reconhecedor_do_documento() -> None:
+    # Soft Connect: dois "GHE 18" e nenhum 19 — o gate tem de acusar o 19.
+    # Reversão que mata: avaliar_numeracao_ghe filtrar por eh_cabecalho_ghe.
+    pendencia = avaliar_numeracao_ghe(
+        ["GHE: 17 \u2013 PINTURA\nGHE: 18 IMPERMEABILIZAÇÃO", "GHE 18: ELEVADOR\nGHE: 20 \u2013 MARMORARIA"]
+    )
+    assert pendencia is not None
+    assert "(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 19)" in pendencia.motivo
+
+
+def test_segmentacao_usa_o_reconhecedor_do_documento() -> None:
+    # Reversão que mata: avaliar_segmentacao passar eh_cabecalho_ghe a
+    # _avaliar_spans — 0 blocos em 20 págs. vira segmentacao_implausivel.
+    paginas = _construir_paginas(
+        20, {1: "GHE: 01 \u2013 A", 5: "GHE: 02 \u2013 B", 9: "GHE: 03 \u2013 C", 13: "GHE: 04 \u2013 D", 17: "GHE: 05 \u2013 E"}
+    )
+    assert avaliar_segmentacao(paginas) is None
+
+
+def test_topo_usa_o_reconhecedor_do_documento() -> None:
+    # Reversão que mata: recortar_topo filtrar por eh_cabecalho_ghe — devolve None.
+    assert recortar_topo(["capa\nGHE: 01 \u2013 A", "GHE: 02 \u2013 B"]) == "capa"
+
+
+def test_familia_usa_o_reconhecedor_do_documento() -> None:
+    # Âncora GHE suplente veta o diagnóstico cargo-based, como a principal.
+    # Reversão que mata: avaliar_familia filtrar por eh_cabecalho_ghe.
+    assert avaliar_familia(["GHE: 01 \u2013 A\nCARGO/FUNÇÃO: Pedreiro", "GHE: 02 \u2013 B"]) is None
+
+
+def test_estrutura_roteia_ghe_com_ancora_suplente() -> None:
+    # Reversão que mata: avaliar_estrutura testar o ramo 1 com eh_cabecalho_ghe
+    # — o documento cai na rota card.
+    paginas = _construir_paginas(
+        20,
+        {
+            1: "GHE: 01 \u2013 A\nCARGO A - CBO: 111111",
+            5: "GHE: 02 \u2013 B\nCARGO B - CBO: 222222",
+            9: "GHE: 03 \u2013 C",
+            13: "GHE: 04 \u2013 D",
+            17: "GHE: 05 \u2013 E",
+        },
+    )
+    assert avaliar_estrutura(paginas) == ("ghe", None)

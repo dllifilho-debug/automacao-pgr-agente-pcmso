@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import NamedTuple, Optional
 
-from agente_medico.motor.extracao_pgr import eh_cabecalho_ghe, extrair_titulo_ancora
+from agente_medico.motor.extracao_pgr import extrair_titulo_ancora, reconhecedor_ghe
 from agente_medico.motor.io_pdf import PaginaLida, paginas_liberadas
 from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
 
@@ -585,18 +585,16 @@ def parsear_paginas(paginas: Sequence[Sequence[PalavraPDF]]) -> tuple[GHEVerbati
     (D-ARQ-65 fatia 1). Recebe palavras pré-extraídas por página (ordem do
     documento) e devolve um GHEVerbatim por bloco.
 
-    Segmentação por bloco reusa eh_cabecalho_ghe (extracao_pgr.py, D-ARQ-57
+    Segmentação por bloco reusa reconhecedor_ghe (extracao_pgr.py, D-ARQ-57
     peça 1) — mesmo repertório de âncora da rota LLM, sem regex duplicada.
     Zero âncoras -> tupla vazia (falha explícita; Pendencia é decisão do
     roteamento, D-ARQ-65 fatia 2, fora desta fatia).
     """
-    todas_linhas: list[_Linha] = []
-    indices_ancora: list[int] = []
-    for palavras_pagina in paginas:
-        for linha in _agrupar_linhas(palavras_pagina):
-            if eh_cabecalho_ghe(linha.texto):
-                indices_ancora.append(len(todas_linhas))
-            todas_linhas.append(linha)
+    todas_linhas: list[_Linha] = [
+        linha for palavras_pagina in paginas for linha in _agrupar_linhas(palavras_pagina)
+    ]
+    eh_ancora = reconhecedor_ghe(linha.texto for linha in todas_linhas)
+    indices_ancora = [i for i, linha in enumerate(todas_linhas) if eh_ancora(linha.texto)]
 
     ghes: list[GHEVerbatim] = []
     for k, inicio in enumerate(indices_ancora):

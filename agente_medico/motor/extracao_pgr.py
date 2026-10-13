@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
@@ -191,6 +191,57 @@ def eh_cabecalho_ghe(linha: str) -> bool:
     return any(reconhecedor(linha) for reconhecedor in _RECONHECEDORES_GHE)
 
 
+# Repertório suplente (PGR Soft Connect15 v04, out/2026, 467 págs.): travessão
+# U+2013 como separador ("GHE: 01 – SUPERVISÃO DE EQUIPES", 19 cabeçalhos),
+# dois-pontos depois do número ("GHE 18: ELEVADOR DE CREMALHEIRA") e "GHE:" sem
+# separador ("GHE: 18 IMPERMEABILIZAÇÃO"). Só vale em documento onde o repertório
+# principal não casa NENHUMA linha (reconhecedor_ghe): aplicado a todo documento,
+# casava 10 linhas de histórico de revisão no PGR Floramazônia ("GHE 20 – Gesso →
+# passou a ser GHE 19 – Gesso"). Varredura dos 37 PGRs do acervo com a regra de
+# documento: só o Soft Connect muda (0 -> 21 cabeçalhos).
+_SEPARADOR_SUPLENTE = r"(?:\s*[-\u2013\x00:]\s*|\s+)"
+
+
+def _reconhece_cabecalho_ghe_suplente_separador(linha: str) -> bool:
+    linha_normalizada = linha.strip()
+    if len(linha_normalizada) > 80:
+        return False
+    return re.fullmatch(r"GHE:? \d+\s*[\u2013:]\s*\S.*", linha_normalizada) is not None
+
+
+def _reconhece_cabecalho_ghe_suplente_dois_pontos(linha: str) -> bool:
+    # Sem separador só com "GHE:" antes do número: "GHE 22 SECONC" segue
+    # sem ser cabeçalho (ver forma 6).
+    linha_normalizada = linha.strip()
+    if len(linha_normalizada) > 80:
+        return False
+    return re.fullmatch(r"GHE: \d+\s+\S.*", linha_normalizada) is not None
+
+
+_RECONHECEDORES_GHE_SUPLENTES: tuple[Callable[[str], bool], ...] = (
+    _reconhece_cabecalho_ghe_suplente_separador,
+    _reconhece_cabecalho_ghe_suplente_dois_pontos,
+)
+
+
+def eh_cabecalho_ghe_suplente(linha: str) -> bool:
+    return eh_cabecalho_ghe(linha) or any(
+        reconhecedor(linha) for reconhecedor in _RECONHECEDORES_GHE_SUPLENTES
+    )
+
+
+def reconhecedor_ghe(linhas: Iterable[str]) -> Callable[[str], bool]:
+    """Reconhecedor de âncora GHE para UM documento: eh_cabecalho_ghe quando
+    alguma linha do documento casa o repertório principal; senão
+    eh_cabecalho_ghe_suplente. Por construção, documento que já tinha ao menos
+    uma âncora recorta exatamente como antes. Todo consumidor que olha o
+    documento inteiro escolhe o reconhecedor aqui, para que recorte, gates e
+    roteamento concordem."""
+    if any(eh_cabecalho_ghe(linha) for linha in linhas):
+        return eh_cabecalho_ghe
+    return eh_cabecalho_ghe_suplente
+
+
 # Extração do título — NÃO duplica o reconhecimento de âncora (eh_cabecalho_ghe,
 # D-ARQ-57 peça 1); só recorta o que sobra depois do "GHE NN"
 # reconhecido. Separador de layout (espaço/traço/NUL) imediatamente após o
@@ -205,6 +256,11 @@ _PADRAO_TITULO_ANCORA = re.compile(r"GHE:?\s*\d+\s*[-\x00]\s*(?P<titulo>.+)")
 _PADRAO_TITULO_ANCORA_SEPARADOR_ANTES = re.compile(
     r"GHE\s*[-\x00]\s*\d+(?:\s*[-\x00]\s*|\s+)(?P<titulo>.+)"
 )
+# Repertório suplente: só para linha que casa _RECONHECEDORES_GHE_SUPLENTES e
+# que os dois padrões acima não recortam — as demais saem com o título de antes.
+_PADRAO_TITULO_ANCORA_SUPLENTE = re.compile(
+    rf"GHE:?\s*\d+{_SEPARADOR_SUPLENTE}(?P<titulo>.+)"
+)
 
 
 def extrair_titulo_ancora(linha_texto: str) -> str:
@@ -216,6 +272,8 @@ def extrair_titulo_ancora(linha_texto: str) -> str:
     m = _PADRAO_TITULO_ANCORA.match(linha_texto) or (
         _PADRAO_TITULO_ANCORA_SEPARADOR_ANTES.match(linha_texto)
     )
+    if m is None and any(r(linha_texto) for r in _RECONHECEDORES_GHE_SUPLENTES):
+        m = _PADRAO_TITULO_ANCORA_SUPLENTE.match(linha_texto.strip())
     if m is None:
         return ""
     return m.group("titulo").strip()
@@ -268,7 +326,8 @@ def recortar_blocos_ghe(paginas: Sequence[str]) -> list[str]:
     NÃO classifica GHE — tudo isso é fatia futura (transcrição-LLM).
     """
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
-    indices_ancora = [i for i, linha in enumerate(linhas) if eh_cabecalho_ghe(linha)]
+    eh_ancora = reconhecedor_ghe(linhas)
+    indices_ancora = [i for i, linha in enumerate(linhas) if eh_ancora(linha)]
     if not indices_ancora:
         return []
     limites = [*indices_ancora, len(linhas)]
@@ -304,7 +363,8 @@ def recortar_topo(paginas: Sequence[str]) -> str | None:
     validade = fatias 2-3, ADIADAS POR MEDIÇÃO — DT-003L-01).
     """
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
-    indices_ancora = [i for i, linha in enumerate(linhas) if eh_cabecalho_ghe(linha)]
+    eh_ancora = reconhecedor_ghe(linhas)
+    indices_ancora = [i for i, linha in enumerate(linhas) if eh_ancora(linha)]
     if not indices_ancora:
         return None
     return "\n".join(linhas[: indices_ancora[0]])
@@ -584,7 +644,8 @@ def avaliar_familia(paginas: Sequence[str]) -> Pendencia | None:
     D-ARQ-31/35 — nunca silêncio), regra_origem "D-ARQ-57", ghe_id=None.
     """
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
-    tem_ancora_ghe = any(eh_cabecalho_ghe(linha) for linha in linhas)
+    eh_ancora = reconhecedor_ghe(linhas)
+    tem_ancora_ghe = any(eh_ancora(linha) for linha in linhas)
     if tem_ancora_ghe:
         return None
 
@@ -653,7 +714,8 @@ def avaliar_estrutura(paginas: Sequence[str]) -> tuple[Rota, Pendencia | None]:
     """
     linhas: list[str] = [linha for pagina in paginas for linha in pagina.splitlines()]
 
-    if any(eh_cabecalho_ghe(linha) for linha in linhas):
+    eh_ancora = reconhecedor_ghe(linhas)
+    if any(eh_ancora(linha) for linha in linhas):
         return "ghe", avaliar_segmentacao(paginas) or avaliar_numeracao_ghe(paginas)
 
     if any(eh_ancora_card_cargo(linha) for linha in linhas):
@@ -759,11 +821,12 @@ def avaliar_numeracao_ghe(paginas: Sequence[str]) -> Pendencia | None:
     antes por avaliar_segmentacao. Um adendo legítimo que traga só GHEs
     altos também bloqueia: falso-positivo aceito por desenho (revisão
     humana, anti-supressão vence — mesma escolha dos limiares acima)."""
+    linhas = [linha for pagina in paginas for linha in pagina.splitlines()]
+    eh_ancora = reconhecedor_ghe(linhas)
     numeros = {
         int(m.group())
-        for pagina in paginas
-        for linha in pagina.splitlines()
-        if eh_cabecalho_ghe(linha) and (m := re.search(r"\d+", linha))
+        for linha in linhas
+        if eh_ancora(linha) and (m := re.search(r"\d+", linha))
     }
     if not numeros:
         return None
@@ -813,4 +876,5 @@ def avaliar_segmentacao(paginas: Sequence[str]) -> Pendencia | None:
     extração para reuso pela rota card): saída byte-idêntica à versão
     pré-4d, eh_cabecalho_ghe e "bloco(s) GHE" fixos.
     """
-    return _avaliar_spans(paginas, eh_cabecalho_ghe, "bloco(s) GHE")
+    linhas = [linha for pagina in paginas for linha in pagina.splitlines()]
+    return _avaliar_spans(paginas, reconhecedor_ghe(linhas), "bloco(s) GHE")
