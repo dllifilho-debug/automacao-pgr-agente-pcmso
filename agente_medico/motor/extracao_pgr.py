@@ -806,6 +806,69 @@ def _avaliar_spans(
     return None
 
 
+TIPO_NUMERACAO_GHE_DUPLICADA = "numeracao_ghe_duplicada"
+
+
+def _titulos_por_numero(paginas: Sequence[str]) -> dict[int, list[str]]:
+    """Número do cabeçalho GHE -> títulos distintos na ordem do documento. Cabeçalho
+    repetido com o mesmo título (continuação de página) conta uma vez; título vazio
+    ("GHE 12") não distingue GHE."""
+    linhas = [linha for pagina in paginas for linha in pagina.splitlines()]
+    eh_ancora = reconhecedor_ghe(linhas)
+    titulos: dict[int, list[str]] = {}
+    chaves: dict[int, set[str]] = {}
+    for linha in linhas:
+        if not eh_ancora(linha) or (m := re.search(r"\d+", linha)) is None:
+            continue
+        numero = int(m.group())
+        titulos.setdefault(numero, [])
+        titulo = re.sub(r"\s+", " ", extrair_titulo_ancora(linha)).strip()
+        chave = titulo.casefold()
+        if titulo and chave not in chaves.setdefault(numero, set()):
+            chaves[numero].add(chave)
+            titulos[numero].append(titulo)
+    return titulos
+
+
+def _lacuna_explicada_por_numero_repetido(titulos: Mapping[int, list[str]]) -> bool:
+    """A lacuna é número repetido, não GHE perdido, quando há número com dois títulos
+    e a conta fecha exata: GHEs distintos (número + título) = maior número. PGR Soft
+    Connect15 v04: dois "GHE 18" (Impermeabilização, Elevador de Cremalheira), nenhum
+    19, 21 distintos para o maior 21. A igualdade estrita protege a numeração por
+    etapa (Vistamérica Ver.02, Viverde: muitos mais distintos que o maior número)."""
+    repetidos = [n for n, t in titulos.items() if len(t) > 1]
+    distintos = sum(max(1, len(t)) for t in titulos.values())
+    # Sem lacuna, número repetido faz distintos > maior número: a igualdade já exige a lacuna.
+    return bool(repetidos) and distintos == max(titulos)
+
+
+def avaliar_numeracao_duplicada(paginas: Sequence[str]) -> Pendencia | None:
+    """Aviso não bloqueante quando a lacuna de numeração é explicada por número
+    repetido (_lacuna_explicada_por_numero_repetido): a matriz é montada na ordem do
+    documento e o erro do PGR vai para a revisão, destacado na tela e no memorial."""
+    titulos = _titulos_por_numero(paginas)
+    if not titulos:
+        return None
+    faltantes = [n for n in range(1, max(titulos) + 1) if n not in titulos]
+    if not _lacuna_explicada_por_numero_repetido(titulos):
+        return None
+    repetidos = "; ".join(
+        f"{len(t)} GHEs numerados como {n} ({', '.join(t)})" for n, t in sorted(titulos.items()) if len(t) > 1
+    )
+    return Pendencia(
+        tipo=TIPO_NUMERACAO_GHE_DUPLICADA,
+        destinatario="extracao",
+        motivo=(
+            f"Erro de numeração no PGR: {repetidos} e nenhum numerado como "
+            f"{', '.join(str(n) for n in faltantes)}. A matriz segue a ordem do documento; "
+            f"confirmar a numeração com o elaborador do PGR"
+        ),
+        bloqueante=False,
+        regra_origem="D-ARQ-57",
+        ghe_id=None,
+    )
+
+
 def avaliar_numeracao_ghe(paginas: Sequence[str]) -> Pendencia | None:
     """Gate de número de GHE saltado: todo número de 1 ao maior número
     reconhecido tem de aparecer em algum cabeçalho. Cabeçalho repetido
@@ -820,18 +883,16 @@ def avaliar_numeracao_ghe(paginas: Sequence[str]) -> Pendencia | None:
     repertório atual: lacuna só em R78 e Floramazônia, ambos já barrados
     antes por avaliar_segmentacao. Um adendo legítimo que traga só GHEs
     altos também bloqueia: falso-positivo aceito por desenho (revisão
-    humana, anti-supressão vence — mesma escolha dos limiares acima)."""
-    linhas = [linha for pagina in paginas for linha in pagina.splitlines()]
-    eh_ancora = reconhecedor_ghe(linhas)
-    numeros = {
-        int(m.group())
-        for linha in linhas
-        if eh_ancora(linha) and (m := re.search(r"\d+", linha))
-    }
-    if not numeros:
+    humana, anti-supressão vence — mesma escolha dos limiares acima).
+
+    Lacuna explicada por número repetido não bloqueia: vira o aviso de
+    avaliar_numeracao_duplicada."""
+    titulos = _titulos_por_numero(paginas)
+    if not titulos:
         return None
+    numeros = set(titulos)
     faltantes = [n for n in range(1, max(numeros) + 1) if n not in numeros]
-    if not faltantes:
+    if not faltantes or _lacuna_explicada_por_numero_repetido(titulos):
         return None
     return Pendencia(
         tipo="numeracao_ghe_lacunar",

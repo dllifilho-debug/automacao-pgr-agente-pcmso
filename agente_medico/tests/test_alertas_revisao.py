@@ -199,3 +199,43 @@ def test_tela_mostra_alerta_do_menor_e_aviso_da_nr01(monkeypatch: pytest.MonkeyP
     assert any("R-TIP-01" in t and "MENOS APRENDIZ" in t for t in textos)
     escritos = [str(el.value) for el in at.markdown] + [str(getattr(el, "value", "")) for el in at.main]
     assert any("R-PSY-07" in t for t in escritos)
+
+
+_AVISO_NUMERACAO = Pendencia(
+    tipo="numeracao_ghe_duplicada",
+    destinatario="extracao",
+    motivo="Erro de numeração no PGR: 2 GHEs numerados como 18 (IMPERMEABILIZAÇÃO, ELEVADOR) e nenhum numerado como 19",
+    bloqueante=False,
+    regra_origem="D-ARQ-57",
+)
+
+
+def test_memorial_abre_o_resumo_com_o_erro_do_pgr_em_vermelho(proto: Protocolo, tmp_path: Path) -> None:
+    # Reversões que matam: erros_do_pgr devolver () (some o parágrafo) ou tirar
+    # `run_erro.font.color.rgb = _COR_ERRO` (sai preto).
+    from docx import Document
+
+    pgr, pendencias = _pgr(proto)
+    resultado = processar_pgr(pgr, proto)
+    memorial = montar_memorial(
+        resultado.matrizes, proto.vocabulario.exames, {}, pgr=pgr, pendencias=[*pendencias, _AVISO_NUMERACAO]
+    )
+    destino = tmp_path / "memorial.docx"
+    renderizar_memorial_docx(memorial, CabecalhoDocumento("SERRINHA", "SOFT", "Atualização", "", "", ""), destino)
+    (paragrafo,) = [p for p in Document(str(destino)).paragraphs if p.text.startswith("ERRO NO PGR — ")]
+    assert "nenhum numerado como 19" in paragrafo.text
+    assert all(str(run.font.color.rgb) == "C00000" for run in paragrafo.runs)
+
+
+def test_tela_mostra_o_erro_do_pgr_em_vermelho(monkeypatch: pytest.MonkeyPatch, proto: Protocolo) -> None:
+    # Reversão que mata: tirar da conferência o laço `caixa_conferencia.error(...)` de erros_pgr.
+    pgr, pendencias = _pgr(proto)
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado",
+        lambda *a, **k: (pgr, (*pendencias, _AVISO_NUMERACAO)),
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    assert not at.exception
+    assert any("Erro no PGR" in str(el.value) and "nenhum numerado como 19" in str(el.value) for el in at.error)

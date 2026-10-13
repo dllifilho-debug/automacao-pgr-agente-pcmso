@@ -19,9 +19,10 @@ from typing import Any, Sequence
 from docx import Document
 from docx.enum.section import WD_ORIENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Cm, Pt
+from docx.shared import Cm, Pt, RGBColor
 
 from agente_medico.motor.estagios.gates import TIPO_PGR_SEM_INVENTARIO_PSICOSSOCIAL
+from agente_medico.motor.extracao_pgr import TIPO_NUMERACAO_GHE_DUPLICADA
 from agente_medico.motor.estagios.pendencias_estruturais import (
     TIPO_CONTAMINANTE_A_CONFIRMAR,
     TIPO_MENOR_APRENDIZ_LISTA_TIP,
@@ -124,7 +125,10 @@ class Memorial:
     contagem_certeza: tuple[tuple[str, int], ...]
     regras_usadas: tuple[RegraUsada, ...]
     avisos_pgr: tuple[str, ...] = ()
+    erros_pgr: tuple[str, ...] = ()
 
+
+_COR_ERRO = RGBColor(0xC0, 0x00, 0x00)
 
 _LEGENDA_MOMENTOS = (
     "Momentos: ADM admissional; PER periódico (anual quando não traz meses); MRO mudança de riscos "
@@ -316,6 +320,16 @@ def avisos_do_pgr(pendencias_globais: Sequence[Pendencia]) -> tuple[str, ...]:
     )
 
 
+def erros_do_pgr(pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
+    """Erro do próprio documento do PGR que não impediu a matriz (D-ARQ-57: número de
+    GHE repetido no lugar de um ausente), destacado em vermelho no memorial e na tela."""
+    return tuple(
+        _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
+        for p in pendencias
+        if p.tipo == TIPO_NUMERACAO_GHE_DUPLICADA
+    )
+
+
 def agravos_pgr_do_ghe(ghe: GHEPGR) -> tuple[str, ...]:
     """D-ARQ-93: agravo que o PGR escreve na linha de cada risco do GHE, verbatim — uma linha
     por risco com agravo lido ("Ruido: A exposição ao ruído…"), sem repetir a mesma."""
@@ -449,6 +463,7 @@ def montar_memorial(
             for regra_id, motivo in sorted(usadas.items())
         ),
         avisos_pgr=avisos_do_pgr(pendencias_globais),
+        erros_pgr=erros_do_pgr(pendencias),
     )
 
 
@@ -530,6 +545,12 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
 
     total = sum(n for _, n in memorial.contagem_certeza)
     documento.add_heading("Resumo", level=1)
+    for erro in memorial.erros_pgr:
+        paragrafo_erro = documento.add_paragraph()
+        for trecho in ("ERRO NO PGR — ", erro):
+            run_erro = paragrafo_erro.add_run(trecho)
+            run_erro.bold = True
+            run_erro.font.color.rgb = _COR_ERRO
     documento.add_paragraph(f"{total} exames na matriz, em {len(memorial.blocos)} GHEs. Base de cada um:")
     for rotulo, n in memorial.contagem_certeza:
         documento.add_paragraph(f"{rotulo}: {n}", style="List Bullet")

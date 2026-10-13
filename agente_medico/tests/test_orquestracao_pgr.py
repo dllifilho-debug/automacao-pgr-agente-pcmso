@@ -641,3 +641,25 @@ def test_preparar_ghes_viverde_real_familia_nao_reconhecida_aciona_fallback_llm(
     pendencia_familia = next(p for p in pendencias if p.tipo == "familia_nao_medida")
     assert pendencia_familia.bloqueante is False
     assert pendencia_familia.regra_origem == "D-ARQ-65"
+
+
+def test_numero_repetido_monta_a_matriz_e_leva_o_aviso() -> None:
+    # PGR Soft Connect15: dois GHE 18, nenhum 19 — a matriz sai e o erro do PGR vai junto.
+    # Reversão que mata: tirar de preparar_pgr_hidratado o acréscimo de
+    # avaliar_numeracao_duplicada às pendências.
+    linhas = [f"GHE {n:02d} - SETOR {n}\nCargo {n}" for n in range(1, 22) if n != 19]
+    linhas.append("GHE 18 - ELEVADOR\nCargo E")
+    with patch(_ALVO_EXTRACAO, return_value=_leitura(["\n".join(linhas)])), patch(
+        _ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")
+    ):
+        resultado, pendencias = processar_arquivo_pgr(
+            Path("qualquer.pdf"),
+            _PROTO,
+            MockTranscritorConstante(_GHE_VALIDO),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
+            envelope=_ENVELOPE_PADRAO,
+        )
+
+    assert resultado is not None and len(resultado.matrizes) == 21
+    (aviso,) = [p for p in pendencias if p.tipo == "numeracao_ghe_duplicada"]
+    assert not aviso.bloqueante

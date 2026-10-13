@@ -9,6 +9,7 @@ from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
     avaliar_inventario_psicossocial,
+    avaliar_numeracao_duplicada,
     recortar_blocos_ghe,
     recortar_cards_cargo,
     recortar_topo,
@@ -341,6 +342,10 @@ def preparar_pgr_hidratado(
     """
     leitura = ler_pdf(caminho, processos_leitura_pdf())
     aprovados, pend_forma = preparar_ghes(caminho, cliente, cliente_card, leitura, cliente_grid)
+    # Erro de numeração do PGR que não impede o recorte (D-ARQ-57): vai para a revisão.
+    aviso_numeracao = avaliar_numeracao_duplicada([p.texto for p in leitura])
+    if aviso_numeracao is not None:
+        pend_forma = (*pend_forma, aviso_numeracao)
     if not aprovados:
         # Parse total falho (blocos ausentes, transcrição indisponível, ou
         # todos os GHE reprovados no gate): sem verbatim para hidratar, não
