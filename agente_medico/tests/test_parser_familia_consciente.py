@@ -4,7 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from agente_medico.motor.parser_familia_consciente import PalavraPDF, parsear_arquivo, parsear_paginas
+from agente_medico.motor.parser_familia_consciente import (
+    FamiliaNaoReconhecida,
+    PalavraPDF,
+    parsear_arquivo,
+    parsear_paginas,
+)
 from agente_medico.motor.tipos import GHEVerbatim
 from agente_medico.motor.transcritor_pgr import gate_forma_ghe
 
@@ -470,3 +475,15 @@ def test_vila_brasil_real_26_ghes_86_cargos() -> None:
         "Assistente Financeiro",
         "Coordenador de Crédito Imobiliário",
     )
+
+
+def test_parser_segmenta_por_ancora_suplente() -> None:
+    # Documento só com cabeçalho em travessão (PGR Soft Connect15): o parser
+    # chega ao bloco e o recusa pela tabela, nomeando o GHE. Reversão que mata:
+    # parsear_paginas filtrar por eh_cabecalho_ghe — devolve () sem levantar.
+    pagina = (
+        _p("GHE:", 50, 10), _p("01", 80, 10), _p("–", 100, 10), _p("PINTURA", 110, 10),
+        _p("linha", 50, 30),
+    )
+    with pytest.raises(FamiliaNaoReconhecida, match="PINTURA"):
+        parsear_paginas([pagina])
