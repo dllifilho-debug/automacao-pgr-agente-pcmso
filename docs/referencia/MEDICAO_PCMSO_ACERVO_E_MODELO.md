@@ -6,6 +6,15 @@ no scratchpad da sessão, fora da árvore. Páginas de DOC/DOCX/RTF = render do 
 `docProps/app.xml` do Word vai entre parênteses quando diverge). Scripts de medição ficaram fora do
 repositório; os números estão aqui.
 
+> **Decisões do Diovanni (13/10/2026), depois da 1ª versão deste relatório:**
+> 1. **As normas de `normas/` estão na última versão.** A vigência da NR-07 deixa de ser `[A MEDIR]` (§6).
+> 2. **O modelo do PCMSO é o de 2026, o mais recente; os antigos não precisam.** Em 2026 o acervo tem dois
+>    PCMSO: **T1 206 (17/03/2026), modelo A**, e **R70 (22/09/2026), modelo B**. O mais recente é o B,
+>    e a troca A→B aconteceu entre essas duas datas (o controle de revisão do R70 tem a rev. 01 em
+>    28/07/2026). Referência daqui em diante: **modelo B, testemunha R70**, e o Mauá Plateu d'Or 28.09.26
+>    quando subir. Modelos A e C (§2) ficam registrados como histórico e saem do escopo. O §2.1 mede o R70
+>    contra a matriz dele.
+
 ---
 
 ## 1. Inventário — os 24 arquivos com "PCMSO" no nome
@@ -108,7 +117,24 @@ Similaridade de texto (difflib sobre palavras, seções equivalentes):
 O Mauá Plateu d'Or (28.09.26) é posterior ao R70; a hipótese é que seja modelo B — **`[A MEDIR]` quando o
 arquivo chegar.**
 
-### 2.1 O que faz um PCMSO pesar — medido nos RTF, hipótese para o Mauá
+### 2.1 R70 (modelo B, 2026) × matriz R70 22.09.26 — o que a matriz decide no PCMSO
+
+`[MEDIDO — 13/10/2026]` O PGR do R70 não está no acervo; a medição é PCMSO × matriz.
+
+- **GHE: 21/21 iguais**, mesma numeração (o R70 também pula o GHE 14), diferenças só de grafia
+  ("MÁQUINAS"/"MAQUINAS", "- DESENERGIZADO"/"(DESENERGIZADO)").
+- **As notas "Incluir no word do PCMSO" da matriz foram feitas.** A matriz pede "risco baixo no PGR para
+  Copolímero de estireno e butadieno" (3×) e "acetona"; os dois aparecem como risco químico, com agravo, no
+  bloco de GHE do PCMSO. A lista de riscos do PCMSO = riscos do PGR + o que a médica manda incluir.
+- **O nome do exame no PCMSO não é o da matriz.** A matriz diz "Avaliação Psicossocial" (43×); o PCMSO lista
+  `(0289) Avaliação Médica de Saúde Mental` (20 GHE). O PCMSO usa nome e código do SOC: 12 exames distintos
+  com código (`(0295) Exame Clínico` 21×, `(0281) Audiometria` 18×, `(0562) Espirometria` 17×, `(1415)
+  Radiografia de tórax` 16×, ..., `(0467) Cromo Urinário` 1×). Gerar o bloco exige o mapa
+  slug do app → código/nome SOC `[A DECIDIR]`.
+- No modelo B o bloco é **por GHE** (descrição do ambiente, cargos com descrição, riscos uma vez só, exames)
+  — 40% das palavras do R70.
+
+### 2.2 O que faz um PCMSO pesar — medido nos RTF, hipótese para o Mauá
 
 Os 4 RTF têm 62–64 MB para ~90–140 páginas. **92–95% dos bytes são imagem em hexadecimal** (P02: 58,5 de
 61,9 MB; P17: 58,4 de 63,4 MB): 8 figuras, das quais 2 metarquivos WMF de página inteira (~45×70 cm em
@@ -219,7 +245,8 @@ do relatório ASO) e salva. Texto fixo, capa, estilos e imagens ficam com a clí
 
 1. **Bloco por GHE em DOCX avulso** — riscos (relatório ASO + agravo D-ARQ-93), exames/momentos/periodicidade
    (matriz). A clínica cola no Word dela: é o mesmo passo que as notas "Incluir no word do PCMSO" pedem hoje.
-   Gabarito: P12 Viverde e P14 R78 (trios). Não depende do modelo Mauá.
+   Formato do modelo B (por GHE). Gabarito: R70 P09 × matriz R70 (2026). P12 Viverde e P14 R78 (modelo A,
+   mas trios com PGR) servem só para conferir a origem PGR → descrição/agravo. Não depende do Mauá.
 2. **Extração de dados da empresa e da descrição de GHE/cargo do PGR** (CNPJ, endereço, CNAE, grau de risco)
    — classe (b), por família de PGR, sob o gate de D-ARQ-65.
 3. **Casca** — Opção 1 ou 3, decidida depois de medir o modelo Mauá (igual ao B? quanto pesa e por quê).
@@ -236,17 +263,16 @@ NR-07, a Opção 1 vira a escolha e a fatia 1 é reaproveitada inteira.
 ## 6. Normas
 
 - **NR-07:** cópia de trabalho `normas/nr-07-atualizada-2022-1 .pdf` (39 p.), última alteração listada:
-  Portaria MTP n.º 567, de 10/03/2022. `normas/README.md`: vigência conferida pelo Diovanni em 06/10/2026.
-  **Conferência no Gov.br/MTE nesta sessão: `[A MEDIR]`** — o container não alcança `www.gov.br` (política de
-  rede, proxy 403). Busca em fonte secundária não indicou alteração de texto da NR-07 em 2025–2026 (a
-  Portaria MTE 104/2026 mexe no Anexo II da NR-28, quadro de infrações) — não substitui a conferência oficial.
+  Portaria MTP n.º 567, de 10/03/2022. **Vigente: o Diovanni confirmou em 13/10/2026 que as normas da pasta
+  estão na última versão** (antes, 06/10/2026 no `normas/README.md`). O container não alcança `www.gov.br`
+  (política de rede, proxy 403), então a conferência desta sessão é essa declaração, não leitura do portal.
 - Itens que o PCMSO tem de conter (NR-07 7.5.4): a) agravos por risco do PGR; b) planejamento de exames
   conforme anexos; c) critérios de interpretação e condutas; d) conhecido pelos médicos examinadores;
   e) relatório analítico (7.6.2). Os itens a e b são o bloco por GHE.
-- **Divergência no texto fixo (modelo A):** a capa e o "Objetivo" citam "Portaria SEPRT n.º 6.734, de
-  10/03/2020"; a cópia de trabalho registra "de 09 de março de 2020" e lista ainda SEPRT 1.295/2021,
-  8.873/2021 e MTP 567/2022, que o modelo A não cita. Se o app reproduzir o texto fixo (Opção 1), corrigir
-  antes `[A CONFERIR no Gov.br]`.
+- **Divergência no texto fixo:** a capa e o "Objetivo" do modelo A, e o texto "Norma Regulamentadora - NR7"
+  do R70 (modelo B), citam "Portaria SEPRT n.º 6.734, de 10/03/2020"; a cópia vigente registra "de 09 de
+  março de 2020" e lista ainda SEPRT 1.295/2021, 8.873/2021 e MTP 567/2022. Vale para qualquer opção em que
+  o app reproduza ou revise o texto fixo.
 
 ---
 
@@ -270,6 +296,5 @@ NR-07, a Opção 1 vira a escolha e a fatia 1 é reaproveitada inteira.
 ## 8. Pendências desta medição
 
 - Modelo Mauá Plateu d'Or 28.09.26: igual ao B? onde estão os 35 MB? — `[A MEDIR]` quando subir.
-- Vigência da NR-07 no Gov.br/MTE — `[A MEDIR]` fora do container.
-- Conferência exame a exame PCMSO × matriz (P12, P14, P09) — `[A MEDIR]` com leitor de tabela, não `pdftotext`.
+- Conferência exame a exame PCMSO × matriz do R70 (modelo B) — `[A MEDIR]` com leitor de tabela, não `pdftotext`.
 - Correções do `PAREAMENTO_ACERVO.md` listadas em §1.1 — aguardam decisão.

@@ -4,7 +4,7 @@ PDFs oficiais das normas usadas nas regras do agente médico. Fonte única:
 Gov.br/MTE (Normas Regulamentadoras Vigentes) e Gov.br/Fundacentro (biblioteca de
 NHOs). Não usar cópia de terceiros nem texto em consulta pública.
 
-**Última conferência de vigência:** 06/10/2026, pelo Diovanni — todas as normas desta pasta estão
+**Última conferência de vigência:** 13/10/2026, pelo Diovanni ("as normas na pasta estão em sua última versão"; antes, 06/10/2026) — todas as normas desta pasta estão
 vigentes. 08/10/2026: acrescentado `D6481.pdf` (Decreto 6.481/2008, Lista TIP), impresso do Planalto
 nessa data pelo Diovanni. Quem substituir ou acrescentar arquivo atualiza esta linha.
 
