@@ -854,6 +854,7 @@ def pagina_matriz() -> None:
         alertas_do_ghe,
         contaminantes_a_confirmar,
         data_exibicao,
+        erros_do_pgr,
         montar_memorial,
         renderizar_memorial_docx,
         resumos_do_protocolo,
@@ -1438,6 +1439,12 @@ def pagina_matriz() -> None:
         caixa_conferencia = etapa_conferencia.container(border=True, key="caixa_conferencia")
         caixa_conferencia.subheader("3. Conferência — pendências")
 
+        # D-ARQ-57: erro do documento do PGR que não impediu a matriz, em vermelho e antes
+        # de tudo — no expander de extração ele se perderia entre os de vocabulário.
+        erros_pgr = erros_do_pgr(pendencias)
+        for erro in erros_pgr:
+            caixa_conferencia.error(f"Erro no PGR — {erro}")
+
         # Elo B: pendências GLOBAIS (D-ARQ-08, prioridade visual) sempre entram
         # na tela, em bloco próprio, ANTES das pendências de extração/hidratação
         # — senão as centenas de vocabulario_ausente afogam a única que importa.
@@ -1468,7 +1475,7 @@ def pagina_matriz() -> None:
                 for texto in alertas:
                     st.write(f"- {texto}")
 
-        if not cache.pendencias_globais and not pendencias and not a_confirmar and not alertas:
+        if not erros_pgr and not cache.pendencias_globais and not pendencias and not a_confirmar and not alertas:
             caixa_conferencia.caption("Nenhuma pendência a confirmar.")
 
         # Elo C: guarda anti-documento-vazio, independente do gate — documento

@@ -10,6 +10,7 @@ from agente_medico.motor.extracao_pgr import (
     _reconhece_lotacao_escala_qtd,
     avaliar_estrutura,
     avaliar_familia,
+    avaliar_numeracao_duplicada,
     avaliar_numeracao_ghe,
     avaliar_segmentacao,
     detectar_psicossocial,
@@ -1164,3 +1165,47 @@ def test_estrutura_roteia_ghe_com_ancora_suplente() -> None:
         },
     )
     assert avaliar_estrutura(paginas) == ("ghe", None)
+
+
+# --- Número de GHE repetido no lugar de um ausente (PGR Soft Connect15 v04) ---
+
+
+def _paginas_numeradas(maior: int, faltantes: tuple[int, ...], repetidos: dict[int, str]) -> list[str]:
+    linhas = [f"GHE {n:02d} - SETOR {n}" for n in range(1, maior + 1) if n not in faltantes]
+    linhas += [f"GHE {n:02d} - {titulo}" for n, titulo in repetidos.items()]
+    return ["\n".join(linhas)]
+
+
+def test_numero_repetido_que_explica_a_lacuna_nao_bloqueia() -> None:
+    # Soft Connect: dois GHE 18 e nenhum 19. Reversão que mata: tirar
+    # `or _lacuna_explicada_por_numero_repetido(titulos)` de avaliar_numeracao_ghe.
+    assert avaliar_numeracao_ghe(_paginas_numeradas(21, (19,), {18: "ELEVADOR DE CREMALHEIRA"})) is None
+
+
+def test_numero_repetido_que_nao_fecha_a_conta_segue_bloqueando() -> None:
+    # Faltam 19 e 20, só o 18 se repete: um GHE pode ter sumido. Reversão que mata:
+    # trocar `distintos == max(titulos)` por só `bool(repetidos)`.
+    pendencia = avaliar_numeracao_ghe(_paginas_numeradas(21, (19, 20), {18: "ELEVADOR"}))
+    assert pendencia is not None
+    assert pendencia.bloqueante and "(19, 20)" in pendencia.motivo
+
+
+def test_continuacao_com_mesmo_titulo_nao_conta_como_ghe_distinto() -> None:
+    # Cabeçalho repetido na página seguinte não compensa número ausente. Reversão que
+    # mata: guardar o título sem conferir se já estava (sem `chave not in chaves`).
+    pendencia = avaliar_numeracao_ghe(_paginas_numeradas(4, (3,), {2: "SETOR 2"}))
+    assert pendencia is not None and "(3)" in pendencia.motivo
+
+
+def test_aviso_de_numero_repetido_nao_bloqueia_e_cita_titulos_e_ausente() -> None:
+    # Reversão que mata: avaliar_numeracao_duplicada devolver None sempre.
+    aviso = avaliar_numeracao_duplicada(_paginas_numeradas(21, (19,), {18: "ELEVADOR DE CREMALHEIRA"}))
+    assert aviso is not None and not aviso.bloqueante
+    assert "SETOR 18, ELEVADOR DE CREMALHEIRA" in aviso.motivo and "nenhum numerado como 19" in aviso.motivo
+
+
+def test_numeracao_por_etapa_sem_lacuna_nao_gera_aviso() -> None:
+    # Vistamérica Ver.02 / Viverde: a numeração recomeça a cada etapa. Reversão que mata:
+    # avaliar_numeracao_duplicada avisar sempre que um número tem dois títulos.
+    paginas = ["GHE 01 - FÔRMA\nGHE 02 - VIGA\nGHE 01 - REBOCO\nGHE 02 - CONTRAPISO"]
+    assert avaliar_numeracao_duplicada(paginas) is None
