@@ -4384,6 +4384,14 @@ não refeita nesta sessão (não estão no disco) `[A MEDIR — no app, rodar a 
 **Título pelo cabeçalho — CONFERIDO no app (12/10/2026, pós-merge do PR #487).** Vistamerica 2026 rodada de novo pela rota
 da IA (28 blocos): matriz, memorial e relatório do ASO trazem os 28 GHEs com o título do cabeçalho do PDF, 07 a 12 como
 CREMALHEIRA, SINALIZAÇÃO DE GRUA, PRODUÇÃO 02, MANUTENÇÃO, SESMT e SUPERVISÃO DE EQUIPES; "Selecione" não aparece em
-nenhum dos três. Os outros 4 PGRs da rodada de 12/10 não foram rodadas de novo.
+nenhum dos três. Os outros 4 PGRs da rodada de 12/10 não foram rodados de novo.
+
+**Status:** sem item aberto nesta frente.
+
+**Título pelo cabeçalho — efeito nos outros 4 PGRs da rodada (12/10/2026).** Lido no transcript da sessão anterior
+(`claude/busy-thompson-lepmze`), saída gravada do script que comparou o "Riscos para o ASO" gerado pelo app em 12/10 com os
+títulos do cabeçalho do PDF (comparação em maiúsculas): Quasar 12/12, CMO Aurora 22/22, adendo Aurora 22/22 e Auro 19/19
+iguais; Vistamerica 2026 com 6 diferentes (GHEs 07 a 12). Refeito na sessão anterior a pedido, sem ignorar a caixa: único
+nome que difere só na caixa é Auro GHE 19, "Montagem" → "MONTAGEM". Nos 4 PGRs, a correção muda só esse nome.
 
 **Status:** sem item aberto nesta frente.

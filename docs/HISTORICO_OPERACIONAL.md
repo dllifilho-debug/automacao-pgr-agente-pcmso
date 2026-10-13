@@ -12859,3 +12859,18 @@ Smoke visual não rodado: a tela não muda.
 **Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
 `test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
 
+## Sessão (branch `claude/wizardly-wozniak-whgb0q` recriada sobre `main 7a887da`, pós-merge do PR #488) — 12/10/2026 — MEDIÇÃO (por transcript): efeito do título pelo cabeçalho nos outros 4 PGRs da rodada
+
+**Medido.** Os arquivos do app de 12/10 ficaram no container da sessão anterior; a comparação foi recuperada do transcript
+dela (`list_events`), saída gravada do script: Quasar, CMO Aurora, adendo Aurora e Auro sem diferença contra o cabeçalho do
+PDF (comparação em maiúsculas); Vistamerica 2026, 6 (GHEs 07 a 12). O "[A MEDIR — no app]" da entrada de implementação fica
+respondido. Pedido repassado à sessão anterior (`send_message`), resposta lida pelo transcript, saída bruta conferida: sem
+ignorar a caixa, o único nome que difere só na caixa é Auro GHE 19 ("Montagem" → "MONTAGEM"); 0 nos demais. Contagem do
+acervo: o script de lá pulava arquivos com "PCMSO"/"MATRIZ" no nome e descartava a pendência de `avaliar_estrutura` — por
+isso contou o Ricco 2025 Administração (`segmentacao_implausivel`, 41,7%, bloqueante: não chega à IA). Fica a medição desta
+branch: 15 PGRs na rota por GHE da IA, 11 com título em todos os blocos, 4 sem (ALT T65, EURO Setor C, Ricco 2026, Viverde
+25 de 31).
+
+**Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
+`test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
+
