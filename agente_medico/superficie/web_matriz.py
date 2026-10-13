@@ -852,6 +852,7 @@ def pagina_matriz() -> None:
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, FraseH, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.memorial_matriz import (
         alertas_do_ghe,
+        avisos_da_extracao,
         contaminantes_a_confirmar,
         data_exibicao,
         erros_do_pgr,
@@ -1444,6 +1445,8 @@ def pagina_matriz() -> None:
         erros_pgr = erros_do_pgr(pendencias)
         for erro in erros_pgr:
             caixa_conferencia.error(f"Erro no PGR — {erro}")
+        for aviso in avisos_da_extracao(pendencias):
+            caixa_conferencia.warning(aviso)
 
         # Elo B: pendências GLOBAIS (D-ARQ-08, prioridade visual) sempre entram
         # na tela, em bloco próprio, ANTES das pendências de extração/hidratação

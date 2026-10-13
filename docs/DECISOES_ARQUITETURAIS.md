@@ -5002,6 +5002,34 @@ inventário psicossocial avaliado e corte "moderado ou acima" para a Saúde Ment
   Psicossocial. O Diovanni mandou seguir a folha (pela transcrição; a foto não está no acervo): composto
   `saude_mental_psicossocial` = `psicossocial_moderado` ou `altura_com_inventario_psicossocial`. Sem caso no acervo.
 
+**Emenda 3 (branch `claude/admiring-maxwell-dhcgko`, sobre `main cbc9673`, 13/10/2026; decisão do Diovanni) — nível do
+inventário lido fora da linha de texto; aviso de inventário citado sem nível.**
+- **Medido.** PGR Soft Connect15 v04 (467 págs.): marcador presente, 44 linhas do grupo `ERGONÔMICOS - PSICOSSOCIAL` com
+  nível (`extract_tables`: 35 MÉDIO, 4 ALTO, 5 BAIXO; 43 sem nível, "Não havia colaboradores…"), e
+  `avaliar_inventario_psicossocial` dava `(False, False)`. Causa: o nível fica centrado na altura da linha da tabela,
+  4,3 a 8,5 pt acima da palavra "PSICOSSOCIAL"; no texto do pdfplumber cai noutra linha ("(Divisão de tarefas e MÉDIO").
+- **Decisão 1 — onde ler.** Faixa de palavras (`PaginaLida.palavras`, já lidas por `ler_pdf`), não `extract_tables`:
+  medido no Soft Connect, `extract_tables` custa 70,8 s de parse extra em série (a leitura inteira por `ler_pdf`, 21,7 s
+  em 4 processos); a faixa, 57 ms. Âncora: palavra "psicossocia…" que abre a linha visual (à esquerda, só o "-" do grupo
+  quebrado "ERGONÔMIC OS - PSICOSSOCIA L"); faixa de ±10 pt (`_FAIXA_NIVEL_PSICOSSOCIAL_PT`; maior distância medida
+  8,5 pt, linha seguinte da tabela a ≥ 31 pt). Somada à regra de texto, que segue intocada.
+- **Decisão 2 — aviso.** Marcador presente e nenhum nível lido: `avaliar_inventario_sem_nivel` emite
+  `Pendencia(tipo="inventario_psicossocial_sem_nivel", bloqueante=False, regra_origem="R-PSY-08")`; `preparar_pgr_hidratado`
+  a acrescenta às pendências; tela (`st.warning`, antes do expander de extração) e Resumo do memorial
+  (`avisos_da_extracao`).
+- **Medido (código final × `main`, 53 PDFs de `matrizes_originais/`, `ler_pdf`).** `detectar_psicossocial` não muda em
+  nenhum; `avaliar_inventario_psicossocial` muda só no Soft Connect: `(False, False)` → `(True, True)`, 44 linhas, 39 no
+  corte, página a página e na posição iguais às da tabela. Nos 10 PGRs com inventário avaliado, contagem de linhas e de
+  cortes igual à da `main`. Aviso em 4 PGRs: os 4 que só citam o FRPRT (Sinduscon 27.08.26, SPE QD. E-13, Seconci REV4,
+  Verde Maris).
+- **Fora.** Sinal segue de PGR inteiro (D-ARQ-49 P2): os 21 GHE do Soft Connect recebem Saúde Mental e Avaliação
+  Psicossocial pelo inventário, embora 9 GHE só tenham "Não havia colaboradores" e o GHE 16 tenha 3 BAIXO e 1 MÉDIO.
+  Na matriz Serrinha de 17/08/2026 (versão anterior, sem as avaliações), a médica pediu os dois em parte dos GHE (01, 02,
+  05–08, 12, 21). Leitura por GHE é decisão à parte. Efeito na matriz pela rota da IA: [A MEDIR — no app]; offline, o
+  Soft Connect cai em `familia_nao_medida` antes da hidratação.
+- **Verificação.** 9 testes novos (7 em `test_inventario_psicossocial.py`, 2 em `test_alertas_revisao.py`) e 1
+  parametrizado estendido; varredura inversa 10/10. Nenhuma `R-*` muda de predicado.
+
 ---
 
 ## D-ARQ-95 — Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO
@@ -5325,3 +5353,4 @@ raciocínio pedida por ele.
 | v264 | 12/10/2026 | Branch `claude/wizardly-wozniak-whgb0q`, sobre `main 2d51b37` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A): **nota em `D-ARQ-49`** — na rota LLM, o nome do GHE vem do título do cabeçalho do bloco (`extrair_titulo_ancora`, movido para `extracao_pgr`); sem título, fica o da IA. Corrige os 6 GHEs "-- Selecione o Setor --" da Vistamerica 2026. |
 | v265 | 13/10/2026 | Branch `claude/busy-cerf-tqxkmg`, sobre `main 096c89e` (IMPLEMENTAÇÃO, decisão do Diovanni — 2ª versão): **andamento em `D-ARQ-57`** — repertório suplente de cabeçalho GHE (travessão U+2013, dois-pontos depois do número, `GHE:` sem separador), aplicado só a documento sem nenhuma âncora do repertório principal. Medido nos 37 PGRs do acervo: só o Soft Connect15 muda (0 → 21 blocos); segue bloqueado por `numeracao_ghe_lacunar` (dois GHE 18, nenhum 19 no PGR). |
 | v266 | 13/10/2026 | Branch `claude/busy-cerf-tqxkmg`, sobre `main 2ba333e` (IMPLEMENTAÇÃO, autorizada pelo Diovanni): **andamento em `D-ARQ-57`** — número de GHE repetido que explica exatamente a lacuna (GHEs distintos = maior número) não bloqueia: a matriz sai e o erro do PGR vai em vermelho para a conferência e o memorial (`numeracao_ghe_duplicada`, não bloqueante). Medido nos 53 PDFs do acervo: só o Soft Connect15 muda. |
+| v267 | 13/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main cbc9673` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 3 em `D-ARQ-94`** — nível do inventário psicossocial lido pela faixa de palavras em volta do fator (tabela que parte a linha, Soft Connect15 v04) e aviso não bloqueante `inventario_psicossocial_sem_nivel` quando o PGR cita o inventário sem nível lido. Medido nos 53 PDFs do acervo: só o Soft Connect muda. |

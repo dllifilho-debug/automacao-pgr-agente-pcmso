@@ -239,3 +239,37 @@ def test_tela_mostra_o_erro_do_pgr_em_vermelho(monkeypatch: pytest.MonkeyPatch, 
     _submeter_formulario(at)
     assert not at.exception
     assert any("Erro no PGR" in str(el.value) and "nenhum numerado como 19" in str(el.value) for el in at.error)
+
+
+_AVISO_INVENTARIO = Pendencia(
+    tipo="inventario_psicossocial_sem_nivel",
+    destinatario="extracao",
+    motivo="O PGR cita o inventário de riscos psicossociais, mas nenhum fator com nível de risco foi lido",
+    bloqueante=False,
+    regra_origem="R-PSY-08",
+)
+
+
+def test_memorial_leva_ao_resumo_o_inventario_sem_nivel(proto: Protocolo) -> None:
+    # Reversão que mata: tirar `avisos_da_extracao(pendencias)` de avisos_pgr em montar_memorial.
+    pgr, pendencias = _pgr(proto)
+    resultado = processar_pgr(pgr, proto)
+    memorial = montar_memorial(
+        resultado.matrizes, proto.vocabulario.exames, {}, pgr=pgr, pendencias=[*pendencias, _AVISO_INVENTARIO]
+    )
+    assert any("nenhum fator com nível" in a and "R-PSY-08" in a for a in memorial.avisos_pgr)
+
+
+def test_tela_mostra_o_inventario_sem_nivel_fora_do_expander(monkeypatch: pytest.MonkeyPatch, proto: Protocolo) -> None:
+    # Reversão que mata: tirar da conferência o laço `caixa_conferencia.warning(...)` de
+    # avisos_da_extracao.
+    pgr, pendencias = _pgr(proto)
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado",
+        lambda *a, **k: (pgr, (*pendencias, _AVISO_INVENTARIO)),
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    assert not at.exception
+    assert any("nenhum fator com nível" in str(el.value) for el in at.warning)

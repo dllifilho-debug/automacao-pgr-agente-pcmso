@@ -22,7 +22,10 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt, RGBColor
 
 from agente_medico.motor.estagios.gates import TIPO_PGR_SEM_INVENTARIO_PSICOSSOCIAL
-from agente_medico.motor.extracao_pgr import TIPO_NUMERACAO_GHE_DUPLICADA
+from agente_medico.motor.extracao_pgr import (
+    TIPO_INVENTARIO_PSICOSSOCIAL_SEM_NIVEL,
+    TIPO_NUMERACAO_GHE_DUPLICADA,
+)
 from agente_medico.motor.estagios.pendencias_estruturais import (
     TIPO_CONTAMINANTE_A_CONFIRMAR,
     TIPO_MENOR_APRENDIZ_LISTA_TIP,
@@ -320,6 +323,17 @@ def avisos_do_pgr(pendencias_globais: Sequence[Pendencia]) -> tuple[str, ...]:
     )
 
 
+def avisos_da_extracao(pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
+    """Aviso da leitura do PGR que não impediu a matriz: inventário psicossocial citado
+    sem nível lido (R-PSY-08). Fora desta lista, ele ficaria no expander de extração,
+    entre as pendências de vocabulário."""
+    return tuple(
+        _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
+        for p in pendencias
+        if p.tipo == TIPO_INVENTARIO_PSICOSSOCIAL_SEM_NIVEL
+    )
+
+
 def erros_do_pgr(pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
     """Erro do próprio documento do PGR que não impediu a matriz (D-ARQ-57: número de
     GHE repetido no lugar de um ausente), destacado em vermelho no memorial e na tela."""
@@ -462,7 +476,7 @@ def montar_memorial(
             )
             for regra_id, motivo in sorted(usadas.items())
         ),
-        avisos_pgr=avisos_do_pgr(pendencias_globais),
+        avisos_pgr=(*avisos_do_pgr(pendencias_globais), *avisos_da_extracao(pendencias)),
         erros_pgr=erros_do_pgr(pendencias),
     )
 

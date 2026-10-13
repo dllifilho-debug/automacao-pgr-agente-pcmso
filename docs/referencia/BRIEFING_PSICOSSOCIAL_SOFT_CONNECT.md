@@ -1,7 +1,7 @@
 # Briefing — inventário psicossocial não detectado (PGR Soft Connect15 v04)
 
-`[MEDIDO — 13/10/2026, branch claude/busy-cerf-tqxkmg]` Ponto de partida para a próxima sessão.
-Nada daqui foi implementado.
+`[MEDIDO — 13/10/2026, branch claude/busy-cerf-tqxkmg]` Ponto de partida da sessão de 13/10/2026 (branch `claude/admiring-maxwell-dhcgko`), que o
+implementou: D-ARQ-94, emenda 3.
 
 ## Sintoma
 
