@@ -12888,3 +12888,20 @@ linhas iguais às da tabela. Aviso em 4 PGRs, os que só citam o FRPRT. Efeito n
 59 arquivos. Varredura inversa 10/10. `test_gerar_indice_darq.py`: 6 passed. Smoke visual não rodado: a tela ganha um
 `st.warning`, coberto por AppTest em `test_alertas_revisao.py`.
 
+## Sessão (branch `claude/admiring-maxwell-dhcgko` sobre `main e1c644d`, pós-merge do PR #495) — 14/10/2026 — MEDIÇÃO no app do Soft Connect + IMPLEMENTAÇÃO: aliases de poeira e hexano
+
+**Medido (arquivos do app de 04/10/2026, rota da IA, 21 blocos).** Inventário psicossocial: Saúde Mental em 20 GHE,
+Psicossocial em 18, sem R-PSY-07 nem aviso de inventário sem nível — fecha o `[A MEDIR]` da emenda 3 de D-ARQ-94. Achados:
+GHE 20 do PGR fora da matriz (20 de 21) e 234 riscos não reconhecidos, entre eles as poeiras respiráveis (RX OIT e
+Espirometria em 1 GHE contra 20 da matriz Serrinha). PENDENCIAS, DT-(sessão `claude/admiring-maxwell-dhcgko`)-01.
+
+**Implementado.** 5 termos em `agentes.yaml`: "Poeiras Respiráveis /PNOS" e "Particulado total - PNOS sem sílica"
+(`poeira_nao_classificada`), "Poeiras Respiráveis /Sílica Livre" (`silica`), "Poeiras respiráveis – Sulfato de cálcio
+semi-hidratado" (`poeira_de_gesso`), "Hexano" (`n_hexano`, decisão do Diovanni diante da divergência do Vistamerica Ver.02).
+Medido: das 234 linhas do memorial, 16 passam a resolver (as visadas), nenhuma outra muda; rota determinística nos 53 PDFs,
+matriz `main` × novo: 0 mudanças (8 PGRs com GHE). Texto dos 53 PDFs: as formas novas só aparecem no Soft Connect, no
+PCMSO Envolt (não é entrada do app) e "Hexano" no PGR Vistamerica Ver.02 (divergência registrada).
+
+**Verificação.** 5 testes novos (8 casos) em `test_resolvedor_termos.py` (inventário 216 → 221); varredura inversa 6/6. Suíte completa (árvore parada):
+1921 passed, 6 skipped (29 min 12 s). Smoke visual não rodado: a tela não muda.
+

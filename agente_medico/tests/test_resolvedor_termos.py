@@ -98,7 +98,9 @@ def test_indice_real_tem_210_entradas(indice_real: IndiceTermos) -> None:
     # "Poeira - Sílica", "Quedas de altura" e 2 de `vibracao_mao_braco` (D-ARQ-70).
     # 210 -> 216 (branch `claude/fervent-shannon-1nq8hw`, 08/10/2026): +1 slug `domissanitarios`
     # (R-ESP-05) e +5 termos do censo de 9 PGRs (Fascino, Vila Brasil, Porto Araras I, Sinduscon-GO).
-    assert len(indice_real.slug_por_forma) == 216
+    # 216 -> 221 (branch `claude/admiring-maxwell-dhcgko`, 14/10/2026): +5 termos do PGR Soft
+    # Connect15 v04 lidos pela IA — 2 de PNOS, 1 de sílica, 1 de gesso e "Hexano" (n_hexano).
+    assert len(indice_real.slug_por_forma) == 221
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -131,6 +133,45 @@ def test_poeira_da_madeira_resolve_exato(indice_real: IndiceTermos) -> None:
     assert resolucao.confianca == Confianca.EXATA
     assert resolucao.slug == "poeira_de_madeira"
     assert resolucao.pendencia is None
+
+
+@pytest.mark.parametrize(
+    "termo", ["Poeiras Respiráveis /PNOS", "Poeiras Respiráveis / PNOS", "Poeiras Respiráveis - PNOS"]
+)
+def test_poeiras_respiraveis_pnos_resolve_para_pnos(indice_real: IndiceTermos, termo: str) -> None:
+    # Grafias do PGR Soft Connect15 v04 (9 GHE, memorial do app de 14/10/2026); as três dão a
+    # mesma chave. Reversão que mata: tirar "Poeiras Respiráveis /PNOS" dos termos de
+    # `poeira_nao_classificada` — volta a vocabulario_ausente e o GHE perde RX OIT e espirometria.
+    resolucao = resolver_termo(termo, indice_real)
+    assert (resolucao.slug, resolucao.confianca) == ("poeira_nao_classificada", Confianca.EXATA)
+
+
+@pytest.mark.parametrize("termo", ["Poeiras Respiráveis /Sílica Livre", "Poeiras Respiráveis – Sílica livre"])
+def test_poeiras_respiraveis_silica_livre_resolve_para_silica(indice_real: IndiceTermos, termo: str) -> None:
+    # Soft Connect15 v04, GHE 03, 09, 12 e Marmoraria. Reversão que mata: tirar
+    # "Poeiras Respiráveis /Sílica Livre" dos termos de `silica`.
+    resolucao = resolver_termo(termo, indice_real)
+    assert (resolucao.slug, resolucao.confianca) == ("silica", Confianca.EXATA)
+
+
+def test_particulado_total_pnos_sem_silica_vai_para_pnos_e_nao_para_silica(indice_real: IndiceTermos) -> None:
+    # Soft Connect15 v04, GHE Elevador de Cremalheira. Reversões que matam: tirar o termo de
+    # `poeira_nao_classificada` (vocabulario_ausente) ou gravá-lo em `silica` ("sem sílica").
+    resolucao = resolver_termo("Particulado total - PNOS sem sílica", indice_real)
+    assert (resolucao.slug, resolucao.confianca) == ("poeira_nao_classificada", Confianca.EXATA)
+
+
+def test_poeiras_respiraveis_sulfato_de_calcio_semi_hidratado_e_gesso(indice_real: IndiceTermos) -> None:
+    # Soft Connect15 v04, GHE 14 GESSO. Reversão que mata: tirar o termo de `poeira_de_gesso`.
+    resolucao = resolver_termo("Poeiras Respiráveis /Sulfato de cálcio semi hidratado", indice_real)
+    assert (resolucao.slug, resolucao.confianca) == ("poeira_de_gesso", Confianca.EXATA)
+
+
+def test_hexano_sem_n_resolve_para_n_hexano(indice_real: IndiceTermos) -> None:
+    # Soft Connect15 v04, GHE 09; matriz Serrinha 17/08/2026 pede 2,5-hexanodiona. Reversão que
+    # mata: tirar `termos: ["Hexano"]` de `n_hexano` — volta a fuzzy_recusado (D-ARQ-64).
+    resolucao = resolver_termo("Hexano", indice_real)
+    assert (resolucao.slug, resolucao.confianca, resolucao.pendencia) == ("n_hexano", Confianca.EXATA, None)
 
 
 def test_po_de_madeira_resolve_exato(indice_real: IndiceTermos) -> None:
