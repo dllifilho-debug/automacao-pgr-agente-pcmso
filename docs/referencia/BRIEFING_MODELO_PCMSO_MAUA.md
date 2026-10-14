@@ -115,3 +115,47 @@ em todas as linhas medidas) e "MUD. FUNÇ." é o MR. O código Seconci não exis
 O par PGR Plateau rev 03 ↔ este PCMSO dá conferência GHE a GHE (exames, momentos e periodicidade)
 entre o que o app gera e o que a médica assinou. Rodar o app no PGR Plateau antes:
 `[A MEDIR — rota e número de GHE aprovados]`.
+
+## Decisões do Diovanni (14/10/2026)
+
+1. **Escopo: PCMSO inteiro.** O texto fixo das seções 3–16 fica guardado como modelo `.docx` no
+   repositório; o app preenche identificação, controle de revisão, blocos por GHE, termo de
+   compromisso e assinatura.
+2. **Texto fixo: corrigir os defeitos listados acima, marcados**, para o Diovanni ver o que mudou.
+   Forma proposta: cada correção realçada em amarelo no modelo, mais uma lista "o que mudou e por
+   quê"; depois da aprovação, o realce sai e o modelo congela. **NR-32 fica** — o Seconci é serviço de
+   saúde e tem a NR-32 como base —, marcada só como **sugestão de alteração** (comentário no Word;
+   ideia em aberto: condicionar ao risco biológico no PGR).
+3. **Agravo: o do PCMSO das médicas, não o do PGR** — agravo à saúde é matéria médica; os engenheiros
+   costumam falhar nesse item. Proposta a decidir: dicionário perigo → agravo extraído dos PCMSOs das
+   médicas no modelo 2026 (Mauá, R70), casado pelo agente que o app já resolve (não pelo texto do
+   PGR); perigo fora do dicionário sai com o agravo do PGR marcado "do PGR — conferir".
+   `[MEDIDO — 14/10/2026, PCMSO Mauá]` 143 linhas, 54 perigos distintos: 45 com uma descrição só,
+   9 com variação (a maioria erro do modelo: "Perda etergen induzida pelo ruído" ao lado de "Perda
+   auditiva…", "membros 37uperiors", "Fraturas, luxações e morte" × "Óbitos, Fraturas e luxações") —
+   a forma limpa de cada um é decisão do Diovanni.
+4. **Código Seconci: manter**, no padrão "(0295) Exame Clínico", como campo de exibição em
+   `exames.yaml`. Não há tabela oficial conhecida; a lista sai dos PCMSOs do acervo.
+   `[MEDIDO — 14/10/2026]` 25 códigos distintos nos 8 PCMSOs em PDF do acervo + Mauá (0029, 0071,
+   0102, 0113, 0116, 0133, 0281, 0289, 0295, 0296, 0300, 0364, 0391, 0467, 0531, 0562, 0658, 0693,
+   0836, 0863, 0951, 1075, 1086, 1181, 1415). O texto dos PDFs embaralha as colunas: o par
+   código ↔ exame `[A MEDIR — por tabela, PDF a PDF]`. Exame sem código conhecido sai sem código e
+   com aviso, nunca com código inventado.
+5. **Matriz RQ.61 e PCMSO saem juntos**, na mesma rodada do app e da mesma fonte — exames iguais
+   por construção; as médicas conferem e validam os dois. Recomendação aceita: uma etapa só
+   (não "validar a matriz, subir de novo e gerar o PCMSO"). Correção de regra volta como entrada e
+   regenera os dois; correção pontual de um PGR, a médica faz nos dois. Se as pontuais ficarem
+   frequentes, avaliar "subir a matriz corrigida → regenerar o PCMSO".
+
+## Ordem combinada
+
+1. Modelo `.docx` corrigido, com as marcações, para revisão do Diovanni; registro das 5 decisões
+   numa D-ARQ nova (número lido do disco na sessão).
+2. Dicionário de agravos (com as 9 variações para decisão) e tabela de códigos.
+3. Geração do PCMSO junto com a matriz, conferida no par PGR Plateau rev 03 ↔ PCMSO Mauá.
+
+## Pendência anterior (Soft Connect)
+
+Rodar o PGR Soft Connect15 v04 no app depois do deploy do PR #497 e conferir: GHE 09 com RX anual
+e a pendência bloqueante em vermelho; 21 GHE na matriz; download liberado. PENDENCIAS,
+DT-(sessão `claude/admiring-maxwell-dhcgko`)-01.
