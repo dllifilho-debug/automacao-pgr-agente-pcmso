@@ -241,11 +241,59 @@ def _helper_silica_asbesto(ctx: GHEContext) -> Union[Quantificacao, bool, Ausent
             "quantitativa ao mesmo tempo — input contraditório, corrigir no PGR"
         )
     if q.pct_LT is None and not q.sem_avaliacao_quantitativa:      # (d)
+        if q.valor is not None:
+            return Ausente(
+                "Sílica/asbesto com medição sem % de quartzo ou sem fração — o limite do "
+                "Anexo 12 da NR-15 não se calcula; pedir os dois ao elaborador do PGR"
+            )
         return Ausente(
             "Sílica/asbesto sem quantificação nem indicação de ausência de "
             "avaliação — medir ou declarar ausência de laudo"
         )
     return q                                                        # (e)
+
+
+def _pct_leo_pior_caso_silica_incompleta(ctx: GHEContext) -> float | None:
+    """R-RX-01-incompleta-* (D-ARQ-68 cl.3, emendas de 14/10/2026): sílica com valor medido e
+    sem % de quartzo ou sem fração. O LEO não se calcula, mas o valor medido tem teto: o
+    menor LEO possível — quartzo 100% e fração respirável no que faltar (Anexo 12 da NR-15:
+    8/(100+2) = 0,078 mg/m³). A faixa sai pelo maior %LEO possível; o erro só pode ser para
+    mais. None fora desse estado ou sem LEO para o cenário. Só sílica: o asbesto não tem LEO
+    em mg/m³ no resolver hoje, e a emenda não o decidiu."""
+    risco = _risco_silica_asbesto(ctx)
+    if risco is None or risco.agente != "silica" or risco.quantificacao is None:
+        return None
+    q = risco.quantificacao
+    if q.valor is None or q.pct_LT is not None or q.sem_avaliacao_quantitativa:
+        return None
+    if q.pct_quartzo is not None and q.fracao is not None:
+        return None
+    fracoes = (q.fracao,) if q.fracao is not None else (Fracao.RESPIRAVEL, Fracao.TOTAL)
+    quartzo = q.pct_quartzo if q.pct_quartzo is not None else 100.0
+    cenario = classifica_cenario(ctx.pgr_ghe.cenario)
+    leos = [
+        leo
+        for fracao in fracoes
+        if (leo := resolve_leo(risco.agente, fracao, cenario, quartzo).leo) is not None
+    ]
+    return (q.valor / min(leos)) * 100.0 if leos else None
+
+
+def _registrar_faixa_pior_caso(nome: str, dentro: Callable[[float], bool]) -> None:
+    @primitivo(nome, riscos=_risco_unico(_risco_silica_asbesto))
+    def _faixa(ctx: GHEContext) -> bool:
+        pct = _pct_leo_pior_caso_silica_incompleta(ctx)
+        return pct is not None and dentro(pct)
+
+
+_registrar_faixa_pior_caso("silica_incompleta_pior_caso_ate_10", lambda p: p <= _PCT_LEO_BAIXO)
+_registrar_faixa_pior_caso(
+    "silica_incompleta_pior_caso_10_50", lambda p: _PCT_LEO_BAIXO < p <= _PCT_LEO_MEDIO
+)
+_registrar_faixa_pior_caso(
+    "silica_incompleta_pior_caso_50_100", lambda p: _PCT_LEO_MEDIO < p <= _PCT_LEO_ALTO
+)
+_registrar_faixa_pior_caso("silica_incompleta_pior_caso_acima_100", lambda p: p > _PCT_LEO_ALTO)
 
 
 _por_filtro("fumos_metalicos", lambda r: r.agente == "fumos_metalicos")

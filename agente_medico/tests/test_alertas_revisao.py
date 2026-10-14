@@ -273,3 +273,90 @@ def test_tela_mostra_o_inventario_sem_nivel_fora_do_expander(monkeypatch: pytest
     _submeter_formulario(at)
     assert not at.exception
     assert any("nenhum fator com nível" in str(el.value) for el in at.warning)
+
+
+_GHE_AUSENTE = Pendencia(
+    tipo="ghe_ausente_da_matriz",
+    destinatario="extracao",
+    motivo="O PGR tem 21 GHE e a matriz 20 — 1 fora da matriz: PRODUÇÃO – PRODUÇÃO MARMORARIA",
+    bloqueante=True,
+    regra_origem="D-ARQ-22",
+)
+
+
+def _pgr_silica_sem_quartzo(proto: Protocolo) -> tuple[PGR, list[Pendencia]]:
+    # GHE 09 do Soft Connect15 v04 no app (14/10/2026): sílica medida sem % de quartzo.
+    indice = construir_indice_termos(
+        proto.vocabulario.agentes, fracoes_sem_agente=proto.vocabulario.fracoes_sem_agente
+    )
+    ghe = GHEVerbatim(
+        nome="HIDROSSANITÁRIO",
+        cargos=("Encanador",),
+        riscos=(RiscoVerbatim(agente="Sílica livre", quantificacao="0,4012 mg/m³", fonte_geradora="corte"),),
+    )
+    return hidratar_pgr([ghe], indice, date(2026, 9, 3), True)
+
+
+def test_memorial_abre_o_resumo_com_o_ghe_ausente_em_vermelho(proto: Protocolo) -> None:
+    # Reversão que mata: tirar TIPO_GHE_AUSENTE_DA_MATRIZ de erros_do_pgr.
+    pgr, pendencias = _pgr(proto)
+    resultado = processar_pgr(pgr, proto)
+    memorial = montar_memorial(
+        resultado.matrizes, proto.vocabulario.exames, {}, pgr=pgr, pendencias=[*pendencias, _GHE_AUSENTE]
+    )
+    assert any("MARMORARIA" in e for e in memorial.erros_pgr)
+
+
+def test_tela_sem_download_quando_ghe_do_pgr_fica_fora_da_matriz(
+    monkeypatch: pytest.MonkeyPatch, proto: Protocolo
+) -> None:
+    # Reversão que mata: tirar de pagina_matriz o bloco que encerra antes dos downloads
+    # quando há ghe_ausente_da_matriz (D-ARQ-22).
+    pgr, pendencias = _pgr(proto)
+    baixados: list[str] = []
+    monkeypatch.setattr("streamlit.download_button", lambda rotulo, *a, **k: baixados.append(rotulo) or False)
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado",
+        lambda *a, **k: (pgr, (*pendencias, _GHE_AUSENTE)),
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    assert not at.exception
+    assert baixados == []
+    assert any("MARMORARIA" in str(el.value) for el in at.error)
+
+
+def test_memorial_leva_a_pendencia_bloqueante_do_ghe_em_vermelho_e_uma_vez_so(
+    proto: Protocolo, tmp_path: Path
+) -> None:
+    # Reversões que matam: (1) `bloqueios=()` em montar_memorial; (2) tirar o rótulo
+    # "PENDÊNCIA BLOQUEANTE — " do laço do Resumo; (3) chave por regra em bloqueios_do_ghe
+    # (as 6 faixas do Quadro 1 virariam 6 linhas).
+    from docx import Document
+
+    pgr, pendencias = _pgr_silica_sem_quartzo(proto)
+    resultado = processar_pgr(pgr, proto)
+    memorial = montar_memorial(resultado.matrizes, proto.vocabulario.exames, {}, pgr=pgr, pendencias=pendencias)
+    (bloqueio,) = memorial.bloqueios
+    assert "RX de Tórax OIT" in bloqueio and "quartzo" in bloqueio and "R-RX-01-alta" in bloqueio
+    destino = tmp_path / "memorial.docx"
+    renderizar_memorial_docx(memorial, CabecalhoDocumento("SERRINHA", "SOFT", "Atualização", "", "", ""), destino)
+    (paragrafo,) = [p for p in Document(str(destino)).paragraphs if p.text.startswith("PENDÊNCIA BLOQUEANTE — ")]
+    assert all(str(run.font.color.rgb) == "C00000" for run in paragrafo.runs)
+
+
+def test_tela_mostra_a_pendencia_bloqueante_do_ghe_em_vermelho(
+    monkeypatch: pytest.MonkeyPatch, proto: Protocolo
+) -> None:
+    # Reversão que mata: tirar da conferência o laço `caixa_conferencia.error(...)` de bloqueios.
+    pgr, pendencias = _pgr_silica_sem_quartzo(proto)
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado",
+        lambda *a, **k: (pgr, tuple(pendencias)),
+    )
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    _submeter_formulario(at)
+    assert not at.exception
+    assert any("Pendência bloqueante" in str(el.value) and "quartzo" in str(el.value) for el in at.error)

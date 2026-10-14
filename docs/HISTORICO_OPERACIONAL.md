@@ -12905,3 +12905,28 @@ PCMSO Envolt (não é entrada do app) e "Hexano" no PGR Vistamerica Ver.02 (dive
 **Verificação.** 5 testes novos (8 casos) em `test_resolvedor_termos.py` (inventário 216 → 221); varredura inversa 6/6. Suíte completa (árvore parada):
 1921 passed, 6 skipped (29 min 12 s). Smoke visual não rodado: a tela não muda.
 
+## Sessão (branch `claude/admiring-maxwell-dhcgko` sobre `main 9d695d2`, pós-merge do PR #496) — 14/10/2026 — IMPLEMENTAÇÃO: sílica medida sem % de quartzo e supressão silenciosa
+
+**Medido (2ª rodada do Soft Connect no app, arquivos do Diovanni).** 21 GHE; RX OIT em 16 GHE, Espirometria em 18. GHE 09:
+sílica 0,4012 mg/m³ sem % de quartzo → nenhuma linha de RX, matriz PARCIAL, nada na tela, na matriz ou no memorial
+(reproduzido offline). PENDENCIAS, DT-(sessão `claude/admiring-maxwell-dhcgko`)-01.
+
+**Decisões do Diovanni.** (1) RX com pendência anexada (emenda à cl.3 de D-ARQ-68): primeiro anual fixo; depois, diante
+do Viverde (sílica abaixo do limite de detecção indo a RX anual, achado da suíte), a faixa pelo pior caso; (2) a
+recomendação de visibilidade (contagem de GHE e pendência bloqueante em vermelho), proposta em 14/10/2026.
+
+**Implementado.** `R-RX-01-incompleta-{adm,baixa,media,alta}` + primitivos `silica_incompleta_pior_caso_*`; mensagem do ramo
+(d) corrigida; consolidação com 0 = "sem periódico" (`_piso_periodicidade`, defeito latente exposto pelo Viverde Acab-05);
+`avaliar_ghes_ausentes` + `_com_contagem` em `preparar_ghes`; `bloqueios_do_ghe` e o campo `Memorial.bloqueios`; tela com
+`st.error` por bloqueio e sem download quando há GHE ausente. Medido (código `main` × novo inteiro, worktree): 7 PGRs
+da rota determinística com GHE e fixture do Viverde (32 GHE) — 0 GHE mudam em exame, periodicidade ou momentos; 0 linhas
+vermelhas novas nos 7; nenhum GHE ausente. 1ª suíte: 8 falhas — 6 da tela (import do tipo fora de `pagina_matriz`, que o
+`AppTest` executa isolada) e 2 do comportamento decidido (sílica sem fração; Viverde Acab-05), que levaram ao pior caso.
+
+**Verificação.** Testes novos: 4 casos do pior caso (parametrizado), medição completa pela regra VALIDADA,
+matriz PARCIAL com a pendência na linha, consolidação 0 × 60, 4 de tela/memorial e 2 do orquestrador; reescritos:
+2 de RX da sílica incompleta e 1 da fração ausente (o comportamento que fixavam mudou por decisão). Varredura inversa
+15/15 (7 da sílica e da consolidação, 8 da visibilidade); o teste "asbesto fora" saiu: sem LEO de asbesto em mg/m³ no
+resolver, nenhuma reversão o matava. Suíte completa (árvore parada): 1933 passed, 6 skipped (23 min 53 s). mypy no alvo
+canônico: limpo, 59 arquivos. Smoke visual: ok (`--chromium` do container).
+

@@ -840,6 +840,17 @@ Evidência empírica de universalidade (D-ARQ-06): a anexação generalizou alé
 
 Recorte: o dedup convergente do Stage 8 (dois riscos determinados emitindo o mesmo exame com periodicidades distintas → escolha de piso em vez de `ConflitoProtocolo`) SAIU do escopo da fatia 3 — não tem caso-âncora vivo (a sílica bloqueada não emite linha, logo não há convergência de duas linhas). Entra na fila como item próprio; quando vier, é mudança de comportamento do `raise ConflitoProtocolo` e merece decisão própria. Commit `f25cd48`, merge `f1cb412` (PR #58). Suíte 333→339 (181→? isolado: 184→190).
 
+**Nota (branch `claude/admiring-maxwell-dhcgko`, 14/10/2026) — pendência bloqueante visível e GHE ausente da matriz.** A cl.3 garantia o teto
+pendente "visível ao lado" da linha, mas nenhuma superfície o mostrava: tela, matriz e memorial ignoravam as
+pendências bloqueantes por GHE e as anexadas [MEDIDO — Soft Connect15 v04 no app, 14/10/2026]. Agora
+`bloqueios_do_ghe` (memorial_matriz.py) as lista uma vez por exame e motivo, com as regras juntas, em vermelho na
+conferência e no Resumo do memorial ("PENDÊNCIA BLOQUEANTE — "). Na mesma linha: `avaliar_ghes_ausentes`
+(extracao_pgr.py) compara os GHE aprovados com os blocos recortados na rota por GHE e emite
+`ghe_ausente_da_matriz` (bloqueante, D-ARQ-22) — vermelho na tela e no memorial, e a tela não oferece download.
+Medido no app: 1ª rodada do Soft Connect com 20 GHE para 21 blocos (GHE 20 MARMORARIA fora, só no expander), 2ª
+com 21 — a transcrição da IA varia entre rodadas. Nos 8 PGRs da rota determinística: 0 linhas vermelhas novas,
+nenhum GHE ausente.
+
 **Nota de implementação (fatia 4, sessão 003.E).** Arco D-ARQ-31 fechado: auditor da invariante piso-sem-teto + regressão Viverde tri-estado, ambos como rede de teste (não custo em produção). Decisão de localização: o auditor mora na CAMADA DE TESTE (`agente_medico/tests/invariantes.py`), não em `motor/` — a invariante já é garantida POR CONSTRUÇÃO por `anexar_pendencias` (toda bloqueante com âncora-casante é anexada; não há ramo de piso-sem-teto), logo o risco real é regressão futura no código, papel de teste; um auditor em produção só adicionaria modo de falha a motor determinístico cuja invariante não pode ser violada por input. `auditar_invariante_piso_teto(resultado) -> list[ViolacaoPisoSemTeto]`: retorno ESTRUTURADO (frozen, campos só-str — ghe_id/exame/regra_origem/motivo — porque ExameEmitido é mutável e não serve a == estável), nunca bool; quando dispara, diz qual GHE e exame achatou. Critério: bloqueante COM exames_alvo SOLTA na matriz cuja âncora casa um slug emitido do mesmo GHE = violação. Sobre saída real é sempre [] (construção); o teste sintético `test_invariante_piso_teto.py` fabrica o estado de violação à mão (que o pipeline nunca produz) — sem ele o auditor jamais seria exercitado no vermelho.
 
 Regressão Viverde tri-estado (a entrega que fecha o arco; o auditor é a rede estreita): congela a forma dos 32 GHEs pós-fatia-3. Diagnóstico real (003.E) instrumentado para imprimir status + pendencias_anexadas confirmou ponto-a-ponto: Acab-05 PARCIAL (rx 60M pnos-acima100, família sílica adm/sem/baixa/media/alta anexada); Acab-06/Acab-08/Est-07 PARCIAL (rx 0M pnos-10a100, mesma família anexada); Est-08 VÁLIDA (rx 0M pnos-ate10, anexada VAZIA). Correção factual sobre o handoff: Est-08 não é "controle sem linha rx" — emite rx pela faixa PNOS branda (pnos-ate10), mas sem sílica não ganha família anexada → VÁLIDA. A família R-RX-01-pnos-* é governada por PNOS, não por sílica; sílica só adiciona as 5 pendências por cima. Prova de que a anexação é dirigida por sílica, não por PNOS (linha rx existe nos dois estados; família anexada só onde há sílica). Asserções estruturais (linha presente + família ⊆ anexadas + não-solta + status), sem cravar periodicidade exceto Acab-05. Contagem dos 32 por invariantes derivadas (soma==32, PARCIAL≥4, VÁLIDA≥1, BLOQUEADA==0), não números cegos de GHEs não medidos. Suíte 339→347 (+8: 4 sintéticos + 4 integração); isolado 190→198. mypy --strict limpo (15 arquivos: 14 motor + invariantes.py). Commit 6f80f46, merge fa11ba3 (PR #60, "Create a merge commit").
@@ -3075,6 +3086,27 @@ Diferença do caso-âncora: aqui a presunção tem corte por nível — todo ris
 presume (mesmo corte da `R-BIO-05` para cancerígeno), medido contra Porto Araras I GHE-14. Com a FDS do
 solvente anexada, o predicado deixa de ser `Ausente` (falso sem benzeno; `R-PKG-BZ` com benzeno).
 Decisão do Diovanni (opção b′ da `DT-(sessão claude/cool-planck-niq4le)-04`).
+
+**Emenda à cl.3 (branch `claude/admiring-maxwell-dhcgko`, sobre `main 9d695d2`, 14/10/2026; decisões do Diovanni) — sílica medida sem % de
+quartzo ou sem fração emite a faixa do pior caso.** Medido no app (Soft Connect15 v04, GHE 09): sílica com
+0,4012 mg/m³ e sem % de quartzo; as 6 faixas do Quadro 1 saíam `Ausente`, nenhuma linha de RX era emitida e a matriz
+saía PARCIAL sem nada visível (tela, matriz, memorial); a médica (matriz Serrinha 17/08/2026) pediu RX OIT anual.
+A cl.3 continua valendo — nenhuma faixa é escolhida com dado inventado e as 6 pendências seguem bloqueantes —, mas a
+linha deixa de faltar: o valor medido tem teto. `R-RX-01-incompleta-{adm,baixa,media,alta}` (primitivos
+`silica_incompleta_pior_caso_*`) calculam o %LEO pelo menor LEO possível — quartzo 100% e fração respirável no que
+faltar (Anexo 12 da NR-15: 8/(100+2) = 0,078 mg/m³; mineração pelo NR-22 via `resolve_leo`) — e emitem a periodicidade da
+faixa do Quadro 1 correspondente; o erro só pode ser para mais. As pendências ficam anexadas à linha (D-ARQ-31 fatia 3)
+e a matriz sai PARCIAL. `[INTERPRETADO — prioridade na revisão de saída]`. 1ª versão (RX anual fixo) trocada pela do
+pior caso antes do merge: a suíte mostrou o Viverde (Est-07, Acab-05, Acab-06, Acab-08: sílica "<0,0050 mg/m³") indo a
+RX anual por sílica abaixo do limite de detecção; no pior caso dá 6,4% do LEO, só admissional. Soft Connect GHE 09:
+512%, anual. Só sílica: asbesto medido sem dado continua sem linha (não decidido). Mensagem do ramo (d) corrigida:
+"medição sem % de quartzo ou sem fração", não "sem quantificação".
+
+**Correção na consolidação (mesma branch).** `stage_8_consolidacao` tomava o `min` das periodicidades, e 0 ("sem
+periódico", ex.: `R-RX-01-adm`) vencia qualquer intervalo: no Viverde Acab-05, o RX só admissional da sílica (pior caso)
+apagava o RX 60M do PNOS. Agora 0 perde para qualquer periodicidade (`_piso_periodicidade`). Latente na `main`: nenhum
+caso medido somava RX só admissional com RX periódico. Medido (código `main` × novo, 7 PGRs da rota determinística e a
+fixture do Viverde, 32 GHE): 0 GHE mudam em exame, periodicidade ou momentos.
 
 ## D-ARQ-69 — Regra clínica escrita antes da sessão não é materializada sem conferir o texto vigente da norma que ela mesma cita
 
@@ -5358,3 +5390,4 @@ raciocínio pedida por ele.
 | v266 | 13/10/2026 | Branch `claude/busy-cerf-tqxkmg`, sobre `main 2ba333e` (IMPLEMENTAÇÃO, autorizada pelo Diovanni): **andamento em `D-ARQ-57`** — número de GHE repetido que explica exatamente a lacuna (GHEs distintos = maior número) não bloqueia: a matriz sai e o erro do PGR vai em vermelho para a conferência e o memorial (`numeracao_ghe_duplicada`, não bloqueante). Medido nos 53 PDFs do acervo: só o Soft Connect15 muda. |
 | v267 | 13/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main cbc9673` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 3 em `D-ARQ-94`** — nível do inventário psicossocial lido pela faixa de palavras em volta do fator (tabela que parte a linha, Soft Connect15 v04) e aviso não bloqueante `inventario_psicossocial_sem_nivel` quando o PGR cita o inventário sem nível lido. Medido nos 53 PDFs do acervo: só o Soft Connect muda. |
 | v268 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main e1c644d` (MEDIÇÃO): **nota em `D-ARQ-94`, emenda 3** — efeito no app medido pela rodada do Diovanni: Saúde Mental em 20 GHE, Psicossocial em 18, nenhum dos dois avisos. |
+| v269 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main 9d695d2` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda à cl.3 de `D-ARQ-68`** — sílica medida sem % de quartzo ou fração emite RX OIT pela faixa do pior caso (quartzo 100%, fração respirável; `R-RX-01-incompleta-*`, INTERPRETADO) com as pendências anexadas, e 0 ("sem periódico") deixa de vencer na consolidação; **nota em `D-ARQ-31`** — pendência bloqueante por GHE em vermelho na tela e no memorial, e GHE recortado fora da matriz (`ghe_ausente_da_matriz`) bloqueia o download. |

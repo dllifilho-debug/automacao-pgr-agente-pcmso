@@ -663,3 +663,34 @@ def test_numero_repetido_monta_a_matriz_e_leva_o_aviso() -> None:
     assert resultado is not None and len(resultado.matrizes) == 21
     (aviso,) = [p for p in pendencias if p.tipo == "numeracao_ghe_duplicada"]
     assert not aviso.bloqueante
+
+
+def test_ghe_reprovado_no_gate_vira_ghe_ausente_da_matriz_com_o_titulo() -> None:
+    # Soft Connect15 v04 no app (14/10/2026): 21 blocos, 20 GHE na matriz, sem aviso visível.
+    # Reversão que mata: tirar _com_contagem da rota da IA em preparar_ghes.
+    paginas = ["GHE 1 - SETOR A\nCargo A\nlinha", "GHE 2 - MARMORARIA\nCargo B\nlinha"]
+    sem_agente = dataclasses.replace(
+        _GHE_VALIDO, riscos=(RiscoVerbatim(agente="", quantificacao="", fonte_geradora="x"),)
+    )
+    with patch(_ALVO_PARSER_DETERMINISTICO, side_effect=FamiliaNaoReconhecida("família não medida (teste)")):
+        aprovados, pendencias = preparar_ghes(
+            Path("qualquer.pdf"),
+            MockTranscritorSequencial((_GHE_VALIDO, sem_agente)),
+            _CLIENTE_CARD_NUNCA_CHAMADO,
+            _leitura(paginas),
+        )
+    assert [g.nome for g in aprovados] == ["SETOR A"]
+    (ausente,) = [p for p in pendencias if p is not None and p.tipo == "ghe_ausente_da_matriz"]
+    assert ausente.bloqueante and "MARMORARIA" in ausente.motivo
+
+
+def test_ghe_renomeado_pela_ia_sai_so_com_a_contagem() -> None:
+    # Reversão que mata: tirar a guarda `len(faltam) == diferenca` de avaliar_ghes_ausentes —
+    # o título de um GHE presente sairia como ausente.
+    from agente_medico.motor.extracao_pgr import avaliar_ghes_ausentes
+
+    blocos = ["GHE 1 - SETOR A\nx", "GHE 2 - SETOR B\nx"]
+    pendencia = avaliar_ghes_ausentes(blocos, (dataclasses.replace(_GHE_VALIDO, nome="Outro nome"),))
+    assert pendencia is not None
+    assert "SETOR" not in pendencia.motivo and "2 GHE e a matriz 1" in pendencia.motivo
+

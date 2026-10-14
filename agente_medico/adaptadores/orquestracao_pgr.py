@@ -8,6 +8,7 @@ from pathlib import Path
 from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
+    avaliar_ghes_ausentes,
     avaliar_inventario_psicossocial,
     avaliar_inventario_sem_nivel,
     avaliar_numeracao_duplicada,
@@ -248,7 +249,7 @@ def preparar_ghes(
         )
     else:
         if len(candidatos_deterministicos) == len(blocos):
-            return gate_forma_ghe(candidatos_deterministicos)
+            return _com_contagem(blocos, gate_forma_ghe(candidatos_deterministicos))
         pendencia_familia = Pendencia(
             tipo="familia_nao_medida",
             destinatario="extracao",
@@ -274,8 +275,16 @@ def preparar_ghes(
                 regra_origem="D-ARQ-52",
             ),
         )
-    aprovados, pend_forma = gate_forma_ghe(candidatos)
+    aprovados, pend_forma = _com_contagem(blocos, gate_forma_ghe(candidatos))
     return aprovados, (pendencia_familia, *pend_forma)
+
+
+def _com_contagem(
+    blocos: Sequence[str], gate: tuple[tuple[GHEVerbatim, ...], tuple[Pendencia, ...]]
+) -> tuple[tuple[GHEVerbatim, ...], tuple[Pendencia, ...]]:
+    aprovados, pendencias = gate
+    ausentes = avaliar_ghes_ausentes(blocos, aprovados)
+    return aprovados, pendencias if ausentes is None else (*pendencias, ausentes)
 
 
 def _preparar_grid(

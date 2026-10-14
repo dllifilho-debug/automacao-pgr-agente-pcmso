@@ -203,3 +203,19 @@ def test_funcao_pura_nao_muta_entrada() -> None:
     assert entrada[1] is e2
     assert e1.momentos == momentos_antes
     assert e1.motivos == motivos_antes
+
+
+def test_rx_so_admissional_nao_apaga_o_periodico_de_outra_regra() -> None:
+    # Viverde Acab-05 (14/10/2026): sílica no pior caso ≤10% do LEO (R-RX-01-incompleta-adm, 0 =
+    # só admissional) + PNOS >100% (60M). Reversão que mata: voltar `min` puro em
+    # stage_8_consolidacao — o 0 venceria e os 60M sumiriam.
+    from agente_medico.motor.estagios.consolidacao import stage_8_consolidacao
+    from agente_medico.motor.tipos import ExameEmitido, Momento
+
+    so_adm = ExameEmitido(exame="rx_torax_oit", periodicidade_meses=0, momentos={Momento.ADM})
+    periodico = ExameEmitido(
+        exame="rx_torax_oit", periodicidade_meses=60, momentos={Momento.ADM, Momento.PER}
+    )
+    for ordem in ((so_adm, periodico), (periodico, so_adm)):
+        (rx,) = stage_8_consolidacao(list(ordem))
+        assert rx.periodicidade_meses == 60

@@ -849,10 +849,12 @@ def pagina_matriz() -> None:
         titulo_ghe,
         renderizar_docx,
     )
+    from agente_medico.motor.extracao_pgr import TIPO_GHE_AUSENTE_DA_MATRIZ
     from agente_medico.motor.tipos import BlocoVerbatim, Fracao, FraseH, MedicaoInformada, ProcedenciaMedicao
     from agente_medico.superficie.memorial_matriz import (
         alertas_do_ghe,
         avisos_da_extracao,
+        bloqueios_do_ghe,
         contaminantes_a_confirmar,
         data_exibicao,
         erros_do_pgr,
@@ -1445,6 +1447,9 @@ def pagina_matriz() -> None:
         erros_pgr = erros_do_pgr(pendencias)
         for erro in erros_pgr:
             caixa_conferencia.error(f"Erro no PGR — {erro}")
+        bloqueios = [b for m in cache.matrizes or () for b in bloqueios_do_ghe(m, cache.exames_vocab)]
+        for texto in bloqueios:
+            caixa_conferencia.error(f"Pendência bloqueante — {texto}")
         for aviso in avisos_da_extracao(pendencias):
             caixa_conferencia.warning(aviso)
 
@@ -1478,7 +1483,7 @@ def pagina_matriz() -> None:
                 for texto in alertas:
                     st.write(f"- {texto}")
 
-        if not erros_pgr and not cache.pendencias_globais and not pendencias and not a_confirmar and not alertas:
+        if not erros_pgr and not bloqueios and not cache.pendencias_globais and not pendencias and not a_confirmar and not alertas:
             caixa_conferencia.caption("Nenhuma pendência a confirmar.")
 
         # Elo C: guarda anti-documento-vazio, independente do gate — documento
@@ -1491,6 +1496,15 @@ def pagina_matriz() -> None:
                 "Nenhum download oferecido (D-ARQ-22)."
             )
             bloqueio = "documento sem linha de cargo — veja a etapa 1"
+            return
+
+        # D-ARQ-22: GHE do PGR fora da matriz — a matriz não vai à assinatura sem ele; o
+        # motivo já está em vermelho na conferência (erros_do_pgr).
+        if any(p.tipo == TIPO_GHE_AUSENTE_DA_MATRIZ for p in pendencias):
+            etapa_pgr.error(
+                "GHE do PGR fora da matriz — nenhum download oferecido. Processe o PGR de novo (D-ARQ-22)."
+            )
+            bloqueio = "GHE do PGR fora da matriz — veja a conferência"
             return
 
         # Aviso de procedência (003.EW, D-ARQ-22 revisão de saída): a matriz muda

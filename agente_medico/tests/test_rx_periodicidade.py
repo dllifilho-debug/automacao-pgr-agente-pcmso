@@ -2,6 +2,7 @@
 # [DERIVADO — 002.N]. Bordas: ate_10 ≤10; 10_50: >10 e ≤50; 50_100: >50 e ≤100; acima_100: >100.
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from agente_medico.motor.protocolo import Protocolo, carregar
 from agente_medico.motor.tipos import (
     Ausente,
     ExameEmitido,
+    Fracao,
     GHEContext,
     GHEPGR,
     Momento,
@@ -159,27 +161,50 @@ def test_rx_silica_quantificacao_none_sem_pendencia_ausente() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Regressão — ramo (d): medição afirmada (valor) mas não roteável (pct_quartzo
-# ausente) segue Ausente. D-ARQ-08/13 intactos: não escolher faixa inventa número.
+# Ramo (d): sílica com valor medido e sem pct_quartzo. As faixas seguem Ausente (não
+# escolher faixa — D-ARQ-08/13), e R-RX-01-incompleta-* emite a faixa do pior caso:
+# quartzo 100% e fração respirável, LEO 8/(100+2) (D-ARQ-68 cl.3, emendas de 14/10/2026).
 # ---------------------------------------------------------------------------
 
-def test_rx_silica_valor_sem_pct_quartzo_continua_ausente_bloqueante() -> None:
-    q_incompleta = Quantificacao(
-        valor=0.05,
-        unidade="mg/m³",
-        relacao_LT=None,
-        pct_LT=None,
-        apenas_qualitativa=False,
-        sem_avaliacao_quantitativa=False,
-        pct_quartzo=None,
-    )
-    ctx, proto = _ctx_com_agente("silica", q_incompleta)
+_Q_SEM_QUARTZO = Quantificacao(
+    valor=0.05,
+    unidade="mg/m³",
+    relacao_LT=None,
+    pct_LT=None,
+    apenas_qualitativa=False,
+    sem_avaliacao_quantitativa=False,
+    pct_quartzo=None,
+)
+
+
+@pytest.mark.parametrize(
+    ("valor", "periodicidade"),
+    [(0.4012, 12), (0.05, 36), (0.02, 60), (0.005, 0)],
+)
+def test_rx_silica_valor_sem_pct_quartzo_sai_pela_faixa_do_pior_caso(valor: float, periodicidade: int) -> None:
+    # %LEO no pior caso: 512% (Soft Connect GHE 09), 64%, 26%, 6,4% (Viverde). Reversões que
+    # matam: (1) tirar as regras R-RX-01-incompleta-*; (2) quartzo do pior caso 0 em vez de 100
+    # (tudo cai em "até 10%"); (3) fração TOTAL em vez das duas (0,05 vira 21%, 60 meses);
+    # (4) voltar a mensagem "sem quantificação" do ramo (d).
+    ctx, proto = _ctx_com_agente("silica", replace(_Q_SEM_QUARTZO, valor=valor))
     exames = stage_5_emissao(ctx, proto)
-    rx_list = [e for e in exames if e.exame == "rx_torax_oit"]
-    assert rx_list == [], "Medição não roteável (sem pct_quartzo) não deve emitir rx_torax_oit"
+    (rx,) = [e for e in exames if e.exame == "rx_torax_oit"]
+    assert rx.periodicidade_meses == periodicidade
     bloqueantes = [p for p in ctx.pendencias if p.bloqueante]
-    assert bloqueantes, "Deve haver pendencia bloqueante"
-    assert any("laudo" in p.motivo.lower() or "avaliação" in p.motivo.lower() for p in bloqueantes)
+    assert bloqueantes, "As faixas do Quadro 1 seguem bloqueantes"
+    assert all("quartzo" in p.motivo for p in bloqueantes if "silica_asbesto" in p.motivo)
+
+
+def test_rx_silica_medicao_completa_nao_aciona_a_regra_incompleta() -> None:
+    # 0,05 mg/m³ com 5% de quartzo respirável = 4,4% do LEO (8/(5+2)): faixa até 10%, só admissional,
+    # pela regra VALIDADA. Reversão que mata: tirar o `return None` de quartzo e fração conhecidos
+    # em _pct_leo_pior_caso_silica_incompleta (a regra INTERPRETADA entraria no motivo).
+    q = replace(_Q_SEM_QUARTZO, pct_quartzo=5.0, fracao=Fracao.RESPIRAVEL)
+    ctx, proto = _ctx_com_agente("silica", q)
+    exames = stage_5_emissao(ctx, proto)
+    (rx,) = [e for e in exames if e.exame == "rx_torax_oit"]
+    assert rx.periodicidade_meses == 0
+    assert [m.regra_id for m in rx.motivos] == ["R-RX-01-adm"]
 
 
 # ---------------------------------------------------------------------------
@@ -379,3 +404,29 @@ def test_rx_pnos_deprecated_nao_emite_dupla() -> None:
     rx_list = [e for e in stage_5_emissao(ctx, proto) if e.exame == "rx_torax_oit"]
     assert len(rx_list) == 1, f"R-RX-01-pnos DEPRECATED não deve coexistir com a faixa: {rx_list}"
     assert rx_list[0].periodicidade_meses == 0
+
+
+def test_matriz_com_silica_sem_quartzo_sai_parcial_com_a_pendencia_na_linha_do_rx() -> None:
+    # Caso do GHE 09 do Soft Connect15 v04 (app, 14/10/2026). Reversão que mata: o ramo (d)
+    # de _helper_silica_asbesto devolver False com valor medido — o RX anual sairia sem
+    # ressalva e a matriz VÁLIDA (D-ARQ-68 cl.3).
+    from agente_medico.motor.entrada import processar_pgr
+    from agente_medico.motor.hidratacao import hidratar_pgr
+    from agente_medico.motor.resolvedor_termos import construir_indice_termos
+    from agente_medico.motor.tipos import GHEVerbatim, RiscoVerbatim
+
+    proto = _proto()
+    indice = construir_indice_termos(
+        proto.vocabulario.agentes, fracoes_sem_agente=proto.vocabulario.fracoes_sem_agente
+    )
+    ghe = GHEVerbatim(
+        nome="Hidrossanitário",
+        cargos=("Encanador",),
+        riscos=(RiscoVerbatim(agente="Sílica livre", quantificacao="0,4012 mg/m³", fonte_geradora="corte"),),
+    )
+    pgr, _ = hidratar_pgr((ghe,), indice, date(2026, 9, 1), True)
+    (matriz,) = processar_pgr(pgr, proto, date(2026, 10, 14)).matrizes
+    (rx,) = [ln for ln in matriz.linhas if ln.exame == "rx_torax_oit"]
+    assert matriz.status == "PARCIAL"
+    assert rx.periodicidade_meses == 12
+    assert any(p.bloqueante for p in rx.pendencias_anexadas)

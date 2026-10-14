@@ -23,6 +23,7 @@ from docx.shared import Cm, Pt, RGBColor
 
 from agente_medico.motor.estagios.gates import TIPO_PGR_SEM_INVENTARIO_PSICOSSOCIAL
 from agente_medico.motor.extracao_pgr import (
+    TIPO_GHE_AUSENTE_DA_MATRIZ,
     TIPO_INVENTARIO_PSICOSSOCIAL_SEM_NIVEL,
     TIPO_NUMERACAO_GHE_DUPLICADA,
 )
@@ -129,6 +130,7 @@ class Memorial:
     regras_usadas: tuple[RegraUsada, ...]
     avisos_pgr: tuple[str, ...] = ()
     erros_pgr: tuple[str, ...] = ()
+    bloqueios: tuple[str, ...] = ()
 
 
 _COR_ERRO = RGBColor(0xC0, 0x00, 0x00)
@@ -336,11 +338,39 @@ def avisos_da_extracao(pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
 
 def erros_do_pgr(pendencias: Sequence[Pendencia]) -> tuple[str, ...]:
     """Erro do próprio documento do PGR que não impediu a matriz (D-ARQ-57: número de
-    GHE repetido no lugar de um ausente), destacado em vermelho no memorial e na tela."""
+    GHE repetido no lugar de um ausente) e GHE do PGR fora da matriz (D-ARQ-22),
+    destacados em vermelho no memorial e na tela."""
     return tuple(
         _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
         for p in pendencias
-        if p.tipo == TIPO_NUMERACAO_GHE_DUPLICADA
+        if p.tipo in (TIPO_NUMERACAO_GHE_DUPLICADA, TIPO_GHE_AUSENTE_DA_MATRIZ)
+    )
+
+
+_PREDICADO_AUSENTE = re.compile(r"^Regra (?P<regra>\S+): predicado '[^']*' não pôde ser avaliado — (?P<texto>.+)$")
+
+
+def bloqueios_do_ghe(matriz: MatrizGHE, exames_vocab: dict[str, Any]) -> tuple[str, ...]:
+    """Pendência bloqueante do GHE — anexada à linha (D-ARQ-31 fatia 3) ou sem linha —,
+    uma por exame e motivo, com as regras juntas. Sem esta lista o exame que falta ou
+    que saiu sob ressalva não aparecia na tela nem no memorial [MEDIDO — Soft Connect15
+    v04 no app, 14/10/2026: GHE 09 sem RX, PARCIAL, nada visível]."""
+    regras_por_texto: dict[str, list[str]] = {}
+    anexadas = [(ln.exame, p) for ln in matriz.linhas for p in ln.pendencias_anexadas]
+    sem_linha = [(alvo, p) for p in matriz.pendencias for alvo in (p.exames_alvo or ("",))]
+    for exame, p in (*anexadas, *sem_linha):
+        if not p.bloqueante:
+            continue
+        m = _PREDICADO_AUSENTE.match(p.motivo)
+        texto = m["texto"] if m else p.motivo
+        regra = m["regra"] if m else (p.regra_origem or "")
+        chave = f"{_nome_exame(exame, exames_vocab)}: {texto}" if exame else texto
+        regras = regras_por_texto.setdefault(chave, [])
+        if regra not in regras:
+            regras.append(regra)
+    return tuple(
+        _sanitizar(f"{matriz.ghe_id} — {chave} (ref. {', '.join(regras)})")
+        for chave, regras in regras_por_texto.items()
     )
 
 
@@ -478,6 +508,7 @@ def montar_memorial(
         ),
         avisos_pgr=(*avisos_do_pgr(pendencias_globais), *avisos_da_extracao(pendencias)),
         erros_pgr=erros_do_pgr(pendencias),
+        bloqueios=tuple(b for m in matrizes for b in bloqueios_do_ghe(m, exames_vocab)),
     )
 
 
@@ -559,12 +590,13 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
 
     total = sum(n for _, n in memorial.contagem_certeza)
     documento.add_heading("Resumo", level=1)
-    for erro in memorial.erros_pgr:
-        paragrafo_erro = documento.add_paragraph()
-        for trecho in ("ERRO NO PGR — ", erro):
-            run_erro = paragrafo_erro.add_run(trecho)
-            run_erro.bold = True
-            run_erro.font.color.rgb = _COR_ERRO
+    for rotulo, textos in (("ERRO NO PGR — ", memorial.erros_pgr), ("PENDÊNCIA BLOQUEANTE — ", memorial.bloqueios)):
+        for texto in textos:
+            paragrafo_erro = documento.add_paragraph()
+            for trecho in (rotulo, texto):
+                run_erro = paragrafo_erro.add_run(trecho)
+                run_erro.bold = True
+                run_erro.font.color.rgb = _COR_ERRO
     documento.add_paragraph(f"{total} exames na matriz, em {len(memorial.blocos)} GHEs. Base de cada um:")
     for rotulo, n in memorial.contagem_certeza:
         documento.add_paragraph(f"{rotulo}: {n}", style="List Bullet")

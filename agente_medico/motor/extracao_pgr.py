@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
 from agente_medico.motor.io_pdf import PaginaLida, paginas_liberadas
 from agente_medico.motor.niveis_pgr import NivelPGR, classificar_nivel_pgr
-from agente_medico.motor.tipos import Pendencia
+from agente_medico.motor.tipos import GHEVerbatim, Pendencia
 
 # D-ARQ-57 peça 4 fatia 4d: rota de roteamento devolvida por avaliar_estrutura
 # — só significativa quando a Pendencia acompanhante é None (documento
@@ -922,6 +923,40 @@ def avaliar_numeracao_duplicada(paginas: Sequence[str]) -> Pendencia | None:
         ),
         bloqueante=False,
         regra_origem="D-ARQ-57",
+        ghe_id=None,
+    )
+
+
+TIPO_GHE_AUSENTE_DA_MATRIZ = "ghe_ausente_da_matriz"
+
+
+def avaliar_ghes_ausentes(blocos: Sequence[str], aprovados: Sequence[GHEVerbatim]) -> Pendencia | None:
+    """GHE recortado do PGR que não chegou à matriz, qualquer que seja a causa (gate de
+    forma, transcrição): pendência bloqueante (D-ARQ-22) — a matriz sem o GHE não pode ir à
+    assinatura. Medido: Soft Connect15 v04 no app, 14/10/2026 — 21 blocos, 20 GHE, sem aviso
+    fora do expander. Os títulos que faltam saem pela comparação com os nomes aprovados; se
+    a IA renomeou algum, a lista não fecha com a diferença e sai só a contagem."""
+    if len(aprovados) >= len(blocos):
+        return None
+    titulos = [extrair_titulo_ancora(b.split("\n", 1)[0]) or b.split("\n", 1)[0].strip() for b in blocos]
+    restantes = Counter(g.nome for g in aprovados)
+    faltam: list[str] = []
+    for titulo in titulos:
+        if restantes[titulo] > 0:
+            restantes[titulo] -= 1
+        else:
+            faltam.append(titulo)
+    diferenca = len(blocos) - len(aprovados)
+    quais = f": {'; '.join(faltam)}" if len(faltam) == diferenca else ""
+    return Pendencia(
+        tipo=TIPO_GHE_AUSENTE_DA_MATRIZ,
+        destinatario="extracao",
+        motivo=(
+            f"O PGR tem {len(blocos)} GHE e a matriz {len(aprovados)} — {diferenca} fora da matriz"
+            f"{quais}. Nenhum exame desses GHE foi emitido; processar o PGR de novo antes de assinar"
+        ),
+        bloqueante=True,
+        regra_origem="D-ARQ-22",
         ghe_id=None,
     )
 
