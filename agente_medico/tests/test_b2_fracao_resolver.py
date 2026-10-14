@@ -136,13 +136,17 @@ def test_fracao_ausente_gera_pendencia_bloqueante() -> None:
     pgr, proto = _pgr_silica(q)
     resultado = executar(pgr, proto, hoje=date.today())
 
-    # (i) RX não emitido: fração ausente bloqueia todas as faixas de R-RX-01
+    # (i) Fração ausente bloqueia as faixas de R-RX-01; o RX sai pela faixa do pior caso
+    # (fração respirável: 0,5 / (8/(10+2)) = 75% do LEO → 36M), D-ARQ-68 cl.3, emenda de 14/10/2026.
     assert len(resultado.matrizes) == 1
-    exames_emitidos = {e.exame for e in resultado.matrizes[0].linhas}
-    assert "rx_torax_oit" not in exames_emitidos, "RX não deve emitir com fração ausente"
+    (rx,) = [e for e in resultado.matrizes[0].linhas if e.exame == "rx_torax_oit"]
+    assert rx.periodicidade_meses == 36
 
-    # (ii) Pendencia(bloqueante=True) presente no Resultado — família sílica intacta
-    bloqueantes = [p for m in resultado.matrizes for p in m.pendencias if p.bloqueante]
+    # (ii) Pendencia(bloqueante=True) presente no Resultado — família sílica intacta, anexada à linha
+    bloqueantes = [
+        p for m in resultado.matrizes for p in (*m.pendencias, *(a for ln in m.linhas for a in ln.pendencias_anexadas))
+        if p.bloqueante
+    ]
     assert bloqueantes, "Deve haver pendência bloqueante quando fracao=None"
     assert any("fração" in p.motivo or "fracao" in p.motivo for p in bloqueantes)
 
@@ -150,8 +154,7 @@ def test_fracao_ausente_gera_pendencia_bloqueante() -> None:
     # de risco determinada"; R-ESP-02 (independente de quantificação) agora determina
     # espirometria para o mesmo risco que bloqueia o RX — não é mais o caso.
     linhas_risco = _linhas_de_risco(resultado.matrizes[0].linhas)
-    assert [e.exame for e in linhas_risco] == ["espirometria"]
-    assert all(m.regra_id == "R-ESP-02" for e in linhas_risco for m in e.motivos)
+    assert sorted(e.exame for e in linhas_risco) == ["espirometria", "rx_torax_oit"]
     assert resultado.matrizes[0].status == "PARCIAL"
     assert resultado.status == "PRELIMINAR"
 

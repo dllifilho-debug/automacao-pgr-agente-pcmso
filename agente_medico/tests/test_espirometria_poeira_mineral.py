@@ -114,8 +114,8 @@ def test_espirometria_emite_mesmo_com_rx_bloqueado_por_medicao_incompleta() -> N
     ctx, proto = _ctx_com_agente("silica", q_incompleta)
     exames = stage_5_emissao(ctx, proto)
 
-    rx_list = [e for e in exames if e.exame == "rx_torax_oit"]
-    assert rx_list == [], "Medição não roteável (sem pct_quartzo) não deve emitir rx_torax_oit"
+    # D-ARQ-68 cl.3, emenda de 14/10/2026: o RX sai anual (R-RX-01-incompleta) e as faixas
+    # seguem bloqueantes; a espirometria não depende de nenhum dos dois.
     bloqueantes = [p for p in ctx.pendencias if p.bloqueante]
     assert bloqueantes, "Deve haver pendência bloqueante do RX"
 

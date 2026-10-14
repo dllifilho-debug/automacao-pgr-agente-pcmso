@@ -523,6 +523,9 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | 50% < CLSC ≤ 100% LEO | adm + 36M até 15 anos → **24M** após |
 | > 100% LEO | adm + 12M desde o início |
 
+**Sílica — medição sem % de quartzo ou sem fração** `[INTERPRETADO — prioridade na revisão de saída]` (emenda à cl.3 de D-ARQ-68, 14/10/2026, decisão do Diovanni):
+- a periodicidade da faixa do Quadro 1 pelo **pior caso**: %LEO calculado com o menor LEO possível (quartzo 100% e fração respirável no que faltar, 8/(100+2) = 0,078 mg/m³), com as pendências das faixas anexadas à linha e a matriz PARCIAL até o PGR trazer os dois dados. Ex.: 0,4012 mg/m³ → 512% → anual (Soft Connect GHE 09; a médica pediu anual); 0,005 mg/m³ → 6,4% → só admissional (Viverde). Asbesto nesse estado continua sem linha.
+
 **Sílica / asbesto — SEM avaliação quantitativa** (canteiro sem laudo de higienista; caso mais comum):
 - adm + **24M** até 15 anos de exposição → 12M após.
 
@@ -547,6 +550,7 @@ Periodicidade do RX de tórax padrão OIT conforme **Anexo III da NR-07 (Portari
 | R-RX-01-baixa | silica_asbesto_leo_10_50 | 60M | → 36M |
 | R-RX-01-media | silica_asbesto_leo_50_100 | 36M | → 24M |
 | R-RX-01-alta | silica_asbesto_leo_acima_100 | 12M | — |
+| R-RX-01-incompleta-{adm,baixa,media,alta} | silica_incompleta_pior_caso_* | a da faixa do pior caso | a da faixa |
 | R-RX-01-pnos-ate10 | pnos_leo_ate_10 | só admissional | — |
 | R-RX-01-pnos-10a100 | pnos_leo_10_100 | só admissional (motor) | — |
 | R-RX-01-pnos-acima100 | pnos_leo_acima_100 | 60M | — |

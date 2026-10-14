@@ -399,6 +399,49 @@ regras:
     resumo_clinico: "Sílica ou asbesto com medição acima do limite → RX de tórax (padrão OIT) anual. NR-07, Anexo III, Quadro 1."
     status: VALIDADO
 
+  - id: R-RX-01-incompleta-adm
+    quando: silica_incompleta_pior_caso_ate_10
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 0
+        momentos: [adm]
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022) — ≤10% do LEO no pior caso: periodicidade de R-RX-01-adm. Sílica com valor medido e sem % de quartzo ou sem fração: o LEO do Anexo 12 da NR-15 não se calcula, mas o valor tem teto — %LEO pelo menor LEO possível (quartzo 100% e fração respirável no que faltar, 8/(100+2) = 0,078 mg/m³). A faixa sai pelo maior %LEO que a medição permite; o erro só pode ser para mais. As pendências bloqueantes das faixas (`predicado_ausente`) ficam anexadas à linha e a matriz sai PARCIAL (D-ARQ-68 cl.3, emendas de 14/10/2026, decisões do Diovanni) [INTERPRETADO — prioridade na revisão de saída; precedente: matriz Serrinha 17/08/2026 (Soft Connect 15), RX OIT anual no GHE com sílica a 0,4012 mg/m³]. Asbesto fora: não decidido."
+    resumo_clinico: "Sílica medida no PGR sem % de quartzo ou sem fração → RX de tórax (padrão OIT) pela faixa do pior caso, só no admissional, até o PGR completar o dado. NR-07, Anexo III, Quadro 1."
+    status: INTERPRETADO
+
+  - id: R-RX-01-incompleta-baixa
+    quando: silica_incompleta_pior_caso_10_50
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 60
+        periodicidade_apos_15a: 36
+        momentos: [adm, per, MR, dem]
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022) — >10% e ≤50% no pior caso: periodicidade de R-RX-01-baixa. Sílica com valor medido e sem % de quartzo ou sem fração: o LEO do Anexo 12 da NR-15 não se calcula, mas o valor tem teto — %LEO pelo menor LEO possível (quartzo 100% e fração respirável no que faltar, 8/(100+2) = 0,078 mg/m³). A faixa sai pelo maior %LEO que a medição permite; o erro só pode ser para mais. As pendências bloqueantes das faixas (`predicado_ausente`) ficam anexadas à linha e a matriz sai PARCIAL (D-ARQ-68 cl.3, emendas de 14/10/2026, decisões do Diovanni) [INTERPRETADO — prioridade na revisão de saída; precedente: matriz Serrinha 17/08/2026 (Soft Connect 15), RX OIT anual no GHE com sílica a 0,4012 mg/m³]. Asbesto fora: não decidido."
+    resumo_clinico: "Sílica medida no PGR sem % de quartzo ou sem fração → RX de tórax (padrão OIT) pela faixa do pior caso, a cada 5 anos, a cada 3 após 15 anos de exposição, até o PGR completar o dado. NR-07, Anexo III, Quadro 1."
+    status: INTERPRETADO
+
+  - id: R-RX-01-incompleta-media
+    quando: silica_incompleta_pior_caso_50_100
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 36
+        periodicidade_apos_15a: 24
+        momentos: [adm, per, MR, dem]
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022) — >50% e ≤100% no pior caso: periodicidade de R-RX-01-media. Sílica com valor medido e sem % de quartzo ou sem fração: o LEO do Anexo 12 da NR-15 não se calcula, mas o valor tem teto — %LEO pelo menor LEO possível (quartzo 100% e fração respirável no que faltar, 8/(100+2) = 0,078 mg/m³). A faixa sai pelo maior %LEO que a medição permite; o erro só pode ser para mais. As pendências bloqueantes das faixas (`predicado_ausente`) ficam anexadas à linha e a matriz sai PARCIAL (D-ARQ-68 cl.3, emendas de 14/10/2026, decisões do Diovanni) [INTERPRETADO — prioridade na revisão de saída; precedente: matriz Serrinha 17/08/2026 (Soft Connect 15), RX OIT anual no GHE com sílica a 0,4012 mg/m³]. Asbesto fora: não decidido."
+    resumo_clinico: "Sílica medida no PGR sem % de quartzo ou sem fração → RX de tórax (padrão OIT) pela faixa do pior caso, a cada 3 anos, a cada 2 após 15 anos de exposição, até o PGR completar o dado. NR-07, Anexo III, Quadro 1."
+    status: INTERPRETADO
+
+  - id: R-RX-01-incompleta-alta
+    quando: silica_incompleta_pior_caso_acima_100
+    emite:
+      - exame: rx_torax_oit
+        periodicidade_meses: 12
+        periodicidade_apos_15a: null
+        momentos: [adm, per, MR, dem]
+    base_normativa: "NR-07 Anexo III Quadro 1 (Portaria MTP 567/2022) — >100% no pior caso: periodicidade de R-RX-01-alta. Sílica com valor medido e sem % de quartzo ou sem fração: o LEO do Anexo 12 da NR-15 não se calcula, mas o valor tem teto — %LEO pelo menor LEO possível (quartzo 100% e fração respirável no que faltar, 8/(100+2) = 0,078 mg/m³). A faixa sai pelo maior %LEO que a medição permite; o erro só pode ser para mais. As pendências bloqueantes das faixas (`predicado_ausente`) ficam anexadas à linha e a matriz sai PARCIAL (D-ARQ-68 cl.3, emendas de 14/10/2026, decisões do Diovanni) [INTERPRETADO — prioridade na revisão de saída; precedente: matriz Serrinha 17/08/2026 (Soft Connect 15), RX OIT anual no GHE com sílica a 0,4012 mg/m³]. Asbesto fora: não decidido."
+    resumo_clinico: "Sílica medida no PGR sem % de quartzo ou sem fração → RX de tórax (padrão OIT) pela faixa do pior caso, anual, até o PGR completar o dado. NR-07, Anexo III, Quadro 1."
+    status: INTERPRETADO
+
   - id: R-RX-01-pnos
     quando: pnos
     emite:

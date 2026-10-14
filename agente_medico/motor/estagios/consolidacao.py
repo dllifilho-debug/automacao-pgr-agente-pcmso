@@ -13,7 +13,8 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
 
     Regras (D-ARQ-39):
     - Mesmo exame normalizado → MERGE:
-        periodicidade_meses = min componente a componente (mais frequente cobre menos frequente)
+        periodicidade_meses = min componente a componente (mais frequente cobre menos frequente);
+            0 ("sem periódico") perde para qualquer periodicidade
         periodicidade_apos_15a = min componente a componente, None tratado como +infinito
             nos dois lados (resultado None só quando AMBOS os lados são None)
         momentos = união dos sets
@@ -51,7 +52,7 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
             )
         else:
             existing = result[indices[norm]]
-            existing.periodicidade_meses = min(
+            existing.periodicidade_meses = _piso_periodicidade(
                 existing.periodicidade_meses, exame.periodicidade_meses
             )
             existing_apos_15a = (
@@ -73,3 +74,13 @@ def stage_8_consolidacao(exames: list[ExameEmitido]) -> list[ExameEmitido]:
             existing.pendencias_anexadas.extend(exame.pendencias_anexadas)
 
     return result
+
+
+def _piso_periodicidade(a: int, b: int) -> int:
+    """0 é "sem periódico" (só os momentos da linha, ex.: R-RX-01-adm), não o intervalo mais
+    curto: perde para qualquer periodicidade. Medido: Viverde Acab-05, RX só admissional da
+    sílica (pior caso, D-ARQ-68 cl.3) + RX 60M do PNOS saía 0 e apagava os 60M (14/10/2026)."""
+    if a == 0 or b == 0:
+        return max(a, b)
+    return min(a, b)
+

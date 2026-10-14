@@ -4422,3 +4422,18 @@ em 13 GHE, já lidos pelo inventário (R-PSY-08).
 
 **Status:** ABERTA — itens 2, 3 e 4.
 
+**Rodada 2 no app (14/10/2026, pós-merge do PR #496), medida pelos 3 arquivos do Diovanni.** 21 GHE (o GHE 20 voltou: a
+transcrição da IA varia entre rodadas); RX OIT em 16 GHE e Espirometria em 18 (médica: 20 e 20). Achados: (a) GHE 09 —
+sílica medida sem % de quartzo, nenhuma linha de RX, nada visível; (b) sílica sem avaliação → RX 24 meses
+(R-RX-01-sem, NR-07 Anexo III Quadro 1, VALIDADO) contra 12 da médica em 5 GHE, e PNOS ≤ 10% do LEO → só admissional
+(R-RX-01-pnos-ate10, Quadro 2) contra 60 meses em 3 GHE — norma vence o precedente (D-ARQ-22 Parte A), sem mudança, para
+a revisão de saída; (c) sem RX nem saída pelo vocabulário: GHE 06 ("Poeiras Respiráveis /Metálica (Ferro, Óxido
+(Fe2O3))", 0,00574 mg/m³), GHE 17 (o PGR v04 não lista poeira), GHE 18 (só silicato de sódio).
+
+**Item 2 — IMPLEMENTADO (branch `claude/admiring-maxwell-dhcgko`, 14/10/2026).** `ghe_ausente_da_matriz` bloqueia o download e sai em vermelho;
+pendência bloqueante por GHE em vermelho na tela e no memorial (nota em D-ARQ-31). **Item 3 — IMPLEMENTADO no caso
+sem % de quartzo:** RX OIT pela faixa do pior caso (quartzo 100%, fração respirável) com pendência anexada — GHE 09: anual (emenda à cl.3 de D-ARQ-68). Sílica sem avaliação (24 × 12) segue
+a norma.
+
+**Status:** ABERTA — item 4 (hexano do Vistamerica, R-BIO-05) e achado (c) (GHE 06, 17, 18).
+
