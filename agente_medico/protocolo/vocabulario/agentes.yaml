@@ -166,6 +166,14 @@ agentes:
     tem_lt: false
     protocolos_especiais: []
     is_ototoxico: true
+    # "Hexano" sem o "n-" [MEDIDO — PGR Soft Connect15 v04, GHE 09 HIDROSSANITÁRIO; o fuzzy
+    # recusava por ser slug que dispara exame, D-ARQ-64]. [DERIVADO — matriz Serrinha
+    # 17/08/2026 (obra Soft Connect 15), GHE 09 Encanador: 2,5 Hexanodiona na urina, PER 6
+    # meses — a médica leu "Hexano" como n-hexano; o PCMSO Envolt 17.03.26 dá "Hexano CAS: 110-54-3",
+    # o CAS do n-hexano.] Divergência conhecida, decisão do Diovanni (14/10/2026): PGR Vistamerica
+    # Ver.02 (ET 14, 0,1 ppm, eventual, "Trivial" na BS 8800) passa a pedir 2,5-hexanodiona que a
+    # matriz de 08.12.25 não pede — a dispensa por nível da R-BIO-05 só lê a escala P×S.
+    termos: ["Hexano"]
     enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("mercaptanos, n-hexano")
   dissulfeto_de_carbono:
     lt_nr15: {ppm: 16, mg_m3: 47, fonte: "NR-15 Anexo 11, Quadro n.º 1 — Dissulfeto de carbono"}
@@ -270,7 +278,11 @@ agentes:
     # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2].
     # [DERIVADO — NR-07 Anexo III, Quadro 1: "poeira contendo sílica"; o mesmo núcleo do alias
     # "Sílica Livre - Poeira respirável" acima.]
-    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável", "Poeira - Sílica"]
+    # "Poeiras Respiráveis /Sílica Livre" (também com "–" e "-"; uma forma normalizada só),
+    # 4 GHE [MEDIDO — PGR Soft Connect15 v04, memorial do app de 14/10/2026: GHE 03, 09, 12 e
+    # Marmoraria sem RX/espirometria por sílica]. [DERIVADO — NR-07 Anexo III, Quadro 1: o
+    # mesmo núcleo "Sílica livre" + fração, como "Sílica Livre - Poeira respirável".]
+    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável", "Poeira - Sílica", "Poeiras Respiráveis /Sílica Livre"]
     enquadramento_3048: {codigo: "1.0.18", tempo_exposicao: "25 anos"}  # literal ("Sílica livre")
   asbesto:
     tipo_ibe: null
@@ -304,7 +316,13 @@ agentes:
     # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2]. Núcleo: a sigla PNOS,
     # NR-07 Anexo III (normas/nr-07-atualizada-2022-1 .pdf, pág. 24: "Para ser classificado como
     # PNOS..."). "Poeira – Silica" do mesmo documento vai para `silica`, não para cá.
-    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)", "Particulados insolúveis ou de baixa solubilidade não especificados de outramaneira (PNOS)", "Poeira - PNOS"]
+    # Sétima forma: "Poeiras Respiráveis /PNOS" (também " / ", "-"; uma forma normalizada só),
+    # 9 GHE [MEDIDO — PGR Soft Connect15 v04, memorial do app de 14/10/2026]. [DERIVADO — NR-07
+    # Anexo III, Quadro 2: núcleo PNOS, como "Poeira - PNOS".] Oitava: "Particulado total - PNOS
+    # sem sílica" (GHE Elevador de Cremalheira). [INTERPRETADO — a fração total cai no ramo
+    # respirável de D-ARQ-29 e, medida, superestima a exposição (faixa igual ou acima, nunca
+    # abaixo); "sem sílica" não vai para `silica`.]
+    termos: ["PNOS", "PNOR", "PNOS/PNOR", "Particulados insolúveis ou de baixa solubilidade não especificados de outra maneira (PNOS)", "Particulados insolúveis ou de baixa solubilidade não especificados de outramaneira (PNOS)", "Poeira - PNOS", "Poeiras Respiráveis /PNOS", "Particulado total - PNOS sem sílica"]
   poeira_de_gesso:
     tipo_ibe: null
     # Três formas de hidratação com CAS próprio — di-hidratado 10101-41-4, hemi-hidratado
@@ -327,7 +345,9 @@ agentes:
     # resolvedor; alias seria literal órfão (D-ARQ-67). PROTOCOLO v117.
     # Quarta forma [MEDIDO — app em produção, 01/10/2026, T65 GHE 16, memorial do Diovanni]:
     # a transcrição do Gemini juntou "pó de" da coluna vizinha (fonte geradora) ao agente.
-    termos: ["Sulfato de cálcio — Gesso", "Gesso (Sulfato de Cálcio hemi-hidratado)", "Sulfato de cálcio", "Sulfato de cálcio — pó de Gesso"]
+    # Quinta forma: "Poeiras respiráveis – Sulfato de cálcio semi-hidratado" (semi- = hemi-
+    # hidratado) [MEDIDO — PGR Soft Connect15 v04, GHE 14 GESSO, memorial do app de 14/10/2026].
+    termos: ["Sulfato de cálcio — Gesso", "Gesso (Sulfato de Cálcio hemi-hidratado)", "Sulfato de cálcio", "Sulfato de cálcio — pó de Gesso", "Poeiras respiráveis – Sulfato de cálcio semi-hidratado"]
   poeira_de_madeira:
     tipo_ibe: null
     cas: null

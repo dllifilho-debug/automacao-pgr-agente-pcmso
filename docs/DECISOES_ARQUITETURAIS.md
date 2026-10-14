@@ -5026,7 +5026,10 @@ inventário lido fora da linha de texto; aviso de inventário citado sem nível.
   Psicossocial pelo inventário, embora 9 GHE só tenham "Não havia colaboradores" e o GHE 16 tenha 3 BAIXO e 1 MÉDIO.
   Na matriz Serrinha de 17/08/2026 (versão anterior, sem as avaliações), a médica pediu os dois em parte dos GHE (01, 02,
   05–08, 12, 21). Leitura por GHE é decisão à parte. Efeito na matriz pela rota da IA: [A MEDIR — no app]; offline, o
-  Soft Connect cai em `familia_nao_medida` antes da hidratação.
+  Soft Connect cai em `familia_nao_medida` antes da hidratação. **Medido no app (14/10/2026, rodada do Diovanni pós-merge
+  do PR #494):** Saúde Mental nos 20 GHE da matriz e Avaliação Psicossocial em 18 (fora Portaria e Suporte
+  Administrativo, sem altura); nem R-PSY-07 nem `inventario_psicossocial_sem_nivel` na tela. A matriz saiu com 20 GHE
+  para 21 do PGR — fora desta emenda, ver PENDENCIAS, DT-(sessão `claude/admiring-maxwell-dhcgko`)-01.
 - **Verificação.** 9 testes novos (7 em `test_inventario_psicossocial.py`, 2 em `test_alertas_revisao.py`) e 1
   parametrizado estendido; varredura inversa 10/10. Nenhuma `R-*` muda de predicado.
 
@@ -5354,3 +5357,4 @@ raciocínio pedida por ele.
 | v265 | 13/10/2026 | Branch `claude/busy-cerf-tqxkmg`, sobre `main 096c89e` (IMPLEMENTAÇÃO, decisão do Diovanni — 2ª versão): **andamento em `D-ARQ-57`** — repertório suplente de cabeçalho GHE (travessão U+2013, dois-pontos depois do número, `GHE:` sem separador), aplicado só a documento sem nenhuma âncora do repertório principal. Medido nos 37 PGRs do acervo: só o Soft Connect15 muda (0 → 21 blocos); segue bloqueado por `numeracao_ghe_lacunar` (dois GHE 18, nenhum 19 no PGR). |
 | v266 | 13/10/2026 | Branch `claude/busy-cerf-tqxkmg`, sobre `main 2ba333e` (IMPLEMENTAÇÃO, autorizada pelo Diovanni): **andamento em `D-ARQ-57`** — número de GHE repetido que explica exatamente a lacuna (GHEs distintos = maior número) não bloqueia: a matriz sai e o erro do PGR vai em vermelho para a conferência e o memorial (`numeracao_ghe_duplicada`, não bloqueante). Medido nos 53 PDFs do acervo: só o Soft Connect15 muda. |
 | v267 | 13/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main cbc9673` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 3 em `D-ARQ-94`** — nível do inventário psicossocial lido pela faixa de palavras em volta do fator (tabela que parte a linha, Soft Connect15 v04) e aviso não bloqueante `inventario_psicossocial_sem_nivel` quando o PGR cita o inventário sem nível lido. Medido nos 53 PDFs do acervo: só o Soft Connect muda. |
+| v268 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main e1c644d` (MEDIÇÃO): **nota em `D-ARQ-94`, emenda 3** — efeito no app medido pela rodada do Diovanni: Saúde Mental em 20 GHE, Psicossocial em 18, nenhum dos dois avisos. |

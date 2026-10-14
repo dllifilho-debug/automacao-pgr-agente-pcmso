@@ -4395,3 +4395,30 @@ iguais; Vistamerica 2026 com 6 diferentes (GHEs 07 a 12). Refeito na sessão ant
 nome que difere só na caixa é Auro GHE 19, "Montagem" → "MONTAGEM". Nos 4 PGRs, a correção muda só esse nome.
 
 **Status:** sem item aberto nesta frente.
+
+### DT-(sessão `claude/admiring-maxwell-dhcgko`)-01 — Soft Connect15 v04 no app (14/10/2026): GHE perdido e divergências da matriz Serrinha `[ABERTA — item 1 IMPLEMENTADO (aliases); itens 2 a 4 aguardando decisão]`
+
+**Origem.** Rodada do Diovanni no app (rota da IA, 21 blocos, 107 s), arquivos da matriz, do memorial e do ASO de
+04/10/2026 anexados à sessão; gabarito: matriz Serrinha de 17/08/2026, feita sobre a versão anterior do PGR.
+
+1. **Poeiras respiráveis e hexano não reconhecidos — IMPLEMENTADO (aliases, 14/10/2026).** "Poeiras Respiráveis /PNOS"
+   (9 GHE), "… /Sílica Livre" (4), "… /Sulfato de cálcio semi-hidratado" (gesso), "Particulado total - PNOS sem sílica" e
+   "Hexano" caíam em vocabulário ausente ou fuzzy recusado: o app pedia RX de Tórax OIT e Espirometria em 1 GHE e a médica em
+   20 de 21. Aliases em `agentes.yaml` (fontes nos comentários). Efeito na matriz pela IA: `[A MEDIR — no app]`.
+2. **GHE 20 "PRODUÇÃO – PRODUÇÃO MARMORARIA" (pág. 278) sumiu da matriz, do memorial e do ASO.** O recorte acha os 21
+   blocos; a saída tem 20, sem aviso fora do expander de pendências. Causa provável, não confirmada: `gate_forma_ghe`
+   reprova o GHE inteiro quando um risco volta da IA com agente vazio, e a pendência bloqueante `forma_verbatim_pgr` só
+   aparece no expander. Recomendação dada ao Diovanni (14/10/2026): contagem de GHE da matriz contra blocos recortados, com
+   destaque em vermelho e bloqueio do download quando faltar GHE; gate por risco, não por GHE. Confirmar no expander antes
+   de mexer no gate.
+3. **RX de Tórax OIT da sílica: médica 12 meses, motor 24 sem quantificação (R-RX-01-sem).** O PGR v04 declara medição
+   ("Quantitativa (planilha abaixo)", "agendada para 10.2026"): `[A MEDIR — no app, com o alias]`.
+4. **"Hexano" no PGR Vistamerica Ver.02 (ET 14, 0,1 ppm, eventual, "Trivial" na BS 8800).** Com o alias, o GHE pede
+   2,5-hexanodiona, que a matriz de 08.12.25 não pede. Decisão do Diovanni (14/10/2026): manter o alias. A dispensa por
+   nível da R-BIO-05 lê só a escala P×S; ler outra escala é decisão de regra à parte (D-ARQ-57, D-ARQ-95).
+
+Ruído registrado, sem decisão: 52 das 234 linhas "não reconhecidas" do memorial são os 4 fatores psicossociais repetidos
+em 13 GHE, já lidos pelo inventário (R-PSY-08).
+
+**Status:** ABERTA — itens 2, 3 e 4.
+
