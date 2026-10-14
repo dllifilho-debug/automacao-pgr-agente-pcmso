@@ -9,6 +9,7 @@ from agente_medico.adaptadores.transcritor_gemini import TranscricaoIndisponivel
 from agente_medico.motor.extracao_pgr import (
     avaliar_estrutura,
     avaliar_inventario_psicossocial,
+    avaliar_inventario_sem_nivel,
     avaliar_numeracao_duplicada,
     recortar_blocos_ghe,
     recortar_cards_cargo,
@@ -358,9 +359,10 @@ def preparar_pgr_hidratado(
     # R-PSY-06/R-PSY-08: o inventário psicossocial é sinal de PGR inteiro (D-ARQ-49 P2
     # aplicado), replicado a todo GHE via hidratar_pgr; sai da mesma leitura. Conta só o
     # inventário avaliado (linha de fator com nível), não a citação do FRPRT.
-    inventario = avaliar_inventario_psicossocial(
-        [p.texto for p in leitura], protocolo.vocabulario.niveis_risco
-    )
+    inventario = avaliar_inventario_psicossocial(leitura, protocolo.vocabulario.niveis_risco)
+    aviso_inventario = avaliar_inventario_sem_nivel([p.texto for p in leitura], inventario)
+    if aviso_inventario is not None:
+        pend_forma = (*pend_forma, aviso_inventario)
     pgr, pend_hidr = hidratar_pgr(
         aprovados,
         indice,

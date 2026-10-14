@@ -754,7 +754,7 @@ GHE com **trabalho em altura e inventário psicossocial no PGR** (composto `altu
 
 **Sem inventário em PGR emitido a partir de 26/05/2026:** alerta de R-PSY-07. Sucede R-PSY-04 (mudança de escopo exige ID nova).
 
-**Inventário = inventário avaliado (09/10/2026, solução D).** Conta o PGR com ao menos uma linha de fator "Psicossocial …" com rótulo de nível (`avaliar_inventario_psicossocial`), não o que só cita o FRPRT. Medido no acervo: 4 de 14 PGRs marcados só citam (Sinduscon 27.08.26, SPE QD. E-13, Verde Maris, Seconci REV4) e saem da perna da altura.
+**Inventário = inventário avaliado (09/10/2026, solução D).** Conta o PGR com ao menos uma linha de fator "Psicossocial …" com rótulo de nível (`avaliar_inventario_psicossocial`), não o que só cita o FRPRT. Medido no acervo: 4 de 14 PGRs marcados só citam (Sinduscon 27.08.26, SPE QD. E-13, Verde Maris, Seconci REV4) e saem da perna da altura. Desde 13/10/2026 (emenda 3 de D-ARQ-94), o nível também é lido pelas palavras a até 10 pt do fator, quando a tabela o põe noutra linha de texto (Soft Connect15 v04); PGR que cita o inventário sem nível lido gera o aviso não bloqueante `inventario_psicossocial_sem_nivel`.
 
 #### R-PSY-07 — PGR sem inventário psicossocial depois da vigência na NR-01: alerta `[DERIVADO — NR-01 item 1.5.3.1.4]`
 **Predicado:** PGR emitido a partir de **26/05/2026** (vigência do item, Portaria MTE 765/2025) sem o inventário de riscos psicossociais avaliado (`avaliar_inventario_psicossocial`: sem linha de fator com nível no PGR inteiro; até 09/10/2026, `detectar_psicossocial`).

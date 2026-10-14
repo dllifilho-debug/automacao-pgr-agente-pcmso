@@ -12874,3 +12874,17 @@ branch: 15 PGRs na rota por GHE da IA, 11 com título em todos os blocos, 4 sem 
 **Verificação.** Sessão só de docs. Recorte dos testes que leem o texto dos docs vivos (`test_particao_pendencias.py`,
 `test_varrer_acervo_lgpd.py`, `test_cobertura_varrer_acervo.py`): 34 passed.
 
+## Sessão (branch `claude/admiring-maxwell-dhcgko` sobre `main cbc9673`, pós-merge do PR #492) — 13/10/2026 — IMPLEMENTAÇÃO: inventário psicossocial do Soft Connect15 v04
+
+**Medido antes.** Causa do briefing confirmada: na pág. 42, "MÉDIO" a 4,3 pt acima de "PSICOSSOCIAL", noutra linha de
+texto. Gabarito por `extract_tables`: 44 linhas com nível (39 no corte). Custo: `extract_tables` 70,8 s em série; faixa de
+palavras 57 ms sobre a leitura de `ler_pdf` (21,7 s em 4 processos). Decisões do Diovanni: faixa de palavras; aviso não
+bloqueante. Registro em D-ARQ-94, emenda 3.
+
+**Medido depois (código final × `main`, 53 PDFs).** Só o Soft Connect muda: `(False, False)` → `(True, True)`, 44/44
+linhas iguais às da tabela. Aviso em 4 PGRs, os que só citam o FRPRT. Efeito na matriz pela IA: [A MEDIR — no app].
+
+**Verificação.** Suíte completa (árvore parada): 1913 passed, 6 skipped (22 min 24 s). mypy no alvo canônico: limpo,
+59 arquivos. Varredura inversa 10/10. `test_gerar_indice_darq.py`: 6 passed. Smoke visual não rodado: a tela ganha um
+`st.warning`, coberto por AppTest em `test_alertas_revisao.py`.
+

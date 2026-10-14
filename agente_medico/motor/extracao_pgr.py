@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
-from agente_medico.motor.io_pdf import paginas_liberadas
-from agente_medico.motor.niveis_pgr import classificar_nivel_pgr
+from agente_medico.motor.io_pdf import PaginaLida, paginas_liberadas
+from agente_medico.motor.niveis_pgr import NivelPGR, classificar_nivel_pgr
 from agente_medico.motor.tipos import Pendencia
 
 # D-ARQ-57 peça 4 fatia 4d: rota de roteamento devolvida por avaliar_estrutura
@@ -79,26 +79,83 @@ class InventarioPsicossocial(NamedTuple):
 
 
 _LINHA_FATOR_PSICOSSOCIAL = re.compile(r"^\s*psicossocia", re.IGNORECASE)
+# Tabela em que o nível fica centrado na altura da linha e o grupo "ERGONÔMICOS -
+# PSICOSSOCIAL" quebra em duas ou três linhas visuais: no texto, o nível cai noutra linha
+# [MEDIDO — Soft Connect15 v04, 13/10/2026: nível de 4,3 a 8,5 pt acima de "PSICOSSOCIAL";
+# a linha seguinte da tabela a ≥ 31 pt].
+_FAIXA_NIVEL_PSICOSSOCIAL_PT = 10.0
+_MESMA_LINHA_PT = 2.0
+TIPO_INVENTARIO_PSICOSSOCIAL_SEM_NIVEL = "inventario_psicossocial_sem_nivel"
+
+
+def _niveis_por_linha_de_texto(texto: str, niveis: Mapping[str, Any]) -> Iterator[NivelPGR]:
+    for linha in texto.splitlines():
+        if _LINHA_FATOR_PSICOSSOCIAL.match(linha) and (nivel := classificar_nivel_pgr(linha, niveis)):
+            yield nivel
+
+
+def _niveis_por_faixa_de_palavras(
+    palavras: Sequence[tuple[str, float, float]], niveis: Mapping[str, Any]
+) -> Iterator[NivelPGR]:
+    """Linha de fator lida pelas coordenadas: a palavra "psicossocia…" que abre a linha
+    visual (à esquerda dela, só o "-" do grupo quebrado) e as palavras a até
+    _FAIXA_NIVEL_PSICOSSOCIAL_PT dela na vertical, em ordem de leitura."""
+    for texto, x0, topo in palavras:
+        if not texto.lower().startswith("psicossocia"):
+            continue
+        if any(
+            abs(t - topo) < _MESMA_LINHA_PT and x < x0 and p not in ("-", "–") for p, x, t in palavras
+        ):
+            continue
+        faixa = sorted((round(t), x, p) for p, x, t in palavras if abs(t - topo) <= _FAIXA_NIVEL_PSICOSSOCIAL_PT)
+        if nivel := classificar_nivel_pgr(" ".join(p for _, _, p in faixa), niveis):
+            yield nivel
 
 
 def avaliar_inventario_psicossocial(
-    paginas: Sequence[str], niveis: Mapping[str, Any]
+    paginas: Sequence[PaginaLida], niveis: Mapping[str, Any]
 ) -> InventarioPsicossocial:
     """Inventário psicossocial avaliado: o marcador de detectar_psicossocial e ao menos uma
-    linha de fator "Psicossocial …" com rótulo de nível de `niveis_risco.yaml`. PGR que só
-    cita o FRPRT ("Antecipação Técnica", "Em avaliação", "detalhada em documento
+    linha de fator "Psicossocial …" com rótulo de nível de `niveis_risco.yaml` — na linha
+    de texto ou, quando a tabela parte a linha, na faixa de palavras em volta do fator. PGR
+    que só cita o FRPRT ("Antecipação Técnica", "Em avaliação", "detalhada em documento
     específico") não conta — medido em 4 de 14 PGRs marcados no acervo, 09/10/2026.
     moderado_ou_acima: algum fator no corte (R-PSY-08, folha da Dra. Carolini)."""
-    if not detectar_psicossocial(paginas):
+    if not detectar_psicossocial([p.texto for p in paginas]):
         return InventarioPsicossocial(avaliado=False, moderado_ou_acima=False)
     posicoes = [
         nivel.posicao
         for pagina in paginas
-        for linha in pagina.splitlines()
-        if _LINHA_FATOR_PSICOSSOCIAL.match(linha)
-        and (nivel := classificar_nivel_pgr(linha, niveis)) is not None
+        for leitor in (
+            _niveis_por_linha_de_texto(pagina.texto, niveis),
+            _niveis_por_faixa_de_palavras(pagina.palavras, niveis),
+        )
+        for nivel in leitor
     ]
     return InventarioPsicossocial(avaliado=bool(posicoes), moderado_ou_acima="corte" in posicoes)
+
+
+def avaliar_inventario_sem_nivel(
+    paginas: Sequence[str], inventario: InventarioPsicossocial
+) -> Pendencia | None:
+    """Aviso não bloqueante: o PGR cita o inventário psicossocial e nenhum fator com nível
+    foi lido. Sem ele, avaliado=False passaria em silêncio — tanto no PGR que só cita o
+    FRPRT quanto num leiaute de tabela que o leitor não conhece."""
+    if inventario.avaliado or not detectar_psicossocial(paginas):
+        return None
+    return Pendencia(
+        tipo=TIPO_INVENTARIO_PSICOSSOCIAL_SEM_NIVEL,
+        destinatario="extracao",
+        motivo=(
+            "O PGR cita o inventário de riscos psicossociais, mas nenhum fator com nível de risco "
+            "foi lido. A matriz sai sem a Av. Médica de Saúde Mental e sem a Avaliação Psicossocial "
+            "por trabalho em altura que dependem do inventário — conferir no PGR se os fatores "
+            "foram avaliados e com que nível"
+        ),
+        bloqueante=False,
+        regra_origem="R-PSY-08",
+        ghe_id=None,
+    )
 
 
 def _reconhece_cabecalho_ghe_padrao(linha: str) -> bool:
