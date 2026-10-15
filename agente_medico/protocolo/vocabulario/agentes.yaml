@@ -73,7 +73,12 @@ agentes:
     # [MEDIDO — 24/09/2026, parser_familia_consciente: PGR ADENDO VILA BRASIL ESCRITORIO
     # 25.08.26 (GHEs DIREÇÃO e PATRIMÔNIO) e PGR CONSCIENTE SPE 0030 FASCINO 15.07.26 (GHE
     # VENDAS), 3 ocorrências; mesma grafia no texto dos PGR Seconci R02AA REV3/REV4 (rota LLM).]
-    termos: ["Bater contra ou ser atingido por (trânsito)"]
+    # "Acidentes de trânsito", GHE 20 Transporte [MEDIDO — PGR Plateau D'Or rev 03, memorial do app
+    # de 15/10/2026: não reconhecido; PCMSO Mauá 28.09.26 pede Acuidade Visual e Audiometria anuais no
+    # GHE, o pacote da R-PKG-TRANSITO]. No resto do acervo a expressão só aparece na campanha "Maio
+    # amarelo - prevenção a acidentes de transito" (AURO, TPB Andrade), que não é linha de risco e
+    # não casa com o termo inteiro.
+    termos: ["Bater contra ou ser atingido por (trânsito)", "Acidentes de trânsito"]
   vibracao_mao_braco:
     tipo_ibe: null
     cas: null
@@ -286,7 +291,11 @@ agentes:
     # 4 GHE [MEDIDO — PGR Soft Connect15 v04, memorial do app de 14/10/2026: GHE 03, 09, 12 e
     # Marmoraria sem RX/espirometria por sílica]. [DERIVADO — NR-07 Anexo III, Quadro 1: o
     # mesmo núcleo "Sílica livre" + fração, como "Sílica Livre - Poeira respirável".]
-    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável", "Poeira - Sílica", "Poeiras Respiráveis /Sílica Livre"]
+    # "Poeiras respiravel/silica" (também "Poeiras respiravel /silica"; uma forma normalizada só),
+    # GHE 15 e 18 [MEDIDO — PGR Plateau D'Or rev 03, memorial do app de 15/10/2026: fuzzy recusado,
+    # sem RX nem espirometria; PCMSO Mauá 28.09.26 pede os dois nos dois GHE]. [DERIVADO — NR-07
+    # Anexo III, Quadro 1: o mesmo núcleo fração + "sílica" de "Poeiras Respiráveis /Sílica Livre".]
+    termos: ["Sílica livre", "Sílica livre cristalizada", "Sílica livre cristalina", "Quartzo", "Cristobalita", "Tridimita", "Sílica Livre - Poeira respirável", "Poeira - Sílica", "Poeiras Respiráveis /Sílica Livre", "Poeiras respiravel/silica"]
     enquadramento_3048: {codigo: "1.0.18", tempo_exposicao: "25 anos"}  # literal ("Sílica livre")
   asbesto:
     tipo_ibe: null
@@ -445,6 +454,11 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: false
     protocolos_especiais: []
+    # "Operações em espaço confinado", GHE 18 Impermeabilização [MEDIDO — PGR Plateau D'Or rev 03,
+    # inventário (risco de acidente, "de acordo com a NR-33"), memorial do app de 15/10/2026: não
+    # reconhecido; PCMSO Mauá 28.09.26 pede Avaliação Psicossocial no GHE]. [DERIVADO — NR-33: o
+    # núcleo "espaço confinado" é o termo da norma.]
+    termos: ["Operações em espaço confinado"]
   eletricidade:
     tipo_ibe: null
     cas: null
@@ -895,6 +909,23 @@ agentes:
       - "Destilados de Petróleo levemente tratados com hidrogênio"
       - "Destilados (Petróleo) leves tratados com hidrogênio"
       - "Destilados (Petróleo) leves tratados com hidrogênio (Querosene hidratado)"
+  hidrocarbonetos_nao_especificados:
+    # "Hidrocarbonetos" sem produto nem CAS, da impermeabilização ("Durante atividades de utilização
+    # de impermeabilizantes para tratamento de pisos", "Desprendimento de gases", Moderado; FISPQ só
+    # por link) [MEDIDO — PGR Plateau D'Or rev 03 GHE 18 e PGR EURO Setor C GHE 18, mesmo
+    # elaborador]. Precedente (D-ARQ-22 nível 2): pacote do benzeno presumido nos dois PCMSOs das
+    # médicas — EURO Park C 15.04.2024 (hemograma, reticulócitos e t,t-mucônico semestrais) e Mauá
+    # 28.09.26 (reticulócitos e t,t-mucônico semestrais). Sem LT nem IBE (não identifica a
+    # substância) — nenhum exame próprio. R-FDS-07: benzeno a confirmar na FDS, como a aguarrás.
+    # Só o termo exato: "Hidrocarboneto Alifático" (Plateau GHE 15, textura; Mauá sem o pacote)
+    # não entra. [INTERPRETADO — decisão da sessão de 15/10/2026, pela analogia com R-PKG-BZ-PRES.]
+    tipo_ibe: null
+    cas: null
+    is_carcinogeno_iarc: false
+    tem_lt: false
+    protocolos_especiais: []
+    termos: ["Hidrocarbonetos"]
+    contaminantes_a_confirmar: [benzeno]
   querosene:
     # Solvente de petróleo da pintura. [MEDIDO — PGRs CMO Aurora 27.08.26 GHE 18 e Vistamerica
     # 2026-07-28: "Querosene (petróleo)", BAIXO; Porto Araras I: "Querosene", IRRELEVANTE]. O próprio

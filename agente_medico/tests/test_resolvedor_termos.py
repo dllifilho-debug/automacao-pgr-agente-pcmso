@@ -102,7 +102,10 @@ def test_indice_real_tem_210_entradas(indice_real: IndiceTermos) -> None:
     # Connect15 v04 lidos pela IA — 2 de PNOS, 1 de sílica, 1 de gesso e "Hexano" (n_hexano).
     # 221 -> 224 (branch `claude/eager-newton-qw5a0u`, 15/10/2026): +3 termos de `vibracao_mao_braco`
     # (Soft Connect15 v04 pela IA e PGR EURO Setor C — D-ARQ-96 decisão 6).
-    assert len(indice_real.slug_por_forma) == 224
+    # 224 -> 229 (branch `claude/pcmso-maua-fatia-2-cdd2e1`, 15/10/2026): PGR Plateau D'Or rev 03 pela IA — +1 slug
+    # `hidrocarbonetos_nao_especificados` e o termo "Hidrocarbonetos", +1 termo em `silica`, `espaco_confinado` e
+    # `transito_via_publica` cada (DT-(sessão claude/pcmso-maua-fatia-2-cdd2e1)-01 item 2).
+    assert len(indice_real.slug_por_forma) == 229
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(

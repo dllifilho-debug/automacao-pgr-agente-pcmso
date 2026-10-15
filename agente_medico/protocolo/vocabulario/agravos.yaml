@@ -91,6 +91,12 @@ agravos:
     agente: espaco_confinado
     texto: "Asfixia, intoxicação, queimaduras por explosão e morte."
     fonte: "[INTERPRETADO] o texto do Mauá descreve o ambiente, não o agravo"
+  transito_via_publica:
+    # "Acidentes de Trânsito" passou a resolver no agente (Plateau GHE 20, 15/10/2026); o texto é o da chave
+    # `transito`, que fica só com a forma no singular, sem PGR medido.
+    agente: transito_via_publica
+    texto: "Contusões, fraturas, traumatismos e morte."
+    fonte: "[INTERPRETADO] junção das 2 formas do Mauá"
   acetona:
     agente: acetona
     texto: "Irritação de mucosas, cefaleia, tontura e depressão do sistema nervoso central."
@@ -150,7 +156,7 @@ agravos:
   transito:
     texto: "Contusões, fraturas, traumatismos e morte."
     fonte: "[INTERPRETADO] junção das 2 formas do Mauá"
-    termos: ["Acidente de Trânsito", "Acidentes de Trânsito"]
+    termos: ["Acidente de Trânsito"]
   projecao_de_particulas:
     texto: "Lesões oculares."
     fonte: "Mauá"
