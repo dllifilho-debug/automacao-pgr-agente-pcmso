@@ -84,7 +84,11 @@ agentes:
     # [MEDIDO — PGR_RICCO_2026_REV06.pdf (= Hetrin set-2026 + adendo), transcrição do app de
     # produção pela rota grid em 05/10/2026, memorial anexado à sessão claude/gifted-cerf-0loir2].
     # [DERIVADO — NR-09 Anexo I: "Vibrações em Mãos e Braços - VMB" (normas/nr-09-atualizada-2026 .pdf, pág. 4).]
-    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas", "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)", "Vibração localizada (mãos e braços)", "Vibrações localizadas (mão-braço)", "Vibrações localizadas (mãos e braços)", "Vibrações localizadas (braço e mãos)"]
+    # [MEDIDO — 15/10/2026, D-ARQ-96 decisão 6] "Vibração (mãos e braços)": transcrição da IA no Soft Connect15 v04
+    # (memorial da rodada 3, fuzzy recusado em 10 GHE); "Vibração de mãos e braço(s)": PGR EURO Setor C, linha do
+    # inventário e avaliação quantitativa (2,80 m/s²). As grafias do PCMSO R70 ("Vibração Localizadas (Mão- Braço)")
+    # não aparecem em nenhum PGR do acervo e não entram.
+    termos: ["Vibrações em Mãos e Braços", "VMB", "Vibrações localizadas (mão e braço)", "Vibração (mão e braço)", "Vibração localizada", "Vibrações localizadas", "Vibração localizada (mão e braço)", "Vibração localizadas (mão e braço)", "Vibração localizada (mãos e braços)", "Vibrações localizadas (mão-braço)", "Vibrações localizadas (mãos e braços)", "Vibrações localizadas (braço e mãos)", "Vibração (mãos e braços)", "Vibração de mãos e braços", "Vibração de mãos e braço"]
     enquadramento_3048: {codigo: "2.0.2", tempo_exposicao: "25 anos"}  # mesmo item único de vibracao_corpo_inteiro
   vibracao:
     tipo_ibe: null
@@ -1335,3 +1339,10 @@ fracoes_sem_agente:
   # atribuição é leitura do Arquiteto (precedente: esforco_fisico, 003.FA).
   # Medido: 2 ocorrências — mesmo documento.
   - "Poeiras Respiráveis/Metálicas"
+  # [INTERPRETADO — analogia com a entrada acima, R-PGR-05; D-ARQ-96 decisão 6, aprovada pelo Diovanni em
+  # 15/10/2026] Classe de agente sem a fonte: não casa com radiacao_uv_ir (solda) porque a mesma expressão cobre a
+  # radiação solar das intempéries. Medido: Soft Connect15 v04, 18 GHE (memorial da rodada 3, 14/10/2026);
+  # "Radiações não ionizantes" em 7 PGRs do acervo (ALT T65, EURO Setor C, Hetrin, Plateau D'Or, EBSERH HUMAP,
+  # RICCO REV06, Cjr).
+  - "Radiação não ionizante"
+  - "Radiações não ionizantes"

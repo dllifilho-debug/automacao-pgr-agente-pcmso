@@ -12973,3 +12973,16 @@ Revisão do modelo `.docx` pelas médicas em paralelo: o modelo não foi regener
 2017 passed, 6 skipped (18 min 32 s). mypy no alvo canônico: limpo, 60 arquivos (+1: `agravos_pcmso.py`). Smoke
 visual não rodado: a tela não muda.
 
+## Sessão (branch `claude/eager-newton-qw5a0u` recriada sobre `main e4ebb57`, pós-merge do PR #501) — 15/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: decisão 6 de D-ARQ-96 (sinônimos que mudam exame)
+
+**Medido.** As grafias do R70 não aparecem em nenhum dos 38 PGRs do acervo. O memorial do Soft Connect (rodada 3) mostra
+"Vibração (mãos e braços)" recusado por grafia aproximada em 10 GHE e "Radiação não ionizante" sem agente em 18; o PGR
+EURO Setor C escreve "Vibração de mãos e braço(s)" no inventário (2,80 m/s²).
+
+**Implementado.** 3 termos em `vibracao_mao_braco`; "Radiação não ionizante" e o plural em `fracoes_sem_agente`
+(R-PGR-05, nota no PROTOCOLO); texto da pendência cobre substância ou fonte. Efeito previsto: audiometria DEM no GHE 09
+do Soft Connect, como a médica `[A MEDIR — no app]`.
+
+**Verificação.** 4 testes novos, varredura inversa 4/4. Suíte completa (árvore parada): 2021 passed, 6 skipped
+(17 min 09 s). mypy no alvo canônico: limpo, 60 arquivos. Smoke visual não rodado: a tela não muda.
+

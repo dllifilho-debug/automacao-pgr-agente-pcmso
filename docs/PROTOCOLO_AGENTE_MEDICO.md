@@ -84,6 +84,12 @@ A conduta já está prescrita por esta regra: solicitar FDS, conversar com o ela
 
 **Medido no Fascino (003.EJ):** `Poeira respirável` em 14 GHEs, dos quais **13 já declaram sílica** e já recebem RX 24M + espirometria — o valor clínico incremental de resolvê-la é praticamente nulo no caso medido. Consequência estrutural (bloquear ou seguir com ressalva) segue em **DT-002I-01**, ABERTA.
 
+
+**Nota de aplicação (15/10/2026, D-ARQ-96 decisão 6) — classe de agente sem a fonte.** `[INTERPRETADO — analogia com "Poeiras Respiráveis/Metálicas"]` "Radiação não ionizante" nomeia a classe, não a fonte: a mesma expressão cobre a
+solda (ultravioleta/infravermelho, com exame pela R-VIS-01) e o sol das intempéries. Não casa com `radiacao_uv_ir`;
+segue o caminho desta regra — pendência ao elaborador do PGR pedindo a fonte, PGR não rejeitado. O texto da pendência
+passou a valer para os dois casos: "não identifica a substância nem a fonte; pedir ao elaborador do PGR que
+especifique (a FDS, se for produto químico)". Medido: Soft Connect15 v04, 18 GHE.
 ---
 
 ## 3. MODELO DE GHE

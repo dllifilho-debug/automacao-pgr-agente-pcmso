@@ -12,7 +12,19 @@ conferir — os sinônimos de agente com exame (decisão 6, ainda a medir) e pro
 1. curto; 2. PAINPSE + extra-auditivos; 3. as 9 formas, sílica com silicose `[INTERPRETADO]`; 4. chave de perigo sem
 agente — nenhum termo pode resolver num agente (o carregamento recusa); 5. um agravo psicossocial único; 6. não
 implementado: medir os sinônimos de vibração mão-braço e sílica nos PGRs pareados; "Radiação não ionizante" vira
-pendência ao elaborador, sem casar com UV/IR; 7. "(0113/0102)" numa linha, a gravar com a etapa 3. Componentes de FDS
+pendência ao elaborador, sem casar com UV/IR; 7. "(0113/0102)" numa linha, a gravar com a etapa 3.
+
+**Decisão 6 — medida e aplicada (15/10/2026).** As duas grafias do R70 ("Vibração Localizadas (Mão- Braço)", "Poeira
+total e Sílica livre") **não aparecem em nenhum dos 38 PGRs do acervo**: são escrita das médicas no PCMSO, e um
+sinônimo não mudaria nenhuma leitura de PGR — não entraram. "Poeiras respirável / sílica" só aparece na legenda de
+metodologia dos PGRs CMO ("Poeiras (respirável, sílica livre cristalina)…"), não em linha de inventário. O que o app
+de fato perde, medido no memorial do Soft Connect (rodada 3): **"Vibração (mãos e braços)" recusado por grafia
+aproximada em 10 GHE**, e o PGR EURO Setor C escreve "Vibração de mãos e braço(s)" no inventário, com 2,80 m/s². Essas
+três grafias entraram em `vibracao_mao_braco`. Efeito previsto no Soft Connect `[DERIVADO — pela regra]`: GHE 09 (ruído
++ n-hexano + vibração) ganha audiometria demissional pela R-AUD-02, como na matriz da médica (Serrinha 21/09/2026); nos
+outros 9 GHE os exames não mudam (já têm audiometria), muda a sugestão do ASO. `[A MEDIR — rodada do Soft Connect no
+app]`. "Radiação não ionizante" (e o plural) entrou em `fracoes_sem_agente`: pendência ao elaborador pedindo a fonte
+(R-PGR-05), sem casar com UV/IR. Componentes de FDS
 do cimento recebem o agravo do produto (precedente do R70).
 
 ## Fontes e método
