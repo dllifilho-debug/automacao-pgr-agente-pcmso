@@ -12942,5 +12942,6 @@ em comentário, 32 campos em turquesa, blocos por GHE trocados por `{{BLOCOS_GHE
 cópias de `normas/`; Lei 15.377/2026 `[A CONFERIR — Planalto]`.
 
 **Verificação.** `tests/test_gerar_modelo_pcmso.py` (17 casos), varredura inversa 8/8; índice D-ARQ regenerado,
-`test_gerar_indice_darq.py` verde. mypy do script: limpo. Suíte: ver abaixo.
+`test_gerar_indice_darq.py` verde. mypy do script: limpo. Suíte completa (árvore parada): 1950 passed, 6 skipped (18 min 20 s). mypy no alvo
+canônico: limpo, 59 arquivos. Smoke visual não rodado: a tela não muda.
 
