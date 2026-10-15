@@ -12999,3 +12999,18 @@ cache por processo. 2ª suíte (árvore parada): 2035 passed, 6 skipped (28 min 
 rodadas anteriores (17–18 min) `[não atribuído]`: os 15 testes mais lentos são todos de leitura de PDF real, que esta
 mudança não toca. mypy no alvo canônico: limpo, 61 arquivos. Smoke visual: ok (desktop e mobile), 5 downloads.
 
+---
+
+## Sessão (branch `claude/pcmso-maua-fatia-2-cdd2e1` sobre `main fd9005b`, pós-merge do PR #504) — 15/10/2026 — MEDIÇÃO das rodadas Soft Connect e Plateau + IMPLEMENTAÇÃO: etapa 3 de D-ARQ-96, fatia 2
+
+**Medido.** Rodada 4 do Soft Connect (decisão 6 conferida; matriz × PCMSO 191/191) e rodada do Plateau rev 03 contra o
+PCMSO Mauá (DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01). Página de identificação em 37 PGRs do acervo.
+
+**Implementado.** `motor/identificacao_pgr.py`; campos "Dados do PCMSO" na tela da matriz; aviso de CNPJ inválido no
+PCMSO. Andamento 5 em D-ARQ-96 (decisões do Diovanni: endereço da obra; CNAE "considerado para este").
+
+**Verificação.** 14 testes novos, varredura inversa 15/15. Suíte (árvore parada): 2049 passed, 6 skipped (30 min 35 s).
+mypy no alvo canônico: limpo, 62 arquivos. `test_web_matriz.py` sozinho estoura o tempo do AppTest (3 s) de forma
+intermitente **também na base** (`main fd9005b`: 5 de 7 rodadas limpas; com a mudança: 4 de 6): rodadas pesadas a
+2,1–2,7 s. A leitura do PDF na tela custava ~30 ms por rodada; `%PDF-` como porta de entrada a zerou (0,09 s nas duas).
+Smoke visual: ok (desktop e mobile).

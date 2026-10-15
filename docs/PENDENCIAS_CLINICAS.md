@@ -4451,5 +4451,46 @@ app na rodada 3 (15/10/2026).
 **Rodada 3, achado novo (15/10/2026, D-ARQ-96 decisão 6).** "Vibração (mãos e braços)" recusado por grafia aproximada em
 10 GHE e "Radiação não ionizante" sem agente em 18. Corrigido: a grafia entrou em `vibracao_mao_braco` (previsão:
 audiometria DEM no GHE 09, como a médica) e a radiação vira pendência ao elaborador pedindo a fonte (R-PGR-05).
-`[A MEDIR — rodada 4 do Soft Connect no app]`.
+`[A MEDIR — rodada 4 do Soft Connect no app]`. **Conferido na rodada 4 (15/10/2026):** GHE 09 com audiometria DEM
+(R-VIB-02) e a radiação como pendência R-PGR-05 em 18 GHE — DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01.
 
+### DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01 — PGR Plateau rev 03 no app × PCMSO Mauá 28.09.26: exames GHE a GHE `[ABERTA — para a revisão de saída e sessão de regra]`
+
+**Origem.** Rodada do Diovanni no app (15/10/2026, rota da IA, 21 blocos, 29 s), matriz, memorial e PCMSO anexados;
+gabarito: `PCMSO(ATUALIZAÇÃO)MAUÁ … 28.09.26.rtf.doc` convertido para `.docx`. Comparação por script, tabela de exames a
+tabela de exames (momentos e periodicidade).
+
+**Igual:** 21 GHE com os mesmos nomes e a mesma numeração do Mauá (o segundo "GHE 01 Contabilidade" do PGR sai como
+GHE 21, sem aviso de erro de numeração — `[A MEDIR — se foi a IA que renumerou]`); GHE 01–04, 06, 10, 12–14, 16 e 21
+iguais em exame, momento e periodicidade, a menos do nome do exame (o Mauá escreve "Hemograma Completo", "Glicemia de
+jejum" e "Radiografia de tórax (PA) Padrão OIT (o mais recente), com pelo menos um leitor habilitado").
+
+**Diferente** (app × Mauá):
+1. **RX OIT 24 × 12 meses** nos GHE 05, 07 e 08 — sílica sem avaliação ambiental (R-RX-01-sem, NR-07 Anexo III
+   Quadro 1). Mesmo caso do Soft Connect, rodada 2, achado (b): norma vence o precedente (D-ARQ-22 Parte A), sem mudança.
+2. **Vocabulário — riscos do PGR não reconhecidos que a médica leu:** "Poeiras respiravel/silica" e "Poeiras respiravel
+   /silica" (GHE 15 e 18: Mauá pede Espirometria e RX anual); "Hidrocarbonetos" (GHE 18: Mauá pede reticulócitos e
+   t,t-mucônico semestrais — benzeno presumido); **"Operações em espaço confinado" (GHE 18)** — NR-33 sem leitura, Mauá
+   pede Avaliação Psicossocial; "Uso de Policorte e lixadeira" (GHE 17). Grafias novas a medir no acervo antes de entrar.
+3. **GHE 17 (serralheria):** Mauá pede Manganês sanguíneo e clínico semestrais e RX anual; o app lê "Fumos metálicos"
+   (RX 60 meses, R-RX-02) e nenhum manganês. `[A MEDIR — se o PGR nomeia o manganês]`.
+4. **GHE 11 (hidráulica):** o app pede acetona e MEK na urina (R-BIO-04); o Mauá não pede e anota "risco trivial no PGR
+   para Metiletilcetona e acetona. Ruído abaixo do nível de ação". Dispensa por nível do PGR (R-BIO-05 lê só P×S):
+   `[A MEDIR — escala e nível no PGR Plateau]`.
+5. **GHE 09 (armação):** Mauá pede Espirometria (24 meses) e RX (60 meses) e anota "Não opera policorte"; o app não
+   pede nenhum. `[A MEDIR — que poeira o PGR lista no GHE 09]`.
+6. **GHE 08 (central de argamassa):** Mauá pede Acuidade Visual e ECG (operador de betoneira); o app não.
+7. **Transporte:** o Mauá põe os motoristas (Munk, carreta) dentro do GHE 18 e não tem GHE 19; o app tem GHE 19
+   "Transporte" com eles. GHE 20: Mauá pede Acuidade Visual e Audiometria; o app só o clínico ("Acidentes de trânsito",
+   "Sentado por longos períodos" não reconhecidos).
+
+**PCMSO gerado:** cargos um por linha (o Mauá agrupa "Almoxarife/ Auxiliar de Almoxarife/ Ferramenteiro"); agravo do
+hexano ausente em `agravos.yaml` (Soft Connect, GHE 09: "(sem agravo no PGR — conferir)" com o agente resolvido);
+grupo vazio para "Ergonômico - Análise Ergonômica Trabalho (AET) Postural".
+
+**Soft Connect15 v04, rodada 4 (mesma data):** decisão 6 conferida — GHE 09 com audiometria DEM (R-VIB-02 pela
+"Vibração (mãos e braços)") e "Radiação não ionizante" como pendência R-PGR-05 em 18 GHE; matriz × PCMSO: 191/191
+linhas iguais. 21 GHE, aviso da numeração 18/18 e bloqueantes de RX nos GHE 03 e 09, como na rodada 3.
+
+**Status:** ABERTA. Itens 2 e 3 são vocabulário/regra (sessão seguinte); 4 a 7 pedem medição no PGR antes da proposta;
+1 fica (norma).

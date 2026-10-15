@@ -173,6 +173,9 @@ entre o que o app gera e o que a médica assinou. Rodar o app no PGR Plateau ant
 - **Rodadas no app pedidas ao Diovanni (15/10/2026):** (1) PGR Plateau rev 03 → conferir matriz e PCMSO GHE a GHE contra
   o PCMSO Mauá; (2) Soft Connect15 v04 → conferir a decisão 6 (GHE 09 com audiometria DEM; "Radiação não ionizante"
   como pendência ao elaborador). Os arquivos chegam como anexos da próxima sessão.
+- **Feito em 15/10/2026 (branch `claude/pcmso-maua-fatia-2-cdd2e1`):** as duas rodadas conferidas (DT-(sessão
+  `claude/pcmso-maua-fatia-2-cdd2e1`)-01) e a fatia 2 (D-ARQ-96 andamento 5): dados da empresa lidos do PGR e do médico
+  na tela. Falta: descrição dos cargos do PGR.
 
 ## Pendência anterior (Soft Connect)
 

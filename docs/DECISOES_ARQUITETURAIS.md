@@ -5209,7 +5209,30 @@ novos (3 grafias e a radiação), varredura inversa 4/4.
   com o número esperado de downloads 4 → 5.
 - **Fora (fatia 2):** dados da empresa lidos da página de identificação do PGR; descrição dos cargos do PGR; cadastro
   do médico (CPF e NIT são dado pessoal: não entram no repositório). Conferência no par PGR Plateau rev 03 ↔ PCMSO Mauá
-  `[A MEDIR — rodada no app, com a IA]`.
+  `[A MEDIR — rodada no app, com a IA]`. **Feita em 15/10/2026:** DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01.
+
+**Andamento 5 (15/10/2026, branch `claude/pcmso-maua-fatia-2-cdd2e1` sobre `main fd9005b`) — etapa 3, fatia 2: dados da empresa lidos do PGR e do médico na tela.**
+- Medido antes (37 PDFs de PGR do acervo, 10 primeiras páginas): os dados vêm como "Rótulo: valor" em linha ou em
+  tabela CAMPO | INFORMAÇÃO; nos PGRs feitos pelo Seconci o bloco do elaborador (CNPJ 36.863.637) vem antes do bloco do
+  cliente; o texto do PDF põe parte do valor acima do rótulo quando a célula é centralizada (EURO, Cjr); o CNPJ chega com
+  separador trocado ("02.689,014/0001-90", Plateau); o sumário traz "GRAU DE RISCO" (Ricco: leitura falsa "4").
+- `motor/identificacao_pgr.py`: rótulo só no começo da linha; bloco "empresa elaboradora / responsável técnico"
+  pulado; CNPJ normalizado e conferido pelo dígito verificador (o TPB Andrade tem DV errado no próprio PGR → aviso);
+  CNAE em `NNNN-N/NN` com descrição; grau de risco como o PGR declara (não recalculado pela NR-04); do endereço,
+  CEP, cidade e UF (estado por extenso vira sigla); bairro e complemento só quando rotulados.
+- **Decisões do Diovanni (15/10/2026), pela recomendação da sessão:** com dois endereços, vai o **da obra** (o PCMSO é
+  por obra; o CNPJ segue o da empresa) e o outro aparece na tela; com dois CNAEs, vai o marcado "considerado para este"
+  e, sem a marca, o principal; o outro aparece na tela. O documento é Word editável: o que sair errado se corrige nele.
+- Cobertura no acervo (37 PDFs): CNPJ 31 (30 com DV válido), CNAE 29, grau 26, endereço 34, cidade/UF 22, CEP 20,
+  segundo endereço em 7. Sem dado: adendos, R78, Ricco Administração, Floramazônia (fora das 10 páginas ou em imagem).
+- Tela: expander "Dados do PCMSO" no formulário da matriz, com os campos da empresa pré-preenchidos (key com o hash
+  do PDF: PGR novo, campos novos) e os do médico (especialidade, RQE, NIT, CPF) em branco. CPF e NIT só existem na
+  sessão e no documento gerado (LGPD). Conteúdo que não começa com `%PDF-` não é aberto. Leitura uma vez por PDF.
+- `documento_pcmso.py`: CNPJ com DV que não confere vira aviso abaixo do botão.
+- **Verificação.** `test_identificacao_pgr.py` (12), 1 caso em `test_documento_pcmso.py`, 1 em `test_web_matriz.py`;
+  varredura inversa 15/15. Suíte completa (árvore parada): 2049 passed, 6 skipped (30 min 35 s). mypy no alvo
+  canônico: limpo, 62 arquivos.
+- **Fora:** descrição dos cargos do PGR (o bloco por GHE segue só com o nome do cargo).
 
 ---
 
@@ -5491,3 +5514,4 @@ novos (3 grafias e a radiação), varredura inversa 4/4.
 | v272 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 8d0045a` (IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 2 em `D-ARQ-96`** — vocabulário de agravos (`agravos.yaml`, `agravos_pcmso.py`); cobertura Mauá 131/140, R70 315/378. |
 | v273 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main e4ebb57` (MEDIÇÃO + IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 3 em `D-ARQ-96`** — decisão 6: 3 grafias de VMB medidas em PGR (Soft Connect, EURO) em `vibracao_mao_braco`; "Radiação não ionizante" em `fracoes_sem_agente` (R-PGR-05); grafias do R70 fora (0 PGRs). |
 | v274 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main cc4d2b2` (IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 4 em `D-ARQ-96`** — etapa 3 fatia 1: `documento_pcmso.py` gera o PCMSO na rodada da matriz; botão "Baixar PCMSO"; campos sem dado em branco visível e listados. |
+| v275 | 15/10/2026 | Branch `claude/pcmso-maua-fatia-2-cdd2e1` sobre `main fd9005b` (MEDIÇÃO + IMPLEMENTAÇÃO, decisões do Diovanni): **andamento 5 em `D-ARQ-96`** — etapa 3 fatia 2: `identificacao_pgr.py` lê CNPJ, CNAE, grau e endereço do PGR (endereço da obra; CNAE "considerado para este"); campos da empresa e do médico na tela; aviso de CNPJ com DV inválido. |
