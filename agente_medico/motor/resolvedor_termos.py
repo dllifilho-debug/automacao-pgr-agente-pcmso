@@ -183,8 +183,8 @@ def resolver_termo(termo: str, indice: IndiceTermos) -> ResolucaoTermo:
             tipo="fracao_sem_agente",
             destinatario="elaborador_pgr",
             motivo=(
-                f"termo '{termo}' declara fração/medida sem identificar a substância — "
-                "solicitar FDS e falar com o elaborador do PGR (R-PGR-05)"
+                f"termo '{termo}' não identifica a substância nem a fonte do agente — pedir ao "
+                "elaborador do PGR que especifique (a FDS, se for produto químico) (R-PGR-05)"
             ),
             bloqueante=False,
             regra_origem="R-PGR-05",

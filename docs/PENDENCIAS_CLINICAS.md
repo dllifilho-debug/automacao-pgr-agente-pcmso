@@ -4448,3 +4448,8 @@ a norma.
 **Status:** ABERTA — item 4 (hexano do Vistamerica, R-BIO-05) e achado (c) (GHE 06, 17, 18). Itens 2 e 3 conferidos no
 app na rodada 3 (15/10/2026).
 
+**Rodada 3, achado novo (15/10/2026, D-ARQ-96 decisão 6).** "Vibração (mãos e braços)" recusado por grafia aproximada em
+10 GHE e "Radiação não ionizante" sem agente em 18. Corrigido: a grafia entrou em `vibracao_mao_braco` (previsão:
+audiometria DEM no GHE 09, como a médica) e a radiação vira pendência ao elaborador pedindo a fonte (R-PGR-05).
+`[A MEDIR — rodada 4 do Soft Connect no app]`.
+

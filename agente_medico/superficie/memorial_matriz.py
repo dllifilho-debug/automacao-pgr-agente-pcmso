@@ -414,7 +414,10 @@ def riscos_nao_reconhecidos(ghe: GHEPGR, pendencias: Sequence[Pendencia]) -> tup
             continue
         termo = _termo_exibicao(risco.termo)
         if risco.causa_nao_resolucao == "fracao_sem_agente":
-            explicacao = "nomeia fração ou medida sem a substância; pedir a FDS ao elaborador do PGR (R-PGR-05)"
+            explicacao = (
+                "não identifica a substância nem a fonte; pedir ao elaborador do PGR que especifique "
+                "(a FDS, se for produto químico) (R-PGR-05)"
+            )
         elif risco.causa_nao_resolucao == "fuzzy_recusado":
             vizinho = _vizinho_recusado(ghe.id, risco.termo, pendencias)
             explicacao = (

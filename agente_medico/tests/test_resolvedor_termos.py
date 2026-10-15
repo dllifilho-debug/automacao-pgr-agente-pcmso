@@ -100,7 +100,9 @@ def test_indice_real_tem_210_entradas(indice_real: IndiceTermos) -> None:
     # (R-ESP-05) e +5 termos do censo de 9 PGRs (Fascino, Vila Brasil, Porto Araras I, Sinduscon-GO).
     # 216 -> 221 (branch `claude/admiring-maxwell-dhcgko`, 14/10/2026): +5 termos do PGR Soft
     # Connect15 v04 lidos pela IA — 2 de PNOS, 1 de sílica, 1 de gesso e "Hexano" (n_hexano).
-    assert len(indice_real.slug_por_forma) == 221
+    # 221 -> 224 (branch `claude/eager-newton-qw5a0u`, 15/10/2026): +3 termos de `vibracao_mao_braco`
+    # (Soft Connect15 v04 pela IA e PGR EURO Setor C — D-ARQ-96 decisão 6).
+    assert len(indice_real.slug_por_forma) == 224
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
@@ -970,3 +972,12 @@ def test_poeira_silica_nao_vira_pnos_nem_poeira_pnos_vira_silica(indice_real: In
     # duplicação nos dois já cai antes, na colisão de `construir_indice_termos`).
     assert resolver_termo("POEIRA – SILICA", indice_real).slug != "poeira_nao_classificada"
     assert resolver_termo("POEIRA - PNOS", indice_real).slug != "silica"
+
+
+@pytest.mark.parametrize("termo", ["Vibração (mãos e braços)", "Vibração de mãos e braços", "Vibração de mãos e braço"])
+def test_grafias_de_vmb_medidas_em_pgr_resolvem_para_vibracao_mao_braco(indice_real: IndiceTermos, termo: str) -> None:
+    # D-ARQ-96 decisão 6: Soft Connect15 v04 (transcrição da IA, fuzzy recusado em 10 GHE) e PGR EURO Setor C
+    # (inventário, 2,80 m/s²). Reversão que mata: tirar a grafia dos termos de `vibracao_mao_braco` — volta a
+    # fuzzy recusado (ou vocabulario_ausente) e o GHE perde a perna de vibração de R-AUD-02 e de R-VIB-02.
+    resolucao = resolver_termo(termo, indice_real)
+    assert (resolucao.slug, resolucao.confianca) == ("vibracao_mao_braco", Confianca.EXATA)

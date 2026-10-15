@@ -16,7 +16,7 @@ from streamlit.testing.v1 import AppTest
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.hidratacao import hidratar_pgr
 from agente_medico.motor.protocolo import Protocolo, carregar
-from agente_medico.motor.resolvedor_termos import construir_indice_termos
+from agente_medico.motor.resolvedor_termos import construir_indice_termos, resolver_termo
 from agente_medico.motor.tipos import PGR, GHEVerbatim, MatrizGHE, Momento, Pendencia, RiscoVerbatim
 from agente_medico.superficie.documento_matriz import CabecalhoDocumento
 from agente_medico.superficie.memorial_matriz import (
@@ -136,8 +136,8 @@ def test_memorial_lista_o_que_o_pgr_declara_e_nao_virou_agente(proto: Protocolo)
     (bloco,) = memorial.blocos
     assert bloco.nao_reconhecidos == (
         "Queda de mesmo nível: sem correspondência no vocabulário de agentes.",
-        "Poeira respirável: nomeia fração ou medida sem a substância; pedir a FDS ao "
-        "elaborador do PGR (R-PGR-05).",
+        "Poeira respirável: não identifica a substância nem a fonte; pedir ao elaborador do PGR que "
+        "especifique (a FDS, se for produto químico) (R-PGR-05).",
     )
 
 
@@ -211,3 +211,16 @@ def test_tela_passa_pgr_e_pendencias_ao_memorial(monkeypatch: pytest.MonkeyPatch
     assert chamadas
     assert chamadas[-1]["pgr"] is at.session_state["web_matriz_cache"].pgr_hidratado
     assert chamadas[-1]["pendencias"] == tuple(pendencias)
+
+
+def test_radiacao_nao_ionizante_pede_a_fonte_ao_elaborador(proto: Protocolo) -> None:
+    # D-ARQ-96 decisão 6: a expressão cobre solda (UV/IR) e sol; não casa com radiacao_uv_ir. Reversão que mata:
+    # tirar "Radiação não ionizante" de `fracoes_sem_agente` — volta a vocabulario_ausente ("sem correspondência").
+    indice = construir_indice_termos(
+        proto.vocabulario.agentes, fracoes_sem_agente=proto.vocabulario.fracoes_sem_agente
+    )
+    resolucao = resolver_termo("Radiação não ionizante", indice)
+    assert resolucao.slug is None
+    assert resolucao.pendencia is not None
+    assert (resolucao.pendencia.tipo, resolucao.pendencia.destinatario) == ("fracao_sem_agente", "elaborador_pgr")
+

@@ -5184,6 +5184,14 @@ marcado para conferir → ausente. O carregamento recusa termo que resolva num a
 decisão 6 à parte), agente inexistente, termo repetido e entrada com agente e termos juntos. Cobertura medida: Mauá
 131/140, R70 315/378. Sem consumidor ainda (etapa 3). Verificação: `test_agravos_pcmso.py`, varredura inversa 9/9.
 
+**Andamento 3 (15/10/2026, branch recriada sobre `main e4ebb57`) — decisão 6 (sinônimos que mudam exame).** Medido:
+as grafias do R70 não aparecem em nenhum PGR do acervo (não entram); o app perde "Vibração (mãos e braços)" no Soft
+Connect (fuzzy recusado, 10 GHE) e o EURO Setor C escreve "Vibração de mãos e braço(s)" — 3 termos novos em
+`vibracao_mao_braco` (índice 221 → 224). "Radiação não ionizante" vai para `fracoes_sem_agente` (R-PGR-05, nota no
+PROTOCOLO): pendência ao elaborador pedindo a fonte; o texto da pendência passa a cobrir substância ou fonte.
+Efeito previsto: audiometria DEM no GHE 09 do Soft Connect, como a médica `[A MEDIR — no app]`. Verificação: 4 testes
+novos (3 grafias e a radiação), varredura inversa 4/4.
+
 ---
 
 ## Histórico de revisões
@@ -5462,3 +5470,4 @@ decisão 6 à parte), agente inexistente, termo repetido e entrada com agente e 
 | v270 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, sobre `main bb9dddf` (DECISÃO do Diovanni de 14/10/2026 + IMPLEMENTAÇÃO da etapa 1): **D-ARQ-96 adicionada** — PCMSO inteiro sobre modelo `.docx` do Seconci 2026, junto com a matriz RQ.61; agravo das médicas; código Seconci como exibição; modelo de revisão marcado (47 correções, 8 sugestões, 32 campos), gerado por `scripts/gerar_modelo_pcmso.py`. |
 | v271 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 91a20c1` (MEDIÇÃO + IMPLEMENTAÇÃO dos códigos): **andamento em `D-ARQ-96`** — `codigo_seconci` em 24 exames; agravos medidos (Mauá × R70 divergem, cobertura pelo agente 44%/23%) com proposta e 7 decisões em `AGRAVOS_PCMSO_PROPOSTA.md`; comentários do modelo reescritos em linguagem de quem valida. |
 | v272 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 8d0045a` (IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 2 em `D-ARQ-96`** — vocabulário de agravos (`agravos.yaml`, `agravos_pcmso.py`); cobertura Mauá 131/140, R70 315/378. |
+| v273 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main e4ebb57` (MEDIÇÃO + IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 3 em `D-ARQ-96`** — decisão 6: 3 grafias de VMB medidas em PGR (Soft Connect, EURO) em `vibracao_mao_braco`; "Radiação não ionizante" em `fracoes_sem_agente` (R-PGR-05); grafias do R70 fora (0 PGRs). |
