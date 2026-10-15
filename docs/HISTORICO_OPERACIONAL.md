@@ -13014,3 +13014,19 @@ mypy no alvo canônico: limpo, 62 arquivos. `test_web_matriz.py` sozinho estoura
 intermitente **também na base** (`main fd9005b`: 5 de 7 rodadas limpas; com a mudança: 4 de 6): rodadas pesadas a
 2,1–2,7 s. A leitura do PDF na tela custava ~30 ms por rodada; `%PDF-` como porta de entrada a zerou (0,09 s nas duas).
 Smoke visual: ok (desktop e mobile).
+
+---
+
+## Sessão (branch `claude/pcmso-maua-fatia-2-cdd2e1` recriada sobre `main 84c18c3`, pós-merge do PR #505) — 15/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: vocabulário do Plateau
+
+**Implementado.** 4 grafias do PGR Plateau rev 03 (DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01 item 2): sílica,
+espaço confinado, trânsito e o slug novo `hidrocarbonetos_nao_especificados` (só pedido da FDS; chave
+`presumir_contaminante: false` em `Risco` e no predicado `benzeno_a_confirmar` — opção b do Diovanni, depois de
+conferidas NR-07, NR-15 Anexos 13 e 13-A, NR-18 18.7.7 e NR-33 em `normas/`). O agravo do trânsito
+passou para entrada por agente em `agravos.yaml` (o carregamento recusa termo de perigo que resolve em agente).
+PROTOCOLO v139.
+
+**Verificação.** `test_vocabulario_plateau.py` (7 casos), varredura inversa 10/10; índice de termos 224 → 229.
+Suíte (árvore parada): 2056 passed, 6 skipped (27 min 53 s); na rodada anterior, com a opção (a), 1 falha por tempo do
+AppTest (`test_aviso_de_anexo_descartado_aparece_uma_vez`, 3 s), a intermitência já registrada — sozinho passa. mypy no alvo
+canônico: limpo, 62 arquivos.
