@@ -52,6 +52,9 @@ TOL_ALTURA = 1.5
 TOL_CONTEUDO = 1.5
 TOL_CENTRO = 2.5
 
+# Matriz DOCX, HTML, memorial, riscos para o ASO e PCMSO (D-ARQ-96 etapa 3).
+DOWNLOADS_DA_MATRIZ = 5
+
 # Estado do passo do stepper → cor da borda superior (estilos.py, regras passo_*).
 COR_DO_ESTADO = {
     "ativo": estilos.PRIMARIA,
@@ -147,8 +150,8 @@ def avaliar(medidas: dict[str, Any], cenario: str) -> list[str]:
     for d in medidas["downloads"]:
         if d["largura"] < d["coluna"] - TOL_ALTURA:
             falhas.append(f"download '{d['rotulo']}' com {round(d['largura'])}px numa coluna de {round(d['coluna'])}px")
-    if cenario == "matriz" and len(medidas["downloads"]) != 4:
-        falhas.append(f"{len(medidas['downloads'])} botões de download, esperados 4")
+    if cenario == "matriz" and len(medidas["downloads"]) != DOWNLOADS_DA_MATRIZ:
+        falhas.append(f"{len(medidas['downloads'])} botões de download, esperados {DOWNLOADS_DA_MATRIZ}")
 
     alturas_botoes = [b["altura"] for b in medidas["botoes"]]
     if alturas_botoes and max(alturas_botoes) - min(alturas_botoes) > TOL_ALTURA:

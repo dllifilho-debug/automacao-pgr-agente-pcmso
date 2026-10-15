@@ -12986,3 +12986,16 @@ do Soft Connect, como a médica `[A MEDIR — no app]`.
 **Verificação.** 4 testes novos, varredura inversa 4/4. Suíte completa (árvore parada): 2021 passed, 6 skipped
 (17 min 09 s). mypy no alvo canônico: limpo, 60 arquivos. Smoke visual não rodado: a tela não muda.
 
+## Sessão (branch `claude/eager-newton-qw5a0u` recriada sobre `main cc4d2b2`, pós-merge do PR #502) — 15/10/2026 — IMPLEMENTAÇÃO: etapa 3 de D-ARQ-96, fatia 1 (PCMSO gerado com a matriz)
+
+**Implementado.** `superficie/documento_pcmso.py` e `modelos/pcmso_seconci_2026.docx` (versão sem marcas do modelo em
+revisão); botão "Baixar PCMSO" com a matriz, anexos numa segunda linha; avisos do que completar no Word. Andamento 4 em
+D-ARQ-96.
+
+**Verificação.** `test_documento_pcmso.py` (14 casos), varredura inversa 13/13. 1ª suíte: 2 falhas — o teste dos nomes
+de arquivo (esperava 4 downloads; atualizado para 5, mudança pretendida) e `test_sugestao_vinculo` estourando o tempo do
+AppTest (3 s): o PCMSO recarregava o protocolo a cada renderização (~0,3 s, medido); vocabulário de agravos passou a
+cache por processo. 2ª suíte (árvore parada): 2035 passed, 6 skipped (28 min 43 s). O tempo total subiu em relação às
+rodadas anteriores (17–18 min) `[não atribuído]`: os 15 testes mais lentos são todos de leitura de PDF real, que esta
+mudança não toca. mypy no alvo canônico: limpo, 61 arquivos. Smoke visual: ok (desktop e mobile), 5 downloads.
+
