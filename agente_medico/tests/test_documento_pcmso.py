@@ -22,6 +22,7 @@ from agente_medico.superficie.documento_pcmso import (
     celulas_do_exame,
     dados_do_cabecalho,
     gerar_pcmso_docx,
+    linhas_de_aviso,
     linhas_de_perigo,
     rotulo_exame,
     rotulo_grupo,
@@ -189,3 +190,15 @@ def test_tela_oferece_o_pcmso_com_os_exames_da_matriz(monkeypatch: pytest.Monkey
     celulas = [c.text for t in Document(io.BytesIO(arquivos[nome])).tables for r in t.rows for c in r.cells]
     assert "(0295) Exame Clínico" in celulas
     assert "{{" not in texto
+
+
+# Reversão: tirar a linha `avisos.cnpj_invalido = ...` de `valores_dos_campos` — o CNPJ com DV errado (PGR TPB
+# Andrade) sai no PCMSO sem aviso; o válido continua sem aviso.
+def test_cnpj_com_digito_errado_vira_aviso() -> None:
+    avisos = AvisosPCMSO()
+    valores_dos_campos(_dados(cnpj="50.055.341/0001-52"), avisos)
+    assert avisos.cnpj_invalido
+    assert any("dígito verificador" in linha for linha in linhas_de_aviso(avisos))
+    avisos_ok = AvisosPCMSO()
+    valores_dos_campos(_dados(cnpj="43.091.205/0001-32"), avisos_ok)
+    assert not avisos_ok.cnpj_invalido

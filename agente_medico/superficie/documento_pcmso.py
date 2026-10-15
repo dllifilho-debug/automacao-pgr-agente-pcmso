@@ -25,6 +25,7 @@ from docx.oxml.ns import qn
 from docx.shared import Twips
 from docx.text.paragraph import Paragraph
 
+from agente_medico.motor.identificacao_pgr import cnpj_valido
 from agente_medico.motor.tipos import GHEPGR, PGR, ExameEmitido, MatrizGHE, Momento, RiscoPGR
 from agente_medico.superficie.agravos_pcmso import OrigemAgravo, VocabularioAgravos, agravo_do_perigo
 from agente_medico.superficie.documento_matriz import (
@@ -104,6 +105,7 @@ class AvisosPCMSO:
     agravos_do_pgr: int = 0
     agravos_ausentes: int = 0
     ghes_sem_pgr: list[str] = field(default_factory=list)
+    cnpj_invalido: bool = False
 
 
 def linhas_de_aviso(avisos: AvisosPCMSO) -> list[str]:
@@ -121,6 +123,8 @@ def linhas_de_aviso(avisos: AvisosPCMSO) -> list[str]:
         )
     if avisos.ghes_sem_pgr:
         linhas.append("GHE sem os perigos do PGR: " + ", ".join(avisos.ghes_sem_pgr) + ".")
+    if avisos.cnpj_invalido:
+        linhas.append("CNPJ com dígito verificador que não confere — conferir no PGR e corrigir no Word.")
     return linhas
 
 
@@ -189,6 +193,7 @@ def valores_dos_campos(dados: DadosPCMSO, avisos: AvisosPCMSO) -> dict[str, str]
         if not valor:
             avisos.campos_em_branco.append(legivel)
         valores[nome] = valor or EM_BRANCO
+    avisos.cnpj_invalido = bool(_sanitizar(dados.cnpj)) and not cnpj_valido(dados.cnpj)
     inicio = _data(dados.data_documento)
     if inicio is None:
         avisos.campos_em_branco.append("período do cronograma")
