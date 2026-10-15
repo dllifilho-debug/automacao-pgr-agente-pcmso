@@ -26,7 +26,7 @@ O amarelo original do Seconci (52 trechos: período e meses do cronograma, empre
 | ID | Onde | Antes → depois | Fonte |
 |---|---|---|---|
 | C-01 | 13.1 (empresa e local) e 15 (termo) | "SPE INCORPORAÇÃO H6 LTDA" → `{{RAZAO_SOCIAL}}` / `{{OBRA}}` | sobra de um PCMSO anterior (briefing) |
-| C-02 | 12, passo 6 | "Lei 15337" → "Lei nº 15.377/2026" | o próprio documento escreve 15.377 três vezes; **número e data `[A CONFERIR — Planalto]`** |
+| C-02 | 12, passo 6 | "Lei 15337" → "Lei nº 15.377/2026" | o próprio documento escreve 15.377 três vezes; número e data conferida no Planalto pela captura do Diovanni (15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026 |
 | C-03 | 6, alínea c) | remissões 11.2/11.3/11.4 → 16.1/16.2/16.3 | os fluxos estão nos anexos 16.1–16.3 |
 | C-04 | 9.3.6, 9.3.7, 9.3.8, 9.3.9.5 | "(Anexo 11.1)" → "(Anexo 16)" (3×); "(Anexo 11.5)" → "(Anexo 16.4)" | questionário OMS em 16; fluxograma de acidente biológico em 16.4 |
 | C-05 | 9.3.4 em diante | dois 9.3.4: Radiações Ionizantes → 9.3.5; altura 9.3.6; espaço confinado 9.3.7; motoristas 9.3.8; NR-32 9.3.9 e 9.3.9.1–9.3.9.5 | numeração |
@@ -43,7 +43,7 @@ O amarelo original do Seconci (52 trechos: período e meses do cronograma, empre
 
 Normas conferidas nas cópias de `normas/` (vigência declarada pelo Diovanni em 13/10/2026, `normas/README.md`): NR-01
 1.5.4.4.6, NR-07 (corpo e Anexos II, III e V), NR-09 Anexo III, NR-18 18.17.1, NR-33 33.2.2, NR-35 35.4.4. O Gov.br/MTE
-e o Planalto não abriram: a rede do ambiente bloqueia os dois hosts.
+não abriu: a rede do ambiente bloqueia o host. A Lei 15.377/2026 foi conferida no Planalto pela captura do Diovanni (15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026.
 
 ## Correções sem marca (não há onde pôr o realce)
 
@@ -65,6 +65,7 @@ e o Planalto não abriram: a rede do ambiente bloqueia os dois hosts.
 | S-06 | 13 | "(OBS: ADENDO NÃO PRECISA DESSE ITEM)" é nota de edição visível: tirar do texto e virar regra do app. |
 | S-07 | 16.1 | **A figura do "Fluxo geral" é a mesma do 16.2** (fluxo do Anexo I, Quadros 1 e 2) — mesmo arquivo de imagem. O fluxo geral não está no documento; falta a figura do Seconci. |
 | S-08 | 13.2 | Datas e temas das palestras continuam manuais (o amarelo original foi retirado). Decidir se o app preenche. |
+| S-09 | 12, "1. FUNDAMENTAÇÃO LEGAL" | Falta o parágrafo único do art. 169-A da CLT: informar aos empregados que podem deixar de comparecer ao serviço, sem prejuízo do salário, para os exames preventivos de HPV e dos cânceres de mama, colo do útero e próstata (inciso XII do art. 473 da CLT). Texto proposto no comentário. Decisão do Diovanni. |
 
 S-05 (índice sem as seções 1 e 11, e "SALAS DE VACINAS" duas vezes) não foi marcado no `.docx`: o índice é campo do Word
 e se refaz ao abrir; corrigir pede campos TC novos — decidir junto com a etapa 3.

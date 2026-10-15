@@ -181,9 +181,9 @@ TROCAS: tuple[Troca, ...] = (
     Troca("referentes aos empegados", "referentes aos empregados", "C-15", "Grafia."),
     # --- 12 ---
     Troca("referente à Lei 15337.", "referente à Lei nº 15.377/2026.", "C-02",
-          "Número da lei em duas formas (15.377 em três lugares, 15337 aqui). Uniformizado em 15.377. O número e a "
-          "data (2 de abril de 2026) não foram conferidos no Planalto: a rede do ambiente bloqueia o site. "
-          "[A CONFERIR — Planalto]"),
+          "Número da lei em duas formas (15.377 em três lugares, 15337 aqui). Uniformizado em 15.377. Conferido no "
+          "Planalto (captura do Diovanni, 15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026, que "
+          "inclui o art. 169-A na CLT."),
     # --- 13 cronograma ---
     Troca("JULHO DE 2026", campo("CRONOGRAMA_INICIO"), "CAMPO"),
     Troca("A JULHO DE 2027", "A " + campo("CRONOGRAMA_FIM"), "CAMPO"),
@@ -215,6 +215,14 @@ SUGESTOES_EM_TITULO: tuple[Troca, ...] = (
     Troca("9.3.1 – QUADRO 1 DO ANEXO I NR-7", "", "S-02",
           "Sugestão: os Quadros 1 e 2 do Anexo I da NR-07 estão em imagem e não acompanham a norma. Substituir "
           "por remissão à NR-07 vigente (Gov.br/MTE) ou por tabela de texto conferida."),
+    Troca("1. FUNDAMENTAÇÃO LEGAL", "", "S-09",
+          "Sugestão: falta o parágrafo único do art. 169-A da CLT (Lei nº 15.377/2026, conferida no Planalto em "
+          "15/10/2026) — a empresa deve informar aos empregados que podem deixar de comparecer ao serviço, sem "
+          "prejuízo do salário, para os exames preventivos de HPV e dos cânceres de mama, de colo do útero e de "
+          "próstata, nos termos do inciso XII do art. 473 da CLT. Texto proposto para o fim de \"1. FUNDAMENTAÇÃO "
+          "LEGAL\": \"Conforme o parágrafo único do art. 169-A, a empresa informará aos empregados a possibilidade "
+          "de deixar de comparecer ao serviço para a realização desses exames preventivos, sem prejuízo do salário, "
+          "nos termos do inciso XII do art. 473 da CLT.\" Decisão do Diovanni."),
     Troca("13.2 - PROGRAMAÇÃO DAS AÇÕES", "", "S-08",
           "O modelo original marcava em amarelo o que se preenche à mão (período, meses, empresa, \"NOV/26\", "
           "\"Inserir Tema\", \"MÊS/XX\"). O amarelo foi retirado: aqui amarelo é só correção. Período, meses e "

@@ -5144,7 +5144,7 @@ longas das seções 3–10 iguais às do PCMSO R70).
 
 **Aplicação — etapa 1 (15/10/2026).**
 - `scripts/gerar_modelo_pcmso.py` sobre o `.docx` que o soffice faz do RTF do acervo: 47 trechos corrigidos (C-01 a
-  C-15), 7 sugestões, 32 campos; 65 tabelas dos blocos por GHE trocadas por `{{BLOCOS_GHE}}` e 55 entradas de GHE tiradas
+  C-15), 8 sugestões, 32 campos; 65 tabelas dos blocos por GHE trocadas por `{{BLOCOS_GHE}}` e 55 entradas de GHE tiradas
   do índice; 11 títulos com `TC "…"` visível (defeito da conversão, não do original) voltaram a ser campo; o amarelo
   original do Seconci (52 trechos, preenchimento manual) saiu para não se confundir com as correções. O gerador para sem
   gravar se um texto esperado não estiver no documento ou aparecer em número diferente de parágrafos.
@@ -5153,7 +5153,7 @@ longas das seções 3–10 iguais às do PCMSO R70).
   (C-12), alíneas da seção 8 (C-13), data da Portaria 6.734 (C-14, divergente no próprio texto da NR-07), e **a figura do
   "Fluxo geral" (16.1) é a mesma do 16.2** (S-07: falta a figura do Seconci).
 - Normas conferidas nas cópias de `normas/` (vigência declarada em 13/10/2026). Lei nº 15.377/2026 (art. 169-A da CLT)
-  `[A CONFERIR — Planalto]`: a rede do ambiente bloqueia o host.
+  conferida no Planalto pela captura do Diovanni (15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026; o modelo não traz o parágrafo único do art. 169-A (S-09).
 - **Verificação.** `tests/test_gerar_modelo_pcmso.py` (17 casos: mecânica da troca em documento sintético e invariantes
   do modelo gravado), varredura inversa 8/8.
 
@@ -5435,4 +5435,4 @@ longas das seções 3–10 iguais às do PCMSO R70).
 | v267 | 13/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main cbc9673` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 3 em `D-ARQ-94`** — nível do inventário psicossocial lido pela faixa de palavras em volta do fator (tabela que parte a linha, Soft Connect15 v04) e aviso não bloqueante `inventario_psicossocial_sem_nivel` quando o PGR cita o inventário sem nível lido. Medido nos 53 PDFs do acervo: só o Soft Connect muda. |
 | v268 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main e1c644d` (MEDIÇÃO): **nota em `D-ARQ-94`, emenda 3** — efeito no app medido pela rodada do Diovanni: Saúde Mental em 20 GHE, Psicossocial em 18, nenhum dos dois avisos. |
 | v269 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main 9d695d2` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda à cl.3 de `D-ARQ-68`** — sílica medida sem % de quartzo ou fração emite RX OIT pela faixa do pior caso (quartzo 100%, fração respirável; `R-RX-01-incompleta-*`, INTERPRETADO) com as pendências anexadas, e 0 ("sem periódico") deixa de vencer na consolidação; **nota em `D-ARQ-31`** — pendência bloqueante por GHE em vermelho na tela e no memorial, e GHE recortado fora da matriz (`ghe_ausente_da_matriz`) bloqueia o download. |
-| v270 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, sobre `main bb9dddf` (DECISÃO do Diovanni de 14/10/2026 + IMPLEMENTAÇÃO da etapa 1): **D-ARQ-96 adicionada** — PCMSO inteiro sobre modelo `.docx` do Seconci 2026, junto com a matriz RQ.61; agravo das médicas; código Seconci como exibição; modelo de revisão marcado (47 correções, 7 sugestões, 32 campos), gerado por `scripts/gerar_modelo_pcmso.py`. |
+| v270 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, sobre `main bb9dddf` (DECISÃO do Diovanni de 14/10/2026 + IMPLEMENTAÇÃO da etapa 1): **D-ARQ-96 adicionada** — PCMSO inteiro sobre modelo `.docx` do Seconci 2026, junto com a matriz RQ.61; agravo das médicas; código Seconci como exibição; modelo de revisão marcado (47 correções, 8 sugestões, 32 campos), gerado por `scripts/gerar_modelo_pcmso.py`. |

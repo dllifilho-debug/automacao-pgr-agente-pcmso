@@ -94,7 +94,7 @@ em todas as linhas medidas) e "MUD. FUNÇ." é o MR. O código Seconci não exis
 - NR-07 e Anexos I, II e III; NR-32; NR-35 item 35.4.4; NR-33: Gov.br/MTE, Normas
   Regulamentadoras Vigentes. Conferir vigência e eventuais revisões em consulta pública.
 - Art. 169-A da CLT, incluído pela "Lei nº 15.377, de 2 de abril de 2026" segundo o modelo:
-  `[A CONFERIR — Planalto]`. Fora da NR, e o número aparece de duas formas no próprio documento.
+  conferida no Planalto pela captura do Diovanni (15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026. Fora da NR, e o número aparece de duas formas no próprio documento.
 
 ## Pontos de decisão (do Diovanni)
 

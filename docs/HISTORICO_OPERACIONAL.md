@@ -12936,12 +12936,16 @@ canônico: limpo, 59 arquivos. Smoke visual: ok (`--chromium` do container).
 caso e pendência bloqueante em vermelho; download liberado. PENDENCIAS, DT-(sessão `claude/admiring-maxwell-dhcgko`)-01.
 
 **Implementado (D-ARQ-96, decisões do Diovanni de 14/10/2026).** `scripts/gerar_modelo_pcmso.py` e o modelo de revisão
-`agente_medico/superficie/modelos/pcmso_seconci_2026_revisao.docx`: 47 correções em amarelo com comentário, 7 sugestões
+`agente_medico/superficie/modelos/pcmso_seconci_2026_revisao.docx`: 47 correções em amarelo com comentário, 8 sugestões
 em comentário, 32 campos em turquesa, blocos por GHE trocados por `{{BLOCOS_GHE}}`. Lista em
 `docs/referencia/MODELO_PCMSO_CORRECOES.md`. Gov.br/MTE e Planalto bloqueados pela rede do ambiente: normas conferidas nas
-cópias de `normas/`; Lei 15.377/2026 `[A CONFERIR — Planalto]`.
+cópias de `normas/`; Lei 15.377/2026 conferida no Planalto pela captura do Diovanni (15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026 — falta no modelo o parágrafo único do art. 169-A (S-09).
 
 **Verificação.** `tests/test_gerar_modelo_pcmso.py` (17 casos), varredura inversa 8/8; índice D-ARQ regenerado,
 `test_gerar_indice_darq.py` verde. mypy do script: limpo. Suíte completa (árvore parada): 1950 passed, 6 skipped (18 min 20 s). mypy no alvo
 canônico: limpo, 59 arquivos. Smoke visual não rodado: a tela não muda.
 
+**Emenda (15/10/2026) — Lei 15.377/2026 conferida.** Captura do Planalto enviada pelo Diovanni: número, data e DOU
+batem com o modelo; o parágrafo único do art. 169-A (dispensa sem prejuízo do salário para os exames preventivos, inciso
+XII do art. 473) não está no texto — sugestão S-09 com redação proposta. Modelo regenerado (54 comentários). Recorte da
+suíte (script e docs tocados): `test_gerar_modelo_pcmso.py` + `test_gerar_indice_darq.py`, 23 passed; mypy do script limpo.
