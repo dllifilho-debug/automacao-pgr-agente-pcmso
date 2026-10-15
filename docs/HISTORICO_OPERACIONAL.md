@@ -12961,3 +12961,15 @@ proposta e 7 decisões em `docs/referencia/AGRAVOS_PCMSO_PROPOSTA.md`.
 (árvore parada): 1999 passed, 6 skipped (18 min 38 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke visual não
 rodado: a tela não muda.
 
+## Sessão (branch `claude/eager-newton-qw5a0u` recriada sobre `main 8d0045a`, pós-merge do PR #500) — 15/10/2026 — IMPLEMENTAÇÃO: vocabulário de agravos do PCMSO
+
+**Decisão.** As 7 decisões de `AGRAVOS_PCMSO_PROPOSTA.md` aprovadas pelo Diovanni pela recomendação técnica da sessão.
+Revisão do modelo `.docx` pelas médicas em paralelo: o modelo não foi regenerado.
+
+**Implementado.** `vocabulario/agravos.yaml` (23 agentes, 22 chaves de perigo sem agente) e
+`superficie/agravos_pcmso.py`. Cobertura medida: Mauá 131/140, R70 315/378. Andamento 2 em D-ARQ-96.
+
+**Verificação.** `test_agravos_pcmso.py` (18 casos), varredura inversa 9/9. Suíte completa (árvore parada):
+2017 passed, 6 skipped (18 min 32 s). mypy no alvo canônico: limpo, 60 arquivos (+1: `agravos_pcmso.py`). Smoke
+visual não rodado: a tela não muda.
+

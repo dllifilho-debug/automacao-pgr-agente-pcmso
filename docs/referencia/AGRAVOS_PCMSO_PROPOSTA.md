@@ -3,7 +3,17 @@
 `[MEDIDO — 15/10/2026, branch claude/eager-newton-qw5a0u sobre main 91a20c1]` D-ARQ-96 cl.3: o agravo da tabela
 "Perigo / Fator de Risco | Grupo | Descrições dos perigos e possíveis lesões ou agravos à saúde" vem dos PCMSOs das
 médicas no modelo 2026, casado pelo agente que o app resolve; fora do dicionário, o agravo do PGR marcado "do PGR —
-conferir". **Nada daqui foi implementado** além dos códigos Seconci (fim do documento). As decisões estão no fim.
+conferir". As decisões estão no fim.
+
+**Aprovado pelo Diovanni em 15/10/2026, pela recomendação técnica dada na sessão. Implementado no mesmo dia:**
+`vocabulario/agravos.yaml` (23 agentes, 22 chaves de perigo sem agente) e `superficie/agravos_pcmso.py`. Cobertura
+medida nas duas fontes: Mauá 131 de 140 linhas (94%), R70 315 de 378 (83%); o resto sai com o agravo do PGR para
+conferir — os sinônimos de agente com exame (decisão 6, ainda a medir) e produtos de FDS. Como ficou cada decisão:
+1. curto; 2. PAINPSE + extra-auditivos; 3. as 9 formas, sílica com silicose `[INTERPRETADO]`; 4. chave de perigo sem
+agente — nenhum termo pode resolver num agente (o carregamento recusa); 5. um agravo psicossocial único; 6. não
+implementado: medir os sinônimos de vibração mão-braço e sílica nos PGRs pareados; "Radiação não ionizante" vira
+pendência ao elaborador, sem casar com UV/IR; 7. "(0113/0102)" numa linha, a gravar com a etapa 3. Componentes de FDS
+do cimento recebem o agravo do produto (precedente do R70).
 
 ## Fontes e método
 

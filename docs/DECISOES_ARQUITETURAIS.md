@@ -5176,6 +5176,14 @@ longas das seções 3–10 iguais às do PCMSO R70).
 - **Verificação.** `test_codigo_seconci_e_o_medido_no_acervo` (varredura inversa 3/3); testes de linguagem dos
   comentários (4/4). Suíte e mypy: ver HISTORICO.
 
+**Andamento 2 (15/10/2026, branch recriada sobre `main 8d0045a`) — vocabulário de agravos.** Aprovado pelo Diovanni
+pela recomendação técnica da sessão (as 7 decisões de `AGRAVOS_PCMSO_PROPOSTA.md`). `vocabulario/agravos.yaml`: 23
+entradas por agente e 22 chaves de perigo sem agente, com `termos` só das formas medidas e a fonte de cada texto
+(Mauá, R70 ou `[INTERPRETADO]`). `superficie/agravos_pcmso.py`: agente EXATA → forma do vocabulário → agravo do PGR
+marcado para conferir → ausente. O carregamento recusa termo que resolva num agente (sinônimo de agente muda exame,
+decisão 6 à parte), agente inexistente, termo repetido e entrada com agente e termos juntos. Cobertura medida: Mauá
+131/140, R70 315/378. Sem consumidor ainda (etapa 3). Verificação: `test_agravos_pcmso.py`, varredura inversa 9/9.
+
 ---
 
 ## Histórico de revisões
@@ -5453,3 +5461,4 @@ longas das seções 3–10 iguais às do PCMSO R70).
 | v269 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main 9d695d2` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda à cl.3 de `D-ARQ-68`** — sílica medida sem % de quartzo ou fração emite RX OIT pela faixa do pior caso (quartzo 100%, fração respirável; `R-RX-01-incompleta-*`, INTERPRETADO) com as pendências anexadas, e 0 ("sem periódico") deixa de vencer na consolidação; **nota em `D-ARQ-31`** — pendência bloqueante por GHE em vermelho na tela e no memorial, e GHE recortado fora da matriz (`ghe_ausente_da_matriz`) bloqueia o download. |
 | v270 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, sobre `main bb9dddf` (DECISÃO do Diovanni de 14/10/2026 + IMPLEMENTAÇÃO da etapa 1): **D-ARQ-96 adicionada** — PCMSO inteiro sobre modelo `.docx` do Seconci 2026, junto com a matriz RQ.61; agravo das médicas; código Seconci como exibição; modelo de revisão marcado (47 correções, 8 sugestões, 32 campos), gerado por `scripts/gerar_modelo_pcmso.py`. |
 | v271 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 91a20c1` (MEDIÇÃO + IMPLEMENTAÇÃO dos códigos): **andamento em `D-ARQ-96`** — `codigo_seconci` em 24 exames; agravos medidos (Mauá × R70 divergem, cobertura pelo agente 44%/23%) com proposta e 7 decisões em `AGRAVOS_PCMSO_PROPOSTA.md`; comentários do modelo reescritos em linguagem de quem valida. |
+| v272 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 8d0045a` (IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 2 em `D-ARQ-96`** — vocabulário de agravos (`agravos.yaml`, `agravos_pcmso.py`); cobertura Mauá 131/140, R70 315/378. |
