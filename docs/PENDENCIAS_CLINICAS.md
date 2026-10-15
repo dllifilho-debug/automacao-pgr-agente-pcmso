@@ -4430,10 +4430,21 @@ sílica medida sem % de quartzo, nenhuma linha de RX, nada visível; (b) sílica
 a revisão de saída; (c) sem RX nem saída pelo vocabulário: GHE 06 ("Poeiras Respiráveis /Metálica (Ferro, Óxido
 (Fe2O3))", 0,00574 mg/m³), GHE 17 (o PGR v04 não lista poeira), GHE 18 (só silicato de sódio).
 
+**Rodada 3 no app (14/10/2026, pós-deploy do PR #497), conferida em 15/10/2026 pelos 3 arquivos do Diovanni e 2 capturas
+de tela** (branch `claude/eager-newton-qw5a0u`). Os três pontos pedidos passam: (1) **21 GHE** na matriz; (2) **GHE 09
+com RX OIT anual** (ADM, PER 12 meses, MRO, DEM; `R-RX-01-incompleta-alta`, sílica 0,4012 mg/m³) e pendência bloqueante
+em vermelho na tela e no topo do memorial; (3) **download liberado** (a matriz veio). Também: **GHE 03** saiu pelo mesmo
+caminho (sílica livre 0,3306 mg/m³ sem % de quartzo → RX anual + pendência bloqueante) — na rodada 2 só o GHE 09 tinha sido
+apontado com medição sem % de quartzo (achado (a)); aviso "Erro no PGR" da numeração 18/18 em vermelho. RX OIT em 17 GHE e
+Espirometria em 17 (médica: 20 e 20); sem nenhum dos dois: GHE 06, 17, 18 (achado (c), aberto) e 16 (Jovem Aprendiz).
+208 riscos não reconhecidos no memorial (234 linhas no expander), o ruído já registrado acima. Processamento 115 s
+(IA 79 s, 21 blocos). **Itens 2 e 3: conferidos no app.**
+
 **Item 2 — IMPLEMENTADO (branch `claude/admiring-maxwell-dhcgko`, 14/10/2026).** `ghe_ausente_da_matriz` bloqueia o download e sai em vermelho;
 pendência bloqueante por GHE em vermelho na tela e no memorial (nota em D-ARQ-31). **Item 3 — IMPLEMENTADO no caso
 sem % de quartzo:** RX OIT pela faixa do pior caso (quartzo 100%, fração respirável) com pendência anexada — GHE 09: anual (emenda à cl.3 de D-ARQ-68). Sílica sem avaliação (24 × 12) segue
 a norma.
 
-**Status:** ABERTA — item 4 (hexano do Vistamerica, R-BIO-05) e achado (c) (GHE 06, 17, 18).
+**Status:** ABERTA — item 4 (hexano do Vistamerica, R-BIO-05) e achado (c) (GHE 06, 17, 18). Itens 2 e 3 conferidos no
+app na rodada 3 (15/10/2026).
 

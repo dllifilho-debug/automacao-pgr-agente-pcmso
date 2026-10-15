@@ -151,6 +151,8 @@ entre o que o app gera e o que a médica assinou. Rodar o app no PGR Plateau ant
 
 1. Modelo `.docx` corrigido, com as marcações, para revisão do Diovanni; registro das 5 decisões
    numa D-ARQ nova (número lido do disco na sessão).
+   **Feito em 15/10/2026 (D-ARQ-96), aguardando revisão:** `agente_medico/superficie/modelos/pcmso_seconci_2026_revisao.docx`,
+   lista em `MODELO_PCMSO_CORRECOES.md`.
 2. Dicionário de agravos (com as 9 variações para decisão) e tabela de códigos.
 3. Geração do PCMSO junto com a matriz, conferida no par PGR Plateau rev 03 ↔ PCMSO Mauá.
 
@@ -158,4 +160,4 @@ entre o que o app gera e o que a médica assinou. Rodar o app no PGR Plateau ant
 
 Rodar o PGR Soft Connect15 v04 no app depois do deploy do PR #497 e conferir: GHE 09 com RX anual
 e a pendência bloqueante em vermelho; 21 GHE na matriz; download liberado. PENDENCIAS,
-DT-(sessão `claude/admiring-maxwell-dhcgko`)-01.
+DT-(sessão `claude/admiring-maxwell-dhcgko`)-01. **Conferido em 15/10/2026: os três passam** (rodada 3 na DT).
