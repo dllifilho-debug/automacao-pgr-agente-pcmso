@@ -35,7 +35,12 @@ _RAIZ = Path(__file__).resolve().parent.parent
 SAIDA_REVISAO = _RAIZ / "agente_medico" / "superficie" / "modelos" / "pcmso_seconci_2026_revisao.docx"
 SAIDA_LIMPO = _RAIZ / "agente_medico" / "superficie" / "modelos" / "pcmso_seconci_2026.docx"
 
-AUTOR_COMENTARIO = "Claude (proposta D-ARQ-96)"
+AUTOR_COMENTARIO = "Revisão do modelo (proposta)"
+_LEGIVEL = {
+    "{{RAZAO_SOCIAL}}": "[nome da empresa, preenchido automaticamente]",
+    "{{OBRA}}": "[nome da obra, preenchido automaticamente]",
+}
+_LIMITE_CITACAO = 160
 
 CAMPOS = (
     "RAZAO_SOCIAL", "OBRA", "DATA_DOCUMENTO", "VERSAO", "ENDERECO", "COMPLEMENTO", "CNPJ",
@@ -69,12 +74,15 @@ def campo(nome: str) -> str:
     return "{{" + nome + "}}"
 
 
-_C01 = ("Razão social de outra empresa (sobra de um PCMSO anterior: \"SPE INCORPORAÇÃO H6 LTDA\"). "
-        "Vira campo preenchido pelo app.")
-_C05 = ("Dois itens 9.3.4 (cancerígenos e radiações ionizantes): Radiações Ionizantes passa a 9.3.5 e os "
-        "seguintes sobem um número (9.3.5→9.3.6 … 9.3.8.5→9.3.9.5).")
-_C04 = ("Remissão a anexo inexistente: os anexos estão na seção 16 (Questionário OMS em 16, fluxograma de "
-        "acidente com material biológico em 16.4).")
+_C01 = ("O documento trazia o nome de outra empresa (\"SPE INCORPORAÇÃO H6 LTDA\"), que sobrou de um PCMSO anterior. "
+        "Agora o nome da empresa e o da obra são preenchidos automaticamente em cada PCMSO.")
+_C05_SEGUINTE = ("Renumeração: havia dois itens 9.3.4; com Radiações Ionizantes passando a 9.3.5, este item e os "
+                 "seguintes sobem um número.")
+_C04 = ("O texto mandava consultar um anexo que não existe com esse número. O Questionário OMS de epilepsia está no "
+        "Anexo 16 e o fluxograma de acidente com material biológico, no Anexo 16.4.")
+_C03 = ("O texto mandava consultar os fluxos nos itens 11.2 a 11.4, mas eles estão nos anexos 16.1 a 16.3 "
+        "deste documento.")
+_C11 = "Redação ajustada à nota sobre PNOS do Quadro 2 do Anexo III da NR-07, conferida no texto oficial."
 
 TROCAS: tuple[Troca, ...] = (
     # --- campos: capa, cabeçalho de página, seção 1, seção 2 ---
@@ -94,21 +102,22 @@ TROCAS: tuple[Troca, ...] = (
     Troca("Unidade: PLATEAU D´OR", "Unidade: " + campo("OBRA"), "CAMPO"),
     # --- seção 3 ---
     Troca("Portaria SEPRT n.º 6.734, de 10/03/2020", "Portaria SEPRT n.º 6.734, de 09/03/2020", "C-14",
-          "Data da portaria em duas formas no mesmo item (10/03 aqui, 9 de março no parágrafo seguinte). A "
-          "tabela de publicação da NR-07 (cópia em normas/, vigência conferida em 13/10/2026) dá 09/03/2020, "
-          "DOU 13/03/2020; a linha \"Redação dada\" da própria NR-07 escreve 10 de março. Decisão do Diovanni."),
+          "A data da portaria aparecia de duas formas: 10/03/2020 aqui e 9 de março de 2020 no parágrafo seguinte. "
+          "A tabela de publicação da NR-07 registra 9 de março de 2020 (Diário Oficial de 13/03/2020). Atenção: o "
+          "próprio texto oficial da NR-07 escreve \"10 de março\" em outra linha; a data a manter fica para "
+          "confirmação."),
     # --- seção 6 ---
-    Troca("11.2 Fluxo Geral", "16.1 Fluxo Geral", "C-03",
-          "O texto remete aos fluxos como 11.2–11.4, mas eles estão nos anexos 16.1–16.3."),
-    Troca("11.3 Fluxo Específico", "16.2 Fluxo Específico", "C-03", "C-03 (remissão 11.3 → 16.2)."),
-    Troca("11.4 Fluxo Específico", "16.3 Fluxo Específico", "C-03", "C-03 (remissão 11.4 → 16.3)."),
+    Troca("11.2 Fluxo Geral", "16.1 Fluxo Geral", "C-03", _C03),
+    Troca("11.3 Fluxo Específico", "16.2 Fluxo Específico", "C-03", _C03),
+    Troca("11.4 Fluxo Específico", "16.3 Fluxo Específico", "C-03", _C03),
     Troca("PGR/PCMAT", "PGR/PCMAT", "S-03",
-          "Sugestão: só \"PGR\". O PCMAT vale apenas para obra iniciada antes da NR-18 revisada (item 18.17.1, "
-          "cópia em normas/)."),
+          "Sugestão: escrever só \"PGR\". O PCMAT foi substituído pelo PGR na NR-18 revisada e só continua valendo "
+          "para obras iniciadas antes dela (item 18.17.1 da NR-18)."),
     Troca("A monitoração da exposição ocupacional a agentes químicos",
           "A monitoração da exposição ocupacional a agentes químicos", "S-04",
-          "Sugestão de redação: \"ficará a critério do PGR\" contradiz a NR-07 — o PGR identifica e classifica o "
-          "risco; os exames são definidos pelo médico responsável no PCMSO (NR-07 7.5.12 e 7.5.18)."),
+          "Sugestão de redação: a frase diz que a monitoração \"ficará a critério do PGR\", mas pela NR-07 quem "
+          "define os exames é o médico responsável pelo PCMSO, a partir dos riscos que o PGR identifica e "
+          "classifica (itens 7.5.12 e 7.5.18 da NR-07)."),
     # --- seção 8 ---
     Troca("Avaliação do estado de saúde dos empregados em atividades críticas, como definidas nesta Norma, "
           "considerando os riscos envolvidos em cada situação e a investigação de patologias que possam "
@@ -116,80 +125,90 @@ TROCAS: tuple[Troca, ...] = (
           "i) Avaliação do estado de saúde dos empregados em atividades críticas, como definidas nesta Norma, "
           "considerando os riscos envolvidos em cada situação e a investigação de patologias que possam "
           "impedir o exercício de tais atividades com segurança.", "C-13",
-          "Alíneas do item 2 da seção 8: a) a h), parágrafo sem letra e \"J)\" maiúsculo. Fica i) e j)."),
-    Troca("J) Prestar esclarecimentos", "j) Prestar esclarecimentos", "C-13", "C-13 (j minúsculo)."),
+          "As responsabilidades do médico responsável iam de a) a h), seguidas de um parágrafo sem letra e de um "
+          "\"J)\" maiúsculo. O parágrafo sem letra passa a ser a alínea i)."),
+    Troca("J) Prestar esclarecimentos", "j) Prestar esclarecimentos", "C-13",
+          "Letra minúscula, na sequência das alíneas (a seguinte à nova alínea i)."),
     # --- seção 9.2 e 9.3 ---
     Troca("VI. No Exame Demissional", "V. No Exame Demissional", "C-07",
-          "Numeração I, II, III, IV, VI: falta o V."),
+          "A numeração dos tipos de exame pulava do IV para o VI. O exame demissional é o V."),
     Troca("135 (centro e trinta e cinco)", "135 (cento e trinta e cinco)", "C-08",
-          "Erro de grafia, presente no próprio texto do MTE (NR-07 7.5.11, cópia em normas/)."),
+          "Erro de digitação (\"centro\" em vez de \"cento\"). O erro vem do próprio texto oficial da NR-07 "
+          "(item 7.5.11); aqui foi corrigido."),
     Troca("o levantamento preliminar de o PGR", "o levantamento preliminar do PGR", "C-09",
-          "NR-07 7.5.12 a): \"do PGR\"."),
+          "Erro de digitação. A NR-07 (item 7.5.12, alínea a) diz \"do PGR\"."),
     Troca("c) Os exames complementares laboratoriais previstos nesta NR devem ser executados por laboratório que "
           "atenda ao disposto na RDC/ANVISA n.º 302/2005, no que se refere aos procedimentos de coleta, "
           "acondicionamento, transporte e análise, e interpretados com base nos critérios constantes nos Anexos "
           "da Norma, NR-07, e são obrigatórios quando:",
           "c) Encaminhar o empregado à Previdência Social, quando houver afastamento do trabalho superior a 15 "
           "(quinze) dias, para avaliação de incapacidade e definição da conduta previdenciária;", "C-06",
-          "Alínea c) era a cópia do parágrafo do laboratório (RDC 302/2005). Texto da NR-07 7.5.19.5 c), o mesmo "
-          "que o modelo já usa em 9.3.2."),
+          "Na lista do que cabe à empresa quando um exame revela doença relacionada ao trabalho, a alínea c) "
+          "repetia por engano o parágrafo sobre os laboratórios. Entra o texto da NR-07 (item 7.5.19.5, alínea c): "
+          "encaminhamento à Previdência Social nos afastamentos acima de 15 dias, o mesmo que o documento já traz "
+          "no item 9.3.2."),
     # --- 9.3.4 a 9.3.9 ---
     Troca("9.3.4 Substâncias Química Cancerígenas", "9.3.4 Substâncias Químicas Cancerígenas", "C-15",
-          "Concordância (\"Químicas\")."),
-    Troca("9.3.4- Radiações Ionizantes", "9.3.5 - Radiações Ionizantes", "C-05", _C05),
-    Troca("9.3.5 - Exames para Trabalho em Altura", "9.3.6 - Exames para Trabalho em Altura", "C-05", "C-05."),
+          "Concordância: \"Substâncias Químicas\"."),
+    Troca("9.3.4- Radiações Ionizantes", "9.3.5 - Radiações Ionizantes", "C-05",
+          "Havia dois itens com o número 9.3.4 (Substâncias Químicas Cancerígenas e Radiações Ionizantes). "
+          "Radiações Ionizantes passa a 9.3.5, e os itens seguintes sobem um número até o 9.3.9."),
+    Troca("9.3.5 - Exames para Trabalho em Altura", "9.3.6 - Exames para Trabalho em Altura", "C-05", _C05_SEGUINTE),
     Troca("trabalhador\">", "trabalhador.\"", "C-15",
-          "Citação da NR-35 35.4.4.1 terminava em '\">' (sobra de marcação); texto conferido na cópia de normas/."),
+          "A citação da NR-35 (item 35.4.4.1) terminava com os sinais '\">', resto de formatação. A citação foi "
+          "conferida com o texto oficial da NR-35."),
     Troca("9.3.6- Exames para Trabalho em Espaço Confinado", "9.3.7 - Exames para Trabalho em Espaço Confinado",
-          "C-05", "C-05."),
+          "C-05", _C05_SEGUINTE),
     Troca("9.3.7 Motoristas e Operadores de Máquinas Pesadas", "9.3.8 Motoristas e Operadores de Máquinas Pesadas",
-          "C-05", "C-05."),
+          "C-05", _C05_SEGUINTE),
     Troca("9.3.8 Segurança e Saúde no Trabalho em Serviços de Saúde (NR 32)",
           "9.3.9 Segurança e Saúde no Trabalho em Serviços de Saúde (NR 32)", "C-05",
-          "C-05. Também S-01: a NR-32 fica (o Seconci é serviço de saúde e tem a NR-32 como base — decisão do "
-          "Diovanni, 14/10/2026). Sugestão em aberto: condicionar esta seção ao risco biológico no PGR."),
-    Troca("9.3.8.1- Saúde do Trabalhador", "9.3.9.1 - Saúde do Trabalhador", "C-05", "C-05."),
-    Troca("9.3.8.2- Cuidados", "9.3.9.2 - Cuidados", "C-05", "C-05."),
-    Troca("9.3.8.3 -Condutas", "9.3.9.3 - Condutas", "C-05", "C-05."),
-    Troca("9.3.8.4. Unidades", "9.3.9.4. Unidades", "C-05", "C-05."),
-    Troca("9.3.8.5. Fluxograma", "9.3.9.5. Fluxograma", "C-05", "C-05."),
+          _C05_SEGUINTE + " A seção da NR-32 foi mantida, porque o Seconci é serviço de saúde e segue a NR-32. "
+          "Fica em aberto se ela deve aparecer só quando o PGR apontar risco biológico (sugestão S-01)."),
+    Troca("9.3.8.1- Saúde do Trabalhador", "9.3.9.1 - Saúde do Trabalhador", "C-05", _C05_SEGUINTE),
+    Troca("9.3.8.2- Cuidados", "9.3.9.2 - Cuidados", "C-05", _C05_SEGUINTE),
+    Troca("9.3.8.3 -Condutas", "9.3.9.3 - Condutas", "C-05", _C05_SEGUINTE),
+    Troca("9.3.8.4. Unidades", "9.3.9.4. Unidades", "C-05", _C05_SEGUINTE),
+    Troca("9.3.8.5. Fluxograma", "9.3.9.5. Fluxograma", "C-05", _C05_SEGUINTE),
     Troca("(Anexo 11.1)", "(Anexo 16)", "C-04", _C04, vezes=3),
     Troca("(Anexo 11.5)", "(Anexo 16.4)", "C-04", _C04),
     Troca("independentemente do tipo do tipo de exame", "independentemente do tipo de exame", "C-15",
           "Palavras repetidas (\"do tipo do tipo\").", vezes=3),
-    Troca("esclarecimento diagnostico", "esclarecimento diagnóstico", "C-15", "Acento.", vezes=3),
+    Troca("esclarecimento diagnostico", "esclarecimento diagnóstico", "C-15",
+          "Acentuação: \"diagnóstico\".", vezes=3),
     # --- 9.4 audiometria ---
     Troca("(nível de audição em decibéis).ienos constantes das alíneas ma devem seguir o preconizado na norma "
           "técnica ISO 8253-1, e os resultados devem ser incluídos em certificado de aferição e/ou calibração que "
           "acompanhará o equipamento.",
           "(nível de audição em decibéis).", "C-10",
-          "Fim do 3.2.1.1 do Anexo II trazia texto corrompido (\"ienos constantes das alíneas ma…\"), repetição "
-          "truncada do 3.2.1. Removido; conferido na NR-07 Anexo II (cópia em normas/)."),
+          "O fim deste item do Anexo II da NR-07 (audiometria em ambiente silencioso) estava corrompido: repetia, "
+          "truncado, o item anterior (\"ienos constantes das alíneas ma…\"). O trecho repetido foi retirado; o "
+          "restante confere com o texto oficial da NR-07."),
     # --- 9.5 RX (Anexo III, Quadro 2) ---
     Troca("**Para ser classificado como PNOS", "***Para ser classificado como PNOS", "C-11",
-          "A nota do PNOS é a de três asteriscos, como no título do Quadro 2 (NR-07 Anexo III)."),
-    Troca("fluído pulmonar", "fluido pulmonar", "C-11", "NR-07 Anexo III, nota *** do Quadro 2."),
-    Troca("não se emitir radiação ionizante", "não ser emissor de radiação ionizante", "C-11",
-          "NR-07 Anexo III, nota *** do Quadro 2."),
+          "A nota sobre PNOS é marcada com três asteriscos, como no título do Quadro 2 do Anexo III da NR-07."),
+    Troca("fluído pulmonar", "fluido pulmonar", "C-11", _C11),
+    Troca("não se emitir radiação ionizante", "não ser emissor de radiação ionizante", "C-11", _C11),
     Troca("não causar defeitos tóxicos além da inflamação", "não causar efeitos tóxicos além de inflamação", "C-11",
-          "NR-07 Anexo III, nota *** do Quadro 2 (\"efeitos\", não \"defeitos\")."),
+          "O documento dizia \"defeitos tóxicos\", o que muda o sentido. A NR-07 (Anexo III, nota sobre PNOS) diz "
+          "\"efeitos tóxicos além de inflamação\"."),
     # --- 9.9 calor ---
     Troca("Conforme o item 4.2.3 da NR 9", "Conforme o item 4.2.3 do Anexo III da NR-09", "C-12",
-          "O item 4.2.3 é do Anexo III (Calor) da NR-09, não do corpo da norma (cópia em normas/)."),
-    Troca("item 4 do Anexo da NR-09", "item 4 do Anexo III da NR-09", "C-12", "C-12 (NR-09 Anexo III 4.2.3.1 a))."),
+          "O item 4.2.3 citado é do Anexo III (Calor) da NR-09, e não do texto principal da norma."),
+    Troca("item 4 do Anexo da NR-09", "item 4 do Anexo III da NR-09", "C-12",
+          "O item 4 citado é do Anexo III (Calor) da NR-09."),
     # --- 10 ---
-    Troca("referentes aos empegados", "referentes aos empregados", "C-15", "Grafia."),
+    Troca("referentes aos empegados", "referentes aos empregados", "C-15", "Erro de digitação: \"empregados\"."),
     # --- 12 ---
     Troca("referente à Lei 15337.", "referente à Lei nº 15.377/2026.", "C-02",
-          "Número da lei em duas formas (15.377 em três lugares, 15337 aqui). Uniformizado em 15.377. Conferido no "
-          "Planalto (captura do Diovanni, 15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026, que "
-          "inclui o art. 169-A na CLT."),
+          "O número da lei aparecia de duas formas no documento (15.377 e 15337). O correto é Lei nº 15.377, de 2 de "
+          "abril de 2026, que incluiu o art. 169-A na CLT (conferida no site do Planalto)."),
     # --- 13 cronograma ---
     Troca("JULHO DE 2026", campo("CRONOGRAMA_INICIO"), "CAMPO"),
     Troca("A JULHO DE 2027", "A " + campo("CRONOGRAMA_FIM"), "CAMPO"),
     Troca("(OBS: ADENDO NÃO PRECISA DESSE ITEM)", "(OBS: ADENDO NÃO PRECISA DESSE ITEM)", "S-06",
-          "Sugestão: é nota de edição visível no documento. Tirar do texto e virar regra do app (adendo sai sem "
-          "cronograma)."),
+          "Sugestão: esta observação é uma nota interna de edição, mas sai impressa no documento. Retirar do texto; "
+          "o sistema passa a gerar o adendo sem o cronograma."),
     Troca("EMPRESA: SPE INCORPORAÇÃO H6 LTDA", "EMPRESA: " + campo("RAZAO_SOCIAL"), "C-01", _C01),
     Troca("Local: SPE INCORPORAÇÃO H6 LTDA", "Local: " + campo("OBRA"), "C-01", _C01),
     # --- 15 termo ---
@@ -198,10 +217,11 @@ TROCAS: tuple[Troca, ...] = (
     # --- 16 ---
     Troca("FLUXO GERAL DE SUGESTÃO DE CONDUTAS EM MEDICINA DO TRABALHO",
           "FLUXO GERAL DE SUGESTÃO DE CONDUTAS EM MEDICINA DO TRABALHO", "S-07",
-          "A figura deste anexo é a mesma do 16.2 (fluxo do Anexo I, Quadros 1 e 2): o fluxo geral não está no "
-          "documento. Falta a figura original do Seconci."),
-    Troca("reavaliação dos iscos ocupacionais", "reavaliação dos riscos ocupacionais", "C-15", "Grafia.", vezes=2),
-    Troca("(imunoglobina)", "(imunoglobulina)", "C-15", "Grafia."),
+          "Atenção: a figura deste anexo é a mesma do anexo 16.2 (fluxo das alterações nos exames de monitoração "
+          "biológica do Anexo I da NR-07). O fluxo geral de condutas não está no documento; falta a figura correta."),
+    Troca("reavaliação dos iscos ocupacionais", "reavaliação dos riscos ocupacionais", "C-15",
+          "Erro de digitação: \"riscos\".", vezes=2),
+    Troca("(imunoglobina)", "(imunoglobulina)", "C-15", "Termo correto: \"imunoglobulina\"."),
     Troca("Patrícia Montalvo Moraes", campo("MEDICO_NOME"), "CAMPO"),
     Troca("CRM: 14949/GO", "CRM: " + campo("MEDICO_CRM"), "CAMPO"),
     Troca("NIT(PIS/PASEP):", "NIT(PIS/PASEP): " + campo("MEDICO_NIT"), "CAMPO"),
@@ -213,22 +233,39 @@ TROCAS: tuple[Troca, ...] = (
 # Comentários sobre títulos que ficam intactos.
 SUGESTOES_EM_TITULO: tuple[Troca, ...] = (
     Troca("9.3.1 – QUADRO 1 DO ANEXO I NR-7", "", "S-02",
-          "Sugestão: os Quadros 1 e 2 do Anexo I da NR-07 estão em imagem e não acompanham a norma. Substituir "
-          "por remissão à NR-07 vigente (Gov.br/MTE) ou por tabela de texto conferida."),
+          "Os Quadros 1 e 2 do Anexo I da NR-07 estão colados como imagem; se a NR-07 mudar, a imagem não "
+          "acompanha. Sugestão: trocar por uma referência à NR-07 vigente ou por uma tabela em texto conferida "
+          "com a norma."),
     Troca("1. FUNDAMENTAÇÃO LEGAL", "", "S-09",
-          "Sugestão: falta o parágrafo único do art. 169-A da CLT (Lei nº 15.377/2026, conferida no Planalto em "
-          "15/10/2026) — a empresa deve informar aos empregados que podem deixar de comparecer ao serviço, sem "
-          "prejuízo do salário, para os exames preventivos de HPV e dos cânceres de mama, de colo do útero e de "
-          "próstata, nos termos do inciso XII do art. 473 da CLT. Texto proposto para o fim de \"1. FUNDAMENTAÇÃO "
-          "LEGAL\": \"Conforme o parágrafo único do art. 169-A, a empresa informará aos empregados a possibilidade "
-          "de deixar de comparecer ao serviço para a realização desses exames preventivos, sem prejuízo do salário, "
-          "nos termos do inciso XII do art. 473 da CLT.\" Decisão do Diovanni."),
+          "Falta o parágrafo único do art. 169-A da CLT (Lei nº 15.377/2026): a empresa deve informar aos "
+          "empregados que podem deixar de comparecer ao serviço, sem prejuízo do salário, para os exames "
+          "preventivos de HPV e dos cânceres de mama, de colo do útero e de próstata (inciso XII do art. 473 da "
+          "CLT). Texto sugerido para o fim deste item: \"Conforme o parágrafo único do art. 169-A, a empresa "
+          "informará aos empregados a possibilidade de deixar de comparecer ao serviço para a realização desses "
+          "exames preventivos, sem prejuízo do salário, nos termos do inciso XII do art. 473 da CLT.\""),
     Troca("13.2 - PROGRAMAÇÃO DAS AÇÕES", "", "S-08",
-          "O modelo original marcava em amarelo o que se preenche à mão (período, meses, empresa, \"NOV/26\", "
-          "\"Inserir Tema\", \"MÊS/XX\"). O amarelo foi retirado: aqui amarelo é só correção. Período, meses e "
-          "empresa viraram campos do app; nesta tabela, datas e temas das palestras continuam manuais — decidir "
-          "se o app preenche."),
+          "No modelo original, o que se preenche à mão estava destacado em amarelo. Esse destaque foi retirado "
+          "para não se confundir com as correções. Período, meses e nome da empresa passam a ser preenchidos "
+          "automaticamente; as datas e os temas das palestras desta tabela continuam a ser preenchidos à mão."),
 )
+
+def _citacao(texto: str) -> str:
+    for marcador, legivel in _LEGIVEL.items():
+        texto = texto.replace(marcador, legivel)
+    if len(texto) > _LIMITE_CITACAO:
+        texto = texto[: _LIMITE_CITACAO].rsplit(" ", 1)[0] + " …"
+    return f"“{texto}”"
+
+
+def texto_comentario(troca: Troca) -> str:
+    """Comentário que a médica valida sozinha: o que mudou, de quê para quê e por quê; o número do item no fim."""
+    if troca.marca.startswith("S-"):
+        return f"SUGESTÃO (o texto não foi alterado). {troca.motivo} (item {troca.marca} da lista de correções)"
+    return (
+        f"CORREÇÃO. Antes: {_citacao(troca.antigo)}. Agora: {_citacao(troca.novo)}. {troca.motivo} "
+        f"(item {troca.marca} da lista de correções)"
+    )
+
 
 _INICIO_GHE = "Unidade: "
 _INICIO_POS_GHE = "11. PROGRAMA DE VACINAÇÃO"
@@ -302,7 +339,7 @@ def _aplicar(doc: DocumentoDocx, paragrafos: list[Paragraph], troca: Troca, marc
         if not so_comentario:
             _realcar(runs[0], troca.marca)
         if troca.marca != "CAMPO" and _no_corpo(doc, paragrafo):
-            doc.add_comment(runs, text=f"{troca.marca} — {troca.motivo}", author=AUTOR_COMENTARIO, initials="CL")
+            doc.add_comment(runs, text=texto_comentario(troca), author=AUTOR_COMENTARIO, initials="RM")
 
 
 def _no_corpo(doc: DocumentoDocx, paragrafo: Paragraph) -> bool:
@@ -323,7 +360,7 @@ def _sugestao_em_titulo(doc: DocumentoDocx, paragrafos: list[Paragraph], troca: 
     if len(alvos) != 1:
         raise ModeloInesperado(f"{troca.marca}: {troca.antigo!r} em {len(alvos)} parágrafo(s)")
     runs = [r for r in alvos[0].runs if r.text]
-    doc.add_comment(runs, text=f"{troca.marca} — {troca.motivo}", author=AUTOR_COMENTARIO, initials="CL")
+    doc.add_comment(runs, text=texto_comentario(troca), author=AUTOR_COMENTARIO, initials="RM")
 
 
 def _consertar_tc_literais(doc: DocumentoDocx) -> int:

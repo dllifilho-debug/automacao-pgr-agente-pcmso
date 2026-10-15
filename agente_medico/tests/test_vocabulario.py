@@ -193,3 +193,24 @@ def test_carregar_aceita_vocabulario_vazio_se_nenhuma_regra_referencia_exame(tmp
     p = carregar(proto)
     assert p.vocabulario.exames == {}
     assert p.regras == []
+
+
+# D-ARQ-96 cl.4: código Seconci só de exibição, medido nas linhas inteiras de tabela dos PCMSOs
+# do acervo (15/10/2026). Reversão que deixa vermelho: trocar, apagar ou duplicar um código em
+# exames.yaml; dar código à soma mandélico+fenilglioxílico antes da decisão do Diovanni.
+_CODIGOS_SECONCI = {
+    "hexanodiona_urina": "0029", "acetona_urina": "0071", "acido_metilhipurico": "0116",
+    "acido_transmuconico": "130", "acido_tricloroacetico": "0133", "audiometria": "0281",
+    "avaliacao_saude_mental": "0289", "exame_clinico": "0295", "acuidade_visual": "0296",
+    "avaliacao_psicossocial": "0300", "carboxihemoglobina": "0364", "ciclohexanol_urina": "0391",
+    "cromo_urina": "0467", "ecg": "0531", "espirometria": "0562", "glicemia": "0658",
+    "hemograma": "0693", "manganes_sangue": "0836", "mek_urina": "0863", "ortocresol_urina": "0951",
+    "rx_coluna_lombo_sacra": "1075", "reticulocitos": "1086", "tetrahidrofurano_urina": "1181",
+    "rx_torax_oit": "1415",
+}
+
+
+def test_codigo_seconci_e_o_medido_no_acervo() -> None:
+    exames = carregar(PROTOCOLO_DIR).vocabulario.exames
+    com_codigo = {slug: meta["codigo_seconci"] for slug, meta in exames.items() if "codigo_seconci" in meta}
+    assert com_codigo == _CODIGOS_SECONCI

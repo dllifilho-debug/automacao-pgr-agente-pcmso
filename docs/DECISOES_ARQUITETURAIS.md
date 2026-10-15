@@ -5160,6 +5160,22 @@ longas das seções 3–10 iguais às do PCMSO R70).
 **Fora.** Leiaute dos blocos por GHE e o preenchimento dos campos (etapa 3); dicionário de agravos e tabela de códigos
 (etapa 2); campos TC novos para o índice (S-05).
 
+**Andamento (15/10/2026, mesma branch recriada sobre `main 91a20c1`) — etapa 2, parte medida; comentários do modelo.**
+- **Códigos Seconci (cl.4) implementados:** `codigo_seconci` em 24 exames de `exames.yaml`, medido pelas linhas inteiras
+  de tabela dos 8 PCMSOs em PDF e do Mauá (26 códigos, nenhum com dois exames). A soma mandélico + fenilglioxílico tem
+  dois códigos no Seconci (0113, 0102) e fica sem campo até decisão. Sem consumidor ainda (etapa 3).
+- **Agravos (cl.3): medido, não implementado** — `docs/referencia/AGRAVOS_PCMSO_PROPOSTA.md`. (1) Mauá e R70 não usam
+  o mesmo texto (curto × descritivo): não há "texto Seconci" único. (2) O agente resolvido cobre 44% das linhas do
+  Mauá e 23% do R70; o resto são acidentes, ergonômicos e os fatores psicossociais (184 linhas no R70). (3) Três formas
+  de PGR não chegam ao agente que tem exame ("Vibração Localizadas (Mão- Braço)", "Poeira total e Sílica livre",
+  "Radiação não ionizante") — decisão à parte, muda exame. Proposta: chave de perigo sem exame num vocabulário novo,
+  com sinônimos (cobertura medida 148 → 443 das 518 linhas, se as 20 formas mais frequentes ganharem chave). Sete
+  decisões listadas no documento.
+- **Comentários do modelo em linguagem de quem valida** (pedido do Diovanni: "C-05 — C-05." não se valida): antes,
+  depois e motivo em cada comentário; o número do item só no fim.
+- **Verificação.** `test_codigo_seconci_e_o_medido_no_acervo` (varredura inversa 3/3); testes de linguagem dos
+  comentários (4/4). Suíte e mypy: ver HISTORICO.
+
 ---
 
 ## Histórico de revisões
@@ -5436,3 +5452,4 @@ longas das seções 3–10 iguais às do PCMSO R70).
 | v268 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main e1c644d` (MEDIÇÃO): **nota em `D-ARQ-94`, emenda 3** — efeito no app medido pela rodada do Diovanni: Saúde Mental em 20 GHE, Psicossocial em 18, nenhum dos dois avisos. |
 | v269 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main 9d695d2` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda à cl.3 de `D-ARQ-68`** — sílica medida sem % de quartzo ou fração emite RX OIT pela faixa do pior caso (quartzo 100%, fração respirável; `R-RX-01-incompleta-*`, INTERPRETADO) com as pendências anexadas, e 0 ("sem periódico") deixa de vencer na consolidação; **nota em `D-ARQ-31`** — pendência bloqueante por GHE em vermelho na tela e no memorial, e GHE recortado fora da matriz (`ghe_ausente_da_matriz`) bloqueia o download. |
 | v270 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, sobre `main bb9dddf` (DECISÃO do Diovanni de 14/10/2026 + IMPLEMENTAÇÃO da etapa 1): **D-ARQ-96 adicionada** — PCMSO inteiro sobre modelo `.docx` do Seconci 2026, junto com a matriz RQ.61; agravo das médicas; código Seconci como exibição; modelo de revisão marcado (47 correções, 8 sugestões, 32 campos), gerado por `scripts/gerar_modelo_pcmso.py`. |
+| v271 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 91a20c1` (MEDIÇÃO + IMPLEMENTAÇÃO dos códigos): **andamento em `D-ARQ-96`** — `codigo_seconci` em 24 exames; agravos medidos (Mauá × R70 divergem, cobertura pelo agente 44%/23%) com proposta e 7 decisões em `AGRAVOS_PCMSO_PROPOSTA.md`; comentários do modelo reescritos em linguagem de quem valida. |
