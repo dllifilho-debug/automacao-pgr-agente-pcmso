@@ -5192,6 +5192,25 @@ PROTOCOLO): pendência ao elaborador pedindo a fonte; o texto da pendência pass
 Efeito previsto: audiometria DEM no GHE 09 do Soft Connect, como a médica `[A MEDIR — no app]`. Verificação: 4 testes
 novos (3 grafias e a radiação), varredura inversa 4/4.
 
+**Andamento 4 (15/10/2026, branch recriada sobre `main cc4d2b2`) — etapa 3, fatia 1: o PCMSO sai junto com a matriz.**
+- `superficie/documento_pcmso.py`: parte de `modelos/pcmso_seconci_2026.docx` (versão sem marcas do modelo em revisão,
+  `gerar_modelo_pcmso --limpo`; troca pela congelada quando as médicas devolverem) e preenche os campos `{{…}}` e,
+  no lugar de `{{BLOCOS_GHE}}`, um bloco por GHE no leiaute do Mauá: "Setor: GHE NN - nome" (com campo TC para o
+  índice), cargos, tabela de perigos (perigo do PGR, grupo no rótulo do modelo, agravo de `agravos.yaml` ou o do PGR
+  marcado "(do PGR — conferir)", fatores psicossociais numa linha) e tabela de exames de 7 colunas com o código
+  Seconci. Os exames saem de `MatrizGHE.linhas` — os mesmos da matriz por construção (cl.5); as observações de
+  dispensa da matriz entram abaixo da tabela. "APÓS ADM." sai sempre "-" (o motor não tem esse momento).
+- Dado que o app não tem (CNPJ, endereço, CEP, CNAE, grau de risco, versão, NIT/CPF/especialidade/RQE do médico,
+  descrição dos cargos) sai em branco visível ("____________") e listado na tela, para completar no Word — nunca
+  inventado. Cronograma: 13 meses a partir da data do documento.
+- Tela: botão "Baixar PCMSO" na linha do que vai à assinatura (matriz DOCX, HTML, PCMSO); memorial e riscos para o
+  ASO numa segunda linha (com 5 colunas os rótulos saíam cortados). Avisos do PCMSO abaixo dos botões.
+- **Verificação.** `test_documento_pcmso.py` (14 casos), varredura inversa 13/13. Smoke visual ok (desktop e mobile),
+  com o número esperado de downloads 4 → 5.
+- **Fora (fatia 2):** dados da empresa lidos da página de identificação do PGR; descrição dos cargos do PGR; cadastro
+  do médico (CPF e NIT são dado pessoal: não entram no repositório). Conferência no par PGR Plateau rev 03 ↔ PCMSO Mauá
+  `[A MEDIR — rodada no app, com a IA]`.
+
 ---
 
 ## Histórico de revisões
@@ -5471,3 +5490,4 @@ novos (3 grafias e a radiação), varredura inversa 4/4.
 | v271 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 91a20c1` (MEDIÇÃO + IMPLEMENTAÇÃO dos códigos): **andamento em `D-ARQ-96`** — `codigo_seconci` em 24 exames; agravos medidos (Mauá × R70 divergem, cobertura pelo agente 44%/23%) com proposta e 7 decisões em `AGRAVOS_PCMSO_PROPOSTA.md`; comentários do modelo reescritos em linguagem de quem valida. |
 | v272 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main 8d0045a` (IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 2 em `D-ARQ-96`** — vocabulário de agravos (`agravos.yaml`, `agravos_pcmso.py`); cobertura Mauá 131/140, R70 315/378. |
 | v273 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main e4ebb57` (MEDIÇÃO + IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 3 em `D-ARQ-96`** — decisão 6: 3 grafias de VMB medidas em PGR (Soft Connect, EURO) em `vibracao_mao_braco`; "Radiação não ionizante" em `fracoes_sem_agente` (R-PGR-05); grafias do R70 fora (0 PGRs). |
+| v274 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main cc4d2b2` (IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 4 em `D-ARQ-96`** — etapa 3 fatia 1: `documento_pcmso.py` gera o PCMSO na rodada da matriz; botão "Baixar PCMSO"; campos sem dado em branco visível e listados. |

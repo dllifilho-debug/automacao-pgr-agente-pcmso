@@ -14,7 +14,7 @@ from typing import Any
 import pytest
 
 from agente_medico.superficie import estilos
-from scripts.smoke_visual import CENARIOS, ESPERADO_NO_CENARIO, avaliar, rgb
+from scripts.smoke_visual import CENARIOS, DOWNLOADS_DA_MATRIZ, ESPERADO_NO_CENARIO, avaliar, rgb
 
 
 def _passo(key: str, topo: float, cor: str) -> dict[str, Any]:
@@ -48,7 +48,7 @@ def _medidas_ok(cenario: str) -> dict[str, Any]:
         "cards": [{"key": "etapa_pgr", "sombra": "rgba(0,0,0,.06) 0px 1px 2px", "raio": 12.0}],
         "dropzones": ["dashed", "dashed"],
         "botoes": [{"rotulo": "Gerar matriz", "altura": 44.0}, {"rotulo": "Upload", "altura": 44.0}],
-        "downloads": [{"rotulo": f"d{i}", "largura": 349.0, "coluna": 349.0} for i in range(4)] if matriz else [],
+        "downloads": [{"rotulo": f"d{i}", "largura": 349.0, "coluna": 349.0} for i in range(DOWNLOADS_DA_MATRIZ)] if matriz else [],
         "alertas": [{"tipo": "stAlertContentError", "borda": rgb(estilos.ERRO)}] if cenario == "bloqueio" else [],
     }
 

@@ -866,6 +866,8 @@ def pagina_matriz() -> None:
         montar_relatorio_aso,
         renderizar_relatorio_aso_docx,
     )
+    from agente_medico.superficie.agravos_pcmso import carregar_agravos
+    from agente_medico.superficie.documento_pcmso import dados_do_cabecalho, gerar_pcmso_docx, linhas_de_aviso
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.sugestao_vinculo import (
         AVISO_SEM_CASAMENTO,
@@ -1400,6 +1402,8 @@ def pagina_matriz() -> None:
             docx_bytes = None
             memorial_bytes = None
             aso_bytes = None
+            pcmso_bytes = None
+            avisos_pcmso: list[str] = []
             if doc is not None:
                 destino_docx = Path(tmp) / "matriz.docx"
                 renderizar_docx(doc, destino_docx)
@@ -1428,6 +1432,18 @@ def pagina_matriz() -> None:
                     destino_aso,
                 )
                 aso_bytes = destino_aso.read_bytes()
+                # D-ARQ-96 etapa 3: PCMSO inteiro, da mesma rodada e dos mesmos exames da matriz.
+                destino_pcmso = Path(tmp) / "pcmso.docx"
+                avisos = gerar_pcmso_docx(
+                    cache.matrizes,
+                    cache.pgr_hidratado,
+                    cache.exames_vocab,
+                    carregar_agravos(_protocolo_padrao().vocabulario.agentes),
+                    dados_do_cabecalho(cabecalho),
+                    destino_pcmso,
+                )
+                pcmso_bytes = destino_pcmso.read_bytes()
+                avisos_pcmso = linhas_de_aviso(avisos)
 
         st.session_state["web_matriz_cache"] = cache
 
@@ -1530,7 +1546,9 @@ def pagina_matriz() -> None:
             st.subheader("4. Matriz e downloads")
             # Chamada via `st.download_button` dentro de `with coluna`, nunca
             # `coluna.download_button`: os testes espionam o atributo do módulo.
-            col_docx, col_html, col_memorial, col_aso = st.columns(4)
+            # Linha 1: o que vai à assinatura (matriz e PCMSO, D-ARQ-96 cl.5); linha 2: anexos para as médicas.
+            col_docx, col_html, col_pcmso = st.columns(3)
+            col_memorial, col_aso = st.columns(2)
             if docx_bytes is not None:
                 with col_docx:
                     st.download_button(
@@ -1565,6 +1583,17 @@ def pagina_matriz() -> None:
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         help="Anexo para as médicas: quais riscos do PGR constam no ASO (NR-07 7.5.19.1 \"c\"). Sugestão a validar.",
                     )
+            if pcmso_bytes is not None:
+                with col_pcmso:
+                    st.download_button(
+                        "Baixar PCMSO",
+                        pcmso_bytes,
+                        file_name=nome_arquivo("PCMSO", cabecalho, "docx", "pcmso.docx"),
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        help="PCMSO completo no modelo do Seconci, com os mesmos exames da matriz. As médicas validam os dois.",
+                    )
+            for aviso in avisos_pcmso:
+                st.caption(f"PCMSO — {aviso}")
 
             for bloco in doc.blocos:
                 st.subheader(titulo_ghe(bloco.ghe_id, bloco.nome_ghe))

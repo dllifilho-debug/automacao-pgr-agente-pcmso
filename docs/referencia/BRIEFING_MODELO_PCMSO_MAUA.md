@@ -156,6 +156,8 @@ entre o que o app gera e o que a médica assinou. Rodar o app no PGR Plateau ant
 2. Dicionário de agravos (com as 9 variações para decisão) e tabela de códigos.
    **15/10/2026:** códigos em `exames.yaml`; agravos medidos, com proposta e decisões em `AGRAVOS_PCMSO_PROPOSTA.md`.
 3. Geração do PCMSO junto com a matriz, conferida no par PGR Plateau rev 03 ↔ PCMSO Mauá.
+   **15/10/2026, fatia 1:** o app gera o PCMSO ("Baixar PCMSO"); dados da empresa e do médico que o app não tem saem em
+   branco para completar no Word. Conferência no par Plateau ↔ Mauá: a fazer no app.
 
 ## Pendência anterior (Soft Connect)
 
