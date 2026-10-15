@@ -20,6 +20,7 @@ de uma mudança real de conteúdo/envelope. Lógica de domínio zero na casca.
 from __future__ import annotations
 
 import dataclasses
+import functools
 import hashlib
 import logging
 import re
@@ -60,6 +61,7 @@ from agente_medico.motor.transcricao_fds import montar_fds
 from agente_medico.motor.transcritor_fds import TranscritorLLM
 from agente_medico.motor.transcritor_grid import EntradaGrid, TranscritorGrid
 from agente_medico.motor.transcritor_pgr import TranscritorGHE
+from agente_medico.superficie.agravos_pcmso import VocabularioAgravos, carregar_agravos
 from agente_medico.superficie.apresentacao import EmissaoFuturaError, validar_data_emissao
 from agente_medico.superficie.documento_matriz import (
     CabecalhoDocumento,
@@ -338,6 +340,13 @@ def _protocolo_padrao() -> Protocolo:
     _rodar_parse_deterministico e pagina_matriz (ao anexar produto) usam
     este helper, nunca Path(__file__) direto."""
     return carregar(Path(__file__).resolve().parent.parent / "protocolo")
+
+
+@functools.lru_cache(maxsize=1)
+def _agravos_padrao() -> VocabularioAgravos:
+    """Vocabulário de agravos do PCMSO (D-ARQ-96), carregado uma vez por processo: a tela renderiza o
+    PCMSO a cada rerun, e recarregar o protocolo aí custava ~0,3 s por renderização (medido em 15/10/2026)."""
+    return carregar_agravos(_protocolo_padrao().vocabulario.agentes)
 
 
 def _rodar_parse_deterministico(
@@ -866,7 +875,6 @@ def pagina_matriz() -> None:
         montar_relatorio_aso,
         renderizar_relatorio_aso_docx,
     )
-    from agente_medico.superficie.agravos_pcmso import carregar_agravos
     from agente_medico.superficie.documento_pcmso import dados_do_cabecalho, gerar_pcmso_docx, linhas_de_aviso
     from agente_medico.superficie.revisao_matriz import montar_revisao, tabela_markdown
     from agente_medico.superficie.sugestao_vinculo import (
@@ -885,6 +893,7 @@ def pagina_matriz() -> None:
         OPCOES_TIPO_DOCUMENTO,
         CacheMatrizes,
         TranscritorGemini,
+        _agravos_padrao,
         _protocolo_padrao,
         agentes_mensuraveis,
         anexar_produto_em_ghes,
@@ -1438,7 +1447,7 @@ def pagina_matriz() -> None:
                     cache.matrizes,
                     cache.pgr_hidratado,
                     cache.exames_vocab,
-                    carregar_agravos(_protocolo_padrao().vocabulario.agentes),
+                    _agravos_padrao(),
                     dados_do_cabecalho(cabecalho),
                     destino_pcmso,
                 )

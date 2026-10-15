@@ -46,7 +46,7 @@ def test_sem_nada_digitado_sai_o_generico() -> None:
     assert nome_arquivo("MATRIZ DE EXAMES", _cab(" ", "", "", ""), "docx", "matriz.docx") == "matriz.docx"
 
 
-def test_tela_usa_o_nome_digitado_nos_quatro_downloads(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_tela_usa_o_nome_digitado_nos_cinco_downloads(monkeypatch: pytest.MonkeyPatch) -> None:
     # Reversão que mata: deixar qualquer um dos `file_name` literais em pagina_matriz.
     from agente_medico.tests.test_web_matriz import _mockar_parse_deterministico, _submeter_formulario
 
@@ -71,4 +71,5 @@ def test_tela_usa_o_nome_digitado_nos_quatro_downloads(monkeypatch: pytest.Monke
         f"MATRIZ DE EXAMES{sufixo}.html",
         f"MEMORIAL DE RACIOCÍNIO{sufixo}.docx",
         f"RISCOS PARA O ASO{sufixo}.docx",
+        f"PCMSO{sufixo}.docx",
     }
