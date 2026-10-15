@@ -159,6 +159,21 @@ entre o que o app gera e o que a médica assinou. Rodar o app no PGR Plateau ant
    **15/10/2026, fatia 1:** o app gera o PCMSO ("Baixar PCMSO"); dados da empresa e do médico que o app não tem saem em
    branco para completar no Word. Conferência no par Plateau ↔ Mauá: a fazer no app.
 
+## Estado em 15/10/2026 (fim da sessão `claude/eager-newton-qw5a0u`, `main ca484b2`)
+
+- **Etapas 1 e 2 feitas; etapa 3, fatia 1, feita:** o app gera o PCMSO junto com a matriz ("Baixar PCMSO"), D-ARQ-96
+  andamentos 1 a 4.
+- **Modelo:** `modelos/pcmso_seconci_2026_revisao.docx` está com as médicas — **ainda não validado**. A geração usa a
+  versão sem marcas (`pcmso_seconci_2026.docx`); quando a revisão voltar, aplicar as correções em
+  `scripts/gerar_modelo_pcmso.py`, regenerar as duas versões e congelar.
+- **Fatia 2 — decisão do Diovanni (15/10/2026), pela recomendação da sessão:** dados da empresa (CNPJ, endereço, CEP,
+  cidade, bairro, UF, CNAE, grau de risco) **lidos da página de identificação do PGR**, com campos na tela para corrigir;
+  antes de implementar, medir como os PGRs do acervo escrevem essa página. Dados do médico (NIT, CPF, especialidade,
+  RQE) **em campos na tela**; CPF e NIT não entram no repositório (LGPD). Descrição dos cargos: a medir no PGR.
+- **Rodadas no app pedidas ao Diovanni (15/10/2026):** (1) PGR Plateau rev 03 → conferir matriz e PCMSO GHE a GHE contra
+  o PCMSO Mauá; (2) Soft Connect15 v04 → conferir a decisão 6 (GHE 09 com audiometria DEM; "Radiação não ionizante"
+  como pendência ao elaborador). Os arquivos chegam como anexos da próxima sessão.
+
 ## Pendência anterior (Soft Connect)
 
 Rodar o PGR Soft Connect15 v04 no app depois do deploy do PR #497 e conferir: GHE 09 com RX anual
