@@ -154,6 +154,7 @@ entre o que o app gera e o que a médica assinou. Rodar o app no PGR Plateau ant
    **Feito em 15/10/2026 (D-ARQ-96), aguardando revisão:** `agente_medico/superficie/modelos/pcmso_seconci_2026_revisao.docx`,
    lista em `MODELO_PCMSO_CORRECOES.md`.
 2. Dicionário de agravos (com as 9 variações para decisão) e tabela de códigos.
+   **15/10/2026:** códigos em `exames.yaml`; agravos medidos, com proposta e decisões em `AGRAVOS_PCMSO_PROPOSTA.md`.
 3. Geração do PCMSO junto com a matriz, conferida no par PGR Plateau rev 03 ↔ PCMSO Mauá.
 
 ## Pendência anterior (Soft Connect)

@@ -12949,3 +12949,15 @@ canônico: limpo, 59 arquivos. Smoke visual não rodado: a tela não muda.
 batem com o modelo; o parágrafo único do art. 169-A (dispensa sem prejuízo do salário para os exames preventivos, inciso
 XII do art. 473) não está no texto — sugestão S-09 com redação proposta. Modelo regenerado (54 comentários). Recorte da
 suíte (script e docs tocados): `test_gerar_modelo_pcmso.py` + `test_gerar_indice_darq.py`, 23 passed; mypy do script limpo.
+
+## Sessão (branch `claude/eager-newton-qw5a0u` recriada sobre `main 91a20c1`, pós-merge do PR #499) — 15/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: etapa 2 do PCMSO (códigos e agravos) e comentários do modelo
+
+**Implementado.** `codigo_seconci` em 24 exames de `exames.yaml` (D-ARQ-96 cl.4); comentários do modelo `.docx`
+reescritos em linguagem de quem valida (pedido do Diovanni). **Medido, não implementado:** agravos do Mauá × R70 —
+textos diferentes, cobertura pelo agente 44% e 23%, três formas de PGR que não chegam ao agente com exame;
+proposta e 7 decisões em `docs/referencia/AGRAVOS_PCMSO_PROPOSTA.md`.
+
+**Verificação.** Teste dos códigos, varredura inversa 3/3; testes de linguagem dos comentários, 4/4. Suíte completa
+(árvore parada): 1999 passed, 6 skipped (18 min 38 s). mypy no alvo canônico: limpo, 59 arquivos. Smoke visual não
+rodado: a tela não muda.
+

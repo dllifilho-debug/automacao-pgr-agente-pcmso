@@ -14,9 +14,14 @@
 
 | Marca | Significa |
 |---|---|
-| Amarelo + comentário `C-NN` | correção de texto (47 trechos, todos com comentário) |
-| Só comentário `S-NN` | sugestão: o texto ficou como estava |
+| Amarelo + comentário "CORREÇÃO." | correção de texto (47 trechos, todos com comentário) |
+| Só comentário "SUGESTÃO" | sugestão: o texto ficou como estava |
 | Turquesa `{{NOME}}` | campo que o app preenche (lista em `CAMPOS` do gerador) |
+
+**Comentários para as médicas (15/10/2026, a pedido do Diovanni).** Cada comentário se lê sozinho, sem esta lista:
+"CORREÇÃO. Antes: “…”. Agora: “…”." e o motivo em linguagem comum, ou "SUGESTÃO (o texto não foi alterado)." e o
+motivo; o número do item (C-NN, S-NN) só no fim, entre parênteses, para cruzar com esta lista. Autor no Word: "Revisão
+do modelo (proposta)". Um teste barra motivo curto ou com termo de bastidor (pasta `normas/`, app, D-ARQ, campo).
 
 O amarelo original do Seconci (52 trechos: período e meses do cronograma, empresa do 13.1, "NOV/26", "Inserir Tema",
 "MÊS/XX") foi retirado para não se confundir com as correções — ver S-08.

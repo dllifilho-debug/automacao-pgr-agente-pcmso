@@ -21,16 +21,27 @@
 # Saúde Mental e Psicossocial em 15 arquivos contra 8; Saúde Mental antes de
 # Psicossocial em 16 contra 9. Nomes "RX de Tórax OIT" (29/30 arquivos),
 # "Carboxihemoglobina" (17 contra 7) e "RX de Coluna Lombo-Sacra" pela mesma medição.
+#
+# codigo_seconci (D-ARQ-96 cl.4): código do exame no Seconci-GO, só para exibição no PCMSO
+# ("(0295) Exame Clínico"); o motor não lê. Não há tabela oficial: o par código ↔ exame vem das
+# linhas inteiras de tabela (código, nome e os 6 momentos na mesma linha) dos 8 PCMSOs em PDF do
+# acervo e do PCMSO Mauá (.docx), medido em 15/10/2026 — nenhum código com dois exames. "130" tem
+# 3 dígitos em todos os documentos; "0300" é a forma de 3 dos 5 (o Mauá escreve "300"). 0391 só
+# em 1 PCMSO. Exame sem o campo sai sem código e com aviso — nunca código inventado. Soma dos
+# ácidos mandélico e fenilglioxílico: o Seconci tem dois códigos (0113 mandélico, 0102
+# fenilglioxílico) para o que aqui é um exame — fica sem campo até a decisão do Diovanni.
 
 exames:
   exame_clinico:
     nome_exibicao: "Exame Clínico"
+    codigo_seconci: "0295"
     categoria: ocupacional
     fonte_matriz: "R-CLI-01 — piso universal"
     ordem_exibicao: 1
 
   avaliacao_psicossocial:
     nome_exibicao: "Avaliação Psicossocial"
+    codigo_seconci: "0300"
     categoria: ocupacional
     fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
     bloco_exibicao: fim
@@ -38,6 +49,7 @@ exames:
 
   avaliacao_saude_mental:
     nome_exibicao: "Av. Médica de Saúde Mental"
+    codigo_seconci: "0289"
     categoria: ocupacional
     fonte_matriz: "R-PSY-02 — NR-01 1.5.3.1.4 (FRPRT)"
     bloco_exibicao: fim
@@ -45,36 +57,42 @@ exames:
 
   hemograma:
     nome_exibicao: "Hemograma"
+    codigo_seconci: "0693"
     categoria: laboratorial
     fonte_matriz: "ASO PADRÃO / TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
     ordem_exibicao: 4
 
   glicemia:
     nome_exibicao: "Glicemia de Jejum"
+    codigo_seconci: "0658"
     categoria: laboratorial
     fonte_matriz: "TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
     ordem_exibicao: 5
 
   audiometria:
     nome_exibicao: "Audiometria"
+    codigo_seconci: "0281"
     categoria: ocupacional
     fonte_matriz: "RUÍDO / MOTORISTA"
     ordem_exibicao: 2
 
   acuidade_visual:
     nome_exibicao: "Acuidade Visual"
+    codigo_seconci: "0296"
     categoria: ocupacional
     fonte_matriz: "PORTEIRO / ELETRICIDADE / TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA"
     ordem_exibicao: 3
 
   ecg:
     nome_exibicao: "ECG"
+    codigo_seconci: "0531"
     categoria: ocupacional
     fonte_matriz: "TRABALHO EM ALTURA / ESPAÇO CONFINADO / MOTORISTA / ELETRICIDADE"
     ordem_exibicao: 6
 
   rx_coluna_lombo_sacra:
     nome_exibicao: "RX de Coluna Lombo-Sacra"
+    codigo_seconci: "1075"
     categoria: imagem
     fonte_matriz: "VIBRAÇÃO CORPO INTEIRO"
     bloco_exibicao: fim
@@ -82,6 +100,7 @@ exames:
 
   rx_torax_oit:
     nome_exibicao: "RX de Tórax OIT"
+    codigo_seconci: "1415"
     categoria: imagem
     fonte_matriz: "SÍLICA / ASBESTO / POEIRAS"
     bloco_exibicao: fim
@@ -90,6 +109,7 @@ exames:
 
   espirometria:
     nome_exibicao: "Espirometria"
+    codigo_seconci: "0562"
     categoria: ocupacional
     fonte_matriz: "R-ESP-02 — poeira mineral (NR-07 Anexo III 3.1)"
     bloco_exibicao: fim
@@ -97,16 +117,19 @@ exames:
 
   reticulocitos:
     nome_exibicao: "Reticulócitos"
+    codigo_seconci: "1086"
     categoria: laboratorial
     fonte_matriz: "BENZENO (R-PKG-BZ)"
 
   acido_transmuconico:
     nome_exibicao: "Ácido trans-trans-mucônico"
+    codigo_seconci: "130"
     categoria: laboratorial
     fonte_matriz: "BENZENO (R-PKG-BZ)"
 
   acetona_urina:
     nome_exibicao: "Acetona na urina"
+    codigo_seconci: "0071"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
 
@@ -132,37 +155,44 @@ exames:
 
   mek_urina:
     nome_exibicao: "Metil-etil-cetona (MEK) na urina"
+    codigo_seconci: "0863"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
 
   manganes_sangue:
     nome_exibicao: "Manganês no sangue"
+    codigo_seconci: "0836"
     categoria: laboratorial
     fonte_matriz: "R-BIO-03 — manganês, fora do Anexo I da NR-07"
 
   carboxihemoglobina:
     nome_exibicao: "Carboxihemoglobina"
+    codigo_seconci: "0364"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
     ordem_exibicao: 7
 
   hexanodiona_urina:
     nome_exibicao: "2,5-hexanodiona na urina"
+    codigo_seconci: "0029"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
 
   ortocresol_urina:
     nome_exibicao: "Ortocresol na urina"
+    codigo_seconci: "0951"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE) — o-cresol, rev.2020"
 
   acido_tricloroacetico:
     nome_exibicao: "Ácido tricloroacético na urina"
+    codigo_seconci: "0133"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
 
   acido_metilhipurico:
     nome_exibicao: "Ácido metil-hipúrico na urina"
+    codigo_seconci: "0116"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro I (IBE/EE)"
 
@@ -187,6 +217,7 @@ exames:
     categoria: laboratorial
   cromo_urina:
     nome_exibicao: "Cromo na urina"
+    codigo_seconci: "0467"
     categoria: laboratorial
   cobalto_urina:
     nome_exibicao: "Cobalto na urina"
@@ -229,6 +260,7 @@ exames:
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
   ciclohexanol_urina:
     nome_exibicao: "Ciclohexanol na urina"
+    codigo_seconci: "0391"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
   clorocatecol_urina:
@@ -269,5 +301,6 @@ exames:
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"
   tetrahidrofurano_urina:
     nome_exibicao: "Tetrahidrofurano na urina"
+    codigo_seconci: "1181"
     categoria: laboratorial
     fonte_matriz: "R-BIO-04 / NR-07 Anexo I Quadro 1 (IBE/EE)"

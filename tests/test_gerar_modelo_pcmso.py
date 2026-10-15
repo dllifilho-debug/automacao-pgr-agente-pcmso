@@ -12,6 +12,8 @@ from docx.oxml.ns import qn
 
 from scripts.gerar_modelo_pcmso import (
     CAMPOS,
+    SUGESTOES_EM_TITULO,
+    TROCAS,
     SAIDA_REVISAO,
     ModeloInesperado,
     Troca,
@@ -40,7 +42,10 @@ def test_troca_que_atravessa_runs_preserva_as_pontas(tmp_path: Path) -> None:
     assert paragrafo.text == "Assumo, em nome da Empresa {{RAZAO_SOCIAL}} o compromisso"
     realcados = [r.text for r in paragrafo.runs if r.font.highlight_color is not None]
     assert realcados == ["{{RAZAO_SOCIAL}}"]
-    assert [c.text for c in doc.comments] == ["C-01 — motivo"]
+    assert [c.text for c in doc.comments] == [
+        "CORREÇÃO. Antes: “SPE INCORPORAÇÃO H6 LTDA”. Agora: “[nome da empresa, preenchido automaticamente]”. "
+        "motivo (item C-01 da lista de correções)"
+    ]
 
 
 def test_contagem_diferente_da_esperada_nao_grava(tmp_path: Path) -> None:
@@ -95,5 +100,26 @@ def test_modelo_tem_todos_os_campos(modelo: tuple[str, list[str]]) -> None:
 def test_toda_correcao_amarela_tem_comentario() -> None:
     doc = Document(str(SAIDA_REVISAO))
     amarelos = sum(1 for h in doc.element.body.iter(qn("w:highlight")) if h.get(qn("w:val")) == "yellow")
-    correcoes = sum(1 for c in doc.comments if c.text.startswith("C-"))
+    correcoes = sum(1 for c in doc.comments if c.text.startswith("CORREÇÃO."))
     assert amarelos == correcoes > 0
+
+
+# Pedido do Diovanni (15/10/2026): as médicas validam o comentário sozinhas. Reversões que deixam vermelho:
+# voltar o comentário a "{marca} — {motivo}"; um motivo que só repete o número ("C-05.") ou fala de bastidor
+# do projeto (pasta normas/, app, D-ARQ, campo de modelo).
+_JARGAO = ("normas/", " app", "D-ARQ", "{{", "Diovanni", "Claude")
+
+
+@pytest.mark.parametrize("troca", [t for t in (*TROCAS, *SUGESTOES_EM_TITULO) if t.marca != "CAMPO"],
+                         ids=lambda t: f"{t.marca}:{t.antigo[:30]}")
+def test_motivo_em_linguagem_de_quem_valida(troca: Troca) -> None:
+    assert len(troca.motivo) >= 25
+    assert not any(termo in troca.motivo for termo in _JARGAO)
+
+
+def test_comentario_de_correcao_mostra_antes_e_depois(modelo: tuple[str, list[str]]) -> None:
+    correcoes = [c for c in modelo[1] if c.startswith("CORREÇÃO.")]
+    sugestoes = [c for c in modelo[1] if c.startswith("SUGESTÃO")]
+    assert len(correcoes) + len(sugestoes) == len(modelo[1])
+    assert all("Antes: “" in c and "Agora: “" in c for c in correcoes)
+    assert not any("{{" in c for c in modelo[1])
