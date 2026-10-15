@@ -5118,6 +5118,50 @@ raciocínio pedida por ele.
 
 ---
 
+## D-ARQ-96 — PCMSO inteiro gerado pelo app sobre modelo .docx do Seconci 2026, junto com a matriz RQ.61; texto fixo corrigido com marcas antes de congelar
+
+**Status:** DECISÃO DO DIOVANNI (14/10/2026, as 5 decisões de `docs/referencia/BRIEFING_MODELO_PCMSO_MAUA.md`) + IMPLEMENTAÇÃO da etapa 1 (modelo marcado, 15/10/2026). Modelo **em revisão**, não congelado.
+
+Sessão branch `claude/eager-newton-qw5a0u` sobre `main bb9dddf`. Origem: levantamento da estrutura do PCMSO
+Mauá/Plateau D'Or (PR #493, briefing de 14/10/2026), que segue o texto fixo do modelo Seconci 2026 (100% das linhas
+longas das seções 3–10 iguais às do PCMSO R70).
+
+**Decisão.**
+- **cl.1 — Escopo: o PCMSO inteiro.** O texto fixo (seções 3–16) fica num modelo `.docx` versionado
+  (`agente_medico/superficie/modelos/`); o app preenche campos `{{NOME}}` — identificação, controle de revisão,
+  cronograma, termo de compromisso, assinatura do médico — e o campo `{{BLOCOS_GHE}}`.
+- **cl.2 — Texto fixo corrigido, marcado, depois congelado.** Correção em amarelo com comentário `C-NN`, sugestão só em
+  comentário `S-NN`, campo em turquesa; lista "o que mudou e por quê" em `docs/referencia/MODELO_PCMSO_CORRECOES.md`.
+  Aprovado pelo Diovanni, o gerador grava a versão sem marcas (`--limpo`) e o modelo congela. A NR-32 fica (o Seconci é
+  serviço de saúde e a tem como base), só com sugestão (S-01).
+- **cl.3 — Agravo: o das médicas, não o do PGR.** Dicionário perigo → agravo extraído dos PCMSOs das médicas no modelo
+  2026, casado pelo agente que o app resolve; fora do dicionário, o agravo do PGR (D-ARQ-93) marcado "do PGR — conferir".
+  A forma limpa das 9 variações é decisão do Diovanni (etapa 2).
+- **cl.4 — Código Seconci do exame**, no padrão "(0295) Exame Clínico", como campo de exibição em `exames.yaml`. Exame
+  sem código conhecido sai sem código e com aviso; nunca código inventado.
+- **cl.5 — Matriz RQ.61 (D-ARQ-73) e PCMSO saem juntos**, na mesma rodada e da mesma fonte: exames iguais por construção.
+  Correção de regra volta como entrada e regenera os dois; correção pontual de um PGR, a médica faz nos dois.
+
+**Aplicação — etapa 1 (15/10/2026).**
+- `scripts/gerar_modelo_pcmso.py` sobre o `.docx` que o soffice faz do RTF do acervo: 47 trechos corrigidos (C-01 a
+  C-15), 8 sugestões, 32 campos; 65 tabelas dos blocos por GHE trocadas por `{{BLOCOS_GHE}}` e 55 entradas de GHE tiradas
+  do índice; 11 títulos com `TC "…"` visível (defeito da conversão, não do original) voltaram a ser campo; o amarelo
+  original do Seconci (52 trechos, preenchimento manual) saiu para não se confundir com as correções. O gerador para sem
+  gravar se um texto esperado não estiver no documento ou aparecer em número diferente de parágrafos.
+- Achados além do briefing: alínea c) do 7.5.19.5 trocada pelo parágrafo do laboratório (C-06), numeração I–IV, VI
+  (C-07), texto corrompido no Anexo II 3.2.1.1 (C-10), nota do PNOS fora da NR-07 (C-11), item do Anexo III da NR-09
+  (C-12), alíneas da seção 8 (C-13), data da Portaria 6.734 (C-14, divergente no próprio texto da NR-07), e **a figura do
+  "Fluxo geral" (16.1) é a mesma do 16.2** (S-07: falta a figura do Seconci).
+- Normas conferidas nas cópias de `normas/` (vigência declarada em 13/10/2026). Lei nº 15.377/2026 (art. 169-A da CLT)
+  conferida no Planalto pela captura do Diovanni (15/10/2026): Lei nº 15.377, de 2 de abril de 2026, DOU 6/4/2026; o modelo não traz o parágrafo único do art. 169-A (S-09).
+- **Verificação.** `tests/test_gerar_modelo_pcmso.py` (17 casos: mecânica da troca em documento sintético e invariantes
+  do modelo gravado), varredura inversa 8/8.
+
+**Fora.** Leiaute dos blocos por GHE e o preenchimento dos campos (etapa 3); dicionário de agravos e tabela de códigos
+(etapa 2); campos TC novos para o índice (S-05).
+
+---
+
 ## Histórico de revisões
 
 | Versão | Data | Alterações |
@@ -5391,3 +5435,4 @@ raciocínio pedida por ele.
 | v267 | 13/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main cbc9673` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda 3 em `D-ARQ-94`** — nível do inventário psicossocial lido pela faixa de palavras em volta do fator (tabela que parte a linha, Soft Connect15 v04) e aviso não bloqueante `inventario_psicossocial_sem_nivel` quando o PGR cita o inventário sem nível lido. Medido nos 53 PDFs do acervo: só o Soft Connect muda. |
 | v268 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main e1c644d` (MEDIÇÃO): **nota em `D-ARQ-94`, emenda 3** — efeito no app medido pela rodada do Diovanni: Saúde Mental em 20 GHE, Psicossocial em 18, nenhum dos dois avisos. |
 | v269 | 14/10/2026 | Branch `claude/admiring-maxwell-dhcgko`, sobre `main 9d695d2` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda à cl.3 de `D-ARQ-68`** — sílica medida sem % de quartzo ou fração emite RX OIT pela faixa do pior caso (quartzo 100%, fração respirável; `R-RX-01-incompleta-*`, INTERPRETADO) com as pendências anexadas, e 0 ("sem periódico") deixa de vencer na consolidação; **nota em `D-ARQ-31`** — pendência bloqueante por GHE em vermelho na tela e no memorial, e GHE recortado fora da matriz (`ghe_ausente_da_matriz`) bloqueia o download. |
+| v270 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, sobre `main bb9dddf` (DECISÃO do Diovanni de 14/10/2026 + IMPLEMENTAÇÃO da etapa 1): **D-ARQ-96 adicionada** — PCMSO inteiro sobre modelo `.docx` do Seconci 2026, junto com a matriz RQ.61; agravo das médicas; código Seconci como exibição; modelo de revisão marcado (47 correções, 8 sugestões, 32 campos), gerado por `scripts/gerar_modelo_pcmso.py`. |
