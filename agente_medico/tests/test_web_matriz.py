@@ -343,12 +343,15 @@ def _preencher_emissao(at: AppTest, emissao: date) -> AppTest:
 
 
 def _submeter_formulario(
-    at: AppTest, validade: date = _EMISSAO_RECENTE, campos: Mapping[str, str | date] | None = None
+    at: AppTest,
+    validade: date = _EMISSAO_RECENTE,
+    campos: Mapping[str, str | date] | None = None,
+    conteudo: bytes = b"conteudo qualquer",
 ) -> None:
     # Campos do `st.form` sem `.run()` entre eles: o navegador só envia o
     # formulário no submit, e o AppTest do Streamlit 1.65 passou a imitar isso —
     # um rerun antes do submit descarta o valor pendente.
-    at.file_uploader[0].set_value(("pgr.pdf", b"conteudo qualquer", "application/pdf")).run()
+    at.file_uploader[0].set_value(("pgr.pdf", conteudo, "application/pdf")).run()
     for rotulo, valor in (campos or {}).items():
         lista = next((s for s in at.selectbox if s.label == rotulo), None)
         if lista is not None:
@@ -1524,3 +1527,45 @@ def test_tela_mostra_hifen_no_nome_do_ghe_com_nul(monkeypatch: pytest.MonkeyPatc
     assert esperado in [e.label for e in at.expander]
     assert esperado in [s.value for s in at.subheader]
     assert not any("\x00" in m.value for m in at.markdown)
+
+
+# ---------------------------------------------------------------------------
+# D-ARQ-96 fatia 2: dados da empresa lidos do PGR e do médico, na tela, até o PCMSO.
+# ---------------------------------------------------------------------------
+
+
+def test_dados_do_pcmso_vem_do_pgr_e_as_correcoes_da_tela_chegam_ao_documento(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Reversões que matam: (1) `text_input` da empresa sem `value=getattr(identificacao, campo)` — o CNPJ lido do
+    # PGR não chega ao PCMSO; (2) gerar o PCMSO com `dados_do_cabecalho(cabecalho)` sem `**campos_pcmso` — nem o
+    # CNPJ, nem o endereço corrigido, nem o RQE chegam.
+    from agente_medico.motor.identificacao_pgr import IdentificacaoPGR
+    from agente_medico.superficie.documento_pcmso import AvisosPCMSO, DadosPCMSO
+
+    pgr_sintetico = _pgr_sintetico(_ghe_pgr(ghe_id="GHE-01", nome="Pintura", cargos=("Pintor",)))
+    recebidos: list[DadosPCMSO] = []
+
+    def _gerar_espiao(*args: Any) -> AvisosPCMSO:
+        recebidos.append(args[4])
+        Path(args[5]).write_bytes(b"pcmso")
+        return AvisosPCMSO()
+
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.ler_identificacao_pdf",
+        lambda caminho: IdentificacaoPGR(cnpj="43.091.205/0001-32", cnpj_valido=True, endereco="R. Córdoba"),
+    )
+    monkeypatch.setattr(
+        "agente_medico.superficie.web_matriz.preparar_pgr_hidratado", lambda *a, **k: (pgr_sintetico, ())
+    )
+    monkeypatch.setattr("agente_medico.superficie.documento_pcmso.gerar_pcmso_docx", _gerar_espiao)
+    at = AppTest.from_function(pagina_matriz)
+    at.run()
+    # Só o cabeçalho: a leitura do PDF está trocada pelo dublê acima.
+    _submeter_formulario(
+        at, campos={"Endereço da obra": "R. Córdoba, Qd. 250", "RQE": "12345"}, conteudo=b"%PDF-1.7 duble"
+    )
+
+    assert not at.exception
+    (dados,) = recebidos
+    assert (dados.cnpj, dados.endereco, dados.medico_rqe) == ("43.091.205/0001-32", "R. Córdoba, Qd. 250", "12345")

@@ -24,6 +24,7 @@ import functools
 import hashlib
 import logging
 import re
+import tempfile
 import time
 from dataclasses import dataclass
 from datetime import date
@@ -41,6 +42,7 @@ from agente_medico.adaptadores.transcritor_gemini_pgr import TranscritorGeminiGH
 from agente_medico.motor.composicao import resolver_composicao
 from agente_medico.motor.entrada import processar_pgr
 from agente_medico.motor.extracao_fds import extrair_agravos_saude_pdf
+from agente_medico.motor.identificacao_pgr import IdentificacaoPGR, ler_identificacao_pdf
 from agente_medico.motor.leo_resolver import limite_quimico
 from agente_medico.motor.medicoes import aplicar_medicoes
 from agente_medico.motor.protocolo import Protocolo, carregar
@@ -799,6 +801,42 @@ def preparar_composicao_cacheada(
     return resultado
 
 
+def identificacao_cacheada(conteudo: bytes, cache: dict[str, IdentificacaoPGR]) -> tuple[str, IdentificacaoPGR]:
+    """D-ARQ-96 fatia 2: dados da empresa lidos das primeiras páginas do PGR, uma vez por PDF. Devolve também a
+    chave do conteúdo, que entra na key dos campos da tela — PDF novo, campos preenchidos de novo."""
+    chave = hashlib.sha256(conteudo).hexdigest()
+    if chave not in cache and not conteudo.lstrip()[:5] == b"%PDF-":
+        cache[chave] = IdentificacaoPGR()
+    if chave not in cache:
+        with tempfile.TemporaryDirectory() as tmp:
+            caminho = Path(tmp) / "pgr.pdf"
+            caminho.write_bytes(conteudo)
+            cache[chave] = ler_identificacao_pdf(caminho)
+    return chave, cache[chave]
+
+
+# Campo de DadosPCMSO → rótulo na tela. Os do PGR vêm preenchidos; os do médico, em branco (LGPD: CPF e NIT
+# não são guardados em lugar nenhum além do documento gerado).
+CAMPOS_EMPRESA_PCMSO: tuple[tuple[str, str], ...] = (
+    ("cnpj", "CNPJ"),
+    ("cnae", "CNAE"),
+    ("descricao_cnae", "Descrição do CNAE"),
+    ("grau_risco", "Grau de risco"),
+    ("endereco", "Endereço da obra"),
+    ("complemento", "Complemento"),
+    ("bairro", "Bairro"),
+    ("cidade", "Cidade"),
+    ("uf", "UF"),
+    ("cep", "CEP"),
+)
+CAMPOS_MEDICO_PCMSO: tuple[tuple[str, str], ...] = (
+    ("medico_especialidade", "Especialidade do médico"),
+    ("medico_rqe", "RQE"),
+    ("medico_nit", "NIT do médico"),
+    ("medico_cpf", "CPF do médico"),
+)
+
+
 AVISO_SEM_AGRAVOS = (
     "Nenhuma frase H de saúde (H3xx) legível no texto desta FDS — conferir a seção 2 no documento "
     "(pode estar em imagem ou a FDS ser anterior ao GHS)."
@@ -889,6 +927,8 @@ def pagina_matriz() -> None:
         EmissaoFuturaError,
     )
     from agente_medico.superficie.web_matriz import (
+        CAMPOS_EMPRESA_PCMSO,
+        CAMPOS_MEDICO_PCMSO,
         ICONE_PASSO,
         OPCOES_TIPO_DOCUMENTO,
         CacheMatrizes,
@@ -901,6 +941,7 @@ def pagina_matriz() -> None:
         executar_rota_determinista_cacheada,
         extrair_agravos_cacheado,
         ghes_com_produto,
+        identificacao_cacheada,
         linha_pendencia,
         linhas_agravos,
         linhas_sugestao,
@@ -1292,6 +1333,9 @@ def pagina_matriz() -> None:
             return
 
         conteudo_pdf = arquivo.getvalue()
+        chave_pgr, identificacao = identificacao_cacheada(
+            conteudo_pdf, st.session_state.setdefault("web_matriz_identificacao", {})
+        )
 
         with etapa_pgr, st.form("cabecalho_rodape_envelope"):
             col_documento, col_responsaveis, col_pgr = st.columns(3)
@@ -1329,6 +1373,30 @@ def pagina_matriz() -> None:
                     "2 anos ou mais é rejeitado (R-PGR-06)."
                 )
                 assinatura = st.checkbox("Assinado por engenheiro de segurança")
+
+            campos_pcmso: dict[str, str] = {}
+            with st.expander("Dados do PCMSO — empresa lida do PGR (confira) e médico responsável"):
+                st.caption(
+                    "Lidos da página de identificação do PGR; corrija o que estiver errado. "
+                    "O que ficar vazio sai em branco no PCMSO, para completar no Word."
+                )
+                col_empresa, col_endereco, col_medico = st.columns(3)
+                for indice, (campo, rotulo) in enumerate(CAMPOS_EMPRESA_PCMSO):
+                    with col_empresa if indice < 4 else col_endereco:
+                        campos_pcmso[campo] = st.text_input(
+                            rotulo, value=getattr(identificacao, campo), key=f"pcmso_{campo}_{chave_pgr[:12]}"
+                        )
+                with col_empresa:
+                    if identificacao.cnpj and not identificacao.cnpj_valido:
+                        st.caption("CNPJ do PGR com dígito verificador que não confere — conferir.")
+                    if identificacao.cnae_alternativo:
+                        st.caption(f"Outro CNAE no PGR: {identificacao.cnae_alternativo}")
+                with col_endereco:
+                    if identificacao.endereco_alternativo:
+                        st.caption(f"Outro endereço no PGR (empresa): {identificacao.endereco_alternativo}")
+                with col_medico:
+                    for campo, rotulo in CAMPOS_MEDICO_PCMSO:
+                        campos_pcmso[campo] = st.text_input(rotulo, key=f"pcmso_{campo}")
 
             enviado = st.form_submit_button("Gerar matriz", type="primary")
 
@@ -1448,7 +1516,7 @@ def pagina_matriz() -> None:
                     cache.pgr_hidratado,
                     cache.exames_vocab,
                     _agravos_padrao(),
-                    dados_do_cabecalho(cabecalho),
+                    dataclasses.replace(dados_do_cabecalho(cabecalho), **campos_pcmso),
                     destino_pcmso,
                 )
                 pcmso_bytes = destino_pcmso.read_bytes()
