@@ -42,6 +42,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     termo=risco_pgr.termo,
                     nivel_pgr=risco_pgr.nivel_pgr,
                     contaminantes_a_confirmar=_contaminantes(meta),
+                    presumir_contaminante=(meta or {}).get("presumir_contaminante", True),
                 )
             )
         else:
@@ -120,6 +121,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                         tipo_ibe=TipoIBE(meta["tipo_ibe"]) if meta is not None and meta.get("tipo_ibe") else None,
                         is_ototoxico=meta.get("is_ototoxico", False) if meta is not None else False,
                         contaminantes_a_confirmar=_contaminantes(meta),
+                        presumir_contaminante=(meta or {}).get("presumir_contaminante", True),
                     )
                 )
 
@@ -213,6 +215,7 @@ def stage_2_riscos(ctx: GHEContext, proto: Protocolo) -> None:
                     is_carcinogeno_iarc=componente.is_carcinogeno_iarc,
                     is_sensibilizante=componente.is_sensibilizante,
                     contaminantes_a_confirmar=_contaminantes(meta),
+                    presumir_contaminante=(meta or {}).get("presumir_contaminante", True),
                 )
             )
 

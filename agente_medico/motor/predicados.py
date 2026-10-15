@@ -106,7 +106,7 @@ def _benzeno_a_confirmar(ctx: GHEContext) -> ResultadoPredicado:
     identificado → False (o pacote sai pela R-PKG-BZ). Todo risco desses solventes
     IRRELEVANTE → False: o corte da R-BIO-05 para cancerígeno (Porto Araras I GHE-14,
     querosene IRRELEVANTE, gabarito sem o pacote)."""
-    pendentes = _riscos_benzeno_a_confirmar(ctx)
+    pendentes = tuple(r for r in _riscos_benzeno_a_confirmar(ctx) if r.presumir_contaminante)
     if not pendentes or all(r.nivel_risco == "IRRELEVANTE" for r in pendentes):
         return False
     nomes = ", ".join(dict.fromkeys(r.termo or r.agente for r in pendentes))

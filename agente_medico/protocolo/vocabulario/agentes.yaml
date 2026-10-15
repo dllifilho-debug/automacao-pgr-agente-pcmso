@@ -918,7 +918,12 @@ agentes:
     # 28.09.26 (reticulócitos e t,t-mucônico semestrais). Sem LT nem IBE (não identifica a
     # substância) — nenhum exame próprio. R-FDS-07: benzeno a confirmar na FDS, como a aguarrás.
     # Só o termo exato: "Hidrocarboneto Alifático" (Plateau GHE 15, textura; Mauá sem o pacote)
-    # não entra. [INTERPRETADO — decisão da sessão de 15/10/2026, pela analogia com R-PKG-BZ-PRES.]
+    # não entra. Sem a presunção da R-PKG-BZ-PRES: nenhuma norma resolve (NR-07 Anexo I pede a
+    # substância; NR-15 Anexo 13-A, benzeno >=1%) e os precedentes divergem — impermeabilização com
+    # asfalto declarado segue a R-PKG-ASF, "sem t,t-mucônico nem reticulócitos" (7/7 matrizes do
+    # acervo); o NR-15 Anexo 13 cita "produtos para impermeabilização ... à base de hidrocarbonetos"
+    # e o betume. Só o pedido da FDS (R-FDS-07); a regra certa dispara quando ela chegar. Decisão do
+    # Diovanni, 15/10/2026 (opção b).
     tipo_ibe: null
     cas: null
     is_carcinogeno_iarc: false
@@ -926,6 +931,7 @@ agentes:
     protocolos_especiais: []
     termos: ["Hidrocarbonetos"]
     contaminantes_a_confirmar: [benzeno]
+    presumir_contaminante: false
   querosene:
     # Solvente de petróleo da pintura. [MEDIDO — PGRs CMO Aurora 27.08.26 GHE 18 e Vistamerica
     # 2026-07-28: "Querosene (petróleo)", BAIXO; Porto Araras I: "Querosene", IRRELEVANTE]. O próprio

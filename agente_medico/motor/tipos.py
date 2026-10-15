@@ -296,6 +296,9 @@ class Risco:
     termo: Optional[str] = None
     # R-FDS-07 / R-PKG-BZ-PRES: `contaminantes_a_confirmar` do vocabulário do agente.
     contaminantes_a_confirmar: tuple[str, ...] = ()
+    # False: o contaminante só gera o pedido da FDS (R-FDS-07), sem a presunção da R-PKG-BZ-PRES — agente que
+    # não identifica o produto ("Hidrocarbonetos", decisão do Diovanni 15/10/2026).
+    presumir_contaminante: bool = True
     # D-ARQ-95: RiscoPGR.nivel_pgr na Fase A; "" nas Fases B e C. Só a sugestão do ASO lê.
     nivel_pgr: str = ""
 

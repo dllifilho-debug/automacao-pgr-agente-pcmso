@@ -30,14 +30,22 @@ def _regras(matriz: MatrizGHE, exame: str) -> set[str]:
     return {m.regra_id for linha in matriz.linhas if linha.exame == exame for m in linha.motivos}
 
 
-def test_hidrocarbonetos_da_impermeabilizacao_presumem_benzeno_e_pedem_a_fds(proto: Protocolo) -> None:
-    # Reversões que matam: (1) tirar "Hidrocarbonetos" dos termos de `hidrocarbonetos_nao_especificados` — o risco
-    # volta a não ser reconhecido e o GHE perde reticulócitos e a pendência; (2) tirar `contaminantes_a_confirmar` do
-    # agente — some a presunção (R-PKG-BZ-PRES) e o pedido da FDS (R-FDS-07).
+def test_hidrocarbonetos_da_impermeabilizacao_pedem_a_fds_sem_presumir_benzeno(proto: Protocolo) -> None:
+    # Decisão do Diovanni (15/10/2026, opção b): só o pedido da FDS. Reversões que matam: (1) tirar "Hidrocarbonetos"
+    # dos termos de `hidrocarbonetos_nao_especificados` — some a pendência; (2) tirar `contaminantes_a_confirmar` do
+    # agente — idem; (3) tirar `presumir_contaminante: false` do agente, ou o filtro `r.presumir_contaminante` de
+    # `_benzeno_a_confirmar` — o GHE ganha o pacote do benzeno presumido (reticulócitos pela R-PKG-BZ-PRES).
     matriz = _matriz(proto, "Hidrocarbonetos")
-    assert "R-PKG-BZ-PRES" in _regras(matriz, "reticulocitos")
     (pendencia,) = _a_confirmar(matriz)
     assert pendencia.motivo.startswith("Hidrocarbonetos sem FDS")
+    assert _regras(matriz, "reticulocitos") == set()
+
+
+def test_aguarras_no_mesmo_ghe_continua_presumindo_benzeno(proto: Protocolo) -> None:
+    # A chave vale por agente, não por GHE. Reversão que mata: descartar o GHE inteiro da presunção quando algum
+    # agente tem `presumir_contaminante: false` — a aguarrás junto com os hidrocarbonetos perde o pacote.
+    matriz = _matriz(proto, "Hidrocarbonetos", "Aguarrás")
+    assert "R-PKG-BZ-PRES" in _regras(matriz, "reticulocitos")
 
 
 def test_hidrocarboneto_alifatico_da_textura_nao_presume_benzeno(proto: Protocolo) -> None:
