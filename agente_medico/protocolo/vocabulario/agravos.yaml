@@ -1,0 +1,202 @@
+# Agravo à saúde por perigo, para a tabela "Perigo / Fator de Risco | Grupo | Descrições dos perigos e possíveis
+# lesões ou agravos à saúde" do PCMSO (D-ARQ-96 cl.3; decisões do Diovanni de 15/10/2026). Só exibição: o motor de
+# exames não lê este arquivo.
+#
+# Casamento, nesta ordem: (1) `agente`: o perigo resolve (EXATA) num agente de agentes.yaml; (2) `termos`: formas de
+# perigo que não têm agente, só as formas medidas nas duas fontes — acidentes, ergonômicos e psicossociais —, pelo mesmo resolver_termo. Nenhum termo daqui
+# pode resolver num agente (validado no carregamento): sinônimo de agente que tem exame é decisão à parte, porque
+# muda exame (AGRAVOS_PCMSO_PROPOSTA.md, decisão 6). Fora daqui, o PCMSO usa o agravo do PGR marcado "do PGR —
+# conferir" (D-ARQ-93).
+#
+# Estilo (decisão 1): curto, uma linha, com os principais desfechos. Fonte de cada texto, pela hierarquia de D-ARQ-22
+# Parte A: precedente das médicas no modelo 2026 — PCMSO Mauá/Plateau D'Or 28.09.26 ("Mauá") ou PCMSO R70 22.09.26
+# ("R70"), limpo de erro de digitação — ou [INTERPRETADO] quando o texto é síntese. Medição das fontes:
+# docs/referencia/AGRAVOS_PCMSO_PROPOSTA.md (15/10/2026). As médicas validam na revisão do PCMSO gerado.
+
+agravos:
+  # ---------------------------------------------------------------- por agente (agentes.yaml)
+  ruido:
+    agente: ruido
+    texto: "Perda auditiva induzida por níveis de pressão sonora elevados (PAINPSE), zumbido e efeitos extra-auditivos (irritabilidade, distúrbios do sono, alterações cardiovasculares)."
+    fonte: "[INTERPRETADO] síntese de Mauá (15×) e R70 (18×); termo PAINPSE do Anexo II da NR-07 — decisão 2"
+  trabalho_altura:
+    agente: trabalho_altura
+    texto: "Fraturas, luxações e morte."
+    fonte: "Mauá (3×), forma escolhida entre 5 variações — decisão 3"
+  eletricidade:
+    agente: eletricidade
+    texto: "Queimaduras cutâneas, lesões de órgãos internos e de outros tecidos moles, arritmias e parada respiratória."
+    fonte: "Mauá (4×, \"Choque Elétrico\"), \"tecidos brandos\" → \"tecidos moles\" — decisão 3"
+  esforco_fisico:
+    agente: esforco_fisico
+    texto: "Lombalgia e lesões musculoesqueléticas da coluna, dos ombros, dos braços e dos punhos (LER/DORT)."
+    fonte: "[INTERPRETADO] síntese de Mauá (3×) e R70 (10×)"
+  postura_inadequada:
+    agente: postura_inadequada
+    texto: "Lombalgia, fadiga e dores musculares."
+    fonte: "Mauá, forma escolhida entre 3 variações (\"Postura de pé por longos períodos\") — decisão 3"
+  queda_de_materiais:
+    agente: queda_de_materiais
+    texto: "Fraturas, lesões ou óbito."
+    fonte: "Mauá"
+  vibracao_corpo_inteiro:
+    agente: vibracao_corpo_inteiro
+    texto: "Lombalgia, degeneração precoce da coluna lombar e hérnia de disco."
+    fonte: "R70, resumido"
+  vibracao_mao_braco:
+    agente: vibracao_mao_braco
+    texto: "Síndrome dos dedos brancos e lesões de articulações, músculos e nervos das mãos e dos punhos."
+    fonte: "R70 (4×), resumido"
+  radiacao_uv_ir:
+    agente: radiacao_uv_ir
+    texto: "Lesões oculares (ceratite, conjuntivite, catarata) e queimaduras de pele."
+    fonte: "R70 (\"Radiação não ionizante\", 15×), parte ocular; queimadura de pele [INTERPRETADO]"
+  silica:
+    agente: silica
+    texto: "Silicose e outros danos às vias respiratórias."
+    fonte: "[INTERPRETADO] Mauá diz \"Danos nas vias respiratórias.\"; silicose pelo Anexo III da NR-07 — decisão 3"
+  poeira_de_gesso:
+    agente: poeira_de_gesso
+    texto: "Irritação das vias respiratórias, ressecamento e irritação da pele."
+    fonte: "Mauá"
+  poeira_de_madeira:
+    agente: poeira_de_madeira
+    texto: "Danos nos pulmões e nas vias respiratórias."
+    fonte: "Mauá"
+  cimento_portland:
+    agente: cimento_portland
+    texto: "Irritações respiratórias, cutâneas, oculares e digestivas."
+    fonte: "R70 (texto do pó e da pasta de cimento), resumido"
+  aluminato_tricalcico:
+    agente: aluminato_tricalcico
+    texto: "Irritações respiratórias, cutâneas, oculares e digestivas."
+    fonte: "R70 — componente do cimento, com o agravo do produto"
+  ferro_aluminato_de_calcio:
+    agente: ferro_aluminato_de_calcio
+    texto: "Irritações respiratórias, cutâneas, oculares e digestivas."
+    fonte: "R70 — componente do cimento, com o agravo do produto"
+  silicato_dicalcico:
+    agente: silicato_dicalcico
+    texto: "Irritações respiratórias, cutâneas, oculares e digestivas."
+    fonte: "R70 — componente do cimento, com o agravo do produto"
+  silicato_tricalcico:
+    agente: silicato_tricalcico
+    texto: "Irritações respiratórias, cutâneas, oculares e digestivas."
+    fonte: "R70 — componente do cimento, com o agravo do produto"
+  fumos_metalicos:
+    agente: fumos_metalicos
+    texto: "Irritação das vias aéreas, febre dos fumos metálicos e pneumoconiose; efeitos específicos conforme o metal."
+    fonte: "[INTERPRETADO] síntese de R70 (cobre, cromo, ferro, manganês) e Mauá (\"Fumos Metálicos e gases\")"
+  espaco_confinado:
+    agente: espaco_confinado
+    texto: "Asfixia, intoxicação, queimaduras por explosão e morte."
+    fonte: "[INTERPRETADO] o texto do Mauá descreve o ambiente, não o agravo"
+  acetona:
+    agente: acetona
+    texto: "Irritação de mucosas, cefaleia, tontura e depressão do sistema nervoso central."
+    fonte: "[INTERPRETADO] síntese de Mauá e R70"
+  metil_etil_cetona:
+    agente: metil_etil_cetona
+    texto: "Irritação de mucosas, cefaleia, tontura e depressão do sistema nervoso central."
+    fonte: "[INTERPRETADO] síntese de Mauá e R70"
+  acetato_de_etila:
+    agente: acetato_de_etila
+    texto: "Irritação ocular, cutânea e das vias aéreas, cefaleia e sonolência."
+    fonte: "R70, resumido"
+  domissanitarios:
+    agente: domissanitarios
+    texto: "Irritação leve na pele e moderada nos olhos."
+    fonte: "R70 (\"Irrigação\" corrigido para \"Irritação\")"
+
+  # ---------------------------------------------------------------- perigos sem agente
+  psicossocial:
+    texto: "Transtornos mentais e comportamentais relacionados ao trabalho (ansiedade, depressão, esgotamento profissional)."
+    fonte: "[INTERPRETADO] R70 diz \"Transtornos mentais.\" nos 9 fatores — decisão 5, um agravo único"
+    termos: ["Relações interpessoais", "Comportamentos ofensivos", "Conflitos família e trabalho",
+             "Demandas no trabalho", "Influência e desenvolvimento", "Liderança", "Satisfação no trabalho",
+             "Significado e compromisso", "Valores no local de trabalho"]
+  queda_mesmo_nivel:
+    texto: "Fraturas e escoriações."
+    fonte: "Mauá (17×) — decisão 3"
+    termos: ["Queda de mesmo nível", "Piso irregular ou em desnível",
+             "Pisos, passagens, passarelas, plataformas, rampas"]
+  queda_de_objetos:
+    texto: "Perfurações, contusões, traumatismos e morte."
+    fonte: "Mauá (\"Quedas de objetos\"), resumido"
+    termos: ["Quedas de objetos", "Queda de objetos"]
+  objetos_cortantes:
+    texto: "Cortes, lesões e perfurações."
+    fonte: "Mauá (5×)"
+    termos: ["Objetos cortantes e/ou perfurocortantes", "Contato com perfuro cortantes", "Corte e Perfuração",
+             "Contato com disco de corte", "Contato com disco de máquinas de corte", "Uso de policorte e lixadeira",
+             "Mobiliário e/ou superfície com quinas vivas rebarbas ou elementos de fixação expostos"]
+  maquinas_equipamentos:
+    texto: "Fraturas, cortes, perfurações e amputação de membros."
+    fonte: "R70 (7×)"
+    termos: ["Máquinas e equipamentos", "Máquinas e Equipamentos (Betoneira)",
+             "Contato com partes móveis de máquinas", "Aprisionamento de membros"]
+  arranjo_fisico:
+    texto: "Contusões, cortes e perfurações, com risco de infecção."
+    fonte: "[INTERPRETADO] R70 (17×) descreve só a infecção"
+    termos: ["Arranjo físico inadequado (Perfuração)"]
+  choque_eletrico:
+    texto: "Queimaduras cutâneas, lesões de órgãos internos e de outros tecidos moles, arritmias e parada respiratória."
+    fonte: "Mauá — mesmo texto do agente eletricidade (sem exame próprio no app)"
+    termos: ["Choque Elétrico"]
+  intemperies:
+    texto: "Insolação, desidratação e lesões por descarga atmosférica."
+    fonte: "Mauá, forma escolhida entre 2 variações — decisão 3"
+    termos: ["Intempéries"]
+  transito:
+    texto: "Contusões, fraturas, traumatismos e morte."
+    fonte: "[INTERPRETADO] junção das 2 formas do Mauá"
+    termos: ["Acidente de Trânsito", "Acidentes de Trânsito"]
+  projecao_de_particulas:
+    texto: "Lesões oculares."
+    fonte: "Mauá"
+    termos: ["Projeção de Partículas"]
+  liquidos_quentes:
+    texto: "Queimaduras."
+    fonte: "Mauá"
+    termos: ["Contato com Líquidos quentes"]
+  animais_peconhentos:
+    texto: "Envenenamento por picada ou mordedura, com dor e edema locais e reações sistêmicas."
+    fonte: "R70, resumido"
+    termos: ["Animais peçonhentos"]
+  violencia_fisica:
+    texto: "Lesões superficiais, traumas e hemorragias."
+    fonte: "R70"
+    termos: ["Violência Física"]
+  levantamento_de_peso:
+    texto: "Lombalgia e lesões musculoesqueléticas da coluna, dos ombros, dos braços e dos punhos (LER/DORT)."
+    fonte: "[INTERPRETADO] mesmo texto do agente esforco_fisico (sem exame próprio no app)"
+    termos: ["Levantamento de peso", "Levantamento e transporte manual de peso",
+             "Levantamento, transporte manual de pesos"]
+  esforco_fisico_intenso:
+    texto: "Cansaço, dores musculares, fraqueza e problemas de coluna."
+    fonte: "Mauá"
+    termos: ["Trabalho com esforço físico intenso"]
+  postura_sentada:
+    texto: "Lombalgia, dores nos membros superiores e inferiores e problemas circulatórios."
+    fonte: "Mauá, forma escolhida entre 2 variações — decisão 3"
+    termos: ["Postura sentada por longos períodos", "Sentado por longos períodos"]
+  postura_incomoda:
+    texto: "Dores musculares."
+    fonte: "Mauá"
+    termos: ["Trabalho em postura incomoda ou pouco confortável durante periodos"]
+  flexao_de_coluna:
+    texto: "Lesão musculoesquelética da coluna vertebral."
+    fonte: "R70"
+    termos: ["Exigência de flexões de coluna vertebral frequentes"]
+  movimentos_repetitivos:
+    texto: "Lesões por esforços repetitivos (tendinites, bursites e síndromes compressivas)."
+    fonte: "R70"
+    termos: ["Movimentos repetitivos", "Exigência de elevação frequente de membros superiores"]
+  mobiliario:
+    texto: "Dores nas costas e nas articulações."
+    fonte: "Mauá"
+    termos: ["Mobiliário sem meios de regulagem de ajuste", "Mobiliário / Equipamento Posto de trabalho improvisado"]
+  uso_de_escadas:
+    texto: "Problemas na coluna e nos joelhos."
+    fonte: "Mauá"
+    termos: ["Uso Frequente de Escadas"]
