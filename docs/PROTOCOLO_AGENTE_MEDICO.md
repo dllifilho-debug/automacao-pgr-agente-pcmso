@@ -195,8 +195,9 @@ Não há classe de produto químico em que a Dra. Carolini sistematicamente desc
 
 ### R-FDS-07 — Contaminante a confirmar na FDS `[DERIVADO — NR-07 7.5.5; FISPQ do acervo]`
 **Predicado:** agente do GHE cujo vocabulário lista `contaminantes_a_confirmar`, sem o contaminante
-entre os riscos do GHE e sem FDS anexada que declare o próprio agente. Hoje três agentes, todos
-→ benzeno: `aguarras_mineral`, `querosene` e `solvente_de_nafta` (os dois últimos desde a v124).
+entre os riscos do GHE e sem FDS anexada que declare o próprio agente. Hoje quatro agentes, todos
+→ benzeno: `aguarras_mineral`, `querosene` e `solvente_de_nafta` (os dois últimos desde a v124) e
+`hidrocarbonetos_nao_especificados` (v139).
 
 **Consequência:** pendência ao elaborador do PGR, não bloqueante: pedir a FDS e anexá-la. Aparece na
 conferência da tela e no memorial (Resumo e bloco do GHE). Desde a v125 o mesmo estado dispara o
@@ -208,6 +209,14 @@ os responsáveis pelo PGR. A FISPQ `fispq-quim-sol-alif-aguarras-mineral.pdf` do
 benzeno 71-43-2 "<0,1" `[MEDIDO]`. Sem a FDS, inferir benzeno do nome "aguarrás" seria pedir exame
 para agente não classificado no PGR (7.5.18), fora do campo da NR-07 Anexo V 2.1 (CAS no inventário,
 mistura ≥0,1%) e do NR-15 Anexo 13-A item 2 (mistura ≥1%). Mesma leitura do `R-PKG-ASF`.
+`hidrocarbonetos_nao_especificados` (v139): "Hidrocarbonetos" sem produto nem CAS, da impermeabilização
+(PGR Plateau D'Or rev 03 e PGR EURO Setor C, GHE 18, mesmo elaborador; FISPQ só por link). Só o termo
+exato — "Hidrocarboneto Alifático" da textura (Plateau GHE 15) fica fora. **Só o pedido da FDS**, sem a
+presunção da `R-PKG-BZ-PRES` (`presumir_contaminante: false`; decisão do Diovanni, 15/10/2026, opção b):
+nenhuma norma resolve (NR-07 Anexo I pede a substância; NR-15 Anexo 13-A, benzeno >=1%) e os precedentes
+divergem — EURO Park C 15.04.2024 e Mauá 28.09.26 pedem o pacote do benzeno na impermeabilização, mas a
+`R-PKG-ASF` (asfalto declarado, 7/7 matrizes) é "sem t,t-mucônico nem reticulócitos", e o NR-15 Anexo 13
+liga impermeabilizante a hidrocarboneto e betume. A FDS decide qual regra dispara.
 Querosene e solvente de nafta do mesmo PGR entraram no vocabulário na v124: slugs sem exame (sem LT no
 NR-15 Anexo 11, sem IBE no NR-07 Anexo I), só com `contaminantes_a_confirmar`. O querosene tem CAS
 8008-20-6 (FISPQ do acervo); a nafta fica sem CAS (o termo não identifica a substância).
@@ -1090,7 +1099,8 @@ pelo Diovanni no Gov.br em 01/10/2026.
 
 ### R-PKG-BZ-PRES — Pacote Benzeno presumido (solvente de petróleo sem FDS) `[INTERPRETADO — prioridade na revisão de saída]`
 **Predicado:** primitivo `benzeno_a_confirmar` — agente com `contaminantes_a_confirmar: [benzeno]`
-(`aguarras_mineral`, `querosene`, `solvente_de_nafta`) no GHE, sem a FDS dele anexada e sem benzeno
+(`aguarras_mineral`, `querosene`, `solvente_de_nafta`; não `hidrocarbonetos_nao_especificados`, que tem
+`presumir_contaminante: false`, v139) no GHE, sem a FDS dele anexada e sem benzeno
 entre os riscos. Responde `Ausente`, que a regra presume verdadeiro (`quando_ausente: {presumir_true:
 [benzeno_a_confirmar]}`, D-ARQ-68 cl.5). Todo risco desses solventes IRRELEVANTE → falso (corte da
 `R-BIO-05` para cancerígeno).
@@ -1459,3 +1469,4 @@ Quando todo risco do GHE sai NÃO CONSTA, o relatório sugere a inexistência de
 | v136 | 09/10/2026 | Branch `claude/confident-fermat-n74hux`, sobre `main 1702f49` (IMPLEMENTAÇÃO, decisão do Diovanni — solução D, emenda em D-ARQ-94): **`R-PSY-05` DEPRECATED, sucedida por `R-PSY-08`** — Saúde Mental só com inventário psicossocial avaliado e fator moderado ou acima (folha da Dra. Carolini; matriz Sinduscon 27.08.26). R-PSY-06 e R-PSY-07 passam a ler o inventário avaliado (linha de fator com nível), não a citação do FRPRT. Na altura, Saúde Mental com o inventário avaliado em qualquer nível (folha). Medido: 4 de 14 PGRs marcados só citam. |
 | v137 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 2ea334e` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A, emenda 3 de D-ARQ-91): **`R-ASO-06`** — fatores de risco psicossociais do inventário avaliado entram no relatório do ASO em todo GHE (moderado ou acima consta; abaixo não consta). Medido: 29 GHEs com inexistência sugerida apesar da Saúde Mental na matriz passam a 0 nos 6 PGRs determinísticos. Nenhuma regra de emissão alterada. |
 | v138 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 3ef348a` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A, emenda 4 de D-ARQ-91): **`R-ASO-07`** — a linha "Ausência de agente…" do PGR sai NÃO CONSTA (declaração de ausência, não fator de risco), em vez de CONFERIR. Medido: 19 linhas em 2 PGRs determinísticos (Porto Araras I 6, WV Maldi 13), nada mais muda. Nenhuma regra de emissão alterada. |
+| v139 | 15/10/2026 | Branch `claude/pcmso-maua-fatia-2-cdd2e1`, sobre `main 84c18c3` (MEDIÇÃO + IMPLEMENTAÇÃO, vocabulário do Plateau): slug `hidrocarbonetos_nao_especificados` ("Hidrocarbonetos", `contaminantes_a_confirmar: [benzeno]`) entra só na `R-FDS-07` (§4): chave nova `presumir_contaminante: false` o tira da `R-PKG-BZ-PRES` (§6) — decisão do Diovanni, opção b. Termos medidos no Plateau rev 03: "Poeiras respiravel/silica" (`silica`), "Operações em espaço confinado" (`espaco_confinado`), "Acidentes de trânsito" (`transito_via_publica`). DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01 item 2. |

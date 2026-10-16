@@ -4472,6 +4472,14 @@ jejum" e "Radiografia de tórax (PA) Padrão OIT (o mais recente), com pelo meno
    /silica" (GHE 15 e 18: Mauá pede Espirometria e RX anual); "Hidrocarbonetos" (GHE 18: Mauá pede reticulócitos e
    t,t-mucônico semestrais — benzeno presumido); **"Operações em espaço confinado" (GHE 18)** — NR-33 sem leitura, Mauá
    pede Avaliação Psicossocial; "Uso de Policorte e lixadeira" (GHE 17). Grafias novas a medir no acervo antes de entrar.
+   **IMPLEMENTADO (mesma branch, recriada sobre `main 84c18c3`, 15/10/2026):** "Poeiras respiravel/silica" em
+   `silica`; "Operações em espaço confinado" em `espaco_confinado` (R-PSY-06); "Acidentes de trânsito" em
+   `transito_via_publica` (R-PKG-TRANSITO, também item 7); "Hidrocarbonetos" em slug novo
+   `hidrocarbonetos_nao_especificados` só com o pedido da FDS (R-FDS-07), sem o pacote do benzeno presumido
+   (decisão do Diovanni, opção b: normas em `normas/` não resolvem; Mauá e EURO Park C 2024 pedem o pacote, a
+   R-PKG-ASF do asfalto não). O GHE 18 do Plateau segue sem reticulócitos e t,t-mucônico até a FDS. "Hidrocarboneto Alifático" (GHE 15) e
+   "Uso de Policorte e lixadeira" ficam fora. No resto do acervo, "acidentes de transito" só aparece na
+   campanha "Maio amarelo" (não é linha de risco). Efeito na matriz pela IA: `[A MEDIR — rodada no app]`.
 3. **GHE 17 (serralheria):** Mauá pede Manganês sanguíneo e clínico semestrais e RX anual; o app lê "Fumos metálicos"
    (RX 60 meses, R-RX-02) e nenhum manganês. `[A MEDIR — se o PGR nomeia o manganês]`.
 4. **GHE 11 (hidráulica):** o app pede acetona e MEK na urina (R-BIO-04); o Mauá não pede e anota "risco trivial no PGR
