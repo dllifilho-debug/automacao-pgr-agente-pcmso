@@ -11,6 +11,11 @@ from agente_medico.motor.tipos import GHEContext, Pendencia
 
 TIPO_CONTAMINANTE_A_CONFIRMAR = "contaminante_a_confirmar"
 TIPO_MENOR_APRENDIZ_LISTA_TIP = "menor_aprendiz_lista_tip"
+TIPO_POEIRA_NAO_INVENTARIADA = "poeira_nao_inventariada"
+
+_ARMADOR = re.compile(r"\barmador(es)?\b")
+# Agentes que a R-ESP-02 e a R-RX-01 já leem como poeira do GHE.
+_AGENTES_POEIRA = frozenset({"silica", "asbesto", "poeira_nao_classificada", "poeira_de_gesso"})
 
 # "menos aprendiz" é a grafia do próprio adendo Hetrin (pág. 8), não erro de leitura.
 _MENOR_APRENDIZ = re.compile(r"\bmeno[rs]\s+aprendiz\b")
@@ -55,6 +60,32 @@ def _menor_aprendiz_lista_tip(ctx: GHEContext, lista_tip: Mapping[str, Any]) -> 
     )
 
 
+def _armacao_sem_poeira(ctx: GHEContext) -> None:
+    """R-PGR-07 [INTERPRETADO] (decisão do Diovanni, 16/10/2026): GHE com armador e sem
+    poeira no inventário → pedir ao elaborador que avalie e inclua a poeira do corte e
+    dobra de aço. Sem exame: a NR-07 7.5.18 só admite exame ligado a risco classificado
+    no PGR, e o Anexo III (RX OIT, espirometria) só para exposto a poeira declarada. Com a
+    poeira no PGR, os exames saem pela R-ESP-02 e R-RX-01. Precedente que motivou: Mauá
+    Plateau e T65, GHE 09 — inventário sem poeira, médica pede espirometria e RX."""
+    cargos = [c for c in ctx.pgr_ghe.cargos if _ARMADOR.search(_sem_acento(c))]
+    if not cargos or any(r.agente in _AGENTES_POEIRA for r in ctx.riscos):
+        return
+    ctx.pendencias.append(
+        Pendencia(
+            tipo=TIPO_POEIRA_NAO_INVENTARIADA,
+            destinatario="elaborador_pgr",
+            motivo=(
+                f"{', '.join(cargos)} em {ctx.pgr_ghe.id} sem poeira no inventário do PGR: pedir ao "
+                "elaborador que avalie e inclua a poeira do corte e dobra de aço; sem ela, espirometria "
+                "e RX de tórax OIT não entram (NR-07 7.5.18 e Anexo III)"
+            ),
+            bloqueante=False,
+            regra_origem="R-PGR-07",
+            ghe_id=ctx.pgr_ghe.id,
+        )
+    )
+
+
 def _contaminantes_a_confirmar(ctx: GHEContext) -> None:
     """R-FDS-07 (NR-07 7.5.5): agente do GHE cujo vocabulário lista contaminante
     em `contaminantes_a_confirmar` (aguarrás, querosene, nafta → benzeno), sem o
@@ -85,6 +116,7 @@ def _contaminantes_a_confirmar(ctx: GHEContext) -> None:
 
 def stage_3_pendencias_estruturais(ctx: GHEContext, proto: Protocolo) -> None:
     _contaminantes_a_confirmar(ctx)
+    _armacao_sem_poeira(ctx)
     _menor_aprendiz_lista_tip(ctx, proto.vocabulario.lista_tip)
     for produto in ctx.pgr_ghe.produtos_quimicos:
         if produto.fds is None:

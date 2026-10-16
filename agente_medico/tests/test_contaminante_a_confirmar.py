@@ -174,7 +174,7 @@ def test_memorial_lista_a_fds_a_pedir_no_resumo_e_no_ghe(proto: Protocolo, tmp_p
     paragrafos = [p.text for p in Document(str(destino)).paragraphs]
     assert pintura.a_confirmar[0] in paragrafos
     assert any(
-        p.startswith("FDS a pedir ao elaborador do PGR para confirmar contaminante:") and pintura.ghe_id in p
+        p.startswith("Pedidos ao elaborador do PGR (FDS ou risco a incluir):") and pintura.ghe_id in p
         for p in paragrafos
     )
 
@@ -192,5 +192,5 @@ def test_tela_mostra_a_fds_a_pedir_na_conferencia(monkeypatch: pytest.MonkeyPatc
     assert not at.exception
 
     textos = [el.value for el in at.markdown]
-    assert "**FDS a pedir ao elaborador do PGR (contaminante a confirmar)**" in textos
+    assert "**Pedidos ao elaborador do PGR (FDS ou risco a incluir)**" in textos
     assert any("R-FDS-07" in t and "benzeno" in t for t in textos)

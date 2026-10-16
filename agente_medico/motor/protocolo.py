@@ -40,6 +40,8 @@ def _carregar_niveis_risco(path: Path) -> dict[str, Any]:
     for rotulo, entrada in niveis.items():
         if not isinstance(entrada, dict) or entrada.get("posicao") not in ("abaixo", "corte"):
             raise ValueError(f"{path}: nível {rotulo!r} sem posicao 'abaixo' ou 'corte'")
+        if "r_bio_05" in entrada and entrada["r_bio_05"] not in NIVEIS_RISCO_PXS:
+            raise ValueError(f"{path}: nível {rotulo!r} com r_bio_05 fora de {list(NIVEIS_RISCO_PXS)}")
     return niveis
 
 

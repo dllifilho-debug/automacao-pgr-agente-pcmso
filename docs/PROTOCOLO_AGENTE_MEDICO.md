@@ -92,6 +92,21 @@ passou a valer para os dois casos: "não identifica a substância nem a fonte; p
 especifique (a FDS, se for produto químico)". Medido: Soft Connect15 v04, 18 GHE.
 ---
 
+### R-PGR-07 — Armação sem poeira no inventário: pedir a poeira ao elaborador `[INTERPRETADO — prioridade na revisão de saída]`
+GHE com **armador** (cargo do PGR, normalizado) e **sem poeira** no inventário (sílica, asbesto, PNOS, gesso) → pendência
+ao elaborador do PGR: avaliar e incluir a poeira do corte e dobra de aço. **Não emite exame.** Com a poeira declarada, a
+espirometria e o RX OIT saem pela R-ESP-02 e pela R-RX-01.
+
+**Base.** NR-07 7.5.18: exame complementar a critério do médico só "relacionado aos riscos ocupacionais classificados no
+PGR"; NR-07 Anexo III item 1: RX OIT e espirometria para "expostos a poeiras minerais"; RDC 330/2019 (citada no Anexo III
+item 2.1): RX exige justificação. Conferido em `normas/` (16/10/2026). **Origem:** decisão do Diovanni (16/10/2026),
+`DT-(sessão claude/pcmso-maua-fatia-2-cdd2e1)-01` item 5. Precedente que motivou: Mauá Plateau 28.09.26 e T65 08.07.26,
+GHE 09 — mesmo modelo de PGR, inventário sem poeira ("Contato com disco de máquinas de corte", corte de aço), médica pede
+espirometria 24M e RX 60M e anota "Não opera policorte"; 34/35 matrizes do acervo com armador pedem os dois. Emitir sem a
+poeira no PGR foi implementado e recusado na mesma sessão, na conferência normativa (7.5.18). A pendência vai em "Pedidos
+ao elaborador do PGR", na tela e no memorial, junto da R-FDS-07. Implementação: `_armacao_sem_poeira` em
+`motor/estagios/pendencias_estruturais.py`.
+
 ## 3. MODELO DE GHE
 
 ### R-GHE-01 — Unidade de análise `[VALIDADO]`
@@ -285,6 +300,10 @@ O **manganês** é o único agente fora do Anexo I (Quadros 1 e 2) da NR-07 que 
 > literal conferida na mesma sessão: NR-15 Anexo 12, "Manganês e seus compostos", item 7 — exames
 > periódicos *"de 6 (seis) meses a anualmente para os trabalhadores de superfície"*,
 > independentemente do LT `[DERIVADO]`; 6M fixo `[INTERPRETADO]`. Caso: Aurora GHE 16.
+
+> **Nota de aplicação (16/10/2026, decisão do Diovanni) — Mn presumido pelos fumos de solda.** `quando:
+> manganes_presumido` (`manganes` ou `fumos_metalicos`), o mesmo da R-BIO-03. Base: R-FDS-05 `[VALIDADO]`; NR-15 Anexo 12
+> item 2 ("fabricação e uso de eletrodos de solda") e item 7. Caso: Plateau rev 03 GHE 17.
 
 #### R-CLI-05 — Clínico semestral: cancerígeno com indicador biológico ou agente do Anexo I MODERADO+ `[DERIVADO — matriz Dra. Patrícia, Aurora 27/08/26]`
 
@@ -859,6 +878,16 @@ Qualquer exposição confirmada a Mn → **manganês sanguíneo semestral em adm
 > não materializada. Limite declarado: o PDF prova o texto da versão fornecida; alteração
 > posterior só a listagem oficial vigente diria.
 
+> **Nota de aplicação (16/10/2026, decisão do Diovanni) — Mn presumido pelos fumos metálicos de solda `[DERIVADO]`.**
+> `quando: manganes_presumido` = `manganes` **ou** `fumos_metalicos` (`predicados_compostos.yaml`); vale também para a
+> R-CLI-03. Fumos metálicos de solda sem o Mn nomeado → manganês no sangue 6M e clínico 6M. Base: **R-FDS-05**
+> `[VALIDADO]` ("praticamente todos os eletrodos contêm manganês → presumir Mn na ausência de informação contrária");
+> **NR-15 Anexo 12, item 2** (operação "fabricação e uso de eletrodos de solda") e **item 7** (exames a todo exposto,
+> "independentemente dos limites de tolerância"), conferidos em `normas/nr-15-anexo-12` (16/10/2026). Precedente
+> (D-ARQ-22 nível 2): Mauá Plateau 28.09.26 GHE 17 e Euro Park C 15.04.2024 — mesmo modelo de PGR ("Fumos metálicos e
+> gases", atividades de solda, Mn não nomeado, FDS do eletrodo só por link), médica pede Mn semestral; 18/18 serralherias
+> com solda do acervo. Não muda a R-GHE-02: o gatilho é a solda **declarada** no PGR, não o cargo de serralheiro.
+
 #### R-BIO-04 — Matriz temporal por Quadro do Anexo I (NR-07) `[DERIVADO — NR-07 Anexo I + itens 7.5.13/7.5.15/7.5.19.4/7.5.19.5, Portaria MTP 567/2022, texto oficial MTE]`
 
 Sucede R-BIO-02. O eixo do biomonitoramento químico é o **Quadro do Anexo I onde o indicador da substância está listado** (natureza do indicador: IBE/EE vs IBE/SC) — NÃO carcinogenicidade nem presença de LT.
@@ -973,6 +1002,21 @@ Agente do **Quadro 1 (IBE/EE)** cujo risco o PGR classifica como **IRRELEVANTE**
 - **Norma `[CONFERIDO — normas/, 01/10/2026]`:** NR-07 7.5.12 "b" (exames laboratoriais obrigatórios "acima dos níveis de ação determinados na NR-09 ou se a classificação de riscos do PGR indicar"); NR-09 (cópia `nr-09-atualizada-2026`) 9.6.1 "b" (nível de ação químico = metade do LT) e 9.6.1.2. Sem medição e com risco BAIXO, nenhum dos dois gatilhos está demonstrado — a norma não obriga nem veda; o corte em BAIXO é leitura sobre o precedente, por isso `[INTERPRETADO]`.
 - **Precedente (nível 2 da D-ARQ-22):** matrizes vigentes das duas médicas dispensam em BAIXO — Dra. Patrícia: Aurora (27/08), T65 (24/09, *"Incluir no Word do PCMSO risco baixo no PGR para Acetona e Metiletilcetona"*), Porto Araras I e Vila Brasil (24/09); Dra. Carolini: Fascino (08/07). As versões anteriores da Dra. Patrícia (Porto Araras I 06/07, Vila Brasil 26/08), base da decisão de 24/09, foram substituídas pelas de 24/09.
 - **Efeito medido (rota determinística, `comparar_matriz_gabarito`):** superemissão 7→0 (Fascino 08.07), 6→0 (Porto Araras I 24.09), 4→0 (Vila Brasil 24.09); nenhuma subemissão nova contra essas matrizes. Contra as versões substituídas, +6 (Porto Araras I 06.07) e +4 (Vila Brasil 26.08), esperado.
+
+**Nota de aplicação (16/10/2026, decisão do Diovanni) — Trivial da BS 8800 dispensa no degrau BAIXO.** Responde à
+pergunta (2) de `DT-(sessão claude/eager-fermat-txbn7h)-01`. Risco sem nível P×S cujo rótulo no PGR é **Trivial** (classe
+mais baixa da BS 8800 e da AIHA Ricco, "não é requerido nenhuma ação") conta, **só para esta regra**, como **BAIXO**:
+dispensa o indicador nas 33 `R-BIO-04-*` com `[IRRELEVANTE, BAIXO]` e na R-BIO-06; os 9 cancerígenos, que só dispensam em
+IRRELEVANTE, seguem emitindo; Tolerável segue emitindo; medição acima do nível de ação emite sempre. A observação diz
+"risco trivial no PGR". Substitui a decisão de 14/10/2026 (Vistamerica Ver.02: R-BIO-05 só lê P×S).
+- **Norma `[CONFERIDO — normas/, 16/10/2026]`:** NR-07 7.5.12 "b" (obrigatório "acima dos níveis de ação determinados na
+  NR-09 ou se a classificação de riscos do PGR indicar"); NR-09 9.6.1 "b". Trivial é a classificação que não indica ação.
+- **Precedente (nível 2):** Mauá Plateau 28.09.26, GHE 11 ("risco trivial no PGR para Metiletilcetona e acetona", sem os
+  indicadores; medição do PGR 0,0281 ppm de acetona e 0,3336 ppm de MEK) e GHE 15 (estireno-acrílicos); Vistamerica
+  08.12.25 sem a 2,5-hexanodiona do hexano Trivial (PGR Ver.02).
+- **Implementação:** `r_bio_05: BAIXO` no TRIVIAL de `vocabulario/niveis_risco.yaml` (o carregador recusa valor fora da
+  P×S); `_nivel_r_bio_05` em `motor/estagios/emissao.py`, lido por `_nivel_dispensa` e `_dispensa_por_medicao`.
+  `nivel_risco` não muda: R-CLI-05 e R-RX-01-qual seguem lendo só a P×S (pergunta (1) da DT segue aberta).
 
 #### R-BIO-06 — Octoato de cobalto: menção em risco baixo, cobalto na urina acima `[INTERPRETADO — prioridade na revisão de saída]`
 **Predicado:** `octoato_de_cobalto` no GHE (termo "Octoato de Cobalto" dos PGRs CMO; CAS 136-52-7 na FDS).
@@ -1470,3 +1514,4 @@ Quando todo risco do GHE sai NÃO CONSTA, o relatório sugere a inexistência de
 | v137 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 2ea334e` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A, emenda 3 de D-ARQ-91): **`R-ASO-06`** — fatores de risco psicossociais do inventário avaliado entram no relatório do ASO em todo GHE (moderado ou acima consta; abaixo não consta). Medido: 29 GHEs com inexistência sugerida apesar da Saúde Mental na matriz passam a 0 nos 6 PGRs determinísticos. Nenhuma regra de emissão alterada. |
 | v138 | 10/10/2026 | Branch `claude/busy-thompson-lepmze`, sobre `main 3ef348a` (IMPLEMENTAÇÃO, decisão do Diovanni — solução A, emenda 4 de D-ARQ-91): **`R-ASO-07`** — a linha "Ausência de agente…" do PGR sai NÃO CONSTA (declaração de ausência, não fator de risco), em vez de CONFERIR. Medido: 19 linhas em 2 PGRs determinísticos (Porto Araras I 6, WV Maldi 13), nada mais muda. Nenhuma regra de emissão alterada. |
 | v139 | 15/10/2026 | Branch `claude/pcmso-maua-fatia-2-cdd2e1`, sobre `main 84c18c3` (MEDIÇÃO + IMPLEMENTAÇÃO, vocabulário do Plateau): slug `hidrocarbonetos_nao_especificados` ("Hidrocarbonetos", `contaminantes_a_confirmar: [benzeno]`) entra só na `R-FDS-07` (§4): chave nova `presumir_contaminante: false` o tira da `R-PKG-BZ-PRES` (§6) — decisão do Diovanni, opção b. Termos medidos no Plateau rev 03: "Poeiras respiravel/silica" (`silica`), "Operações em espaço confinado" (`espaco_confinado`), "Acidentes de trânsito" (`transito_via_publica`). DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01 item 2. |
+| v140 | 16/10/2026 | Branch `claude/ecstatic-johnson-eyx2p2`, sobre `main 2dc236b` (MEDIÇÃO + IMPLEMENTAÇÃO, decisões do Diovanni, `DT-(sessão claude/pcmso-maua-fatia-2-cdd2e1)-01` itens 3 a 6): **R-BIO-03 e R-CLI-03** — Mn presumido pelos fumos metálicos de solda (`manganes_presumido`, R-FDS-05, NR-15 Anexo 12), `[DERIVADO]`; **R-BIO-05** — Trivial dispensa no degrau BAIXO (`r_bio_05` em `niveis_risco.yaml`; cancerígenos e Tolerável emitem), `[INTERPRETADO]`; **`R-PGR-07` CRIADA** (§2) — armador sem poeira no PGR → pedido ao elaborador, sem exame (NR-07 7.5.18, Anexo III), `[INTERPRETADO]`; betoneira segue fora da atividade crítica (DT-003ED-01, faceta máquina pesada fechada). |

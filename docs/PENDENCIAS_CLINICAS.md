@@ -966,7 +966,10 @@ Em particular: (1) sílica com classificação de escore declarada conta como "a
 qualitativa" para o RX 12M? (2) "Trivial" equivale a "Irrelevante" para dispensar o indicador?
 Sem decisão, a rota segue o lado protetivo: RX 24M (R-RX-01-sem) e indicador emitido.
 
-**Status:** ABERTA. Não-bloqueante.
+**Pergunta (2) respondida (16/10/2026, decisão do Diovanni):** Trivial dispensa o indicador da R-BIO-05 no degrau BAIXO
+(emenda à cl.4 de D-ARQ-95; R-BIO-05 no PROTOCOLO v140) — cancerígenos e Tolerável seguem emitindo.
+
+**Status:** ABERTA só na pergunta (1) (sílica). Não-bloqueante.
 
 ### DT-003DX-01 — Migrar acreção pós-decisão para satélites `docs/darq/` `[ABERTA — higiene de doc]`
 
@@ -1032,7 +1035,7 @@ Documentos envolvidos: HUMAP, UFGD-v7, Fascino, Viverde.
 
 **Status:** ABERTA. Não-bloqueante.
 
-### DT-003ED-01 — Grafia natural com preposição não resolve contra slug sem preposição `[PARCIALMENTE RESOLVIDA — 003.EJ; faceta máquina pesada ABERTA]`
+### DT-003ED-01 — Grafia natural com preposição não resolve contra slug sem preposição `[RESOLVIDA — 003.EJ; faceta máquina pesada fechada em 16/10/2026]`
 
 **Origem:** 003.ED, ao medir por que R-PKG-ATIVCRIT não acionava no caso real.
 
@@ -1089,6 +1092,11 @@ vibração sem tipo continua em aberto, mas o Aurora não tem caso dela.
 
 **Status:** PARCIALMENTE RESOLVIDA (003.EJ). Faceta vibração RESOLVIDA; faceta máquina pesada ABERTA, não-bloqueante.
 
+
+**Faceta máquina pesada fechada (16/10/2026, decisão do Diovanni).** Betoneira não é equipamento pesado: sem
+`riscos_implicitos` no `operador_betoneira`, o pacote de atividade crítica não sai pela betoneira. Medido no acervo: 23
+matrizes sem o pacote para o operador de betoneira × 9 com (Mauá Plateau GHE 08 entre elas). Ver
+`DT-(sessão claude/pcmso-maua-fatia-2-cdd2e1)-01` item 6.
 ### DH-003ED-01 — Relatório do harness não carrega o gatilho por linha `[RESOLVIDA — 003.EG + D-ARQ-88, 29/09/2026]`
 
 **Origem:** 003.ED, ao tentar atribuir causa às 16 emissões de R-PKG-ATIVCRIT. Precedente: DH-003EC-01.
@@ -4501,7 +4509,7 @@ grupo vazio para "Ergonômico - Análise Ergonômica Trabalho (AET) Postural".
 linhas iguais. 21 GHE, aviso da numeração 18/18 e bloqueantes de RX nos GHE 03 e 09, como na rodada 3.
 
 **Status:** ABERTA. Itens 2 e 3 são vocabulário/regra (sessão seguinte); 4 a 7 pedem medição no PGR antes da proposta;
-1 fica (norma).
+1 fica (norma). Itens 3 a 6 medidos no PGR e decididos (16/10/2026, abaixo).
 
 **Rodada 2 no app (16/10/2026, pós-merge do PR #506), conferida pelos 3 arquivos do Diovanni e 2 capturas.** Matriz ×
 PCMSO 119/119. Contra o Mauá: GHE 15 e 18 com espirometria e RX OIT, GHE 18 com Avaliação Psicossocial e a pendência
@@ -4511,3 +4519,62 @@ no GHE 17:** a IA leu "Fumos metálicos e gases" numa célula só (na rodada 1, 
 espirometria e COHb — **IMPLEMENTADO** (termo em `fumos_metalicos`, mesma data). Seguem abertos: itens 1 (norma), 3 a 6.
 O índice do PCMSO saía sem os GHE até o usuário atualizar o campo no Word — corrigido: o app grava as entradas no
 resultado do índice (D-ARQ-96, em `documento_pcmso.py`; atualizar o campo substitui, sem duplicar, medido no LibreOffice).
+
+**Itens 3 a 6 medidos no PGR (16/10/2026, branch `claude/ecstatic-johnson-eyx2p2`).** `pdftotext -layout` de
+`matrizes_originais/PGR_-_plateau Dor_assinado rev 03.pdf` (55 páginas, camada de texto, sem OCR), inventários GHE a GHE;
+gabarito relido em `MATRIZ DE EXAMES(ATUALIZAÇÃO)MAUÁ … PLATEU D'OR 28.09.26.doc` (antiword); app pela matriz e
+memorial da rodada 2 (16/10/2026).
+- **Item 3 (GHE 17) — o PGR não nomeia manganês** (0 ocorrência de "mangan" no documento). O químico do GHE é uma linha
+  só, "Fumos metálicos e gases", origem "Gases da atividade de solda", eventual, 3×3 = 9 Moderado; sem avaliação
+  quantitativa. A FDS do eletrodo é só um link externo de imagem ("Eletrodos https://ibb.co/VDttJmb"), não anexada. GHE
+  "Situação: inativo", 00 expostos. O manganês do Mauá vem do eletrodo presumido (o E 6013 Gerdau do acervo declara
+  manganês, `fds_originais/`), não do PGR. Também diferem: clínico PER 6 meses e RX OIT 12 meses no Mauá × anual e 60
+  meses (R-RX-02) no app.
+- **Item 4 (GHE 11) — escala BS 8800 sobre matriz AIHA 5×5, com medição.** Legenda do PGR: Trivial (1–3) < Tolerável
+  (4–8) < Moderado (9–12) < Substancial (13–15) < Intolerável (16–25), "Trivial: não é requerido nenhuma ação". MEK e
+  acetona: eventual, 2×1 = 2 **Trivial**. Avaliação quantitativa no próprio GHE: acetona 0,0281 ppm (LT 780 ppm), MEK
+  0,3336 ppm (LT 155 ppm), ambos "Dentro do limite de tolerância" — abaixo da metade do LT (nível de ação, NR-09);
+  ruído "76,5" com LT "80,0" (unidade escrita "dose diária de ruído", ilegível como dose; o Mauá lê "abaixo do nível de
+  ação"). Por que o app pede: `nivel_risco` só aceita a escala P×S Irrelevante…Crítico (D-ARQ-57; o prompt da IA manda
+  deixar `avaliacao_qualitativa` vazio para Trivial/Tolerável), então R-BIO-05 não tem nível para dispensar, e a emenda
+  D-ARQ-86 exige BAIXO **e** medição. Além disso a rodada 2 não leu nenhuma medição do PGR: o memorial diz "sem medição
+  no PGR" em 16 linhas, inclusive o ruído do GHE 11. Só dois GHE trazem tabela preenchida (GHE 11: acetona, MEK, ruído;
+  GHE 15: ruído 68,6); GHE 18 escreve "Não avaliado" para ruído, hidrocarbonetos e poeira. Dispensar aqui exige decidir
+  se Trivial (BS 8800) equivale a IRRELEVANTE/BAIXO para a R-BIO-05 — hoje recusado por D-ARQ-57. **Achado novo:** o
+  Mauá pede Espirometria (ADM, PER 24 meses, MRO, DEM) no GHE 11 para os três cargos e o app não; o PGR do GHE 11 não
+  tem poeira nem fumos (riscos: postura, queda de mesmo nível, queda em altura 5×2 = 10 Substancial, objetos
+  cortantes, ruído, MEK, acetona).
+- **Item 5 (GHE 09) — o PGR não lista poeira nem fumos.** Riscos: postura, levantamento de peso, queda de mesmo nível,
+  queda em altura (habitual, 5×2 = 10 Substancial), "Contato com disco de máquinas de corte" (eventual, "Corte de aço",
+  origem "Lixadeiras"), choque elétrico, ruído (origem "lixadeiras e furadeiras") e intempéries; sem avaliação
+  quantitativa. A espirometria 24 meses e o RX 60 meses do Mauá ("Não opera policorte") não têm risco respiratório
+  escrito no PGR; o único gancho é a lixadeira no corte de aço (`acidente_disco_corte`, sem conduta).
+- **Item 6 (GHE 08) — o PGR não traz gatilho de atividade crítica.** Riscos: postura, levantamento de peso, queda de
+  mesmo nível, "Contato com partes moveis de maquinas" (tambor da betoneira, 5×1 = 5), choque elétrico, ruído, sílica e
+  cimento (3×3 = 9 Moderado); **sem queda em altura**, sem espaço confinado, sem condução. O Mauá não pede só acuidade e
+  ECG: pede o pacote inteiro de R-PKG-ATIVCRIT (acuidade, ECG, glicemia, hemograma, ADM/PER/MRO) para operador **e**
+  servente — betoneira lida como equipamento pesado. É a faceta "máquina pesada" de DT-003ED-01, já aberta (GHE-12
+  Betoneira do Consciente, HISTORICO 003.EJ): `operador_betoneira` está em `cargos.yaml` sem pacote e
+  "Contato com partes moveis de maquinas" não resolve no vocabulário. Também difere o RX OIT: 12 meses no Mauá × 24 no
+  app (item 1, norma).
+
+**Decisões do Diovanni (16/10/2026, mesma branch) e implementação** — conferidas contra `normas/` antes do commit:
+- **Item 3 — IMPLEMENTADO:** fumos metálicos de solda presumem Mn (`manganes_presumido` em R-BIO-03 e R-CLI-03): Mn no
+  sangue 6M e clínico 6M no GHE 17. Base: R-FDS-05 `[VALIDADO]`, NR-15 Anexo 12 itens 2 e 7; precedente Euro Park C (mesmo
+  modelo de PGR) e 18/18 serralherias. O RX segue 60M (R-RX-02); Mauá 12M e Euro Park C 24M — divergência conhecida, fora
+  desta decisão.
+- **Item 4 — IMPLEMENTADO:** Trivial dispensa o indicador da R-BIO-05 no degrau BAIXO (emenda à cl.4 de D-ARQ-95): GHE 11
+  sai com a menção "risco trivial no PGR" no lugar de acetona e MEK na urina; cancerígenos e Tolerável emitem. Substitui a
+  decisão de 14/10/2026 sobre o hexano do Vistamerica Ver.02 (`agentes.yaml`). A leitura da tabela de avaliação
+  quantitativa pela rota da IA (16 "sem medição no PGR") fica fora. A espirometria do Mauá no GHE 11 não tem poeira no
+  PGR — fica como diferença conhecida.
+- **Item 5 — IMPLEMENTADO como pendência (R-PGR-07):** armador sem poeira no inventário → pedido ao elaborador para incluir
+  a poeira do corte e dobra de aço, sem exame. A primeira forma (emitir espirometria 24M e RX 60M pelo cargo) foi recusada
+  na conferência normativa: NR-07 7.5.18 só admite exame ligado a risco classificado no PGR, e o Anexo III exige a poeira
+  declarada. O GHE 09 do Plateau segue sem os dois exames até o PGR incluir a poeira.
+- **Item 6 — sem mudança:** betoneira não é equipamento pesado. Medido no acervo: 23 matrizes sem o pacote de atividade
+  crítica para o operador de betoneira × 9 com (incluindo o Mauá; não medido se essas 9 têm altura no PGR). Fecha a faceta
+  máquina pesada de DT-003ED-01.
+- Efeito no app: `[A MEDIR — rodada do Plateau]` (o item 4 depende de a IA transcrever "Trivial" em `nivel_pgr`).
+
+**Status:** ABERTA só no item 7 (transporte) e nas diferenças conhecidas acima; itens 1 a 6 resolvidos.

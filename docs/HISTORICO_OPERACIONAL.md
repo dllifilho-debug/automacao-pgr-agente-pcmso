@@ -13045,3 +13045,30 @@ no app; regressão do GHE 17 pela transcrição da IA. Índice do PCMSO: TOC `\f
 
 **Verificação.** 2 testes novos, varredura inversa 3/3; índice de termos 229 → 230. Suíte (árvore parada): 2058 passed,
 6 skipped (27 min 24 s). mypy no alvo canônico: limpo, 62 arquivos.
+
+---
+
+## Sessão (branch `claude/ecstatic-johnson-eyx2p2` sobre `main 2dc236b`, pós-merge do PR #507) — 16/10/2026 — MEDIÇÃO + IMPLEMENTAÇÃO: itens 3 a 6 do Plateau
+
+**Medido.** Itens 3 a 6 de `DT-(sessão claude/pcmso-maua-fatia-2-cdd2e1)-01` no PGR Plateau rev 03 (`pdftotext -layout`,
+55 p.) e no acervo (54 `.doc` convertidos pelo LibreOffice; 32 PGRs): Mn não nomeado no GHE 17; MEK e acetona Trivial
+(BS 8800) com medição no PGR; GHE 09 sem poeira; GHE 08 sem gatilho de atividade crítica. Precedentes: Euro Park C (Mn),
+T65 (armação), 23 × 9 matrizes de betoneira, 34/35 armadores com espirometria e RX.
+
+**Implementado (decisões do Diovanni).** Mn presumido pelos fumos de solda (`manganes_presumido` em R-BIO-03/R-CLI-03);
+Trivial dispensa a R-BIO-05 no degrau BAIXO (`r_bio_05` em `niveis_risco.yaml`, emenda à cl.4 de D-ARQ-95); R-PGR-07
+(armador sem poeira → pedido ao elaborador, sem exame); betoneira sem mudança (fecha a faceta de DT-003ED-01). O canal
+"FDS a pedir ao elaborador" virou "Pedidos ao elaborador do PGR (FDS ou risco a incluir)", na tela e no memorial
+(`pedidos_ao_elaborador`). PROTOCOLO v140, DECISOES v276.
+
+**Conferência normativa antes do commit (`normas/`, vigência conferida pelo Diovanni em 13/10/2026).** A primeira forma do
+item 5 (emitir espirometria 24M e RX 60M pelo cargo de armador, `R-PKG-ARMACAO`) foi implementada, conferida e recusada:
+NR-07 7.5.18 só admite exame ligado a risco classificado no PGR, o Anexo III item 1 exige exposição a poeira, e o RX exige
+justificação (RDC 330/2019, Anexo III item 2.1). Por decisão do Diovanni virou pendência (R-PGR-07). Itens 3 e 4 dentro do
+texto: NR-15 Anexo 12 itens 2 e 7; NR-07 7.5.12 "b" c/c NR-09 9.6.1 "b".
+
+**Verificação.** 9 testes novos (`test_bio_risco_irrelevante.py` +4, `test_bio_manganes.py` +1,
+`test_armacao_sem_poeira.py` 4), varredura inversa 11/11 reversões nomeadas; em
+`test_contaminante_a_confirmar.py` só o rótulo do canal mudou. Índice D-ARQ regenerado, `test_gerar_indice_darq.py` 6
+passed. Suíte (árvore parada): 2067 passed, 6 skipped (21 min 05 s). mypy no alvo canônico: limpo, 62 arquivos. Efeito
+no app `[A MEDIR — rodada do Plateau]`.

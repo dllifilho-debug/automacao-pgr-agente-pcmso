@@ -30,6 +30,7 @@ from agente_medico.motor.extracao_pgr import (
 from agente_medico.motor.estagios.pendencias_estruturais import (
     TIPO_CONTAMINANTE_A_CONFIRMAR,
     TIPO_MENOR_APRENDIZ_LISTA_TIP,
+    TIPO_POEIRA_NAO_INVENTARIADA,
 )
 from agente_medico.motor.tipos import (
     GHEPGR,
@@ -295,13 +296,14 @@ def _vizinho_recusado(ghe_id: str, termo: str, pendencias: Sequence[Pendencia]) 
     return None
 
 
-def contaminantes_a_confirmar(matriz: MatrizGHE) -> tuple[str, ...]:
-    """R-FDS-07: o pacote do contaminante não sai sem ele identificado; sem esta
-    lista, a FDS que falta no GHE não aparece no anexo que a médica revisa."""
+def pedidos_ao_elaborador(matriz: MatrizGHE) -> tuple[str, ...]:
+    """R-FDS-07 e R-PGR-07: o que o elaborador do PGR tem de mandar (FDS que falta) ou
+    incluir (risco não inventariado); sem esta lista, o pedido não aparece no anexo que a
+    médica revisa."""
     return tuple(
         _sanitizar(f"{p.motivo}. (ref. {p.regra_origem})")
         for p in matriz.pendencias
-        if p.tipo == TIPO_CONTAMINANTE_A_CONFIRMAR
+        if p.tipo in (TIPO_CONTAMINANTE_A_CONFIRMAR, TIPO_POEIRA_NAO_INVENTARIADA)
     )
 
 
@@ -491,7 +493,7 @@ def montar_memorial(
                     if matriz.ghe_id in ghes_pgr
                     else ()
                 ),
-                a_confirmar=contaminantes_a_confirmar(matriz),
+                a_confirmar=pedidos_ao_elaborador(matriz),
                 agravos=agravos_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
                 agravos_pgr=agravos_pgr_do_ghe(ghes_pgr[matriz.ghe_id]) if matriz.ghe_id in ghes_pgr else (),
                 alertas=alertas_do_ghe(matriz),
@@ -619,7 +621,7 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
     a_confirmar = [b for b in memorial.blocos if b.a_confirmar]
     if a_confirmar:
         documento.add_paragraph(
-            f"FDS a pedir ao elaborador do PGR para confirmar contaminante: "
+            f"Pedidos ao elaborador do PGR (FDS ou risco a incluir): "
             f"{', '.join(b.ghe_id for b in a_confirmar)}.",
             style="List Bullet",
         )
@@ -653,7 +655,7 @@ def renderizar_memorial_docx(memorial: Memorial, cabecalho: CabecalhoDocumento, 
             for texto in bloco.nao_reconhecidos:
                 documento.add_paragraph(texto, style="List Bullet")
         if bloco.a_confirmar:
-            documento.add_paragraph("FDS a pedir ao elaborador do PGR (contaminante a confirmar):")
+            documento.add_paragraph("Pedidos ao elaborador do PGR (FDS ou risco a incluir):")
             for texto in bloco.a_confirmar:
                 documento.add_paragraph(texto, style="List Bullet")
         if bloco.alertas:

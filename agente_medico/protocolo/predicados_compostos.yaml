@@ -73,3 +73,13 @@ predicados_compostos:
       - manganes
       - fumos_metalicos
 
+  # R-BIO-03 / R-CLI-03: manganês nomeado no PGR, ou presumido pelos fumos metálicos de solda
+  # (R-FDS-05 [VALIDADO]: "praticamente todos os eletrodos contêm manganês → presumir Mn na
+  # ausência de informação contrária"; NR-15 Anexo 12, item 2: "fabricação e uso de eletrodos
+  # de solda"). Decisão do Diovanni, 16/10/2026, sobre Plateau rev 03 GHE 17 e Euro Park C —
+  # mesmo modelo de PGR, Mn não nomeado, médica pede Mn no sangue; 18/18 serralherias do acervo.
+  manganes_presumido:
+    ou:
+      - manganes
+      - fumos_metalicos
+

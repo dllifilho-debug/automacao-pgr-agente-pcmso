@@ -12,7 +12,7 @@ regras:
     status: VALIDADO
 
   - id: R-CLI-03
-    quando: manganes
+    quando: manganes_presumido
     emite:
       - {exame: exame_clinico, periodicidade_meses: 6, momentos: [per]}
     base_normativa: "Protocolo Dra. Carolini R-CLI-03 [VALIDADO] — manganês, único agente
@@ -21,8 +21,9 @@ regras:
       obrigatórios a todo exposto independentemente do LT, 'de 6 (seis) meses a
       anualmente para os trabalhadores de superfície'. [INTERPRETADO]: 6M fixo é a ponta
       protetiva da faixa. Emite só o periódico 6M: os demais momentos vêm de R-CLI-01, e a
-      consolidação (D-ARQ-39) une os momentos e fica com a menor periodicidade."
-    resumo_clinico: "Manganês no PGR → exame clínico a cada 6 meses. A NR-15, Anexo 12 (manganês) exige exames periódicos de 6 meses a 1 ano para todo exposto; o protocolo adota 6 meses."
+      consolidação (D-ARQ-39) une os momentos e fica com a menor periodicidade. Mn presumido
+      pelos fumos metálicos de solda (R-FDS-05; decisão do Diovanni, 16/10/2026)."
+    resumo_clinico: "Manganês no PGR, ou fumos metálicos de solda (o eletrodo quase sempre contém manganês) → exame clínico a cada 6 meses. A NR-15, Anexo 12 (manganês) exige exames periódicos de 6 meses a 1 ano para todo exposto; o protocolo adota 6 meses."
     status: VALIDADO
 
   - id: R-CLI-05
@@ -707,7 +708,7 @@ regras:
   # diclorometano, estireno, dimetilformamida e tetracloroetileno ficam sem a
   # chave — cancerígeno recebe o indicador com qualquer medição (Diovanni, 25/09/2026).
   - id: R-BIO-03
-    quando: manganes
+    quando: manganes_presumido
     emite:
       - {exame: manganes_sangue, periodicidade_meses: 6, momentos: [adm, per, MR]}
     base_normativa: "Protocolo Dra. Carolini R-BIO-03 [VALIDADO] — qualquer exposição
@@ -721,8 +722,12 @@ regras:
       [INTERPRETADO]: o analito (Mn no sangue), o 6M fixo e o momento MR são conduta do
       protocolo — a norma fala em análise de sangue, faixa 6-12M e adm/per. Momentos e
       periodicidade conferidos contra o gabarito Aurora Lago das Rosas 27.08.26 (Dra.
-      Patrícia, GHE 16 SERRALHERIA: 'Manganês no sangue (ADM, PER 6 meses, MRO)')."
-    resumo_clinico: "Manganês no PGR → manganês no sangue a cada 6 meses (admissional, periódico e mudança de risco). A NR-15, Anexo 12 exige acompanhamento de todo exposto; protocolo da coordenação."
+      Patrícia, GHE 16 SERRALHERIA: 'Manganês no sangue (ADM, PER 6 meses, MRO)').
+      Presunção [DERIVADO] (decisão do Diovanni, 16/10/2026): fumos metálicos de solda sem Mn
+      nomeado presumem Mn — R-FDS-05 [VALIDADO] e NR-15 Anexo 12 item 2 ('uso de eletrodos de
+      solda'); precedentes Mauá Plateau 28.09.26 GHE 17 e Euro Park C 15.04.2024 (mesmo modelo
+      de PGR, 'Fumos metálicos e gases' sem Mn, médica pede Mn semestral)."
+    resumo_clinico: "Manganês no PGR, ou fumos metálicos de solda (o eletrodo quase sempre contém manganês) → manganês no sangue a cada 6 meses (admissional, periódico e mudança de risco). A NR-15, Anexo 12 exige acompanhamento de todo exposto; protocolo da coordenação."
     status: VALIDADO
 
   - id: R-BIO-04-acetona

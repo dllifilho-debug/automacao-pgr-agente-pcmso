@@ -1,8 +1,9 @@
 # Rótulos de nível de risco escritos nos PGRs, e a posição de cada um em relação ao corte
 # "iguais ou superiores a moderados" do e-mail da Dra. Carolini (R-ASO-06). D-ARQ-95.
 #
-# Só a sugestão do ASO lê este arquivo. `nivel_risco` (escala P×S, que alimenta R-BIO-05,
+# A sugestão do ASO lê a posição. `nivel_risco` (escala P×S, que alimenta R-BIO-05,
 # R-CLI-05 e R-RX-01-qual) não muda: a ordem de outra escala não vira P×S (D-ARQ-57).
+# Exceção nomeada: `r_bio_05` dá ao rótulo o degrau P×S que só a dispensa da R-BIO-05 compara.
 #
 # Fonte de cada posição: a legenda do próprio PGR, medida no censo de 08/10/2026 sobre os 32
 # PGRs do acervo (docs/referencia/CENSO_NIVEIS_RISCO.md). Rótulo fora desta lista não tem
@@ -17,6 +18,12 @@ niveis_risco:
   TRIVIAL:
     posicao: abaixo
     escalas: [BS 8800 (Trivial < Tolerável < Moderado < Substancial < Intolerável), AIHA Ricco]
+    # R-BIO-05 [INTERPRETADO] (decisão do Diovanni, 16/10/2026): Trivial dispensa o indicador
+    # no degrau BAIXO, por isso os cancerígenos (só IRRELEVANTE) seguem emitindo. Precedente:
+    # Mauá Plateau 28.09.26, GHE 11 ("risco trivial no PGR para Metiletilcetona e acetona",
+    # sem os indicadores) e GHE 15 (estireno-acrílicos); Vistamerica 08.12.25 sem a
+    # 2,5-hexanodiona do hexano Trivial do PGR Ver.02.
+    r_bio_05: BAIXO
   TOLERÁVEL:
     posicao: abaixo
     escalas: [BS 8800]

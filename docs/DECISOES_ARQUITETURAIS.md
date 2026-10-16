@@ -5118,6 +5118,14 @@ raciocínio pedida por ele.
 
 ---
 
+**Emenda à cl.4 (branch `claude/ecstatic-johnson-eyx2p2`, sobre `main 2dc236b`, 16/10/2026; decisão do Diovanni) — R-BIO-05
+lê o Trivial.** Exceção nomeada ao "só a sugestão do ASO lê": a entrada do vocabulário pode trazer `r_bio_05: <nível P×S>`,
+e só a dispensa da R-BIO-05 a usa, quando o risco não tem nível P×S. Hoje só `TRIVIAL: r_bio_05: BAIXO` — os cancerígenos
+(dispensa só em IRRELEVANTE) e o Tolerável seguem emitindo. `nivel_risco` não muda, e R-CLI-05 e R-RX-01-qual seguem só na
+P×S. Carregador recusa `r_bio_05` fora da P×S. Base e precedente na R-BIO-05 do PROTOCOLO (v140): NR-07 7.5.12 "b"; Mauá
+Plateau 28.09.26, GHE 11 e 15; Vistamerica 08.12.25. Responde à pergunta (2) de `DT-(sessão claude/eager-fermat-txbn7h)-01`.
+Efeito no app `[A MEDIR — rodada do Plateau]`: depende de a rota da IA transcrever "Trivial" em `nivel_pgr`.
+
 ## D-ARQ-96 — PCMSO inteiro gerado pelo app sobre modelo .docx do Seconci 2026, junto com a matriz RQ.61; texto fixo corrigido com marcas antes de congelar
 
 **Status:** DECISÃO DO DIOVANNI (14/10/2026, as 5 decisões de `docs/referencia/BRIEFING_MODELO_PCMSO_MAUA.md`) + IMPLEMENTAÇÃO da etapa 1 (modelo marcado, 15/10/2026). Modelo **em revisão**, não congelado.
@@ -5515,3 +5523,4 @@ novos (3 grafias e a radiação), varredura inversa 4/4.
 | v273 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main e4ebb57` (MEDIÇÃO + IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 3 em `D-ARQ-96`** — decisão 6: 3 grafias de VMB medidas em PGR (Soft Connect, EURO) em `vibracao_mao_braco`; "Radiação não ionizante" em `fracoes_sem_agente` (R-PGR-05); grafias do R70 fora (0 PGRs). |
 | v274 | 15/10/2026 | Branch `claude/eager-newton-qw5a0u`, recriada sobre `main cc4d2b2` (IMPLEMENTAÇÃO, aprovada pelo Diovanni): **andamento 4 em `D-ARQ-96`** — etapa 3 fatia 1: `documento_pcmso.py` gera o PCMSO na rodada da matriz; botão "Baixar PCMSO"; campos sem dado em branco visível e listados. |
 | v275 | 15/10/2026 | Branch `claude/pcmso-maua-fatia-2-cdd2e1` sobre `main fd9005b` (MEDIÇÃO + IMPLEMENTAÇÃO, decisões do Diovanni): **andamento 5 em `D-ARQ-96`** — etapa 3 fatia 2: `identificacao_pgr.py` lê CNPJ, CNAE, grau e endereço do PGR (endereço da obra; CNAE "considerado para este"); campos da empresa e do médico na tela; aviso de CNPJ com DV inválido. |
+| v276 | 16/10/2026 | Branch `claude/ecstatic-johnson-eyx2p2`, sobre `main 2dc236b` (IMPLEMENTAÇÃO, decisão do Diovanni): **emenda à cl.4 de `D-ARQ-95`** — `r_bio_05` no vocabulário de níveis; Trivial dispensa o indicador da R-BIO-05 no degrau BAIXO (PROTOCOLO v140). |
