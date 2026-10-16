@@ -202,3 +202,22 @@ def test_cnpj_com_digito_errado_vira_aviso() -> None:
     avisos_ok = AvisosPCMSO()
     valores_dos_campos(_dados(cnpj="43.091.205/0001-32"), avisos_ok)
     assert not avisos_ok.cnpj_invalido
+
+
+def _entradas_do_indice(doc: Any) -> list[str]:
+    return [
+        "".join(t.text or "" for t in p.iter(qn("w:t")))
+        for p in doc.element.body.iter(qn("w:p"))
+        if any((e.get(qn("w:val")) or "") == "TOC1" for e in p.iter(qn("w:pStyle")))
+    ]
+
+
+# Reversões: (1) tirar a chamada a `_indice_com_ghes` de `gerar_pcmso_docx` — o índice sai sem os GHE até o usuário
+# atualizar o campo no Word (pedido do Diovanni, 16/10/2026); (2) inserir as entradas em outro ponto do índice (antes
+# de "10 - DOCUMENTOS" ou depois da seção 11) — a ordem do índice deixa de seguir a do documento. A entrada seguinte é
+# "SALAS DE VACINAS" (a seção 11 não tem campo TC no modelo), a mesma ordem do índice atualizado pelo LibreOffice.
+def test_indice_sai_com_os_ghe_entre_a_secao_10_e_a_11(gerado: tuple[Any, AvisosPCMSO]) -> None:
+    entradas = _entradas_do_indice(gerado[0])
+    posicao = entradas.index("Setor: GHE 09 - HIDROSSANITÁRIO")
+    assert entradas[posicao - 1].startswith("10 - DOCUMENTOS")
+    assert entradas[posicao + 1].startswith("SALAS DE VACINAS")

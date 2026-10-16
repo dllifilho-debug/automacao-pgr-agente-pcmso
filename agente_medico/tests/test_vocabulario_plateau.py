@@ -78,3 +78,12 @@ def test_acidentes_de_transito_pedem_acuidade_e_audiometria(proto: Protocolo) ->
     matriz = _matriz(proto, "Acidentes de trânsito")
     assert "R-PKG-TRANSITO" in _regras(matriz, "acuidade_visual")
     assert "R-PKG-TRANSITO" in _regras(matriz, "audiometria")
+
+
+def test_fumos_metalicos_e_gases_pedem_os_exames_da_solda(proto: Protocolo) -> None:
+    # Rodada do Plateau de 16/10/2026: a IA leu a célula inteira. Reversão que mata: tirar "Fumos metálicos e gases" dos
+    # termos de `fumos_metalicos` — o GHE 17 perde RX OIT (R-RX-02), espirometria (R-ESP-04) e COHb (R-PKG-SOLD-CO).
+    matriz = _matriz(proto, "Fumos metálicos e gases")
+    assert "R-RX-02" in _regras(matriz, "rx_torax_oit")
+    assert "R-ESP-04" in _regras(matriz, "espirometria")
+    assert "R-PKG-SOLD-CO" in _regras(matriz, "carboxihemoglobina")

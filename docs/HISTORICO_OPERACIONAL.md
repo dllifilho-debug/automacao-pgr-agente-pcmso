@@ -13030,3 +13030,18 @@ PROTOCOLO v139.
 Suíte (árvore parada): 2056 passed, 6 skipped (27 min 53 s); na rodada anterior, com a opção (a), 1 falha por tempo do
 AppTest (`test_aviso_de_anexo_descartado_aparece_uma_vez`, 3 s), a intermitência já registrada — sozinho passa. mypy no alvo
 canônico: limpo, 62 arquivos.
+
+---
+
+## Sessão (branch `claude/pcmso-maua-fatia-2-cdd2e1` recriada sobre `main dba0fa4`, pós-merge do PR #506) — 16/10/2026 — MEDIÇÃO da rodada 2 do Plateau + IMPLEMENTAÇÃO: índice do PCMSO e "Fumos metálicos e gases"
+
+**Medido.** Rodada 2 do Plateau rev 03 (DT-(sessão `claude/pcmso-maua-fatia-2-cdd2e1`)-01): vocabulário da v139 conferido
+no app; regressão do GHE 17 pela transcrição da IA. Índice do PCMSO: TOC `\f \o "1-5"` sobre 51 campos TC (21 dos GHE),
+`updateFields` ligado; o resultado gravado vinha do modelo, sem os GHE. Atualizado pelo LibreOffice (UNO), entram os 21.
+
+**Implementado.** `_indice_com_ghes` em `documento_pcmso.py` (entradas sem página depois de "10 - DOCUMENTOS");
+"Fumos metálicos e gases" em `fumos_metalicos`. Fora: títulos do modelo em estilo "Título 1" (para título novo entrar no
+índice) — junto da revisão do modelo pelas médicas.
+
+**Verificação.** 2 testes novos, varredura inversa 3/3; índice de termos 229 → 230. Suíte (árvore parada): 2058 passed,
+6 skipped (27 min 24 s). mypy no alvo canônico: limpo, 62 arquivos.

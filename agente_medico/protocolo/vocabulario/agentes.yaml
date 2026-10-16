@@ -10,6 +10,11 @@ agentes:
     is_carcinogeno_iarc: false
     tem_lt: true
     protocolos_especiais: [R-PKG-SOLD, R-OP-01, R-RX-02]
+    # "Fumos metálicos e gases", GHE 17 Serralheria [MEDIDO — PGR Plateau D'Or rev 03, célula "Fumos metálicos e
+    # gases" em duas linhas; a IA a transcreveu inteira na rodada de 16/10/2026 (na de 15/10, em dois riscos) e o
+    # GHE perdeu RX OIT, espirometria e carboxihemoglobina; PCMSO Mauá 28.09.26 usa a mesma forma na tabela de
+    # perigos]. "gases" sem agente não muda exame: o CO da solda sai pela R-PKG-SOLD-CO.
+    termos: ["Fumos metálicos e gases"]
   radiacao_uv_ir:
     tipo_ibe: null
     cas: null

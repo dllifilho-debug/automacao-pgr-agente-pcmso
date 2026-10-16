@@ -4502,3 +4502,12 @@ linhas iguais. 21 GHE, aviso da numeração 18/18 e bloqueantes de RX nos GHE 03
 
 **Status:** ABERTA. Itens 2 e 3 são vocabulário/regra (sessão seguinte); 4 a 7 pedem medição no PGR antes da proposta;
 1 fica (norma).
+
+**Rodada 2 no app (16/10/2026, pós-merge do PR #506), conferida pelos 3 arquivos do Diovanni e 2 capturas.** Matriz ×
+PCMSO 119/119. Contra o Mauá: GHE 15 e 18 com espirometria e RX OIT, GHE 18 com Avaliação Psicossocial e a pendência
+R-FDS-07 dos hidrocarbonetos (sem o pacote, opção b), GHE 20 com acuidade e audiometria — item 2 conferido no app. Painel
+"Dados do PCMSO": CNPJ, CNAE, grau e endereço da obra lidos; cidade, UF e CEP vazios (o PGR não os escreve). **Regressão
+no GHE 17:** a IA leu "Fumos metálicos e gases" numa célula só (na rodada 1, em dois riscos) e o GHE perdeu RX OIT,
+espirometria e COHb — **IMPLEMENTADO** (termo em `fumos_metalicos`, mesma data). Seguem abertos: itens 1 (norma), 3 a 6.
+O índice do PCMSO saía sem os GHE até o usuário atualizar o campo no Word — corrigido: o app grava as entradas no
+resultado do índice (D-ARQ-96, em `documento_pcmso.py`; atualizar o campo substitui, sem duplicar, medido no LibreOffice).
