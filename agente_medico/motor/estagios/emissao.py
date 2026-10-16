@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 from agente_medico.motor.leo_resolver import AvaliacaoLimiteQuimico, avaliar_medicao_quimica
+from agente_medico.motor.niveis_pgr import classificar_nivel_pgr
 from agente_medico.motor.predicados import (
     ResultadoPredicado,
     avaliar,
@@ -142,19 +144,37 @@ def _emitir_regra(
         )
 
 
-def _nivel_dispensa(regra: dict[str, Any], ctx: GHEContext) -> str | None:
-    """R-BIO-05 (DT-003EB-02, [INTERPRETADO]): o nível P×S que troca o exame por
+def _nivel_r_bio_05(risco: Risco, niveis_pgr: Mapping[str, Any]) -> tuple[str, str] | None:
+    """(degrau P×S comparado pela R-BIO-05, rótulo exibido na observação). Sem nível
+    P×S, o rótulo de outra escala só conta se `niveis_risco.yaml` lhe dá `r_bio_05`:
+    Trivial da BS 8800 no degrau BAIXO (decisão do Diovanni, 16/10/2026) — os
+    cancerígenos, que só dispensam em IRRELEVANTE, seguem emitindo."""
+    if risco.nivel_risco is not None:
+        return risco.nivel_risco, risco.nivel_risco
+    achado = classificar_nivel_pgr(risco.nivel_pgr, niveis_pgr) if risco.nivel_pgr else None
+    degrau = niveis_pgr[achado.rotulo].get("r_bio_05") if achado else None
+    return (str(degrau), achado.rotulo) if achado and degrau else None
+
+
+def _mais_alto(niveis: list[tuple[str, str]]) -> str:
+    return max(niveis, key=lambda par: NIVEIS_RISCO_PXS.index(par[0]))[1]
+
+
+def _nivel_dispensa(
+    regra: dict[str, Any], ctx: GHEContext, niveis_pgr: Mapping[str, Any]
+) -> str | None:
+    """R-BIO-05 (DT-003EB-02, [INTERPRETADO]): o nível que troca o exame por
     menção documental, ou None se a regra deve emitir. Dispensa só quando TODO
     risco do agente traz nível listado em `niveis_risco` — nível ausente (rota
     sem avaliação, risco implícito, composição de FDS) ou acima da lista emite."""
     mencao = regra.get("mencao_documental")
     if mencao is None:
         return None
-    niveis = [r.nivel_risco for r in ctx.riscos if r.agente == regra["quando"]]
+    niveis = [_nivel_r_bio_05(r, niveis_pgr) for r in ctx.riscos if r.agente == regra["quando"]]
     permitidos = set(mencao["niveis_risco"])
-    if not niveis or not all(n in permitidos for n in niveis):
+    if not niveis or not all(n is not None and n[0] in permitidos for n in niveis):
         return None
-    return max((str(n) for n in niveis), key=NIVEIS_RISCO_PXS.index)
+    return _mais_alto([n for n in niveis if n is not None])
 
 
 def _numero(valor: float) -> str:
@@ -175,7 +195,10 @@ def _descrever_medicao(
 
 
 def _dispensa_por_medicao(
-    regra: dict[str, Any], ctx: GHEContext, agentes_vocab: dict[str, Any]
+    regra: dict[str, Any],
+    ctx: GHEContext,
+    agentes_vocab: dict[str, Any],
+    niveis_pgr: Mapping[str, Any],
 ) -> tuple[str, str] | None:
     """R-BIO-05 emenda D-ARQ-86 cl.6 (NR-07 7.5.12 "b" c/c NR-09 9.6.1 "b"):
     nível em `niveis_com_medicao_abaixo_acao` dispensa só com medição do agente
@@ -188,12 +211,13 @@ def _dispensa_por_medicao(
     if not com_medicao:
         return None
     riscos = [r for r in ctx.riscos if r.agente == regra["quando"]]
-    classificados = [r.nivel_risco for r in riscos if r.nivel_risco is not None]
+    niveis = [(r, _nivel_r_bio_05(r, niveis_pgr)) for r in riscos]
+    classificados = [n for _, n in niveis if n is not None]
     aceitos = com_medicao | set(mencao["niveis_risco"])
     if (
         not classificados
-        or any(r.nivel_risco is None and r.fonte != "quimico_composicao" for r in riscos)
-        or not all(n in aceitos for n in classificados)
+        or any(n is None and r.fonte != "quimico_composicao" for r, n in niveis)
+        or not all(n[0] in aceitos for n in classificados)
     ):
         return None
     avaliacoes = [
@@ -208,8 +232,7 @@ def _dispensa_por_medicao(
     maior, procedencia = max(avaliacoes, key=lambda par: par[0].pct_limite)
     if not maior.abaixo_nivel_acao:
         return None
-    nivel = max((str(n) for n in classificados), key=NIVEIS_RISCO_PXS.index)
-    return nivel, _descrever_medicao(maior, procedencia)
+    return _mais_alto(classificados), _descrever_medicao(maior, procedencia)
 
 
 def _medicao_acima_do_nivel_de_acao(
@@ -330,11 +353,12 @@ def stage_5_emissao(ctx: GHEContext, protocolo: Protocolo) -> list[ExameEmitido]
         if "mencao_documental" in regra and not _medicao_acima_do_nivel_de_acao(
             regra, ctx, protocolo.vocabulario.agentes
         ):
-            por_medicao = _dispensa_por_medicao(regra, ctx, protocolo.vocabulario.agentes)
+            niveis_pgr = protocolo.vocabulario.niveis_risco
+            por_medicao = _dispensa_por_medicao(regra, ctx, protocolo.vocabulario.agentes, niveis_pgr)
             if por_medicao is not None:
                 nivel, medicao = por_medicao
             else:
-                nivel = _nivel_dispensa(regra, ctx)
+                nivel = _nivel_dispensa(regra, ctx, niveis_pgr)
         if nivel is not None:
             ctx.observacoes.append(
                 Observacao(

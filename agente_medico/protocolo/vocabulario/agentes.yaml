@@ -184,9 +184,9 @@ agentes:
     # recusava por ser slug que dispara exame, D-ARQ-64]. [DERIVADO — matriz Serrinha
     # 17/08/2026 (obra Soft Connect 15), GHE 09 Encanador: 2,5 Hexanodiona na urina, PER 6
     # meses — a médica leu "Hexano" como n-hexano; o PCMSO Envolt 17.03.26 dá "Hexano CAS: 110-54-3",
-    # o CAS do n-hexano.] Divergência conhecida, decisão do Diovanni (14/10/2026): PGR Vistamerica
-    # Ver.02 (ET 14, 0,1 ppm, eventual, "Trivial" na BS 8800) passa a pedir 2,5-hexanodiona que a
-    # matriz de 08.12.25 não pede — a dispensa por nível da R-BIO-05 só lê a escala P×S.
+    # o CAS do n-hexano.] PGR Vistamerica Ver.02 (ET 14, 0,1 ppm, eventual, "Trivial" na BS 8800):
+    # a decisão de 14/10/2026 (pedir 2,5-hexanodiona) foi substituída em 16/10/2026 — Trivial dispensa
+    # no degrau BAIXO da R-BIO-05 (`r_bio_05` em niveis_risco.yaml), como a matriz de 08.12.25.
     termos: ["Hexano"]
     enquadramento_3048: {codigo: "1.0.19", tempo_exposicao: "25 anos"}  # Grupo I, literal ("mercaptanos, n-hexano")
   dissulfeto_de_carbono:

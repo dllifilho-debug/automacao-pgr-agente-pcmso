@@ -279,3 +279,54 @@ def test_apresentacao_de_revisao_lista_a_observacao() -> None:
     texto = "\n".join(renderizar_matriz(_matriz_com_observacao()))
 
     assert "`acetona` risco IRRELEVANTE → acetona_urina não emitido (R-BIO-04-acetona, R-BIO-05)" in texto
+
+
+def _risco_bs8800(agente: str, nivel_pgr: str) -> RiscoPGR:
+    return RiscoPGR(
+        tipo="", agente=agente, quantificacao=None, severidade=None, nivel_risco=None,
+        nivel_pgr=nivel_pgr,
+    )
+
+
+def test_trivial_da_bs_8800_dispensa_nao_cancerigeno(proto: Protocolo) -> None:
+    # Caso Plateau rev 03, GHE 11: MEK e acetona "2 Trivial", Mauá 28.09.26 sem os
+    # indicadores. Reversão que mata: tirar `r_bio_05: BAIXO` do TRIVIAL em
+    # niveis_risco.yaml, ou fazer `_nivel_r_bio_05` devolver None sem nível P×S —
+    # acetona e MEK na urina voltam.
+    emitidos, ctx = _emitir(
+        proto, _risco_bs8800("acetona", "Trivial"), _risco_bs8800("metil_etil_cetona", "Trivial")
+    )
+    assert "acetona_urina" not in emitidos
+    assert {o.agente: o.nivel_risco for o in ctx.observacoes} == {
+        "acetona": "TRIVIAL",
+        "metil_etil_cetona": "TRIVIAL",
+    }
+
+
+def test_trivial_nao_dispensa_cancerigeno(proto: Protocolo) -> None:
+    # Estireno (IARC 2A) só dispensa em IRRELEVANTE. Reversão que mata: dar
+    # `r_bio_05: IRRELEVANTE` ao TRIVIAL — o indicador do estireno some.
+    emitidos, ctx = _emitir(proto, _risco_bs8800("estireno", "Trivial"))
+    assert not ctx.observacoes
+    assert "acido_mandelico_fenilglioxilico" in emitidos
+
+
+def test_toleravel_da_bs_8800_segue_emitindo(proto: Protocolo) -> None:
+    # Só a classe mais baixa entrou. Reversão que mata: dar `r_bio_05` ao TOLERÁVEL.
+    emitidos, ctx = _emitir(proto, _risco_bs8800("acetona", "Tolerável"))
+    assert "acetona_urina" in emitidos
+    assert not ctx.observacoes
+
+
+def test_carregador_recusa_r_bio_05_fora_da_escala_pxs(tmp_path: Path) -> None:
+    # Reversão que mata: tirar de `_carregar_niveis_risco` a checagem de `r_bio_05` —
+    # "TRIVIAL" carregaria e `_mais_alto` quebraria só na emissão, com ValueError fora de lugar.
+    destino = tmp_path / "protocolo"
+    shutil.copytree(_PROTOCOLO_DIR, destino)
+    niveis = destino / "vocabulario" / "niveis_risco.yaml"
+    texto = niveis.read_text(encoding="utf-8")
+    assert "    r_bio_05: BAIXO\n" in texto
+    niveis.write_text(texto.replace("    r_bio_05: BAIXO\n", "    r_bio_05: TRIVIAL\n"), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="r_bio_05 fora de"):
+        carregar(destino)

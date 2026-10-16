@@ -4,7 +4,7 @@ Gerado por `scripts/gerar_indice_darq.py` a partir de
 `docs/DECISOES_ARQUITETURAIS.md`. Editar este arquivo à mão faz
 `tests/test_gerar_indice_darq.py` falhar.
 
-Fonte: DECISOES_ARQUITETURAIS.md v275 · 96 decisões
+Fonte: DECISOES_ARQUITETURAIS.md v276 · 96 decisões
 
 | ID | Título | Status | Linha | Chars |
 |---|---|---|---|---|
@@ -102,5 +102,5 @@ Fonte: DECISOES_ARQUITETURAIS.md v275 · 96 decisões
 | D-ARQ-92 | Frases H de saúde (H3xx) da FDS como "agravos à saúde" do produto: leitura determinística, só exibição; `frases_h` por componente segue para fatia medida | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com as frases H da FDS") | 4905 | 6543 |
 | D-ARQ-93 | Agravo à saúde do PGR guardado por risco, verbatim, pela linha inteira da tabela; só para os anexos das médicas | DECISÃO DE ARQUITETURA — pedida pelo Diovanni em 07/10/2026 ("pode seguir com a coluna AGRAVO do PGR"), na ordem recomendada na sessão (rota por coordenadas agora; rota da IA na sessão com a chave) | 4952 | 3021 |
 | D-ARQ-94 | Avaliação Psicossocial da altura condicionada ao inventário do PGR; alertas para a revisão médica sem mudar exame | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (07/10/2026, na sessão: "aprovo os dois, pode implementar") | 4981 | 9584 |
-| D-ARQ-95 | Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (08/10/2026, na sessão: desenho genérico aprovado — "tem que valer para qualquer PGR"; "Médio" no corte `[INTERPRETADO]` e "Tolerável" pela legenda, pela recomendação) | 5070 | 5807 |
-| D-ARQ-96 | PCMSO inteiro gerado pelo app sobre modelo .docx do Seconci 2026, junto com a matriz RQ.61; texto fixo corrigido com marcas antes de congelar | DECISÃO DO DIOVANNI (14/10/2026, as 5 decisões de `docs/referencia/BRIEFING_MODELO_PCMSO_MAUA | 5121 | 11080 |
+| D-ARQ-95 | Nível de risco do PGR em qualquer escala, por vocabulário de rótulos, só para a sugestão do ASO | DECISÃO DE ARQUITETURA — RATIFICADA pelo Diovanni (08/10/2026, na sessão: desenho genérico aprovado — "tem que valer para qualquer PGR"; "Médio" no corte `[INTERPRETADO]` e "Tolerável" pela legenda, pela recomendação) | 5070 | 6656 |
+| D-ARQ-96 | PCMSO inteiro gerado pelo app sobre modelo .docx do Seconci 2026, junto com a matriz RQ.61; texto fixo corrigido com marcas antes de congelar | DECISÃO DO DIOVANNI (14/10/2026, as 5 decisões de `docs/referencia/BRIEFING_MODELO_PCMSO_MAUA | 5129 | 11080 |

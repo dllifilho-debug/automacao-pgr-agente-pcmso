@@ -127,3 +127,14 @@ def test_documento_mostra_clinico_semestral_como_no_gabarito(proto: Protocolo) -
 
     (linha,) = doc.blocos[0].linhas
     assert "Exame Clínico (ADM, PER 6 meses, MRO, RET, DEM)" in linha.celulas
+
+
+def test_fumos_metalicos_de_solda_presumem_manganes(proto: Protocolo) -> None:
+    # Caso Plateau rev 03, GHE 17: "Fumos metálicos e gases" de solda, Mn não nomeado;
+    # Mauá 28.09.26 pede Mn no sangue e clínico semestrais (R-FDS-05). Reversão que mata:
+    # voltar `quando: manganes` em R-BIO-03 e R-CLI-03 — as duas linhas somem.
+    matriz = _matriz(proto, _risco("fumos_metalicos", "MODERADO"))
+
+    linhas = {e.exame: e for e in matriz.linhas}
+    assert linhas["manganes_sangue"].periodicidade_meses == 6
+    assert linhas["exame_clinico"].periodicidade_meses == 6

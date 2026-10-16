@@ -902,10 +902,10 @@ def pagina_matriz() -> None:
         alertas_do_ghe,
         avisos_da_extracao,
         bloqueios_do_ghe,
-        contaminantes_a_confirmar,
         data_exibicao,
         erros_do_pgr,
         montar_memorial,
+        pedidos_ao_elaborador,
         renderizar_memorial_docx,
         resumos_do_protocolo,
     )
@@ -1555,11 +1555,11 @@ def pagina_matriz() -> None:
                 for p in cache.pendencias_globais:
                     st.write(linha_pendencia(p, com_regra=True))
 
-        # R-FDS-07: pendência por GHE, que a tela não mostrava (só as globais).
-        a_confirmar = [texto for m in cache.matrizes or () for texto in contaminantes_a_confirmar(m)]
+        # R-FDS-07 e R-PGR-07: pendência por GHE, que a tela não mostrava (só as globais).
+        a_confirmar = [texto for m in cache.matrizes or () for texto in pedidos_ao_elaborador(m)]
         if a_confirmar:
             with caixa_conferencia:
-                st.markdown("**FDS a pedir ao elaborador do PGR (contaminante a confirmar)**")
+                st.markdown("**Pedidos ao elaborador do PGR (FDS ou risco a incluir)**")
                 for texto in a_confirmar:
                     st.write(f"- {texto}")
 
