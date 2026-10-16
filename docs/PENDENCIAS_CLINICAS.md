@@ -4501,7 +4501,7 @@ grupo vazio para "Ergonômico - Análise Ergonômica Trabalho (AET) Postural".
 linhas iguais. 21 GHE, aviso da numeração 18/18 e bloqueantes de RX nos GHE 03 e 09, como na rodada 3.
 
 **Status:** ABERTA. Itens 2 e 3 são vocabulário/regra (sessão seguinte); 4 a 7 pedem medição no PGR antes da proposta;
-1 fica (norma).
+1 fica (norma). Itens 3 a 6 medidos no PGR (16/10/2026, abaixo): todos pedem decisão de regra, nenhum é erro de leitura.
 
 **Rodada 2 no app (16/10/2026, pós-merge do PR #506), conferida pelos 3 arquivos do Diovanni e 2 capturas.** Matriz ×
 PCMSO 119/119. Contra o Mauá: GHE 15 e 18 com espirometria e RX OIT, GHE 18 com Avaliação Psicossocial e a pendência
@@ -4511,3 +4511,41 @@ no GHE 17:** a IA leu "Fumos metálicos e gases" numa célula só (na rodada 1, 
 espirometria e COHb — **IMPLEMENTADO** (termo em `fumos_metalicos`, mesma data). Seguem abertos: itens 1 (norma), 3 a 6.
 O índice do PCMSO saía sem os GHE até o usuário atualizar o campo no Word — corrigido: o app grava as entradas no
 resultado do índice (D-ARQ-96, em `documento_pcmso.py`; atualizar o campo substitui, sem duplicar, medido no LibreOffice).
+
+**Itens 3 a 6 medidos no PGR (16/10/2026, branch `claude/ecstatic-johnson-eyx2p2`).** `pdftotext -layout` de
+`matrizes_originais/PGR_-_plateau Dor_assinado rev 03.pdf` (55 páginas, camada de texto, sem OCR), inventários GHE a GHE;
+gabarito relido em `MATRIZ DE EXAMES(ATUALIZAÇÃO)MAUÁ … PLATEU D'OR 28.09.26.doc` (antiword); app pela matriz e
+memorial da rodada 2 (16/10/2026).
+- **Item 3 (GHE 17) — o PGR não nomeia manganês** (0 ocorrência de "mangan" no documento). O químico do GHE é uma linha
+  só, "Fumos metálicos e gases", origem "Gases da atividade de solda", eventual, 3×3 = 9 Moderado; sem avaliação
+  quantitativa. A FDS do eletrodo é só um link externo de imagem ("Eletrodos https://ibb.co/VDttJmb"), não anexada. GHE
+  "Situação: inativo", 00 expostos. O manganês do Mauá vem do eletrodo presumido (o E 6013 Gerdau do acervo declara
+  manganês, `fds_originais/`), não do PGR. Também diferem: clínico PER 6 meses e RX OIT 12 meses no Mauá × anual e 60
+  meses (R-RX-02) no app.
+- **Item 4 (GHE 11) — escala BS 8800 sobre matriz AIHA 5×5, com medição.** Legenda do PGR: Trivial (1–3) < Tolerável
+  (4–8) < Moderado (9–12) < Substancial (13–15) < Intolerável (16–25), "Trivial: não é requerido nenhuma ação". MEK e
+  acetona: eventual, 2×1 = 2 **Trivial**. Avaliação quantitativa no próprio GHE: acetona 0,0281 ppm (LT 780 ppm), MEK
+  0,3336 ppm (LT 155 ppm), ambos "Dentro do limite de tolerância" — abaixo da metade do LT (nível de ação, NR-09);
+  ruído "76,5" com LT "80,0" (unidade escrita "dose diária de ruído", ilegível como dose; o Mauá lê "abaixo do nível de
+  ação"). Por que o app pede: `nivel_risco` só aceita a escala P×S Irrelevante…Crítico (D-ARQ-57; o prompt da IA manda
+  deixar `avaliacao_qualitativa` vazio para Trivial/Tolerável), então R-BIO-05 não tem nível para dispensar, e a emenda
+  D-ARQ-86 exige BAIXO **e** medição. Além disso a rodada 2 não leu nenhuma medição do PGR: o memorial diz "sem medição
+  no PGR" em 16 linhas, inclusive o ruído do GHE 11. Só dois GHE trazem tabela preenchida (GHE 11: acetona, MEK, ruído;
+  GHE 15: ruído 68,6); GHE 18 escreve "Não avaliado" para ruído, hidrocarbonetos e poeira. Dispensar aqui exige decidir
+  se Trivial (BS 8800) equivale a IRRELEVANTE/BAIXO para a R-BIO-05 — hoje recusado por D-ARQ-57. **Achado novo:** o
+  Mauá pede Espirometria (ADM, PER 24 meses, MRO, DEM) no GHE 11 para os três cargos e o app não; o PGR do GHE 11 não
+  tem poeira nem fumos (riscos: postura, queda de mesmo nível, queda em altura 5×2 = 10 Substancial, objetos
+  cortantes, ruído, MEK, acetona).
+- **Item 5 (GHE 09) — o PGR não lista poeira nem fumos.** Riscos: postura, levantamento de peso, queda de mesmo nível,
+  queda em altura (habitual, 5×2 = 10 Substancial), "Contato com disco de máquinas de corte" (eventual, "Corte de aço",
+  origem "Lixadeiras"), choque elétrico, ruído (origem "lixadeiras e furadeiras") e intempéries; sem avaliação
+  quantitativa. A espirometria 24 meses e o RX 60 meses do Mauá ("Não opera policorte") não têm risco respiratório
+  escrito no PGR; o único gancho é a lixadeira no corte de aço (`acidente_disco_corte`, sem conduta).
+- **Item 6 (GHE 08) — o PGR não traz gatilho de atividade crítica.** Riscos: postura, levantamento de peso, queda de
+  mesmo nível, "Contato com partes moveis de maquinas" (tambor da betoneira, 5×1 = 5), choque elétrico, ruído, sílica e
+  cimento (3×3 = 9 Moderado); **sem queda em altura**, sem espaço confinado, sem condução. O Mauá não pede só acuidade e
+  ECG: pede o pacote inteiro de R-PKG-ATIVCRIT (acuidade, ECG, glicemia, hemograma, ADM/PER/MRO) para operador **e**
+  servente — betoneira lida como equipamento pesado. É a faceta "máquina pesada" de DT-003ED-01, já aberta (GHE-12
+  Betoneira do Consciente, HISTORICO 003.EJ): `operador_betoneira` está em `cargos.yaml` sem pacote e
+  "Contato com partes moveis de maquinas" não resolve no vocabulário. Também difere o RX OIT: 12 meses no Mauá × 24 no
+  app (item 1, norma).
