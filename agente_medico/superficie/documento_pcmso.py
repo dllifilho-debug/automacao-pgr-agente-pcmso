@@ -9,6 +9,7 @@ para a lista de avisos, nunca inventado.
 
 from __future__ import annotations
 
+import copy
 import re
 import unicodedata
 from collections.abc import Mapping, Sequence
@@ -39,6 +40,8 @@ MODELO_PADRAO = Path(__file__).resolve().parent / "modelos" / "pcmso_seconci_202
 
 EM_BRANCO = "____________"
 _MARCA_GHE = "{{BLOCOS_GHE}}"
+# Entrada do índice depois da qual entram os GHE (os blocos ficam entre a seção 10 e a 11 no modelo).
+_INDICE_ANTES_DOS_GHE = "10 - DOCUMENTOS"
 _CAMPO = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
 _LARGURA_TOTAL = 10467
 _LARGURAS_PERIGOS = (4186, 2094, 4187)
@@ -344,10 +347,50 @@ def _campo_tc(paragrafo: Paragraph, titulo: str) -> None:
         paragrafo._p.insert(posicao + deslocamento, run)
 
 
+def _texto_visivel(paragrafo: Any) -> str:
+    return "".join(t.text or "" for t in paragrafo.iter(qn("w:t")))
+
+
+def _indice_com_ghes(doc: DocumentoDocx, titulos: Sequence[str]) -> None:
+    """Grava os GHE no resultado do índice que o Word mostra antes de atualizar: sem isso o índice sai sem eles até o
+    usuário atualizar o campo (Word Online e Google Docs não atualizam). Página em branco — só o Word a calcula."""
+    entradas = [
+        p for p in doc.element.body.iter(qn("w:p"))
+        if any((e.get(qn("w:val")) or "") == "TOC1" for e in p.iter(qn("w:pStyle")))
+    ]
+    ancora = next((p for p in entradas if _texto_visivel(p).startswith(_INDICE_ANTES_DOS_GHE)), None)
+    if ancora is None:
+        raise ValueError(f"modelo do PCMSO sem a entrada {_INDICE_ANTES_DOS_GHE!r} no índice")
+    estilo_run = next((r for r in ancora.iter(qn("w:rPr")) if r.getparent().tag == qn("w:r")), None)
+    anterior = ancora
+    for titulo in titulos:
+        paragrafo = OxmlElement("w:p")
+        ppr = ancora.find(qn("w:pPr"))
+        if ppr is not None:
+            paragrafo.append(copy.deepcopy(ppr))
+        for conteudo in (titulo, None):
+            run = OxmlElement("w:r")
+            if estilo_run is not None:
+                run.append(copy.deepcopy(estilo_run))
+            if conteudo is None:
+                run.append(OxmlElement("w:tab"))
+            else:
+                texto = OxmlElement("w:t")
+                texto.text = conteudo
+                run.append(texto)
+            paragrafo.append(run)
+        anterior.addnext(paragrafo)
+        anterior = paragrafo
+
+
+def _titulo_do_setor(matriz: MatrizGHE) -> str:
+    return "Setor: " + _sanitizar(titulo_ghe_rq61(matriz.ghe_id, matriz.nome_ghe))
+
+
 def _bloco_ghe(doc: DocumentoDocx, matriz: MatrizGHE, ghe: GHEPGR | None, exames_vocab: Mapping[str, Any],
                vocabulario: VocabularioAgravos, avisos: AvisosPCMSO) -> list[Any]:
     elementos: list[Any] = []
-    titulo = "Setor: " + _sanitizar(titulo_ghe_rq61(matriz.ghe_id, matriz.nome_ghe))
+    titulo = _titulo_do_setor(matriz)
     setor = _nova_tabela(doc, 1, (_LARGURA_TOTAL,))
     paragrafo = _escrever_celula(setor.cell(0, 0), titulo, negrito=True, fundo=_FUNDO_CABECALHO)
     _campo_tc(paragrafo, titulo)
@@ -427,6 +470,7 @@ def gerar_pcmso_docx(
         for elemento in _bloco_ghe(doc, matriz, ghes_pgr.get(matriz.ghe_id), exames_vocab, vocabulario, avisos):
             marca[0].addprevious(elemento)
     marca[0].getparent().remove(marca[0])
+    _indice_com_ghes(doc, [_titulo_do_setor(m) for m in matrizes])
     destino.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(destino))
     return avisos

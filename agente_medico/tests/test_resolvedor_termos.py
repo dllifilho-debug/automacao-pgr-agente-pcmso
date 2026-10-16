@@ -105,7 +105,8 @@ def test_indice_real_tem_210_entradas(indice_real: IndiceTermos) -> None:
     # 224 -> 229 (branch `claude/pcmso-maua-fatia-2-cdd2e1`, 15/10/2026): PGR Plateau D'Or rev 03 pela IA — +1 slug
     # `hidrocarbonetos_nao_especificados` e o termo "Hidrocarbonetos", +1 termo em `silica`, `espaco_confinado` e
     # `transito_via_publica` cada (DT-(sessão claude/pcmso-maua-fatia-2-cdd2e1)-01 item 2).
-    assert len(indice_real.slug_por_forma) == 229
+    # 229 -> 230 (mesma branch, 16/10/2026): "Fumos metálicos e gases" em `fumos_metalicos` (Plateau GHE 17, IA).
+    assert len(indice_real.slug_por_forma) == 230
 
 
 def test_cimento_asfaltico_resolve_slug_proprio_e_asfalto_segue_generico(
